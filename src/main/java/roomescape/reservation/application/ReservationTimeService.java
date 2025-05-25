@@ -28,7 +28,7 @@ public class ReservationTimeService {
             throw new AlreadyExistException("해당 예약 시간이 이미 존재합니다. startAt = " + startAt);
         }
 
-        final ReservationTime found = reservationTimeRepository.save(new ReservationTime(startAt));
+        final ReservationTime found = reservationTimeRepository.save(ReservationTime.from(startAt));
 
         return ReservationTimeResponse.from(found);
     }

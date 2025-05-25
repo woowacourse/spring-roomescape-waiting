@@ -29,14 +29,14 @@ public class ReservationTime {
     @Column(nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
+    private ReservationTime(final LocalTime startAt) {
         validateStartAt(startAt);
-        this.id = id;
+
         this.startAt = startAt;
     }
 
-    public ReservationTime(final LocalTime startAt) {
-        this(null, startAt);
+    public static ReservationTime from(final LocalTime startAt) {
+        return new ReservationTime(startAt);
     }
 
     private void validateStartAt(final LocalTime startAt) {
