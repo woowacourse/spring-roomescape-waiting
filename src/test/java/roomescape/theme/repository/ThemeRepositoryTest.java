@@ -49,12 +49,12 @@ class ThemeRepositoryTest {
         List<Theme> themes = themeRepository.findAll();
 
         // then
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(themes).hasSize(3);
-        softly.assertThat(themes.stream()
-                .map(Theme::getName))
-                .containsExactlyInAnyOrder("공포", "추리", "액션");
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(themes).hasSize(3);
+            softly.assertThat(themes.stream()
+                            .map(Theme::getName))
+                    .containsExactlyInAnyOrder("공포", "추리", "액션");
+        });
     }
 
     @Test

@@ -43,10 +43,10 @@ class MemberRepositoryTest {
         Optional<Member> foundMember = memberRepository.findByEmailAndPassword(email, rawPassword);
 
         // then
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(foundMember).isPresent();
-        softly.assertThat(foundMember.get().getEmail()).isEqualTo(email);
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(foundMember).isPresent();
+            softly.assertThat(foundMember.get().getEmail()).isEqualTo(email);
+        });
     }
 
     @Test
@@ -75,17 +75,17 @@ class MemberRepositoryTest {
         boolean notExists = memberRepository.existsByEmail("nonexistent@example.com");
 
         // then
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(exists).isTrue();
-        softly.assertThat(notExists).isFalse();
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(exists).isTrue();
+            softly.assertThat(notExists).isFalse();
+        });
     }
 
     @Test
-    void 유저_저장_테스트(){
+    void 유저_저장_테스트() {
         Password password = new Password("1234");
-
         Member member = Member.signUpUser("꾹", "admin@naver.com", password);
+        
         assertThatCode(() -> memberRepository.save(member))
                 .doesNotThrowAnyException();
     }

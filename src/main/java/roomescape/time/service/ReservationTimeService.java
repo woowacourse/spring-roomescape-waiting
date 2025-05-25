@@ -2,9 +2,12 @@ package roomescape.time.service;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.controller.request.AvailableReservationTimeRequest;
 import roomescape.time.controller.request.ReservationTimeCreateRequest;
@@ -14,17 +17,13 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
-public class ReservationTimeService {
+@RequiredArgsConstructor
+public class ReservationTimeService implements ReservationTimeQueryService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
-    }
-
+    @Transactional
     public ReservationTimeResponse open(ReservationTimeCreateRequest request) {
         LocalTime startAt = request.startAt();
         isAlreadyOpened(startAt);
@@ -41,12 +40,14 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return ReservationTimeResponse.from(reservationTimes);
     }
 
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new InvalidArgumentException("해당 시간에 이미 예약이 존재하여 삭제할 수 없습니다.");
@@ -56,11 +57,13 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(reservationTime.getId());
     }
 
+    @Transactional(readOnly = true)
     public ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("예약 시간을 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다."));
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(
             AvailableReservationTimeRequest request) {
         List<ReservationTime> allTimes = reservationTimeRepository.findAll();

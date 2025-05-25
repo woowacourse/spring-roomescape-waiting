@@ -14,7 +14,7 @@ document.addEventListener('DOMContentLoaded', () => {
     requestRead(RESERVATION_API_ENDPOINT)
         .then(res => {
             console.log('[API response]', res);
-            render(res.data)
+            render(res.data.content)
         })
         .catch(error => console.error('Error fetching reservations:', error));
 

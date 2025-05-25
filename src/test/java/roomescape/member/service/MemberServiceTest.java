@@ -43,11 +43,11 @@ class MemberServiceTest {
 
         MemberResponse response = memberService.signUp(request);
 
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(response.id()).isNotNull();
-        softly.assertThat(response.name()).isEqualTo("유저1");
-        softly.assertThat(response.email()).isEqualTo("user1@email.com");
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(response.id()).isNotNull();
+            softly.assertThat(response.name()).isEqualTo("유저1");
+            softly.assertThat(response.email()).isEqualTo("user1@email.com");
+        });
     }
 
     @Test
@@ -70,12 +70,12 @@ class MemberServiceTest {
 
         Member member = memberService.getMember(유저1.getId());
 
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(member.getId()).isEqualTo(유저1.getId());
-        softly.assertThat(member.getName()).isEqualTo(유저1.getName());
-        softly.assertThat(member.getRole()).isEqualTo(유저1.getRole());
-        softly.assertThat(member.getEmail()).isEqualTo(유저1.getEmail());
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(member.getId()).isEqualTo(유저1.getId());
+            softly.assertThat(member.getName()).isEqualTo(유저1.getName());
+            softly.assertThat(member.getRole()).isEqualTo(유저1.getRole());
+            softly.assertThat(member.getEmail()).isEqualTo(유저1.getEmail());
+        });
     }
 
     @Test
@@ -84,12 +84,12 @@ class MemberServiceTest {
 
         Member member = memberService.getMember(유저1.getEmail(), RAW_PASSWORD);
 
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(member.getId()).isEqualTo(유저1.getId());
-        softly.assertThat(member.getName()).isEqualTo(유저1.getName());
-        softly.assertThat(member.getRole()).isEqualTo(유저1.getRole());
-        softly.assertThat(member.getEmail()).isEqualTo(유저1.getEmail());
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(member.getId()).isEqualTo(유저1.getId());
+            softly.assertThat(member.getName()).isEqualTo(유저1.getName());
+            softly.assertThat(member.getRole()).isEqualTo(유저1.getRole());
+            softly.assertThat(member.getEmail()).isEqualTo(유저1.getEmail());
+        });
     }
 
     @Test
@@ -98,11 +98,11 @@ class MemberServiceTest {
 
         MemberResponse 유저1_응답 = memberService.getMembers().get(0);
 
-        SoftAssertions softly = new SoftAssertions();
-        softly.assertThat(유저1_응답.id()).isEqualTo(유저1.getId());
-        softly.assertThat(유저1_응답.name()).isEqualTo(유저1.getName());
-        softly.assertThat(유저1_응답.email()).isEqualTo(유저1.getEmail());
-        softly.assertAll();
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(유저1_응답.id()).isEqualTo(유저1.getId());
+            softly.assertThat(유저1_응답.name()).isEqualTo(유저1.getName());
+            softly.assertThat(유저1_응답.email()).isEqualTo(유저1.getEmail());
+        });
     }
 
     @Test

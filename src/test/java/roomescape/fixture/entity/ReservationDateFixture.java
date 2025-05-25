@@ -1,4 +1,4 @@
-package roomescape.fixture.db;
+package roomescape.fixture.entity;
 
 import java.time.LocalDate;
 import roomescape.reservation.domain.ReservationDate;

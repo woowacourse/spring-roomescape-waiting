@@ -14,11 +14,12 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import roomescape.common.CleanUp;
 import roomescape.fixture.db.MemberDbFixture;
-import roomescape.fixture.db.ReservationDateFixture;
+import roomescape.fixture.entity.ReservationDateFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ReservationTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
 import roomescape.global.exception.InvalidArgumentException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
@@ -107,7 +108,7 @@ class ThemeServiceTest {
     @Test
     void 존재하지_않는_테마를_삭제할_수_없다() {
         assertThatThrownBy(() -> themeService.deleteById(3L))
-                .isInstanceOf(NoSuchElementException.class)
+                .isInstanceOf(NotFoundException.class)
                 .hasMessage("해당 테마가 존재하지 않습니다.");
     }
 

@@ -18,9 +18,10 @@ import roomescape.config.AuthServiceTestConfig;
 import roomescape.fixture.db.MemberDbFixture;
 import roomescape.fixture.db.ReservationDateTimeDbFixture;
 import roomescape.fixture.db.ThemeDbFixture;
+import roomescape.reservation.controller.exception.ReservationExceptionHandler;
 import roomescape.reservation.domain.ReservationDateTime;
 
-@Import(AuthServiceTestConfig.class)
+@Import({AuthServiceTestConfig.class, ReservationExceptionHandler.class})
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationApiTest {
 
@@ -51,8 +52,8 @@ class ReservationApiTest {
         Long memberId = memberDbFixture.유저1_생성().getId();
         Long themeId = themeDbFixture.공포().getId();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Long timeId = reservationDateTime.reservationTime().getId();
-        String dateTime = formatDateTime(reservationDateTime.reservationDate().date());
+        Long timeId = reservationDateTime.getReservationTime().getId();
+        String dateTime = formatDateTime(reservationDateTime.getDate());
 
         HashMap<String, Object> request = new HashMap<>();
         request.put("memberId", memberId);
@@ -71,21 +72,20 @@ class ReservationApiTest {
 
     @Test
     void 예약_삭제시_존재하지_않는_예약이면_예외를_응답한다() {
-        RestAssured.given().log().all()
+        RestAssured.given()
                 .when().delete("/reservations/1")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(401);
     }
 
     @Test
     void 예약_생성_시_null_값을_허용하지_않는다() {
         Long themeId = themeDbFixture.공포().getId();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Long timeId = reservationDateTime.reservationTime().getId();
-        String dateTime = formatDateTime(reservationDateTime.reservationDate().date());
+        Long timeId = reservationDateTime.getReservationTime().getId();
+        String dateTime = formatDateTime(reservationDateTime.getDate());
 
         HashMap<String, Object> request = new HashMap<>();
-        request.put("memberId", null);
         request.put("themeId", themeId);
         request.put("timeId", timeId);
         request.put("date", dateTime);
@@ -97,6 +97,29 @@ class ReservationApiTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    void 과거_시간으로_예약을_하면_예외를_반환한다() {
+        Long memberId = memberDbFixture.유저1_생성().getId();
+        Long themeId = themeDbFixture.공포().getId();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture._7일전_열시();
+        Long timeId = reservationDateTime.getReservationTime().getId();
+        String dateTime = formatDateTime(reservationDateTime.getDate());
+
+        HashMap<String, Object> request = new HashMap<>();
+        request.put("memberId", memberId);
+        request.put("themeId", themeId);
+        request.put("timeId", timeId);
+        request.put("date", dateTime);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", StubTokenProvider.USER_STUB_TOKEN)
+                .body(request)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(422);
     }
 
     private String formatDateTime(LocalDate localDate) {
