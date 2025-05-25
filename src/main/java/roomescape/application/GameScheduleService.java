@@ -30,8 +30,13 @@ public class GameScheduleService {
         this.timeService = timeService;
     }
 
+    public GameSchedule getGameScheduleForReservation(LocalDate date, Long timeId, Long themeId) {
+        return gameScheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseGet(() -> createGameSchedule(date, timeId, themeId));
+    }
+
     @Transactional
-    public GameSchedule createGameSchedule(LocalDate date, Long timeId, Long themeId, LocalDateTime now) {
+    protected GameSchedule createGameSchedule(LocalDate date, Long timeId, Long themeId) {
         ReservationTime time = timeService.getTimeEntityById(timeId);
         validateNotPast(date, time.getStartAt(), LocalDateTime.now(ZoneId.of("Asia/Seoul")));
         Theme theme = themeService.getThemeEntityById(themeId);

@@ -24,7 +24,6 @@ import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
-import roomescape.domain.repository.GameScheduleRepository;
 import roomescape.domain.repository.ReservationRepository;
 
 @ExtendWith(MockitoExtension.class)
@@ -35,11 +34,7 @@ public class ReservationServiceTest {
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
-    private GameScheduleRepository gameScheduleRepository;
-    @Mock
-    private TimeService timeService;
-    @Mock
-    private ThemeService themeService;
+    private GameScheduleService gameScheduleService;
     @Mock
     private MemberService memberService;
 
@@ -78,40 +73,28 @@ public class ReservationServiceTest {
     @Test
     void registerReservation() {
         //given
-        Theme theme = stubTheme(1L);
-        ReservationTime time = stubTime(1L);
-        Member member = stubMember(1L);
         LocalDate date = LocalDate.now().plusDays(1);
+        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
 
         GameSchedule gameSchedule = GameSchedule.of(1L, date, time, theme);
-        Mockito.doReturn(gameSchedule).when(gameScheduleRepository).save(Mockito.any(GameSchedule.class));
+        Mockito.doReturn(gameSchedule).when(gameScheduleService).getGameScheduleForReservation(
+                date,
+                time.getId(),
+                theme.getId()
+        );
 
+        Member member = stubMember(1L);
         Reservation reservation = Reservation.of(1L, member, gameSchedule, RESERVED);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
         //when
         ReservationServiceResponse reservationServiceResponse = reservationService.registerReservation(
-                new ReservationCreateServiceRequest(
-                        date,
-                        theme.getId(),
-                        time.getId(),
-                        member.getId()
-                ));
+                new ReservationCreateServiceRequest(date, theme.getId(), time.getId(), member.getId())
+        );
 
         //then
         Assertions.assertThat(reservationServiceResponse).isEqualTo(ReservationServiceResponse.from(reservation));
-    }
-
-    private Theme stubTheme(long themeId) {
-        Theme theme = Theme.of(themeId, "테마1", "테마1입니다.", "썸네일1");
-        Mockito.doReturn(theme).when(themeService).getThemeEntityById(themeId);
-        return theme;
-    }
-
-    private ReservationTime stubTime(long timeId) {
-        ReservationTime time = ReservationTime.of(timeId, LocalTime.of(10, 0));
-        Mockito.doReturn(time).when(timeService).getTimeEntityById(timeId);
-        return time;
     }
 
     private Member stubMember(long memberId) {

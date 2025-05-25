@@ -12,9 +12,6 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
-import roomescape.domain.entity.ReservationTime;
-import roomescape.domain.entity.Theme;
-import roomescape.domain.repository.GameScheduleRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 
@@ -23,59 +20,38 @@ import roomescape.exception.NotFoundException;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final GameScheduleRepository gameScheduleRepository;
-    private final TimeService timeService;
-    private final ThemeService themeService;
+    private final GameScheduleService gameScheduleService;
     private final MemberService memberService;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            GameScheduleRepository gameScheduleRepository,
-            TimeService timeService,
-            ThemeService themeService,
+            GameScheduleService gameScheduleService,
             MemberService memberService
     ) {
         this.reservationRepository = reservationRepository;
-        this.gameScheduleRepository = gameScheduleRepository;
-        this.timeService = timeService;
-        this.themeService = themeService;
+        this.gameScheduleService = gameScheduleService;
         this.memberService = memberService;
     }
 
     @Transactional
     public ReservationServiceResponse registerReservation(ReservationCreateServiceRequest request) {
-        validateNotDuplicate(request);
-        Theme theme = themeService.getThemeEntityById(request.themeId());
-        ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
-        Member member = memberService.getMemberEntityById(request.memberId());
-
-        GameSchedule gameSchedule = GameSchedule.withoutId(request.date(), reservationTime, theme);
-        GameSchedule savedGameSchedule = gameScheduleRepository.save(gameSchedule);
-
-        Reservation reservationWithoutId = Reservation.withoutId(
-                member,
-                savedGameSchedule,
-                ReservationStatus.RESERVED
-        );
-        validateNotPast(reservationWithoutId);
-        Reservation reservation = reservationRepository.save(reservationWithoutId);
-        return ReservationServiceResponse.from(reservation);
-    }
-
-    private void validateNotDuplicate(ReservationCreateServiceRequest request) {
-        boolean duplicated = gameScheduleRepository.existsByDateAndTimeIdAndThemeId(
+        GameSchedule gameSchedule = gameScheduleService.getGameScheduleForReservation(
                 request.date(),
                 request.timeId(),
                 request.themeId()
         );
-        if (duplicated) {
-            throw new IllegalArgumentException("이미 예약된 일시입니다");
-        }
+        validateNotDuplicate(gameSchedule.getId());
+        Member member = memberService.getMemberEntityById(request.memberId());
+
+        Reservation reservationWithoutId = Reservation.withoutId(member, gameSchedule, ReservationStatus.RESERVED);
+        Reservation reservation = reservationRepository.save(reservationWithoutId);
+        return ReservationServiceResponse.from(reservation);
     }
 
-    private void validateNotPast(Reservation reservation) {
-        if (reservation.isPast()) {
-            throw new IllegalArgumentException("과거 일시로 예약할 수 없습니다.");
+    private void validateNotDuplicate(Long id) {
+        boolean duplicated = reservationRepository.existsByGameScheduleId(id);
+        if (duplicated) {
+            throw new IllegalArgumentException("이미 예약된 일시입니다. 예약대기를 이용해주세요.");
         }
     }
 
@@ -93,15 +69,19 @@ public class ReservationService {
         Member member = memberService.getMemberEntityById(memberId);
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()
-                .map(reservation -> new ReservationStatusServiceResponse(
-                                reservation.getId(),
-                                reservation.getGameSchedule().getTheme().getName(),
-                                reservation.getGameSchedule().getDate(),
-                                reservation.getGameSchedule().getTime().getStartAt(),
-                                ReservationStatus.name(reservation.getStatus())
-                        )
-                )
+                .map(ReservationService::createReservationStatusDto)
                 .toList();
+    }
+
+    private static ReservationStatusServiceResponse createReservationStatusDto(Reservation reservation) {
+        GameSchedule gameSchedule = reservation.getGameSchedule();
+        return new ReservationStatusServiceResponse(
+                reservation.getId(),
+                gameSchedule.getTheme().getName(),
+                gameSchedule.getDate(),
+                gameSchedule.getTime().getStartAt(),
+                ReservationStatus.name(reservation.getStatus())
+        );
     }
 
     public List<ReservationServiceResponse> searchReservationsWith(
@@ -110,22 +90,19 @@ public class ReservationService {
             LocalDate dateFrom,
             LocalDate dateTo
     ) {
-        List<Reservation> reservations = reservationRepository
-                .findByMemberAndThemeAndDateRange(
-                        memberId,
-                        themeId,
-                        dateFrom,
-                        dateTo
-                );
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
+                memberId,
+                themeId,
+                dateFrom,
+                dateTo
+        );
         return ReservationServiceResponse.from(reservations);
     }
 
     @Transactional
     public void deleteReservation(Long id) {
         try {
-            Reservation reservation = getReservationEntityById(id);
             reservationRepository.deleteById(id);
-            reservationRepository.flush();
         } catch (EmptyResultDataAccessException e) {
             throw new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id);
         }
