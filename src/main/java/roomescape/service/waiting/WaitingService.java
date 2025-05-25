@@ -49,14 +49,14 @@ public class WaitingService {
 
     private void validateDuplicateWaiting(Waiting waiting) {
         if (waitingRepository.existsByDateAndTimeAndThemeAndMember(waiting)) {
-            throw new IllegalArgumentException("중복된 예약대기 신청입니다");
+            throw new IllegalArgumentException("이미 해당 예약에 대기를 신청한 상태입니다.");
         }
     }
 
     private void validateAddReservationDateTime(Waiting waiting) {
         LocalDateTime currentDateTime = LocalDateTime.of(LocalDate.now(), LocalTime.now());
         if (waiting.isBeforeDateTime(currentDateTime)) {
-            throw new IllegalArgumentException("과거 시간에 예약할 수 없습니다.");
+            throw new IllegalArgumentException("과거 시간에 대기할 수 없습니다.");
         }
     }
 
