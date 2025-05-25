@@ -33,8 +33,8 @@ public class Waiting {
     @Column(nullable = false)
     private LocalDateTime createAt;
 
-    private Waiting(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
-                    final Theme theme, final LocalDateTime createAt) {
+    public Waiting(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
+                   final Theme theme, final LocalDateTime createAt) {
         validateNull(member, date, reservationTime, theme, createAt);
         this.id = id;
         this.member = member;
@@ -106,5 +106,9 @@ public class Waiting {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public LocalDateTime getCreateAt() {
+        return createAt;
     }
 }
