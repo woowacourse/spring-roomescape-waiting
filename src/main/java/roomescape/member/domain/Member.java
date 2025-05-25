@@ -48,10 +48,6 @@ public class Member {
         this.password = password;
     }
 
-    public static Member generateWithPrimaryKey(Member member, Long newPrimaryKey) {
-        return new Member(newPrimaryKey, member.name, member.email, member.role, member.password);
-    }
-
     public boolean checkInvalidLogin(String email, String password) {
         return !(this.email.equals(email) && this.password.equals(password));
     }
