@@ -1,6 +1,10 @@
 package roomescape.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.MyReservationWithWaitingResponse;
@@ -11,18 +15,27 @@ import java.util.List;
 import java.util.stream.Stream;
 
 @Service
-public class MyReservationQueryService {
+@Transactional(readOnly = true)
+public class MyReservationService {
 
-    private final ReservationService reservationService;
+    private final ReservationRepository reservationRepository;
     private final WaitingService waitingService;
+    private final MemberService memberService;
 
-    public MyReservationQueryService(ReservationService reservationService, WaitingService waitingService) {
-        this.reservationService = reservationService;
+    public MyReservationService(ReservationRepository reservationRepository, WaitingService waitingService, MemberService memberService) {
+        this.reservationRepository = reservationRepository;
         this.waitingService = waitingService;
+        this.memberService = memberService;
+    }
+
+    public List<MyReservationResponse> getMyReservations(LoginMember loginMember) {
+        Member member = memberService.findMemberById(loginMember.id());
+        List<Reservation> reservations = reservationRepository.findAllByMember(member);
+        return MyReservationResponse.from(reservations);
     }
 
     public List<MyReservationWithWaitingResponse> getMyReservationsWithWaitings(LoginMember loginMember) {
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
+        List<MyReservationResponse> myReservations = getMyReservations(loginMember);
 
         List<WaitingWithRank> myWaitingsWithRank = waitingService.getMyWaitingsWithRank(loginMember);
 

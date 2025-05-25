@@ -20,7 +20,6 @@ import roomescape.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.MemberResponse;
-import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
 import roomescape.presentation.dto.response.ReservationTimeResponse;
 import roomescape.presentation.dto.response.ThemeResponse;
@@ -195,23 +194,6 @@ class ReservationServiceTest extends BaseTest {
                 () -> assertThat(responses).hasSize(1),
                 () -> assertThat(response.id()).isEqualTo(reservation.getId()),
                 () -> assertThat(response.date()).isEqualTo(reservation.getDate())
-        );
-    }
-
-    @Test
-    void 나의_예약_기록을_조회한다() {
-        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
-        Theme theme = themeDbFixture.공포();
-        Member member = memberDbFixture.한스_사용자();
-
-        Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
-        LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
-
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
-
-        assertAll(
-                () -> assertThat(myReservations).hasSize(1),
-                () -> assertThat(myReservations.getFirst().id()).isEqualTo(reservation.getId())
         );
     }
 }

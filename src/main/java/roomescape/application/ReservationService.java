@@ -18,7 +18,6 @@ import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
-import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
 
 import java.time.LocalDate;
@@ -125,12 +124,6 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByThemeAndMemberAndDate(themeId, memberId, dateFrom, dateTo);
 
         return ReservationResponse.from(reservations);
-    }
-
-    public List<MyReservationResponse> getMyReservations(LoginMember loginMember) {
-        Member member = memberService.findMemberById(loginMember.id());
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return MyReservationResponse.from(reservations);
     }
 
     private ReservationDateTime getReservationDateTime(Long timeId, ReservationDate reservationDate) {
