@@ -42,7 +42,9 @@ public class FakeWaitingRepository implements WaitingRepository {
         return waitings.stream()
                 .filter(w -> w.getTheme().equals(waiting.getTheme()))
                 .filter(w -> w.getReservationTime().equals(waiting.getReservationTime()))
-                .filter(w -> w.getId() < waiting.getId())
+                .filter(w ->
+                        w.getQueuedAt().isBefore(waiting.getQueuedAt()) ||
+                        w.getQueuedAt().equals(waiting.getQueuedAt()) && w.getId() < waiting.getId())
                 .count();
     }
 

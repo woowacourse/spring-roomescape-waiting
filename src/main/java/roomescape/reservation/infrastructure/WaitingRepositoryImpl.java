@@ -23,7 +23,8 @@ public class WaitingRepositoryImpl implements WaitingRepositoryCustom {
                      FROM Waiting w2
                      WHERE w2.theme = w.theme
                        AND w2.reservationTime = w.reservationTime
-                       AND w2.id < w.id))
+                       AND (w2.queuedAt < w.queuedAt OR (w2.queuedAt = w.queuedAt AND w2.id < w.id))
+                     ))
                 FROM Waiting w
                 JOIN FETCH w.member
                 JOIN FETCH w.theme

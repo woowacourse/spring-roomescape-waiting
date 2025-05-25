@@ -79,6 +79,10 @@ public class Waiting {
         return theme;
     }
 
+    public LocalDateTime getQueuedAt() {
+        return queuedAt;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Waiting waiting)) {
