@@ -24,7 +24,7 @@ public class LoginService {
         this.memberQueryService = memberQueryService;
     }
 
-    public String createAdminToken(final LoginRequest request) {
+    public String loginAdmin(final LoginRequest request) {
         validateAdminExistsAccount(request);
 
         Admin admin = adminQueryService.findByEmail(request.email());
@@ -33,7 +33,7 @@ public class LoginService {
         return jwtTokenManager.createToken(admin.getId(), "ADMIN");
     }
 
-    public String createMemberToken(final LoginRequest request) {
+    public String loginMember(final LoginRequest request) {
         validateMemberExistsAccount(request);
 
         Member member = memberQueryService.findByEmail(new Email(request.email()));

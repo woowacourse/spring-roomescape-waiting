@@ -25,7 +25,7 @@ public class MemberLoginController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
-        String token = loginService.createMemberToken(request);
+        String token = loginService.loginMember(request);
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)

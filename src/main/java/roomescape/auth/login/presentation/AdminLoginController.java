@@ -27,7 +27,7 @@ public class AdminLoginController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
-        String token = loginService.createAdminToken(request);
+        String token = loginService.loginAdmin(request);
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
                 .httpOnly(true)
