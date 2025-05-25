@@ -16,10 +16,10 @@ public interface JpaReservationRepository extends ListCrudRepository<Reservation
             attributePaths = {"info.time", "info.theme", "member"}
     )
     List<Reservation> findByInfoThemeIdAndMemberIdAndInfoDateBetween(
-            Long themeId,
-            Long memberId,
-            LocalDate startDate,
-            LocalDate endDate
+            @Param("themeId") Long themeId,
+            @Param("memberId") Long memberId,
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate
     );
 
     @Query("""

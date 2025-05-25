@@ -127,16 +127,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void createReservation_shouldThrowException_WhenDuplicated() {
-        reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
-        reservationCompositeService.createReservation(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-
-        assertThatThrownBy(() -> reservationCompositeService.createReservation(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour))
-                .isInstanceOf(ReservationAlreadyExistsException.class)
-                .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
-    }
-
-    @Test
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(() -> reservationCompositeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
                 .isInstanceOf(ReservationNotFoundException.class)
