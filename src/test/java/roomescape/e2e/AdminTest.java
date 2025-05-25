@@ -1,5 +1,6 @@
 package roomescape.e2e;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static roomescape.fixture.IntegrationFixture.ADMIN_EMAIL;
 import static roomescape.fixture.IntegrationFixture.FUTURE_DATE;
@@ -9,16 +10,20 @@ import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
 import static roomescape.fixture.IntegrationFixture.findThemesBySize;
 import static roomescape.fixture.IntegrationFixture.loginAndGetAuthToken;
+import static roomescape.fixture.IntegrationFixture.makeWaitingReservations;
 
 import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.waiting.presentation.dto.WaitingResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -119,5 +124,21 @@ public class AdminTest {
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+
+    @Test
+    void findWaitingReservation() {
+        makeWaitingReservations();
+        List<WaitingResponse> responses = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, ADMIN_TOKEN)
+                .when().get("/admin/waiting-reservations")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .as(new TypeRef<>() {
+                });
+        assertThat(responses.size()).isOne();
     }
 }

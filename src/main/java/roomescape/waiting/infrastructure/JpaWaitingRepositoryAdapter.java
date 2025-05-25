@@ -3,6 +3,7 @@ package roomescape.waiting.infrastructure;
 import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingStatus;
 import roomescape.waiting.domain.repository.WaitingRepository;
 
 @Repository
@@ -32,5 +33,10 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     @Override
     public boolean existsByReservationIdAndMemberId(final Long reservationId, final Long memberId) {
         return jpaWaitingRepository.existsByReservationIdAndMemberId(reservationId, memberId);
+    }
+
+    @Override
+    public List<Waiting> findAllByWaitingStatus(final WaitingStatus waitingStatus) {
+        return jpaWaitingRepository.findAllByWaitingStatus(waitingStatus);
     }
 }

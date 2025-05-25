@@ -11,6 +11,7 @@ import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
 import static roomescape.fixture.IntegrationFixture.loginAndGetAuthToken;
+import static roomescape.fixture.IntegrationFixture.makeWaitingReservations;
 
 import io.restassured.RestAssured;
 import io.restassured.common.mapper.TypeRef;
@@ -75,7 +76,7 @@ public class RegularTest {
 
     @Test
     void createAndDeleteReservation() {
-        IntegrationFixture.createReservationTime();
+        createReservationTime();
         createTheme("추리");
         createRegularReservation(1L);
 
@@ -117,25 +118,7 @@ public class RegularTest {
 
     @Test
     void createWaitingReservations() {
-        createReservationTime();
-        createTheme("추리");
-        createRegularReservation(1L);
-
-        String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", FUTURE_DATE);
-        reservation.put("timeId", 1L);
-        reservation.put("themeId", 1L);
-
-        WaitingReservationResponse waitingReservationResponse = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .cookie(TOKEN, user2Token)
-                .body(reservation)
-                .when().post("/waiting-reservations")
-                .then().log().all()
-                .statusCode(201)
-                .extract()
-                .as(WaitingReservationResponse.class);
+        WaitingReservationResponse waitingReservationResponse = makeWaitingReservations();
 
         assertThat(waitingReservationResponse.waitingStatus()).isEqualTo(WaitingStatus.WAITING);
     }

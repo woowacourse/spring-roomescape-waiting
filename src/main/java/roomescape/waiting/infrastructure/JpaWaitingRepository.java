@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingStatus;
 
 public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> {
 
@@ -27,4 +28,14 @@ public interface JpaWaitingRepository extends ListCrudRepository<Waiting, Long> 
     void deleteByReservationIdAndMemberId(Long reservationId, Long memberId);
 
     boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
+
+    @Query("""
+            SELECT w 
+            FROM Waiting w 
+            JOIN FETCH w.reservation r            
+            JOIN FETCH r.time t 
+            JOIN FETCH r.theme th                   
+            WHERE w.waitingStatus = :waitingStatus
+            """)
+    List<Waiting> findAllByWaitingStatus(WaitingStatus waitingStatus);
 }

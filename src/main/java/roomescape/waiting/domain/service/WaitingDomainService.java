@@ -5,9 +5,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.reservation.presentation.dto.response.MyReservationResponse;
-import roomescape.waiting.exception.WaitingOwnerException;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingStatus;
 import roomescape.waiting.domain.repository.WaitingRepository;
+import roomescape.waiting.exception.WaitingOwnerException;
 
 @Service
 public class WaitingDomainService {
@@ -40,5 +41,9 @@ public class WaitingDomainService {
         if (!doesExists) {
             throw new WaitingOwnerException("자신의 예약 대기가 아닙니다.");
         }
+    }
+
+    public List<Waiting> findAllWaitingReservations() {
+        return waitingRepository.findAllByWaitingStatus(WaitingStatus.WAITING);
     }
 }
