@@ -57,7 +57,6 @@ public class ReservationSlot {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        // TODO : 연관관계 저장 안됨 문제
         reservations.add(new Reservation(ReservationStatus.CURRENT, member, this));
     }
 

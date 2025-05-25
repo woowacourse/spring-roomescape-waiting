@@ -40,11 +40,6 @@ public class Member {
     @Column(nullable = false)
     private MemberRole memberRole;
 
-    // TODO: 꼭 필요할까?
-    @OneToMany(mappedBy = "member", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    @Column(name = "waiting_id")
-    private List<Reservation> reservationList = new ArrayList<>();
-
     public Member(final String name, final String email, final String password,
                   final MemberRole memberRole) {
         validate(name);
