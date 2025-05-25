@@ -15,15 +15,18 @@ import roomescape.dto.request.ReservationCondition;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @RestController
 @RequestMapping("/api/admin")
 public class AdminController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public AdminController(ReservationService reservationService) {
+    public AdminController(final ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations")
@@ -44,6 +47,6 @@ public class AdminController {
 
     @GetMapping("/waitings")
     public List<WaitingResponse> getWaitings() {
-        return reservationService.findWaitings();
+        return waitingService.findWaitings();
     }
 }

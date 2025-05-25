@@ -13,22 +13,22 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.Authenticated;
 import roomescape.dto.request.WaitingCreateRequest;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @RestController
 @RequestMapping(value = "/api/waiting")
 public class WaitingController {
-    private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public WaitingController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public WaitingController(final WaitingService waitingService) {
+        this.waitingService = waitingService;
     }
 
     @PostMapping
     public ResponseEntity<WaitingResponse> createNewWaiting(
             @Authenticated Long memberId,
             @Valid @RequestBody WaitingCreateRequest request) {
-        WaitingResponse waitingResponse = reservationService.createWaiting(
+        WaitingResponse waitingResponse = waitingService.createWaiting(
                 memberId, request.timeId(), request.themeId(), request.date(), LocalDateTime.now());
         return ResponseEntity
                 .created(URI.create("/reservations/waitings/" + waitingResponse.id()))
@@ -37,7 +37,7 @@ public class WaitingController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-        reservationService.deleteWaitingById(id);
+        waitingService.deleteWaitingById(id);
         return ResponseEntity.noContent().build();
     }
 }

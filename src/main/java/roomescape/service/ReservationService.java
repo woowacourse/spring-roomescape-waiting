@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
@@ -20,13 +19,11 @@ import roomescape.domain.repository.WaitingRepository;
 import roomescape.dto.request.ReservationCondition;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWithStatusResponse;
-import roomescape.dto.response.WaitingResponse;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.MemberNotFoundException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
-import roomescape.exception.WaitingNotFoundException;
 
 @Service
 @Transactional
@@ -58,14 +55,6 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<WaitingResponse> findWaitings() {
-        List<Waiting> waitings = waitingRepository.findAll();
-        return waitings.stream()
-                .map(WaitingResponse::from)
-                .toList();
-    }
-
-    @Transactional(readOnly = true)
     public List<ReservationWithStatusResponse> findBookingHistory(Long memberId) {
         List<ReservationWithStatusResponse> reservations = findReservationByMemberId(memberId);
         List<ReservationWithStatusResponse> waitings = findWaitingByMemberId(memberId);
@@ -86,7 +75,6 @@ public class ReservationService {
                 .toList();
     }
 
-
     public ReservationResponse createReservation(Long memberId, Long timeId, Long themeId, LocalDate date) {
         ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
                 .orElseThrow(ReservationTimeNotFoundException::new);
@@ -102,30 +90,8 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public WaitingResponse createWaiting(Long memberId, Long timeId, Long themeId, LocalDate date,
-                                         LocalDateTime createAt) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(timeId)
-                .orElseThrow(ReservationTimeNotFoundException::new);
-        Theme theme = themeRepository.findById(themeId).orElseThrow(ThemeNotFoundException::new);
-        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
-
-        Waiting waiting = Waiting.createWithoutId(member, date, reservationTime, theme, createAt);
-
-        waiting.validateDateTime();
-        validateWaitingDuplicate(date, reservationTime, theme, member);
-
-        Waiting savedWaiting = waitingRepository.save(waiting);
-        return WaitingResponse.from(savedWaiting);
-    }
-
     private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
         if (reservationRepository.findByDateAndReservationTimeAndTheme(date, time, theme).isPresent()) {
-            throw new ExistedReservationException();
-        }
-    }
-
-    private void validateWaitingDuplicate(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        if (waitingRepository.findByDateAndReservationTimeAndThemeAndMember(date, time, theme, member).isPresent()) {
             throw new ExistedReservationException();
         }
     }
@@ -147,10 +113,5 @@ public class ReservationService {
             Reservation promotedReservation = firstWaiting.promoteToReservation();
             reservationRepository.save(promotedReservation);
         }
-    }
-
-    public void deleteWaitingById(Long id) {
-        waitingRepository.findById(id).orElseThrow(WaitingNotFoundException::new);
-        waitingRepository.deleteById(id);
     }
 }
