@@ -18,16 +18,21 @@ import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.ReservationCommandService;
+import roomescape.reservation.service.ReservationQueryService;
 
 @RestController
 public class ReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
 
-    public ReservationController(final ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public ReservationController(final ReservationCommandService reservationCommandService,
+                                 final ReservationQueryService reservationQueryService) {
+        this.reservationCommandService = reservationCommandService;
+        this.reservationQueryService = reservationQueryService;
     }
+
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(
@@ -37,20 +42,20 @@ public class ReservationController {
         final CreateReservationWithMemberRequest newRequest = new CreateReservationWithMemberRequest(
                 request.date(), request.timeId(), request.themeId(), member.id());
 
-        final ReservationResponse response = reservationService.createReservation(newRequest);
+        final ReservationResponse response = reservationCommandService.createReservation(newRequest);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @PostMapping("/admin/reservations")
     public ResponseEntity<ReservationResponse> createByAdmin(
             @RequestBody @Valid final CreateReservationWithMemberRequest request) {
-        final ReservationResponse response = reservationService.createReservation(request);
+        final ReservationResponse response = reservationCommandService.createReservation(request);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 
     @GetMapping("/reservations")
     public ResponseEntity<List<ReservationResponse>> findAll() {
-        final List<ReservationResponse> responses = reservationService.getReservations();
+        final List<ReservationResponse> responses = reservationQueryService.getReservations();
         return ResponseEntity.ok().body(responses);
     }
 
@@ -61,7 +66,7 @@ public class ReservationController {
             @RequestParam(value = "dateFrom") final LocalDate dateFrom,
             @RequestParam(value = "dateTo") final LocalDate dateTo
     ) {
-        final List<ReservationResponse> responses = reservationService.getReservations(
+        final List<ReservationResponse> responses = reservationQueryService.getReservations(
                 memberId,
                 themeId,
                 dateFrom,
@@ -72,13 +77,13 @@ public class ReservationController {
 
     @GetMapping("/me/reservations")
     public ResponseEntity<List<MyReservationResponse>> findAllMyReservations(@AuthMember LoginMember loginMember) {
-        final List<MyReservationResponse> responses = reservationService.getMyReservations(loginMember);
+        final List<MyReservationResponse> responses = reservationQueryService.getMyReservations(loginMember);
         return ResponseEntity.ok().body(responses);
     }
 
     @DeleteMapping("/reservations/{id}")
     public ResponseEntity<Void> delete(@PathVariable("id") final long id) {
-        reservationService.cancelReservationById(id);
+        reservationCommandService.cancelReservationById(id);
         return ResponseEntity.noContent().build();
     }
 }

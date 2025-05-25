@@ -263,7 +263,7 @@ public class ReservationApiTest {
         @DisplayName("예약을 취소할 경우 대기 목록을 자동 업데이트 한다.")
         @Test
         @Sql({"/test-time-data.sql", "/test-theme-data.sql", "/test-member-data.sql", "/test-waiting-data.sql"})
-        void test() {
+        void testUpdateWaiting() {
             // given
             // when
             RestAssured.given().log().all()
