@@ -37,8 +37,8 @@ class AuthServiceTest extends AbstractServiceIntegrationTest {
         LoginResult loginResult = authService.login(loginParam);
 
         // then
-        assertThat(loginResult)
-                .isEqualTo(new LoginResult(jwtProvider.issue(new JwtPayload(1L, "벨로", Role.NORMAL))));
+        JwtPayload payload = jwtProvider.extractPayload(loginResult.token());
+        assertThat(payload).isEqualTo(new JwtPayload(1L, "벨로", Role.NORMAL));
     }
 
     @Test
