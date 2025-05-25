@@ -1,0 +1,25 @@
+package roomescape.reservation.time.presentation;
+
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RestController;
+import roomescape.reservation.time.application.ReservationTimeFacadeService;
+import roomescape.reservation.time.presentation.dto.TimeConditionRequest;
+import roomescape.reservation.time.presentation.dto.TimeConditionResponse;
+
+@RestController
+public class MemberReservationTimeController {
+
+    private final ReservationTimeFacadeService reservationTimeFacadeService;
+
+    public MemberReservationTimeController(ReservationTimeFacadeService reservationTimeFacadeService) {
+        this.reservationTimeFacadeService = reservationTimeFacadeService;
+    }
+
+    @GetMapping("/available-times")
+    public ResponseEntity<List<TimeConditionResponse>> getReservationTimes(final TimeConditionRequest request) {
+        List<TimeConditionResponse> responses = reservationTimeFacadeService.getTimesWithCondition(request);
+        return ResponseEntity.ok().body(responses);
+    }
+}
