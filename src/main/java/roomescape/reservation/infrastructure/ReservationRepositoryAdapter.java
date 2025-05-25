@@ -21,11 +21,6 @@ public class ReservationRepositoryAdapter implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeId(LocalDate reservationDate, Long id) {
-        return reservationJpaRepository.existsBySpecDateValueAndSpecTimeId(reservationDate, id);
-    }
-
-    @Override
     public List<Reservation> findAllByMemberId(Long memberId) {
         return reservationJpaRepository.findAllByMemberId(memberId);
     }
