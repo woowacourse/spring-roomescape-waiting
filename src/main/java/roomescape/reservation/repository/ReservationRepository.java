@@ -33,4 +33,8 @@ public interface ReservationRepository {
     );
 
     long findOrder(Reservation reservation);
+
+    Optional<Reservation> findById(Long id);
+
+    void delete(Reservation reservation);
 }

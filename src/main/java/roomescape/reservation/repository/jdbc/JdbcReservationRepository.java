@@ -186,6 +186,21 @@ public class JdbcReservationRepository implements ReservationRepository {
         return 0;
     }
 
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return Optional.empty();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public void delete(Reservation reservation) {
+    }
+
     @Override
     public boolean existsByTimeId(Long timeId) {
         final String query = """

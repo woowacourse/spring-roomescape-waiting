@@ -78,4 +78,14 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
             reservation.getPriority()
         );
     }
+
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return jpaReservationRepository.findById(id);
+    }
+
+    @Override
+    public void delete(Reservation reservation) {
+        jpaReservationRepository.delete(reservation);
+    }
 }

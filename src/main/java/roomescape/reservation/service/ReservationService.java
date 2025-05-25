@@ -151,4 +151,15 @@ public class ReservationService {
         }
         return order + "번째 예약대기";
     }
+
+    public void deleteWaiting(Long id, Member member) {
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new BadRequestException("존재하지 않는 예약입니다."));
+
+        if (!reservation.getMember().equals(member)) {
+            throw new BadRequestException("예약 대기 취소 권한이 없습니다.");
+        }
+
+        reservationRepository.delete(reservation);
+    }
 }

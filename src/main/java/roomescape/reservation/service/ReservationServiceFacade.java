@@ -92,4 +92,9 @@ public class ReservationServiceFacade {
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
         return reservationService.findAllByMember(member);
     }
+
+    public void deleteWaiting(Long id, MemberPrincipal memberPrincipal) {
+        Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
+        reservationService.deleteWaiting(id, member);
+    }
 }
