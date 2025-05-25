@@ -45,6 +45,6 @@ public class MemberController {
             @PathVariable("id") long id
     ) {
         memberService.deleteMember(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

@@ -19,7 +19,7 @@ import roomescape.reservation.service.WaitingService;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/waiting")
+@RequestMapping("/waitings")
 public class WaitingController {
 
     private final WaitingService waitingService;
@@ -40,6 +40,6 @@ public class WaitingController {
             @PathVariable("id") long id
     ) {
         waitingService.deleteWaiting(loginMember.id(), id);
-        return ResponseEntity.status(204).build();
+        return ResponseEntity.noContent().build();
     }
 }
