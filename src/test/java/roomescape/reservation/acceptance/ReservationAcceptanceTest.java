@@ -216,7 +216,7 @@ class ReservationAcceptanceTest {
         );
 
         // when & then
-        TestHelper.postWithToken("/admin/reservations", adminCreateRequest, token)
+        TestHelper.postWithToken("/reservations/admin", adminCreateRequest, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
@@ -240,7 +240,7 @@ class ReservationAcceptanceTest {
         );
 
         // when & then
-        TestHelper.postWithToken("/admin/reservations", adminCreateRequest, token)
+        TestHelper.postWithToken("/reservations/admin", adminCreateRequest, token)
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }

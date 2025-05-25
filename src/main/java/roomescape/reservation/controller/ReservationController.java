@@ -3,6 +3,7 @@ package roomescape.reservation.controller;
 import jakarta.validation.Valid;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,8 +17,10 @@ import roomescape.global.auth.annotation.AuthenticationPrincipal;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.member.entity.RoleType;
+import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.dto.response.ReservationAdminCreateResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
 import roomescape.reservation.dto.response.ReservationReadMemberResponse;
@@ -38,6 +41,15 @@ public class ReservationController {
     ) {
         ReservationCreateResponse response = reservationService.createReservation(loginMember.id(), request);
         return ResponseEntity.ok().body(response);
+    }
+
+    @PostMapping("/admin")
+    @RoleRequired(roleType = RoleType.ADMIN)
+    public ResponseEntity<ReservationAdminCreateResponse> createReservationByAdmin(
+            @RequestBody @Valid ReservationAdminCreateRequest request
+    ) {
+        ReservationAdminCreateResponse response = reservationService.createReservationByAdmin(request);
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
