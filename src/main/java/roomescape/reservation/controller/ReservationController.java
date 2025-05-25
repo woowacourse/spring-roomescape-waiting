@@ -68,7 +68,7 @@ public class ReservationController {
                 createReservationWebRequest,
                 memberInfo);
         final URI location = UriFactory.buildPath(BASE_PATH,
-                String.valueOf(reservationWithStatusResponse.reservationId()));
+                String.valueOf(reservationWithStatusResponse.id()));
         return ResponseEntity.created(location)
                 .body(reservationWithStatusResponse);
     }

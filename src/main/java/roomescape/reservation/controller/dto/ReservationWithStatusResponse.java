@@ -8,7 +8,7 @@ import roomescape.common.utils.Validator;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
 public record ReservationWithStatusResponse(
-        Long reservationId,
+        Long id,
         String themeName,
         LocalDate date,
         LocalTime time,
@@ -16,28 +16,28 @@ public record ReservationWithStatusResponse(
 ) {
 
     public ReservationWithStatusResponse {
-        validate(reservationId, themeName, date, time, status);
+        validate(id, themeName, date, time, status);
     }
 
     public ReservationWithStatusResponse(
-            Long reservationId,
+            Long id,
             String themeName,
             LocalDate date,
             LocalTime time,
             Integer rank
     ) {
-        this(reservationId, themeName, date, time, rank.toString() + "번째 예약대기");
+        this(id, themeName, date, time, rank.toString() + "번째 예약대기");
     }
 
     private void validate(
-            final Long reservationId,
+            final Long id,
             final String themeName,
             final LocalDate date,
             final LocalTime time,
             final String status
     ) {
         Validator.of(ReservationWithStatusResponse.class)
-                .notNullField(Fields.reservationId, reservationId)
+                .notNullField(Fields.id, id)
                 .notNullField(Fields.themeName, themeName)
                 .notNullField(Fields.date, date)
                 .notNullField(Fields.time, time)
