@@ -8,6 +8,7 @@ import io.restassured.response.Response;
 import java.util.HashMap;
 import java.util.Map;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,14 +21,31 @@ import roomescape.common.exception.handler.dto.ExceptionResponse;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationTimeIntegrationTest {
 
+    private String token;
+
+    @BeforeEach
+    void before_token_set() {
+        Map<String, Object> loginParam = new HashMap<>();
+        loginParam.put("email", "admin@email.com");
+        loginParam.put("password", "password");
+
+        token = RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .body(loginParam)
+            .when().post("/admin/login")
+            .then().log().all()
+            .extract().cookie("token");
+    }
+
     @DisplayName("예약 시간을 조회할 수 있다.")
     @Test
     void reservation_time_view() {
         RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+            .header("Cookie", "token=" + token)
+            .when().get("/admin/times")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(0));
     }
 
     @DisplayName("예약 시간을 추가 및 삭제 할 수 있다.")
@@ -37,16 +55,18 @@ public class ReservationTimeIntegrationTest {
         params.put("startAt", "10:00");
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201);
+            .header("Cookie", "token=" + token)
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/admin/times")
+            .then().log().all()
+            .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().delete("/times/1")
-                .then().log().all()
-                .statusCode(204);
+            .header("Cookie", "token="+token)
+            .when().delete("/admin/times/1")
+            .then().log().all()
+            .statusCode(204);
     }
 
     @DisplayName("시간이 null인 상태로 생성 요청 시 400 응답을 준다.")
@@ -55,16 +75,17 @@ public class ReservationTimeIntegrationTest {
         Map<String, Object> reservationTime = new HashMap<>();
         reservationTime.put("startAt", null);
 
-        ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] time은 null 일 수 없습니다.", "/times");
+        ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] time은 null 일 수 없습니다.", "/admin/times");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservationTime)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .header("Cookie", "token=" + token)
+            .contentType(ContentType.JSON)
+            .body(reservationTime)
+            .when().post("/admin/times")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
@@ -77,16 +98,17 @@ public class ReservationTimeIntegrationTest {
         Map<String, Object> reservationTime = new HashMap<>();
         reservationTime.put("startAt", time);
 
-        ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 요청 시간 형식이 맞지 않습니다.", "/times");
+        ExceptionResponse expected = new ExceptionResponse(400, "[ERROR] 요청 시간 형식이 맞지 않습니다.", "/admin/times");
 
         Response response = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservationTime)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(400)
-                .extract()
-                .response();
+            .header("Cookie", "token=" + token)
+            .contentType(ContentType.JSON)
+            .body(reservationTime)
+            .when().post("/admin/times")
+            .then().log().all()
+            .statusCode(400)
+            .extract()
+            .response();
 
         ExceptionResponse actual = response.as(ExceptionResponse.class);
         Assertions.assertThat(actual).isEqualTo(expected);
