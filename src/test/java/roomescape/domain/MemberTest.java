@@ -39,7 +39,7 @@ class MemberTest {
         @Test
         void cannotCreateBecauseTooLongName() {
             // given
-            String tooLongName = "1".repeat(256);
+            String tooLongName = "1" .repeat(256);
 
             // when & then
             assertThatThrownBy(() -> new Member(1L, Role.GENERAL, tooLongName, "test@test.com", "qwer1234!"))
@@ -61,7 +61,7 @@ class MemberTest {
         @Test
         void cannotCreateBecauseTooLongEmail() {
             // given
-            String tooLongEmail = "1".repeat(256);
+            String tooLongEmail = "1" .repeat(256);
 
             // when & then
             assertThatThrownBy(() -> new Member(1L, Role.GENERAL, "이름", tooLongEmail, "비밀번호"))
@@ -95,7 +95,7 @@ class MemberTest {
         @Test
         void cannotCreateBecauseTooLongPassword() {
             // given
-            String tooLongPassword = "i".repeat(51);
+            String tooLongPassword = "i" .repeat(51);
             // when & then
             assertThatThrownBy(() -> new Member(1L, Role.GENERAL, "이름", "test@test.com", tooLongPassword))
                     .isInstanceOf(IllegalArgumentException.class)

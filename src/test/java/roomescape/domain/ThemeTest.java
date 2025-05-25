@@ -28,7 +28,7 @@ class ThemeTest {
         @Test
         void cannotCreateBecauseTooLongName() {
             // given
-            String tooLongName = "1".repeat(51);
+            String tooLongName = "1" .repeat(51);
 
             // when & then
             assertThatThrownBy(() -> new Theme(1L, tooLongName, "설명", "섬네일"))
@@ -60,7 +60,7 @@ class ThemeTest {
         @Test
         void cannotCreateBecauseTooLongThumbnail() {
             // given
-            String tooLongThumbnail = "1".repeat(601);
+            String tooLongThumbnail = "1" .repeat(601);
 
             // when & then
             assertThatThrownBy(() -> new Theme(1L, "테마", "설명", tooLongThumbnail))
