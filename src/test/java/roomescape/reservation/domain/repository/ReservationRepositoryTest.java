@@ -190,4 +190,20 @@ class ReservationRepositoryTest {
         // then
         assertThat(reservation.getId()).isEqualTo(waitingId);
     }
+
+    @Test
+    @DisplayName("대기 상태가 아닌 동일 예약 내역이 존재하는지 확인한다")
+    void existsByDateAndTimeIdAndStatus() {
+        // when
+        Reservation reservation = allReservations.getFirst();
+
+        boolean isOccupied = reservationRepository.existsByDateAndTimeIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getStatus()
+        );
+
+        // then
+        assertThat(isOccupied).isTrue();
+    }
 }

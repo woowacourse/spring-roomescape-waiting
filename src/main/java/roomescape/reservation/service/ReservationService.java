@@ -83,11 +83,11 @@ public class ReservationService {
                 waitingReservation.getTheme(),
                 Status.BOOKED
         );
+
+        validateDuplicateReservationExceptWaiting(bookedReservation.getDate(), bookedReservation.getTime());
         reservationRepository.deleteById(id);
 
-        validateDuplicateReservation(bookedReservation.getDate(), bookedReservation.getTime());
         Reservation savedReservation = reservationRepository.save(bookedReservation);
-
         return ReservationResponse.from(savedReservation);
     }
 
@@ -138,6 +138,20 @@ public class ReservationService {
 
     private boolean isPastTime(final ReservationTime reservationTime) {
         return reservationTime.getStartAt().isBefore(LocalTime.now());
+    }
+
+    private void validateDuplicateReservationExceptWaiting(
+            final LocalDate reservationDate,
+            final ReservationTime reservationTime
+    ) {
+        boolean isOccupiedByReservation = reservationRepository.existsByDateAndTimeIdAndStatus(
+                reservationDate,
+                reservationTime.getId(),
+                Status.BOOKED
+        );
+        if (isOccupiedByReservation) {
+            throw new DuplicateException(ReservationExceptionMessage.OCCUPIED_RESERVATION.getMessage());
+        }
     }
 
     private void validateDuplicateReservation(
