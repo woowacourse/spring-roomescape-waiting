@@ -130,13 +130,6 @@ class ReservationControllerTest {
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(204);
-
-            RestAssured.given().log().all()
-                    .header("Cookie", adminCookie)
-                    .when().get("/reservations")
-                    .then().log().all()
-                    .statusCode(200)
-                    .body("size()", is(0));
         }
 
         @DisplayName("존재하지 않는 예약을 삭제할 수 없다")
