@@ -2,6 +2,7 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.exception.DuplicateWaitingException;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -11,6 +12,7 @@ import roomescape.presentation.dto.request.WaitingRequest;
 import roomescape.presentation.dto.response.WaitingResponse;
 import roomescape.presentation.dto.response.WaitingWithRank;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 
@@ -30,6 +32,7 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest, LoginMember loginMember) {
+        validateDuplicateWaiting(waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId(), loginMember.id());
         Theme theme = themeService.findThemeById(waitingRequest.themeId());
         ReservationTime reservationTime = timeService.findReservationTimeById(waitingRequest.timeId());
         Waiting waiting = Waiting.from(waitingRequest.date(), loginMember.id(), theme, reservationTime);
@@ -50,5 +53,12 @@ public class WaitingService {
     private Waiting findWaitingById(Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기를 찾을 수 없습니다. : " + id));
+    }
+
+    private void validateDuplicateWaiting(LocalDate date, Long themeId, Long timeId, Long memberId) {
+        boolean isAlreadyWaited = waitingRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
+        if (isAlreadyWaited) {
+            throw new DuplicateWaitingException("[ERROR] 이미 예약 대기를 요청한 상태입니다.");
+        }
     }
 }

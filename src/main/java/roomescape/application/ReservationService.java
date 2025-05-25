@@ -2,6 +2,7 @@ package roomescape.application;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.exception.DuplicateWaitingException;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationDate;
@@ -49,6 +50,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest request, LoginMember loginMember) {
+        validateDuplicateReservation(request.date(), request.themeId(), request.timeId(), loginMember.id());
         ReservationDate reservationDate = new ReservationDate(request.date());
         Long timeId = request.timeId();
         Long themeId = request.themeId();
@@ -120,5 +122,12 @@ public class ReservationService {
         Member member = memberService.findMemberById(loginMember.id());
         List<Reservation> reservations = reservationRepository.findAllByMember(member);
         return MyReservationResponse.from(reservations);
+    }
+
+    private void validateDuplicateReservation(LocalDate date, Long themeId, Long timeId, Long memberId) {
+        boolean isAlreadyReserved = reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
+        if (isAlreadyReserved) {
+            throw new DuplicateWaitingException("[ERROR] 이미 예약을 요청한 상태입니다.");
+        }
     }
 }
