@@ -7,6 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.dto.request.MemberSignUpRequest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
@@ -18,6 +19,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
@@ -53,13 +55,5 @@ class MemberControllerTest {
                 .when().post("/members")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public MemberRepository memberRepository() {
-            return new FakeMemberRepository();
-        }
     }
 }

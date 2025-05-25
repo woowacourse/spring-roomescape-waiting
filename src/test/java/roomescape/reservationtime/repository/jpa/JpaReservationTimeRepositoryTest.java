@@ -1,6 +1,5 @@
 package roomescape.reservationtime.repository.jpa;
 
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +11,8 @@ import roomescape.member.repository.jpa.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.jpa.JpaReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.schedule.domain.Schedule;
+import roomescape.schedule.respository.jpa.JpaScheduleRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.jpa.JpaThemeRepository;
 
@@ -19,7 +20,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ActiveProfiles("test")
@@ -38,15 +40,20 @@ class JpaReservationTimeRepositoryTest {
     @Autowired
     private JpaReservationRepository jpaReservationRepository;
 
+    @Autowired
+    private JpaScheduleRepository jpaScheduleRepository;
+
     private Member member;
     private Theme theme;
     private ReservationTime time;
+    private Schedule schedule;
 
     @BeforeEach
     void setUp() {
         member = jpaMemberRepository.save(new Member(null, "test", "test@test.com", MemberRole.USER, "testpassword"));
         theme = jpaThemeRepository.save(new Theme(null, "test theme", "test description", "test thumbnail"));
         time = jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        schedule = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(1), time, theme));
     }
 
     @Test
@@ -58,7 +65,7 @@ class JpaReservationTimeRepositoryTest {
     @Test
     void 예약_가능한_시간_목록_확인() {
         jpaReservationTimeRepository.saveAll(createTimes());
-        jpaReservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), time, theme, member));
+        jpaReservationRepository.save(new Reservation(null, schedule, member));
         List<ReservationTime> availableReservationTimes = jpaReservationTimeRepository.findAllByReservationDateAndThemeId(LocalDate.now().plusDays(1), theme.getId());
         assertAll(
                 () -> assertThat(availableReservationTimes).hasSize(3),

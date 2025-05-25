@@ -11,6 +11,8 @@ import roomescape.member.repository.jpa.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.jpa.JpaReservationTimeRepository;
+import roomescape.schedule.domain.Schedule;
+import roomescape.schedule.respository.jpa.JpaScheduleRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.jpa.JpaThemeRepository;
 
@@ -37,34 +39,40 @@ class JpaReservationRepositoryTest {
     @Autowired
     private JpaMemberRepository jpaMemberRepository;
 
+    @Autowired
+    private JpaScheduleRepository jpaScheduleRepository;
+
     private Member member;
     private Theme theme;
     private ReservationTime time;
+    private Schedule schedule;
 
     @BeforeEach
     void setUp() {
         member = jpaMemberRepository.save(new Member(null, "test", "test@test.com", MemberRole.USER, "testpassword"));
         theme = jpaThemeRepository.save(new Theme(null, "test theme", "test description", "test thumbnail"));
         time = jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        schedule = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(1), time, theme));
     }
 
     @Test
     void 예약_생성_확인() {
-        Reservation saved = jpaReservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), time, theme, member));
+        Reservation saved = jpaReservationRepository.save(new Reservation(null, schedule, member));
         assertThatCode(() -> jpaReservationRepository.findById(saved.getId())).doesNotThrowAnyException();
     }
 
     @Test
     void 특정_시간의_예약이_존재하는경우_True() {
-        jpaReservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), time, theme, member));
-        assertThat(jpaReservationRepository.existsByTimeId(time.getId())).isTrue();
+        Reservation saved = jpaReservationRepository.save(new Reservation(null, schedule, member));
+
+        assertThat(jpaReservationRepository.existsByScheduleTimeId(time.getId())).isTrue();
     }
 
     @Test
     void 특정_시간의_예약이_존재하는경우_False() {
-        Reservation savedReservation = jpaReservationRepository.save(new Reservation(null, LocalDate.now().plusDays(1), time, theme, member));
+        Reservation savedReservation = jpaReservationRepository.save(new Reservation(null, schedule, member));
         jpaReservationRepository.delete(savedReservation);
-        assertThat(jpaReservationRepository.existsByTimeId(savedReservation.getId())).isFalse();
+        assertThat(jpaReservationRepository.existsByScheduleTimeId(savedReservation.getId())).isFalse();
     }
 
     @Test
@@ -90,10 +98,12 @@ class JpaReservationRepositoryTest {
     }
 
     private List<Reservation> createReservations() {
+        Schedule schedule2 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(2), time, theme));
+        Schedule schedule3 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(3), time, theme));
         return List.of(
-                new Reservation(null, LocalDate.now().plusDays(1), time, theme, member),
-                new Reservation(null, LocalDate.now().plusDays(2), time, theme, member),
-                new Reservation(null, LocalDate.now().plusDays(3), time, theme, member)
+                new Reservation(null, schedule, member),
+                new Reservation(null, schedule2, member),
+                new Reservation(null, schedule3, member)
         );
     }
 }

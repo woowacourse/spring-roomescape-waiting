@@ -11,6 +11,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.jpa.JpaReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.jpa.JpaReservationTimeRepository;
+import roomescape.schedule.domain.Schedule;
+import roomescape.schedule.respository.jpa.JpaScheduleRepository;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
@@ -19,6 +21,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -36,6 +39,9 @@ class JpaThemeRepositoryTest {
     @Autowired
     private JpaMemberRepository jpaMemberRepository;
 
+    @Autowired
+    private JpaScheduleRepository jpaScheduleRepository;
+
     @Test
     void 테마_생성_확인() {
         Theme savedTheme = jpaThemeRepository.save(new Theme(null, "test theme", "test description", "test thumbnail"));
@@ -52,29 +58,39 @@ class JpaThemeRepositoryTest {
                 10
         );
 
-        assertThat(findThemes).hasSize(3);
-        assertThat(findThemes.get(0).getName()).isEqualTo("test theme 1");
-        assertThat(findThemes.get(1).getName()).isEqualTo("test theme 2");
-        assertThat(findThemes.get(2).getName()).isEqualTo("test theme 3");
-
+        assertAll(
+                () -> assertThat(findThemes).hasSize(3),
+                () -> assertThat(findThemes.get(0).getName()).isEqualTo("test theme 1"),
+                () -> assertThat(findThemes.get(1).getName()).isEqualTo("test theme 2"),
+                () -> assertThat(findThemes.get(2).getName()).isEqualTo("test theme 3")
+        );
     }
 
     private List<Reservation> createReservations() {
-        Member member = jpaMemberRepository.save(new Member(null, "test", "test@test.com", MemberRole.USER, "testpassword"));
+        Member member = jpaMemberRepository.save(new Member(null, "test1", "test1@test.com", MemberRole.USER, "testpassword"));
+
         ReservationTime time = jpaReservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
         Theme theme1 = jpaThemeRepository.save(new Theme(null, "test theme 1", "test description 1", "test thumbnail 1"));
         Theme theme2 = jpaThemeRepository.save(new Theme(null, "test theme 2", "test description 2", "test thumbnail 2"));
         Theme theme3 = jpaThemeRepository.save(new Theme(null, "test theme 3", "test description 3", "test thumbnail 3"));
+
+        Schedule schedule1 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(1), time, theme1));
+        Schedule schedule2 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(1), time, theme2));
+        Schedule schedule3 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(1), time, theme3));
+
+        Schedule schedule4 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(2), time, theme1));
+        Schedule schedule5 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(2), time, theme2));
+
+        Schedule schedule6 = jpaScheduleRepository.save(new Schedule(null, LocalDate.now().plusDays(3), time, theme1));
+
+
         return List.of(
-                new Reservation(null, LocalDate.now().plusDays(1), time, theme1, member),
-                new Reservation(null, LocalDate.now().plusDays(1), time, theme1, member),
-                new Reservation(null, LocalDate.now().plusDays(1), time, theme1, member),
-                new Reservation(null, LocalDate.now().plusDays(2), time, theme1, member),
-                new Reservation(null, LocalDate.now().plusDays(1), time, theme2, member),
-                new Reservation(null, LocalDate.now().plusDays(2), time, theme2, member),
-                new Reservation(null, LocalDate.now().plusDays(3), time, theme2, member),
-                new Reservation(null, LocalDate.now().plusDays(2), time, theme3, member),
-                new Reservation(null, LocalDate.now().plusDays(3), time, theme3, member)
+                new Reservation(null, schedule1, member),
+                new Reservation(null, schedule2, member),
+                new Reservation(null, schedule3, member),
+                new Reservation(null, schedule4, member),
+                new Reservation(null, schedule5, member),
+                new Reservation(null, schedule6, member)
         );
     }
 }

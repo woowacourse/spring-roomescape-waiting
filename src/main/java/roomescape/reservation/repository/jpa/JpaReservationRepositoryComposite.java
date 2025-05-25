@@ -33,8 +33,8 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     }
 
     @Override
-    public boolean existsByTimeId(Long id) {
-        return jpaReservationRepository.existsByTimeId(id);
+    public boolean existsByScheduleTimeId(Long id) {
+        return jpaReservationRepository.existsByScheduleTimeId(id);
     }
 
     @Override

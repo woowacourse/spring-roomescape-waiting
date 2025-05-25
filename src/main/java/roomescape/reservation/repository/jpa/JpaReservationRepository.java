@@ -11,8 +11,7 @@ import java.util.List;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Query("SELECT r FROM Reservation r WHERE r.schedule.time.id = :id")
-    boolean existsByTimeId(Long id);
+    boolean existsByScheduleTimeId(Long id);
 
     @Query("""
                 SELECT r FROM Reservation r
