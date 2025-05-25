@@ -1,9 +1,12 @@
 package roomescape.waiting.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -15,7 +18,6 @@ import roomescape.member.domain.MemberRole;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -28,6 +30,7 @@ public class WaitingJpaRepositoryTest {
     @Autowired
     WaitingRepository waitingRepository;
 
+    @DisplayName("조건에 맞는 대기의 개수를 조회할 수 있다")
     @Test
     void countByDateAndTimeIdAndThemeId() {
         // given
@@ -50,6 +53,7 @@ public class WaitingJpaRepositoryTest {
         assertThat(result).isEqualTo(2);
     }
 
+    @DisplayName("조건에 맞는 대기 존재 여부를 조회할 수 있다")
     @Test
     void existsByDateAndThemeIdAndTimeIdAndMemberId() {
         // given
@@ -72,5 +76,66 @@ public class WaitingJpaRepositoryTest {
 
         // then
         assertThat(result).isTrue();
+    }
+
+    @DisplayName("조건에 해당하는 대기들의 순번을 앞당길 수 있다")
+    @Test
+    void pullPriority() {
+        // given
+        LocalDate now = LocalDate.now();
+        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
+        Theme theme = new Theme(null, "공포테마", "진짜 무서운거임", "덜덜");
+        Member firstMember = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
+        Member secondMember = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
+        entityManager.persist(reservationTime);
+        entityManager.persist(theme);
+        entityManager.persist(firstMember);
+        entityManager.persist(secondMember);
+        Waiting firstWaiting = new Waiting(null, now, reservationTime, theme, firstMember, 1);
+        Waiting secondWaiting = new Waiting(null, now, reservationTime, theme, secondMember, 2);
+        entityManager.persist(firstWaiting);
+        entityManager.persist(secondWaiting);
+
+        // when
+        waitingRepository.pullPriority(theme, now, reservationTime, 1L, 1);
+
+        // then
+        assertAll(
+                () -> assertThat(waitingRepository.findById(firstWaiting.getId()).get().getPriority()).isEqualTo(0),
+                () -> assertThat(waitingRepository.findById(secondWaiting.getId()).get().getPriority()).isEqualTo(1)
+        );
+    }
+
+    @DisplayName("조건에 해당하는 첫번째 대기를 조회할 수 있다")
+    @Test
+    void popFirstWaiting() {
+        // given
+        LocalDate now = LocalDate.now();
+        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
+        Theme theme = new Theme(null, "공포테마", "진짜 무서운거임", "덜덜");
+        Member firstMember = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
+        Member secondMember = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
+        entityManager.persist(reservationTime);
+        entityManager.persist(theme);
+        entityManager.persist(firstMember);
+        entityManager.persist(secondMember);
+        Waiting firstWaiting = new Waiting(null, now, reservationTime, theme, firstMember, 1);
+        Waiting secondWaiting = new Waiting(null, now, reservationTime, theme, secondMember, 2);
+        entityManager.persist(firstWaiting);
+        entityManager.persist(secondWaiting);
+
+        // when
+        Optional<Waiting> result = waitingRepository.popFirstWaiting(theme, now, reservationTime);
+
+        // then
+        Waiting waiting = result.get();
+        assertAll(
+                () -> assertThat(waiting.getId()).isEqualTo(firstWaiting.getId()),
+                () -> assertThat(waiting.getDate()).isEqualTo(firstWaiting.getDate()),
+                () -> assertThat(waiting.getTheme()).isEqualTo(firstWaiting.getTheme()),
+                () -> assertThat(waiting.getMember()).isEqualTo(firstWaiting.getMember()),
+                () -> assertThat(waiting.getTime()).isEqualTo(firstWaiting.getTime()),
+                () -> assertThat(waiting.getPriority()).isEqualTo(firstWaiting.getPriority())
+        );
     }
 }
