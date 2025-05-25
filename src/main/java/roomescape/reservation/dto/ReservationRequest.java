@@ -6,6 +6,7 @@ import jakarta.validation.constraints.PositiveOrZero;
 import java.time.LocalDate;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDetails;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -22,6 +23,6 @@ public record ReservationRequest(
 ) {
 
     public Reservation createWithoutId(ReservationTime reservationTime, Theme theme, Member member) {
-        return new Reservation(null, member, date, reservationTime, theme);
+        return new Reservation(null, member, new ReservationDetails(date, reservationTime, theme));
     }
 }

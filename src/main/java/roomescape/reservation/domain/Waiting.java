@@ -28,17 +28,24 @@ public class Waiting {
     public Waiting() {
     }
 
-    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public Waiting(Long id, Member member, ReservationDetails details) {
         validateMember(member);
+        validateDetails(details);
 
         this.id = id;
         this.member = member;
-        this.details = new ReservationDetails(date, time, theme);
+        this.details = details;
     }
 
     private void validateMember(Member member) {
         if (member == null) {
             throw new IllegalArgumentException("[ERROR] 회원 정보는 반드시 입력해야 합니다.");
+        }
+    }
+
+    private void validateDetails(ReservationDetails details) {
+        if (details == null) {
+            throw new IllegalArgumentException("[ERROR] 예약 정보는 반드시 입력해야 합니다.");
         }
     }
 
