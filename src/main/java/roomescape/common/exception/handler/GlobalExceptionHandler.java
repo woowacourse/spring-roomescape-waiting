@@ -76,10 +76,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleException(final Exception exception,
                                                              final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = createErrorResponse(
-            HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI()
+            HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI()
         );
 
-        return ResponseEntity.badRequest().body(exceptionResponse);
+        return ResponseEntity.internalServerError().body(exceptionResponse);
     }
 
     private ExceptionResponse createErrorResponse(final HttpStatus httpStatus, final String msg, final String uri) {
