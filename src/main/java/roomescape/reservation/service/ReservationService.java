@@ -87,16 +87,7 @@ public class ReservationService {
                 createReservationWebRequest.timeId(),
                 createReservationWebRequest.themeId())
         ) {
-            return ReservationConverter.toDtoWithStatus(
-                    waitingCommandUseCase.create(
-                            new CreateReservationWithMemberIdServiceRequest(
-                                    memberInfo.id(),
-                                    createReservationWebRequest.date(),
-                                    createReservationWebRequest.timeId(),
-                                    createReservationWebRequest.themeId()
-                            )
-                    )
-            );
+            return createWaiting(createReservationWebRequest, memberInfo);
         }
 
         return ReservationConverter.toDtoWithStatus(
@@ -119,22 +110,7 @@ public class ReservationService {
                 reservation.getTime().getId(),
                 reservation.getTheme().getId()
         )) {
-            Waiting waiting = waitingQueryUseCase.get(
-                    reservation.getDate(),
-                    reservation.getTime().getId(),
-                    reservation.getTheme().getId()
-            );
-
-            reservationCommandUseCase.create(
-                    new CreateReservationServiceRequest(
-                            waiting.getMember().getId(),
-                            waiting.getDate().getValue(),
-                            waiting.getTime().getId(),
-                            waiting.getTheme().getId()
-                    )
-            );
-
-            waitingCommandUseCase.delete(waiting.getId());
+            promoteWaitingToReservation(reservation);
         }
     }
 
@@ -151,5 +127,39 @@ public class ReservationService {
                 .stream()
                 .map(ReservationConverter::toDto)
                 .toList();
+    }
+
+    private ReservationWithStatusResponse createWaiting(
+            CreateReservationWebRequest createReservationWebRequest, MemberInfo memberInfo) {
+
+        return ReservationConverter.toDtoWithStatus(
+                waitingCommandUseCase.create(
+                        new CreateReservationWithMemberIdServiceRequest(
+                                memberInfo.id(),
+                                createReservationWebRequest.date(),
+                                createReservationWebRequest.timeId(),
+                                createReservationWebRequest.themeId()
+                        )
+                )
+        );
+    }
+
+    private void promoteWaitingToReservation(Reservation reservation) {
+        Waiting waiting = waitingQueryUseCase.get(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+
+        reservationCommandUseCase.create(
+                new CreateReservationServiceRequest(
+                        waiting.getMember().getId(),
+                        waiting.getDate().getValue(),
+                        waiting.getTime().getId(),
+                        waiting.getTheme().getId()
+                )
+        );
+
+        waitingCommandUseCase.delete(waiting.getId());
     }
 }
