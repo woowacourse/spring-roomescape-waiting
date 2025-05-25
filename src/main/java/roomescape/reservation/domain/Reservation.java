@@ -14,6 +14,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -69,6 +70,11 @@ public class Reservation {
                 waiting.getTime(),
                 waiting.getTheme()
         );
+    }
+
+    public boolean isBefore(LocalDateTime compare) {
+        LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
+        return dateTime.isBefore(compare);
     }
 
     public Long getId() {

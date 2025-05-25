@@ -8,16 +8,14 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.service.dto.request.ReservationCreateRequest;
-import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.service.dto.request.ReservationCreateRequest;
+import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 
 @Service
 public class CreateReservationService {
@@ -35,12 +33,11 @@ public class CreateReservationService {
 
     public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
-            throw new AlreadyInUseException("reservation is already in use");
+            throw new AlreadyInUseException("중복되는 예약이 존재합니다.");
         }
 
         Reservation reservation = createReservation(request);
-        LocalDateTime now = LocalDateTime.now();
-        validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
+        validateReservationDateTime(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
@@ -65,20 +62,19 @@ public class CreateReservationService {
     private Theme getTheme(final ReservationCreateRequest request) {
         Long themeId = request.themeId();
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 테마입니다."));
     }
 
     private ReservationTime getReservationTime(final ReservationCreateRequest request) {
         Long timeId = request.timeId();
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 가능 시간입니다."));
     }
 
-    private void validateDateTime(final LocalDateTime now, final LocalDate date, final LocalTime time) {
-        LocalDateTime dateTime = LocalDateTime.of(date, time);
-
-        if (now.isAfter(dateTime)) {
-            throw new IllegalArgumentException("이미 지난 예약 시간입니다.");
+    private void validateReservationDateTime(Reservation reservation) {
+        LocalDateTime now = LocalDateTime.now();
+        if (reservation.isBefore(now)) {
+            throw new IllegalArgumentException("과거 날짜의 예약은 생성할 수 없습니다.");
         }
     }
 }
