@@ -34,13 +34,14 @@ public class ReservationController {
         if (!Role.isAdmin(member.getRole())) {
             throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
         }
-        List<ReservationResponse> allReservations = reservationService.findAllReservationResponses();
+        List<ReservationResponse> allReservations = reservationService.findAllReservations();
         return ResponseEntity.ok(allReservations);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationCreateRequest request,
-                                                              Member member) {
+    public ResponseEntity<ReservationResponse> addReservation(
+            @Valid @RequestBody final UserReservationCreateRequest request,
+            Member member) {
         ReservationResponse responseDto = reservationService.createUserReservation(request, member);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }

@@ -1,130 +1,60 @@
+CREATE TABLE member
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    name     VARCHAR(255) NOT NULL,
+    email    VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    role     BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (role_id) REFERENCES role (id)
+);
+
 CREATE TABLE IF NOT EXISTS reservation_time
 (
-    id
-    BIGINT
-    NOT
-    NULL
-    AUTO_INCREMENT,
-    start_at
-    TIME
-    NOT
-    NULL
-    UNIQUE,
-    PRIMARY
-    KEY
-(
-    id
-)
-    );
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    start_at VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);
 
 CREATE TABLE IF NOT EXISTS theme
 (
-    id
-    BIGINT
-    NOT
-    NULL
-    AUTO_INCREMENT,
-    name
-    VARCHAR
-(
-    255
-) NOT NULL UNIQUE,
-    description VARCHAR
-(
-    255
-) NOT NULL,
-    thumbnail VARCHAR
-(
-    255
-) NOT NULL,
-    PRIMARY KEY
-(
-    id
-)
-    );
+    id          BIGINT       NOT NULL AUTO_INCREMENT,
+    name        VARCHAR(255) NOT NULL,
+    description VARCHAR(255) NOT NULL,
+    thumbnail   VARCHAR(255) NOT NULL,
+    PRIMARY KEY (id)
+);
 
-CREATE TABLE IF NOT EXISTS member
+CREATE TABLE IF NOT EXISTS
+    reservation_slot
 (
-    id
-    BIGINT
-    NOT
-    NULL
-    AUTO_INCREMENT,
-    name
-    VARCHAR
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    theme_id BIGINT NOT NULL,
+    time_id  BIGINT NOT NULL,
+    date     DATE   NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
+CREATE TABLE IF NOT EXISTS waiting
 (
-    255
-) NOT NULL,
-    email VARCHAR
-(
-    255
-) NOT NULL UNIQUE,
-    password VARCHAR
-(
-    255
-) NOT NULL,
-    role ENUM
-(
-    'USER',
-    'ADMIN'
-) DEFAULT 'USER',
-    PRIMARY KEY
-(
-    id
-)
-    );
+    id                  BIGINT    NOT NULL AUTO_INCREMENT,
+    member_id           BIGINT    NOT NULL,
+    reservation_slot_id BIGINT    NOT NULL,
+    created_at          TIMESTAMP NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
+    FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id)
+);
 
 CREATE TABLE IF NOT EXISTS reservation
 (
-    id
-    BIGINT
-    NOT
-    NULL
-    AUTO_INCREMENT,
-    date
-    DATE
-    NOT
-    NULL,
-    member_id
-    BIGINT,
-    time_id
-    BIGINT,
-    theme_id
-    BIGINT,
-    status
-    ENUM
-(
-    'RESERVED'
-),
-    PRIMARY KEY
-(
-    id
-),
-    FOREIGN KEY
-(
-    member_id
-) REFERENCES member
-(
-    id
-),
-    FOREIGN KEY
-(
-    time_id
-) REFERENCES reservation_time
-(
-    id
-),
-    FOREIGN KEY
-(
-    theme_id
-) REFERENCES theme
-(
-    id
-),
-    UNIQUE
-(
-    date,
-    time_id,
-    theme_id
-)
-    );
+    id                  BIGINT NOT NULL AUTO_INCREMENT,
+    member_id           BIGINT NOT NULL,
+    reservation_slot_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
+    FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id)
+);

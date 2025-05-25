@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.UserReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.dto.WaitingWithRank;
 import roomescape.waiting.repository.WaitingRepository;
 
 @Service

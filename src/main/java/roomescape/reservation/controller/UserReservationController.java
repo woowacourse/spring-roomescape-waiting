@@ -11,7 +11,7 @@ import roomescape.reservation.dto.UserReservationResponse;
 import roomescape.reservation.service.UserReservationService;
 
 @RestController
-@RequestMapping("/member")
+@RequestMapping
 public class UserReservationController {
 
     private final UserReservationService userReservationService;
@@ -22,7 +22,7 @@ public class UserReservationController {
         this.tokenProvider = tokenProvider;
     }
 
-    @GetMapping("/reservations")
+    @GetMapping("/member/reservations")
     public ResponseEntity<List<UserReservationResponse>> getMemberReservations(
             @CookieValue(name = "token", required = false) String token) {
         Long memberId = tokenProvider.getMemberIdFromToken(token);

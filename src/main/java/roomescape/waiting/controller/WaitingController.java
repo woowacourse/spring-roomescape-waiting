@@ -1,4 +1,4 @@
-package roomescape.waiting.contorller;
+package roomescape.waiting.controller;
 
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
