@@ -2,6 +2,7 @@ package roomescape.auth.application;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.application.dto.LoginCheckResponse;
 import roomescape.auth.application.dto.LoginRequest;
 import roomescape.auth.exception.PasswordNotMatchedException;
@@ -12,6 +13,7 @@ import roomescape.member.exception.MemberNotFoundException;
 
 @Service
 @AllArgsConstructor
+@Transactional(readOnly = true)
 public class AuthService {
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;

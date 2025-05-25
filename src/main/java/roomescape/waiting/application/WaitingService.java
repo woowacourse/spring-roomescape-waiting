@@ -3,6 +3,7 @@ package roomescape.waiting.application;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.exception.AccessForbiddenException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
@@ -30,6 +31,7 @@ import roomescape.waiting.exception.WaitingNotFoundException;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class WaitingService {
     public static final int FIRST_WAITING = 1;
 
@@ -87,6 +89,7 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> findAll() {
         List<Waiting> waitings = waitingRepository.findAll();
         return WaitingResponse.from(waitings);

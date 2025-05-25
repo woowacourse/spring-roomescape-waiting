@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.exception.MemberNotFoundException;
@@ -29,6 +30,7 @@ import roomescape.waiting.domain.WaitingWithRank;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
@@ -36,12 +38,14 @@ public class ReservationService {
     private final MemberRepository memberRepository;
     private final WaitingRepository waitingRepository;
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         List<WaitingWithRank> waitings = waitingRepository.findWithRankByMemberId(memberId);
         return MyReservationResponse.of(reservations, waitings);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findFiltered(AdminReservationSearchRequest request) {
         Long memberId = request.memberId();
         Long themeId = request.themeId();

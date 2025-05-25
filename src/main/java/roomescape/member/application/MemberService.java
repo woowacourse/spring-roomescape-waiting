@@ -3,6 +3,7 @@ package roomescape.member.application;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.dto.MemberRequest;
 import roomescape.member.application.dto.MemberResponse;
 import roomescape.member.domain.Email;
@@ -15,6 +16,7 @@ import roomescape.member.exception.EmailAlreadyExistsException;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
@@ -36,6 +38,7 @@ public class MemberService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)

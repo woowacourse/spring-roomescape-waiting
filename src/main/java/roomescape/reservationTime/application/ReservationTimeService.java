@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservationTime.application.dto.AvailableTimeRequest;
 import roomescape.reservationTime.application.dto.AvailableTimeResponse;
@@ -17,6 +18,7 @@ import roomescape.reservationTime.exception.UsingTimeException;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class ReservationTimeService {
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
@@ -35,10 +37,12 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<TimeResponse> findAll() {
         return TimeResponse.from(timeRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeResponse> findAvailableTimes(AvailableTimeRequest request) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndTheme(request.date(), request.themeId());
         Collection<ReservationTime> times = timeRepository.findAll();

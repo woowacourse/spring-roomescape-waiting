@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.theme.application.dto.ThemeRequest;
 import roomescape.theme.application.dto.ThemeResponse;
@@ -13,6 +14,7 @@ import roomescape.theme.exception.UsingThemeException;
 
 @Service
 @AllArgsConstructor
+@Transactional
 public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -22,10 +24,12 @@ public class ThemeService {
         return ThemeResponse.from(themeRepository.save(theme));
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         return ThemeResponse.from(themeRepository.findAll());
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findRankedByPeriod() {
         List<Theme> topRankedThemes = themeRepository.findRankedByPeriod(
                 LocalDate.now().minusDays(7),
