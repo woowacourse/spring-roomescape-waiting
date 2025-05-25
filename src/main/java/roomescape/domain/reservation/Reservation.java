@@ -78,6 +78,10 @@ public class Reservation {
         this.status = reservationStatus;
     }
 
+    public boolean isReservationWaiting() {
+        return status == ReservationStatus.WAITING;
+    }
+
     public static void validateReservableTime(final LocalDate date, final LocalTime startAt) {
        LocalDateTime dateTime = LocalDateTime.of(date, startAt);
         if (dateTime.isBefore(LocalDateTime.now())) {
@@ -116,10 +120,6 @@ public class Reservation {
     @Override
     public int hashCode() {
         return Objects.hash(id, member, date, time, theme);
-    }
-
-    public boolean isReservationWaiting() {
-        return status == ReservationStatus.WAITING;
     }
 
     public Long getId() {

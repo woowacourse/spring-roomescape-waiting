@@ -1,9 +1,8 @@
 package roomescape.controller.api;
 
-import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,6 +10,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.reservation.ReservationResponseDto;
@@ -28,36 +28,35 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDto>> readReservedReservations() {
-        List<ReservationResponseDto> reservations = reservationService.findAllReservedReservations();
-        return ResponseEntity.ok().body(reservations);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ReservationResponseDto> readReservedReservations() {
+        return reservationService.findAllReservedReservations();
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponseDto> addReservation(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReservationResponseDto addReservation(
             @RequestBody AdminReservationCreateRequestDto requestDto) {
         ReservationCreateDto createDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
                 requestDto.themeId(), requestDto.memberId());
-        ReservationResponseDto responseDto = reservationService.createReservation(createDto);
-        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+        return reservationService.createReservation(createDto);
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ReservationResponseDto>> searchReservationsByPeriod(
+    @ResponseStatus(HttpStatus.OK)
+    public List<ReservationResponseDto> searchReservationsByPeriod(
             @RequestParam("themeId") long themeId,
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
             @RequestParam("dateTo") LocalDate dateTo) {
-        List<ReservationResponseDto> reservationBetween = reservationService.findReservationBetween(themeId, memberId,
-                dateFrom, dateTo);
-        return ResponseEntity.ok(reservationBetween);
+        return reservationService.findReservationBetween(themeId, memberId, dateFrom, dateTo);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteReservation(
             @PathVariable("id") final Long id
     ) {
         reservationService.deleteReservation(id);
-        return ResponseEntity.noContent().build();
     }
 }

@@ -1,11 +1,13 @@
 package roomescape.controller.api;
 
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.auth.SignUpRequestDto;
 import roomescape.dto.member.MemberResponseDto;
@@ -23,14 +25,16 @@ public class MemberController {
     }
 
     @GetMapping
-    public ResponseEntity<List<MemberResponseDto>> getMembers() {
-        List<MemberResponseDto> allMembers = memberService.findAllMembers();
-        return ResponseEntity.ok(allMembers);
+    @ResponseStatus(HttpStatus.OK)
+    public List<MemberResponseDto> getMembers() {
+        return memberService.findAllMembers();
     }
 
     @PostMapping
-    public ResponseEntity<MemberSignupResponseDto> signup(@RequestBody SignUpRequestDto requestDto) {
-        MemberSignupResponseDto memberSignupResponseDto = memberService.registerMember(requestDto);
-        return ResponseEntity.ok().body(memberSignupResponseDto);
+    @ResponseStatus(HttpStatus.OK)
+    public MemberSignupResponseDto signup(
+            @RequestBody SignUpRequestDto requestDto
+    ) {
+        return memberService.registerMember(requestDto);
     }
 }

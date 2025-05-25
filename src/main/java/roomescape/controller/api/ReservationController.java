@@ -2,6 +2,7 @@ package roomescape.controller.api;
 
 import java.net.URI;
 import java.util.List;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.auth.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
@@ -29,27 +31,27 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDto>> getAllReservations() {
-        List<ReservationResponseDto> allReservations = reservationService.findAllReservationResponses();
-        return ResponseEntity.ok(allReservations);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ReservationResponseDto> getAllReservations() {
+        return reservationService.findAllReservationResponses();
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<MyReservationResponseDto>> getMyReservations(
+    @ResponseStatus(HttpStatus.OK)
+    public List<MyReservationResponseDto> getMyReservations(
             @CurrentMember LoginInfo loginInfo
     ) {
-        List<MyReservationResponseDto> myReservations = reservationService.findMyReservations(loginInfo);
-        return ResponseEntity.ok(myReservations);
+        return reservationService.findMyReservations(loginInfo);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponseDto> addReservation(
+    @ResponseStatus(HttpStatus.CREATED)
+    public ReservationResponseDto addReservation(
             @CurrentMember LoginInfo loginInfo,
             @RequestBody final MemberReservationCreateRequestDto requestDto
     ) {
         ReservationCreateDto reservationCreateDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
                 requestDto.themeId(), loginInfo.id());
-        ReservationResponseDto responseDto = reservationService.createReservation(reservationCreateDto);
-        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+        return reservationService.createReservation(reservationCreateDto);
     }
 }
