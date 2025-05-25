@@ -7,6 +7,7 @@ import roomescape.waiting.repository.dto.WaitingInfoDataResponse;
 import roomescape.waiting.domain.Waiting;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 public record MyReservationsResponse(
@@ -20,14 +21,22 @@ public record MyReservationsResponse(
 ) {
 
     public static MyReservationsResponse from(Reservation reservation) {
+        ReservationStatus reservationStatus = getSavedReservationStatus(reservation);
         return new MyReservationsResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                ReservationStatus.CONFIRMED.getDescription(),
+                reservationStatus.getDescription(),
                 null
         );
+    }
+
+    private static ReservationStatus getSavedReservationStatus(Reservation reservation) {
+        if (reservation.isBefore(LocalDateTime.now())) {
+            return ReservationStatus.DONE;
+        }
+        return ReservationStatus.CONFIRMED;
     }
 
     public static MyReservationsResponse from(WaitingInfoDataResponse waitingInfoDataResponse) {
