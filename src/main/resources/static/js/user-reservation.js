@@ -37,7 +37,7 @@ function renderTheme(themes) {
   themeSlots.innerHTML = '';
   themes.forEach(theme => {
     const name = theme.name;
-    const themeId = theme.themeId; // id로 바꿔야할 수도 있음
+    const themeId = theme.id; // id로 바꿔야할 수도 있음
     /*
     TODO: [3단계] 사용자 예약 - 테마 목록 조회 API 호출 후 렌더링
           response 명세에 맞춰 createSlot 함수 호출 시 값 설정
@@ -121,7 +121,7 @@ function renderAvailableTimes(times) {
           response 명세에 맞춰 createSlot 함수 호출 시 값 설정
     */
     const startAt = time.startAt;
-    const timeId = time.timeId;
+    const timeId = time.id;
     const alreadyBooked = false;
 
     const div = createSlot('time', startAt, timeId, alreadyBooked); // createSlot('time', 시작 시간, time id, 예약 여부)
