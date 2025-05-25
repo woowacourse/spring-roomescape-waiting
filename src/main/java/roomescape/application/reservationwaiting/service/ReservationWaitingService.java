@@ -5,6 +5,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.reservationwaiting.service.dto.ReservationInfoAndWaitingInfo;
+import roomescape.common.exception.NoPermissionException;
 import roomescape.member.service.dto.LoginMemberInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.service.ReservationService;
@@ -36,7 +37,7 @@ public class ReservationWaitingService {
         Reservation reservation = reservationService.getReservation(reservationId);
         boolean isSameMember = reservation.isMemberHasSameId(loginMemberInfo.id());
         if (!isSameMember && !loginMemberInfo.isAdmin()) {
-            throw new IllegalArgumentException("해당 예약에 대한 취소 권한이 없습니다.");
+            throw new NoPermissionException("해당 예약에 대한 취소 권한이 없습니다.");
         }
         reservationService.cancel(reservation);
         waitingService.pullPriority(reservation.getTheme(), reservation.getDate(), reservation.getTime(), 1, 1);

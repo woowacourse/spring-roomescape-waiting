@@ -29,7 +29,7 @@ public class AdminRoleInterceptor implements HandlerInterceptor {
                 .getValue();
         TokenInfo tokenInfo = authService.getTokenInfo(token);
         if (tokenInfo.isNotAdmin()) {
-            throw new NoPermissionException();
+            throw new NoPermissionException("관리자만 접근할 수 있습니다.");
         }
         return true;
     }
