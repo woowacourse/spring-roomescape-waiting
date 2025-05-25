@@ -1,4 +1,4 @@
-package roomescape.presentation.controller;
+package roomescape.presentation.controller.admin;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
