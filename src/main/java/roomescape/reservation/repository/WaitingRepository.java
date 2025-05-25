@@ -14,6 +14,8 @@ public interface WaitingRepository {
     List<Waiting> findAll();
 
     List<Waiting> findAllByMemberId(Long memberId);
+    
+    List<Waiting> findAllOrderByAsc();
 
     Waiting save(Waiting waiting);
 }

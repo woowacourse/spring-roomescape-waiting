@@ -12,6 +12,7 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
+import roomescape.reservation.service.dto.WaitingWithRank;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.converter.ThemeConverter;
 import roomescape.time.domain.ReservationTime;
@@ -39,6 +40,15 @@ public class ReservationConverter {
                 ThemeConverter.toDto(reservation.getTheme()));
     }
 
+    public static ReservationWebResponse toDto(final Waiting waiting) {
+        return new ReservationWebResponse(
+                waiting.getId(),
+                MemberConverter.toDto(waiting.getMember()),
+                waiting.getDate().getValue(),
+                ReservationTimeConverter.toDto(waiting.getTime()),
+                ThemeConverter.toDto(waiting.getTheme()));
+    }
+
     public static List<ReservationWebResponse> toDto(final List<Reservation> reservations) {
         return reservations.stream()
                 .map(ReservationConverter::toDto)
@@ -64,6 +74,16 @@ public class ReservationConverter {
         );
     }
 
+    public static ReservationWithStatusResponse toDtoWithStatus(WaitingWithRank waitingWithRank) {
+        return new ReservationWithStatusResponse(
+                waitingWithRank.waiting().getId(),
+                waitingWithRank.waiting().getTheme().getName().getValue(),
+                waitingWithRank.waiting().getDate().getValue(),
+                waitingWithRank.waiting().getTime().getStartAt(),
+                waitingWithRank.rank()
+        );
+    }
+
     public static ReservationWithStatusResponse toDtoWithStatus(Reservation reservation) {
         return new ReservationWithStatusResponse(
                 reservation.getId(),
@@ -71,6 +91,13 @@ public class ReservationConverter {
                 reservation.getDate().getValue(),
                 reservation.getTime().getStartAt(),
                 ReservationStatus.CONFIRM.getStatus()
+        );
+    }
+
+    public static WaitingWithRank toDtoWithRank(Waiting waiting, Integer rank) {
+        return new WaitingWithRank(
+                waiting,
+                rank
         );
     }
 }

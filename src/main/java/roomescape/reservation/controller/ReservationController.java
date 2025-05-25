@@ -42,6 +42,12 @@ public class ReservationController {
         return reservationService.getAll();
     }
 
+    @RoleRequired(value = Role.ADMIN)
+    @GetMapping("/waitings")
+    public List<ReservationWebResponse> getAllWaiting() {
+        return reservationService.getAllWaiting();
+    }
+
     @GetMapping(BASE_PATH + "/mine")
     public List<ReservationWithStatusResponse> getAll(@LoginMember MemberInfo memberInfo) {
         return reservationService.getByMemberId(memberInfo.id());

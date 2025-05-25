@@ -36,6 +36,11 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findAllOrderByAsc() {
+        return jpaWaitingRepository.findAllByOrderByAsc();
+    }
+
+    @Override
     public Waiting save(Waiting waiting) {
         return jpaWaitingRepository.save(waiting);
     }

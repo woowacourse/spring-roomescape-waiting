@@ -42,11 +42,17 @@ public class ReservationService {
                 .map(ReservationConverter::toDtoWithStatus)
                 .collect(Collectors.toList());
 
-        waitingQueryUseCase.getByMemberId(memberId).stream()
+        waitingQueryUseCase.getWaitingWithRank(memberId).stream()
                 .map(ReservationConverter::toDtoWithStatus)
                 .forEach(reservationWithStatusResponses::add);
 
         return reservationWithStatusResponses;
+    }
+
+    public List<ReservationWebResponse> getAllWaiting() {
+        return waitingQueryUseCase.getAll().stream()
+                .map(ReservationConverter::toDto)
+                .toList();
     }
 
     public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long id) {
