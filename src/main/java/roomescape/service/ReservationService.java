@@ -75,35 +75,6 @@ public class ReservationService {
         }
     }
 
-    public ReservationResponseDto createReservationWaiting(ReservationCreateDto createDto) {
-        //todo 같은 멤버 검증
-        // 1. 요청한 시간, 테마, 멤버 반환
-        ReservationTime reservationTime = reservationTimeRepository.findById(createDto.timeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + createDto.timeId()));
-
-        Reservation.validateReservableTime(createDto.date(), reservationTime.getStartAt());
-
-        Theme theme = themeRepository.findById(createDto.themeId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 테마를 찾을 수 없습니다. id : " + createDto.themeId()));
-
-        Member member = memberRepository.findById(createDto.memberId())
-                .orElseThrow(() -> new NotFoundException("[ERROR] 유저를 찾을 수 없습니다. id : " + createDto.memberId()));
-
-        // 2. 예약 대기 등록
-       if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
-                createDto.date(),
-                createDto.timeId(),
-                createDto.themeId())
-       ) {
-            throw new IllegalArgumentException("[ERROR] 현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
-        }
-
-        Reservation requestReservation = Reservation.createWaitingWithoutId(member, createDto.date(), reservationTime, theme);
-        Reservation newReservation = reservationRepository.save(requestReservation);
-        waitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
-        return ReservationResponseDto.of(newReservation);
-    }
-
     @Transactional(readOnly = true)
     public List<ReservationResponseDto> findAllReservationResponses() {
         List<Reservation> allReservations = reservationRepository.findAll();
@@ -144,14 +115,9 @@ public class ReservationService {
         }).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponseDto> findAllReservedReservations() {
         return reservationRepository.findReservationsByStatus(ReservationStatus.RESERVED).stream()
-                .map(ReservationResponseDto::of)
-                .toList();
-    }
-
-    public List<ReservationResponseDto> findAllReservationWaitings() {
-        return reservationRepository.findReservationsByStatus(ReservationStatus.WAITING).stream()
                 .map(ReservationResponseDto::of)
                 .toList();
     }
@@ -166,14 +132,6 @@ public class ReservationService {
         updateReservationWaitingToReservation(reservation.get());
     }
 
-    public void deleteReservationWaiting(Long id) {
-        Optional<Reservation> reservationWaiting = reservationRepository.findById(id);
-        if (reservationWaiting.isEmpty()) {
-            throw new NotFoundException("[ERROR] 등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
-        }
-        reservationRepository.deleteById(id);
-    }
-
     private void updateReservationWaitingToReservation(Reservation deletedReservation) {
         List<Reservation> reservationWaitings = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
                 deletedReservation.getDate(),
@@ -185,6 +143,7 @@ public class ReservationService {
             return;
         }
 
+        //todo 리팩토링
         LocalDateTime earliestCreatedAt = LocalDateTime.MAX;
         Long earliestReservationWaitingId = null;
         for (Reservation waiting : reservationWaitings) {
