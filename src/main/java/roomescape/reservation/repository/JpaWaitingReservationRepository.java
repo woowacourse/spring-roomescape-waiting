@@ -35,26 +35,9 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
 
     @Query("""
             SELECT EXISTS (
-              SELECT 1
-              FROM Reservation r
-              WHERE r.info.time.id = :timeId)
-            """)
-    boolean existsByTimeId(Long timeId);
-
-    @Query("""
-            SELECT EXISTS (
                 SELECT 1
-                FROM Reservation r
-                WHERE r.info.theme.id = :themeId
-            )
-            """)
-    boolean existsByThemeId(@Param("themeId") Long themeId);
-
-    @Query("""
-            SELECT EXISTS (
-                SELECT 1
-                FROM Reservation r
-                WHERE (r.info.date, r.info.time.id, r.info.theme.id) = (:date, :timeId, :themeId)
+                FROM Waiting w
+                WHERE (w.info.date, w.info.time.id, w.info.theme.id) = (:date, :timeId, :themeId)
             )
             """)
     boolean existsByDateAndTimeIdAndThemeId(
@@ -63,25 +46,6 @@ public interface JpaWaitingReservationRepository extends WaitingReservationRepos
             @Param("themeId") Long themeId
     );
 
-    @Query("""
-            SELECT new roomescape.reservationtime.dto.response.AvailableReservationTimeResponse(
-                rt.id,
-                rt.startAt,
-                CASE WHEN r.id IS NOT NULL THEN TRUE ELSE FALSE END AS already_booked
-            )
-            FROM ReservationTime AS rt
-            LEFT JOIN Reservation r
-              ON rt.id = r.info.time.id
-             AND r.info.date = :date
-             AND r.info.theme.id = :themeId
-            ORDER BY rt.startAt
-            """)
-    List<AvailableReservationTimeResponse> findBookedTimesByDateAndThemeId(
-            @Param("date") LocalDate date,
-            @Param("themeId") Long themeId
-    );
-
-    @Lock(LockModeType.PESSIMISTIC_WRITE)
     @Query("""
                 SELECT COALESCE(MAX(w.turn), 0)
                   FROM Waiting w

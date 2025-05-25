@@ -62,39 +62,11 @@ public class ReservationModuleService {
         reservationRepository.deleteById(id);
     }
 
-    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
-                                      final LocalDateTime now) {
-        checkIfReservationExists(date, timeId, themeId);
-        ReservationTime time = findReservationTime(timeId);
-        Theme theme = findTheme(themeId);
-        Member member = findUserByMemberId(memberId);
-        Reservation newReservation = reservationRepository.save(
-                Reservation.createUpcomingReservationWithUnassignedId(
-                        member,
-                        new ReservationInfo(date, time, theme), now));
-        return ReservationResponse.of(newReservation, time, theme, member);
-    }
-
     public void checkIfReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
         boolean exists = isReservationExists(date, timeId, themeId);
         if (exists) {
             throw new ReservationAlreadyExistsException("해당 시간에 이미 예약이 존재합니다.");
         }
-    }
-
-    public Member findUserByMemberId(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
-    }
-
-    public Theme findTheme(final Long request) {
-        return themeRepository.findById(request)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
-    }
-
-    public ReservationTime findReservationTime(final Long reservationTimeId) {
-        return reservationTimeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new ReservationNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
     }
 
     public boolean isReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
@@ -103,13 +75,6 @@ public class ReservationModuleService {
         }
         return false;
     }
-
-//    public List<MyReservationOutput> findMyReservationsOutput(final UserInfo userInfo) {
-//        return reservationRepository.findByMemberId(userInfo.id())
-//                .stream()
-//                .map(MyReservationOutput::from)
-//                .toList();
-//    }
 
     public List<Reservation> findMyReservations(final UserInfo userInfo) {
         return reservationRepository.findByMemberId(userInfo.id());

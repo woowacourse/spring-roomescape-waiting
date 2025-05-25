@@ -15,15 +15,19 @@ import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.service.ReservationCompositeService;
 import roomescape.reservation.service.WaitingModuleService;
 
 @RestController
 public class WaitingController {
 
     private final WaitingModuleService waitingModuleService;
+    private final ReservationCompositeService reservationCompositeService;
 
-    public WaitingController(final WaitingModuleService waitingModuleService) {
+    public WaitingController(final WaitingModuleService waitingModuleService,
+                             ReservationCompositeService reservationCompositeService) {
         this.waitingModuleService = waitingModuleService;
+        this.reservationCompositeService = reservationCompositeService;
     }
 
     @RequireRole(MemberRole.USER)
@@ -32,7 +36,7 @@ public class WaitingController {
             @RequestBody ReservationCreateRequest request,
             UserInfo userInfo
     ) {
-        ReservationResponse dto = waitingModuleService.create(request.date(), request.timeId(), request.themeId(),
+        ReservationResponse dto = reservationCompositeService.createWaiting(request.date(), request.timeId(), request.themeId(),
                 userInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }

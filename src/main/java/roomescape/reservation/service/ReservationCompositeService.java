@@ -63,7 +63,7 @@ public class ReservationCompositeService {
         return createWaiting(date, timeId, themeId, memberId, now);
     }
 
-    private ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
+    public ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
                                                   final Long memberId,
                                                   final LocalDateTime now) {
         reservationModuleService.checkIfReservationExists(date, timeId, themeId);
@@ -77,7 +77,7 @@ public class ReservationCompositeService {
         return ReservationResponse.of(newReservation, time, theme, member);
     }
 
-    private ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
+    public ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
                                               final Long memberId, final LocalDateTime now) {
         ReservationTime time = reservationTimeService.findReservationTime(timeId);
         Theme theme = themeService.findTheme(themeId);
@@ -100,6 +100,9 @@ public class ReservationCompositeService {
     }
 
     private void promoteWaiting(final ReservationInfo info) {
+        if (!waitingModuleService.isWaitingExists(info)) {
+            return;
+        }
         Waiting waiting = waitingModuleService.findFirstWaitingOfInfo(info);
         createReservation(
                 waiting.getInfo().getDate(),
