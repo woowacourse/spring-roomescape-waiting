@@ -70,7 +70,7 @@ public class WaitingService {
     public void deleteById(final Long id) {
         Waiting waiting = getById(id);
 
-        if (waiting.isPast(currentUtil.getCurrentDate())) {
+        if (waiting.isPast(currentUtil.getCurrentDateTime())) {
             throw new BadRequestException("이전 예약 대기는 삭제할 수 없습니다.");
         }
         waitingRepository.deleteById(id);

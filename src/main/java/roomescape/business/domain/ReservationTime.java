@@ -50,7 +50,7 @@ public class ReservationTime {
         return id.equals(reservationTime.getId());
     }
 
-    public boolean isPast() {
-        return startAt.isBefore(LocalTime.now());
+    public boolean isPast(LocalTime target) {
+        return startAt.isBefore(target);
     }
 }

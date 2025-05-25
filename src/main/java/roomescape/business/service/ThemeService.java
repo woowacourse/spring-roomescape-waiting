@@ -68,9 +68,8 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findPopularThemes() {
-        final LocalDate now = currentUtil.getCurrentDate();
-        final LocalDate endDate = now;
-        final LocalDate startDate = now.minusDays(7);
+        final LocalDate endDate = currentUtil.getCurrentDate();
+        final LocalDate startDate = endDate.minusDays(7);
         return findPopularThemesBetween(startDate, endDate);
     }
 
