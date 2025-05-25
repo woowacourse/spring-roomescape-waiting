@@ -43,4 +43,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
                 waiting.getReservationTime()
         );
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return waitingJpaRepository.findAll();
+    }
 }

@@ -14,4 +14,6 @@ public interface WaitingRepository {
     List<Waiting> findForMember(Long id);
 
     int countWaitingBefore(Waiting waiting);
+
+    List<Waiting> findAll();
 }
