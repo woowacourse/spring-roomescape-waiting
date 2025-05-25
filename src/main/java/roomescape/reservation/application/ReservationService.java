@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -42,8 +41,8 @@ public class ReservationService {
             final Long memberId
     ) {
         final ReservationTime time = getReservationTime(request.date(), request.timeId());
-        final Theme theme = getThemeById(request.themeId());
-        final Member member = getMemberById(memberId);
+        final Theme theme = themeRepository.getById(request.themeId());
+        final Member member = memberRepository.getById(memberId);
 
         return ReservationResponse.from(createReservedReservation(request.date(), time, theme, member));
     }
@@ -66,7 +65,7 @@ public class ReservationService {
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
-        final ReservationTime reservationTime = getReservationTime(timeId);
+        final ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         if (reservationDateTime.isBefore(now)) {
@@ -78,8 +77,8 @@ public class ReservationService {
 
     @Transactional
     public void deleteIfOwner(final Long reservationId, final Long memberId) {
-        final Reservation reservation = getReservationById(reservationId);
-        final Member member = getMemberById(memberId);
+        final Reservation reservation = reservationRepository.getById(reservationId);
+        final Member member = memberRepository.getById(memberId);
 
         if (!Objects.equals(reservation.getMember(), member)) {
             throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
@@ -93,7 +92,7 @@ public class ReservationService {
             final AvailableReservationTimeRequest request
     ) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final Theme theme = getThemeById(request.themeId());
+        final Theme theme = themeRepository.getById(request.themeId());
 
         final List<LocalTime> bookedTimes = reservationRepository.findAllByDateAndTheme(
                         request.date(),
@@ -115,30 +114,10 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<ReservationResponse.ForMember> findReservationsByMemberId(final Long memberId) {
-        final Member member = getMemberById(memberId);
+        final Member member = memberRepository.getById(memberId);
 
         return reservationRepository.findAllByMember(member).stream()
                 .map(ReservationResponse.ForMember::from)
                 .toList();
-    }
-
-    private Reservation getReservationById(final Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
-    }
-
-    private ReservationTime getReservationTime(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme getThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-    }
-
-    private Member getMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 }

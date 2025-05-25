@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
@@ -34,17 +35,13 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member) {
-        return jpaReservationRepository.existsByReservationSlotAndMember(reservationSlot, member);
+    public Reservation getById(final Long reservationId) {
+        return jpaReservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다. id = " + reservationId));
     }
 
     @Override
-    public Optional<Reservation> findById(final Long id) {
-        return jpaReservationRepository.findById(id);
-    }
-
-    @Override
-    public Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot) {
+    public Optional<Reservation> findByReservationSlot(final ReservationSlot reservationSlot) {
         return jpaReservationRepository.findByReservationSlot(reservationSlot);
     }
 

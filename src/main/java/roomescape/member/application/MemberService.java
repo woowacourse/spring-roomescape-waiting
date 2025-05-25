@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthRole;
 import roomescape.exception.auth.AuthorizationException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.ui.dto.MemberResponse;
@@ -34,8 +33,7 @@ public class MemberService {
 
     @Transactional
     public void delete(final Long memberId) {
-        final Member found = memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+        final Member found = memberRepository.getById(memberId);
 
         if (found.getRole() == AuthRole.ADMIN) {
             throw new AuthorizationException("관리자 계정은 삭제할 수 없습니다.");

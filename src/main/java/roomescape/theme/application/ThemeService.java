@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceInUseException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
@@ -33,8 +32,7 @@ public class ThemeService {
 
     @Transactional
     public void delete(final Long id) {
-        themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다. id = " + id));
+        themeRepository.getById(id);
 
         try {
             themeRepository.deleteById(id);

@@ -37,9 +37,9 @@ public class AdminWaitingService {
 
     @Transactional
     public WaitingResponse create(final CreateWaitingRequest request) {
-        final ReservationTime time = getReservationTimeById(request.timeId());
-        final Theme theme = getThemeById(request.themeId());
-        final Member member = getMemberById(request.memberId());
+        final ReservationTime time = reservationTimeRepository.getById(request.timeId());
+        final Theme theme = themeRepository.getById(request.themeId());
+        final Member member = memberRepository.getById(request.memberId());
 
         return WaitingResponse.from(createWaiting(request.date(), time, theme, member));
     }
@@ -86,20 +86,5 @@ public class AdminWaitingService {
 
         return projections.stream()
                 .map(WaitingWithRankResponse::from).toList();
-    }
-
-    private ReservationTime getReservationTimeById(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme getThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-    }
-
-    private Member getMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 }

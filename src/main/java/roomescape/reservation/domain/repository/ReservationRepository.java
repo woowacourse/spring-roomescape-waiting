@@ -16,7 +16,7 @@ public interface ReservationRepository {
 
     boolean existsByReservationSlot(ReservationSlot reservationSlot);
 
-    Optional<Reservation> findById(Long id);
+    Reservation getById(Long reservationId);
 
     Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 
@@ -28,6 +28,4 @@ public interface ReservationRepository {
     List<Reservation> findAllByDateAndTheme(LocalDate date, Theme theme);
 
     List<Reservation> findAllByMember(Member member);
-
-    boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
 }

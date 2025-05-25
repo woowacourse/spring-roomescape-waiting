@@ -10,7 +10,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.resource.AlreadyExistException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -40,9 +39,9 @@ public class AdminReservationService {
 
     @Transactional
     public ReservationResponse create(final CreateBookedReservationRequest request) {
-        final ReservationTime time = getReservationTimeById(request.timeId());
-        final Theme theme = getThemeById(request.themeId());
-        final Member member = getMemberById(request.memberId());
+        final ReservationTime time = reservationTimeRepository.getById(request.timeId());
+        final Theme theme = themeRepository.getById(request.themeId());
+        final Member member = memberRepository.getById(request.memberId());
 
         return ReservationResponse.from(
                 createBookedReservation(request.date(), time, theme, member)
@@ -68,7 +67,7 @@ public class AdminReservationService {
 
     @Transactional
     public void deleteAsAdmin(final Long reservationId) {
-        final Reservation reservation = getReservationById(reservationId);
+        final Reservation reservation = reservationRepository.getById(reservationId);
         final Optional<Waiting> optionalWaiting = waitingRepository.findFirstByReservationSlotOrderByCreatedAt(
                 reservation.getReservationSlot()
         );
@@ -109,25 +108,5 @@ public class AdminReservationService {
         return Arrays.stream(ReservationStatus.values())
                 .map(ReservationStatusResponse::from)
                 .toList();
-    }
-
-    private ReservationTime getReservationTimeById(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme getThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-    }
-
-    private Member getMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
-    }
-
-    private Reservation getReservationById(final Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 }

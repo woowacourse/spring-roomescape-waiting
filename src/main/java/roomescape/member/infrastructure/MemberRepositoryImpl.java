@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
@@ -29,8 +30,9 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findById(final Long id) {
-        return jpaMemberRepository.findById(id);
+    public Member getById(final Long memberId) {
+        return jpaMemberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다. id = " + memberId));
     }
 
     @Override

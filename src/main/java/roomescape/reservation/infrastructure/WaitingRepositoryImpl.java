@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
@@ -42,8 +43,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findById(final Long id) {
-        return jpaWaitingRepository.findById(id);
+    public Waiting getById(final Long waitingId) {
+        return jpaWaitingRepository.findById(waitingId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 대기를 찾을 수 없습니다. id = " + waitingId));
     }
 
     @Override

@@ -42,8 +42,8 @@ public class WaitingService {
             final Long memberId
     ) {
         final ReservationTime time = getReservationTime(request.date(), request.timeId());
-        final Theme theme = getThemeById(request.themeId());
-        final Member member = getMemberById(memberId);
+        final Theme theme = themeRepository.getById(request.themeId());
+        final Member member = memberRepository.getById(memberId);
 
         return WaitingResponse.from(createWaiting(request.date(), time, theme, member));
     }
@@ -72,7 +72,7 @@ public class WaitingService {
     }
 
     private ReservationTime getReservationTime(final LocalDate date, final Long timeId) {
-        final ReservationTime reservationTime = getReservationTimeById(timeId);
+        final ReservationTime reservationTime = reservationTimeRepository.getById(timeId);
         final LocalDateTime now = LocalDateTime.now();
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, reservationTime.getStartAt());
         if (reservationDateTime.isBefore(now)) {
@@ -84,34 +84,14 @@ public class WaitingService {
 
     @Transactional
     public void deleteIfOwner(final Long waitingId, final Long memberId) {
-        final Waiting waiting = getWaitingById(waitingId);
-        final Member member = getMemberById(memberId);
+        final Waiting waiting = waitingRepository.getById(waitingId);
+        final Member member = memberRepository.getById(memberId);
 
         if (!Objects.equals(waiting.getMember(), member)) {
             throw new AuthorizationException("본인이 아니면 삭제할 수 없습니다.");
         }
 
         waitingRepository.deleteById(waitingId);
-    }
-
-    private Waiting getWaitingById(final Long waitingId) {
-        return waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 대기를 찾을 수 없습니다."));
-    }
-
-    private ReservationTime getReservationTimeById(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme getThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다."));
-    }
-
-    private Member getMemberById(final Long memberId) {
-        return memberRepository.findById(memberId)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
     }
 
     @Transactional(readOnly = true)

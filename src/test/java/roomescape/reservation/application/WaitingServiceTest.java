@@ -168,8 +168,8 @@ class WaitingServiceTest {
         waitingService.deleteIfOwner(waiting.getId(), member.getId()); // member1 예약 대기 삭제
 
         // then
-        Assertions.assertThat(waitingRepository.findById(waiting.getId()).isEmpty())
-                .isTrue();
+        Assertions.assertThatThrownBy(() -> waitingRepository.getById(waiting.getId()))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test

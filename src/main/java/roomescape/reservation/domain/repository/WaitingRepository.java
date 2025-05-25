@@ -19,7 +19,7 @@ public interface WaitingRepository {
 
     boolean existsByReservationSlotAndMember(ReservationSlot reservationSlot, Member member);
 
-    Optional<Waiting> findById(Long waitingId);
+    Waiting getById(Long waitingId);
 
     List<WaitingWithRankProjection> findAllWaitingWithRankProjectionByMemberId(Long memberId);
 

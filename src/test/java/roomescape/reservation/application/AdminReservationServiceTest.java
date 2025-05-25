@@ -125,14 +125,15 @@ class AdminReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(notSavedReservationTime1());
         final Theme theme = themeRepository.save(notSavedTheme1());
         final Member member = memberRepository.save(notSavedMember1());
-        final Reservation reservation = reservationRepository.save(
-                Reservation.of(ReservationSlot.of(date, time, theme), member, BOOKED));
+        final ReservationSlot slot = ReservationSlot.of(date, time, theme);
+        final Reservation reservation = reservationRepository.save(Reservation.of(slot, member, BOOKED));
 
         // when
         adminReservationService.deleteAsAdmin(reservation.getId());
 
         // then
-        Assertions.assertThat(reservationRepository.findById(reservation.getId()).isEmpty()).isTrue();
+        Assertions.assertThatThrownBy(() -> reservationRepository.getById(reservation.getId()))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 
     @Test
