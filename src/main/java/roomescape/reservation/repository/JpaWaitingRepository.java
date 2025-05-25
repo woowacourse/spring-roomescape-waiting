@@ -27,6 +27,11 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId) {
+        return waitingListCrudRepository.findWaitingWithRankByMemberId(memberId);
+    }
+
+    @Override
     public Optional<Waiting> findById(Long id) {
         return waitingListCrudRepository.findById(id);
     }
@@ -37,17 +42,12 @@ public class JpaWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return waitingListCrudRepository.findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(date, timeId, themeId);
     }
 
     @Override
-    public List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId) {
-        return waitingListCrudRepository.findWaitingWithRankByMemberId(memberId);
-    }
-
-    @Override
-    public boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId) {
+    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId) {
         return waitingListCrudRepository.existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(date, timeId, themeId, memberId);
     }
 

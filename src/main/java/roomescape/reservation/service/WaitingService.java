@@ -38,7 +38,7 @@ public class WaitingService {
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest dto, Member member) {
         Waiting waiting = reservationChecker.createWaitingWithoutId(dto, member);
-        if (waitingRepository.existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(), member.getId())) {
+        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(), member.getId())) {
             throw new DuplicateContentException("[ERROR] 해당 날짜와 테마로 이미 예약대기 내역이 존재합니다.");
         }
         Waiting newWaiting = waitingRepository.save(waiting);

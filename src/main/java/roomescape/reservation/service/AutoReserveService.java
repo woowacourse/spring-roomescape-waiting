@@ -22,7 +22,7 @@ public class AutoReserveService {
 
     @Transactional
     public void addReservationFromWaiting(Reservation reservation) {
-        Optional<Waiting> waiting = waitingRepository.findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        Optional<Waiting> waiting = waitingRepository.findFirstWaitingByDateAndTimeIdAndThemeId(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         if (waiting.isPresent()) {
             Waiting targetWaiting = waiting.get();
             Reservation newReservation = convertWaitingToReservation(targetWaiting);

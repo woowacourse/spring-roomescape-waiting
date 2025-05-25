@@ -12,15 +12,15 @@ public interface WaitingRepository {
 
     List<Waiting> findAll();
 
+    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
+
     Optional<Waiting> findById(Long id);
 
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
-    Optional<Waiting> findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(LocalDate date, Long timeId, Long themeId);
+    Optional<Waiting> findFirstWaitingByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
-
-    boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
+    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 
     void deleteById(Long id);
 }
