@@ -46,8 +46,8 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    public List<ReservationResponse> findReservations(ReservationCondition cond) {
-        List<Reservation> filteredReservations = reservationRepository.findByCondition(cond);
+    public List<ReservationResponse> findReservations(ReservationCondition condition) {
+        List<Reservation> filteredReservations = reservationRepository.findByCondition(condition);
         return filteredReservations.stream()
                 .map(ReservationResponse::from)
                 .toList();

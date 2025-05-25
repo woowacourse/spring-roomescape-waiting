@@ -43,8 +43,8 @@ public class AdminController {
     }
 
     @GetMapping("/reservations")
-    public List<ReservationResponse> getReservations(@ModelAttribute ReservationCondition cond) {
-        return reservationService.findReservations(cond);
+    public List<ReservationResponse> getReservations(@ModelAttribute ReservationCondition condition) {
+        return reservationService.findReservations(condition);
     }
 
     @GetMapping("/waitings")
