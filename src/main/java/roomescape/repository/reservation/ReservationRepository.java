@@ -28,4 +28,6 @@ public interface ReservationRepository extends Repository<Reservation, Long> {
     List<Reservation> findAll();
 
     Optional<Reservation> findById(Long id);
+
+    int countByThemeIdAndDateAndTimeId(Long themeId, LocalDate date, Long timeId);
 }

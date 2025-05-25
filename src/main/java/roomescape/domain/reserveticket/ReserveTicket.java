@@ -11,6 +11,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.member.Reserver;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 
 @Entity
 public class ReserveTicket {
@@ -20,11 +21,11 @@ public class ReserveTicket {
     private Long id;
 
     @JoinColumn(name = "reservation_id", unique = true)
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Reservation reservation;
 
     @JoinColumn(name = "reserver_id")
-    @ManyToOne
+    @ManyToOne(optional = false)
     private Reserver reserver;
 
     public ReserveTicket() {
@@ -57,7 +58,7 @@ public class ReserveTicket {
         return reserver.getName();
     }
 
-    public String getStatus() {
+    public ReservationStatus getReservationStatus() {
         return reservation.getReservationStatus();
     }
 

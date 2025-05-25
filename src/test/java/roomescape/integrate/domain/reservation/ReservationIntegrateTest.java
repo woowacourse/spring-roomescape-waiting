@@ -23,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
+import roomescape.dto.reservationmember.ReservationTicketWaitingDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.integrate.IntegrationTest;
 import roomescape.integrate.fixture.RequestFixture;
@@ -96,17 +96,17 @@ class ReservationIntegrateTest extends IntegrationTest {
         long themeId2 = requestFixture.requestAddTheme("테마 명2", "description", "thumbnail");
         long themeId3 = requestFixture.requestAddTheme("테마 명3", "description", "thumbnail");
 
-        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(1),
+        reservationRepository.save(new Reservation(null, LocalDate.now().minusDays(1),
                 new ReservationTime(timeId, afterTime), new Theme(themeId1, "테마 명1", "description", "thumbnail")));
-        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(2),
+        reservationRepository.save(new Reservation(null, LocalDate.now().minusDays(2),
                 new ReservationTime(timeId, afterTime), new Theme(themeId1, "테마 명1", "description", "thumbnail")));
-        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(3),
+        reservationRepository.save(new Reservation(null, LocalDate.now().minusDays(3),
                 new ReservationTime(timeId, afterTime), new Theme(themeId1, "테마 명1", "description", "thumbnail")));
-        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(4),
+        reservationRepository.save(new Reservation(null, LocalDate.now().minusDays(4),
                 new ReservationTime(timeId, afterTime), new Theme(themeId2, "테마 명2", "description", "thumbnail")));
-        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(5),
+        reservationRepository.save(new Reservation(null, LocalDate.now().minusDays(5),
                 new ReservationTime(timeId, afterTime), new Theme(themeId2, "테마 명2", "description", "thumbnail")));
-        reservationRepository.save(new Reservation(null, "이름", LocalDate.now().minusDays(6),
+        reservationRepository.save(new Reservation(null, LocalDate.now().minusDays(6),
                 new ReservationTime(timeId, afterTime), new Theme(themeId3, "테마 명3", "description", "thumbnail")));
 
         Response response = RestAssured.given()
@@ -148,9 +148,9 @@ class ReservationIntegrateTest extends IntegrationTest {
                 .body("size()", is(2))
                 .extract().response();
 
-        List<MyReservationMemberResponseDto> myReservationMemberResponseDtos = response.jsonPath()
-                .getList("", MyReservationMemberResponseDto.class);
+        List<ReservationTicketWaitingDto> reservationTicketWaitingDtos = response.jsonPath()
+                .getList("", ReservationTicketWaitingDto.class);
 
-        assertThat(myReservationMemberResponseDtos.getFirst().status()).contains("예약");
+        assertThat(reservationTicketWaitingDtos.getFirst().status()).contains("예약");
     }
 }
