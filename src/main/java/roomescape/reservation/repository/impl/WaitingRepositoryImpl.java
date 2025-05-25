@@ -8,6 +8,7 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.repository.JpaWaitingRepository;
 import roomescape.reservation.repository.WaitingRepository;
+import roomescape.reservation.repository.dto.WaitingWithRankDto;
 
 @Repository
 @RequiredArgsConstructor
@@ -46,13 +47,8 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findAllByMemberId(Long memberId) {
-        return jpaWaitingRepository.findByMemberId(memberId);
-    }
-
-    @Override
-    public List<Waiting> findAllOrderByAsc() {
-        return jpaWaitingRepository.findAllByOrderByAsc();
+    public List<WaitingWithRankDto> findWithRankByMemberId(Long memberId) {
+        return jpaWaitingRepository.findWithRankByMemberId(memberId);
     }
 
     @Override

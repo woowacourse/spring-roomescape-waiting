@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.repository.dto.WaitingWithRankDto;
 
 public interface WaitingRepository {
 
@@ -15,9 +16,7 @@ public interface WaitingRepository {
 
     List<Waiting> findAll();
 
-    List<Waiting> findAllByMemberId(Long memberId);
-
-    List<Waiting> findAllOrderByAsc();
+    List<WaitingWithRankDto> findWithRankByMemberId(Long memberId);
 
     Waiting save(Waiting waiting);
 

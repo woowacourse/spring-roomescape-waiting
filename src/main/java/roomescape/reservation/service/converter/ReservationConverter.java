@@ -10,9 +10,9 @@ import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.repository.dto.WaitingWithRankDto;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
-import roomescape.reservation.service.dto.WaitingWithRank;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.converter.ThemeConverter;
 import roomescape.time.domain.ReservationTime;
@@ -74,13 +74,13 @@ public class ReservationConverter {
         );
     }
 
-    public static ReservationWithStatusResponse toDtoWithStatus(WaitingWithRank waitingWithRank) {
+    public static ReservationWithStatusResponse toDtoWithStatus(WaitingWithRankDto waitingWithRank) {
         return new ReservationWithStatusResponse(
-                waitingWithRank.waiting().getId(),
-                waitingWithRank.waiting().getTheme().getName().getValue(),
-                waitingWithRank.waiting().getDate().getValue(),
-                waitingWithRank.waiting().getTime().getStartAt(),
-                waitingWithRank.rank()
+                waitingWithRank.id(),
+                waitingWithRank.themeName(),
+                waitingWithRank.date().toLocalDate(),
+                waitingWithRank.time().toLocalTime(),
+                waitingWithRank.rank().intValue()
         );
     }
 
@@ -91,13 +91,6 @@ public class ReservationConverter {
                 reservation.getDate().getValue(),
                 reservation.getTime().getStartAt(),
                 ReservationStatus.CONFIRM.getStatus()
-        );
-    }
-
-    public static WaitingWithRank toDtoWithRank(Waiting waiting, Integer rank) {
-        return new WaitingWithRank(
-                waiting,
-                rank
         );
     }
 }
