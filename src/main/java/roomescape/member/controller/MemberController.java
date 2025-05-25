@@ -11,26 +11,26 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.dto.response.SignUpResponse;
-import roomescape.member.service.MemberService;
+import roomescape.member.service.MemberModuleService;
 
 @RestController
 @RequestMapping("/members")
 public class MemberController {
 
-    private final MemberService memberService;
+    private final MemberModuleService memberModuleService;
 
-    public MemberController(final MemberService memberService) {
-        this.memberService = memberService;
+    public MemberController(final MemberModuleService memberModuleService) {
+        this.memberModuleService = memberModuleService;
     }
 
     @GetMapping
     public ResponseEntity<List<MemberResponse>> findAllUsers() {
-        return ResponseEntity.ok(memberService.findAllUsers());
+        return ResponseEntity.ok(memberModuleService.findAllUsers());
     }
 
     @PostMapping
     public ResponseEntity<SignUpResponse> signUp(final @RequestBody SignupRequest signupRequest) {
-        SignUpResponse response = memberService.signup(signupRequest);
+        SignUpResponse response = memberModuleService.signup(signupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 }

@@ -30,7 +30,6 @@ public class ReservationInfo {
     }
 
     public ReservationInfo() {
-
     }
 
     public LocalDate getDate() {
@@ -45,6 +44,5 @@ public class ReservationInfo {
     public Theme getTheme() {
         return theme;
     }
-
 
 }

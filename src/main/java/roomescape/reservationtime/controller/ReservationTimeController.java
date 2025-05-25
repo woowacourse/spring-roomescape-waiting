@@ -13,26 +13,25 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RequireRole;
-import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
-import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.reservationtime.service.ReservationTimeModuleService;
 
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeController {
 
-    private final ReservationTimeService reservationTimeService;
+    private final ReservationTimeModuleService reservationTimeModuleService;
 
-    public ReservationTimeController(final ReservationTimeService reservationTimeService) {
-        this.reservationTimeService = reservationTimeService;
+    public ReservationTimeController(final ReservationTimeModuleService reservationTimeModuleService) {
+        this.reservationTimeModuleService = reservationTimeModuleService;
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
-        return ResponseEntity.ok(reservationTimeService.getReservationTimes());
+        return ResponseEntity.ok(reservationTimeModuleService.getReservationTimes());
     }
 
     @GetMapping("/available")
@@ -40,7 +39,7 @@ public class ReservationTimeController {
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") Long themeId
     ) {
-        return ResponseEntity.ok(reservationTimeService.getAvailableReservationTimes(date, themeId));
+        return ResponseEntity.ok(reservationTimeModuleService.getAvailableReservationTimes(date, themeId));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -48,7 +47,7 @@ public class ReservationTimeController {
     public ResponseEntity<ReservationTimeResponse> createReservationTime(
             @RequestBody ReservationTimeCreateRequest request
     ) {
-        ReservationTimeResponse dto = reservationTimeService.create(request);
+        ReservationTimeResponse dto = reservationTimeModuleService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
@@ -57,7 +56,7 @@ public class ReservationTimeController {
     public ResponseEntity<Void> deleteReservationTimes(
             @PathVariable("id") Long id
     ) {
-        reservationTimeService.delete(id);
+        reservationTimeModuleService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

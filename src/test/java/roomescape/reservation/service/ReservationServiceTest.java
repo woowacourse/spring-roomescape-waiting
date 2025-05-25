@@ -17,17 +17,17 @@ import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberService;
+import roomescape.member.service.MemberModuleService;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.WaitingReservationRepository;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.reservationtime.service.ReservationTimeModuleService;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.ThemeService;
 
@@ -47,9 +47,9 @@ class ReservationServiceTest {
 
     private ReservationModuleService reservationModuleService;
     private ReservationCompositeService reservationCompositeService;
-    private MemberService memberService;
+    private MemberModuleService memberModuleService;
     private ThemeService themeService;
-    private ReservationTimeService reservationTimeService;
+    private ReservationTimeModuleService reservationTimeModuleService;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -64,17 +64,17 @@ class ReservationServiceTest {
     private MemberRepository memberRepository;
 
     @Autowired
-    private WaitingReservationRepository waitingReservationRepository;
+    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
         reservationModuleService = new ReservationModuleService(reservationRepository);
 
         reservationCompositeService = new ReservationCompositeService(reservationModuleService,
-                new WaitingModuleService(waitingReservationRepository),
-                new MemberService(memberRepository, new MyPasswordEncoder()),
+                new WaitingModuleService(waitingRepository),
+                new MemberModuleService(memberRepository, new MyPasswordEncoder()),
                 new ThemeService(themeRepository, reservationRepository),
-                new ReservationTimeService(reservationTimeRepository, reservationRepository));
+                new ReservationTimeModuleService(reservationTimeRepository, reservationRepository));
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
         timeId = reservationTimeRepository.save(time2).getId();

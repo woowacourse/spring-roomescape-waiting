@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
@@ -15,13 +14,13 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @Service
-public class ReservationTimeService {
+public class ReservationTimeModuleService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
-                                  final ReservationRepository reservationRepository) {
+    public ReservationTimeModuleService(final ReservationTimeRepository reservationTimeRepository,
+                                        final ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }

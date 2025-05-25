@@ -32,7 +32,7 @@ public class WaitingController {
 
     @RequireRole(MemberRole.USER)
     @PostMapping("/waiting")
-    public ResponseEntity<ReservationResponse> createReservation(
+    public ResponseEntity<ReservationResponse> createWaiting(
             @RequestBody ReservationCreateRequest request,
             UserInfo userInfo
     ) {

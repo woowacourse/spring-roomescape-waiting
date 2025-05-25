@@ -23,9 +23,9 @@ import roomescape.member.repository.MemberRepository;
 @TestPropertySource(properties = {
     "spring.sql.init.mode=never"
 })
-public class MemberServiceTest {
+public class MemberModuleServiceTest {
 
-    private MemberService memberService;
+    private MemberModuleService memberModuleService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -35,12 +35,12 @@ public class MemberServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberService = new MemberService(memberRepository, myPasswordEncoder);
+        memberModuleService = new MemberModuleService(memberRepository, myPasswordEncoder);
     }
 
     @Test
     void signUpTest() {
-        SignUpResponse response = memberService.signup(new SignupRequest("userr@gmail.com", "password", "userr"));
+        SignUpResponse response = memberModuleService.signup(new SignupRequest("userr@gmail.com", "password", "userr"));
 
         Optional<Member> optionalMember = memberRepository.findById(response.id());
         assertThat(optionalMember.get().getName()).isEqualTo("userr");
@@ -48,10 +48,10 @@ public class MemberServiceTest {
 
     @Test
     void findAllUsersTest() {
-        memberService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
-        memberService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
-        memberService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
-        List<MemberResponse> memberResponses = memberService.findAllUsers();
+        memberModuleService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
+        memberModuleService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
+        memberModuleService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
+        List<MemberResponse> memberResponses = memberModuleService.findAllUsers();
         assertThat(memberResponses.size()).isEqualTo(3);
     }
 }

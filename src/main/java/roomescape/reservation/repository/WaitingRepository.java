@@ -8,7 +8,7 @@ import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-public interface WaitingReservationRepository {
+public interface WaitingRepository {
 
     List<Waiting> findAll();
 

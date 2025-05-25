@@ -14,12 +14,12 @@ import roomescape.member.exception.MemberNotFoundException;
 import roomescape.member.repository.MemberRepository;
 
 @Service
-public class MemberService {
+public class MemberModuleService {
 
     private final MemberRepository memberRepository;
     private final MyPasswordEncoder myPasswordEncoder;
 
-    public MemberService(final MemberRepository memberRepository, final MyPasswordEncoder myPasswordEncoder) {
+    public MemberModuleService(final MemberRepository memberRepository, final MyPasswordEncoder myPasswordEncoder) {
         this.memberRepository = memberRepository;
         this.myPasswordEncoder = myPasswordEncoder;
     }

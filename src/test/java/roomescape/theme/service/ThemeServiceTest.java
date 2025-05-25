@@ -19,7 +19,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.dto.request.SignupRequest;
 import roomescape.member.dto.response.SignUpResponse;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberService;
+import roomescape.member.service.MemberModuleService;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationModuleService;
@@ -27,7 +27,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.reservationtime.service.ReservationTimeService;
+import roomescape.reservationtime.service.ReservationTimeModuleService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
@@ -57,17 +57,17 @@ class ThemeServiceTest {
 
     private ThemeService themeService;
 
-    private MemberService memberService;
+    private MemberModuleService memberModuleService;
 
     private ReservationModuleService reservationModuleService;
 
-    private ReservationTimeService reservationTimeService;
+    private ReservationTimeModuleService reservationTimeModuleService;
 
     @BeforeEach
     void setUp() {
         themeService = new ThemeService(themeRepository, reservationRepository);
-        memberService = new MemberService(memberRepository, myPasswordEncoder);
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+        memberModuleService = new MemberModuleService(memberRepository, myPasswordEncoder);
+        reservationTimeModuleService = new ReservationTimeModuleService(reservationTimeRepository, reservationRepository);
         reservationModuleService = new ReservationModuleService(reservationRepository);
     }
 
@@ -93,7 +93,7 @@ class ThemeServiceTest {
         String email = "user2@gmail.com";
         String password = "password";
         String name = "user2";
-        SignUpResponse signUpResponse = memberService.signup(new SignupRequest(email, password, name));
+        SignUpResponse signUpResponse = memberModuleService.signup(new SignupRequest(email, password, name));
         Member member = memberRepository.findById(signUpResponse.id()).get();
 
         ThemeResponse themeResponse1 = themeService.create(
@@ -126,9 +126,9 @@ class ThemeServiceTest {
         ThemeResponse themeResponse12 = themeService.create(
                 new ThemeCreateRequest("음악", "멜로디 탐정: 잃어버린 노래", "lost_melody.png"));
 
-        ReservationTimeResponse reservationTime1 = reservationTimeService.create(
+        ReservationTimeResponse reservationTime1 = reservationTimeModuleService.create(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        ReservationTimeResponse reservationTime2 = reservationTimeService.create(
+        ReservationTimeResponse reservationTime2 = reservationTimeModuleService.create(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
 
         LocalDate nowDate = LocalDate.now();
