@@ -14,13 +14,16 @@ import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationViewQueryService;
+import roomescape.reservation.application.service.WaitingReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationView;
+import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
+import roomescape.reservation.ui.dto.WaitingReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -50,8 +53,13 @@ class ReservationFacadeTest {
 
     @Mock
     private ReservationQueryService reservationQueryService;
+
     @Mock
     private ReservationViewQueryService reservationViewQueryService;
+
+    @Mock
+    private WaitingReservationQueryService waitingReservationQueryService;
+
     @Mock
     private ReservationCommandService reservationCommandService;
 
@@ -80,6 +88,27 @@ class ReservationFacadeTest {
         //then
         assertThat(result).hasSize(2);
         then(reservationQueryService).should(times(1)).getAll();
+    }
+
+    @Test
+    @DisplayName("모든 예약을 조회할 수 있다")
+    void getAllWaiting() {
+        //given
+        List<WaitingReservation> waiting = List.of(
+                createWaiting(1L, 1),
+                createWaiting(2L, 2)
+        );
+        given(waitingReservationQueryService.getAll()).willReturn(waiting);
+
+        List<User> users = List.of(createUser(1L));
+        given(userQueryService.getAllByIds(anyList())).willReturn(users);
+
+        //when
+        List<WaitingReservationResponse> result = reservationFacade.getAllWaiting();
+
+        //then
+        assertThat(result).hasSize(2);
+        then(waitingReservationQueryService).should(times(1)).getAll();
     }
 
     @Test
@@ -250,6 +279,25 @@ class ReservationFacadeTest {
         return Reservation.withId(
                 id,
                 1L,
+                ReservationDate.from(LocalDate.now().plusDays(1)),
+                ReservationTime.withId(
+                        1L,
+                        LocalTime.of(15, 0)
+                ),
+                Theme.withId(
+                        1L,
+                        ThemeName.from("테스트테마"),
+                        ThemeDescription.from("설명"),
+                        ThemeThumbnail.from("thumbnail.jpg")
+                )
+        );
+    }
+
+    private WaitingReservation createWaiting(Long id, int waitingNumber) {
+        return WaitingReservation.withId(
+                id,
+                1L,
+                waitingNumber,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 ReservationTime.withId(
                         1L,

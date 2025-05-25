@@ -70,6 +70,7 @@ public class WaitingReservation {
     ) {
         validate(id);
         validate(userId, waitingOrder, date, time, theme);
+        this.id = id;
         this.userId = userId;
         this.waitingOrder = waitingOrder;
         this.date = date;
