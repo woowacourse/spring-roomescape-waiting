@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -67,7 +68,7 @@ class ReservationItemServiceTest {
         LocalDate date = LocalDate.now().plusDays(2L);
 
         // when
-        final ReservationItem reservationItem = reservationItemService.addReservationItem(date, time, theme);
+        final ReservationItem reservationItem = reservationItemService.createReservationItemIfNotExist(date, time, theme);
 
         // then
         assertAll(
@@ -78,28 +79,34 @@ class ReservationItemServiceTest {
     }
 
     @Test
-    @DisplayName("이미 예약이 존재하는 경우 예약을 생성할 수 없다.")
+    @DisplayName("이미 예약이 존재하는 경우 기존 예약을 가져온다.")
     void duplicateReservationItemTest() {
         // given
         LocalDate date = LocalDate.now().plusDays(1L);
 
-        // when, then
-        assertThatThrownBy(() -> reservationItemService.addReservationItem(date, time, theme))
-                .isInstanceOf(IllegalArgumentException.class);
+        // when
+        final ReservationItem reservationItem = reservationItemService.createReservationItemIfNotExist(
+                date, time, theme
+        );
+
+        // then
+        assertThat(reservationItem.getId()).isEqualTo(item.getId());
     }
 
     @Test
     @DisplayName("미래의 예약이 아닌 경우 예약을 생성할 수 없다.")
     void notFutureReservationItemTest() {
         // given
-        LocalDate today = LocalDate.now();
+        final LocalDateTime timeBeforeMinute = LocalDateTime.now().minusMinutes(1L);
+        final ReservationTime reservationTimeBeforeMinute = reservationTimeRepository.save(
+                new ReservationTime(timeBeforeMinute.toLocalTime()));
         LocalDate yesterday = LocalDate.now().minusDays(1);
 
         // when, then
         assertAll(
-                () -> assertThatThrownBy(() -> reservationItemService.addReservationItem(today, timeBeforeHour, theme))
+                () -> assertThatThrownBy(() -> reservationItemService.createReservationItemIfNotExist(timeBeforeMinute.toLocalDate(), reservationTimeBeforeMinute, theme))
                         .isInstanceOf(IllegalArgumentException.class),
-                () -> assertThatThrownBy(() -> reservationItemService.addReservationItem(yesterday, time, theme))
+                () -> assertThatThrownBy(() -> reservationItemService.createReservationItemIfNotExist(yesterday, time, theme))
                         .isInstanceOf(IllegalArgumentException.class)
         );
     }

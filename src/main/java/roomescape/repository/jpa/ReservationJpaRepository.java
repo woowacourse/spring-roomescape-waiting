@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationItem;
 import roomescape.domain.ReservationStatus;
@@ -39,6 +40,8 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
             @Param("reservationItemId") Long reservationItemId,
             @Param("currentReservationId") Long currentReservationId
     );
+
+    boolean existsByMemberAndReservationItem(Member member, ReservationItem reservationItem);
 
     Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem, ReservationStatus reservationStatus);
 

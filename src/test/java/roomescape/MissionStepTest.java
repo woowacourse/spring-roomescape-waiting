@@ -16,6 +16,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
@@ -23,9 +25,12 @@ import roomescape.controller.ReservationController;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.ReservationResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class MissionStepTest {
+
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -37,6 +42,8 @@ class MissionStepTest {
 
     @BeforeEach
     void setUp() {
+        RestAssured.port = port;
+
         final LoginRequest loginRequest = new LoginRequest("admin@email.com", "1234");
         sessionId = RestAssured.given().contentType(ContentType.JSON)
                 .body(loginRequest)

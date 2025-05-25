@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationItem;
 import roomescape.domain.ReservationRepository;
@@ -53,6 +54,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public long countByReservationItemIdAndIdLessThan(Long reservationItemId, Long currentReservationId) {
         return reservationJpaRepository.countByReservationItemIdAndIdLessThan(reservationItemId, currentReservationId);
+    }
+
+    @Override
+    public boolean existsByMemberAndReservationItem(Member member, ReservationItem reservationItem) {
+        return reservationJpaRepository.existsByMemberAndReservationItem(member, reservationItem);
     }
 
     @Override

@@ -36,30 +36,29 @@ public class ReservationService {
         final ReservationTime time = reservationTimeService.getReservationTimeById(timeId);
         final ReservationTheme theme = reservationThemeService.getThemeById(themeId);
 
-        // TODO: 리펙토링
-        if (!reservationItemService.isExistReservationItem(date, time, theme)) {
-            final ReservationItem reservationItem = reservationItemService.addReservationItem(date, time, theme);
-            final Reservation saved = reservationRepository.save(
-                    Reservation.builder()
-                            .member(member)
-                            .reservationItem(reservationItem)
-                            .reservationStatus(ReservationStatus.ACCEPTED)
-                            .build()
-            );
-            return ReservationResponse.from(saved);
-        } else {
-            final ReservationItem reservationItem = reservationItemService.getReservationItemByDateAndTimeAndTheme(
-                    date, time, theme
-            );
-            final Reservation saved = reservationRepository.save(
-                    Reservation.builder()
-                            .member(member)
-                            .reservationItem(reservationItem)
-                            .reservationStatus(ReservationStatus.PENDING)
-                            .build()
-            );
-            return ReservationResponse.from(saved);
+        final ReservationStatus reservationStatus = checkReservationStatus(date, time, theme);
+        final ReservationItem reservationItem = reservationItemService.createReservationItemIfNotExist(
+                date, time, theme
+        );
+        if (reservationRepository.existsByMemberAndReservationItem(member, reservationItem)) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약을 등록하였습니다.");
         }
+
+        final Reservation saved = reservationRepository.save(
+                Reservation.builder()
+                        .member(member)
+                        .reservationItem(reservationItem)
+                        .reservationStatus(reservationStatus)
+                        .build()
+        );
+        return ReservationResponse.from(saved);
+    }
+
+    private ReservationStatus checkReservationStatus(LocalDate date, ReservationTime time, ReservationTheme theme) {
+        if (reservationItemService.isExistReservationItem(date, time, theme)) {
+            return ReservationStatus.PENDING;
+        }
+        return ReservationStatus.ACCEPTED;
     }
 
     public List<ReservationResponse> getAllReservations() {

@@ -15,7 +15,16 @@ public class ReservationItemService {
 
     private final ReservationItemRepository reservationItemRepository;
 
-    public ReservationItem addReservationItem(LocalDate date, ReservationTime reservationTime, ReservationTheme theme) {
+    public ReservationItem createReservationItemIfNotExist(LocalDate date,
+                                                           ReservationTime reservationTime,
+                                                           ReservationTheme theme) {
+        if (isExistReservationItem(date, reservationTime, theme)) {
+            return getReservationItemByDateAndTimeAndTheme(date, reservationTime, theme);
+        }
+        return addReservationItem(date, reservationTime, theme);
+    }
+
+    private ReservationItem addReservationItem(LocalDate date, ReservationTime reservationTime, ReservationTheme theme) {
         if (isExistReservationItem(date, reservationTime, theme)) {
             throw new IllegalArgumentException("[ERROR] 이미 존재하는 예약입니다.");
         }
@@ -28,7 +37,7 @@ public class ReservationItemService {
         );
     }
 
-    public ReservationItem getReservationItemByDateAndTimeAndTheme(LocalDate date,
+    private ReservationItem getReservationItemByDateAndTimeAndTheme(LocalDate date,
                                                                    ReservationTime reservationTime,
                                                                    ReservationTheme theme) {
         return reservationItemRepository.findReservationItemByDateAndTimeAndTheme(date, reservationTime, theme)

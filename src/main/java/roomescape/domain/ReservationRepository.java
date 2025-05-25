@@ -32,5 +32,7 @@ public interface ReservationRepository {
             @Param("currentReservationId") Long currentReservationId
     );
 
+    boolean existsByMemberAndReservationItem(Member member, ReservationItem reservationItem);
+
     List<Reservation> findByMemberId(Long memberId);
 }

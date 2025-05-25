@@ -46,6 +46,8 @@ class ReservationServiceTest {
 
     private Long memberId1;
     private Long memberId2;
+    private Long memberId3;
+    private Long memberId4;
     private Long timeId;
     private Long themeId1;
     private Long themeId2;
@@ -55,8 +57,10 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberId1 = memberService.addMember(new MemberRegisterRequest("user1@example.com", "password1", "User One")).id();
-        memberId2 = memberService.addMember(new MemberRegisterRequest("user2@example.com", "password2", "User Two")).id();
+        memberId1 = memberService.addMember(new MemberRegisterRequest("user1@example.com", "password1", "User 1")).id();
+        memberId2 = memberService.addMember(new MemberRegisterRequest("user2@example.com", "password2", "User 2")).id();
+        memberId3 = memberService.addMember(new MemberRegisterRequest("user3@example.com", "password3", "User 3")).id();
+        memberId4 = memberService.addMember(new MemberRegisterRequest("user4@example.com", "password4", "User 4")).id();
 
         timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
 
@@ -499,7 +503,7 @@ class ReservationServiceTest {
                 new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
         );
         ReservationResponse pending2 = reservationService.addReservation(
-                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+                new CreateReservationRequest(memberId3, testDate, themeId1, timeId)
         );
 
         // when
@@ -507,6 +511,8 @@ class ReservationServiceTest {
                 reservationService.getReservationsByMemberId(memberId1);
         List<MyPageReservationResponse> member2Reservations =
                 reservationService.getReservationsByMemberId(memberId2);
+        List<MyPageReservationResponse> member3Reservations =
+                reservationService.getReservationsByMemberId(memberId3);
 
         // then
         assertThat(member1Reservations)
@@ -519,7 +525,7 @@ class ReservationServiceTest {
                         reservation.reservationId().equals(pending.id()) &&
                                 reservation.priority() == 1
                 );
-        assertThat(member1Reservations)
+        assertThat(member3Reservations)
                 .anyMatch(reservation ->
                         reservation.reservationId().equals(pending2.id()) &&
                                 reservation.priority() == 2
@@ -612,10 +618,10 @@ class ReservationServiceTest {
                 new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
         );
         ReservationResponse pending2Reservation = reservationService.addReservation(
-                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+                new CreateReservationRequest(memberId3, testDate, themeId1, timeId)
         );
         ReservationResponse pending3Reservation = reservationService.addReservation(
-                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+                new CreateReservationRequest(memberId4, testDate, themeId1, timeId)
         );
 
         // when
@@ -623,9 +629,9 @@ class ReservationServiceTest {
 
         // then
         List<MyPageReservationResponse> member1Reservations =
-                reservationService.getReservationsByMemberId(memberId1);
+                reservationService.getReservationsByMemberId(memberId3);
         List<MyPageReservationResponse> member2Reservations =
-                reservationService.getReservationsByMemberId(memberId2);
+                reservationService.getReservationsByMemberId(memberId4);
 
         assertThat(member1Reservations).anyMatch(reservation ->
                         reservation.reservationId().equals(pending2Reservation.id()) && reservation.priority() == 1
@@ -633,5 +639,14 @@ class ReservationServiceTest {
         assertThat(member2Reservations).anyMatch(reservation ->
                         reservation.reservationId().equals(pending3Reservation.id()) && reservation.priority() == 2
                 );
+    }
+
+    @Test
+    @DisplayName("같은 사용자가 같은 예약 항목에 예약을 두번 걸 수 없다")
+    void duplicateSameMemberSameReservationItemTest() {
+        // when, then
+        assertThatThrownBy(() -> reservationService.addReservation(
+                new CreateReservationRequest(memberId1, tomorrow, themeId1, timeId)
+        )).isInstanceOf(IllegalArgumentException.class);
     }
 }
