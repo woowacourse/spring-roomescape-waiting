@@ -20,7 +20,6 @@ public class WaitingCommandUseCase {
 
     private final WaitingRepository waitingRepository;
     private final WaitingQueryUseCase waitingQueryUseCase;
-    private final ReservationQueryUseCase reservationQueryUseCase;
     private final ReservationTimeQueryUseCase reservationTimeQueryUseCase;
     private final ThemeQueryUseCase themeQueryUseCase;
     private final MemberQueryUseCase memberQueryUseCase;

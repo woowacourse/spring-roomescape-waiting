@@ -24,7 +24,9 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public Optional<ReservationTime> findById(Long id) {
         try {
-            return Optional.of(reservationTimes.get((int) (id - 1)));
+            return reservationTimes.stream()
+                    .filter(reservationTime -> reservationTime.getId().equals(id))
+                    .findFirst();
         } catch (IndexOutOfBoundsException e) {
             return Optional.empty();
         }

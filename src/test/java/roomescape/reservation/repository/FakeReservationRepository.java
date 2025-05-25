@@ -30,6 +30,16 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsByParams(final ReservationDate date, final Long timeId, final Long themeId,
+                                  final Long memberId) {
+        return reservations.stream()
+                .anyMatch(reservation -> Objects.equals(reservation.getDate(), date)
+                        && Objects.equals(reservation.getTime().getId(), timeId)
+                        && Objects.equals(reservation.getTheme().getId(), themeId)
+                        && Objects.equals(reservation.getMember().getId(), memberId));
+    }
+
+    @Override
     public List<Reservation> findByParams(Long memberId, Long themeId, ReservationDate from,
                                           ReservationDate to) {
         return reservations.stream()
