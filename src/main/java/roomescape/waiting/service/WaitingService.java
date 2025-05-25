@@ -12,6 +12,7 @@ import java.util.List;
 
 @Service
 public class WaitingService {
+
     private final WaitingRepository waitingRepository;
 
     public WaitingService(WaitingRepository waitingRepository) {
@@ -35,5 +36,9 @@ public class WaitingService {
 
     public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
         return waitingRepository.existsByMemberAndSchedule(member, schedule);
+    }
+
+    public List<Waiting> findAll() {
+        return waitingRepository.findAll();
     }
 }

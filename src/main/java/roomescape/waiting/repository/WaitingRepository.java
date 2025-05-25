@@ -17,4 +17,6 @@ public interface WaitingRepository {
     void deleteById(Long waitingId);
 
     boolean existsByMemberAndSchedule(Member member, Schedule schedule);
+
+    List<Waiting> findAll();
 }

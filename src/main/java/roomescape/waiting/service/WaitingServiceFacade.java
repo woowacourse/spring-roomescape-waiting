@@ -15,7 +15,10 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.dto.request.WaitingCreateRequest;
+import roomescape.waiting.dto.response.AdminWaitingResponse;
 import roomescape.waiting.dto.response.WaitingCreateResponse;
+
+import java.util.List;
 
 @Service
 public class WaitingServiceFacade {
@@ -60,6 +63,12 @@ public class WaitingServiceFacade {
         Waiting waiting = waitingService.createWaiting(waitingCreateRequest, schedule, member);
 
         return WaitingCreateResponse.from(waiting);
+    }
+
+    public List<AdminWaitingResponse> getAdminWaitingResponses() {
+        return waitingService.findAll().stream()
+                .map(AdminWaitingResponse::from)
+                .toList();
     }
 
     public void deleteWaiting(Long id) {

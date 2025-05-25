@@ -27,4 +27,6 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
 
     boolean existsByMemberAndSchedule(Member member, Schedule schedule);
+
+    List<Waiting> findAllByMember(Member member);
 }

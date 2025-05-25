@@ -36,4 +36,9 @@ public class JpaWaitingRepositoryComposite implements WaitingRepository {
     public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
         return jpaWaitingRepository.existsByMemberAndSchedule(member, schedule);
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return jpaWaitingRepository.findAll();
+    }
 }
