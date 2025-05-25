@@ -16,6 +16,7 @@ public record MemberRequest(
                 .name(name)
                 .email(email)
                 .password(password)
-                .role(Role.MEMBER).build();
+                .role(Role.MEMBER)
+                .build();
     }
 }

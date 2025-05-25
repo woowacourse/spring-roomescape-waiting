@@ -56,7 +56,8 @@ public class WaitingService {
         Waiting waiting = Waiting.builder()
                 .reservationTime(reservationTime)
                 .member(member)
-                .theme(theme).build();
+                .theme(theme)
+                .build();
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(savedWaiting);
     }
