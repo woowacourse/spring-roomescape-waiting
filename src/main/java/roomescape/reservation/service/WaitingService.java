@@ -50,6 +50,23 @@ public class WaitingService {
         return WaitingCreateResponse.from(waiting);
     }
 
+    @Transactional
+    public void approveWaiting(Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+
+        validateExistsReservation(waiting);
+
+        Reservation reservation = new Reservation(
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme(),
+                waiting.getMember()
+        );
+        reservationRepository.save(reservation);
+        waitingRepository.delete(waiting);
+    }
+
     @Transactional(readOnly = true)
     public List<WaitingReadResponse> getAllWaitings() {
         return waitingRepository.findAll().stream()
@@ -100,6 +117,16 @@ public class WaitingService {
         LocalDateTime waitingDateTime = waiting.getDateTime();
         if (waitingDateTime.isBefore(now)) {
             throw new BadRequestException("과거 날짜는 예약할 수 없습니다.");
+        }
+    }
+
+    private void validateExistsReservation(Waiting waiting) {
+        if (reservationRepository.findByDateAndTimeIdAndThemeId(
+                waiting.getDate(),
+                waiting.getTime().getId(),
+                waiting.getTheme().getId()
+        ).isPresent()) {
+            throw new BadRequestException("이미 예약이 존재하여 대기자를 승인할 수 없습니다.");
         }
     }
 
