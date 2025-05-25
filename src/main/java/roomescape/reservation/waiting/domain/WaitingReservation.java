@@ -42,7 +42,7 @@ public class WaitingReservation {
     private Member member;
 
     @CreationTimestamp
-    private LocalTime createdAt;
+    private LocalDateTime createdAt;
 
     public WaitingReservation(final LocalDate date,
                               final ReservationTime time,
