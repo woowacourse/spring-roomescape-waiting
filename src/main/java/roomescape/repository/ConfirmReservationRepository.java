@@ -14,7 +14,7 @@ public interface ConfirmReservationRepository extends JpaRepository<ConfirmedRes
     List<ConfirmedReservation> findAllByDateBetween(LocalDate start, LocalDate end);
 
     @Query(value = """
-        select r from Reservation r
+        select r from ConfirmedReservation r
         where (:memberId is null or r.member.id  = :memberId)
         and (:themeId is null or r.theme.id = :themeId)
         and (:dateFrom is null or r.date >= :dateFrom)
