@@ -42,6 +42,10 @@ public class ReservationTimeService {
         return reservationTimes.stream().map(ReservationTimeResponse::from).toList();
     }
 
+    public ReservationTime getById(final long id) {
+        return reservationTimeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
+    }
+
     private void validateUniqueReservationTime(final ReservationTime reservationTime) {
         final LocalTime startAt = reservationTime.getStartAt();
         if (reservationTimeRepository.existsByStartAt(startAt)) {

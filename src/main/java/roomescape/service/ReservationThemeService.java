@@ -48,6 +48,10 @@ public class ReservationThemeService {
         reservationThemeRepository.deleteById(id);
     }
 
+    public ReservationTheme getById(final long id) {
+        return reservationThemeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("[ERROR] 테마를 찾을 수 없습니다."));
+    }
+
     private void validateExistTheme(final long id) {
         if (!reservationThemeRepository.existsById(id)) {
             throw new NoSuchElementException("[ERROR] 존재하지 않는 테마 입니다.");
