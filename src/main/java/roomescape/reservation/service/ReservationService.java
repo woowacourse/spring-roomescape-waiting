@@ -96,6 +96,7 @@ public class ReservationService {
         if (isAlreadyBooked(request)) {
             throw new AlreadyInUseException("reservation is already in use");
         }
+        // TODO: 예약 대기가 존재하는 경우 예약을 생성할 수 없다
 
         Reservation reservation = getReservation(request, request.loginMember());
         LocalDateTime now = LocalDateTime.now();

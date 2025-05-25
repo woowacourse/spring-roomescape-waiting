@@ -59,6 +59,7 @@ public class WaitingService {
         if (hasAlreadyWaiting(request)) {
             throw new AlreadyInUseException("이미 예약 대기가 존재합니다.");
         }
+        // TODO: 예약이 존재하지 않으면 예약 대기를 생성할 수 없다
 
         Waiting waiting = getWaiting(request);
         LocalDateTime now = LocalDateTime.now();
@@ -115,6 +116,7 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
+    // TODO: 필요할까? 현재 자동승인을 기본 전략으로 사용하는데, 항상 hasAlreadyBooked 에서 걸려 예외가 발생
     @Transactional
     public ReservationResponse acceptWaiting(final Long id) {
         Waiting waiting = waitingRepository.findById(id)
