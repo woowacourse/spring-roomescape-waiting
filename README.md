@@ -8,10 +8,11 @@
 - 회원가입 페이지: /signup
 - 인기 테마 페이지: /
 - 사용자 예약 페이지: /reservation
+- 내 예약 페이지: /reservation-mine
 - 관리자 메인 페이지: /admin
 - 예약 관리 페이지: /admin/reservation
 - 시간 관리 페이지: /admin/time
-- 내 예약 페이지: /reservation-mine
+- 예약대기 관리 페이지: /admin/waiting
 
 # API 명세
 
@@ -161,7 +162,7 @@ Request
 DELETE /api/reservations/{id} HTTP/1.1
 
 Response
-HTTP/1.1 200
+HTTP/1.1 204
 ```
 
 ### 시간 추가
@@ -330,4 +331,66 @@ Content-Type: application/json
     "themeName" : string
     "status" : string
 }
+```
+
+### 관리자 예약대기 목록 조회
+
+```
+Request
+GET /api/admin/waitings HTTP/1.1
+cookie: token={accessToken}
+
+Response
+HTTP/1.1 200 
+Content-Type: application/json
+[
+    {
+        "id": number
+        "memberName": string,
+        "date": string (YYYY-MM-DD),
+        "time": {
+            "id": number,
+            "startAt": string (HH:mm)
+        },
+        "themeName": string
+    }, ...
+]
+```
+
+### 예약대기 추가
+
+```
+Request
+Content-Type: application/json
+POST /api/waiting
+{
+    "date": string (YYYY-MM-DD),
+    "timeId": number,
+    "themeId": number
+}
+
+Response
+Content-Type: application/json
+HTTP/1.1 200 
+{
+    "id": number,
+    "name": string,
+    "date": string (YYYY-MM-DD),
+    "reservationTime": {
+        "id": number,
+        "startAt" : string (HH:mm)
+    },
+    "themeName" : string
+}
+
+```
+
+### 예약 취소
+
+```
+Request
+DELETE /api/waiting/{id} HTTP/1.1
+
+Response
+HTTP/1.1 204
 ```
