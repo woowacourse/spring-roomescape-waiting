@@ -11,11 +11,11 @@ public enum Role {
 
     private final String value;
 
-    Role(String value) {
+    Role(final String value) {
         this.value = value;
     }
 
-    public static Role fromValue(String role) {
+    public static Role fromValue(final String role) {
         return Arrays.stream(Role.values())
                 .filter(roleName -> roleName.name().equalsIgnoreCase(role))
                 .findAny()

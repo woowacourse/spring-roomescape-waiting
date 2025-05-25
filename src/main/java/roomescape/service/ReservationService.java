@@ -36,12 +36,12 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
 
     @Transactional
-    public ReservationResponseDto saveReservation(ReservationRegisterDto reservationRegisterDto,
-                                                  LoginMember loginMember) {
-        Reservation reservation = createReservation(reservationRegisterDto, loginMember);
+    public ReservationResponseDto saveReservation(final ReservationRegisterDto reservationRegisterDto,
+                                                  final LoginMember loginMember) {
+        final Reservation reservation = createReservation(reservationRegisterDto, loginMember);
         assertReservationIsNotDuplicated(reservation);
 
-        Reservation savedReservation = reservationRepository.save(reservation);
+        final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponseDto.from(savedReservation);
     }
 
@@ -51,11 +51,11 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponseDto> searchReservations(ReservationSearchDto reservationSearchDto) {
-        Long themeId = reservationSearchDto.themeId();
-        Long memberId = reservationSearchDto.memberId();
-        LocalDate startDate = reservationSearchDto.startDate();
-        LocalDate endDate = reservationSearchDto.endDate();
+    public List<ReservationResponseDto> searchReservations(final ReservationSearchDto reservationSearchDto) {
+        final Long themeId = reservationSearchDto.themeId();
+        final Long memberId = reservationSearchDto.memberId();
+        final LocalDate startDate = reservationSearchDto.startDate();
+        final LocalDate endDate = reservationSearchDto.endDate();
 
         return reservationRepository.findByThemeIdAndMemberIdAndDateBetween(
                         themeId,
@@ -67,24 +67,25 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelReservation(Long id) {
+    public void cancelReservation(final Long id) {
         reservationRepository.deleteById(id);
     }
 
-    public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.getId());
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(loginMember.getId());
+    public List<MemberReservationResponseDto> getReservationsOfMember(final LoginMember loginMember) {
+        final List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.getId());
+        final List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(
+                loginMember.getId());
 
         return getMemberReservationResponseDtos(reservations, waitingWithRanks);
     }
 
     private List<MemberReservationResponseDto> getMemberReservationResponseDtos(final List<Reservation> reservations,
                                                                                 final List<WaitingWithRank> waitingList) {
-        List<MemberReservationResponseDto> reservationResponse = reservations.stream()
+        final List<MemberReservationResponseDto> reservationResponse = reservations.stream()
                 .map(MemberReservationResponseDto::from)
                 .toList();
 
-        List<MemberReservationResponseDto> waitingResponse = waitingList.stream()
+        final List<MemberReservationResponseDto> waitingResponse = waitingList.stream()
                 .map(MemberReservationResponseDto::from)
                 .toList();
 
@@ -92,10 +93,11 @@ public class ReservationService {
                 .toList();
     }
 
-    private Reservation createReservation(ReservationRegisterDto reservationRegisterDto, LoginMember loginMember) {
-        ReservationTime time = findTimeById(reservationRegisterDto.timeId());
-        Theme theme = findThemeById(reservationRegisterDto.themeId());
-        Member member = findMemberById(loginMember.getId());
+    private Reservation createReservation(final ReservationRegisterDto reservationRegisterDto,
+                                          final LoginMember loginMember) {
+        final ReservationTime time = findTimeById(reservationRegisterDto.timeId());
+        final Theme theme = findThemeById(reservationRegisterDto.themeId());
+        final Member member = findMemberById(loginMember.getId());
 
         return reservationRegisterDto.convertToReservation(time, theme, member);
     }
@@ -110,12 +112,12 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("id 에 해당하는 테마가 존재하지 않습니다."));
     }
 
-    private Member findMemberById(Long id) {
+    private Member findMemberById(final Long id) {
         return memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자에 대한 예약 요청입니다."));
     }
 
-    private void assertReservationIsNotDuplicated(Reservation reservation) {
+    private void assertReservationIsNotDuplicated(final Reservation reservation) {
         reservationRepository.findByDateAndReservationTime(reservation.getDate(), reservation.getReservationTime())
                 .ifPresent(foundReservation -> {
                     throw new DuplicatedException("이미 예약이 존재합니다.");

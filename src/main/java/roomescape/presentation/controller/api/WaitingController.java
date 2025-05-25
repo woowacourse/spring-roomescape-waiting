@@ -23,13 +23,13 @@ public class WaitingController {
 
     @ResponseStatus(HttpStatus.OK)
     @PostMapping
-    public Long register(@RequestBody @Valid WaitingRequestDto waitingRequestDto, LoginMember loginMember) {
+    public Long register(@RequestBody @Valid final WaitingRequestDto waitingRequestDto, final LoginMember loginMember) {
         return waitingService.register(waitingRequestDto, loginMember);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void cancel(@PathVariable("id") Long id) {
+    public void cancel(@PathVariable("id") final Long id) {
         waitingService.cancel(id);
     }
 }

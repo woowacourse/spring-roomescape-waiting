@@ -2,6 +2,7 @@ package roomescape.presentation.interceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.LoginMember;
@@ -9,19 +10,15 @@ import roomescape.domain.Role;
 import roomescape.presentation.support.CookieUtils;
 import roomescape.service.AuthService;
 
+@RequiredArgsConstructor
 @Component
 public class AdminAuthInterceptor implements HandlerInterceptor {
 
     private final AuthService authService;
     private final CookieUtils cookieUtils;
 
-    public AdminAuthInterceptor(AuthService authService, CookieUtils cookieUtils) {
-        this.authService = authService;
-        this.cookieUtils = cookieUtils;
-    }
-
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
+    public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
             throws Exception {
 
         if (!cookieUtils.containsCookieForToken(request)) {
@@ -29,9 +26,9 @@ public class AdminAuthInterceptor implements HandlerInterceptor {
             return false;
         }
 
-        String token = cookieUtils.getToken(request);
+        final String token = cookieUtils.getToken(request);
 
-        LoginMember loginMember = authService.getMemberByToken(token);
+        final LoginMember loginMember = authService.getMemberByToken(token);
         if (Role.isAdmin(loginMember.getRole())) {
             return true;
         }

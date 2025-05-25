@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,36 +19,31 @@ import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
+@RequiredArgsConstructor
 @Service
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository) {
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
-    }
-
     public List<ReservationTimeResponseDto> getAllTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
         return reservationTimes.stream().map(ReservationTimeResponseDto::from).toList();
     }
 
     @Transactional
-    public ReservationTimeResponseDto saveTime(ReservationTimeRegisterDto reservationTimeRegisterDto) {
+    public ReservationTimeResponseDto saveTime(final ReservationTimeRegisterDto reservationTimeRegisterDto) {
         validateReservationTime(reservationTimeRegisterDto);
 
-        ReservationTime reservationTime = reservationTimeRegisterDto.convertToTime();
-        ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        final ReservationTime reservationTime = reservationTimeRegisterDto.convertToTime();
+        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
 
         return new ReservationTimeResponseDto(savedReservationTime.getId(), savedReservationTime.getStartAt());
     }
 
     @Transactional
-    public void deleteTime(Long id) {
+    public void deleteTime(final Long id) {
         try {
             reservationTimeRepository.deleteById(id);
         } catch (DataIntegrityViolationException e) {
@@ -56,40 +52,43 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<AvailableReservationTimeResponseDto> getAvailableTimes(String date, Long themeId) {
-        List<Reservation> reservations = getReservationsBy(date, themeId);
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        Set<ReservationTime> nonDuplicatedReservationTimes = getReservationTimes(reservations);
+    public List<AvailableReservationTimeResponseDto> getAvailableTimes(final String date, final Long themeId) {
+        final List<Reservation> reservations = getReservationsBy(date, themeId);
+        final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
+        final Set<ReservationTime> nonDuplicatedReservationTimes = getReservationTimes(reservations);
 
         reservationTimes.removeAll(nonDuplicatedReservationTimes);
 
         return getAvailableReservationTimes(reservationTimes, nonDuplicatedReservationTimes);
     }
 
-    private List<Reservation> getReservationsBy(String date, Long themeId) {
-        LocalDate parsedDate = LocalDate.parse(date);
+    private List<Reservation> getReservationsBy(final String date, final Long themeId) {
+        final LocalDate parsedDate = LocalDate.parse(date);
         return reservationRepository.findByThemeIdAndDate(themeId, parsedDate);
     }
 
-    private Set<ReservationTime> getReservationTimes(List<Reservation> reservations) {
+    private Set<ReservationTime> getReservationTimes(final List<Reservation> reservations) {
         return reservations.stream()
                 .map(Reservation::getReservationTime)
                 .collect(Collectors.toSet());
     }
 
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
-            List<ReservationTime> reservationTimes,
-            Set<ReservationTime> nonDuplicatedReservationTimes) {
-        List<AvailableReservationTimeResponseDto> availableReservationTimes = getAvailableReservationTimes(
+            final List<ReservationTime> reservationTimes,
+            final Set<ReservationTime> nonDuplicatedReservationTimes) {
+
+        final List<AvailableReservationTimeResponseDto> availableReservationTimes = getAvailableReservationTimes(
                 reservationTimes);
-        List<AvailableReservationTimeResponseDto> nonAvailableReservationTimes = getAvailableReservationTimes(
+        final List<AvailableReservationTimeResponseDto> nonAvailableReservationTimes = getAvailableReservationTimes(
                 nonDuplicatedReservationTimes);
+
         availableReservationTimes.addAll(nonAvailableReservationTimes);
         return availableReservationTimes;
     }
 
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
-            List<ReservationTime> reservationTimes) {
+            final List<ReservationTime> reservationTimes) {
+
         return new java.util.ArrayList<>(reservationTimes.stream()
                 .map(reservationTime -> AvailableReservationTimeResponseDto.from(
                         reservationTime,
@@ -98,7 +97,8 @@ public class ReservationTimeService {
     }
 
     private List<AvailableReservationTimeResponseDto> getAvailableReservationTimes(
-            Set<ReservationTime> nonDuplicatedReservationTimes) {
+            final Set<ReservationTime> nonDuplicatedReservationTimes) {
+
         return nonDuplicatedReservationTimes.stream()
                 .map(reservationTime -> AvailableReservationTimeResponseDto.from(
                         reservationTime,
@@ -106,8 +106,8 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    private void validateReservationTime(ReservationTimeRegisterDto reservationTimeRegisterDto) {
-        LocalTime parsedStartAt = LocalTime.parse(reservationTimeRegisterDto.startAt());
+    private void validateReservationTime(final ReservationTimeRegisterDto reservationTimeRegisterDto) {
+        final LocalTime parsedStartAt = LocalTime.parse(reservationTimeRegisterDto.startAt());
 
         if (reservationTimeRepository.existsByStartAt((parsedStartAt))) {
             throw new DuplicatedException("중복된 예약시각은 등록할 수 없습니다.");

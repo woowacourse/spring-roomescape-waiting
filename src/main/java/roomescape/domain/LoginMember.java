@@ -6,11 +6,8 @@ import lombok.Getter;
 public class LoginMember {
 
     private final Long id;
-
     private final String name;
-
     private final String email;
-
     private final Role role;
 
     private LoginMember(final Long id, final String name, final String email, final Role role) {

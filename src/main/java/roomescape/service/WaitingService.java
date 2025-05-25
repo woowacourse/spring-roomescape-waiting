@@ -60,8 +60,10 @@ public class WaitingService {
     public Long approveWaiting(final Long waitingId) {
         final Waiting waiting = findWaiting(waitingId);
         validateNotExistsReservationBy(waiting);
-        Long savedReservationId = saveApproveReservation(waiting);
+
+        final Long savedReservationId = saveApproveReservation(waiting);
         waitingRepository.deleteById(waitingId);
+
         return savedReservationId;
     }
 
@@ -128,7 +130,7 @@ public class WaitingService {
 
     private Long saveApproveReservation(final Waiting waiting) {
         final Reservation approveReservation = createApproveReservation(waiting);
-        Reservation savedReservation = reservationRepository.save(approveReservation);
+        final Reservation savedReservation = reservationRepository.save(approveReservation);
         return savedReservation.getId();
     }
 

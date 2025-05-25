@@ -1,7 +1,6 @@
-package roomescape.service;
+package roomescape.service.timeprovider;
 
 import java.time.LocalDateTime;
-import roomescape.service.timeprovider.TimeProvider;
 
 public class FixTimeProvider implements TimeProvider {
 

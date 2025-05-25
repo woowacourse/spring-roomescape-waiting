@@ -30,6 +30,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingRepository;
+import roomescape.service.timeprovider.TestTimeProviderConfig;
 import roomescape.service.timeprovider.TimeProvider;
 
 @Import(TestTimeProviderConfig.class)
