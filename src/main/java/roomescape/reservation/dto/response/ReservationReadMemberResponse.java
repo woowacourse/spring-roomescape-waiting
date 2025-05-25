@@ -3,9 +3,10 @@ package roomescape.reservation.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.reservation.entity.Reservation;
+import roomescape.reservation.entity.Waiting;
 
 public record ReservationReadMemberResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,
@@ -17,8 +18,17 @@ public record ReservationReadMemberResponse(
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getTime().getStartAt(),
-                // TODO: 3단계에서 구현
                 "예약"
+        );
+    }
+
+    public static ReservationReadMemberResponse from(Waiting waiting, int position) {
+        return new ReservationReadMemberResponse(
+                waiting.getId(),
+                waiting.getTheme().getName(),
+                waiting.getDate(),
+                waiting.getTime().getStartAt(),
+                String.format("%d번째 예약대기", position + 1)
         );
     }
 }

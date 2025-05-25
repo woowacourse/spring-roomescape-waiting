@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -20,8 +22,10 @@ import roomescape.reservation.dto.response.ReservationReadMemberResponse;
 import roomescape.reservation.dto.response.ReservationReadResponse;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
+import roomescape.reservation.entity.Waiting;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -33,6 +37,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     @Transactional
     public ReservationCreateResponse createReservation(Long memberId, ReservationCreateRequest request) {
@@ -89,10 +94,38 @@ public class ReservationService {
     public List<ReservationReadMemberResponse> getReservationsByMember(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream()
+
+        List<ReservationReadMemberResponse> responses = new ArrayList<>();
+
+        getReservationByMember(member, responses);
+        getWaitingByMember(member, responses);
+
+        responses.sort(Comparator
+                .comparing(ReservationReadMemberResponse::date)
+                .thenComparing(ReservationReadMemberResponse::time));
+
+        return responses;
+    }
+
+    private void getReservationByMember(Member member, List<ReservationReadMemberResponse> responses) {
+        reservationRepository.findAllByMember(member).stream()
                 .map(ReservationReadMemberResponse::from)
-                .toList();
+                .forEach(responses::add);
+    }
+
+    private void getWaitingByMember(Member member, List<ReservationReadMemberResponse> responses) {
+        for (Waiting waiting : waitingRepository.findAllByMember(member)) {
+            List<Waiting> waitings = waitingRepository.findAllByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+                    waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId());
+            int position = 0;
+            for (int i = 0; i < waitings.size(); i++) {
+                if (waitings.get(i).getId().equals(waiting.getId())) {
+                    position = i;
+                    break;
+                }
+            }
+            responses.add(ReservationReadMemberResponse.from(waiting, position));
+        }
     }
 
     @Transactional
@@ -109,8 +142,12 @@ public class ReservationService {
     }
 
     private void validateDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeId(reservation.getDate(), reservation.getTime().getId())) {
-            throw new ConflictException("해당 날짜와 시간에 이미 예약이 존재합니다.");
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        )) {
+            throw new ConflictException("중복된 예약입니다.");
         }
     }
 }

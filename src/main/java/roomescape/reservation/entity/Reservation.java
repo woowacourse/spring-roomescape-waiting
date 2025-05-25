@@ -46,6 +46,10 @@ public class Reservation {
         this(null, date, time, theme, member);
     }
 
+    public boolean isOwnedBy(Long memberId) {
+        return member.getId().equals(memberId);
+    }
+
     public LocalDateTime getDateTime() {
         return LocalDateTime.of(date, time.getStartAt());
     }
