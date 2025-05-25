@@ -28,24 +28,26 @@ class WaitingRepositoryTest {
     @Autowired
     private WaitingRepository waitingRepository;
 
-    @DisplayName("회원의 에약 대기 목록을 순번과 함께 구할 수 있다.")
+    @DisplayName("회원의 예약 대기 목록을 순번과 함께 구할 수 있다.")
     @Test
     void findWithRankingByMember() {
         // given
-        ReservationTime time = entityManager.persist(
-                ReservationTime.createWithoutId(LocalTime.of(10, 0)));
-        Theme theme = entityManager.persist(
-                Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
-
         Member targetMember = entityManager.persist(
                 Member.createWithoutId(Role.GENERAL, "회원1", "member1@test.com", "qwer1234!"));
         Member otherMember = entityManager.persist(
                 Member.createWithoutId(Role.GENERAL, "회원2", "member2@test.com", "qwer1234!"));
 
+        ReservationTime time = entityManager.persist(
+                ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+        Theme theme = entityManager.persist(
+                Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+
         Waiting waitingWithOtherMember = entityManager.persist(
                 Waiting.createWithoutId(NEXT_DAY, theme, time, otherMember));
         Waiting waitingWithTargetMember = entityManager.persist(
                 Waiting.createWithoutId(NEXT_DAY, theme, time, targetMember));
+
+        entityManager.flush();
 
         // when
         List<WaitingWithRank> waitingWithRankings = waitingRepository.findWithRankingByMember(targetMember.getId());
