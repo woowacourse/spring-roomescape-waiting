@@ -108,10 +108,9 @@ function requestCreate(data) {
     body: JSON.stringify(data)
   };
 
-  return fetch(API_ENDPOINT, requestOptions)
+  return fetch('/admin' + API_ENDPOINT, requestOptions)
       .then(response => {
-        if (response.status === 201) return response.json();
-        throw new Error('Create failed');
+        if (response.status !== 201) throw new Error('Create failed');
       });
 }
 
@@ -128,7 +127,7 @@ function requestDelete(id) {
     method: 'DELETE',
   };
 
-  return fetch(`${API_ENDPOINT}/${id}`, requestOptions)
+  return fetch('/admin' + `${API_ENDPOINT}/${id}`, requestOptions)
       .then(response => {
         if (response.status !== 204) throw new Error('Delete failed');
       });

@@ -13,3 +13,9 @@
     color: #666666;
     cursor: not-allowed;
 }
+
+.booked {
+    opacity: 0.7;
+    background-color: #e0e0e0;
+    cursor: not-allowed;
+}

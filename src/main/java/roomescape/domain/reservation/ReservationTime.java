@@ -9,7 +9,7 @@ import java.util.Objects;
 import roomescape.infrastructure.error.exception.ReservationTimeException;
 
 @Entity
-public final class ReservationTime {
+public class ReservationTime {
 
     private static final LocalTime RESERVATION_START_TIME = LocalTime.of(12, 0);
     private static final LocalTime RESERVATION_END_TIME = LocalTime.of(22, 0);

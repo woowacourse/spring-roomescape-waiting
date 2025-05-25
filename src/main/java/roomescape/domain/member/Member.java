@@ -27,17 +27,17 @@ public class Member {
     private String password;
 
     @Enumerated(EnumType.STRING)
-    private Role role;
+    private MemberRole role;
 
-    public Member(String name, Email email, String password, Role role) {
+    public Member(String name, Email email, String password, MemberRole role) {
         this(null, name, email, password, role);
     }
 
     public Member(String name, Email email, String password) {
-        this(null, name, email, password, Role.NORMAL);
+        this(null, name, email, password, MemberRole.NORMAL);
     }
 
-    public Member(Long id, String name, Email email, String password, Role role) {
+    public Member(Long id, String name, Email email, String password, MemberRole role) {
         validateName(name);
         validatePassword(password);
         this.id = id;
@@ -70,7 +70,7 @@ public class Member {
     }
 
     public boolean isAdmin() {
-        return this.role == Role.ADMIN;
+        return this.role == MemberRole.ADMIN;
     }
 
     public Long getId() {
@@ -89,7 +89,7 @@ public class Member {
         return password;
     }
 
-    public Role getRole() {
+    public MemberRole getRole() {
         return role;
     }
 

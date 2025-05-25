@@ -1,7 +1,7 @@
 package roomescape.presentation.api.member;
 
 import jakarta.validation.constraints.NotBlank;
-import roomescape.application.member.RegisterParam;
+import roomescape.application.member.command.dto.RegisterCommand;
 
 public record SignupRequest(
         @NotBlank(message = "이메일은 필수입니다.") String email,
@@ -9,7 +9,7 @@ public record SignupRequest(
         @NotBlank(message = "사용자명은 필수입니다.") String name
 ) {
 
-    public RegisterParam toRegisterParameter() {
-        return new RegisterParam(email, password, name);
+    public RegisterCommand toRegisterParameter() {
+        return new RegisterCommand(email, password, name);
     }
 }

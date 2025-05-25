@@ -6,7 +6,7 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberRepository;
+import roomescape.domain.member.repository.MemberRepository;
 import roomescape.infrastructure.error.exception.ForbiddenException;
 import roomescape.infrastructure.error.exception.JwtExtractException;
 import roomescape.infrastructure.error.exception.UnauthorizedException;
@@ -34,7 +34,7 @@ public class AdminInterceptor implements HandlerInterceptor {
                              @NonNull HttpServletResponse response,
                              @NonNull Object handler) {
         Member member = getMemberFromRequest(request);
-        if (member.isAdmin()) {
+        if (!member.isAdmin()) {
             throw new ForbiddenException("접근 권한이 없습니다.");
         }
         return true;
