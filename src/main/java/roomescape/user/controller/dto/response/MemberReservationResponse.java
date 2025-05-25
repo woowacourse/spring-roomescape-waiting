@@ -1,6 +1,10 @@
 package roomescape.user.controller.dto.response;
 
+import static roomescape.global.ReservationStatus.RESERVATION;
+import static roomescape.global.ReservationStatus.WAITING;
+
 import java.time.LocalDate;
+import roomescape.global.ReservationStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
@@ -12,10 +16,11 @@ public record MemberReservationResponse(
         String name,
         ReservationTimeResponse time,
         ThemeResponse theme,
-        String reservationStatus
+        ReservationStatus reservationStatus,
+        Long rank
 ) {
 
-    private static final String WAITING_RANK_FORMAT = "%d 번째 예약";
+    public static final long DEFAULT_RESERVATION_RANK = 0L;
 
     public static MemberReservationResponse fromReservation(Reservation reservation) {
         return new MemberReservationResponse(
@@ -24,7 +29,8 @@ public record MemberReservationResponse(
                 reservation.getMember().getName(),
                 ReservationTimeResponse.from(reservation.getReservationTime()),
                 ThemeResponse.from(reservation.getTheme()),
-                "예약"
+                RESERVATION,
+                DEFAULT_RESERVATION_RANK
         );
     }
 
@@ -35,7 +41,8 @@ public record MemberReservationResponse(
                 waitingWithRank.getWaiting().getMember().getName(),
                 ReservationTimeResponse.from(waitingWithRank.getWaiting().getReservationTime()),
                 ThemeResponse.from(waitingWithRank.getWaiting().getTheme()),
-                String.format(WAITING_RANK_FORMAT, waitingWithRank.getRank() + 1)
+                WAITING,
+                waitingWithRank.getRank()
         );
     }
 }

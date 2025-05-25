@@ -15,6 +15,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.global.ReservationStatus;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
@@ -116,7 +117,9 @@ public class ReservationServiceTest {
         Theme savedTheme = new Theme(1L, "test", "test", "test");
         MemberReservationResponse response = new MemberReservationResponse(1L, 예약날짜_내일.getDate(), "매트",
                 ReservationTimeResponse.from(savedReservationTime),
-                ThemeResponse.from(savedTheme), "1번째 대기");
+                ThemeResponse.from(savedTheme),
+                ReservationStatus.WAITING,
+                1L);
         when(waitingService.findAllByMemberId(any(Long.class))).thenReturn(List.of(
                 response
         ));

@@ -24,7 +24,15 @@ function render(data) {
         const theme = item.theme.name;
         const date = item.date;
         const time = item.time.startAt;
-        const status = item.reservationStatus;
+        const statusContext = item.reservationStatus;
+        const rank = item.rank;
+
+        let status = '';
+        if (statusContext === 'RESERVATION') {
+            status = '예약';
+        } else if (statusContext === 'WAITING') {
+            status = `${rank}번째 대기`;
+        }
 
         row.insertCell().textContent = theme;
         row.insertCell().textContent = date;
