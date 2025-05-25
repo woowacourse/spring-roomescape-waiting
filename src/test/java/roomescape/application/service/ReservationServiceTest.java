@@ -1,8 +1,10 @@
 package roomescape.application.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.extern.slf4j.Slf4j;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -21,11 +23,14 @@ import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
 import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
+import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
+import roomescape.model.PendingReservation;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
+import roomescape.model.Waiting;
 import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
@@ -50,7 +55,11 @@ class ReservationServiceTest {
     @Autowired
     MemberJpaRepository memberJpaRepository;
 
+    @Autowired
+    WaitingJpaRepository waitingJpaRepository;
+
     private LoginMember loginMember;
+
     @Autowired
     private ThemeJpaRepository themeJpaRepository;
 
@@ -154,6 +163,67 @@ class ReservationServiceTest {
         assertAll(
                 () -> assertThat(response).hasSize(1),
                 () -> assertThat(response).isEqualTo(comparedResponse)
+        );
+    }
+
+    @DisplayName("사용자의 예약 내역 삭제 시에 가장 높은 우선순위의 웨이팅을 예약으로 전환해 저장한다")
+    @Test
+    void test7() {
+        //given
+        String emailOfAdministrator = "email@gmail.com";
+        Member administrator = memberJpaRepository.save(new Member("이름", emailOfAdministrator, "password", Role.ADMIN));
+        Member user = memberJpaRepository.save(
+                new Member("사용자", "user@gmail.com", "password", Role.USER));
+
+        Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                new ReservationTime(LocalTime.of(12, 30)));
+
+        Waiting firstWaiting = waitingJpaRepository.save(new Waiting(
+                LocalDateTime.now(),
+                new PendingReservation(
+                        LocalDate.now().plusDays(1),
+                        reservationTime,
+                        theme,
+                        user,
+                        LocalDate.now()
+                )
+        ));
+
+        Waiting secondWaiting = waitingJpaRepository.save(new Waiting(
+                LocalDateTime.now().plusHours(1),
+                new PendingReservation(
+                        LocalDate.now().plusDays(1),
+                        reservationTime,
+                        theme,
+                        user,
+                        LocalDate.now()
+                )
+        ));
+
+        Reservation reservation = reservationRepository.save(new Reservation(
+                LocalDate.now().plusDays(1),
+                reservationTime,
+                theme,
+                user,
+                LocalDate.now()
+        ));
+
+        // when
+        reservationService.cancelReservation(reservation.getId());
+
+        // then
+        List<Reservation> allReservations = reservationRepository.findAll();
+        Optional<Reservation> foundReservation = allReservations.stream()
+                .filter(reservation1 -> reservation1.getReservationTime().getId().equals(reservationTime.getId()))
+                .filter(reservation1 -> reservation1.getTheme().getId().equals(theme.getId()))
+                .filter(reservation1 -> reservation1.getMember().getId().equals(user.getId()))
+                .findAny();
+
+        assertAll(
+                () -> assertThat(waitingJpaRepository.findAll()).doesNotContain(firstWaiting),
+                () -> assertThat(allReservations).doesNotContain(reservation),
+                () -> assertThat(foundReservation).isPresent()
         );
     }
 }
