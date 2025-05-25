@@ -60,7 +60,7 @@ class UserControllerTest {
     @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다.")
     void getMyReservations() throws Exception {
         Mockito.when(userService.getMyReservations(Mockito.anyLong())).thenReturn(List.of(
-            new ReservationWithOrder(anyReservationWithNewId())));
+            new ReservationWithOrder(anyReservationWithNewId(), 1)));
 
         mockMvc.perform(get("/users/reservations")
                 .contentType(MediaType.APPLICATION_JSON)

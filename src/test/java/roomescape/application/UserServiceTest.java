@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Import;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationWithOrder;
+import roomescape.domain.user.User;
 
 @Import(UserService.class)
 class UserServiceTest extends ServiceTest {
@@ -37,18 +38,20 @@ class UserServiceTest extends ServiceTest {
     @DisplayName("사용자의 예약을 조회한다.")
     void getMyReservations() {
         // given
-        var savedTimeSlot = repositoryHelper.saveAnyTimeSlot();
-        var savedTheme = repositoryHelper.saveAnyTheme();
         var user = service.register("popo@email.com", "pw", "popo");
-
-        var reservation = new Reservation(user, ReservationSlot.forReserve(tomorrow(), savedTimeSlot, savedTheme));
-        var savedReservation = repositoryHelper.saveReservation(reservation);
-        repositoryHelper.flushAndClear();
+        var reservation = reserveWithUser(user);
 
         // when
         var reservations = service.getMyReservations(user.id());
 
         // then
-        assertThat(reservations).contains(new ReservationWithOrder(savedReservation));
+        assertThat(reservations).contains(new ReservationWithOrder(reservation, 1));
+    }
+
+    private Reservation reserveWithUser(final User user) {
+        var savedTimeSlot = repositoryHelper.saveAnyTimeSlot();
+        var savedTheme = repositoryHelper.saveAnyTheme();
+        var reservation = new Reservation(user, ReservationSlot.forReserve(tomorrow(), savedTimeSlot, savedTheme));
+        return repositoryHelper.saveReservation(reservation);
     }
 }
