@@ -6,8 +6,6 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
-import roomescape.business.model.vo.Id;
-import roomescape.business.model.vo.StartTime;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,11 +19,9 @@ public class ReservationTimeReader {
 
     public List<ReservationTimeDto> getAll() {
         String sql = "SELECT * FROM reservation_time";
+        
         return jdbcClient.sql(sql)
-                .query((rs, rowNum) -> new ReservationTimeDto(
-                        Id.create(rs.getString("id")),
-                        new StartTime(rs.getTime("start_time").toLocalTime())
-                ))
+                .query(ReservationTimeDto.ROW_MAPPER)
                 .list();
     }
 
@@ -54,11 +50,7 @@ public class ReservationTimeReader {
         return jdbcClient.sql(sql)
                 .param("date", date)
                 .param("themeId", themeIdValue)
-                .query((rs, rowNum) -> new ReservableReservationTimeDto(
-                        Id.create(rs.getString("id")),
-                        new StartTime(rs.getTime("start_time").toLocalTime()),
-                        rs.getBoolean("available")
-                ))
+                .query(ReservableReservationTimeDto.ROW_MAPPER)
                 .list();
     }
 }

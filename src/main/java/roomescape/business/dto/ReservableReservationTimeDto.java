@@ -1,12 +1,9 @@
 package roomescape.business.dto;
 
+import org.springframework.jdbc.core.RowMapper;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.StartTime;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 
 public record ReservableReservationTimeDto(
         Id id,
@@ -21,10 +18,9 @@ public record ReservableReservationTimeDto(
         );
     }
 
-    public static List<ReservableReservationTimeDto> fromEntities(final List<ReservationTime> available, final List<ReservationTime> notAvailable) {
-        List<ReservableReservationTimeDto> results = new ArrayList<>();
-        available.forEach(time -> results.add(fromEntity(time, true)));
-        notAvailable.forEach(time -> results.add(fromEntity(time, false)));
-        return Collections.unmodifiableList(results);
-    }
+    public static RowMapper<ReservableReservationTimeDto> ROW_MAPPER = (rs, rowNum) -> new ReservableReservationTimeDto(
+            Id.create(rs.getString("id")),
+            new StartTime(rs.getTime("start_time").toLocalTime()),
+            rs.getBoolean("available")
+    );
 }

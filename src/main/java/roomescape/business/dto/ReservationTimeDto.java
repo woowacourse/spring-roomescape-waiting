@@ -1,10 +1,9 @@
 package roomescape.business.dto;
 
+import org.springframework.jdbc.core.RowMapper;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.StartTime;
-
-import java.util.List;
 
 public record ReservationTimeDto(
         Id id,
@@ -17,9 +16,8 @@ public record ReservationTimeDto(
         );
     }
 
-    public static List<ReservationTimeDto> fromEntities(final List<ReservationTime> reservationTimes) {
-        return reservationTimes.stream()
-                .map(ReservationTimeDto::fromEntity)
-                .toList();
-    }
+    public static RowMapper<ReservationTimeDto> ROW_MAPPER = (rs, rowNum) -> new ReservationTimeDto(
+            Id.create(rs.getString("id")),
+            new StartTime(rs.getTime("start_time").toLocalTime())
+    );
 }

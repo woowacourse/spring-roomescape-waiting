@@ -1,10 +1,9 @@
 package roomescape.business.dto;
 
+import org.springframework.jdbc.core.RowMapper;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ThemeName;
-
-import java.util.List;
 
 public record ThemeDto(
         Id id,
@@ -21,9 +20,11 @@ public record ThemeDto(
         );
     }
 
-    public static List<ThemeDto> fromEntities(final List<Theme> themes) {
-        return themes.stream()
-                .map(ThemeDto::fromEntity)
-                .toList();
-    }
+    public static RowMapper<ThemeDto> ROW_MAPPER = (rs, rowNum) -> new ThemeDto(
+            Id.create(rs.getString("id")),
+            new ThemeName(rs.getString("theme_name")),
+            rs.getString("description"),
+            rs.getString("thumbnail")
+    );
+
 }
