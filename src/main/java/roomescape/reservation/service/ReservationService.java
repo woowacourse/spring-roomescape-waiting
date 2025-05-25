@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.global.error.exception.NotFoundException;
@@ -33,6 +34,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
+    @Transactional
     public ReservationCreateResponse createReservation(Long memberId, ReservationCreateRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
@@ -49,6 +51,7 @@ public class ReservationService {
         return ReservationCreateResponse.from(reservation);
     }
 
+    @Transactional
     public ReservationAdminCreateResponse createReservationByAdmin(ReservationAdminCreateRequest request) {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
@@ -65,12 +68,14 @@ public class ReservationService {
         return ReservationAdminCreateResponse.from(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationReadResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
                 .map(ReservationReadResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationReadFilteredResponse> getFilteredReservations(ReservationReadFilteredRequest request) {
         List<Reservation> reservations = reservationRepository.findAllFiltered(
                 request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
@@ -80,6 +85,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationReadMemberResponse> getReservationsByMember(Long id) {
         Member member = memberRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
@@ -89,6 +95,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         reservationRepository.deleteById(id);
     }

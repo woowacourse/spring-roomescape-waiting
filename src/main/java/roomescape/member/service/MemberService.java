@@ -3,6 +3,7 @@ package roomescape.member.service;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.member.dto.request.MemberCreateRequest;
 import roomescape.member.dto.response.MemberCreateResponse;
@@ -16,6 +17,7 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional
     public MemberCreateResponse createMember(MemberCreateRequest request) {
         validateDuplicateEmail(request.email());
         Member member = request.toEntity();
@@ -23,12 +25,14 @@ public class MemberService {
         return MemberCreateResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberReadResponse> getAllMembers() {
         return memberRepository.findAll().stream()
                 .map(MemberReadResponse::from)
                 .toList();
     }
 
+    @Transactional
     public void deleteMember(long id) {
         memberRepository.deleteById(id);
     }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeCreateResponse;
@@ -17,6 +18,7 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
 
+    @Transactional
     public ThemeCreateResponse createTheme(ThemeCreateRequest request) {
         Theme newTheme = request.toEntity();
         validateDuplicateThemeName(newTheme);
@@ -24,6 +26,7 @@ public class ThemeService {
         return ThemeCreateResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeReadResponse> getAllThemes() {
         return themeRepository.findAll()
                 .stream()
@@ -31,6 +34,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeReadResponse> getPopularThemes(int limit) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusWeeks(1);
@@ -40,6 +44,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteTheme(Long id) {
         themeRepository.deleteById(id);
     }
