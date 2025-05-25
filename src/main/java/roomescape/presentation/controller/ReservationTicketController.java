@@ -13,10 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.service.ReservationService;
+import roomescape.application.service.ReservationTicketService;
 import roomescape.dto.LoginMember;
-import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
+import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.response.ReservationTicketResponseDto;
 
 @RestController
@@ -24,31 +24,31 @@ import roomescape.dto.response.ReservationTicketResponseDto;
 @RequiredArgsConstructor
 public class ReservationTicketController {
 
-    private final ReservationService reservationService;
+    private final ReservationTicketService reservationTicketService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationTicketResponseDto> getReservations() {
-        return reservationService.getAllReservations();
+        return reservationTicketService.getAllReservations();
     }
 
     @GetMapping("/search")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationTicketResponseDto> getReservations(
             @ModelAttribute ReservationSearchDto reservationSearchDto) {
-        return reservationService.searchReservations(reservationSearchDto);
+        return reservationTicketService.searchReservations(reservationSearchDto);
     }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationTicketResponseDto addReservation(
             @RequestBody @Valid ReservationTicketRegisterDto reservationTicketRegisterDto, LoginMember loginMember) {
-        return reservationService.saveReservation(reservationTicketRegisterDto, loginMember);
+        return reservationTicketService.saveReservation(reservationTicketRegisterDto, loginMember);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteReservation(@PathVariable("id") Long id) {
-        reservationService.cancelReservation(id);
+        reservationTicketService.cancelReservation(id);
     }
 }

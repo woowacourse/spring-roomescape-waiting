@@ -25,7 +25,7 @@ import roomescape.persistence.vo.Period;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationService {
+public class ReservationTicketService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;

@@ -23,7 +23,7 @@ import roomescape.infrastructure.db.ReservationTicketJpaRepository;
 import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
-import roomescape.application.service.ReservationService;
+import roomescape.application.service.ReservationTicketService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -44,7 +44,7 @@ class MemberReservationTicketAcceptanceTest {
     @Autowired
     ReservationTicketJpaRepository reservationTicketJpaRepository;
     @Autowired
-    private ReservationService reservationService;
+    private ReservationTicketService reservationTicketService;
 
     @DisplayName("로그인 토큰이 요청되면 로그인된 사용자의 예약 결과가 응답으로 반환된다.")
     @Test

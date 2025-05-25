@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.LoginMember;
 import roomescape.dto.response.MemberReservationResponseDto;
-import roomescape.application.service.ReservationService;
+import roomescape.application.service.ReservationTicketService;
 
 @RestController
 @RequestMapping("/reservations-mine")
 @RequiredArgsConstructor
 public class MemberReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationTicketService reservationTicketService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<MemberReservationResponseDto> getMemberReservations(LoginMember loginMember) {
-        return reservationService.getReservationsOfMember(loginMember);
+        return reservationTicketService.getReservationsOfMember(loginMember);
     }
 }

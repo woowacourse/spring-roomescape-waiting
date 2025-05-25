@@ -41,7 +41,7 @@ import roomescape.persistence.repository.ReservationTimeRepository;
 class ReservationTicketServiceTest {
 
     @Autowired
-    ReservationService reservationService;
+    ReservationTicketService reservationTicketService;
 
     @Autowired
     ReservationRepository reservationRepository;
@@ -80,7 +80,7 @@ class ReservationTicketServiceTest {
         );
 
         // when
-        ReservationTicketResponseDto response = this.reservationService.saveReservation(request, this.loginMember);
+        ReservationTicketResponseDto response = this.reservationTicketService.saveReservation(request, this.loginMember);
 
         // then
         assertAll(
@@ -95,13 +95,13 @@ class ReservationTicketServiceTest {
         // given
         ReservationTicketRegisterDto request = new ReservationTicketRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        ReservationTicketResponseDto saved = this.reservationService.saveReservation(request, this.loginMember);
+        ReservationTicketResponseDto saved = this.reservationTicketService.saveReservation(request, this.loginMember);
 
         // when
-        this.reservationService.cancelReservation(saved.id());
+        this.reservationTicketService.cancelReservation(saved.id());
 
         // then
-        List<ReservationTicketResponseDto> reservations = this.reservationService.getAllReservations();
+        List<ReservationTicketResponseDto> reservations = this.reservationTicketService.getAllReservations();
         assertThat(reservations).isEmpty();
     }
 
@@ -111,13 +111,13 @@ class ReservationTicketServiceTest {
         // given
         ReservationTicketRegisterDto request = new ReservationTicketRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
-        this.reservationService.saveReservation(request, this.loginMember);
+        this.reservationTicketService.saveReservation(request, this.loginMember);
         ReservationTicketRegisterDto savedRequest = new ReservationTicketRegisterDto(
                 LocalDate.now().plusDays(1).toString(), 1L, 1L);
 
         // when && then
         assertThatThrownBy(
-                () -> this.reservationService.saveReservation(savedRequest, this.loginMember))
+                () -> this.reservationTicketService.saveReservation(savedRequest, this.loginMember))
                 .isInstanceOf(DuplicatedException.class);
     }
 
@@ -129,7 +129,7 @@ class ReservationTicketServiceTest {
                 LocalDate.now().toString(), 1L, 1L);
         // when && then
         assertThatThrownBy(
-                () -> this.reservationService.saveReservation(request, this.loginMember))
+                () -> this.reservationTicketService.saveReservation(request, this.loginMember))
                 .isInstanceOf(IllegalStateException.class);
 
     }
@@ -154,7 +154,7 @@ class ReservationTicketServiceTest {
         LoginMember loginMember = new LoginMember(savedMember);
 
         //when
-        List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);
+        List<MemberReservationResponseDto> response = reservationTicketService.getReservationsOfMember(loginMember);
 
         List<MemberReservationResponseDto> comparedResponse = List.of(
                 new MemberReservationResponseDto(savedReservationTicket));
@@ -210,7 +210,7 @@ class ReservationTicketServiceTest {
         ));
 
         // when
-        reservationService.cancelReservation(reservationTicket.getId());
+        reservationTicketService.cancelReservation(reservationTicket.getId());
 
         // then
         List<ReservationTicket> allReservationTickets = reservationRepository.findAll();
