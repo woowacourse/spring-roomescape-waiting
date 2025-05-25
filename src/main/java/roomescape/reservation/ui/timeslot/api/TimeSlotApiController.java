@@ -42,7 +42,7 @@ public class TimeSlotApiController {
 
     @GetMapping
     public ResponseEntity<List<TimeSlotResponse>> findAll() {
-        final List<TimeSlotInfo> timeInfos = timeSlotService.getTimeSlots();
+        final List<TimeSlotInfo> timeInfos = timeSlotService.findTimeSlots();
         final List<TimeSlotResponse> responses = timeInfos.stream()
                 .map(TimeSlotResponse::new)
                 .toList();

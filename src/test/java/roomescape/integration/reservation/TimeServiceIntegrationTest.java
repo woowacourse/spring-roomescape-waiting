@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
 import roomescape.reservation.application.timeslot.dto.TimeSlotCreateCommand;
@@ -26,7 +25,6 @@ import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/schema.sql", "/test-data.sql"})
-@Transactional
 public class TimeServiceIntegrationTest {
 
     @Autowired
@@ -68,7 +66,7 @@ public class TimeServiceIntegrationTest {
     @Test
     void getTimeSlots() {
         // when
-        final List<TimeSlotInfo> result = timeSlotService.getTimeSlots();
+        final List<TimeSlotInfo> result = timeSlotService.findTimeSlots();
         // then
         assertThat(result).hasSize(3);
     }

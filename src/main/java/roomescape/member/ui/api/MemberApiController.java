@@ -18,7 +18,7 @@ public class MemberApiController {
 
     @GetMapping("/members")
     public ResponseEntity<List<MemberResponse>> getMembers() {
-        final List<MemberResponse> responses = memberService.findAll()
+        final List<MemberResponse> responses = memberService.findMembers()
                 .stream()
                 .map(MemberResponse::new)
                 .toList();

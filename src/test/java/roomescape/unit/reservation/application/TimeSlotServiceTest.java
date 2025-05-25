@@ -71,7 +71,7 @@ class TimeSlotServiceTest {
         timeSlotService.createTimeSlot(request1);
         timeSlotService.createTimeSlot(request2);
         // when
-        final List<TimeSlotInfo> result = timeSlotService.getTimeSlots();
+        final List<TimeSlotInfo> result = timeSlotService.findTimeSlots();
         // then
         assertThat(result).hasSize(2);
     }

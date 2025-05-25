@@ -14,7 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
 import roomescape.reservation.application.theme.dto.ThemeInfo;
@@ -27,7 +26,6 @@ import roomescape.support.util.TestCurrentDateTime;
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/schema.sql", "/test-data.sql"})
-@Transactional
 public class ThemeServiceIntegrationTest {
 
     @Autowired
@@ -81,9 +79,9 @@ public class ThemeServiceIntegrationTest {
 
     @DisplayName("모든 테마를 조회할 수 있다")
     @Test
-    void findAll() {
+    void findThemes() {
         // when
-        final List<ThemeInfo> result = themeService.findAll();
+        final List<ThemeInfo> result = themeService.findThemes();
         // then
         assertThat(result).hasSize(11);
     }
@@ -94,7 +92,7 @@ public class ThemeServiceIntegrationTest {
         // when
         themeService.deleteThemeById(10L);
         // then
-        final List<ThemeInfo> responses = themeService.findAll();
+        final List<ThemeInfo> responses = themeService.findThemes();
         assertThat(responses).hasSize(10);
     }
 

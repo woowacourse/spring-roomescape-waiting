@@ -27,9 +27,9 @@ class MemberServiceTest {
 
     @DisplayName("모든 멤버 정보를 조회하여 반환할 수 있다")
     @Test
-    void findAll() {
+    void findMembers() {
         // when
-        final List<MemberInfo> result = memberService.findAll();
+        final List<MemberInfo> result = memberService.findMembers();
 
         // then
         assertThat(result).hasSize(2);

@@ -163,7 +163,7 @@ class ReservationServiceTest {
         reservationService.createReservation(request1);
         reservationService.createReservation(request2);
         // when
-        final List<ReservationInfo> result = reservationService.findReservationsBySearchCondition();
+        final List<ReservationInfo> result = reservationService.findReservations();
         // then
         assertThat(result).hasSize(2);
     }
@@ -178,7 +178,7 @@ class ReservationServiceTest {
         // when
         reservationService.cancelReservationById(response.id());
         // then
-        assertThat(reservationService.findReservationsBySearchCondition()).isEmpty();
+        assertThat(reservationService.findReservations()).isEmpty();
     }
 
     @DisplayName("멤버 예약 목록을 조회할 수 있다")

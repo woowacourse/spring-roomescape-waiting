@@ -37,7 +37,7 @@ public class ThemeApiController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> findAll() {
-        final List<ThemeInfo> themeInfos = themeService.findAll();
+        final List<ThemeInfo> themeInfos = themeService.findThemes();
         final List<ThemeResponse> responses = mapThemeInfoToThemeResponse(themeInfos);
         return ResponseEntity.ok().body(responses);
     }

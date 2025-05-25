@@ -131,14 +131,14 @@ public class WaitingServiceTest {
 
     @DisplayName("예약 대기 목록을 조회할 수 있다")
     @Test
-    void findAll() {
+    void findWaitings() {
         // given
         final WaitingCreateCommand request1 = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), theme1.id());
         final WaitingCreateCommand request2 = new WaitingCreateCommand(tomorrow, member2.id(), time2.id(), theme2.id());
         waitingService.createWaiting(request1);
         waitingService.createWaiting(request2);
         // when
-        final List<WaitingInfo> result = waitingService.findAll();
+        final List<WaitingInfo> result = waitingService.findWaitings();
         // then
         assertThat(result).hasSize(2);
     }
@@ -152,6 +152,6 @@ public class WaitingServiceTest {
         // when
         waitingService.cancelWaitingById(response.id());
         // then
-        assertThat(waitingService.findAll()).isEmpty();
+        assertThat(waitingService.findWaitings()).isEmpty();
     }
 }

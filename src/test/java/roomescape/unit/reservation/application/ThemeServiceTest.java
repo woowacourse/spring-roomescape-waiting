@@ -78,14 +78,14 @@ class ThemeServiceTest {
 
     @DisplayName("테마 목록을 조회할 수 있다")
     @Test
-    void findAll() {
+    void findThemes() {
         // given
         final ThemeCreateCommand request1 = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
         final ThemeCreateCommand request2 = new ThemeCreateCommand("테마2", "설명2", "썸네일2.png");
         themeService.createTheme(request1);
         themeService.createTheme(request2);
         // when
-        final List<ThemeInfo> result = themeService.findAll();
+        final List<ThemeInfo> result = themeService.findThemes();
         // then
         assertThat(result).hasSize(2);
     }

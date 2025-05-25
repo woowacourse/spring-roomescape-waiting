@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.datetime.CurrentDateTime;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
@@ -26,6 +27,7 @@ import roomescape.reservation.domain.waiting.Waiting;
 import roomescape.reservation.domain.waiting.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private static final LocalDate MINIMUM_SEARCH_DATE = LocalDate.of(2000, 1, 1);
@@ -51,6 +53,7 @@ public class ReservationService {
         this.currentDateTime = dateTimeGenerator;
     }
 
+    @Transactional
     public ReservationInfo createReservation(final ReservationCreateCommand command) {
         final Reservation reservation = makeReservation(command);
         final Reservation savedReservation = reservationRepository.save(reservation);
@@ -85,7 +88,21 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationInfo> findReservationsBySearchCondition() {
+    @Transactional
+    public void cancelReservationById(final long id) {
+        final Reservation reservation = findReservation(id);
+        if (waitingRepository.existsByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())) {
+            final Waiting waiting = waitingRepository.findTopByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())
+                    .orElseThrow(() -> new RoomescapeException("예약 대기가 존재하지 않습니다."));
+            final Reservation promotedReservation = new Reservation(waiting.date(), waiting.member(), waiting.time(), waiting.theme());
+            reservationRepository.save(promotedReservation);
+            waitingRepository.deleteById(waiting.id());
+        }
+        reservationRepository.deleteById(id);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ReservationInfo> findReservations() {
         return reservationRepository.findAll().stream()
                 .map(ReservationInfo::new)
                 .toList();
@@ -114,18 +131,6 @@ public class ReservationService {
                 reservationInfos.stream().map(ReservationMineInfo::new),
                 waitingInfos.stream().map(ReservationMineInfo::new)
         ).sorted(Comparator.comparing(ReservationMineInfo::date)).toList();
-    }
-
-    public void cancelReservationById(final long id) {
-        final Reservation reservation = findReservation(id);
-        if (waitingRepository.existsByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())) {
-            final Waiting waiting = waitingRepository.findTopByReservation(reservation.date(), reservation.time().id(), reservation.theme().id())
-                    .orElseThrow(() -> new RoomescapeException("예약 대기가 존재하지 않습니다."));
-            final Reservation promotedReservation = new Reservation(waiting.date(), waiting.member(), waiting.time(), waiting.theme());
-            reservationRepository.save(promotedReservation);
-            waitingRepository.deleteById(waiting.id());
-        }
-        reservationRepository.deleteById(id);
     }
 
     private Reservation findReservation(final long id) {

@@ -17,13 +17,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
 import roomescape.reservation.application.reservation.dto.ReservationInfo;
 import roomescape.reservation.application.reservation.service.ReservationService;
-import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationRepository;
 import roomescape.reservation.domain.theme.ThemeRepository;
 import roomescape.reservation.domain.timeslot.TimeSlotRepository;
@@ -33,7 +31,6 @@ import roomescape.support.util.TestCurrentDateTime;
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/schema.sql", "/test-data.sql"})
-@Transactional
 public class ReservationServiceIntegrationTest {
 
     @Autowired
@@ -122,9 +119,9 @@ public class ReservationServiceIntegrationTest {
 
     @DisplayName("모든 예약을 조회할 수 있다")
     @Test
-    void findReservationsBySearchCondition() {
+    void findReservations() {
         // when
-        final List<ReservationInfo> result = reservationService.findReservationsBySearchCondition();
+        final List<ReservationInfo> result = reservationService.findReservations();
         // then
         assertThat(result).hasSize(13);
     }
@@ -133,10 +130,10 @@ public class ReservationServiceIntegrationTest {
     @Test
     void cancelReservationById() {
         // when
-        final List<Reservation> cancelBeforeReservations = reservationRepository.findAll();
+        final List<ReservationInfo> beforeCancelReservations = reservationService.findReservations();
         reservationService.cancelReservationById(1L);
         // then
-        final List<Reservation> cancelAfterReservations = reservationRepository.findAll();
-        assertThat(cancelAfterReservations).hasSize(cancelBeforeReservations.size() - 1);
+        final List<ReservationInfo> afterCancelReservations = reservationService.findReservations();
+        assertThat(afterCancelReservations).hasSize(beforeCancelReservations.size() - 1);
     }
 }

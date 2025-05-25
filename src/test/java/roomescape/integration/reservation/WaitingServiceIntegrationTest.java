@@ -17,7 +17,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.waiting.dto.WaitingCreateCommand;
@@ -32,7 +31,6 @@ import roomescape.support.util.TestCurrentDateTime;
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql(scripts = {"/schema.sql", "/test-data.sql"})
-@Transactional
 public class WaitingServiceIntegrationTest {
 
     @Autowired

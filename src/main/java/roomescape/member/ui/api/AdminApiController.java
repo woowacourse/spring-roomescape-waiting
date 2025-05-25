@@ -40,7 +40,7 @@ public class AdminApiController {
 
     @GetMapping("/waitings")
     public ResponseEntity<List<WaitingResponse>> getWaitings() {
-        final List<WaitingResponse> responses = waitingService.findAll()
+        final List<WaitingResponse> responses = waitingService.findWaitings()
                 .stream()
                 .map(WaitingResponse::new)
                 .toList();

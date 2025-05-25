@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.datetime.CurrentDateTime;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
@@ -18,6 +19,7 @@ import roomescape.reservation.domain.waiting.Waiting;
 import roomescape.reservation.domain.waiting.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -36,6 +38,7 @@ public class WaitingService {
         this.currentDateTime = dateTimeGenerator;
     }
 
+    @Transactional
     public WaitingInfo createWaiting(final WaitingCreateCommand command) {
         final Waiting waiting = makeWaiting(command);
         final Waiting savedWaiting = waitingRepository.save(waiting);
@@ -70,13 +73,13 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void cancelWaitingById(final long id) {
         waitingRepository.deleteById(id);
     }
 
-    public List<WaitingInfo> findAll() {
-        return waitingRepository.findAll()
-                .stream()
+    public List<WaitingInfo> findWaitings() {
+        return waitingRepository.findAll().stream()
                 .map(WaitingInfo::new)
                 .toList();
     }
