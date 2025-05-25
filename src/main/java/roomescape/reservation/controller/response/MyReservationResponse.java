@@ -3,8 +3,8 @@ package roomescape.reservation.controller.response;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 public record MyReservationResponse(
         Long id,
@@ -14,19 +14,13 @@ public record MyReservationResponse(
         String status
 ) {
 
-    public static MyReservationResponse from(Reservation reservation) {
+    public static MyReservationResponse from(Reservation reservation, ReservationSlot reservationSlot) {
         return new MyReservationResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getStartAt(),
-                reservation.getStatus().getMessage()
+                reservationSlot.getStatusDescription(reservation)
         );
-    }
-
-    public static List<MyReservationResponse> from(List<Reservation> reservations) {
-        return reservations.stream()
-                .map(MyReservationResponse::from)
-                .toList();
     }
 }

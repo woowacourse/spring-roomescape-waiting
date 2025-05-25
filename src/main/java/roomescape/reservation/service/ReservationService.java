@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -17,6 +16,7 @@ import roomescape.reservation.controller.response.WaitingReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
@@ -101,21 +101,15 @@ public class ReservationService {
         List<MyReservationResponse> responses = new ArrayList<>();
 
         for (Reservation myReservation : myReservations) {
-            List<Reservation> sameSlotReservations = reservationRepository.findByDateAndTimeIdAndThemeId(
-                    myReservation.getDate(),
-                    myReservation.getTimeId(),
-                    myReservation.getTheme()
-            ).stream().sorted(Comparator.comparing(Reservation::getReservedAt)).toList();
-
-            int myReservationNumber = sameSlotReservations.indexOf(myReservation);
-
-            MyReservationResponse response = new MyReservationResponse(
-                    myReservation.getId(),
-                    myReservation.getThemeName(),
-                    myReservation.getDate(),
-                    myReservation.getStartAt(),
-                    myReservationNumber == 0 ? "예약" : myReservationNumber + "번째 예약 대기"
+            ReservationSlot reservationSlot = new ReservationSlot(
+                    reservationRepository.findByDateAndTimeIdAndThemeId(
+                            myReservation.getDate(),
+                            myReservation.getTimeId(),
+                            myReservation.getTheme()
+                    )
             );
+            
+            MyReservationResponse response = MyReservationResponse.from(myReservation, reservationSlot);
             responses.add(response);
         }
 
