@@ -16,6 +16,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
+import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
 
 @Service
@@ -106,14 +107,13 @@ public class ReservationCommandService {
         return ReservationDto.from(reservation);
     }
 
-    public void deleteReservation(Long id) {
-        try {
-            Reservation reservation = reservationRepository.findById(id)
-                    .orElseThrow();
-            reservation.deleteReservationInTime();
-            reservationRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id);
+    public void deleteReservation(Long reservationId, Long memberId) {
+        Member member = memberService.getMemberEntityById(memberId);
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
+        if (!member.isAdmin() && !member.isSame(reservation.getMember())) {
+            throw new AuthorizationException("권한이 없습니다.");
         }
+        reservation.cancel();
     }
 }

@@ -44,10 +44,11 @@ public class WaitingService {
     public void deleteWaiting(Long reservationId, Long memberId) {
         Member member = memberService.getMemberEntityById(memberId);
         Reservation reservation = reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new NotFoundException("Id에 해당하는 예약이 없습니다."));
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
         if (!member.isAdmin() && !member.isSame(reservation.getMember())) {
             throw new AuthorizationException("권한이 없습니다.");
         }
-        reservation.cancel();
+        reservation.deleteSelf();
+        reservationRepository.delete(reservation);
     }
 }

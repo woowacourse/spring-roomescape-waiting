@@ -77,8 +77,10 @@ public class Reservation {
         return reservationDateTime.isBefore(comparedDateTime);
     }
 
-    public void deleteReservationInTime() {
-        this.time.removeReservation(this);
+    public void deleteSelf() {
+        if (this.time != null) {
+            this.time.removeReservation(this);
+        }
     }
 
     public boolean isDuplicated(Reservation other) {

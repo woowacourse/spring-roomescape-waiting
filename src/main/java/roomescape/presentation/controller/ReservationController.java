@@ -69,17 +69,20 @@ public class ReservationController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
-        commandService.deleteReservation(id);
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable("id") Long id,
+            @AuthenticatedMemberId MemberIdDto memberIdDto
+    ) {
+        commandService.deleteReservation(id, memberIdDto.id());
         return ResponseEntity.noContent().build();
     }
 
     @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteWaiting(
-            @PathVariable("id") Long id,
+            @PathVariable("id") Long reservationId,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
-        waitingService.deleteWaiting(id, memberIdDto.id());
+        waitingService.deleteWaiting(reservationId, memberIdDto.id());
         return ResponseEntity.noContent().build();
     }
 }
