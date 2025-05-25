@@ -16,6 +16,8 @@ import lombok.experimental.FieldNameConstants;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 import org.hibernate.annotations.Synchronize;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.validate.Validator;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -94,13 +96,14 @@ public class ReservationView {
             validateId();
             return Long.parseLong(compositeId.substring(2));
         } catch (NumberFormatException e) {
-            throw new IllegalStateException("Cannot parse ID from compositeId: " + compositeId, e);
+            throw new IllegalArgumentException("Cannot parse ID from compositeId: " + compositeId, e);
         }
     }
 
     private void validateId() {
-        if (compositeId == null || compositeId.length() < 3) {
-            throw new IllegalStateException("Invalid compositeId format: " + compositeId);
+        if (compositeId == null) {
+            Validator.of(ReservationView.class)
+                    .validateNotNull(Fields.compositeId, compositeId, DomainTerm.RESERVATION_VIEW_ID.label());
         }
     }
 }
