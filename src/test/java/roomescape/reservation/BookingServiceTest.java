@@ -7,23 +7,20 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.booking.BookingService;
 import roomescape.booking.reservation.Reservation;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.Waiting;
-import roomescape.booking.waiting.WaitingRepository;
+import roomescape.booking.waiting.WaitingService;
 import roomescape.member.Member;
-import roomescape.member.MemberRepository;
 import roomescape.member.MemberRole;
 import roomescape.reservationtime.ReservationTime;
 import roomescape.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
 import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.*;
 
@@ -31,19 +28,17 @@ import static roomescape.util.TestFactory.*;
 class BookingServiceTest {
 
     private BookingService bookingService;
-    private ReservationRepository reservationRepository;
-    private WaitingRepository waitingRepository;
+    private ReservationService reservationService;
+    private WaitingService waitingService;
 
     private Member member;
     private Schedule schedule;
-    private List<Waiting> waitings;
 
     @BeforeEach
     void setUp() {
-        reservationRepository = mock(ReservationRepository.class);
-        waitingRepository = mock(WaitingRepository.class);
-        MemberRepository memberRepository = mock(MemberRepository.class);
-        bookingService = new BookingService(reservationRepository, waitingRepository, memberRepository);
+        reservationService = mock(ReservationService.class);
+        waitingService = mock(WaitingService.class);
+        bookingService = new BookingService(reservationService, waitingService);
 
         ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
         Theme theme = themeWithId(1L, new Theme("테마명", "테마 설명", "썸네일 URL"));
@@ -52,24 +47,37 @@ class BookingServiceTest {
     }
 
     @Test
-    @DisplayName("예약 삭제 시, 나머지 웨이팅의 대기 번호를 감소시킨다")
+    @DisplayName("예약 삭제 시, 그 스케줄의 첫 번째 웨이팅을 예약으로 변경한다")
     void changeFirstWaitingToReservation() {
         // given
         Waiting firstWaiting = waitingWithId(1L, new Waiting(schedule, member, 1L));
-        Waiting secondWaiting = waitingWithId(2L, new Waiting(schedule, member, 2L));
-        Waiting thirdWaiting = waitingWithId(3L, new Waiting(schedule, member, 3L));
-        waitings = List.of(firstWaiting, secondWaiting, thirdWaiting);
-
         Reservation reservation = reservationWithId(1L, new Reservation(member, schedule));
-        given(reservationRepository.findById(1L)).willReturn(java.util.Optional.of(reservation));
-        given(waitingRepository.findAllBySchedule(schedule)).willReturn(waitings);
-        given(reservationRepository.save(any(Reservation.class))).willReturn(new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule()));
+        given(reservationService.findById(1L)).willReturn(reservation);
+        given(waitingService.existsBySchedule(schedule)).willReturn(true);
+        given(waitingService.findFirstWaitingOfSchedule(schedule)).willReturn(firstWaiting);
 
         // when
         bookingService.deleteReservationById(1L);
 
         // then
-        assertThat(secondWaiting.getRank()).isEqualTo(1L);
-        assertThat(thirdWaiting.getRank()).isEqualTo(2L);
+        then(reservationService).should().save(new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule()));
+    }
+
+    @Test
+    @DisplayName("예약 삭제 시, 그 스케줄의 웨이팅들 대기 순번이 감소한다.")
+    void changeRanksOfWaitings() {
+        // given
+        Waiting firstWaiting = waitingWithId(1L, new Waiting(schedule, member, 1L));
+
+        Reservation reservation = reservationWithId(1L, new Reservation(member, schedule));
+        given(reservationService.findById(1L)).willReturn(reservation);
+        given(waitingService.existsBySchedule(schedule)).willReturn(true);
+        given(waitingService.findFirstWaitingOfSchedule(schedule)).willReturn(firstWaiting);
+
+        // when
+        bookingService.deleteReservationById(1L);
+
+        // then
+        then(waitingService).should().decreaseRankOfSchedule(schedule);
     }
 }

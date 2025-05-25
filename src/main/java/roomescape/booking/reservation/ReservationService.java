@@ -11,6 +11,7 @@ import roomescape.booking.schedule.Schedule;
 import roomescape.booking.schedule.ScheduleRepository;
 import roomescape.exception.custom.reason.reservation.ReservationConflictException;
 import roomescape.exception.custom.reason.reservation.ReservationNotExistsMemberException;
+import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
 import roomescape.exception.custom.reason.reservation.ReservationPastDateException;
 import roomescape.exception.custom.reason.schedule.PastScheduleException;
 import roomescape.exception.custom.reason.schedule.ScheduleNotExistException;
@@ -94,5 +95,23 @@ public class ReservationService {
     private Member getMemberByEmail(final String email) {
         return memberRepository.findByEmail(email)
                 .orElseThrow(ReservationNotExistsMemberException::new);
+    }
+
+    public List<Reservation> findAllByEmail(final String email) {
+        Member member = getMemberByEmail(email);
+        return reservationRepository.findAllByMember(member);
+    }
+
+    public void deleteById(final Long id) {
+        reservationRepository.deleteById(id);
+    }
+
+    public void save(final Reservation reservation) {
+        reservationRepository.save(reservation);
+    }
+
+    public Reservation findById(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(ReservationNotFoundException::new);
     }
 }

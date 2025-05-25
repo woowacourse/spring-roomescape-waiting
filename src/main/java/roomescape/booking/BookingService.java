@@ -6,14 +6,10 @@ import org.springframework.stereotype.Service;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.dto.BookingResponse;
 import roomescape.booking.reservation.Reservation;
-import roomescape.booking.reservation.ReservationRepository;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.schedule.Schedule;
 import roomescape.booking.waiting.Waiting;
-import roomescape.booking.waiting.WaitingRepository;
-import roomescape.exception.custom.reason.member.MemberNotFoundException;
-import roomescape.exception.custom.reason.reservation.ReservationNotFoundException;
-import roomescape.member.Member;
-import roomescape.member.MemberRepository;
+import roomescape.booking.waiting.WaitingService;
 
 import java.util.List;
 import java.util.stream.Stream;
@@ -22,14 +18,12 @@ import java.util.stream.Stream;
 @AllArgsConstructor
 public class BookingService {
 
-    private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
-    private final MemberRepository memberRepository;
+    private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
     public List<BookingResponse> readAllByMember(final LoginMember loginMember) {
-        Member member = getMemberByEmail(loginMember.email());
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        List<Waiting> waitings = waitingRepository.findAllByMember(member);
+        List<Reservation> reservations = reservationService.findAllByEmail(loginMember.email());
+        List<Waiting> waitings = waitingService.findAllByEmail(loginMember.email());
 
         return Stream.concat(
                 reservations.stream().map(BookingResponse::of),
@@ -39,34 +33,22 @@ public class BookingService {
 
     @Transactional
     public void deleteReservationById(final Long id) {
-        Reservation reservation = getReservationById(id);
-        reservationRepository.deleteById(id);
+        Reservation oldReservation = reservationService.findById(id);
+        reservationService.deleteById(id);
 
-        Schedule schedule = reservation.getSchedule();
-
-        List<Waiting> waitings = waitingRepository.findAllBySchedule(schedule);
-        if (waitings.isEmpty()) {
+        Schedule schedule = oldReservation.getSchedule();
+        if (!waitingService.existsBySchedule(schedule)) {
             return;
         }
 
-        changeFirstWaitingToReservation(waitings);
-        waitings.forEach(Waiting::decrementRank);
+        Waiting firstWaiting = waitingService.findFirstWaitingOfSchedule(schedule);
+        waitingService.decreaseRankOfSchedule(schedule);
+        changeFirstWaitingToReservation(firstWaiting);
     }
 
-    private void changeFirstWaitingToReservation(final List<Waiting> waitings) {
-        Waiting firstWaiting = waitings.getFirst();
+    private void changeFirstWaitingToReservation(final Waiting firstWaiting) {
+        waitingService.delete(firstWaiting);
         Reservation reservation = new Reservation(firstWaiting.getMember(), firstWaiting.getSchedule());
-        reservationRepository.save(reservation);
-        waitingRepository.delete(firstWaiting);
-    }
-
-    private Reservation getReservationById(final Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
-    }
-
-    private Member getMemberByEmail(final String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(MemberNotFoundException::new);
+        reservationService.save(reservation);
     }
 }
