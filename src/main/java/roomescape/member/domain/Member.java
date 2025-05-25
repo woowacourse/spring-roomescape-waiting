@@ -92,18 +92,12 @@ public class Member {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Member member = (Member) o;
-        if (member.getId() == null || id == null) {
-            return false;
-        }
+        if (!(o instanceof Member member)) return false;
         return Objects.equals(id, member.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hashCode(id);
     }
 }
