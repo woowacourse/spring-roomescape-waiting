@@ -1,6 +1,5 @@
 package roomescape.reservation.application.service;
 
-import jakarta.persistence.EntityManager;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,56 +96,6 @@ class ReservationCommandServiceTest {
         assertThat(reservation.getDate()).isEqualTo(found.getDate());
         assertThat(reservation.getTime()).isEqualTo(found.getTime());
         assertThat(reservation.getTheme()).isEqualTo(found.getTheme());
-    }
-
-    @Test
-    @DisplayName("슬롯의 첫 번쨰 예약은 곧바로 승인된다.")
-    void existsReservation() {
-        // given
-        final Theme theme = themeRepository.save(
-                Theme.withoutId(
-                        ThemeName.from("공포"),
-                        ThemeDescription.from("지구별 방탈출 최고"),
-                        ThemeThumbnail.from("www.making.com")));
-
-        final User user = userRepository.save(
-                User.withoutId(
-                        UserName.from("강산"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-
-        final User somebody = userRepository.save(
-                User.withoutId(
-                        UserName.from("다른사람"),
-                        Email.from("email@email.com"),
-                        Password.fromEncoded("1234"),
-                        UserRole.NORMAL));
-
-        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
-        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
-
-        final Reservation reservation1 = Reservation.withoutId(
-                user.getId(),
-                date,
-                time,
-                theme
-        );
-
-        final Reservation reservation2 = Reservation.withoutId(
-                somebody.getId(),
-                date,
-                time,
-                theme
-        );
-
-        reservationCommandService.create(reservation1);
-        reservationCommandService.create(reservation2);
-
-        // when
-        // then
-        assertThat(reservation1.getStatus() == BookedStatus.APPROVED).isTrue();
-        assertThat(reservation2.getStatus() == BookedStatus.WAITING).isTrue();
     }
 
     @Test
@@ -250,5 +199,153 @@ class ReservationCommandServiceTest {
         assertThatThrownBy(() -> reservationCommandService.delete(id))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("[RESERVATION] not found. params={ReservationId=ReservationId(-1)}");
+    }
+
+    @Test
+    @DisplayName("슬롯의 첫 번쨰 예약은 곧바로 승인된다.")
+    void firstReservationOfSlotIsApprove() {
+        // given
+        final Theme theme = themeRepository.save(
+                Theme.withoutId(
+                        ThemeName.from("공포"),
+                        ThemeDescription.from("지구별 방탈출 최고"),
+                        ThemeThumbnail.from("www.making.com")));
+
+        final User user = userRepository.save(
+                User.withoutId(
+                        UserName.from("강산"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("1234"),
+                        UserRole.NORMAL));
+
+        final User somebody = userRepository.save(
+                User.withoutId(
+                        UserName.from("다른사람"),
+                        Email.from("email@email.com"),
+                        Password.fromEncoded("1234"),
+                        UserRole.NORMAL));
+
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation reservation1 = Reservation.withoutId(
+                user.getId(),
+                date,
+                time,
+                theme
+        );
+
+        final Reservation reservation2 = Reservation.withoutId(
+                somebody.getId(),
+                date,
+                time,
+                theme
+        );
+
+        reservationCommandService.create(reservation1);
+        reservationCommandService.create(reservation2);
+
+        // when
+        // then
+        assertThat(reservation1.getStatus() == BookedStatus.APPROVED).isTrue();
+        assertThat(reservation2.getStatus() == BookedStatus.WAITING).isTrue();
+    }
+
+    @Test
+    @DisplayName("동일 슬롯에 동일 유저로 중복 예약 시 DuplicateException이 발생한다")
+    void cannotReserveSameSlotTwiceBySameUser() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+        final User user = userRepository.save(User.withoutId(
+                UserName.from("강산"),
+                Email.from("email@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation r1 = Reservation.withoutId(user.getId(), date, time, theme);
+        reservationCommandService.create(r1);
+
+        final Reservation r2 = Reservation.withoutId(user.getId(), date, time, theme);
+
+        // when
+        // then
+        assertThatThrownBy(() -> reservationCommandService.create(r2))
+                .isInstanceOf(roomescape.common.exception.DuplicateException.class);
+    }
+
+    @Test
+    @DisplayName("예약 삭제 시 같은 슬롯의 다음 대기자가 APPROVED로 승격된다")
+    void deletePromotesNextWaiting() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+        final User user1 = userRepository.save(User.withoutId(
+                UserName.from("강산"),
+                Email.from("email@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final User user2 = userRepository.save(User.withoutId(
+                UserName.from("다른사람"),
+                Email.from("email2@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation r1 = Reservation.withoutId(user1.getId(), date, time, theme);
+        final Reservation r2 = Reservation.withoutId(user2.getId(), date, time, theme);
+
+        final Reservation saved1 = reservationCommandService.create(r1);
+        final Reservation saved2 = reservationCommandService.create(r2);
+
+        // when
+        reservationCommandService.delete(saved1);
+
+        // then
+        final Reservation updatedR2 = reservationRepository.findById(saved2.getId()).orElseThrow();
+        assertThat(updatedR2.getStatus()).isEqualTo(roomescape.reservation.domain.BookedStatus.APPROVED);
+    }
+
+    @Test
+    @DisplayName("슬롯이 비어 있을 때 새로운 예약이 들어오면 곧바로 승인된다")
+    void emptySlot_thenNewReservationIsApproved() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+        final User user = userRepository.save(User.withoutId(
+                UserName.from("강산"),
+                Email.from("email@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation first = Reservation.withoutId(user.getId(), date, time, theme);
+        final Reservation saved = reservationCommandService.create(first);
+        assertThat(saved.getStatus()).isEqualTo(BookedStatus.APPROVED);
+
+        reservationCommandService.delete(saved.getId());
+
+        final User user2 = userRepository.save(User.withoutId(
+                UserName.from("다른사람"),
+                Email.from("email2@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final Reservation second = Reservation.withoutId(user2.getId(), date, time, theme);
+
+        // when
+        final Reservation newSaved = reservationCommandService.create(second);
+
+        // then
+        assertThat(newSaved.getStatus()).isEqualTo(BookedStatus.APPROVED);
     }
 }

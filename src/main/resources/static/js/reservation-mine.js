@@ -25,18 +25,14 @@ function render(data) {
         row.insertCell(2).textContent = time;
         row.insertCell(3).textContent = status;
 
-        if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
-            const cancelCell = row.insertCell(4);
-            const cancelButton = document.createElement('button');
-            cancelButton.textContent = '취소';
-            cancelButton.className = 'btn btn-danger';
-            cancelButton.onclick = function () {
-                requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
-            };
-            cancelCell.appendChild(cancelButton);
-        } else { // 예약 완료 상태일 때
-            row.insertCell(4).textContent = '';
-        }
+        const cancelCell = row.insertCell(4);
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = '취소';
+        cancelButton.className = 'btn btn-danger';
+        cancelButton.onclick = function () {
+            requestDeleteWaiting(item.reservationId.value).then(() => window.location.reload());
+        };
+        cancelCell.appendChild(cancelButton);
     });
 }
 

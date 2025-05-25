@@ -75,7 +75,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
     public void delete(final ReservationId id, final UserSession userSession) {
         final Reservation target = reservationQueryService.getById(id);
         if (userSession.canManage(target.getUserId())) {
-            reservationCommandService.delete(id);
+            reservationCommandService.delete(target);
             return;
         }
         throw new ForbiddenException(userSession.id(), userSession.role(), target.getUserId());

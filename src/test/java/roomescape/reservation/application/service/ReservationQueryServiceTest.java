@@ -11,14 +11,15 @@ import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotRepository;
-import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -271,5 +272,40 @@ class ReservationQueryServiceTest {
             assertThat(noFilter.contains(reservation)).isTrue();
             assertThat(wrongFilter.isEmpty()).isTrue();
         });
+    }
+
+    @Test
+    @DisplayName("특정 슬롯(날짜+시간+테마)에 해당하는 모든 예약을 조회할 수 있다")
+    void findAllBySlot() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+        final User user1 = userRepository.save(User.withoutId(
+                UserName.from("강산"),
+                Email.from("email@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final User user2 = userRepository.save(User.withoutId(
+                UserName.from("다른사람"),
+                Email.from("email2@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation r1 = reservationRepository.save(Reservation.withoutId(user1.getId(), date, time, theme));
+        final Reservation r2 = reservationRepository.save(Reservation.withoutId(user2.getId(), date, time, theme));
+
+        final ReservationSlot slot = ReservationSlot.of(date, time, theme);
+
+        // when
+        final var found = reservationRepository.findAll().stream()
+                .filter(r -> r.getSlot().equals(slot))
+                .toList();
+
+        // then
+        assertThat(found).containsExactlyInAnyOrder(r1, r2);
     }
 }

@@ -68,6 +68,7 @@ public class ReservationQueryService {
 
         return reservationSequences.stream()
                 .map(reservationIdWithSequence -> new SlotSequenceResponse(
+                        reservationIdWithSequence.reservationId(),
                         reservations.get(reservationIdWithSequence.reservationId()).getSlot(),
                         reservationIdWithSequence.sequence()))
                 .toList();

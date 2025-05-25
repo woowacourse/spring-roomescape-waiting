@@ -23,9 +23,9 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotRepository;
-import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -110,7 +110,7 @@ public class MissionStepTest {
 
     @Test
     @DisplayName("2단계: localhost:8080/admin/reservation 요청 시 예약 관리 페이지가 성공적으로 응답된다, " +
-            "예약들을 조회할 수 있다")
+                 "예약들을 조회할 수 있다")
     void second() {
         RestAssured.given().log().all()
                 .cookie(TokenType.ACCESS.getDescription(), testTokenGenerator.execute(adminUser))
@@ -172,8 +172,8 @@ public class MissionStepTest {
 
     @Test
     @DisplayName("JdbcTemplate로 DataSource객체에 접근할 수 있다" +
-            "DataSource로 Connection 확인할 수 있다" +
-            "Connection로 데이터베이스, 테이블 이름 검증할 수 있다")
+                 "DataSource로 Connection 확인할 수 있다" +
+                 "Connection로 데이터베이스, 테이블 이름 검증할 수 있다")
     void fourth() {
         try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();

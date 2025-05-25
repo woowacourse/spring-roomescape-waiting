@@ -5,10 +5,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotId;
 import roomescape.timeslot.domain.TimeSlotRepository;
-import roomescape.timeslot.domain.ReservationTime;
 
 import java.time.LocalTime;
 import java.util.List;

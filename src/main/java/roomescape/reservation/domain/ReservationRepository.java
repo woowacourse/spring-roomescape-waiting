@@ -12,7 +12,7 @@ import java.util.Optional;
 
 public interface ReservationRepository {
 
-    boolean existsByParams(ReservationId id);
+    boolean existsById(ReservationId id);
 
     boolean existsBySlot(ReservationSlot slot);
 
@@ -28,11 +28,9 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByParams(UserId userId, ThemeId themeId, ReservationDate reservationDate, ReservationDate reservationDate1);
 
-    List<Reservation> findAllBySlot(ReservationSlot slot);
-
-    List<Reservation> findAllBySlotAndCreatedAt(ReservationSlot slot, LocalDateTime createdAt);
-
     List<ReservationIdWithSequenceResponse> findAllReservationSequencesByIds(final List<ReservationId> ids);
+
+    Optional<Reservation> findNextBySlotAndCreatedAt(ReservationSlot slot, LocalDateTime createdAt);
 
     Reservation save(Reservation reservation);
 

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.exception.DuplicateException;
-import roomescape.common.exception.NotFoundException;
 import roomescape.common.time.TimeProvider;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationId;
@@ -28,7 +27,6 @@ public class ReservationCommandService {
         final ReservationSlot slot = reservation.getSlot();
         final UserId userId = reservation.getUserId();
 
-        // TODO 중복 검증 해결
         if (reservationQueryService.existsBySlotAndUserId(slot, userId)) {
             throw new DuplicateException(DomainTerm.RESERVATION, slot, userId);
         }
@@ -40,16 +38,17 @@ public class ReservationCommandService {
         return reservationRepository.save(reservation);
     }
 
-    public void delete(final ReservationId id) {
-        if (reservationRepository.existsByParams(id)) {
-            reservationRepository.deleteById(id);
-            return;
-        }
+    public void delete(final Reservation reservation) {
+        reservationRepository.deleteById(reservation.getId());
 
-        throw new NotFoundException(DomainTerm.RESERVATION, id);
+        reservationRepository.findNextBySlotAndCreatedAt(
+                        reservation.getSlot(),
+                        reservation.getCreatedAt())
+                .ifPresent(Reservation::approved);
     }
 
-    public void delete(final Reservation target) {
-        reservationRepository.delete(target);
+    public void delete(final ReservationId id) {
+        final Reservation reservation = reservationQueryService.getById(id);
+        delete(reservation);
     }
 }

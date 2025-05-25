@@ -1,5 +1,6 @@
 package roomescape.reservation.infrastructure;
 
+import com.querydsl.core.types.dsl.BooleanExpression;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -30,7 +31,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     private final QReservation reservation = QReservation.reservation;
 
     @Override
-    public boolean existsByParams(final ReservationId id) {
+    public boolean existsById(final ReservationId id) {
         return jpaReservationRepository.existsById(id.getValue());
     }
 
@@ -40,9 +41,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                        .selectOne()
                        .from(reservation)
                        .where(
-                               reservation.date.eq(slot.getDate()),
-                               reservation.time.eq(slot.getTime()),
-                               reservation.theme.eq(slot.getTheme())
+                               slotEquals(slot)
                        )
                        .fetchFirst() != null;
     }
@@ -53,9 +52,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                        .selectOne()
                        .from(reservation)
                        .where(
-                               reservation.date.eq(slot.getDate()),
-                               reservation.time.eq(slot.getTime()),
-                               reservation.theme.eq(slot.getTheme()),
+                               slotEquals(slot),
                                reservation.userId.eq(userId)
                        )
                        .fetchFirst() != null;
@@ -87,31 +84,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllBySlot(final ReservationSlot slot) {
-        return queryFactory
-                .selectFrom(reservation)
-                .where(
-                        reservation.date.eq(slot.getDate()),
-                        reservation.time.eq(slot.getTime()),
-                        reservation.theme.eq(slot.getTheme())
-                )
-                .fetch();
-    }
-
-    @Override
-    public List<Reservation> findAllBySlotAndCreatedAt(final ReservationSlot slot, final LocalDateTime createdAt) {
-        return queryFactory
-                .selectFrom(reservation)
-                .where(
-                        reservation.date.eq(slot.getDate()),
-                        reservation.time.eq(slot.getTime()),
-                        reservation.theme.eq(slot.getTheme()),
-                        reservation.createdAt.lt(createdAt)
-                )
-                .fetch();
-    }
-
-    @Override
     public List<ReservationIdWithSequenceResponse> findAllReservationSequencesByIds(final List<ReservationId> ids) {
         return jpaReservationRepository.findSequenceOfSlotByIds(
                         ids.stream().map(ReservationId::getValue).toList()).stream()
@@ -119,6 +91,19 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                         ReservationId.from(projection.getReservationId()), projection.getSlotRank()
                 ))
                 .toList();
+    }
+
+    @Override
+    public Optional<Reservation> findNextBySlotAndCreatedAt(final ReservationSlot slot,
+                                                            final LocalDateTime createdAt) {
+        return Optional.ofNullable(
+                queryFactory
+                        .selectFrom(reservation)
+                        .where(
+                                slotEquals(slot),
+                                reservation.createdAt.gt(createdAt)
+                        )
+                        .fetchFirst());
     }
 
     @Override
@@ -134,5 +119,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public void delete(final Reservation reservation) {
         jpaReservationRepository.delete(reservation);
+    }
+
+    private BooleanExpression slotEquals(final ReservationSlot slot) {
+        return reservation.date.eq(slot.getDate())
+                .and(reservation.time.eq(slot.getTime()))
+                .and(reservation.theme.eq(slot.getTheme()));
     }
 }
