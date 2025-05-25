@@ -19,4 +19,7 @@ public class WaitingAdminService {
                 .collect(Collectors.toList());
     }
 
+    public void rejectWaiting(Long id) {
+        waitingRepository.rejectById(id);
+    }
 }

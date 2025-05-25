@@ -48,4 +48,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public List<Waiting> findAll() {
         return waitingJpaRepository.findAll();
     }
+
+    @Override
+    public void rejectById(Long id) {
+        waitingJpaRepository.deleteById(id);
+    }
 }
