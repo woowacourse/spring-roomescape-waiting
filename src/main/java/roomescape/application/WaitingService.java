@@ -3,6 +3,7 @@ package roomescape.application;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.exception.DuplicateWaitingException;
+import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -23,20 +24,25 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ThemeService themeService;
     private final ReservationTimeService timeService;
+    private final MemberService memberService;
 
-    public WaitingService(WaitingRepository waitingRepository, ThemeService themeService, ReservationTimeService timeService) {
+    public WaitingService(WaitingRepository waitingRepository, ThemeService themeService, ReservationTimeService timeService, MemberService memberService) {
         this.waitingRepository = waitingRepository;
         this.themeService = themeService;
         this.timeService = timeService;
+        this.memberService = memberService;
     }
 
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest, LoginMember loginMember) {
         validateDuplicateWaiting(waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId(), loginMember.id());
+        Member member = memberService.findMemberById(loginMember.id());
         Theme theme = themeService.findThemeById(waitingRequest.themeId());
         ReservationTime reservationTime = timeService.findReservationTimeById(waitingRequest.timeId());
-        Waiting waiting = Waiting.from(waitingRequest.date(), loginMember.id(), theme, reservationTime);
+
+        Waiting waiting = Waiting.from(waitingRequest.date(), member, theme, reservationTime);
         Waiting savedWaiting = waitingRepository.save(waiting);
+
         return WaitingResponse.from(savedWaiting);
     }
 
@@ -48,6 +54,12 @@ public class WaitingService {
     public void deleteWaiting(Long id) {
         Waiting waiting = findWaitingById(id);
         waitingRepository.delete(waiting);
+    }
+
+    public List<WaitingResponse> getAllWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 
     private Waiting findWaitingById(Long id) {

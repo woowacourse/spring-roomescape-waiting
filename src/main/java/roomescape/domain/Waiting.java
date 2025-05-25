@@ -31,7 +31,8 @@ public class Waiting {
 
     private LocalDate date;
 
-    private Long memberId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
@@ -41,7 +42,7 @@ public class Waiting {
 
     private LocalDateTime createdAt;
 
-    public static Waiting from(LocalDate date, Long memberId, Theme theme, ReservationTime time) {
-        return new Waiting(null, date, memberId, theme, time, LocalDateTime.now());
+    public static Waiting from(LocalDate date, Member member, Theme theme, ReservationTime time) {
+        return new Waiting(null, date, member, theme, time, LocalDateTime.now());
     }
 }
