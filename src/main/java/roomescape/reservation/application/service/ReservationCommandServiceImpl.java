@@ -25,6 +25,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
 
     private final ReservationRepository reservationRepository;
     private final WaitingReservationRepository waitingReservationRepository;
+
     private final ReservationQueryService reservationQueryService;
     private final ReservationTimeQueryService reservationTimeQueryService;
     private final ThemeQueryService themeQueryService;
@@ -61,17 +62,7 @@ public class ReservationCommandServiceImpl implements ReservationCommandService 
     @Override
     public WaitingReservation createWaitingReservation(final CreateReservationServiceRequest request) {
         if (!isExistsByParams(request.date(), request.timeId(), request.themeId())) {
-            throw new NotFoundException(DomainTerm.RESERVATION, //Todo 예외와 중복 생성 검증 필요, 예약 없을 시 처리도 필요
-                    request.date(),
-                    DomainTerm.THEME_ID,
-                    DomainTerm.RESERVATION_TIME_ID);
-        }
-        if (waitingReservationRepository.existsByParams(
-                request.date(), request.timeId(), request.themeId())) {
-            throw new DuplicateException(DomainTerm.RESERVATION_WAITING,
-                    request.date(),
-                    DomainTerm.THEME_ID,
-                    DomainTerm.RESERVATION_TIME_ID);
+            throw new IllegalArgumentException("Can't Add Waiting - No Reservation Found");
         }
 
         final ReservationTime reservationTime = reservationTimeQueryService.get(request.timeId());

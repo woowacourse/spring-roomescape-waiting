@@ -10,8 +10,6 @@ import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.WaitingReservation;
-import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.time.application.service.ReservationTimeQueryService;
 import roomescape.time.domain.ReservationTime;
 
@@ -26,7 +24,6 @@ import java.util.Set;
 public class ReservationQueryServiceImpl implements ReservationQueryService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingReservationRepository waitingReservationRepository;
     private final ReservationTimeQueryService reservationTimeQueryService;
 
     @Override
@@ -77,13 +74,9 @@ public class ReservationQueryServiceImpl implements ReservationQueryService {
         );
     }
 
+    @Override
     public List<Reservation> getAllReservationsByUserId(final Long userId) {
         return reservationRepository.findAllByUserId(userId);
-    }
-
-    @Override
-    public List<WaitingReservation> getWaitingByUserId(final Long userId) {
-        return waitingReservationRepository.findAllByUserId(userId);
     }
 
     @Override

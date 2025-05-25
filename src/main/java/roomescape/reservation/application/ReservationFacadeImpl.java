@@ -3,11 +3,15 @@ package roomescape.reservation.application;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.exception.DuplicateException;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
+import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.dto.WaitingReservationResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
+import roomescape.reservation.application.service.ReservationViewQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.WaitingReservation;
@@ -19,10 +23,8 @@ import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +32,7 @@ public class ReservationFacadeImpl implements ReservationFacade {
 
     private final ReservationQueryService reservationQueryService;
     private final ReservationCommandService reservationCommandService;
+    private final ReservationViewQueryService reservationViewQueryService;
     private final UserQueryService userQueryService;
 
     @Override
@@ -69,21 +72,11 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     public List<MyReservationsResponse> getAllByUserId(final Long userId) {
         userQueryService.getById(userId);
-        final List<MyReservationsResponse> responses = new ArrayList<>();
-
-        responses.addAll(reservationQueryService.getAllReservationsByUserId(userId)
+        return reservationViewQueryService.getAllByUserId(userId)
                 .stream()
-                .map(MyReservationsResponse::fromReservation)
-                .toList());
-
-        responses.addAll(reservationQueryService.getWaitingByUserId(userId)
-                .stream()
-                .map(MyReservationsResponse::fromWaiting)
-                .toList());
-
-        return responses.stream()
+                .map(MyReservationsResponse::from)
                 .sorted(Comparator.comparing(MyReservationsResponse::sequence))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     @Override
@@ -105,9 +98,19 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     public WaitingReservationResponse addWaiting(final CreateReservationWithUserIdWebRequest request) {
         final User user = userQueryService.getById(request.userId());
+        final CreateReservationServiceRequest serviceRequest = request.toServiceRequest();
+
+        if (reservationViewQueryService.existsByParams(serviceRequest, user.getId())) {
+            throw new DuplicateException(DomainTerm.RESERVATION,
+                    request.date(),
+                    DomainTerm.THEME_ID,
+                    DomainTerm.RESERVATION_TIME_ID,
+                    DomainTerm.USER_ID
+            );
+        }
 
         final WaitingReservation waitingReservation = reservationCommandService.createWaitingReservation(
-                request.toServiceRequest());
+                serviceRequest);
 
         return WaitingReservationResponse.from(waitingReservation, user);
     }

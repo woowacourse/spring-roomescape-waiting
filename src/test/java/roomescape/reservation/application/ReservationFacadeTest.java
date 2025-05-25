@@ -101,7 +101,6 @@ class ReservationFacadeTest {
         List<Reservation> reservations = List.of(createReservation(1L));
         given(userQueryService.getById(any())).willReturn(createUser(userId));
         given(reservationQueryService.getAllReservationsByUserId(any(Long.class))).willReturn(reservations);
-        given(reservationQueryService.getWaitingByUserId(any(Long.class))).willReturn(List.of());
 
         //when
         List<MyReservationsResponse> result = reservationFacade.getAllByUserId(userId);
@@ -109,7 +108,6 @@ class ReservationFacadeTest {
         //then
         assertThat(result).hasSize(1);
         then(reservationQueryService).should(times(1)).getAllReservationsByUserId(any(Long.class));
-        then(reservationQueryService).should(times(1)).getWaitingByUserId(any(Long.class));
     }
 
     @Test

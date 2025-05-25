@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
@@ -22,6 +23,7 @@ import java.time.LocalDate;
 @Embeddable
 public class ReservationDate {
 
+    @Column(name = "date")
     private LocalDate value;
 
     public static ReservationDate from(final LocalDate date) {
