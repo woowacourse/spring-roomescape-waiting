@@ -42,13 +42,13 @@ public class Waiting {
     }
 
     public Waiting(final Member member, final Theme theme, final ReservationTime time,
-                   final LocalDate date) {
+                   final LocalDate date, LocalDateTime createdAt) {
         validateDate(date);
         this.member = member;
         this.theme = theme;
         this.time = time;
         this.date = date;
-        this.createdAt = LocalDateTime.now();
+        this.createdAt = createdAt;
     }
 
     private void validateDate(final LocalDate date) {

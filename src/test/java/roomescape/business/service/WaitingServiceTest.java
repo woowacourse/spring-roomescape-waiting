@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,14 +43,24 @@ class WaitingServiceTest {
     private CurrentUtil currentUtil;
 
     @TestConfiguration
-    static class StubCurrentMember {
+    static class TestConfig {
         @Bean
         public LoginMember loginMember() {
             return new LoginMember(100L, "미미", "test1@example.com", "USER");
         }
         @Bean
         public CurrentUtil currentUtil() {
-            return () -> LocalDate.of(2025, 5, 10);
+            return new CurrentUtil() {
+                @Override
+                public LocalDate getCurrentDate() {
+                    return LocalDate.of(2025, 5, 10);
+                }
+
+                @Override
+                public LocalDateTime getCurrentDateTime() {
+                    return LocalDateTime.of(2025, 5, 10, 12, 0);
+                }
+            };
         }
     }
 

@@ -31,6 +31,11 @@ public class QueryService {
         this.reservationRepository = reservationRepository;
     }
 
+    public Reservation getReservationById(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("해당하는 예약을 찾을 수 없습니다. 예약 id: %d".formatted(id)));
+    }
+
     public Member getMemberById(final Long memberId) {
         return memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)));

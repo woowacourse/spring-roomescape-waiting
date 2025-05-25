@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
@@ -17,11 +16,11 @@ import roomescape.business.domain.Waiting;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
-import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.util.CurrentUtil;
 
 @Service
 @Transactional(readOnly = true)
@@ -30,18 +29,21 @@ public class ReservationService {
     private final QueryService queryService;
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
+    private final CurrentUtil currentUtil;
 
     public ReservationService(final QueryService queryService,
                               final ReservationRepository reservationRepository,
-                              final WaitingRepository waitingRepository
-    ) {
+                              final WaitingRepository waitingRepository,
+                              final CurrentUtil currentUtil) {
         this.queryService = queryService;
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
+        this.currentUtil = currentUtil;
     }
 
     @Transactional
-    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId, final Long themeId) {
+    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
+                                      final Long themeId) {
         validateIsDuplicate(date, timeId, themeId);
         final ReservationTime reservationTime = queryService.getReservationTimeById(timeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
@@ -61,10 +63,8 @@ public class ReservationService {
     }
 
     private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
-        final LocalDateTime now = LocalDateTime.now();
-
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
-        if (reservationDateTime.isBefore(now)) {
+        if (reservationDateTime.isBefore(currentUtil.getCurrentDateTime())) {
             throw new InvalidDateAndTimeException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
         }
     }
@@ -86,22 +86,22 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(final Long id) {
-        final Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("해당하는 예약을 찾을 수 없습니다. 예약 id: %d".formatted(id)));
-
-        if(reservation.getDate().isBefore(LocalDate.now())) {
-            throw new BadRequestException("이전 날짜의 예약은 삭제할 수 없습니다.");
-        }
-        if (Objects.equals(reservation.getDate(), LocalDate.now())) {
-            if(reservation.getTime().getStartAt().isBefore(LocalTime.now())) {
-                throw new BadRequestException("지난 시간의 예약을 삭제할 수 없습니다.");
-            }
-        }
-
+        final Reservation reservation = queryService.getReservationById(id);
+        validateNotPast(reservation);
         reservationRepository.deleteById(id);
 
-        final Optional<Waiting> firstWaiting = waitingRepository.findFirstByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
-                reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+        promoteFirstWaitingToReservation(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+    }
+
+    private void validateNotPast(final Reservation reservation) {
+        if (reservation.isPast(currentUtil.getCurrentDateTime())) {
+            throw new BadRequestException("이전 예약은 삭제할 수 없습니다.");
+        }
+    }
+
+    private void promoteFirstWaitingToReservation(LocalDate date, long themeId, long timeId) {
+        final Optional<Waiting> firstWaiting  = waitingRepository.findFirstByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
+                date, themeId, timeId);
 
         firstWaiting.ifPresent(waiting -> {
             waitingRepository.deleteById(waiting.getId());

@@ -11,13 +11,18 @@ INSERT INTO theme (id, name, description, thumbnail) VALUES (100, '평범', '평
 -- 사용자 계정 삽입
 INSERT INTO member (id, name, role, email, password) VALUES (100, 'kim', 'USER', 'email@test.com', 'pass');
 INSERT INTO member (id, name, role, email, password) VALUES (101, 'lee', 'USER', 'lee@test.com', 'pass');
+INSERT INTO member (id, name, role, email, password) VALUES (102, 'mimi', 'USER', 'mimi@test.com', 'pass');
 
 
 -- 방탈출 예약 삽입
-INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (100, '2025-05-10', 100, 100, 100);
+INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (100, '2025-05-11', 100, 100, 100);
 INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (101, '2025-05-09', 100, 100, 100);
 
 -- 방탈출 예약 필터링에서 조회되지 않는 데이터
 INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (102, '2025-05-08', 100, 100, 100);
 
 INSERT INTO reservation (id, date, member_id, reservation_time_id, theme_id) VALUES (103, '2025-05-10', 101, 100, 100);
+
+-- 예약 대기 삽입
+insert into waiting (id, member_id, theme_id, date, reservation_time_id, created_at) values (100, 101, 100, '2025-05-11', 100, '2025-04-30 10:00:00');
+insert into waiting (id, member_id, theme_id, date, reservation_time_id, created_at) values (101, 102, 100, '2025-05-11', 100, '2025-04-30 11:00:00');

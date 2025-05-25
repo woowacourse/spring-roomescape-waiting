@@ -5,22 +5,29 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.exception.NotFoundException;
+import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.util.CurrentUtil;
 
 @SpringBootTest
 @Transactional
@@ -37,6 +44,30 @@ public class ReservationServiceTest {
     private WaitingRepository waitingRepository;
     @Autowired
     private QueryService queryService;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public CurrentUtil currentUtil() {
+            return new CurrentUtil() {
+                @Override
+                public LocalDate getCurrentDate() {
+                    return LocalDate.of(2025, 5, 10);
+                }
+
+                @Override
+                public LocalDateTime getCurrentDateTime() {
+                    return LocalDateTime.of(2025, 5, 10, 12, 0);
+                }
+            };
+        }
+    }
 
     // data-reservationService.sql
     private final Long memberId = 100L;
@@ -202,6 +233,28 @@ public class ReservationServiceTest {
         assertAll(
                 () -> assertThat(reservationMineResponses).hasSize(3),
                 () -> assertThat(reservationMineResponses.get(0).status()).isEqualTo("예약")
+        );
+    }
+
+    @Test
+    @DisplayName("예약 삭제 시 대기 인원이 있으면 첫 번째 대기자가 예약으로 승격된다")
+    void deleteReservationPromotesWaiting() {
+        // given
+        final long firstWaitingId = 100L;
+        final long originalReservationId = 100L;
+        final long firstWaitingMemberId = 101L;
+        final int originalMemberReservationCount = 3;
+        final int firstWaitingMemberReservationCount = 1;
+
+        // when
+        reservationService.deleteById(originalReservationId);
+
+        // then
+        assertAll(
+                () -> assertThat(reservationRepository.findById(originalReservationId)).isNotPresent(),
+                () -> assertThat(reservationRepository.findByMemberId(memberId)).hasSize(originalMemberReservationCount-1),
+                () -> assertThat(waitingRepository.findById(firstWaitingId)).isNotPresent(),
+                () -> assertThat(reservationRepository.findByMemberId(firstWaitingMemberId)).hasSize(firstWaitingMemberReservationCount+1)
         );
     }
 }
