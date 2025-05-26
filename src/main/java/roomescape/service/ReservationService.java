@@ -100,12 +100,14 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id).orElseThrow(ReservationNotFoundException::new);
         reservationRepository.deleteById(id);
 
+        promoteWaitingToReservationIfExist(reservation);
+    }
+
+    private void promoteWaitingToReservationIfExist(Reservation reservation) {
         List<WaitingWithRank> waitings = waitingRepository.findByDateAndReservationTimeAndThemeSortedByCreateAt(
                 reservation.getDate(),
                 reservation.getReservationTime().getId(),
                 reservation.getTheme().getId());
-
-        System.out.println(waitings);
 
         if (!waitings.isEmpty()) {
             Waiting firstWaiting = waitings.getFirst().waiting();
