@@ -149,7 +149,7 @@ class ReservationAcceptanceTest {
                 1L
         );
         TestHelper.postWithToken("/reservations", reservationRequest, token);
-        String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
+        String url = String.format("/admin/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
                 1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
 
         // when & then
@@ -191,7 +191,7 @@ class ReservationAcceptanceTest {
         Member nonAdminMember = new Member("일반회원", "user@email.com", "password", RoleType.USER);
         memberRepository.save(nonAdminMember);
         String token = TestHelper.login("user@email.com", "password");
-        String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
+        String url = String.format("/admin/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
                 1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
 
         // when & then
@@ -216,7 +216,7 @@ class ReservationAcceptanceTest {
         );
 
         // when & then
-        TestHelper.postWithToken("/reservations/admin", adminCreateRequest, token)
+        TestHelper.postWithToken("/admin/reservations", adminCreateRequest, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
@@ -240,7 +240,7 @@ class ReservationAcceptanceTest {
         );
 
         // when & then
-        TestHelper.postWithToken("/reservations/admin", adminCreateRequest, token)
+        TestHelper.postWithToken("/admin/reservations", adminCreateRequest, token)
                 .then()
                 .statusCode(HttpStatus.FORBIDDEN.value());
     }

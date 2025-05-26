@@ -25,6 +25,7 @@ public class WaitingController {
     private final WaitingService waitingService;
 
     @PostMapping
+    @RoleRequired(roleType = {RoleType.USER, RoleType.ADMIN})
     public ResponseEntity<WaitingCreateResponse> createWaiting(
             @AuthenticationPrincipal LoginMember loginMember,
             @RequestBody @Valid WaitingCreateRequest request

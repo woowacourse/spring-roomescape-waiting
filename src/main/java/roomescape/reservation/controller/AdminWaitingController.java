@@ -23,7 +23,7 @@ public class AdminWaitingController {
 
     @PostMapping("/{id}/approve")
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<Void> approveWaiting(
+    public ResponseEntity<Void> approveWaitingByAdmin(
             @PathVariable("id") Long id
     ) {
         waitingService.approveWaiting(id);
@@ -32,14 +32,14 @@ public class AdminWaitingController {
 
     @GetMapping
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<List<WaitingReadResponse>> getAllReservations() {
+    public ResponseEntity<List<WaitingReadResponse>> getAllWaitings() {
         List<WaitingReadResponse> responses = waitingService.getAllWaitings();
         return ResponseEntity.ok().body(responses);
     }
 
     @DeleteMapping("/{id}/reject")
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<Void> rejectWaiting(
+    public ResponseEntity<Void> rejectWaitingByAdmin(
             @PathVariable("id") Long id
     ) {
         waitingService.deleteWaitingByAdmin(id);
