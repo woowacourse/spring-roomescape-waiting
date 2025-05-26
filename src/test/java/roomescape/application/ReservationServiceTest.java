@@ -93,16 +93,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("사용자의 예약을 조회할 수 있다.")
-    void findReservationsByUserId() {
-        // when
-        var reservations = service.findReservationsByUserId(2L);
-
-        // then
-        assertThat(reservations.getFirst().user().id()).isEqualTo(2L);
-    }
-
-    @Test
     @DisplayName("예약을 삭제할 수 있다.")
     void removeById() {
         // when

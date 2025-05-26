@@ -121,32 +121,6 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("사용자의 대기를 조회할 수 있다.")
-    void findWaitingByUserId() {
-        // given
-        var userId = 3L;
-
-        // when
-        var waitings = service.findWaitingByUserId(userId);
-
-        // then
-        assertThat(waitings).hasSize(1);
-        assertThat(waitings.getFirst().waiting().user().id()).isEqualTo(userId);
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 사용자의 대기 조회 시 예외가 발생한다.")
-    void findWaitingByUserId_WhenUserNotFound() {
-        // given
-        var invalidUserId = 1000000L;
-
-        // when & then
-        assertThatThrownBy(() -> service.findWaitingByUserId(invalidUserId))
-                .isInstanceOf(NotFoundException.class)
-                .hasMessage("존재하지 않는 사용자입니다. id : " + invalidUserId);
-    }
-
-    @Test
     @DisplayName("대기를 삭제할 수 있다.")
     void removeById() {
         // given

@@ -36,7 +36,7 @@ class UserControllerTest {
 
     @Test
     @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다")
-    void readAllReservationsByUser() {
+    void readAllRecordByUser() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "user1@email.com", "password", "password1"))

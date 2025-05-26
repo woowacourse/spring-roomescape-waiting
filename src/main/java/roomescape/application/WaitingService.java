@@ -12,7 +12,6 @@ import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
-import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.NotFoundException;
@@ -90,13 +89,6 @@ public class WaitingService {
 
     public List<Waiting> findAllWaitings() {
         return waitingRepository.findAll();
-    }
-
-    public List<WaitingWithRank> findWaitingByUserId(final long userId) {
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다. id : " + userId));
-
-        return waitingRepository.findWaitingWithRankByUserId(user.id());
     }
 
     public void removeById(final long id) {

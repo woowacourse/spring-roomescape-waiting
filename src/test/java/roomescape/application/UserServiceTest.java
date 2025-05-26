@@ -12,6 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
 import roomescape.exception.AlreadyExistedException;
+import roomescape.exception.NotFoundException;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -62,5 +63,30 @@ class UserServiceTest {
 
         // then
         assertThat(users).hasSize(3);
+    }
+
+    @Test
+    @DisplayName("사용자의 전체 기록을 조회할 수 있다.")
+    void findTotalRecordByUserId() {
+        // given
+        var userId = 1L;
+
+        // when
+        var records = service.findTotalRecordByUserId(userId);
+
+        // then
+        assertThat(records).hasSize(1);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 사용자의 전체 기록 조회 시 예외가 발생한다.")
+    void findTotalRecordByUserId_WhenUserNotFound() {
+        // given
+        var invalidUserId = 1000000L;
+
+        // when & then
+        assertThatThrownBy(() -> service.findTotalRecordByUserId(invalidUserId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 사용자입니다.");
     }
 }
