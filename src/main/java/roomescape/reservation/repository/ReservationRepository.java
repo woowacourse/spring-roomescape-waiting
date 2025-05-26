@@ -12,8 +12,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("""
             select r from Reservation r
-            join RoomEscapeInformation re
-            on r.roomEscapeInformation.id = re.id
+            join fetch r.roomEscapeInformation re
             where (:themeId is null or re.theme.id = :themeId)
               and (:memberId is null or r.member.id = :memberId)
               and (:localDateFrom is null or re.date >= :localDateFrom)
