@@ -75,7 +75,9 @@ public class ReservationService {
         List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndThemeId(
                 availableTimeRequestDto.date(), availableTimeRequestDto.themeId());
 
-        return new ReservationSlotTimes(times, alreadyReservedReservations);
+        List<Waiting> alreadyWaitings = waitingService.getAllByDateAndThemeId(availableTimeRequestDto.date(), availableTimeRequestDto.themeId());
+
+        return new ReservationSlotTimes(times, alreadyReservedReservations, alreadyWaitings);
     }
 
     public Reservation getReservationById(long addedReservationId) {
