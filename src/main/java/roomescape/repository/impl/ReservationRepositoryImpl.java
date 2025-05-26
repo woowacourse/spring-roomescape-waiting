@@ -7,9 +7,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.repository.jpa.ReservationJpaRepository;
 
 @RequiredArgsConstructor
@@ -57,6 +57,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public boolean existsByMemberAndReservationItem(Member member, ReservationItem reservationItem) {
         return reservationJpaRepository.existsByMemberAndReservationItem(member, reservationItem);
+    }
+
+    @Override
+    public List<Reservation> findByReservationStatusOrderByIdDesc(ReservationStatus reservationStatus) {
+        return reservationJpaRepository.findByReservationStatusOrderByIdDesc(reservationStatus);
     }
 
     @Override

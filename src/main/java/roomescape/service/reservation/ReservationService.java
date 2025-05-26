@@ -8,14 +8,15 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.reservationitem.ReservationTheme;
 import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.WaitingReservationResponse;
 import roomescape.service.member.MemberService;
 
 @RequiredArgsConstructor
@@ -83,6 +84,13 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<WaitingReservationResponse> getAllWaitingReservations() {
+        List<Reservation> waitingReservations = reservationRepository.findByReservationStatusOrderByIdDesc(ReservationStatus.PENDING);
+        return waitingReservations.stream()
+                .map(WaitingReservationResponse::from)
+                .toList();
+    }
+
     public List<MyPageReservationResponse> getReservationsByMemberId(Long memberId) {
         final Member member = memberService.getMemberById(memberId);
         List<Reservation> myReservations = reservationRepository.findByMemberId(member.getId());
@@ -102,6 +110,18 @@ public class ReservationService {
         return (int) reservationRepository.countByReservationItemIdAndIdLessThan(
                 reservationItemId, currentReservationId
         );
+    }
+
+    @Transactional
+    public void denyPendingReservation(Long reservationId) {
+        Reservation waitingReservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 예약입니다."));
+
+        if (waitingReservation.getReservationStatus() != ReservationStatus.PENDING) {
+            throw new IllegalArgumentException("[ERROR] 대기 상태의 예약만 거절할 수 있습니다.");
+        }
+
+        waitingReservation.changeStatusToDenied();
     }
 
     @Transactional

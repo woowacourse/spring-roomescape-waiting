@@ -12,8 +12,8 @@ import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservationitem.ReservationItem;
 
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
@@ -44,5 +44,9 @@ public class Reservation {
 
     public void changeStatusToAccepted() {
         this.reservationStatus = ReservationStatus.ACCEPTED;
+    }
+
+    public void changeStatusToDenied() {
+        this.reservationStatus = ReservationStatus.DENIED;
     }
 }

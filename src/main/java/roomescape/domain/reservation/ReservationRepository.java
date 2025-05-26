@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.repository.query.Param;
-import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservationitem.ReservationItem;
 
 public interface ReservationRepository {
 
@@ -35,6 +35,8 @@ public interface ReservationRepository {
     );
 
     boolean existsByMemberAndReservationItem(Member member, ReservationItem reservationItem);
+
+    List<Reservation> findByReservationStatusOrderByIdDesc(ReservationStatus reservationStatus);
 
     List<Reservation> findByMemberId(Long memberId);
 }
