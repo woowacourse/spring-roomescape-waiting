@@ -49,6 +49,6 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
 
     @Override
     public List<Waiting> findByReservationId(Long reservationId) {
-        return jpaWaitingRepository.findByReservationId(reservationId);
+        return jpaWaitingRepository.findByReservationIdOrderById(reservationId);
     }
 }

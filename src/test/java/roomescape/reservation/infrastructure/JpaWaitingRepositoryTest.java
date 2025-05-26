@@ -18,7 +18,7 @@ class JpaWaitingRepositoryTest {
 
     @Test
     void 특정_예약에_대한_모든_대기자를_조회할_수_있다() {
-        List<Waiting> result = jpaWaitingRepository.findByReservationId(1L);
+        List<Waiting> result = jpaWaitingRepository.findByReservationIdOrderById(1L);
 
         assertThat(result)
             .extracting(w -> w.getMember().getId())
