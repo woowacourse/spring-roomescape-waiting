@@ -18,6 +18,7 @@ public record MyReservationAndWaitingResponse(
     private static final int ADDITIONAL_RANK = 1;
     private static final String RANK_SUFFIX = "번째 ";
 
+
     public static MyReservationAndWaitingResponse fromReservation(Reservation reservation) {
         return new MyReservationAndWaitingResponse(
                 reservation.getId(),
@@ -30,12 +31,18 @@ public record MyReservationAndWaitingResponse(
 
     public static MyReservationAndWaitingResponse fromWaitingWithRank(WaitingWithRank waitingWithRank) {
         Waiting waiting = waitingWithRank.getWaiting();
+        String status = String.format("%d%s%s",
+                waitingWithRank.getRank() + ADDITIONAL_RANK,
+                RANK_SUFFIX,
+                waiting.getStatusText()
+        );
+
         return new MyReservationAndWaitingResponse(
                 waiting.getId(),
                 waiting.getThemeName(),
                 waiting.getDate(),
                 waiting.getStartAt(),
-                waitingWithRank.getRank() + ADDITIONAL_RANK + RANK_SUFFIX + waiting.getStatusText()
+                status
         );
     }
 }
