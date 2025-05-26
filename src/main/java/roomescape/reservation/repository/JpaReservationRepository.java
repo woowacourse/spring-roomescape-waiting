@@ -63,6 +63,11 @@ public class JpaReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        return reservationListCrudRepository.existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(date, timeId, themeId, memberId);
+    }
+
+    @Override
     public void deleteById(Long id) {
         reservationListCrudRepository.deleteById(id);
     }

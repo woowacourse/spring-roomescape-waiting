@@ -9,6 +9,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
@@ -16,10 +17,12 @@ import roomescape.reservation.repository.WaitingRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationChecker reservationChecker;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationChecker reservationChecker) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository, ReservationChecker reservationChecker) {
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationChecker = reservationChecker;
     }
 
@@ -33,11 +36,21 @@ public class WaitingService {
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest dto, Member member) {
         Waiting waiting = reservationChecker.createWaitingWithoutId(dto, member);
-        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(), member.getId())) {
-            throw new DuplicateContentException("[ERROR] 해당 날짜와 테마로 이미 예약대기 내역이 존재합니다.");
-        }
+
+        validate(waiting);
+
         Waiting newWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(newWaiting, newWaiting.getTime(), newWaiting.getTheme());
+    }
+
+    private void validate(Waiting waiting) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(), waiting.getMember().getId())) {
+            throw new DuplicateContentException("[ERROR] 이미 예약한 건에는 예약대기를 걸 수 없습니다.");
+        }
+
+        if (waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId(), waiting.getMember().getId())) {
+            throw new DuplicateContentException("[ERROR] 해당 날짜와 테마로 이미 예약대기 내역이 존재합니다.");
+        }
     }
 
     @Transactional

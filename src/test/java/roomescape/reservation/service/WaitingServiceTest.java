@@ -10,6 +10,7 @@ import roomescape.exception.DuplicateContentException;
 import roomescape.exception.InvalidRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
+import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeReservationTimeRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
 import roomescape.fixture.FakeWaitingRepositoryFixture;
@@ -19,6 +20,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.NameResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -34,9 +36,10 @@ class WaitingServiceTest {
     private final ReservationTimeRepository reservationTimeRepository = FakeReservationTimeRepositoryFixture.create();
     private final ThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
+    private final ReservationRepository reservationRepository = FakeReservationRepositoryFixture.create();
     private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository, themeRepository, memberRepository);
     private final WaitingRepository waitingRepository = FakeWaitingRepositoryFixture.create();
-    private final WaitingService waitingService = new WaitingService(waitingRepository, reservationChecker);
+    private final WaitingService waitingService = new WaitingService(waitingRepository, reservationRepository, reservationChecker);
 
     @Nested
     @DisplayName("예약대기 조회")
