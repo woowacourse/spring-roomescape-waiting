@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
@@ -21,11 +22,13 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public Waiting createWaiting(WaitingCreateRequest waitingCreateRequest, Schedule schedule, Member member) {
         Waiting waiting = waitingCreateRequest.toWaiting(schedule, member);
         return waitingRepository.save(waiting);
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationAndWaitingResponse> getMyReservationAndWaitingResponseByMemberId(Long memberId) {
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
         return convertMyReservationAndWaitingResponseTo(waitingWithRanks);
@@ -37,26 +40,32 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public void deleteWaitingById(Long id) {
         waitingRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
         return waitingRepository.existsByMemberAndSchedule(member, schedule);
     }
 
+    @Transactional(readOnly = true)
     public List<Waiting> findAll() {
         return waitingRepository.findAll();
     }
 
+    @Transactional(readOnly = true)
     public Waiting getScheduleByWaitingId(Long id) {
         return waitingRepository.findById(id).orElseThrow(() -> new BadRequestException("존재하지 않는 일정입니다."));
     }
 
+    @Transactional(readOnly = true)
     public boolean existsBySchedule(Schedule schedule) {
         return waitingRepository.existsBySchedule(schedule);
     }
 
+    @Transactional(readOnly = true)
     public Waiting getFirstWaitingBySchedule(Schedule schedule) {
         return waitingRepository.findFirstWaiting(schedule).orElseThrow(() -> new BadRequestException("대기를 찾을 수 없습니다."));
     }

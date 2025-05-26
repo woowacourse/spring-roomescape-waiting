@@ -1,6 +1,7 @@
 package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
@@ -38,6 +39,7 @@ public class WaitingServiceFacade {
         this.scheduleService = scheduleService;
     }
 
+    @Transactional
     public WaitingCreateResponse createWaiting(WaitingCreateRequest waitingCreateRequest, MemberPrincipal memberPrincipal) {
         ReservationTime reservationTime = reservationTimeService.getReservationTimeByTimeId(waitingCreateRequest.timeId());
         Theme theme = themeService.getByThemeId(waitingCreateRequest.themeId());
@@ -60,16 +62,19 @@ public class WaitingServiceFacade {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<AdminWaitingResponse> getAdminWaitings() {
         return waitingService.findAll().stream()
                 .map(AdminWaitingResponse::from)
                 .toList();
     }
 
+    @Transactional
     public void deleteWaiting(Long waitingId) {
         waitingService.deleteWaitingById(waitingId);
     }
 
+    @Transactional
     public void acceptWaiting(Long waitingId) {
         Schedule schedule = getScheduleByWaitingId(waitingId);
         validateScheduleConflictInReservation(schedule);
