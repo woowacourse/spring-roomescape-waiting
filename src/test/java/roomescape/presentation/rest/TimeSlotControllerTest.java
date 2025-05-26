@@ -20,13 +20,25 @@ class TimeSlotControllerTest {
             "startAt", "13:00"
     );
 
+    private String getAdminToken() {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "admin@email.com", "password", "password"))
+                .when().post("/login")
+                .then().statusCode(200)
+                .extract().response().getDetailedCookies().getValue("token");
+    }
+
     @Test
     @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다")
     void addReservationTime() {
+        var token = getAdminToken();
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookie("token", token)
                 .body(RESERVATION_BODY)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("id", Matchers.equalTo(4))
@@ -55,8 +67,11 @@ class TimeSlotControllerTest {
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
     void removeReservationTime() {
+        var token = getAdminToken();
+
         RestAssured.given().log().all()
-                .when().delete("/times/1")
+                .cookie("token", token)
+                .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(HttpStatus.CONFLICT.value());
     }

@@ -22,13 +22,25 @@ class ThemeControllerTest {
             "thumbnail", "url"
     );
 
+    private String getAdminToken() {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "admin@email.com", "password", "password"))
+                .when().post("/login")
+                .then().statusCode(200)
+                .extract().response().getDetailedCookies().getValue("token");
+    }
+
     @Test
     @DisplayName("방 테마 추가 요청시, id를 포함한 방 테마와 CREATED를 응답한다")
     void addTheme() {
+        var token = getAdminToken();
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookie("token", token)
                 .body(RESERVATION_BODY)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("id", Matchers.equalTo(4))
@@ -57,8 +69,11 @@ class ThemeControllerTest {
     @Test
     @DisplayName("방 테마 삭제 요청시, 주어진 아이디에 해당하는 방테마가 사용중이라면 CONFLICT를 응답한다.")
     void removeTheme() {
+        var token = getAdminToken();
+
         RestAssured.given().log().all()
-                .when().delete("/themes/1")
+                .cookie("token", token)
+                .when().delete("/admin/themes/1")
                 .then().log().all()
                 .statusCode(HttpStatus.CONFLICT.value());
     }

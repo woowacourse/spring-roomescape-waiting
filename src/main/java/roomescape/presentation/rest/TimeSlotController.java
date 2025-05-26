@@ -30,7 +30,7 @@ public class TimeSlotController {
         this.service = service;
     }
 
-    @PostMapping("/times")
+    @PostMapping("/admin/times")
     @ResponseStatus(CREATED)
     public TimeSlotResponse createTimeSlot(@RequestBody @Valid final CreateTimeSlotRequest request) {
         TimeSlot timeSlot = service.saveTimeSlot(request.startAt());
@@ -59,7 +59,7 @@ public class TimeSlotController {
                 .toList();
     }
 
-    @DeleteMapping("/times/{id}")
+    @DeleteMapping("/admin/times/{id}")
     @ResponseStatus(NO_CONTENT)
     public void deleteTimeSlotById(@PathVariable("id") final long id) {
         service.removeById(id);

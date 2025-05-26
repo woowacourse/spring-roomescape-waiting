@@ -21,48 +21,44 @@ import roomescape.presentation.request.CreateThemeRequest;
 import roomescape.presentation.response.ThemeResponse;
 
 @RestController
-@RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService service;
+    private final ThemeService themeService;
 
-    public ThemeController(final ThemeService service) {
-        this.service = service;
+    public ThemeController(final ThemeService themeService) {
+        this.themeService = themeService;
     }
 
-    @PostMapping
+    @PostMapping("/admin/themes")
     @ResponseStatus(CREATED)
-    public ThemeResponse createTheme(@RequestBody @Valid final CreateThemeRequest request) {
-        Theme theme = service.saveTheme(request.name(), request.description(), request.thumbnail());
-
+    public ThemeResponse addTheme(@Valid @RequestBody final CreateThemeRequest request) {
+        Theme theme = themeService.saveTheme(request.name(), request.description(), request.thumbnail());
         return ThemeResponse.from(theme);
     }
 
-    @GetMapping
-    public List<ThemeResponse> readAllThemes() {
-        List<Theme> themes = service.findAllThemes();
-
-        return themes.stream()
+    @GetMapping("/themes")
+    public List<ThemeResponse> findAllThemes() {
+        return themeService.findAllThemes()
+                .stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    @GetMapping(value = "/popular", params = {"startDate", "endDate", "count"})
-    public List<ThemeResponse> readPopularThemes(
-            @RequestParam("startDate") final LocalDate startDate,
-            @RequestParam("endDate") final LocalDate endDate,
-            @RequestParam("count") final Integer count
-    ) {
-        List<Theme> themes = service.findPopularThemes(startDate, endDate, count);
-
-        return themes.stream()
-                .map(ThemeResponse::from)
-                .toList();
-    }
-
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/themes/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void deleteThemeById(@PathVariable("id") final long id) {
-        service.removeById(id);
+    public void removeTheme(@PathVariable final long id) {
+        themeService.removeById(id);
+    }
+
+    @GetMapping("/themes/popular")
+    public List<ThemeResponse> findPopularThemes(
+            @RequestParam final LocalDate startDate,
+            @RequestParam final LocalDate endDate,
+            @RequestParam final int count
+    ) {
+        return themeService.findPopularThemes(startDate, endDate, count)
+                .stream()
+                .map(ThemeResponse::from)
+                .toList();
     }
 }
