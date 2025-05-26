@@ -152,4 +152,77 @@ class ReservationControllerTest {
                     .statusCode(403);
         }
     }
+
+    @Nested
+    @DisplayName("예약대기 생성")
+    class WaitingPostTest {
+
+        @DisplayName("Waiting을 생성할 수 있다")
+        @Test
+        void addWaitingTest() {
+            Map<String, Object> params = new HashMap<>();
+            params.put("date", "2030-08-05");
+            params.put("timeId", 1);
+            params.put("themeId", 1);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", userCookie)
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/reservations/waiting")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("id", is(2));
+        }
+
+        @DisplayName("동일한 날짜, 시간, 테마, 멤버로는 예약대기를 생성할 수 없다")
+        @Test
+        void addWaitingExceptionTest() {
+            Map<String, Object> params = new HashMap<>();
+            params.put("date", "2030-08-05");
+            params.put("timeId", 1);
+            params.put("themeId", 1);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", userCookie)
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/reservations/waiting")
+                    .then().log().all()
+                    .statusCode(201);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", userCookie)
+                    .contentType(ContentType.JSON)
+                    .body(params)
+                    .when().post("/reservations/waiting")
+                    .then().log().all()
+                    .statusCode(400);
+        }
+    }
+
+    @Nested
+    @DisplayName("예약대기 삭제")
+    class WaitingDeleteTest {
+
+        @DisplayName("존재하는 예약대기를 삭제할 수 있다")
+        @Test
+        void deleteWaitingTest() {
+            RestAssured.given().log().all()
+                    .header("Cookie", userCookie)
+                    .when().delete("/reservations/waiting/1")
+                    .then().log().all()
+                    .statusCode(204);
+        }
+
+        @DisplayName("존재하지 않는 예약을 삭제할 수 없다")
+        @Test
+        void invalidWaitingIdDeleteTest() {
+            RestAssured.given().log().all()
+                    .header("Cookie", adminCookie)
+                    .when().delete("/reservations/waiting/50")
+                    .then().log().all()
+                    .statusCode(404);
+        }
+    }
 }

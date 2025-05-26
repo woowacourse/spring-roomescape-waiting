@@ -1,4 +1,4 @@
-package roomescape.member.controller;
+package roomescape.reservation.controller;
 
 import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,9 +38,9 @@ class MemberReservationControllerTest {
     @DisplayName("멤버 예약 목록 조회")
     class MemberReservationGetTest {
 
-        @DisplayName("로그인한 멤버의 예약 목록을 조회할 수 있다")
+        @DisplayName("로그인한 멤버의 예약 및 예약대기 목록을 조회할 수 있다")
         @Test
-        void readMembersTest() {
+        void readTest() {
             RestAssured.given().log().all()
                     .header("Cookie", adminCookie)
                     .when().get("/member/reservations")
