@@ -148,7 +148,7 @@ public class ReservationService {
     }
 
     public int calculateWaitingOrder(Reservation reservation) {
-        return reservationRepository.countReservationsBefore(
+        return reservationRepository.countByDateAndTimeAndThemeAndCreatedAtBefore(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme(),

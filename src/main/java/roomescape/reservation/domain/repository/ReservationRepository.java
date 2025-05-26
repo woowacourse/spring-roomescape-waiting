@@ -32,13 +32,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findAllByStatus(ReservationStatus reservationStatus);
 
-    @Query(value = "SELECT COUNT(r) "
-            + "FROM Reservation r "
-            + "WHERE r.date = :date "
-            + "AND r.time = :time "
-            + "AND r.theme = :theme "
-            + "AND r.createdAt < :createdAt")
-    int countReservationsBefore(LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt);
+    int countByDateAndTimeAndThemeAndCreatedAtBefore(LocalDate date, ReservationTime time, Theme theme,
+                                                     LocalDateTime createdAt);
 
     boolean existsByTheme(Theme theme);
 

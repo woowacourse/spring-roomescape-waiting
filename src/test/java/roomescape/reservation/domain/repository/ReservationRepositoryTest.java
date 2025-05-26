@@ -186,7 +186,7 @@ class ReservationRepositoryTest {
         entityManager.clear();
 
         // when
-        int result = reservationRepository.countReservationsBefore(date, time, theme, baseTime);
+        int result = reservationRepository.countByDateAndTimeAndThemeAndCreatedAtBefore(date, time, theme, baseTime);
 
         // then
         assertThat(result).isEqualTo(3);
