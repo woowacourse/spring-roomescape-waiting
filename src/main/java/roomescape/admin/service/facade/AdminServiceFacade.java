@@ -16,7 +16,7 @@ import roomescape.reservation.domain.Waiting;
 
 @Service
 @RequiredArgsConstructor
-public class AdminService {
+public class AdminServiceFacade {
 
     private final AdminReservationService reservationService;
     private final AdminWaitingService waitingService;

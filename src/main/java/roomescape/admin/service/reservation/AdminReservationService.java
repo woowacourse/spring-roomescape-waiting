@@ -5,8 +5,8 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.common.exception.ReservationNotAllowedException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
@@ -27,8 +27,8 @@ public class AdminReservationService {
 
     @Transactional
     public Reservation saveByAdmin(final LocalDate date, final Long themeId, final Long timeId, final Long memberId) {
-        final ReservationTime reservationTime = findReservationTimeById(timeId);
-        final Theme theme = findThemeById(themeId);
+        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId);
+        final Theme theme = themeRepository.findById(themeId);
         final Member member = findMemberById(memberId);
 
         validateExistReservation(date, reservationTime, theme);
@@ -42,14 +42,10 @@ public class AdminReservationService {
     @Transactional(readOnly = true)
     public List<Reservation> findByInFromTo(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                             final LocalDate dateTo) {
-        final Theme theme = findThemeById(themeId);
+        final Theme theme = themeRepository.findById(themeId);
         final Member member = findMemberById(memberId);
-        return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
-    }
 
-    private ReservationTime findReservationTimeById(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
+        return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
     }
 
     private Member findMemberById(final Long memberId) {
@@ -57,19 +53,10 @@ public class AdminReservationService {
                 .orElseThrow(() -> new DataNotFoundException("해당 회원 데이터가 존재하지 않습니다. id = " + memberId));
     }
 
-    private Theme findThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
-    }
-
-    private void validateExistReservation(final LocalDate date, final ReservationTime time, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
-            throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
+    private void validateExistReservation(final LocalDate date, final ReservationTime reservationTime,
+                                          final Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
+            throw new ReservationNotAllowedException("이미 예약이 존재해 예약을 할 수 없습니다.");
         }
-    }
-
-    private Reservation findReservationById(final Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + reservationId));
     }
 }
