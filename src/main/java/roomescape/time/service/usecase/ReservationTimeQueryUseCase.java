@@ -26,5 +26,4 @@ public class ReservationTimeQueryUseCase {
     public boolean existsByStartAt(final LocalTime startAt) {
         return reservationTimeRepository.existsByStartAt(startAt);
     }
-
 }

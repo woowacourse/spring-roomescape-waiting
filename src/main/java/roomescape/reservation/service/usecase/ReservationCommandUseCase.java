@@ -2,6 +2,7 @@ package roomescape.reservation.service.usecase;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.usecase.MemberQueryUseCase;
@@ -55,6 +56,7 @@ public class ReservationCommandUseCase {
         }
     }
 
+    @Transactional
     public void delete(final Long id) {
         // id에 해당하는 예약을 조회하고, 없으면 예외가 발생한다.
         final Reservation deletedReservation = reservationQueryUseCase.get(id);
