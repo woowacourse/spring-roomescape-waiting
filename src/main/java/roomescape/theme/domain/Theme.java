@@ -73,14 +73,12 @@ public class Theme {
         if (!(object instanceof final Theme theme)) {
             return false;
         }
-        return Objects.equals(getId(), theme.getId()) && Objects.equals(getName(), theme.getName())
-                && Objects.equals(getDescription(), theme.getDescription()) && Objects.equals(
-                getThumbnail(), theme.getThumbnail());
+        return Objects.equals(getId(), theme.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getName(), getDescription(), getThumbnail());
+        return Objects.hashCode(getId());
     }
 
     public Long getId() {

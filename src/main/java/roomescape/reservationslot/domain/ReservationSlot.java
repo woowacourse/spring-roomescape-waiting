@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationslot.exception.InvalidReservationSlotException;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
@@ -56,7 +55,7 @@ public class ReservationSlot {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        reservations.add(new Reservation(ReservationStatus.CURRENT, member, this));
+        reservations.add(new Reservation(member, this));
     }
 
     protected ReservationSlot() {
@@ -82,7 +81,7 @@ public class ReservationSlot {
         if (alreadyWaiting) {
             throw new ReservationSlotAlreadyExistsException("이미 예약 대기중입니다.");
         }
-        Reservation reservation = new Reservation(ReservationStatus.WAITING, member, this);
+        Reservation reservation = new Reservation(member, this);
         reservations.add(reservation);
         return reservation;
     }
@@ -111,9 +110,7 @@ public class ReservationSlot {
         if (!(object instanceof final ReservationSlot that)) {
             return false;
         }
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getDate(), that.getDate())
-                && Objects.equals(getTime(), that.getTime()) && Objects.equals(getTheme(),
-                that.getTheme()) && Objects.equals(reservations, that.reservations);
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override

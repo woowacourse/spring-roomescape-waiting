@@ -8,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import roomescape.member.exception.InvalidMemberException;
 
 @Entity
@@ -50,6 +51,19 @@ public class Member {
         if (name.length() > MAX_NAME_LENGTH) {
             throw new InvalidMemberException("name은 10글자 이하이어야합니다.");
         }
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Member member)) {
+            return false;
+        }
+        return Objects.equals(getId(), member.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
     }
 
     public Long getId() {
