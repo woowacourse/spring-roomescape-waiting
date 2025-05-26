@@ -42,6 +42,14 @@
 | 조건부 예약 조회   | GET    | `/admin/reservations`           | `themeId`, `memberId`, `dateFrom`, `dateTo` | -                                       |
 | 예약 생성 (관리자) | POST   | `/admin/reservations`           | -                                           | `themeId`, `memberId`, `date`, `timeId` |
 
+### 예약 대기
+
+| 기능                | Method | URL                             | 파라미터 / Path Variable | Body                                               |
+|-------------------|--------|---------------------------------|----------------------|----------------------------------------------------|
+| 예약 대기 생성          | POST   | `/waiting`                      | -                    | `themeId`, `date`, `timeId`            |
+| 예약 대기 삭제 / 거절     | DELETE | `/waiting/{waitingId}`          | `waitingId`          | -                                                  |
+| 예약 대기 전체 조회 (관리자) | GET    | `/admin/waitings`               | -                    | `id`, `memberName`, `themeName`, `date`, `startAt` |
+
 ### 예약 시간
 
 | 기능          | Method | URL                  | 파라미터 / Path Variable | Body                   |
