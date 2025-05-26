@@ -113,7 +113,7 @@ public class Reservation {
         this.status.cancelStatus();
     }
 
-    public void setTime(ReservationTime time) {
+    void setTime(ReservationTime time) {
         this.time = time;
     }
 

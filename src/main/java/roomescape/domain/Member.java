@@ -50,8 +50,8 @@ public class Member {
         return this.role == Role.ADMIN;
     }
 
-    public boolean isEqual(Member member) {
-        return member.getId().equals(this.getId());
+    public boolean isNotEqual(Member member) {
+        return !member.getId().equals(this.getId());
     }
 
     public Long getId() {
