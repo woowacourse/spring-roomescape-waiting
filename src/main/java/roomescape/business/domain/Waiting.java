@@ -20,15 +20,15 @@ public class Waiting {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "theme_id")
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     @ManyToOne
-    @JoinColumn(name = "reservation_time_id")
+    @JoinColumn(name = "reservation_time_id", nullable = false)
     private ReservationTime time;
 
     @Column(nullable = false)

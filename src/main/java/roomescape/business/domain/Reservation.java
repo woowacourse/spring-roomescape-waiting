@@ -9,11 +9,15 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "reservation")
+@Table(
+        name = "reservation",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"date", "reservation_time_id", "theme_id"})
+)
 public class Reservation {
 
     @Id
@@ -24,15 +28,15 @@ public class Reservation {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_time_id")
+    @JoinColumn(name = "reservation_time_id", nullable = false)
     private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime time,

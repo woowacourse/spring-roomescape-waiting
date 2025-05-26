@@ -69,7 +69,7 @@ class ReservationControllerIntegrationTest {
 
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                null,
+                1L,
                 1L,
                 1L
         );
@@ -163,7 +163,7 @@ class ReservationControllerIntegrationTest {
 
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                null,
+                1L,
                 1L,
                 1L
         );
@@ -381,7 +381,7 @@ class ReservationControllerIntegrationTest {
 
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                null,
+                1L,
                 1L,
                 1L
         );
