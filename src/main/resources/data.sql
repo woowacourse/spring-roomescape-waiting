@@ -1,3 +1,4 @@
+-- 테마 데이터
 INSERT INTO themes(name, description, thumbnail)
 VALUES ('추리', '셜록 with Danny', 'image/thumbnail.png'),
        ('공포', '어둠 속의 비명', 'image/thumbnail.png'),
@@ -12,6 +13,7 @@ VALUES ('추리', '셜록 with Danny', 'image/thumbnail.png'),
        ('로맨스', '잃어버린 편지', 'image/thumbnail.png'),
        ('논리', '퍼즐 마스터', 'image/thumbnail.png');
 
+-- 예약 시간 데이터
 INSERT INTO reservation_times(start_at)
 VALUES ('08:00'),
        ('12:00'),
@@ -19,6 +21,7 @@ VALUES ('08:00'),
        ('16:00'),
        ('18:00');
 
+-- 회원 데이터
 INSERT INTO members (name, email, password, member_role)
 VALUES ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'ADMIN'),
        ('Regular', 'user@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5nQPqaWyiUQtay6Msa', 'REGULAR'),
@@ -50,136 +53,112 @@ VALUES ('Admin', 'admin@gmail.com', '$2a$10$lsczSamG1eaxq1KE2ivIpek7hOx.uNkDILI5
        ('Chloe', 'chloe@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR'),
        ('Daniel', 'daniel@example.com', '$2a$10$hKDVYxLefVHV/vtuPhWD3OigtRyOykRLDdUAp80Z1crSoS1lFqF.W', 'REGULAR');
 
--- Reservation 테이블 데이터 (ReservationStatus 제거)
+-- 예약 슬롯 데이터 (ReservationSlot) - 각 테마별 고유한 날짜/시간 조합
 INSERT INTO reservation_slots(date, time_id, theme_id)
 VALUES
-    -- theme_id = 12 (6회) - 2025-05-10
-    ('2025-05-10', 1, 12),  -- ID: 1
-    ('2025-05-10', 2, 12),  -- ID: 2
-    ('2025-05-10', 3, 12),  -- ID: 3
-    ('2025-05-10', 4, 12),  -- ID: 4
-    ('2025-05-10', 5, 12),  -- ID: 5
-    ('2025-05-10', 1, 12),  -- ID: 6
+    -- theme_id = 12 (논리) - 2025-05-10 (5개 슬롯)
+    ('2025-05-10', 1, 12), -- ID: 1 (08:00)
+    ('2025-05-10', 2, 12), -- ID: 2 (12:00)
+    ('2025-05-10', 3, 12), -- ID: 3 (14:00)
+    ('2025-05-10', 4, 12), -- ID: 4 (16:00)
+    ('2025-05-10', 5, 12), -- ID: 5 (18:00)
 
-    -- theme_id = 11 (5회) - 2025-05-10
-    ('2025-05-10', 2, 11),  -- ID: 7
-    ('2025-05-10', 3, 11),  -- ID: 8
-    ('2025-05-10', 4, 11),  -- ID: 9
-    ('2025-05-10', 5, 11),  -- ID: 10
-    ('2025-05-10', 1, 11),  -- ID: 11
+    -- theme_id = 11 (로맨스) - 2025-05-10 (5개 슬롯)
+    ('2025-05-10', 1, 11), -- ID: 6 (08:00)
+    ('2025-05-10', 2, 11), -- ID: 7 (12:00)
+    ('2025-05-10', 3, 11), -- ID: 8 (14:00)
+    ('2025-05-10', 4, 11), -- ID: 9 (16:00)
+    ('2025-05-10', 5, 11), -- ID: 10 (18:00)
 
-    -- theme_id = 3 (4회) - 2025-05-10
-    ('2025-05-10', 2, 3),   -- ID: 12
-    ('2025-05-10', 3, 3),   -- ID: 13
-    ('2025-05-10', 4, 3),   -- ID: 14
-    ('2025-05-10', 5, 3),   -- ID: 15
+    -- theme_id = 3 (모험) - 2025-05-10 (4개 슬롯)
+    ('2025-05-10', 1, 3),  -- ID: 11 (08:00)
+    ('2025-05-10', 2, 3),  -- ID: 12 (12:00)
+    ('2025-05-10', 3, 3),  -- ID: 13 (14:00)
+    ('2025-05-10', 4, 3),  -- ID: 14 (16:00)
 
-    -- theme_id = 4 (3회) - 2025-05-11
-    ('2025-05-11', 1, 4),   -- ID: 16
-    ('2025-05-11', 2, 4),   -- ID: 17
-    ('2025-05-11', 3, 4),   -- ID: 18
+    -- theme_id = 4 (SF) - 2025-05-11 (3개 슬롯)
+    ('2025-05-11', 1, 4),  -- ID: 15 (08:00)
+    ('2025-05-11', 2, 4),  -- ID: 16 (12:00)
+    ('2025-05-11', 3, 4),  -- ID: 17 (14:00)
 
-    -- theme_id = 5 (2회) - 2025-05-11
-    ('2025-05-11', 4, 5),   -- ID: 19
-    ('2025-05-11', 5, 5),   -- ID: 20
+    -- theme_id = 5 (감성) - 2025-05-11 (2개 슬롯)
+    ('2025-05-11', 1, 5),  -- ID: 18 (08:00)
+    ('2025-05-11', 2, 5);  -- ID: 19 (12:00)
 
-    -- theme_id = 6 (1회) - 2025-05-11
-    ('2025-05-11', 1, 6),   -- ID: 21
-
-    -- theme_id = 7 (1회) - 2025-05-11
-    ('2025-05-11', 2, 7),   -- ID: 22
-
-    -- theme_id = 8 (1회) - 2025-05-11
-    ('2025-05-11', 3, 8),   -- ID: 23
-
-    -- theme_id = 9 (1회) - 2025-05-11
-    ('2025-05-11', 4, 9),   -- ID: 24
-
-    -- theme_id = 10 (1회) - 2025-05-11
-    ('2025-05-11', 5, 10),  -- ID: 25
-
-    -- theme_id = 11 (1회) - 2025-05-11
-    ('2025-05-11', 1, 11),  -- ID: 26
-
-    -- theme_id = 12 (1회) - 2025-05-11
-    ('2025-05-11', 2, 12);  -- ID: 27
-
--- Waiting 테이블 데이터 (WaitingStatus enum 값 사용)
-INSERT INTO reservations(booking_slot_id, member_id, waiting_status, created_at)
+-- 예약 데이터 (Reservation) - 수정된 ReservationSlot ID에 맞게 조정
+INSERT INTO reservations(reservation_slot_id, member_id, reservation_status, created_at)
 VALUES
-    -- Reservation ID 1 (테마12, 5/10, 시간1) - Alice, Bob, Carol이 대기
-    (1, 3, 'CURRENT', '2025-05-09 10:00:00'),
-    (1, 4, 'WAITING', '2025-05-09 10:30:00'),
-    (1, 5, 'WAITING', '2025-05-09 11:00:00'),
+    -- ReservationSlot ID 1 (논리, 5/10, 08:00) - Alice(현재), Bob(대기), Carol(대기)
+    (1, 3, 'CURRENT', '2025-05-09 10:00:00'),  -- Alice
+    (1, 4, 'WAITING', '2025-05-09 10:30:00'),  -- Bob
+    (1, 5, 'WAITING', '2025-05-09 11:00:00'),  -- Carol
 
-    -- Reservation ID 2 (테마12, 5/10, 시간2) - Dave, Eve가 대기
-    (2, 6, 'CURRENT', '2025-05-09 11:30:00'),
-    (2, 7, 'WAITING', '2025-05-09 12:00:00'),
+    -- ReservationSlot ID 2 (논리, 5/10, 12:00) - Dave(현재), Eve(대기)
+    (2, 6, 'CURRENT', '2025-05-09 11:30:00'),  -- Dave
+    (2, 7, 'WAITING', '2025-05-09 12:00:00'),  -- Eve
 
-    -- Reservation ID 3 (테마12, 5/10, 시간3) - Frank 혼자 대기
-    (3, 8, 'CURRENT', '2025-05-09 12:30:00'),
+    -- ReservationSlot ID 3 (논리, 5/10, 14:00) - Frank(현재)
+    (3, 8, 'CURRENT', '2025-05-09 12:30:00'),  -- Frank
 
-    -- Reservation ID 4 (테마12, 5/10, 시간4) - Grace, Heidi가 대기
-    (4, 9, 'CURRENT', '2025-05-09 13:00:00'),
-    (4, 10, 'WAITING', '2025-05-09 13:30:00'),
+    -- ReservationSlot ID 4 (논리, 5/10, 16:00) - Grace(현재), Heidi(대기)
+    (4, 9, 'CURRENT', '2025-05-09 13:00:00'),  -- Grace
+    (4, 10, 'WAITING', '2025-05-09 13:30:00'), -- Heidi
 
-    -- Reservation ID 5 (테마12, 5/10, 시간5) - Ivan, Judy, Mallory가 대기
-    (5, 11, 'CURRENT', '2025-05-09 14:00:00'),
-    (5, 12, 'WAITING', '2025-05-09 14:30:00'),
-    (5, 13, 'WAITING', '2025-05-09 15:00:00'),
+    -- ReservationSlot ID 5 (논리, 5/10, 18:00) - Ivan(현재), Judy(대기), Mallory(대기)
+    (5, 11, 'CURRENT', '2025-05-09 14:00:00'), -- Ivan
+    (5, 12, 'WAITING', '2025-05-09 14:30:00'), -- Judy
+    (5, 13, 'WAITING', '2025-05-09 15:00:00'), -- Mallory
 
-    -- Reservation ID 6 (테마12, 5/10, 시간1) - Niaj, Olivia가 대기
-    (6, 14, 'CURRENT', '2025-05-09 15:30:00'),
-    (6, 15, 'WAITING', '2025-05-09 16:00:00'),
+    -- ReservationSlot ID 6 (로맨스, 5/10, 08:00) - Niaj(현재), Olivia(대기)
+    (6, 14, 'CURRENT', '2025-05-09 15:30:00'), -- Niaj
+    (6, 15, 'WAITING', '2025-05-09 16:00:00'), -- Olivia
 
-    -- Reservation ID 7 (테마11, 5/10, 시간2) - Peggy가 혼자 대기
-    (7, 16, 'CURRENT', '2025-05-09 16:30:00'),
+    -- ReservationSlot ID 7 (로맨스, 5/10, 12:00) - Peggy(현재)
+    (7, 16, 'CURRENT', '2025-05-09 16:30:00'), -- Peggy
 
-    -- Reservation ID 8 (테마11, 5/10, 시간3) - Rupert, Sybil이 대기
-    (8, 17, 'CURRENT', '2025-05-09 17:00:00'),
-    (8, 18, 'WAITING', '2025-05-09 17:30:00'),
+    -- ReservationSlot ID 8 (로맨스, 5/10, 14:00) - Rupert(현재), Sybil(대기)
+    (8, 17, 'CURRENT', '2025-05-09 17:00:00'), -- Rupert
+    (8, 18, 'WAITING', '2025-05-09 17:30:00'), -- Sybil
 
-    -- Reservation ID 9 (테마11, 5/10, 시간4) - Trent, Uma가 대기
-    (9, 19, 'CURRENT', '2025-05-09 18:00:00'),
-    (9, 20, 'WAITING', '2025-05-09 18:30:00'),
+    -- ReservationSlot ID 9 (로맨스, 5/10, 16:00) - Trent(현재), Uma(대기)
+    (9, 19, 'CURRENT', '2025-05-09 18:00:00'), -- Trent
+    (9, 20, 'WAITING', '2025-05-09 18:30:00'), -- Uma
 
-    -- Reservation ID 10 (테마11, 5/10, 시간5) - Victor가 혼자 대기
-    (10, 21, 'CURRENT', '2025-05-09 19:00:00'),
+    -- ReservationSlot ID 10 (로맨스, 5/10, 18:00) - Victor(현재)
+    (10, 21, 'CURRENT', '2025-05-09 19:00:00'), -- Victor
 
-    -- Reservation ID 11 (테마11, 5/10, 시간1) - Wendy, Xander가 대기
-    (11, 22, 'CURRENT', '2025-05-09 19:30:00'),
-    (11, 23, 'WAITING', '2025-05-09 20:00:00'),
+    -- ReservationSlot ID 11 (모험, 5/10, 08:00) - Wendy(현재), Xander(대기)
+    (11, 22, 'CURRENT', '2025-05-09 19:30:00'), -- Wendy
+    (11, 23, 'WAITING', '2025-05-09 20:00:00'), -- Xander
 
-    -- Reservation ID 12 (테마3, 5/10, 시간2) - Yvonne, Zack이 대기
-    (12, 24, 'CURRENT', '2025-05-09 20:30:00'),
-    (12, 25, 'WAITING', '2025-05-09 21:00:00'),
+    -- ReservationSlot ID 12 (모험, 5/10, 12:00) - Yvonne(현재), Zack(대기)
+    (12, 24, 'CURRENT', '2025-05-09 20:30:00'), -- Yvonne
+    (12, 25, 'WAITING', '2025-05-09 21:00:00'), -- Zack
 
-    -- Reservation ID 13 (테마3, 5/10, 시간3) - Amy가 혼자 대기
-    (13, 26, 'CURRENT', '2025-05-09 21:30:00'),
+    -- ReservationSlot ID 13 (모험, 5/10, 14:00) - Amy(현재)
+    (13, 26, 'CURRENT', '2025-05-09 21:30:00'), -- Amy
 
-    -- Reservation ID 14 (테마3, 5/10, 시간4) - Brian, Chloe가 대기
-    (14, 27, 'CURRENT', '2025-05-09 22:00:00'),
-    (14, 28, 'WAITING', '2025-05-09 22:30:00'),
+    -- ReservationSlot ID 14 (모험, 5/10, 16:00) - Brian(현재), Chloe(대기)
+    (14, 27, 'CURRENT', '2025-05-09 22:00:00'), -- Brian
+    (14, 28, 'WAITING', '2025-05-09 22:30:00'), -- Chloe
 
-    -- Reservation ID 15 (테마3, 5/10, 시간5) - Daniel이 혼자 대기
-    (15, 29, 'CURRENT', '2025-05-09 23:00:00'),
+    -- 5월 11일 예약들
+    -- ReservationSlot ID 15 (SF, 5/11, 08:00) - Daniel(현재), Alice(대기)
+    (15, 29, 'CURRENT', '2025-05-10 10:00:00'), -- Daniel
+    (15, 3, 'WAITING', '2025-05-10 10:30:00'),  -- Alice (다른 예약)
 
-    -- 5월 11일 예약들의 대기자들
-    -- Reservation ID 16 (테마4, 5/11, 시간1) - Alice가 또 다른 예약에 대기
-    (16, 3, 'CURRENT', '2025-05-10 10:00:00'),
+    -- ReservationSlot ID 16 (SF, 5/11, 12:00) - Bob(현재), Carol(대기)
+    (16, 4, 'CURRENT', '2025-05-10 11:00:00'),  -- Bob
+    (16, 5, 'WAITING', '2025-05-10 11:30:00'),  -- Carol
 
-    -- Reservation ID 17 (테마4, 5/11, 시간2) - Bob, Carol이 대기
-    (17, 4, 'CURRENT', '2025-05-10 10:30:00'),
-    (17, 5, 'WAITING', '2025-05-10 11:00:00'),
+    -- ReservationSlot ID 17 (SF, 5/11, 14:00) - Dave(현재), Eve(대기), Frank(대기)
+    (17, 6, 'CURRENT', '2025-05-10 12:00:00'),  -- Dave
+    (17, 7, 'WAITING', '2025-05-10 12:30:00'),  -- Eve
+    (17, 8, 'WAITING', '2025-05-10 13:00:00'),  -- Frank
 
-    -- Reservation ID 18 (테마4, 5/11, 시간3) - Dave, Eve, Frank가 대기
-    (18, 6, 'CURRENT', '2025-05-10 11:30:00'),
-    (18, 7, 'WAITING', '2025-05-10 12:00:00'),
-    (18, 8, 'WAITING', '2025-05-10 12:30:00'),
+    -- ReservationSlot ID 18 (감성, 5/11, 08:00) - Grace(현재)
+    (18, 9, 'CURRENT', '2025-05-10 13:30:00'),  -- Grace
 
-    -- Reservation ID 19 (테마5, 5/11, 시간4) - Grace가 혼자 대기
-    (19, 9, 'CURRENT', '2025-05-10 13:00:00'),
-
-    -- Reservation ID 20 (테마5, 5/11, 시간5) - Heidi, Ivan이 대기
-    (20, 10, 'CURRENT', '2025-05-10 13:30:00'),
-    (20, 11, 'WAITING', '2025-05-10 14:00:00');
+    -- ReservationSlot ID 19 (감성, 5/11, 12:00) - Heidi(현재), Ivan(대기)
+    (19, 10, 'CURRENT', '2025-05-10 14:00:00'), -- Heidi
+    (19, 11, 'WAITING', '2025-05-10 14:30:00'); -- Ivan
