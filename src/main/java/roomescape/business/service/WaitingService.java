@@ -1,6 +1,7 @@
 package roomescape.business.service;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
@@ -12,6 +13,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.LoginMember;
+import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.WaitingRequest;
 import roomescape.presentation.dto.WaitingResponse;
 import roomescape.util.CurrentUtil;
@@ -85,5 +87,26 @@ public class WaitingService {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::from)
                 .toList();
+    }
+
+    public List<ReservationMineResponse> findByMemberId(final Long memberId) {
+        return waitingRepository.findWithRankByMemberId(memberId)
+                .stream()
+                .map(ReservationMineResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public Optional<WaitingResponse> deleteFirstBySameConditionReservation(final WaitingRequest waitingRequest) {
+        final Optional<Waiting> firstWaiting  = waitingRepository.findFirstByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
+                waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId());
+
+        if(firstWaiting.isEmpty()) {
+            return Optional.empty();
+        }
+        Waiting waiting = firstWaiting.get();
+        waitingRepository.deleteById(waiting.getId());
+
+        return Optional.of(WaitingResponse.from(waiting));
     }
 }

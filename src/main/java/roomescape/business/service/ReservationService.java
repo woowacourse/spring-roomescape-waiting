@@ -12,14 +12,15 @@ import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
-import roomescape.business.domain.Waiting;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.infrastructure.repository.ReservationRepository;
-import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.ReservationMineResponse;
+import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.presentation.dto.WaitingRequest;
+import roomescape.presentation.dto.WaitingResponse;
 import roomescape.util.CurrentUtil;
 
 @Service
@@ -27,29 +28,32 @@ import roomescape.util.CurrentUtil;
 public class ReservationService {
 
     private final QueryService queryService;
+    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
     private final CurrentUtil currentUtil;
 
     public ReservationService(final QueryService queryService,
+                              final WaitingService waitingService,
                               final ReservationRepository reservationRepository,
-                              final WaitingRepository waitingRepository,
                               final CurrentUtil currentUtil) {
         this.queryService = queryService;
+        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
         this.currentUtil = currentUtil;
     }
 
     @Transactional
-    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
-                                      final Long themeId) {
+    public ReservationResponse insert(final ReservationRequest reservationRequest) {
+        final LocalDate date = reservationRequest.date();
+        final Long timeId = reservationRequest.timeId();
+        final Long themeId = reservationRequest.themeId();
+
         validateIsDuplicate(date, timeId, themeId);
         final ReservationTime reservationTime = queryService.getReservationTimeById(timeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
         final Theme theme = queryService.getThemeById(themeId);
-        final Member member = queryService.getMemberById(memberId);
+        final Member member = queryService.getMemberById(reservationRequest.memberId());
 
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
@@ -89,8 +93,22 @@ public class ReservationService {
         final Reservation reservation = queryService.getReservationById(id);
         validateNotPast(reservation);
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
 
-        promoteFirstWaitingToReservation(reservation.getDate(), reservation.getTheme().getId(), reservation.getTime().getId());
+        promoteFirstWaitingToReservation(reservation);
+    }
+
+    private void promoteFirstWaitingToReservation(final Reservation reservation) {
+        final Optional<WaitingResponse> waiting = waitingService.deleteFirstBySameConditionReservation(
+                WaitingRequest.from(reservation));
+
+        if (waiting.isEmpty()) {
+            return;
+        }
+        final WaitingResponse newReservation = waiting.get();
+        reservationRepository.save(
+                new Reservation(newReservation.date(), newReservation.member(), newReservation.time(),
+                        newReservation.theme()));
     }
 
     private void validateNotPast(final Reservation reservation) {
@@ -99,30 +117,17 @@ public class ReservationService {
         }
     }
 
-    private void promoteFirstWaitingToReservation(LocalDate date, long themeId, long timeId) {
-        final Optional<Waiting> firstWaiting  = waitingRepository.findFirstByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
-                date, themeId, timeId);
-
-        firstWaiting.ifPresent(waiting -> {
-            waitingRepository.deleteById(waiting.getId());
-            Reservation newReservation = new Reservation(waiting.getDate(), waiting.getMember(), waiting.getTime(),
-                    waiting.getTheme());
-            reservationRepository.save(newReservation);
-        });
+    public List<ReservationMineResponse> findByMemberId(final Long memberId) {
+        final List<ReservationMineResponse> reservations = getByMemberId(memberId);
+        final List<ReservationMineResponse> waitings = waitingService.findByMemberId(memberId);
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .toList();
     }
 
-    public List<ReservationMineResponse> findByMemberId(final Long memberId) {
-        final List<ReservationMineResponse> reservations = reservationRepository.findByMemberId(memberId)
+    private List<ReservationMineResponse> getByMemberId(final Long memberId) {
+        return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(ReservationMineResponse::from)
-                .toList();
-
-        final List<ReservationMineResponse> waitings = waitingRepository.findWithRankByMemberId(memberId)
-                .stream()
-                .map(ReservationMineResponse::from)
-                .toList();
-
-        return Stream.concat(reservations.stream(), waitings.stream())
                 .toList();
     }
 }
