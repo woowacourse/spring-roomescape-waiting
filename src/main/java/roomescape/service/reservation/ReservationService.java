@@ -6,19 +6,23 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRanking;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
+import roomescape.dto.waiting.ApplyWaitingRequestDto;
 import roomescape.exception.reservation.InvalidReservationException;
 import roomescape.exception.reservation.InvalidReservationTimeException;
 import roomescape.exception.reservation.InvalidThemeException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.repository.theme.ThemeRepository;
+import roomescape.service.waiting.WaitingService;
 
 @Service
 public class ReservationService {
@@ -29,7 +33,7 @@ public class ReservationService {
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository) {
+                              ThemeRepository themeRepository, WaitingService waitingService) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -40,7 +44,6 @@ public class ReservationService {
                 .orElseThrow(() -> new InvalidReservationTimeException("존재하지 않는 예약 시간 id입니다."));
         Theme theme = themeRepository.findById(newReservation.themeId())
                 .orElseThrow(() -> new InvalidThemeException("존재하지 않는 테마 id입니다."));
-
         Reservation reservation = new Reservation(null, memberName, newReservation.date(), reservationTime, theme);
 
         validateDuplicateReservation(reservation);
@@ -69,20 +72,13 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public ReservationSlotTimes availableReservationTimes(AvailableTimeRequestDto availableTimeRequestDto) {
-        List<ReservationTime> times = reservationTimeRepository.findAll();
-
-        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndThemeId(
-                availableTimeRequestDto.date(), availableTimeRequestDto.themeId());
-
-        List<Waiting> alreadyWaitings = waitingService.getAllByDateAndThemeId(availableTimeRequestDto.date(), availableTimeRequestDto.themeId());
-
-        return new ReservationSlotTimes(times, alreadyReservedReservations, alreadyWaitings);
-    }
-
     public Reservation getReservationById(long addedReservationId) {
         return reservationRepository.findById(addedReservationId)
                 .orElseThrow(() -> new InvalidReservationException("존재하지 않는 예약입니다."));
+    }
+
+    public List<Reservation> getAllByDateAndThemeId(LocalDate date, Long themeId) {
+        return reservationRepository.findAllByDateAndThemeId(date, themeId);
     }
 
     public List<Theme> getRankingThemes(LocalDate originDate, int themeRankingStartRange, int themeRankingEndRange) {
@@ -92,6 +88,10 @@ public class ReservationService {
 
         ThemeRanking themeRanking = new ThemeRanking(inRangeReservations);
         return themeRanking.getAscendingRanking();
+    }
+
+    public List<ReservationTime> getAllReservationTimes() {
+        return reservationTimeRepository.findAll();
     }
 
     public Optional<Reservation> searchReservation(long reservationId, long themeId, LocalDate dateFrom,

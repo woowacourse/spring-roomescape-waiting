@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,8 +33,18 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findByDateAndThemeId(LocalDate date, Long themeId) {
+        return jpaWaitingRepository.findByDateAndThemeId(date, themeId);
+    }
+
+    @Override
     public List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId) {
         return jpaWaitingRepository.findWaitingsWithRankByMemberId(memberId);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return jpaWaitingRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override

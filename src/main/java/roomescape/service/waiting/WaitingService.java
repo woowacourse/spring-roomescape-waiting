@@ -69,8 +69,16 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약대기입니다."));
     }
 
+    public List<Waiting> getAllByDateAndThemeId(LocalDate date, Long themeId) {
+        return waitingRepository.findByDateAndThemeId(date, themeId);
+    }
+
     public List<WaitingWithRank> getWaitingsWithRankByMemberId(Long memberId) {
         return waitingRepository.findWaitingsWithRankByMemberId(memberId);
+    }
+
+    public boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId) {
+        return waitingRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     public void deleteWaiting(Long id) {

@@ -15,6 +15,8 @@ import java.util.List;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
+    List<Waiting> findByDateAndThemeId(LocalDate date, Long themeId);
+
     @Query("SELECT new roomescape.domain.waiting.WaitingWithRank(" +
             "    w, " +
             "    (SELECT COUNT(w2) + 1L " +
@@ -27,6 +29,8 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             "WHERE w.member.id = :memberId")
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
