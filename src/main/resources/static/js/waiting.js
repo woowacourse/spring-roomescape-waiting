@@ -41,8 +41,8 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    return fetch(`/reservations/waiting/${id}/approve`, {
-        method: 'POST'
+    return fetch(``, {
+        method: ''
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Approve failed');
@@ -53,8 +53,8 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    return fetch(`/reservations/waiting/${id}/deny`, {
-        method: 'POST'
+    return fetch(`/reservations/waiting/${id}`, {
+        method: 'DELETE'
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Deny failed');
