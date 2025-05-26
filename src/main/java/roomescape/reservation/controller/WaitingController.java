@@ -9,21 +9,16 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.service.ReservationCompositeService;
 import roomescape.reservation.service.WaitingModuleService;
 
 @RestController
 public class WaitingController {
 
     private final WaitingModuleService waitingModuleService;
-    private final ReservationCompositeService reservationCompositeService;
 
-    public WaitingController(final WaitingModuleService waitingModuleService,
-                             ReservationCompositeService reservationCompositeService) {
+    public WaitingController(final WaitingModuleService waitingModuleService) {
         this.waitingModuleService = waitingModuleService;
-        this.reservationCompositeService = reservationCompositeService;
     }
-
 
     @GetMapping("/waiting")
     public ResponseEntity<List<ReservationResponse>> findWaitings(
