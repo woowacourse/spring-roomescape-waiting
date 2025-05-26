@@ -105,3 +105,37 @@ response
 ```
 HTTP/1.1 204
 ```
+
+### 예약대기 목록 조회
+request
+```
+GET /reservations/waiting HTTP/1.1
+Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
+```
+response
+```
+HTTP/1.1 200
+Content-Type: application/json
+Location: /reservations/waiting/1
+
+[
+    {
+        "id": 1,
+        "date": "2025-05-27",
+        "member": {
+            "id": 2,
+            "name": "회원1"
+        },
+        "theme": {
+            "id": 1,
+            "name": "테마 A",
+            "description": "테마 A입니다.",
+            "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+        },
+        "time": {
+            "id": 1,
+            "startAt": "10:00"
+        }
+    }
+]
+```
