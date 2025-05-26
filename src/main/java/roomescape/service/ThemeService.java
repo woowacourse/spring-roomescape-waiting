@@ -7,7 +7,7 @@ import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.DateRange;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;

@@ -1,8 +1,8 @@
 package roomescape.integration.fixture;
 
 import org.springframework.stereotype.Component;
-import roomescape.domain.reservation.schdule.ReservationDate;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationDate;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.ReservationScheduleRepository;

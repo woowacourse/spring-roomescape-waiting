@@ -6,7 +6,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.time.AvailableReservationTime;
 import roomescape.domain.time.ReservationTime;
 import roomescape.repository.ReservationRepository;

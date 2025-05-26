@@ -21,8 +21,8 @@ import roomescape.domain.member.MemberName;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDateTime;
-import roomescape.domain.reservation.schdule.ReservationDate;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationDate;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
@@ -157,7 +157,7 @@ class ThemeServiceTest {
     }
 
     @Test
-    void 최근_일주일_인기_테마를_조회할_수_있다() {  // ?? 이거 예약 없이 getWeeklyPopularThemes가 돌아가었던 건가?? 나머지는 다 고쳐놨는디 이거는 한번 같이 봐야할듯! - 머피
+    void 최근_일주일_인기_테마를_조회할_수_있다() {
         // given
         Theme 공포 = themeDbFixture.공포();
         Theme 로맨스 = themeDbFixture.로맨스();

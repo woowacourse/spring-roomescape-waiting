@@ -1,6 +1,7 @@
 package roomescape.integration.api.rest;
 
-import static org.hamcrest.Matchers.*;
+import static org.hamcrest.Matchers.greaterThanOrEqualTo;
+import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -21,7 +22,7 @@ class ThemeRestTest extends RestAssuredTestBase {
 
     @BeforeEach
     void setUp() {
-        restLoginMember = generateLoginMember();
+        restLoginMember = generateLoginMember(memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개());
     }
 
     @Test

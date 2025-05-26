@@ -1,6 +1,6 @@
 package roomescape.domain.time;
 
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 
 public record AvailableReservationTime(
         ReservationSchedule schedule,

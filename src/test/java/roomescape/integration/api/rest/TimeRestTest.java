@@ -18,7 +18,7 @@ class TimeRestTest extends RestAssuredTestBase {
 
     @BeforeEach
     void setUp() {
-        restLoginMember = generateLoginMember();
+        restLoginMember = generateLoginMember(memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개());
     }
 
     @Test

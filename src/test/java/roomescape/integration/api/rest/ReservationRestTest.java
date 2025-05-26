@@ -9,8 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RestAssuredTestBase;
+import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.integration.api.RestLoginMember;
@@ -29,13 +30,16 @@ class ReservationRestTest extends RestAssuredTestBase {
 
     private ReservationSchedule schedule;
 
+    private Member member;
+
     @BeforeEach
     void setUp(
             @Autowired ReservationScheduleDbFixture reservationScheduleDbFixture,
             @Autowired ReservationTimeDbFixture reservationTimeDbFixture,
             @Autowired ThemeDbFixture themeDbFixture
     ) {
-        restLoginMember = generateLoginMember();
+        member = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        restLoginMember = generateLoginMember(member);
         Theme theme = themeDbFixture.공포();
         ReservationTime time = reservationTimeDbFixture.예약시간_10시();
         schedule = reservationScheduleDbFixture.createSchedule(ReservationDateFixture.예약날짜_오늘, time, theme);
@@ -56,7 +60,7 @@ class ReservationRestTest extends RestAssuredTestBase {
                 .then().log().all()
                 .statusCode(201)
                 .body("id", is(1))
-                .body("name", is("홍길동"))
+                .body("name", is(member.getName().name()))
                 .body("date", is(schedule.getDate().toString()))
                 .body("time.startAt", is(schedule.getReservationTime().getStartAt().toString()))
                 .body("theme.name", is(schedule.getTheme().getName().name()));

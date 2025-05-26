@@ -6,7 +6,7 @@ import static roomescape.common.Constant.FIXED_CLOCK;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservation.ReservationDateTime;
-import roomescape.domain.reservation.schdule.ReservationDate;
+import roomescape.domain.reservation.schedule.ReservationDate;
 import roomescape.domain.time.ReservationTime;
 
 class ReservationDateTimeTest {

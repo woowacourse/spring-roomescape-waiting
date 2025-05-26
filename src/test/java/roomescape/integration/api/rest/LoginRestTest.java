@@ -54,7 +54,8 @@ class LoginRestTest extends RestAssuredTestBase {
     @Test
     void 현재_로그인된_멤버가_누구인지_조회한다() {
         // given
-        RestLoginMember restLoginMember = generateLoginMember();
+        Member member = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        RestLoginMember restLoginMember = generateLoginMember(member);
 
         // when & then
         RestAssured.given().log().all()

@@ -2,13 +2,15 @@ package roomescape.service;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWait;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
+import roomescape.global.exception.AccessDeniedException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationScheduleRepository;
@@ -47,6 +49,8 @@ public class ReservationWaitService {
                 request.theme(),
                 request.date()
         ).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 일정입니다."));
+        reservationRepository.findByScheduleId(schedule.getId())
+                .orElseThrow(() -> new IllegalStateException("해당 일정에 예약이 없어서 예약 대기가 불가능합니다."));
         ReservationWait saved = reservationWaitRepository.save(new ReservationWait(null, member, schedule));
         return ReservationWaitResponse.from(saved);
     }
@@ -69,7 +73,15 @@ public class ReservationWaitService {
         return ReservationResponse.from(savedReservation);
     }
 
-    public void deleteReservationWait(final Long waitId) {
+    public void deleteReservationWait(
+            final Long waitId,
+            final Long memberId
+    ) {
+        ReservationWait reservationWait = reservationWaitRepository.findById(waitId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 대기 입니다."));
+        if (!Objects.equals(reservationWait.getMember().getId(), memberId)) {
+            throw new AccessDeniedException("본인의 예약 대기가 아닙니다.");
+        }
         reservationWaitRepository.deleteById(waitId);
     }
 

@@ -4,7 +4,7 @@ import static org.assertj.core.api.Assertions.*;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeDescription;
 import roomescape.domain.theme.ThemeName;
