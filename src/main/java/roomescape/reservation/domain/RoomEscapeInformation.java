@@ -8,7 +8,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -55,13 +54,13 @@ public class RoomEscapeInformation {
             @NonNull final ReservationTime time,
             @NonNull final Theme theme
     ) {
+        validateFutureOrPresent();
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    @PrePersist
     private void validateFutureOrPresent() {
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         final LocalDateTime currentDateTime = LocalDateTime.now();
