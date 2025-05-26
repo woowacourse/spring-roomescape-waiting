@@ -83,7 +83,7 @@ public class ReservationController {
 
     @GetMapping("/my")
     public ResponseEntity<List<MyReservationsResponse>> getMyReservations(final @Valid LoginMember loginMember) {
-        List<MyReservationsResponse> response = reservationService.getAllMemberReservations(loginMember);
+        List<MyReservationsResponse> response = reservationService.getAllMyReservations(loginMember);
         return ResponseEntity.ok(response);
     }
 }
