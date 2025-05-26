@@ -83,6 +83,19 @@ class ReserveTicketServiceTest {
     }
 
     @Test
+    void 예약대기가_있는_시간에는_예약을_추가할_수_없다() {
+        long timeId = reservationTimeService.addReservationTime(
+                new AddReservationTimeDto(LocalTime.now().plusMinutes(1L)));
+        long themeId = themeService.addTheme(new AddThemeDto("tuda", "asdf", "asdf"));
+        AddReservationDto addReservationDto = new AddReservationDto(LocalDate.now(), Long.valueOf(timeId), Long.valueOf(themeId));
+        long memberId = memberService.signup(new SignupRequestDto("test@naver.com", "testtest", "test"));
+        waitingService.addWaiting(addReservationDto, memberId);
+
+        assertThatThrownBy(() -> reserveTicketService.addReservationIfWaitingNotExists(addReservationDto, memberId))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
     void 존재하지않는_유저로_예약을_진행하면_예외가_발생한다() {
         long timeId = reservationTimeService.addReservationTime(
                 new AddReservationTimeDto(LocalTime.now().plusHours(1L)));
