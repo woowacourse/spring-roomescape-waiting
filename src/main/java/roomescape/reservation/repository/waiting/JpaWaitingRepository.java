@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation.repository.waiting;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,7 +10,7 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
 import roomescape.theme.domain.Theme;
 
-public interface WaitingRepository extends CrudRepository<Waiting, Long> {
+public interface JpaWaitingRepository extends CrudRepository<Waiting, Long> {
 
     @Query("""
                 SELECT w

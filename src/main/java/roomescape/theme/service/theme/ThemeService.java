@@ -7,7 +7,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DataExistException;
-import roomescape.reservation.repository.ReservationRepositoryInterface;
+import roomescape.reservation.repository.reservation.ReservationRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 

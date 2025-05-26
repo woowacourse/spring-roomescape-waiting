@@ -9,26 +9,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberRepository;
+import roomescape.member.repository.JpaMemberRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.repository.time.JpaReservationTimeRepository;
+import roomescape.reservation.repository.waiting.JpaWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
-public class WaitingRepositoryTest {
+public class JpaWaitingRepositoryTest {
 
     @Autowired
-    private WaitingRepository waitingRepository;
+    private JpaWaitingRepository jpaWaitingRepository;
 
     @Autowired
-    private MemberRepository memberRepository;
+    private JpaMemberRepository jpaMemberRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private JpaReservationTimeRepository jpaReservationTimeRepository;
 
     @Test
     void 대기_저장() {
@@ -39,15 +41,15 @@ public class WaitingRepositoryTest {
         final LocalDate date = LocalDate.of(2026, 10, 10);
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
 
         // when
-        final Waiting savedWaiting = waitingRepository.save(waiting);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
 
         // then
-        Assertions.assertThat(waitingRepository.findAll()).containsExactly(savedWaiting);
+        Assertions.assertThat(jpaWaitingRepository.findAll()).containsExactly(savedWaiting);
     }
 
     @Test
@@ -59,13 +61,13 @@ public class WaitingRepositoryTest {
         final LocalDate date = LocalDate.of(2026, 10, 10);
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        waitingRepository.save(waiting);
+        jpaWaitingRepository.save(waiting);
 
         // when
-        final boolean exists = waitingRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
+        final boolean exists = jpaWaitingRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
 
         // then
         Assertions.assertThat(exists).isTrue();
@@ -82,15 +84,15 @@ public class WaitingRepositoryTest {
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
         final Waiting waiting2 = new Waiting(member2, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        memberRepository.save(member2);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaMemberRepository.save(member2);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        final Waiting savedWaiting = waitingRepository.save(waiting);
-        waitingRepository.save(waiting2);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
+        jpaWaitingRepository.save(waiting2);
 
         // when
-        final List<Waiting> foundWaiting = waitingRepository.findByMember(member);
+        final List<Waiting> foundWaiting = jpaWaitingRepository.findByMember(member);
 
         // then
         Assertions.assertThat(foundWaiting).containsOnly(savedWaiting);
@@ -105,13 +107,13 @@ public class WaitingRepositoryTest {
         final LocalDate date = LocalDate.of(2026, 10, 10);
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        final Waiting savedWaiting = waitingRepository.save(waiting);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
 
         // when
-        final Waiting foundWaiting = waitingRepository.findById(savedWaiting.getId()).orElseThrow();
+        final Waiting foundWaiting = jpaWaitingRepository.findById(savedWaiting.getId()).orElseThrow();
 
         // then
         Assertions.assertThat(foundWaiting).isEqualTo(savedWaiting);
@@ -128,15 +130,15 @@ public class WaitingRepositoryTest {
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
         final Waiting waiting2 = new Waiting(member2, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        memberRepository.save(member2);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaMemberRepository.save(member2);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        final Waiting savedWaiting = waitingRepository.save(waiting);
-        waitingRepository.save(waiting2);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
+        jpaWaitingRepository.save(waiting2);
 
         // when
-        final Waiting foundWaiting = waitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date,
+        final Waiting foundWaiting = jpaWaitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date,
                         reservationTime)
                 .orElseThrow();
 
@@ -153,16 +155,16 @@ public class WaitingRepositoryTest {
         final LocalDate date = LocalDate.of(2026, 10, 10);
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        final Waiting savedWaiting = waitingRepository.save(waiting);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
 
         // when
-        waitingRepository.deleteById(savedWaiting.getId());
+        jpaWaitingRepository.deleteById(savedWaiting.getId());
 
         // then
-        Assertions.assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+        Assertions.assertThat(jpaWaitingRepository.findById(savedWaiting.getId())).isEmpty();
     }
 
     @Test
@@ -176,15 +178,15 @@ public class WaitingRepositoryTest {
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
         final Waiting waiting2 = new Waiting(member2, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        memberRepository.save(member2);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaMemberRepository.save(member2);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        final Waiting savedWaiting = waitingRepository.save(waiting);
-        final Waiting savedWaiting2 = waitingRepository.save(waiting2);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
+        final Waiting savedWaiting2 = jpaWaitingRepository.save(waiting2);
 
         // when
-        final long count = waitingRepository.countBefore(theme, date, reservationTime, savedWaiting2.getId());
+        final long count = jpaWaitingRepository.countBefore(theme, date, reservationTime, savedWaiting2.getId());
 
         // then
         Assertions.assertThat(count).isEqualTo(1);
@@ -199,13 +201,13 @@ public class WaitingRepositoryTest {
         final LocalDate date = LocalDate.of(2026, 10, 10);
         final Waiting waiting = new Waiting(member, reservationTime, theme, date);
 
-        memberRepository.save(member);
-        reservationTimeRepository.save(reservationTime);
+        jpaMemberRepository.save(member);
+        jpaReservationTimeRepository.save(reservationTime);
         themeRepository.save(theme);
-        final Waiting savedWaiting = waitingRepository.save(waiting);
+        final Waiting savedWaiting = jpaWaitingRepository.save(waiting);
 
         // when
-        final List<Waiting> allWaitings = waitingRepository.findAll();
+        final List<Waiting> allWaitings = jpaWaitingRepository.findAll();
 
         // then
         Assertions.assertThat(allWaitings).containsExactly(savedWaiting);

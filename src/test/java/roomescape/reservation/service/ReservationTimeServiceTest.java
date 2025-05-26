@@ -8,7 +8,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import roomescape.common.exception.DataExistException;
 import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
+import roomescape.reservation.repository.time.ReservationTimeRepositoryInterface;
 import roomescape.reservation.service.time.ReservationTimeService;
 
 class ReservationTimeServiceTest {

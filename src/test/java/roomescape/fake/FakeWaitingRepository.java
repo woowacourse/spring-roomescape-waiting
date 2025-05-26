@@ -8,7 +8,7 @@ import java.util.Optional;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.repository.WaitingRepositoryInterface;
+import roomescape.reservation.repository.waiting.WaitingRepositoryInterface;
 import roomescape.theme.domain.Theme;
 
 public class FakeWaitingRepository implements WaitingRepositoryInterface {

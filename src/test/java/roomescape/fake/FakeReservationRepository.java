@@ -8,7 +8,7 @@ import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationRepositoryInterface;
+import roomescape.reservation.repository.reservation.ReservationRepositoryInterface;
 import roomescape.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepositoryInterface {

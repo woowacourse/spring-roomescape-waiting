@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DataExistException;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
+import roomescape.reservation.repository.time.ReservationTimeRepositoryInterface;
 
 @Service
 @RequiredArgsConstructor

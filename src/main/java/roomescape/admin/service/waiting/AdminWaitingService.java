@@ -6,7 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.repository.WaitingRepositoryInterface;
+import roomescape.reservation.repository.waiting.WaitingRepositoryInterface;
 
 @RequiredArgsConstructor
 @Service

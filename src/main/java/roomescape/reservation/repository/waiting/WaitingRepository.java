@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation.repository.waiting;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -12,43 +12,43 @@ import roomescape.theme.domain.Theme;
 
 @RequiredArgsConstructor
 @Repository
-public class JpaWaitingRepository implements WaitingRepositoryInterface {
+public class WaitingRepository implements WaitingRepositoryInterface {
 
-    private final WaitingRepository waitingRepository;
+    private final JpaWaitingRepository jpaWaitingRepository;
 
     @Override
     public Waiting save(final Waiting waiting) {
-        return waitingRepository.save(waiting);
+        return jpaWaitingRepository.save(waiting);
     }
 
     @Override
     public boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme) {
-        return waitingRepository.existsByDateAndTimeAndTheme(date, time, theme);
+        return jpaWaitingRepository.existsByDateAndTimeAndTheme(date, time, theme);
     }
 
     @Override
     public List<Waiting> findByMember(final Member member) {
-        return waitingRepository.findByMember(member);
+        return jpaWaitingRepository.findByMember(member);
     }
 
     @Override
     public Optional<Waiting> findById(final Long id) {
-        return waitingRepository.findById(id);
+        return jpaWaitingRepository.findById(id);
     }
 
     @Override
     public void deleteById(final Long id) {
-        waitingRepository.deleteById(id);
+        jpaWaitingRepository.deleteById(id);
     }
 
     @Override
     public long countBefore(final Theme theme, final LocalDate date, final ReservationTime time, final Long id) {
-        return waitingRepository.countBefore(theme, date, time, id);
+        return jpaWaitingRepository.countBefore(theme, date, time, id);
     }
 
     @Override
     public List<Waiting> findAll() {
-        return waitingRepository.findAll();
+        return jpaWaitingRepository.findAll();
     }
 
     @Override
@@ -56,6 +56,6 @@ public class JpaWaitingRepository implements WaitingRepositoryInterface {
             final Theme theme,
             final LocalDate date,
             final ReservationTime time) {
-        return waitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date, time);
+        return jpaWaitingRepository.findFirstByThemeAndDateAndTimeOrderByIdAsc(theme, date, time);
     }
 }

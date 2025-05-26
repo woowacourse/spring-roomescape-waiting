@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation.repository.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,45 +13,45 @@ import roomescape.theme.domain.Theme;
 
 @RequiredArgsConstructor
 @Repository
-public class JpaReservationRepository implements ReservationRepositoryInterface {
+public class ReservationRepository implements ReservationRepositoryInterface {
 
-    private final ReservationRepository reservationRepository;
+    private final JpaReservationRepository jpaReservationRepository;
 
     @Override
     public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+        return jpaReservationRepository.findAll();
     }
 
     @Override
     public boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme) {
-        return reservationRepository.existsByDateAndTimeAndTheme(date, time, theme);
+        return jpaReservationRepository.existsByDateAndTimeAndTheme(date, time, theme);
     }
 
     @Override
     public List<Theme> findPopularThemesByReservationBetween(
             LocalDate dateFrom, LocalDate dateTo, PageRequest pageRequest) {
-        return reservationRepository.findPopularThemesByReservationBetween(dateFrom, dateTo, pageRequest);
+        return jpaReservationRepository.findPopularThemesByReservationBetween(dateFrom, dateTo, pageRequest);
     }
 
     @Override
     public List<Reservation> findByMember(Member member) {
-        return reservationRepository.findByMember(member);
+        return jpaReservationRepository.findByMember(member);
     }
 
     @Override
     public Reservation findById(Long id) {
-        return reservationRepository.findById(id)
+        return jpaReservationRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
     }
 
     @Override
     public Reservation save(final Reservation reservation) {
-        return reservationRepository.save(reservation);
+        return jpaReservationRepository.save(reservation);
     }
 
     @Override
     public void deleteById(Long id) {
-        reservationRepository.deleteById(id);
+        jpaReservationRepository.deleteById(id);
     }
 
     @Override
@@ -60,6 +60,6 @@ public class JpaReservationRepository implements ReservationRepositoryInterface 
             final Member member,
             final LocalDate dateFrom,
             final LocalDate dateTo) {
-        return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
+        return jpaReservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
     }
 }

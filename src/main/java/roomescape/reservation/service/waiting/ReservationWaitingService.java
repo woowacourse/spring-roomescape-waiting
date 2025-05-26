@@ -11,9 +11,9 @@ import roomescape.common.exception.WaitingNotAllowedException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.repository.ReservationRepositoryInterface;
-import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
-import roomescape.reservation.repository.WaitingRepositoryInterface;
+import roomescape.reservation.repository.reservation.ReservationRepositoryInterface;
+import roomescape.reservation.repository.time.ReservationTimeRepositoryInterface;
+import roomescape.reservation.repository.waiting.WaitingRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
