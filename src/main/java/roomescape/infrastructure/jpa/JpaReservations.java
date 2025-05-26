@@ -32,28 +32,24 @@ public class JpaReservations implements Reservations {
     @Override
     public List<Reservation> findAllReservedWithFilter(Id themeId, Id userId, LocalDate dateFrom, LocalDate dateTo) {
         List<ReservationSlot> slots = slotDao.findAllBy(themeId, userId, dateFrom, dateTo);
-        Map<Reservation, Integer> reservations = toWaitingNumberAndReservation(slots, userId);
-        return reservations.entrySet().stream()
-                .filter(entry -> entry.getValue() == 0)
-                .map(Map.Entry::getKey)
+        return slots.stream()
+                .map(ReservationSlot::getReservedReservation)
+                .filter(reservation -> {
+                    if (userId == null) {
+                        return true;
+                    } else {
+                        return reservation.isSameReserver(userId.value());
+                    }
+                })
                 .toList();
     }
 
     @Override
     public List<Reservation> findAllNotReserved() {
         List<ReservationSlot> slots = slotDao.findAll();
-        Map<Reservation, Integer> reservations = toWaitingNumberAndReservation(slots, null);
-        return reservations.entrySet().stream()
-                .filter(entry -> entry.getValue() != 0)
-                .map(Map.Entry::getKey)
+        return slots.stream()
+                .flatMap(slot -> slot.getWaitingReservations().stream())
                 .toList();
-    }
-
-    private Map<Reservation, Integer> toWaitingNumberAndReservation(List<ReservationSlot> slots, Id userId) {
-        if (userId == null) {
-            return ReservationSlot.toWaitingNumberAndReservation(slots);
-        }
-        return ReservationSlot.toWaitingNumberAndReservation(slots, userId);
     }
 
     @Override

@@ -59,14 +59,7 @@ public class ReservationSlot {
                         slot -> slot.waitingNumberOf(userId)
                 ));
     }
-
-    public static Map<Reservation, Integer> toWaitingNumberAndReservation(final List<ReservationSlot> slots) {
-        return slots.stream()
-                .flatMap(slot -> slot.reservations.stream()
-                        .map(reservation -> Map.entry(reservation, slot.reservations.indexOf(reservation))))
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-    }
-
+    
     private int waitingNumberOf(final Id userId) {
         List<Reservation> sortedReservations = new ArrayList<>(reservations).stream()
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
@@ -84,6 +77,19 @@ public class ReservationSlot {
         return reservations.stream()
                 .filter(reservation -> reservation.isSameReserver(userId.value()))
                 .findFirst()
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
+    }
+
+    public List<Reservation> getWaitingReservations() {
+        return new ArrayList<>(reservations).stream()
+                .sorted(Comparator.comparing(Reservation::getCreatedAt))
+                .skip(1)
+                .toList();
+    }
+
+    public Reservation getReservedReservation() {
+        return new ArrayList<>(reservations).stream()
+                .min(Comparator.comparing(Reservation::getCreatedAt))
                 .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_EXIST));
     }
 }
