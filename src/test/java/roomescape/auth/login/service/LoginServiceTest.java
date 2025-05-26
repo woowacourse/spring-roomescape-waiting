@@ -4,26 +4,12 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
-import roomescape.admin.application.AdminQueryService;
-import roomescape.admin.domain.AdminRepository;
-import roomescape.admin.infrastructure.JpaAdminRepository;
-import roomescape.admin.infrastructure.JpaAdminRepositoryAdaptor;
 import roomescape.auth.exception.UnauthorizedException;
 import roomescape.auth.login.presentation.dto.LoginRequest;
-import roomescape.auth.login.service.LoginServiceTest.LoginConfig;
 import roomescape.auth.token.JwtTokenManager;
-import roomescape.member.application.service.MemberQueryService;
-import roomescape.member.domain.MemberRepository;
-import roomescape.member.infrastructure.JpaMemberRepository;
-import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
+import roomescape.common.BaseServiceTest;
 
-@DataJpaTest
-@Import(LoginConfig.class)
-class LoginServiceTest {
+class LoginServiceTest extends BaseServiceTest {
 
     @Autowired
     private LoginService loginService;
@@ -87,46 +73,5 @@ class LoginServiceTest {
 
         Assertions.assertThatThrownBy(() -> loginService.loginMember(memberRequest))
             .isInstanceOf(UnauthorizedException.class);
-    }
-
-    static class LoginConfig {
-
-        @Value("${expiration.time}")
-        private int EXPIRATION_TIME;
-
-        @Value("${secret.key}")
-        private String SECRET_KEY;
-
-        @Bean
-        public JwtTokenManager jwtTokenManager() {
-            return new JwtTokenManager(EXPIRATION_TIME, SECRET_KEY);
-        }
-
-        @Bean
-        public AdminRepository adminRepository(JpaAdminRepository jpaAdminRepository) {
-            return new JpaAdminRepositoryAdaptor(jpaAdminRepository);
-        }
-
-        @Bean
-        public AdminQueryService adminQueryService(AdminRepository adminRepository) {
-            return new AdminQueryService(adminRepository);
-        }
-
-        @Bean
-        public MemberRepository memberRepository(JpaMemberRepository jpaMemberRepository) {
-            return new JpaMemberRepositoryAdapter(jpaMemberRepository);
-        }
-
-        @Bean
-        public MemberQueryService memberQueryService(MemberRepository memberRepository) {
-            return new MemberQueryService(memberRepository);
-        }
-
-        @Bean
-        public LoginService loginService(JwtTokenManager jwtTokenManager,
-                                         AdminQueryService adminQueryService,
-                                         MemberQueryService memberQueryService) {
-            return new LoginService(jwtTokenManager, adminQueryService, memberQueryService);
-        }
     }
 }

@@ -7,36 +7,24 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import roomescape.common.BaseServiceTest;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
-import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.time.application.ReservationTimeApplicationService;
-import roomescape.reservation.time.application.service.ReservationTimeCommandService;
-import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
-import roomescape.reservation.time.infrastructure.JpaReservationTimeRepositoryAdaptor;
 import roomescape.reservation.time.presentation.dto.TimeConditionRequest;
 import roomescape.reservation.time.presentation.dto.TimeConditionResponse;
-import roomescape.reservationTime.application.ReservationTimeApplicationServiceTest.ReservationTimeConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.JpaThemeRepository;
 
-@DataJpaTest
-@Import(ReservationTimeConfig.class)
-class ReservationTimeApplicationServiceTest {
+class ReservationTimeApplicationServiceTest extends BaseServiceTest {
 
     @Autowired
     private ReservationTimeApplicationService reservationTimeApplicationService;
@@ -89,44 +77,5 @@ class ReservationTimeApplicationServiceTest {
             new TimeConditionResponse(time2.getId(), time2.getStartAt(), true),
             new TimeConditionResponse(time3.getId(), time3.getStartAt(), false)
         );
-    }
-
-    static class ReservationTimeConfig {
-
-        @Bean
-        public ReservationRepository reservationRepository(JpaReservationRepository jpaReservationRepository) {
-            return new JpaReservationRepositoryAdapter(jpaReservationRepository);
-        }
-
-        @Bean
-        public ReservationTimeRepository reservationTimeRepository(JpaReservationTimeRepository jpaReservationTimeRepository) {
-            return new JpaReservationTimeRepositoryAdaptor(jpaReservationTimeRepository);
-        }
-
-        @Bean
-        public ReservationQueryService reservationQueryService(ReservationRepository reservationRepository) {
-            return new ReservationQueryService(reservationRepository);
-        }
-
-        @Bean
-        public ReservationTimeQueryService reservationTimeQueryService(ReservationTimeRepository reservationTimeRepository) {
-            return new ReservationTimeQueryService(reservationTimeRepository);
-        }
-
-        @Bean
-        public ReservationTimeCommandService reservationTimeCommandService(ReservationRepository reservationRepository, ReservationTimeRepository reservationTimeRepository) {
-            return new ReservationTimeCommandService(reservationRepository, reservationTimeRepository);
-        }
-
-        @Bean
-        public ReservationTimeApplicationService reservationTimeService(ReservationTimeQueryService reservationTimeQueryService,
-                                                                        ReservationTimeCommandService reservationTimeCommandService,
-                                                                        ReservationQueryService reservationQueryService) {
-            return new ReservationTimeApplicationService(
-                reservationTimeQueryService,
-                reservationTimeCommandService,
-                reservationQueryService
-            );
-        }
     }
 }

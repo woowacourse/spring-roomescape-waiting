@@ -13,46 +13,24 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
+import roomescape.common.BaseServiceTest;
 import roomescape.common.exception.BusinessException;
-import roomescape.member.application.service.MemberQueryService;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
-import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
-import roomescape.reservation.application.ReservationApplicationServiceTest.ReservationConfig;
-import roomescape.reservation.application.service.ReservationCommandService;
-import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
-import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
-import roomescape.reservation.time.infrastructure.JpaReservationTimeRepositoryAdaptor;
-import roomescape.reservation.waiting.application.service.WaitingReservationQueryService;
-import roomescape.reservation.waiting.domain.WaitingReservationRepository;
-import roomescape.reservation.waiting.infrastructure.JpaWaitingReservationRepository;
-import roomescape.reservation.waiting.infrastructure.JpaWaitingReservationRepositoryAdaptor;
-import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
-import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 
-@DataJpaTest
-@Import(ReservationConfig.class)
-class ReservationApplicationServiceTest {
+class ReservationApplicationServiceTest extends BaseServiceTest {
 
     @Autowired
     private ReservationApplicationService reservationApplicationService;
@@ -107,16 +85,16 @@ class ReservationApplicationServiceTest {
         LocalDate date = LocalDate.now().minusDays(days);
 
         Assertions.assertThatThrownBy(
-                        () -> reservationApplicationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
-                .isInstanceOf(BusinessException.class);
+                () -> reservationApplicationService.createReservation(new ReservationRequest(date, timeId, 1L), 1L))
+            .isInstanceOf(BusinessException.class);
     }
 
     private static Stream<Arguments> cant_not_reserve_before_now() {
         return Stream.of(
-                Arguments.of(1L, 1L),
-                Arguments.of(3L, 1L),
-                Arguments.of(6L, 1L),
-                Arguments.of(2L, 2L)
+            Arguments.of(1L, 1L),
+            Arguments.of(3L, 1L),
+            Arguments.of(6L, 1L),
+            Arguments.of(2L, 2L)
         );
     }
 
@@ -124,83 +102,7 @@ class ReservationApplicationServiceTest {
     @Test
     void cant_not_reserve_duplicate() {
         Assertions.assertThatThrownBy(() -> reservationApplicationService.createReservation(
-                        new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
-                .isInstanceOf(BusinessException.class);
-    }
-
-    static class ReservationConfig {
-
-        @Bean
-        public ReservationRepository reservationRepository(JpaReservationRepository jpaReservationRepository) {
-            return new JpaReservationRepositoryAdapter(jpaReservationRepository);
-        }
-
-        @Bean
-        public WaitingReservationRepository waitingReservationRepository(JpaWaitingReservationRepository jpaWaitingReservationRepository) {
-            return new JpaWaitingReservationRepositoryAdaptor(jpaWaitingReservationRepository);
-        }
-
-        @Bean
-        public ReservationTimeRepository reservationTimeRepository(JpaReservationTimeRepository jpaReservationTimeRepository) {
-            return new JpaReservationTimeRepositoryAdaptor(jpaReservationTimeRepository);
-        }
-
-        @Bean
-        public ThemeRepository themeRepository(JpaThemeRepository jpaThemeRepository) {
-            return new JpaThemeRepositoryAdaptor(jpaThemeRepository);
-        }
-
-        @Bean
-        public MemberRepository memberRepository(JpaMemberRepository jpaMemberRepository) {
-            return new JpaMemberRepositoryAdapter(jpaMemberRepository);
-        }
-
-        @Bean
-        public ReservationQueryService reservationQueryService(ReservationRepository reservationRepository) {
-            return new ReservationQueryService(reservationRepository);
-        }
-
-        @Bean
-        public ReservationCommandService reservationCommandService(ReservationRepository reservationRepository) {
-            return new ReservationCommandService(reservationRepository);
-        }
-
-        @Bean
-        public WaitingReservationQueryService waitingReservationQueryService(WaitingReservationRepository waitingReservationRepository) {
-            return new WaitingReservationQueryService(waitingReservationRepository);
-        }
-
-        @Bean
-        public ReservationTimeQueryService reservationTimeQueryService(ReservationTimeRepository reservationTimeRepository) {
-            return new ReservationTimeQueryService(reservationTimeRepository);
-        }
-
-        @Bean
-        public ThemeQueryService themeQueryService(ThemeRepository themeRepository) {
-            return new ThemeQueryService(themeRepository);
-        }
-
-        @Bean
-        public MemberQueryService memberQueryService(MemberRepository memberRepository) {
-            return new MemberQueryService(memberRepository);
-        }
-
-        @Bean
-        public ReservationApplicationService reservationFacadeService(
-            ReservationQueryService reservationQueryService,
-            ReservationCommandService reservationCommandService,
-            WaitingReservationQueryService waitingReservationQueryService,
-            ReservationTimeQueryService reservationTimeQueryService,
-            ThemeQueryService themeQueryService,
-            MemberQueryService memberQueryService
-        ) {
-            return new ReservationApplicationService(
-                reservationQueryService,
-                reservationCommandService,
-                waitingReservationQueryService,
-                reservationTimeQueryService,
-                themeQueryService,
-                memberQueryService);
-        }
+                new ReservationRequest(LocalDate.of(2024, 10, 6), 1L, 1L), 1L))
+            .isInstanceOf(BusinessException.class);
     }
 }

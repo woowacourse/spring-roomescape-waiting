@@ -6,47 +6,25 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import roomescape.common.BaseServiceTest;
 import roomescape.common.exception.BusinessException;
-import roomescape.member.application.service.MemberQueryService;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
-import roomescape.member.infrastructure.JpaMemberRepository;
-import roomescape.member.infrastructure.JpaMemberRepositoryAdapter;
-import roomescape.reservation.application.service.ReservationCommandService;
-import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.presentation.dto.ReservationRequest;
-import roomescape.reservation.time.application.service.ReservationTimeQueryService;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.domain.ReservationTimeRepository;
-import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
-import roomescape.reservation.time.infrastructure.JpaReservationTimeRepositoryAdaptor;
-import roomescape.reservation.waiting.application.WaitingReservationApplicationServiceTest.WaitingReservationConfig;
-import roomescape.reservation.waiting.application.service.WaitingReservationCommandService;
-import roomescape.reservation.waiting.application.service.WaitingReservationQueryService;
 import roomescape.reservation.waiting.domain.WaitingReservation;
 import roomescape.reservation.waiting.domain.WaitingReservationRepository;
-import roomescape.reservation.waiting.infrastructure.JpaWaitingReservationRepository;
-import roomescape.reservation.waiting.infrastructure.JpaWaitingReservationRepositoryAdaptor;
 import roomescape.reservation.waiting.presentation.dto.WaitingReservationResponse;
-import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
-import roomescape.theme.infrastructure.JpaThemeRepository;
-import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 
-@DataJpaTest
-@Import(WaitingReservationConfig.class)
-class WaitingReservationApplicationServiceTest {
+class WaitingReservationApplicationServiceTest extends BaseServiceTest {
 
     @Autowired
     private WaitingReservationApplicationService waitingReservationApplicationService;
@@ -158,87 +136,5 @@ class WaitingReservationApplicationServiceTest {
             .isFalse();
         Assertions.assertThat(reservationRepository.findAll())
             .isEmpty();
-    }
-
-    static class WaitingReservationConfig {
-
-        @Bean
-        public ReservationRepository reservationRepository(JpaReservationRepository jpaReservationRepository) {
-            return new JpaReservationRepositoryAdapter(jpaReservationRepository);
-        }
-
-        @Bean
-        public WaitingReservationRepository waitingReservationRepository(JpaWaitingReservationRepository jpaWaitingReservationRepository) {
-            return new JpaWaitingReservationRepositoryAdaptor(jpaWaitingReservationRepository);
-        }
-
-        @Bean
-        public ReservationTimeRepository reservationTimeRepository(JpaReservationTimeRepository jpaReservationTimeRepository) {
-            return new JpaReservationTimeRepositoryAdaptor(jpaReservationTimeRepository);
-        }
-
-        @Bean
-        public ThemeRepository themeRepository(JpaThemeRepository jpaThemeRepository) {
-            return new JpaThemeRepositoryAdaptor(jpaThemeRepository);
-        }
-
-        @Bean
-        public MemberRepository memberRepository(JpaMemberRepository jpaMemberRepository) {
-            return new JpaMemberRepositoryAdapter(jpaMemberRepository);
-        }
-
-        @Bean
-        public ReservationQueryService reservationQueryService(ReservationRepository reservationRepository) {
-            return new ReservationQueryService(reservationRepository);
-        }
-
-        @Bean
-        public ReservationCommandService reservationCommandService(ReservationRepository reservationRepository) {
-            return new ReservationCommandService(reservationRepository);
-        }
-
-        @Bean
-        public WaitingReservationCommandService waitingReservationCommandService(WaitingReservationRepository waitingReservationRepository) {
-            return new WaitingReservationCommandService(waitingReservationRepository);
-        }
-
-        @Bean
-        public WaitingReservationQueryService waitingReservationQueryService(WaitingReservationRepository waitingReservationRepository) {
-            return new WaitingReservationQueryService(waitingReservationRepository);
-        }
-
-        @Bean
-        public ReservationTimeQueryService reservationTimeQueryService(ReservationTimeRepository reservationTimeRepository) {
-            return new ReservationTimeQueryService(reservationTimeRepository);
-        }
-
-        @Bean
-        public ThemeQueryService themeQueryService(ThemeRepository themeRepository) {
-            return new ThemeQueryService(themeRepository);
-        }
-
-        @Bean
-        public MemberQueryService memberQueryService(MemberRepository memberRepository) {
-            return new MemberQueryService(memberRepository);
-        }
-
-        @Bean
-        public WaitingReservationApplicationService waitingReservationFacadeService(ReservationQueryService reservationQueryService,
-                                                                                    ReservationCommandService reservationCommandService,
-                                                                                    WaitingReservationCommandService waitingReservationCommandService,
-                                                                                    WaitingReservationQueryService waitingReservationQueryService,
-                                                                                    ReservationTimeQueryService timeQueryService,
-                                                                                    ThemeQueryService themeQueryService,
-                                                                                    MemberQueryService memberQueryService) {
-            return new WaitingReservationApplicationService(
-                reservationQueryService,
-                reservationCommandService,
-                waitingReservationCommandService,
-                waitingReservationQueryService,
-                timeQueryService,
-                themeQueryService,
-                memberQueryService
-            );
-        }
     }
 }
