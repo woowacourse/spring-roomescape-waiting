@@ -52,6 +52,12 @@ public class AdminReservationController {
     @PatchMapping("/{id}/waitings/approve")
     public ResponseEntity<Void> approveWaiting(@PathVariable Long id) {
         adminReservationService.approveWaiting(id);
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{id}/waitings/deny")
+    public ResponseEntity<Void> denyWaiting(@PathVariable Long id) {
+        adminReservationService.denyWaiting(id);
+        return ResponseEntity.noContent().build();
     }
 }

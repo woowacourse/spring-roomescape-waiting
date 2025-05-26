@@ -63,4 +63,8 @@ public class AdminReservationFacade {
     public void approveWaiting(Long id) {
         reservationService.approveWaiting(id);
     }
+
+    public void denyWaiting(Long id) {
+        reservationService.denyWaiting(id);
+    }
 }

@@ -186,4 +186,15 @@ public class ReservationService {
             throw new BadRequestException("앞에 대기 중인 예약이 있습니다. 대기 순서를 확인해주세요.");
         }
     }
+
+    public void denyWaiting(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new BadRequestException("존재하지 않는 예약입니다."));
+
+        if (!reservation.isWaiting()) {
+            throw new BadRequestException("대기 중인 예약이 아닙니다.");
+        }
+
+        reservationRepository.delete(reservation);
+    }
 }
