@@ -5,12 +5,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.business.application_service.service.ThemeService;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
+import roomescape.business.service.application.ThemeService;
 import roomescape.exception.business.NotFoundException;
 import roomescape.exception.business.RelatedEntityExistException;
 

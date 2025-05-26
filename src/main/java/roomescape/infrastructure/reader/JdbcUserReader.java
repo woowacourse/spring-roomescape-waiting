@@ -4,8 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.business.application_service.reader.UserReader;
 import roomescape.business.dto.UserDto;
+import roomescape.business.service.reader.UserReader;
 import roomescape.exception.business.NotFoundException;
 
 import java.util.List;

@@ -3,12 +3,12 @@ package roomescape.infrastructure.reader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.business.application_service.reader.ReservationReader;
 import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
+import roomescape.business.service.reader.ReservationReader;
 
 import java.time.LocalDate;
 import java.util.List;

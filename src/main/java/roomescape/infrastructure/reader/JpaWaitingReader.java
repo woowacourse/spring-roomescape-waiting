@@ -3,10 +3,10 @@ package roomescape.infrastructure.reader;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.business.application_service.reader.WaitingReader;
 import roomescape.business.dto.WaitingDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.repository.Reservations;
+import roomescape.business.service.reader.WaitingReader;
 
 import java.util.List;
 

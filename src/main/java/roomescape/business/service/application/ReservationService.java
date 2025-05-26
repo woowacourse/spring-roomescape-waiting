@@ -1,16 +1,16 @@
-package roomescape.business.application_service.service;
+package roomescape.business.service.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservationDto;
-import roomescape.business.helper_service.ReservationSlotHelper;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
 import roomescape.business.model.vo.Id;
+import roomescape.business.service.helper.ReservationSlotHelper;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.business.DuplicatedException;
 import roomescape.exception.business.NotFoundException;

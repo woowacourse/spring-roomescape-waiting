@@ -1,4 +1,4 @@
-package roomescape.business.application_service.reader;
+package roomescape.business.service.reader;
 
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;

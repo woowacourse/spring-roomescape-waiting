@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.AuthRequired;
 import roomescape.auth.Role;
-import roomescape.business.application_service.reader.WaitingReader;
 import roomescape.business.dto.WaitingDto;
 import roomescape.business.model.vo.UserRole;
+import roomescape.business.service.reader.WaitingReader;
 import roomescape.presentation.dto.response.WaitingResponse;
 
 import java.util.List;

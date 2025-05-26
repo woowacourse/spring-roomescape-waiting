@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.business.application_service.reader.ReservationTimeReader;
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
+import roomescape.business.service.reader.ReservationTimeReader;
 
 import java.time.LocalDate;
 import java.util.List;

@@ -5,9 +5,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.business.application_service.service.ReservationService;
 import roomescape.business.dto.ReservationDto;
-import roomescape.business.helper_service.ReservationSlotHelper;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.ReservationTime;
@@ -15,6 +13,8 @@ import roomescape.business.model.entity.Theme;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.repository.Users;
+import roomescape.business.service.application.ReservationService;
+import roomescape.business.service.helper.ReservationSlotHelper;
 import roomescape.exception.business.DuplicatedException;
 
 import java.time.LocalDate;

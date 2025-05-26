@@ -1,4 +1,4 @@
-package roomescape.business.application_service.service;
+package roomescape.business.service.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
