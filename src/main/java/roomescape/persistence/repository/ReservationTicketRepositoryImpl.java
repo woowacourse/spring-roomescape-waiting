@@ -2,10 +2,12 @@ package roomescape.persistence.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.common.exception.NotFoundException;
 import roomescape.infrastructure.db.ReservationTicketJpaRepository;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.persistence.vo.Period;
@@ -61,5 +63,16 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
     public ReservationTicket findById(Long id) {
         return reservationTicketJpaRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당 예약 내역을 찾을 수 없습니다."));
+    }
+
+    @Override
+    public Optional<ReservationTicket> findForThemeAndReservationTimeOnDate(
+            Reservation reservation
+    ) {
+        return reservationTicketJpaRepository.findByReservation_ThemeAndReservation_ReservationTimeAndReservation_Date(
+                reservation.getTheme(),
+                reservation.getReservationTime(),
+                reservation.getDate()
+        );
     }
 }

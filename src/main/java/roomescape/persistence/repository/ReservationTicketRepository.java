@@ -2,6 +2,8 @@ package roomescape.persistence.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
+import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.persistence.vo.Period;
@@ -27,4 +29,6 @@ public interface ReservationTicketRepository {
     void deleteById(Long id);
 
     ReservationTicket findById(Long id);
+
+    Optional<ReservationTicket> findForThemeAndReservationTimeOnDate(Reservation reservation);
 }

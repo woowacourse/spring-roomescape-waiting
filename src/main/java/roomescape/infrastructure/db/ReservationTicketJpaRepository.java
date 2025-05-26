@@ -6,6 +6,7 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
+import roomescape.model.Theme;
 
 public interface ReservationTicketJpaRepository extends JpaRepository<ReservationTicket, Long> {
 
@@ -25,4 +26,10 @@ public interface ReservationTicketJpaRepository extends JpaRepository<Reservatio
     List<ReservationTicket> findByReservation_ThemeId(Long id);
 
     List<ReservationTicket> findByReservation_ReservationTimeId(Long id);
+
+    Optional<ReservationTicket> findByReservation_ThemeAndReservation_ReservationTimeAndReservation_Date(
+            Theme theme,
+            ReservationTime reservationTime,
+            LocalDate date
+    );
 }

@@ -56,6 +56,13 @@ public class RoomescapeExceptionHandler {
         return ex.getMessage();
     }
 
+    @ExceptionHandler(OperationNotAllowedException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    public String handleException(OperationNotAllowedException ex) {
+        logger.error(ex.getMessage(), ex);
+        return ex.getMessage();
+    }
+
     @ExceptionHandler(NoResourceFoundException.class)
     @ResponseStatus(HttpStatus.NOT_FOUND)
     public String handleNoResourceFound(NoResourceFoundException ex) {
