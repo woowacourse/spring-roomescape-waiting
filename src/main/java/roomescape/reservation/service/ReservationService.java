@@ -130,7 +130,32 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElse(null);
+        if (reservation == null) {
+            return;
+        }
+
         reservationRepository.deleteById(id);
+
+        List<Waiting> candidates = waitingRepository.findAllByDateAndTimeIdAndThemeIdOrderByCreatedAt(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+        if (candidates.isEmpty()) {
+            return;
+        }
+
+        Waiting nextWaiting = candidates.get(0);
+        Reservation newReservation = new Reservation(
+                nextWaiting.getDate(),
+                nextWaiting.getTime(),
+                nextWaiting.getTheme(),
+                nextWaiting.getMember()
+        );
+        reservationRepository.save(newReservation);
+        waitingRepository.delete(nextWaiting);
     }
 
     private void validateDateTime(Reservation reservation) {
