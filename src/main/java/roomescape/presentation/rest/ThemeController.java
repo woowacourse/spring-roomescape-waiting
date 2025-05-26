@@ -32,15 +32,15 @@ public class ThemeController {
     @ResponseStatus(CREATED)
     public ThemeResponse addTheme(@Valid @RequestBody final CreateThemeRequest request) {
         Theme theme = themeService.saveTheme(request.name(), request.description(), request.thumbnail());
-        return ThemeResponse.from(theme);
+
+        return ThemeResponse.fromTheme(theme);
     }
 
     @GetMapping("/themes")
     public List<ThemeResponse> findAllThemes() {
-        return themeService.findAllThemes()
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
+        List<Theme> themes = themeService.findAllThemes();
+
+        return ThemeResponse.fromThemes(themes);
     }
 
     @GetMapping("/themes/popular")
@@ -49,10 +49,9 @@ public class ThemeController {
             @RequestParam final LocalDate endDate,
             @RequestParam final int count
     ) {
-        return themeService.findPopularThemes(startDate, endDate, count)
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
+        List<Theme> popularThemes = themeService.findPopularThemes(startDate, endDate, count);
+
+        return ThemeResponse.fromThemes(popularThemes);
     }
 
     @DeleteMapping("/admin/themes/{id}")

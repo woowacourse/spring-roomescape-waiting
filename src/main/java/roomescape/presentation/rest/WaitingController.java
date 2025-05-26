@@ -34,7 +34,8 @@ public class WaitingController {
             @Authenticated final User user, @RequestBody @Valid final CreateWaitingRequest request
     ) {
         Waiting waiting = service.saveWaiting(user, request.date(), request.timeId(), request.themeId());
-        return WaitingResponse.from(waiting);
+
+        return WaitingResponse.fromWaiting(waiting);
     }
 
     @DeleteMapping("/{id}")

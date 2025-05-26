@@ -40,7 +40,8 @@ public class ReservationController {
     ) {
         Reservation reservation = service.saveReservation(user.id(), request.date(), request.timeId(),
                 request.themeId());
-        return ReservationResponse.from(reservation);
+
+        return ReservationResponse.fromReservation(reservation);
     }
 
     @GetMapping
@@ -53,9 +54,7 @@ public class ReservationController {
         ReservationSearchFilter searchFilter = new ReservationSearchFilter(themeId, userId, dateFrom, dateTo);
         List<Reservation> reservations = service.findReservationsByFilter(searchFilter);
 
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return ReservationResponse.fromReservations(reservations);
     }
 
     @DeleteMapping("/{id}")

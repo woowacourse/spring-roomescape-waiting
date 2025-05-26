@@ -1,6 +1,7 @@
 package roomescape.presentation.response;
 
 import java.time.LocalTime;
+import java.util.List;
 import roomescape.domain.timeslot.TimeSlot;
 
 public record TimeSlotResponse(
@@ -8,7 +9,13 @@ public record TimeSlotResponse(
         LocalTime startAt
 ) {
 
-    public static TimeSlotResponse from(final TimeSlot timeSlot) {
+    public static List<TimeSlotResponse> fromTimeSlots(List<TimeSlot> timeSlots) {
+        return timeSlots.stream()
+                .map(TimeSlotResponse::fromTimeSlot)
+                .toList();
+    }
+
+    public static TimeSlotResponse fromTimeSlot(final TimeSlot timeSlot) {
         return new TimeSlotResponse(
                 timeSlot.id(),
                 timeSlot.startAt()

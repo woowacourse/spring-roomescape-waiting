@@ -1,6 +1,7 @@
 package roomescape.presentation.response;
 
 import java.time.LocalDate;
+import java.util.List;
 import roomescape.domain.waiting.Waiting;
 
 public record WaitingResponse(
@@ -11,13 +12,19 @@ public record WaitingResponse(
         ThemeResponse theme
 ) {
 
-    public static WaitingResponse from(Waiting waiting) {
+    public static List<WaitingResponse> fromWaitings(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(WaitingResponse::fromWaiting)
+                .toList();
+    }
+
+    public static WaitingResponse fromWaiting(Waiting waiting) {
         return new WaitingResponse(
                 waiting.id(),
-                UserResponse.from(waiting.user()),
+                UserResponse.fromUser(waiting.user()),
                 waiting.date(),
-                TimeSlotResponse.from(waiting.timeSlot()),
-                ThemeResponse.from(waiting.theme())
+                TimeSlotResponse.fromTimeSlot(waiting.timeSlot()),
+                ThemeResponse.fromTheme(waiting.theme())
         );
     }
 }

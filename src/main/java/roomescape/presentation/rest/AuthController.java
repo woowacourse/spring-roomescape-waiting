@@ -34,7 +34,7 @@ public class AuthController {
 
     @GetMapping("/login/check")
     public UserResponse checkLogin(@Authenticated final User user) {
-        return UserResponse.from(user);
+        return UserResponse.fromUser(user);
     }
 
     @PostMapping("/logout")

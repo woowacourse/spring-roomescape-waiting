@@ -11,39 +11,44 @@ public record UserReservedRecordsResponse(
         LocalDate date,
         TimeSlotResponse time,
         String status
-
 ) {
 
     public static List<UserReservedRecordsResponse> fromReservations(
-            final List<Reservation> reservations) {
+            final List<Reservation> reservations
+    ) {
         return reservations.stream()
                 .map(UserReservedRecordsResponse::fromReservation)
                 .toList();
     }
 
-    private static UserReservedRecordsResponse fromReservation(final Reservation reservation) {
+    private static UserReservedRecordsResponse fromReservation(
+            final Reservation reservation
+    ) {
         return new UserReservedRecordsResponse(
                 reservation.id(),
-                ThemeResponse.from(reservation.theme()),
+                ThemeResponse.fromTheme(reservation.theme()),
                 reservation.date(),
-                TimeSlotResponse.from(reservation.timeSlot()),
+                TimeSlotResponse.fromTimeSlot(reservation.timeSlot()),
                 "예약"
         );
     }
 
     public static List<UserReservedRecordsResponse> fromWaitingsWithRank(
-            final List<WaitingWithRank> waitingsWithRanks) {
+            final List<WaitingWithRank> waitingsWithRanks
+    ) {
         return waitingsWithRanks.stream()
                 .map(UserReservedRecordsResponse::fromWaitingWithRank)
                 .toList();
     }
 
-    private static UserReservedRecordsResponse fromWaitingWithRank(final WaitingWithRank waitingWithRank) {
+    private static UserReservedRecordsResponse fromWaitingWithRank(
+            final WaitingWithRank waitingWithRank
+    ) {
         return new UserReservedRecordsResponse(
                 waitingWithRank.waiting().id(),
-                ThemeResponse.from(waitingWithRank.waiting().theme()),
+                ThemeResponse.fromTheme(waitingWithRank.waiting().theme()),
                 waitingWithRank.waiting().date(),
-                TimeSlotResponse.from(waitingWithRank.waiting().timeSlot()),
+                TimeSlotResponse.fromTimeSlot(waitingWithRank.waiting().timeSlot()),
                 waitingWithRank.rank() + "번째 예약대기"
         );
     }

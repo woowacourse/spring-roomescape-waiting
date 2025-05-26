@@ -40,26 +40,24 @@ public class AdminController {
     @PostMapping("/reservations")
     @ResponseStatus(CREATED)
     public ReservationResponse createReservation(@RequestBody @Valid final CreateReservationAdminRequest request) {
-        Reservation reservation = reservationService.saveReservation(request.userId(), request.date(), request.timeId(),
-                request.themeId());
-        return ReservationResponse.from(reservation);
+        Reservation reservation =
+                reservationService.saveReservation(request.userId(), request.date(), request.timeId(),
+                        request.themeId());
+
+        return ReservationResponse.fromReservation(reservation);
     }
 
     @GetMapping("/users")
     public List<UserResponse> readAllUsers() {
         List<User> users = userService.findAllUsers();
 
-        return users.stream()
-                .map(UserResponse::from)
-                .toList();
+        return UserResponse.fromUsers(users);
     }
 
     @GetMapping("/waitings")
     public List<WaitingResponse> readAllWaitings() {
         List<Waiting> waitings = waitingService.findAllWaitings();
 
-        return waitings.stream()
-                .map(WaitingResponse::from)
-                .toList();
+        return WaitingResponse.fromWaitings(waitings);
     }
 }

@@ -35,16 +35,14 @@ public class TimeSlotController {
     public TimeSlotResponse createTimeSlot(@RequestBody @Valid final CreateTimeSlotRequest request) {
         TimeSlot timeSlot = service.saveTimeSlot(request.startAt());
 
-        return TimeSlotResponse.from(timeSlot);
+        return TimeSlotResponse.fromTimeSlot(timeSlot);
     }
 
     @GetMapping("/times")
     public List<TimeSlotResponse> readAllTimeSlots() {
         List<TimeSlot> timeSlots = service.findAllTimeSlots();
 
-        return timeSlots.stream()
-                .map(TimeSlotResponse::from)
-                .toList();
+        return TimeSlotResponse.fromTimeSlots(timeSlots);
     }
 
     @GetMapping(value = "/availableTimes", params = {"date", "themeId"})
@@ -54,9 +52,7 @@ public class TimeSlotController {
 
         List<AvailableTimeSlot> availableTimeSlots = service.findAvailableTimeSlots(date, themeId);
 
-        return availableTimeSlots.stream()
-                .map(AvailableTimeSlotResponse::from)
-                .toList();
+        return AvailableTimeSlotResponse.fromAvailableTimeSlots(availableTimeSlots);
     }
 
     @DeleteMapping("/admin/times/{id}")

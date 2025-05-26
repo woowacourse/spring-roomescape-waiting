@@ -32,7 +32,7 @@ public class UserController {
     public UserResponse createUser(@RequestBody @Valid final SignupRequest request) {
         User user = userService.saveUser(request.email(), request.password(), request.name());
 
-        return UserResponse.from(user);
+        return UserResponse.fromUser(user);
     }
 
     @GetMapping("/reservations")
