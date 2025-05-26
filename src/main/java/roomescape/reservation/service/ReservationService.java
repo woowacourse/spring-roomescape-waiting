@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
@@ -47,6 +48,8 @@ public class ReservationService {
         Theme theme = themeService.getTheme(themeId);
         Member reserver = memberQueryService.getMember(reserveCommand.memberId());
 
+        validateDuplicateReservation(date, timeId, themeId, reserver.getId());
+
         LocalDateTime reservedAt = LocalDateTime.now();
         Reservation reservation = isAlreadyReserved(date, timeId, themeId)
                 ? Reservation.wait(reserver, reservationDateTime, theme, reservedAt)
@@ -54,6 +57,12 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
         return ReservationResponse.from(saved);
+    }
+
+    private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        if (reservationRepository.existsBy(date, timeId, themeId, memberId)) {
+            throw new InvalidArgumentException("이미 예약했습니다.");
+        }
     }
 
     private boolean isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {

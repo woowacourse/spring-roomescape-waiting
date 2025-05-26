@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -17,6 +18,7 @@ import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDateTimeDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
+import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
@@ -87,19 +89,42 @@ class ReservationServiceTest {
         );
         reservationRepository.save(reservation);
 
+        Member reserver2 = memberDbFixture.유저2_생성();
         ReserveCommand command = new ReserveCommand(
                 reservation.getDate(),
                 reservation.getTheme().getId(),
                 reservation.getReservationTime().getId(),
-                reservation.getReserver().getId()
+                reserver2.getId()
         );
         ReservationResponse response = reservationService.reserve(command);
 
         assertThat(response.id()).isNotNull();
-        assertThat(response.member().name()).isEqualTo(reserver.getName());
+        assertThat(response.member().name()).isEqualTo(reserver2.getName());
         assertThat(response.date()).isEqualTo(reservationDateTime.reservationDate().date());
         assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationDateTime.reservationTime()));
         assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
+    }
+
+    @Test
+    void 같은_유저가_예약을_중복해서_할_수_없다() {
+        Member reserver = memberDbFixture.유저1_생성();
+        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+        Theme theme = themeDbFixture.공포();
+        Reservation reservation = Reservation.reserve(
+                reserver, reservationDateTime, theme, LocalDateTime.now()
+        );
+        reservationRepository.save(reservation);
+
+        ReserveCommand command = new ReserveCommand(
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getReservationTime().getId(),
+                reserver.getId()
+        );
+
+        assertThatThrownBy(() -> reservationService.reserve(command))
+                .isInstanceOf(InvalidArgumentException.class)
+                .hasMessage("이미 예약했습니다.");
     }
 
     @Test
