@@ -1,307 +1,79 @@
-### 요구사항
-- [x] gradle 의존성 추가
-- [x] 엔티티 매핑
-  - [x] Theme나 Time 엔티티 설정을 하세요.
-  - [x] 연관관계 매핑
-    - [x] Reservation이 Member나 Theme, ReservationTime 객체에 의존하도록
+# 방탈출 서비스(Room Escape)
 
-- [x] 내 예약 목록 조회 API 추가
-- 
+이 프로젝트는 방탈출 서비스의 예약 시스템을 구현합니다.
 
+## 📚 도메인 개념
+도메인에서 사용되는 개념들을 정리합니다. 실제 도메인으로 나타나지 않은 개념도 포함합니다.
 
+- **Booking**: 예약의 상위 개념. 예약된 상태(Reservation)와 대기 상태(Waiting)를 모두 포함하는 개념
+- **Reservation**: 예약됨. BookingSlot(테마-날짜-시간)을 선택하여 예약이 확정된 상태
+- **Waiting**: 예약 대기. BookingSlot에 대해 예약이 승인되지 않은 상태
+- **Theme**: 방탈출 테마
+- **ReservationTime**: 예약 시간
+- **Date**: 예약 날짜. `LocalDate`를 사용하여 표현
+- **BookingSlot**: 테마-날짜-시간의 조합으로, 예약 가능한 하나의 슬롯을 의미
+- **MyPage**: 사용자가 자신의 예약 및 대기 목록을 확인하는 페이지
+- **Auth**: 사용자 인증 및 인가를 모두 의미
+
+## 🧩️ 구현 기능
+
+### Theme(테마)
+
+- 기능
+  - 관리자가 테마를 추가/삭제/조회하는 API
+  - 사용자가 인기 테마를 조회하는 API
+
+### ReservationTime(예약 시간)
+
+- 기능
+  - 관리자가 시간을 추가/삭제/조회하는 API
+  - 사용자가 테마,날짜에 따른 예약 가능한 시간을 조회하는 API
+
+### Reservation(예약됨)
+
+- 기능
+  - 관리자가 예약을 조회(+필터링)/추가/삭제하는 API
+  - 사용자가 BookingSlot(테마-날짜-시간)을 선택하여 예약을 등록하는 API
+- 기능 세부
+  - 예약 삭제 시 첫 번째 대기자(Waiter)가 자동으로 예약 승인되도록 구현
+
+### Waiting(예약 대기)
+
+- 기능
+  - 관리자가 예약 대기를 조회/삭제하는 API
+  - 사용자가 BookingSlot(테마-날짜-시간)에 대해 예약 대기를 요청/삭제하는 API
+- 기능 세부
+  - 한 사용자가 동일한 BookingSlot에 대한 중복 대기 요청 방지
+  - 관리자는 모든 Waiting 삭제 가능, 사용자는 본인의 Waiting만 삭제할 수 있도록 권한 제한
+  - 대기 우선 순위는 대기를 시작한 시간(waitingStartedAt) 순서대로 계산
+
+### MyPage(마이페이지)
+
+- 기능: 사용자의 booking(Reservation + Waiting)을 모두 조회하는 API
+- 기능 세부:
+  - 예약+대기 목록 조회 시 date, ReservationTime 순대로 정렬
+
+### Auth(인증, 인가)
+
+- 기능
+  - 사용자 로그인, 로그아웃 API
+  - 현재 로그인 되어 있는 사용자 정보를 체크하는 API
+- 기능 세부
+  - 로그인은 email과 password를 통하여 진행
+  - 로그인 성공 시 JWT 토큰을 발급하고, 이를 쿠키에 저장
+  - 로그인 체크 시 쿠키에 저장된 JWT 토큰을 검증하여 현재 로그인된 사용자 정보를 반환
 ---
 
-### API 명세
-
-[GET] 테마 조회 `/themes`
-  
-  
-  **응답 예시**
-
-```json
-[
-  {
-    "id": 1,
-    "name": "레벨2 탈출",
-    "description": "우테코 레벨2를 탈출하는 내용입니다.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  }
-]
-```
-
-**id:** 식별자
-
-**name:** 이름
-
-**description:** 설명
-
-**thumbnail:** 썸네일 이미지 경로
-
----
-[POST] 테마 삭제 `/themes`
-
-  **요청 예시**
-
-```json
-{
-  "name": "레벨2 탈출",
-  "description": "우테코 레벨2를 탈출하는 내용입니다.",
-  "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-}
-```
-
-**name:** 이름
-
-**description:** 설명
-
-**thumbnail:** 썸네일 이미지 경로
-
-**응답 예시**
-
-```json
-{
-  "id": 1,
-  "name": "레벨2 탈출",
-  "description": "우테코 레벨2를 탈출하는 내용입니다.",
-  "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-}
-```
-
-**id:** 식별자
-
-**name:** 이름
-
-**description:** 설명
-
-**thumbnail:** 썸네일 이미지 경로
-
----
-[DELETE] 테마 삭제 `/themes/{id}`
-  
-  
----
-[GET] 예약 가능 시간 조회 `/times/available`
-
-- Query Parameter
-  - themeId: 테마의 식별자
-  - date: 에약 날짜
-
-**응답 예시**
-
-```json
-[
-  {
-    "timeId": 1,
-    "startAt": "12:00:00",
-    "booked": true
-  },
-  {
-    "timeId": 2,
-    "startAt": "13:00:00",
-    "booked": false
-  }
-]
-```
-
-**timeId:** 예약 시간의 식별자
-
-**startAt:** 예약 시작 시간
-
-**booked:** 예약 여부
-
----
-[GET] 일주일 간, 인기 테마 10개 내림차순 조회 `/themes/rank`
-
-**응답 예시**
-
-```json
-[
-  {
-    "id": 7,
-    "name": "The Lost City",
-    "description": "Discover the secrets of the lost city and find your way out.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  },
-  {
-    "id": 11,
-    "name": "The Bank Heist",
-    "description": "Plan and execute the perfect bank heist to escape.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  },
-  {
-    "id": 20,
-    "name": "The Wild West",
-    "description": "Escape the wild west town before the showdown.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  },
-  ...
-]
-```
----
-
-[POST] 예약 생성 `/reservations`
-
-**요청 예시**
-```json
-Content-Type: application/json
-Set-Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZW1haWwiOiJhZG1pbkBlbWFpbC5jb20iLCJleHAiOjE3NDY2Mzc2MjF9.WxJxnaS-fmy-VmNrIMERWlPf0TOboT5WY2nATnybbVw
-
-{
-  "date": "2025-05-11",
-  "timeId": 1,
-  "themeId": 1
-}
-```
-
-**date**: 예약 일자
-
-**timeId**: 예약 시간 식별자
-
-**themeId**: 예약 테마 식별자
-
-**응답 예시**
-```json
-{
-  "id": 21,
-  "name": "admin",
-  "date": "2025-05-11",
-  "time": {
-    "id": 1,
-    "startAt": "12:00:00"
-  },
-  "theme": {
-    "id": 1,
-    "name": "The Haunted Mansion",
-    "description": "Solve the mysteries of the haunted mansion to escape.",
-    "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-  }
-}
-```
-
-**id**: 예약 식별자
-
-**name**: 예약자명
-
-**date**: 예약 날짜
-
-**time.id**: 예약 시간 식별자
-
-**time.startAt**: 예약 시작 시간
-
-**theme.id**: 예약 테마 식별자
-
-**theme.name**: 예약 테마명
-
-**theme.description**: 예약 테마 설명
-
-**theme.thumbnail**: 예약 테마 썸네일
-
----
-
-[GET] 모든 사용자 찾기 `/members`
-
-**응답 형식**
-```json
-[
-  {
-    "id": 1,
-    "name": "admin",
-    "email": "admin@email.com"
-  },
-  {
-    "id": 2,
-    "name": "Alice",
-    "email": "alice@example.com"
-  },
-...
-]
-```
-
-**id**: 사용자 식별자
-
-**email**: 사용자 이메일
-
-**name**: 사용자 이름
-
----
-
-[POST] 사용자 회원 가입 `/members`
-
-**요청 형식**
-```json
-{
-  "email": "abc@email.com",
-  "password": "abc",
-  "name": "abc"
-}
-```
-
-**email**: 사용자 이메일
-
-**password**: 로그인 패스워드
-
-**name**: 사용자 이름
-
-**응답 형식**
-```json
-{
-  "id": 12,
-  "name": "abc",
-  "email": "abc@email.com"
-}
-```
-**id**: 사용자 식별자
-
-**email**: 사용자 이메일
-
-**name**: 사용자 이름
-
-[POST] 사용자 로그인 `/login`
-
-**요청 예시**
-
-```json
-{
-  "email": "abc@email.com",
-  "password": "abc"
-}
-```
-**email**: 사용자 이메일
-
-**password**: 로그인 패스워드
-
-**응답 예시**
-
-```json
-HTTP/1.1 200
-Set-Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwiZXhwIjoxNzQ2ODE0NzIxfQ.yV-Ikj-XDo1c8q66kHNtf6lCKEx-y1KfImvm3kjovDE; Path=/; Max-Age=86400; Expires=Sat, 10 May 2025 17:18:41 GMT; Secure; HttpOnly; SameSite=Strict
-Content-Type: application/json
-Transfer-Encoding: chunked
-Date: Fri, 09 May 2025 17:18:41 GMT
-
-{
-"id": 1,
-"name": "admin",
-"email": "admin@email.com"
-}
-```
-
-**id:** 사용자 식별자
-
-**name:** 사용자 이름
-
-**email:** 사용자 이메일
-
----
-
-[GET] 로그인 체크 `/login/check`
-
-**응답 형식**
-```json
-{
-  "name": "admin"
-}
-```
-**name**: 사용자 이름
-
----
+## API 명세
+main 실행 후 --> http://localhost:8080/docs/index.html
+- 업데이트는 `.gradlew build`
+
+### 테스트 계정
+
+| 역할    | ID                | Password  |
+|-------|-------------------|-----------|
+| ADMIN | admin@email.com   | password  |
+| USER  | alice@example.com | password  |
+| USER  | bob@example.com   | password  |
+
+- 더 많은 테스트 계정은 `src/main/resources/data.sql` 참고
