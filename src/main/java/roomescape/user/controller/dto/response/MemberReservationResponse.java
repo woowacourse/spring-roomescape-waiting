@@ -17,10 +17,10 @@ public record MemberReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme,
         ReservationStatus reservationStatus,
-        Long rank
+        int rank
 ) {
 
-    public static final long DEFAULT_RESERVATION_RANK = 0L;
+    public static final int DEFAULT_RESERVATION_RANK = 0;
 
     public static MemberReservationResponse fromReservation(Reservation reservation) {
         return new MemberReservationResponse(
@@ -42,7 +42,7 @@ public record MemberReservationResponse(
                 ReservationTimeResponse.from(waitingWithRank.getWaiting().getReservationTime()),
                 ThemeResponse.from(waitingWithRank.getWaiting().getTheme()),
                 WAITING,
-                waitingWithRank.getRank()
+                (int) waitingWithRank.getAdjustedRank()
         );
     }
 }
