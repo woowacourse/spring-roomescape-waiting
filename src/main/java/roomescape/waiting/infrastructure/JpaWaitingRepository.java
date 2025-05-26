@@ -24,4 +24,10 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             Long timeId,
             WaitingStatus status
     );
+
+    boolean existsByMember_IdAndDateAndTime_IdAndStatus(
+            Long memberId,
+            LocalDate date,
+            Long timeId,
+            WaitingStatus status);
 }

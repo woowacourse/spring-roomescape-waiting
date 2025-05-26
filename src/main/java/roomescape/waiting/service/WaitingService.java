@@ -39,6 +39,14 @@ public class WaitingService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("테마를 찾을 수 없습니다"));
 
+        if (waitingRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
+                loginMember.id(),
+                request.date(),
+                request.timeId(),
+                WaitingStatus.PENDING)) {
+            throw new IllegalStateException("해당 날짜와 시간에 이미 대기가 존재합니다.");
+        }
+
         long currentWaitingCounts = waitingRepository.countByDateAndThemeIdAndTimeIdAndStatus(
                 request.date(),
                 request.themeId(),

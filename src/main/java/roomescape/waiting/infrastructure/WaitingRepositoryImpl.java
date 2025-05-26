@@ -47,4 +47,14 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public java.util.Optional<Waiting> findById(Long id) {
         return jpaWaitingRepository.findById(id);
     }
+
+    @Override
+    public boolean existsByMemberIdAndDateAndTimeIdAndStatus(
+            Long memberId,
+            LocalDate date,
+            Long timeId,
+            WaitingStatus status) {
+        return jpaWaitingRepository.existsByMember_IdAndDateAndTime_IdAndStatus(
+                memberId, date, timeId, status);
+    }
 }
