@@ -5,6 +5,8 @@ import org.springframework.stereotype.Service;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.global.exception.custom.ForbiddenException;
+import roomescape.global.exception.custom.NotFoundException;
+import roomescape.global.exception.custom.UnauthorizedException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -50,9 +52,9 @@ public class WaitingService {
 
     public void deleteMyWaiting(final long waitingId, final LoginMember loginMember) {
         final Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new BadRequestException("회원 정보를 찾을 수 없습니다."));
+                .orElseThrow(() -> new UnauthorizedException("회원 정보를 찾을 수 없습니다."));
         final Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new BadRequestException("id를 찾을 수 없습니다."));
+                .orElseThrow(() -> new NotFoundException("예약 대기 정보를 찾을 수 없습니다."));
         if (!waiting.hasOwner(member)) {
             throw new ForbiddenException("본인의 예약대기만 삭제할 수있습니다.");
         }

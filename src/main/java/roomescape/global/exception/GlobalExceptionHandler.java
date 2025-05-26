@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.global.exception.custom.ForbiddenException;
+import roomescape.global.exception.custom.NotFoundException;
 import roomescape.global.exception.custom.UnauthorizedException;
 import roomescape.global.exception.dto.ErrorResponse;
 
@@ -65,6 +66,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ForbiddenException.class)
     @ResponseStatus(HttpStatus.FORBIDDEN)
     public void handleForbiddenException(final ForbiddenException e) {
+    }
+
+    /**
+     * 404 Not Found
+     */
+    @ExceptionHandler(NotFoundException.class)
+    @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleNotFoundException(final NotFoundException e) {
+        return new ErrorResponse(e.getMessage());
     }
 
     /**

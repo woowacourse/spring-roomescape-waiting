@@ -2,6 +2,7 @@ package roomescape.time.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.custom.BadRequestException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.CreateReservationTimeRequest;
@@ -22,7 +23,7 @@ public class ReservationTimeService {
 
     public ReservationTimeResponse createReservationTime(final CreateReservationTimeRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
-            throw new IllegalArgumentException("이미 존재하는 시간입니다.");
+            throw new BadRequestException("이미 존재하는 시간입니다.");
         }
         final ReservationTime reservationTime = request.convertToReservationTime();
         final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
@@ -37,7 +38,7 @@ public class ReservationTimeService {
 
     public void deleteReservationTimeById(final long id) {
         if (reservationRepository.existsByTimeId(id)) {
-            throw new IllegalArgumentException("예약이 존재하는 시간은 삭제할 수 없습니다.");
+            throw new BadRequestException("예약이 존재하는 시간은 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);
     }

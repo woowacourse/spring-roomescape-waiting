@@ -46,8 +46,8 @@ class ReservationServiceTest {
                 TOMORROW, TIME.getId(), THEME.getId(), MEMBER.getId());
         CreateReservationWithMemberRequest request2 = new CreateReservationWithMemberRequest(TOMORROW.plusDays(1),
                 TIME.getId(), THEME.getId(), MEMBER.getId());
-        reservationCommandService.createReservation(request1);
-        reservationCommandService.createReservation(request2);
+        reservationCommandService.createReservationByAdmin(request1);
+        reservationCommandService.createReservationByAdmin(request2);
     }
 
     @DisplayName("예약 생성 테스트")
@@ -65,7 +65,7 @@ class ReservationServiceTest {
         @Test
         void testCreate() {
             // when
-            ReservationResponse result = reservationCommandService.createReservation(REQUEST);
+            ReservationResponse result = reservationCommandService.createReservationByAdmin(REQUEST);
             // then
             Reservation savedReservation = reservationDao.findById(3L).orElseThrow();
             assertAll(
@@ -96,10 +96,10 @@ class ReservationServiceTest {
         @Test
         void testValidateDuplication() {
             // given
-            reservationCommandService.createReservation(REQUEST);
+            reservationCommandService.createReservationByAdmin(REQUEST);
             // when
             // then
-            assertThatThrownBy(() -> reservationCommandService.createReservation(REQUEST))
+            assertThatThrownBy(() -> reservationCommandService.createReservationByAdmin(REQUEST))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("해당 시간에 이미 예약이 존재합니다.");
         }
@@ -112,7 +112,7 @@ class ReservationServiceTest {
                     THEME.getId(), MEMBER.getId());
             // when
             // then
-            assertThatThrownBy(() -> reservationCommandService.createReservation(request))
+            assertThatThrownBy(() -> reservationCommandService.createReservationByAdmin(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("예약 시간이 존재하지 않습니다.");
         }
@@ -125,7 +125,7 @@ class ReservationServiceTest {
                     2L, MEMBER.getId());
             // when
             // then
-            assertThatThrownBy(() -> reservationCommandService.createReservation(request))
+            assertThatThrownBy(() -> reservationCommandService.createReservationByAdmin(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("테마가 존재하지 않습니다.");
         }
@@ -139,7 +139,7 @@ class ReservationServiceTest {
                     THEME.getId(), MEMBER.getId());
             // when
             // then
-            assertThatThrownBy(() -> reservationCommandService.createReservation(request))
+            assertThatThrownBy(() -> reservationCommandService.createReservationByAdmin(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
         }

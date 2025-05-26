@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.AuthMember;
 import roomescape.global.auth.LoginMember;
 import roomescape.reservation.dto.CreateReservationRequest;
-import roomescape.reservation.dto.CreateReservationWithMemberRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationCommandService;
@@ -34,10 +33,7 @@ public class ReservationController {
             @RequestBody @Valid final CreateReservationRequest request,
             @AuthMember final LoginMember member
     ) {
-        final CreateReservationWithMemberRequest newRequest = new CreateReservationWithMemberRequest(
-                request.date(), request.timeId(), request.themeId(), member.id());
-
-        final ReservationResponse response = reservationCommandService.createReservation(newRequest);
+        final ReservationResponse response = reservationCommandService.createMyReservation(request, member);
         return ResponseEntity.created(URI.create("/reservations/" + response.id())).body(response);
     }
 

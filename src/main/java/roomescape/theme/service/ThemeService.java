@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.stereotype.Service;
+import roomescape.global.exception.custom.BadRequestException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
@@ -24,9 +25,9 @@ public class ThemeService {
     }
 
     public ThemeResponse createTheme(final CreateThemeRequest createThemeRequest) {
-        Theme theme = createThemeRequest.convertToTheme();
+        final Theme theme = createThemeRequest.convertToTheme();
         if (themeRepository.existsByName(theme.getName())) {
-            throw new IllegalArgumentException("해당 이름의 테마는 이미 존재합니다.");
+            throw new BadRequestException("해당 이름의 테마는 이미 존재합니다.");
         }
         final Theme savedTheme = themeRepository.save(theme);
         return new ThemeResponse(savedTheme);
@@ -41,7 +42,7 @@ public class ThemeService {
 
     public void deleteThemeById(final Long id) {
         if (reservationRepository.existsByThemeId(id)) {
-            throw new IllegalArgumentException("예약이 존재하는 테마는 삭제할 수 없습니다.");
+            throw new BadRequestException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         }
         themeRepository.deleteById(id);
     }
