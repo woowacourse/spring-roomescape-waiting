@@ -12,16 +12,12 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.common.BaseTest;
-import roomescape.presentation.dto.response.ReservationResponse;
 
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
 class IntegrationTest extends BaseTest {
@@ -32,11 +28,19 @@ class IntegrationTest extends BaseTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    private static final Map<String, Object> reservation = new HashMap<>();
     private static final Map<String, String> reservationTime = new HashMap<>();
     private static final Map<String, String> theme = new HashMap<>();
+
     private static final Map<String, String> member = new HashMap<>();
     private static final Map<String, Object> authOfMember = new HashMap<>();
+    private static final Map<String, Object> anotherMember = new HashMap<>();
+    private static final Map<String, Object> anotherAuthOfMember = new HashMap<>();
+
+    private static final Map<String, Object> reservation = new HashMap<>();
+    private static final Map<String, Object> anotherReservation = new HashMap<>();
+
+    private static final Map<String, Object> waiting = new HashMap<>();
+
     private static final Map<String, String> admin = new HashMap<>();
     private static final Map<String, Object> authOfAdmin = new HashMap<>();
     private static final Map<String, Object> adminReservation = new HashMap<>();
@@ -48,6 +52,7 @@ class IntegrationTest extends BaseTest {
         setUpTheme();
         setUpMemberAndLogin();
         setUpReservation();
+        setUpWaiting();
         setUpAdminAndLogin();
         setUpAdminReservation();
     }
@@ -69,21 +74,41 @@ class IntegrationTest extends BaseTest {
 
         authOfMember.put("email", "test@email.com");
         authOfMember.put("password", "pass1");
+
+        anotherMember.put("name", "제로");
+        anotherMember.put("email", "test2@email.com");
+        anotherMember.put("password", "pass2");
+
+        anotherAuthOfMember.put("email", "test2@email.com");
+        anotherAuthOfMember.put("password", "pass2");
     }
 
     private void setUpReservation() {
         reservation.put("date", "2025-08-05");
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
+
+        anotherReservation.put("date", "2025-08-06");
+        anotherReservation.put("timeId", 1);
+        anotherReservation.put("themeId", 1);
+    }
+
+    private void setUpWaiting() {
+        waiting.put("reservationId", 2);
+        waiting.put("date", "2025-08-06");
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+        waiting.put("memberId", 1);
+        waiting.put("rank", 1);
     }
 
     private void setUpAdminAndLogin() {
         admin.put("name", "듀이");
-        admin.put("email", "test2@email.com");
-        admin.put("password", "pass2");
+        admin.put("email", "admin@email.com");
+        admin.put("password", "admin");
 
-        authOfAdmin.put("email", "test2@email.com");
-        authOfAdmin.put("password", "pass2");
+        authOfAdmin.put("email", "admin@email.com");
+        authOfAdmin.put("password", "admin");
     }
 
     private void setUpAdminReservation() {
@@ -94,78 +119,104 @@ class IntegrationTest extends BaseTest {
     }
 
     @Nested
-    class Page {
+    class ReservationTime {
 
         @Test
-        void 메인_페이지를_응답한다() {
+        void 예약_시간을_생성_조회_삭제한다() {
             RestAssured.given().log().all()
-                    .when().get("/")
+                    .contentType(ContentType.JSON)
+                    .body(reservationTime)
+                    .when().post("/times")
                     .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
+                    .statusCode(HttpStatus.CREATED.value());
+
+            RestAssured.given().log().all()
+                    .when().get("/times")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(1));
+
+            RestAssured.given().log().all()
+                    .when().delete("/times/1")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
         }
 
         @Test
-        void 관리자_페이지를_응답한다() {
-            givenCreatedAdmin();
-            String token = givenAdminLoginToken();
+        void 예약시간_생성시_이미_존재하는_예약시간이면_예외를_응답한다() {
+            givenCreatedReservationTime();
 
             RestAssured.given().log().all()
-                    .cookie("token", token)
-                    .when().get("/admin")
+                    .contentType(ContentType.JSON)
+                    .body(reservationTime)
+                    .when().post("/times")
                     .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
+                    .statusCode(HttpStatus.CONFLICT.value());
         }
 
         @Test
-        void 방탈출_예약관리_페이지를_응답한다() {
-            givenCreatedAdmin();
-            String token = givenAdminLoginToken();
+        void 예약_시간_삭제시_존재하지_않는_예약시간이면_예외를_응답한다() {
+            RestAssured.given().log().all()
+                    .when().delete("/times/1")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NOT_FOUND.value());
+        }
+        @Test
+        void 예약_시간_삭제시_이미_예약이_존재하면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
 
             RestAssured.given().log().all()
-                    .cookie("token", token)
-                    .when().get("/admin/reservation")
+                    .when().delete("/times/1")
                     .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
+                    .statusCode(HttpStatus.CONFLICT.value());
+        }
+    }
+
+    @Nested
+    class Theme {
+
+        @Test
+        void 테마를_생성_조회_삭제한다() {
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(theme)
+                    .when().post("/themes")
+                    .then().log().all()
+                    .statusCode(HttpStatus.CREATED.value());
+
+            RestAssured.given().log().all()
+                    .when().get("/themes")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(1));
+
+            RestAssured.given().log().all()
+                    .when().delete("/themes/1")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
         }
 
         @Test
-        void 방탈출_시간관리_페이지를_응답한다() {
-            givenCreatedAdmin();
-            String token = givenAdminLoginToken();
-
+        void 테마_삭제시_존재하지_않는_테마면_예외를_응답한다() {
             RestAssured.given().log().all()
-                    .cookie("token", token)
-                    .when().get("/admin/time")
+                    .when().delete("/themes/1")
                     .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
+                    .statusCode(HttpStatus.NOT_FOUND.value());
         }
-
         @Test
-        void 방탈출_테마관리_페이지를_응답한다() {
-            givenCreatedAdmin();
-            String token = givenAdminLoginToken();
+        void 테마_삭제시_이미_예약이_존재하면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
 
             RestAssured.given().log().all()
-                    .cookie("token", token)
-                    .when().get("/admin/theme")
+                    .when().delete("/themes/1")
                     .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
-        }
-
-        @Test
-        void 방탈출_사용자_예약페이지를_응답한다() {
-            RestAssured.given().log().all()
-                    .when().get("/reservation")
-                    .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
-        }
-
-        @Test
-        void 방탈출_로그인_페이지를_응답한다() {
-            RestAssured.given().log().all()
-                    .when().get("/login")
-                    .then().log().all()
-                    .statusCode(HttpStatus.OK.value());
+                    .statusCode(HttpStatus.CONFLICT.value());
         }
     }
 
@@ -234,150 +285,11 @@ class IntegrationTest extends BaseTest {
         }
 
         @Test
-        void 예약_삭제시_존재하지_않는_예약이면_예외를_응답한다() {
-            RestAssured.given().log().all()
-                    .when().delete("/reservations/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.NOT_FOUND.value());
-        }
-    }
-
-    @Nested
-    class ReservationTime {
-
-        @Test
-        void 예약_시간을_생성_조회_삭제한다() {
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(reservationTime)
-                    .when().post("/times")
-                    .then().log().all()
-                    .statusCode(HttpStatus.CREATED.value());
-
-            RestAssured.given().log().all()
-                    .when().get("/times")
-                    .then().log().all()
-                    .statusCode(HttpStatus.OK.value())
-                    .body("size()", is(1));
-
-            RestAssured.given().log().all()
-                    .when().delete("/times/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.NO_CONTENT.value());
-        }
-
-        @Test
-        void 예약_시간_삭제시_존재하지_않는_예약시간이면_예외를_응답한다() {
-            RestAssured.given().log().all()
-                    .when().delete("/times/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.NOT_FOUND.value());
-        }
-
-        @Test
-        void 예약_시간_삭제시_이미_예약이_존재하면_예외를_응답한다() {
+        void 이미_예약된_방탈출_예약을_생성하면_예외를_응답한다() {
             givenCreatedReservationTime();
             givenCreatedTheme();
             givenCreatedMember();
             givenCreatedReservation();
-
-            RestAssured.given().log().all()
-                    .when().delete("/times/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.CONFLICT.value());
-        }
-    }
-
-    @Nested
-    class Theme {
-
-        @Test
-        void 테마를_생성_조회_삭제한다() {
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(theme)
-                    .when().post("/themes")
-                    .then().log().all()
-                    .statusCode(HttpStatus.CREATED.value());
-
-            RestAssured.given().log().all()
-                    .when().get("/themes")
-                    .then().log().all()
-                    .statusCode(HttpStatus.OK.value())
-                    .body("size()", is(1));
-
-            RestAssured.given().log().all()
-                    .when().delete("/themes/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.NO_CONTENT.value());
-        }
-
-        @Test
-        void 테마_삭제시_존재하지_않는_테마면_예외를_응답한다() {
-            RestAssured.given().log().all()
-                    .when().delete("/themes/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.NOT_FOUND.value());
-        }
-
-        @Test
-        void 테마_삭제시_이미_예약이_존재하면_예외를_응답한다() {
-            givenCreatedReservationTime();
-            givenCreatedTheme();
-            givenCreatedMember();
-            givenCreatedReservation();
-
-            RestAssured.given().log().all()
-                    .when().delete("/themes/1")
-                    .then().log().all()
-                    .statusCode(HttpStatus.CONFLICT.value());
-        }
-    }
-
-    @Nested
-    class Database {
-
-        @Test
-        void 데이터베이스_연결을_검증한다() {
-            try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-                assertThat(connection).isNotNull();
-                assertThat(connection.getCatalog()).isEqualTo("DATABASE");
-                assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
-            } catch (SQLException e) {
-                throw new RuntimeException(e);
-            }
-        }
-
-        @Test
-        void 방탈출_예약_목록을_조회한다() {
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)",
-                    "10:00");
-            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
-                    "테마1", "설명1", "썸네일1");
-            jdbcTemplate.update("INSERT INTO member (name, role, email, password) VALUES (?, ?, ?, ?)",
-                    "브라운", "USER", "test@email.com", "pass1");
-            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
-                    "2025-08-05", 1, 1, 1);
-
-            List<ReservationResponse> response = RestAssured.given().log().all()
-                    .when().get("/reservations")
-                    .then().log().all()
-                    .statusCode(HttpStatus.OK.value()).extract()
-                    .jsonPath().getList(".", ReservationResponse.class);
-
-            Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-
-            assertThat(response.size()).isEqualTo(count);
-        }
-
-        @Test
-        void 방탈출_예약_목록을_생성_조회_삭제한다() {
-            jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)",
-                    "10:00");
-            jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES (?, ?, ?)",
-                    "테마1", "설명1", "썸네일1");
-            jdbcTemplate.update("INSERT INTO member (name, role, email, password) VALUES (?, ?, ?, ?)",
-                    "브라운", "USER", "test@email.com", "pass1");
             String token = givenMemberLoginToken();
 
             RestAssured.given().log().all()
@@ -386,17 +298,273 @@ class IntegrationTest extends BaseTest {
                     .body(reservation)
                     .when().post("/reservations")
                     .then().log().all()
-                    .statusCode(HttpStatus.CREATED.value());
+                    .statusCode(HttpStatus.CONFLICT.value());
+        }
 
-            Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-            assertThat(count).isEqualTo(1);
+        @Test
+        void 과거_방탈출_예약을_생성하면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            reservation.put("date", "2024-08-06");
+            givenCreatedReservation();
+            String token = givenMemberLoginToken();
 
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
+                    .body(reservation)
+                    .when().post("/reservations")
+                    .then().log().all()
+                    .statusCode(HttpStatus.BAD_REQUEST.value());
+        }
+
+        @Test
+        void 예약_삭제시_존재하지_않는_예약이면_예외를_응답한다() {
             RestAssured.given().log().all()
                     .when().delete("/reservations/1")
                     .then().log().all()
+                    .statusCode(HttpStatus.NOT_FOUND.value());
+        }
+
+        @Test
+        void 사용자의_예약과_예약대기_목록을_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            givenCreatedWaiting();
+
+            String token = givenMemberLoginToken();
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().get("/reservations-mine")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(2));
+        }
+    }
+
+    @Nested
+    class Member {
+
+        @Test
+        void 전체_사용자_목록을_응답한다() {
+            givenCreatedMember();
+
+            RestAssured.given().log().all()
+                    .when().get("/members")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(2));
+        }
+    }
+
+    @Nested
+    class Auth {
+
+        @Test
+        void 로그인_성공시_토큰을_응답한다() {
+            givenCreatedMember();
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(authOfMember)
+                    .when().post("/login")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .cookie("token", notNullValue());
+        }
+
+        @Test
+        void 존재하지_않는_이메일로_로그인하면_예외를_응답한다() {
+            givenCreatedMember();
+            authOfMember.put("email", "notExistEmail@email.com");
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(authOfMember)
+                    .when().post("/login")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NOT_FOUND.value());
+        }
+
+        @Test
+        void 잘못된_비밀번호로_로그인하면_예외를_응답한다() {
+            givenCreatedMember();
+            authOfMember.put("password", "incorrectPassword");
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(authOfMember)
+                    .when().post("/login")
+                    .then().log().all()
+                    .statusCode(HttpStatus.CONFLICT.value());
+        }
+    }
+
+    @Nested
+    class Waiting {
+
+        @Test
+        void 사용자가_예약대기를_생성_삭제한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            String token = givenMemberLoginToken();
+
+            // 생성
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
+                    .body(waiting)
+                    .when().post("/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.CREATED.value());
+
+            // 삭제
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().delete("/reservations/waitings/1")
+                    .then().log().all()
                     .statusCode(HttpStatus.NO_CONTENT.value());
-            Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
-            assertThat(countAfterDelete).isEqualTo(0);
+        }
+
+        @Test
+        void 사용자가_이미_예약한_예약에_대기를_생성하면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            waiting.put("reservationId", 1);
+            waiting.put("date", "2025-08-05");
+            String token = givenMemberLoginToken();
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
+                    .body(waiting)
+                    .when().post("/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.CONFLICT.value());
+        }
+
+        @Test
+        void 사용자가_이미_대기한_예약에_대기를_생성하면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            givenCreatedWaiting();
+            String token = givenMemberLoginToken();
+
+            RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
+                    .body(waiting)
+                    .when().post("/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.CONFLICT.value());
+        }
+
+        @Test
+        void 사용자가_내_예약대기가_아닌_예약대기를_삭제하면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            givenCreatedWaiting();
+            String token = givenAnotherMemberLoginToken();
+
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().delete("/reservations/waitings/1")
+                    .then().log().all()
+                    .statusCode(HttpStatus.CONFLICT.value());
+        }
+
+        @Test
+        void 사용자가_예약을_취소하면_1순위_예약대기가_삭제된다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            givenCreatedWaiting();
+            givenCreatedAdmin();
+            String token = givenAnotherMemberLoginToken();
+            String adminToken = givenAdminLoginToken();
+
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().delete("/reservations/2")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+
+            RestAssured.given().log().all()
+                    .cookie("token", adminToken)
+                    .when().get("/admin/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(0));
+        }
+
+        @Test
+        void 관리자가_예약대기를_조회_삭제한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            givenCreatedWaiting();
+            givenCreatedAdmin();
+            String token = givenAdminLoginToken();
+
+            // 조회
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .body(waiting)
+                    .when().get("/admin/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(1));
+
+            // 삭제
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().delete("/admin/reservations/waitings/1")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+        }
+
+        @Test
+        void 관리자가_예약을_거절하면_1순위_예약대기가_삭제된다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            givenCreatedReservation();
+            givenCreatedAnotherReservation();
+            givenCreatedWaiting();
+            givenCreatedAdmin();
+            String token = givenAdminLoginToken();
+
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().delete("/reservations/2")
+                    .then().log().all()
+                    .statusCode(HttpStatus.NO_CONTENT.value());
+
+            RestAssured.given().log().all()
+                    .cookie("token", token)
+                    .when().get("/admin/reservations/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value())
+                    .body("size()", is(0));
         }
     }
 
@@ -404,27 +572,26 @@ class IntegrationTest extends BaseTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationTime)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value());
+                .when().post("/times");
     }
 
     private void givenCreatedTheme() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(theme)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value());
+                .when().post("/themes");
     }
 
     private void givenCreatedMember() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(member)
-                .when().post("/members")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value());
+                .when().post("/members");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(anotherMember)
+                .when().post("/members");
     }
 
     private String givenMemberLoginToken() {
@@ -436,15 +603,40 @@ class IntegrationTest extends BaseTest {
                 .extract().response().cookie("token");
     }
 
+    private String givenAnotherMemberLoginToken() {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(anotherAuthOfMember)
+                .when().post("/login")
+                .then()
+                .extract().response().cookie("token");
+    }
+
     private void givenCreatedReservation() {
         String token = givenMemberLoginToken();
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.CREATED.value());
+                .when().post("/reservations");
+    }
+
+    private void givenCreatedAnotherReservation() {
+        String token = givenAnotherMemberLoginToken();
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(anotherReservation)
+                .when().post("/reservations");
+    }
+
+    private void givenCreatedWaiting() {
+        String token = givenMemberLoginToken();
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", token)
+                .body(waiting)
+                .when().post("/reservations/waitings");
     }
 
     private void givenCreatedAdmin() {

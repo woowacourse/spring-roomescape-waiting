@@ -135,7 +135,7 @@ class ThemeServiceTest extends BaseTest {
     private void addReservation(int count, ReservationDate date, ReservationTime time, Theme theme) {
         Member member = memberDbFixture.한스_사용자();
         for (int i = 0; i < count; i++) {
-            reservationDbFixture.예약_생성_한스(member, date, time, theme);
+            reservationDbFixture.예약_생성(member, date, time, theme);
         }
     }
 }

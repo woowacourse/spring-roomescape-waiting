@@ -181,7 +181,10 @@ function deleteRow(event) {
   const reservationId = row.cells[0].textContent;
 
   requestDelete(reservationId)
-      .then(() => row.remove())
+      .then(() => {
+        return requestRead(RESERVATION_API_ENDPOINT)
+      })
+      .then(render)
       .catch(error => console.error('Error:', error));
 }
 

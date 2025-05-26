@@ -44,7 +44,10 @@ public class Member {
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;
         Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        if (id != null && member.id != null) {
+            return Objects.equals(id, member.id);
+        }
+        return Objects.equals(email, member.email);
     }
 
     @Override
