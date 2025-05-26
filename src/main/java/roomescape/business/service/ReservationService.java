@@ -26,6 +26,9 @@ import roomescape.presentation.dto.WaitResponse;
 @Service
 public class ReservationService {
 
+    private static final Long FIRST_RANK = 1L;
+    private static final Long RANK_START_VALUE = 1L;
+
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -61,7 +64,7 @@ public class ReservationService {
         final Reservation reservation = findOrCreateReservation(date, reservationTime, theme);
 
         validateWaitInfoEmpty(reservation.getId());
-        final WaitInfo waitInfo = new WaitInfo(member, reservation, 1L);
+        final WaitInfo waitInfo = new WaitInfo(member, reservation, FIRST_RANK);
         waitInfoRepository.save(waitInfo);
 
         return new ReservationResponse(
@@ -131,7 +134,7 @@ public class ReservationService {
     }
 
     private Long getNextRank(final Long reservationId) {
-        return waitInfoRepository.countByReservationId(reservationId) + 1;
+        return waitInfoRepository.countByReservationId(reservationId) + RANK_START_VALUE;
     }
 
     private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
@@ -240,7 +243,7 @@ public class ReservationService {
     }
 
     private Long calculateRank(int index) {
-        return (long) index + 1L;
+        return (long) index + RANK_START_VALUE;
     }
 
     public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
