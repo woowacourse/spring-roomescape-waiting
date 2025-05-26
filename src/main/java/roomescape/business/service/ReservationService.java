@@ -52,21 +52,13 @@ public class ReservationService {
             final LocalDate date,
             final Long timeId
     ) {
-        validateMemberIdExists(memberId);
-        final Member member = memberRepository.findById(memberId).get();
-        validateTimeIdExists(timeId);
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
-        validateThemeIdExists(themeId);
-        final Theme theme = themeRepository.findById(themeId).get();
+        final Member member = getMemberOrThrow(memberId);
+        final ReservationTime reservationTime = getReservationTimeOrThrow(timeId);
+        final Theme theme = getThemeOrThrow(themeId);
 
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
-        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
-            final Reservation reservation = new Reservation(date, reservationTime, theme);
-            reservationRepository.save(reservation);
-        }
-        final Reservation reservation =
-                reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).get();
+        final Reservation reservation = findOrCreateReservation(date, reservationTime, theme);
 
         validateWaitInfoEmpty(reservation.getId());
         final WaitInfo waitInfo = new WaitInfo(member, reservation, 1L);
@@ -87,21 +79,13 @@ public class ReservationService {
             final LocalDate date,
             final Long timeId
     ) {
-        validateMemberIdExists(memberId);
-        final Member member = memberRepository.findById(memberId).get();
-        validateTimeIdExists(timeId);
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
-        validateThemeIdExists(themeId);
-        final Theme theme = themeRepository.findById(themeId).get();
+        final Member member = getMemberOrThrow(memberId);
+        final ReservationTime reservationTime = getReservationTimeOrThrow(timeId);
+        final Theme theme = getThemeOrThrow(themeId);
 
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
-        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
-            final Reservation reservation = new Reservation(date, reservationTime, theme);
-            reservationRepository.save(reservation);
-        }
-        final Reservation reservation =
-                reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId).get();
+        final Reservation reservation = findOrCreateReservation(date, reservationTime, theme);
 
         validateWaitInfoExistsByReservationId(reservation.getId());
         validateWaitInfoIsNotDuplicate(memberId, reservation.getId());
@@ -116,26 +100,38 @@ public class ReservationService {
         );
     }
 
+    private Member getMemberOrThrow(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId)));
+    }
+
+    private ReservationTime getReservationTimeOrThrow(final Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundException("해당하는 방탈출 예약 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(timeId)));
+    }
+
+    private Theme getThemeOrThrow(final Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(themeId)));
+    }
+
+    private Reservation findOrCreateReservation(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final Theme theme
+    ) {
+        final Long timeId = reservationTime.getId();
+        final Long themeId = theme.getId();
+        if (!reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)) {
+            final Reservation reservation = new Reservation(date, reservationTime, theme);
+            reservationRepository.save(reservation);
+        }
+        return reservationRepository.findByDateAndReservationTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(() -> new NotFoundException("예약 정보를 찾을 수 없습니다."));
+    }
+
     private Long getNextRank(final Long reservationId) {
         return waitInfoRepository.countByReservationId(reservationId) + 1;
-    }
-
-    private void validateMemberIdExists(final Long memberId) {
-        if (!memberRepository.existsById(memberId)) {
-            throw new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId));
-        }
-    }
-
-    private void validateTimeIdExists(final Long timeId) {
-        if (!reservationTimeRepository.existsById(timeId)) {
-            throw new NotFoundException("해당하는 방탈출 예약 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(timeId));
-        }
-    }
-
-    private void validateThemeIdExists(final Long themeId) {
-        if (!themeRepository.existsById(themeId)) {
-            throw new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(themeId));
-        }
     }
 
     private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
