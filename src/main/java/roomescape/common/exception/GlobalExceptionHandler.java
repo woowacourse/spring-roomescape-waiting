@@ -27,7 +27,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ErrorResponse> handleAllException(final HttpServletRequest request, RuntimeException e) {
-        log.info(e.getMessage(), e);
+        log.error(e.getMessage(), e);
         ErrorResponse errorResponse = ErrorResponse.of(ErrorCode.INTERNAL_SERVER_ERROR, request);
         return ResponseEntity.internalServerError().body(errorResponse);
     }
