@@ -1,6 +1,7 @@
 package roomescape.view.controller;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
@@ -27,8 +28,8 @@ public class UserPageController {
     }
 
     @GetMapping("/reservation-mine")
-    public String reservationMinePage() {
-        //TODO - 로그인 못하면 /login 페이지로 redirect
+    public String reservationMinePage(@CookieValue(name = "token", required = false) String token) {
+        if (token == null) return "login";
         return "reservation-mine";
     }
 }
