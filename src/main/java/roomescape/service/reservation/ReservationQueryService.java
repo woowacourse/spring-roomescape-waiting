@@ -2,7 +2,7 @@ package roomescape.service.reservation;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
+import roomescape.domain.reservation.Reservation;
 import roomescape.dto.reservation.ReservationAndWaitingResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
 import roomescape.repository.JpaReservationRepository;
