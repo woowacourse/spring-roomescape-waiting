@@ -6,7 +6,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.TokenResponse;
 import roomescape.exception.InvalidAuthorizationException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.MemberService;
@@ -27,7 +29,7 @@ public class LoginService {
     }
 
     public TokenResponse createToken(LoginRequest loginRequest) {
-        Optional<Member> memberOptional = memberRepository.findByEmailAndPassword(loginRequest.email(), loginRequest.password());
+        Optional<Member> memberOptional = memberRepository.findByEmailAndPassword(new Email(loginRequest.email()), new Password(loginRequest.password()));
         if (memberOptional.isEmpty()) {
             throw new InvalidAuthorizationException("[ERROR] 로그인 정보를 다시 확인해 주세요.");
         }

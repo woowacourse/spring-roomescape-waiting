@@ -5,7 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.dao.DuplicateKeyException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
@@ -20,22 +22,22 @@ public class FakeMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByEmailAndPassword(String email, String password) {
+    public Optional<Member> findByEmailAndPassword(Email email, Password password) {
         return members.stream()
-                .filter(member -> member.getEmail().equalsIgnoreCase(email) && member.getPassword().equals(password))
+                .filter(member -> member.getEmail().equals(email) && member.getPassword().equals(password))
                 .findFirst();
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public boolean existsByEmail(Email email) {
         return members.stream()
-                .anyMatch(member -> member.getEmail().equalsIgnoreCase(email));
+                .anyMatch(member -> member.getEmail().equals(email));
     }
 
     @Override
     public Member save(Member member) {
         long count = members.stream()
-                .filter(m -> m.getEmail().equalsIgnoreCase(member.getEmail()))
+                .filter(m -> m.getEmail().equals(member.getEmail()))
                 .count();
         if (count != 0) {
             throw new DuplicateKeyException("이미 가입한 이메일입니다.");

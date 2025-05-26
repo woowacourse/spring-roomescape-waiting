@@ -4,7 +4,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -17,7 +19,7 @@ class ReservationTest {
     @Test
     void invalidReservationDetailsTest() {
         // given
-        Member member = new Member(1L, "가이온", "user@gmail.com", "wooteco7", Role.USER);
+        Member member = new Member(1L, "가이온", new Email("user@gmail.com"), new Password("wooteco7"), Role.USER);
 
         // when & then
         assertThatThrownBy(() -> new Reservation(1L, member, null))

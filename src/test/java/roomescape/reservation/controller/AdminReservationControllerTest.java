@@ -31,7 +31,7 @@ class AdminReservationControllerTest {
 
         cookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(admin.getPassword(), admin.getEmail()))
+                .body(new LoginRequest(admin.getPasswordValue(), admin.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -62,7 +62,7 @@ class AdminReservationControllerTest {
             Member user = LoginMemberFixture.getUser();
             String userCookie = RestAssured
                     .given().log().all()
-                    .body(new LoginRequest(user.getPassword(), user.getEmail()))
+                    .body(new LoginRequest(user.getPasswordValue(), user.getEmailValue()))
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .when().post("/login")
                     .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -115,7 +115,7 @@ class AdminReservationControllerTest {
             Member user = LoginMemberFixture.getUser();
             String userCookie = RestAssured
                     .given().log().all()
-                    .body(new LoginRequest(user.getPassword(), user.getEmail()))
+                    .body(new LoginRequest(user.getPasswordValue(), user.getEmailValue()))
                     .contentType(MediaType.APPLICATION_JSON_VALUE)
                     .when().post("/login")
                     .then().log().all().extract().header("Set-Cookie").split(";")[0];

@@ -8,7 +8,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.NotFoundException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeReservationTimeRepository;
@@ -82,7 +84,7 @@ class ReservationTimeServiceTest {
 
             ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
             Theme theme = new Theme(1L, "ABC", "DEF", "https://");
-            Member member = new Member(1L, "어드민", "admin@gmail.com", "wooteco7", Role.ADMIN);
+            Member member = new Member(1L, "어드민", new Email("admin@gmail.com"), new Password("wooteco7"), Role.ADMIN);
             Reservation reservation = new Reservation(1L, member, new ReservationDetails(LocalDate.now().plusDays(1), reservationTime, theme));
             reservationRepository.save(reservation);
 

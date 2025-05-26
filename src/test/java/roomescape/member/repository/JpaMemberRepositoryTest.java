@@ -9,7 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -47,7 +49,7 @@ class JpaMemberRepositoryTest {
         @Test
         void test1() {
             // given
-            Member member = new Member(null, "테스트", "test@test.com", "wooteco7", Role.USER);
+            Member member = new Member(null, "테스트", new Email("test@test.com"), new Password("wooteco7"), Role.USER);
 
             // when
             Member newMember = memberRepository.save(member);
@@ -60,7 +62,7 @@ class JpaMemberRepositoryTest {
         @Test
         void test2() {
             // given
-            Member member = new Member(null, "테스트", "test@test.com", "wooteco7", Role.USER);
+            Member member = new Member(null, "테스트", new Email("test@test.com"), new Password("wooteco7"), Role.USER);
             entityManager.persist(member);
             entityManager.flush();
             entityManager.clear();

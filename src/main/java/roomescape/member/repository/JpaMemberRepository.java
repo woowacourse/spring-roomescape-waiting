@@ -3,7 +3,9 @@ package roomescape.member.repository;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 
 @Repository
 public class JpaMemberRepository implements MemberRepository {
@@ -30,12 +32,12 @@ public class JpaMemberRepository implements MemberRepository {
     }
 
     @Override
-    public Optional<Member> findByEmailAndPassword(String email, String password) {
+    public Optional<Member> findByEmailAndPassword(Email email, Password password) {
         return memberListCrudRepository.findByEmailAndPassword(email, password);
     }
 
     @Override
-    public boolean existsByEmail(String email) {
+    public boolean existsByEmail(Email email) {
         return memberListCrudRepository.existsByEmail(email);
     }
 }
