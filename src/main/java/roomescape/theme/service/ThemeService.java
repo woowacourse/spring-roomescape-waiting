@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.message.ThemeExceptionMessage;
@@ -43,6 +44,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public ThemeResponse add(final ThemeRequest themeRequest) {
         validateDuplicate(themeRequest);
         Theme newTheme = new Theme(themeRequest.name(), themeRequest.description(), themeRequest.thumbnail());
@@ -59,6 +61,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         validateUnoccupiedThemeId(id);
         themeRepository.deleteById(id);

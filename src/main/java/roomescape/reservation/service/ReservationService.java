@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.InvalidTimeException;
@@ -70,6 +71,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public ReservationResponse addFromWaiting(final Long id) {
         Reservation waitingReservation = reservationRepository.findByWaitingId(id)
                 .orElseThrow(() -> new InvalidIdException(
@@ -91,6 +93,7 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
+    @Transactional
     public ReservationResponse addWaiting(final Long memberId, final UserReservationRequest request) {
         Member member = searchMember(memberId);
         ReservationTime reservationTime = searchReservationTime(request.timeId());
@@ -110,7 +113,8 @@ public class ReservationService {
         return addReservation(request.memberId(), request.date(), request.timeId(), request.themeId());
     }
 
-    private ReservationResponse addReservation(Long memberId, LocalDate date, Long timeId, Long themeId) {
+    @Transactional
+    public ReservationResponse addReservation(Long memberId, LocalDate date, Long timeId, Long themeId) {
         Member member = searchMember(memberId);
         ReservationTime reservationTime = searchReservationTime(timeId);
         validateRequest(date, reservationTime);
