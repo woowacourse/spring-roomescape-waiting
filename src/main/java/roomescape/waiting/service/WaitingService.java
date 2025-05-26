@@ -2,7 +2,6 @@ package roomescape.waiting.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.exception.NotFoundReservationTimeException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -21,16 +20,13 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationTimeRepository reservationTimeRepository,
-                          ReservationRepository reservationRepository,
                           ThemeRepository themeRepository) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
     }
 
