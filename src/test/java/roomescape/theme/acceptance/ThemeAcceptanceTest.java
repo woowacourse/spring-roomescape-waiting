@@ -46,7 +46,7 @@ class ThemeAcceptanceTest {
         );
 
         // when & then
-        TestHelper.postWithToken("/themes", request, token)
+        TestHelper.postWithToken("/admin/themes", request, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("id", equalTo(1))
@@ -71,12 +71,12 @@ class ThemeAcceptanceTest {
                 "https://miso2.com"
         );
 
-        TestHelper.postWithToken("/themes", request1, token)
+        TestHelper.postWithToken("/admin/themes", request1, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
 
         // when & then
-        TestHelper.postWithToken("/themes", request2, token)
+        TestHelper.postWithToken("/admin/themes", request2, token)
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("이미 존재하는 테마 이름입니다."));
@@ -98,11 +98,11 @@ class ThemeAcceptanceTest {
                 "https://wooteco.com"
         );
 
-        TestHelper.postWithToken("/themes", request1, token)
+        TestHelper.postWithToken("/admin/themes", request1, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
 
-        TestHelper.postWithToken("/themes", request2, token)
+        TestHelper.postWithToken("/admin/themes", request2, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
 
@@ -131,11 +131,11 @@ class ThemeAcceptanceTest {
                 "https://wooteco.com"
         );
 
-        TestHelper.postWithToken("/themes", request1, token)
+        TestHelper.postWithToken("/admin/themes", request1, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
 
-        TestHelper.postWithToken("/themes", request2, token)
+        TestHelper.postWithToken("/admin/themes", request2, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
 
@@ -157,12 +157,12 @@ class ThemeAcceptanceTest {
                 "https://miso.com"
         );
 
-        TestHelper.postWithToken("/themes", request, token)
+        TestHelper.postWithToken("/admin/themes", request, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value());
 
         // when & then
-        TestHelper.deleteWithToken("/themes/1", token)
+        TestHelper.deleteWithToken("/admin/themes/1", token)
                 .then()
                 .statusCode(HttpStatus.NO_CONTENT.value());
 

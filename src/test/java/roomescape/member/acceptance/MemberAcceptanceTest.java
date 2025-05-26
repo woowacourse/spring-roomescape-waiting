@@ -72,7 +72,7 @@ class MemberAcceptanceTest {
         // when & then
         TestHelper.deleteWithToken("/members/" + 1, token)
                 .then()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
         TestHelper.get("/members")
                 .then()

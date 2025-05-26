@@ -22,6 +22,7 @@ import roomescape.reservation.dto.request.ReservationFindFilteredRequest;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.WaitingRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -43,13 +44,17 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @BeforeEach
     void setUp() {
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
-                memberRepository
+                memberRepository,
+                waitingRepository
         );
     }
 
@@ -135,7 +140,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(member.getId(), request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 날짜와 시간에 이미 예약이 존재합니다.");
+                .hasMessage("중복된 예약입니다.");
     }
 
     @Test

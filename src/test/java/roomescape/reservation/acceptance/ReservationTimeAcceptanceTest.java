@@ -43,7 +43,7 @@ class ReservationTimeAcceptanceTest {
         var timeRequest = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
 
         // when & then
-        TestHelper.postWithToken("/times", timeRequest, token)
+        TestHelper.postWithToken("/admin/times", timeRequest, token)
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
                 .body("id", equalTo(1))
@@ -56,7 +56,7 @@ class ReservationTimeAcceptanceTest {
         // given
         String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
         var timeRequest = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
-        TestHelper.postWithToken("/times", timeRequest, token);
+        TestHelper.postWithToken("/admin/times", timeRequest, token);
 
         // when & then
         TestHelper.get("/times")
@@ -73,10 +73,10 @@ class ReservationTimeAcceptanceTest {
         // given
         String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
         var timeRequest = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
-        TestHelper.postWithToken("/times", timeRequest, token);
+        TestHelper.postWithToken("/admin/times", timeRequest, token);
 
         // when & then
-        TestHelper.get("/times/available-times?date=2024-03-20&themeId=1")
+        TestHelper.get("/times/available?date=2024-03-20&themeId=1")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(1))
@@ -91,12 +91,12 @@ class ReservationTimeAcceptanceTest {
         // given
         String token = TestHelper.login(DEFAULT_EMAIL, DEFAULT_PASSWORD);
         var timeRequest = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
-        TestHelper.postWithToken("/times", timeRequest, token);
+        TestHelper.postWithToken("/admin/times", timeRequest, token);
 
         // when & then
-        TestHelper.deleteWithToken("/times/1", token)
+        TestHelper.deleteWithToken("/admin/times/1", token)
                 .then()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
         TestHelper.get("/times")
                 .then()
@@ -112,7 +112,7 @@ class ReservationTimeAcceptanceTest {
         var timeRequest = new ReservationTimeCreateRequest(LocalTime.of(9, 0));
 
         // when & then
-        TestHelper.postWithToken("/times", timeRequest, token)
+        TestHelper.postWithToken("/admin/times", timeRequest, token)
                 .then()
                 .statusCode(HttpStatus.BAD_REQUEST.value())
                 .body(equalTo("운영 시간 이외의 날짜는 예약할 수 없습니다."));
@@ -126,10 +126,10 @@ class ReservationTimeAcceptanceTest {
         var timeRequest1 = new ReservationTimeCreateRequest(LocalTime.of(10, 0));
         var timeRequest2 = new ReservationTimeCreateRequest(LocalTime.of(11, 0));
 
-        TestHelper.postWithToken("/times", timeRequest1, token);
+        TestHelper.postWithToken("/admin/times", timeRequest1, token);
 
         // when & then
-        TestHelper.postWithToken("/times", timeRequest2, token)
+        TestHelper.postWithToken("/admin/times", timeRequest2, token)
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value())
                 .body(equalTo("러닝 타임이 겹치는 시간이 존재합니다."));
