@@ -19,6 +19,7 @@ import roomescape.common.util.TokenCookieManager;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.service.ReservationService;
+import roomescape.waiting.service.WaitingService;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -34,13 +35,16 @@ class AdminInterceptorUnitTest {
     @Mock
     private ReservationService reservationService;
 
+    @Mock
+    private WaitingService waitingService;
+
     @Test
     @DisplayName("로그인이 안된 경우에는 login 페이지로 리다이렉트가 된다.")
     void preHandle_when_no_login() throws Exception {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/reservations");
         Method method = AdminController.class.getMethod("createReservation", AdminReservationRequest.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService), method);
+        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService, waitingService), method);
         MockHttpServletResponse response = new MockHttpServletResponse();
         // when
         boolean check = adminInterceptor.preHandle(request, response, handlerMethod);
@@ -55,7 +59,7 @@ class AdminInterceptorUnitTest {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/reservations");
         Method method = AdminController.class.getMethod("createReservation", AdminReservationRequest.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService), method);
+        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService, waitingService), method);
         MockHttpServletResponse response = new MockHttpServletResponse();
         String strangeToken = "Asdasdasd";
         putCookieToRequest(strangeToken, request);
@@ -72,7 +76,7 @@ class AdminInterceptorUnitTest {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/reservations");
         Method method = AdminController.class.getMethod("createReservation", AdminReservationRequest.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService), method);
+        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService, waitingService), method);
         MockHttpServletResponse response = new MockHttpServletResponse();
         Member member = Member.createWithoutId("a", "a", "a", Role.ADMIN);
         ReflectionTestUtils.setField(member, "id", 1L);
@@ -91,7 +95,7 @@ class AdminInterceptorUnitTest {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/reservations");
         Method method = AdminController.class.getMethod("createReservation", AdminReservationRequest.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService), method);
+        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService, waitingService), method);
         MockHttpServletResponse response = new MockHttpServletResponse();
         Member member = Member.createWithoutId("a", "a", "a", Role.USER);
         ReflectionTestUtils.setField(member, "id", 1L);
@@ -110,7 +114,7 @@ class AdminInterceptorUnitTest {
         // given
         MockHttpServletRequest request = new MockHttpServletRequest("POST", "/admin/reservations");
         Method method = AdminController.class.getMethod("createReservation", AdminReservationRequest.class);
-        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService), method);
+        HandlerMethod handlerMethod = new HandlerMethod(new AdminController(reservationService, waitingService), method);
         MockHttpServletResponse response = new MockHttpServletResponse();
         Member member = Member.createWithoutId("a", "a", "a", Role.ADMIN);
         ReflectionTestUtils.setField(member, "id", 1L);

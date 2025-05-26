@@ -30,4 +30,11 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             LocalDate date,
             Long timeId,
             WaitingStatus status);
+
+    List<Waiting> findByDateAndTheme_IdAndTime_IdAndStatusOrderByCreatedAtAsc(
+            LocalDate date,
+            Long themeId,
+            Long timeId,
+            WaitingStatus status
+    );
 }

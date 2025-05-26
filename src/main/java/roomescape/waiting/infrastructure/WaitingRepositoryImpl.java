@@ -62,4 +62,14 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public List<Waiting> findAll() {
         return jpaWaitingRepository.findAll();
     }
+
+    @Override
+    public List<Waiting> findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
+            LocalDate date,
+            Long themeId,
+            Long timeId,
+            WaitingStatus status
+    ) {
+        return jpaWaitingRepository.findByDateAndTheme_IdAndTime_IdAndStatusOrderByCreatedAtAsc(date, themeId, timeId, status);
+    }
 }

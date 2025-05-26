@@ -36,5 +36,4 @@ public class TestFixture {
         ReflectionTestUtils.setField(member, "id", 1L);
         return member;
     }
-
 }

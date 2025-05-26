@@ -3,9 +3,12 @@ package roomescape.reservation.domain;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
+
+    Optional<Reservation> findById(Long id);
 
     void deleteById(Long id);
 

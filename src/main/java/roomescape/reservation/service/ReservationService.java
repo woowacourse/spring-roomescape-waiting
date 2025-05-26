@@ -80,6 +80,37 @@ public class ReservationService {
 
     public void deleteReservationById(final Long id) {
         reservationRepository.deleteById(id);
+
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+        List<Waiting> waitings = waitingRepository.findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
+                reservation.getDate(),
+                reservation.getThemeId(),
+                reservation.getTimeId(),
+                WaitingStatus.PENDING
+        );
+
+        if (!waitings.isEmpty()) {
+            approveWaiting(waitings);
+        }
+
+    }
+
+    private void approveWaiting(List<Waiting> waitings) {
+        Waiting firstWaiting = waitings.get(0);
+
+        Reservation newReservation = Reservation.createWithoutId(
+                dateTime.now(),
+                firstWaiting.getMember(),
+                firstWaiting.getDate(),
+                firstWaiting.getTime(),
+                firstWaiting.getTheme()
+        );
+        reservationRepository.save(newReservation);
+
+        firstWaiting.approve();
+        waitingRepository.save(firstWaiting);
     }
 
     public List<MyReservationResponse> getMyReservations(final Long id) {

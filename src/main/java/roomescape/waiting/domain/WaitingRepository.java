@@ -30,4 +30,11 @@ public interface WaitingRepository {
     boolean existsByMemberIdAndDateAndTimeIdAndStatus(Long id, LocalDate date, Long aLong, WaitingStatus waitingStatus);
 
     List<Waiting> findAll();
+
+    List<Waiting> findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
+            LocalDate date,
+            Long themeId,
+            Long timeId,
+            WaitingStatus status
+    );
 }
