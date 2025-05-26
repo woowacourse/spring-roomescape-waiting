@@ -27,6 +27,6 @@ public class WaitingQueryService {
 
     public List<WaitingResponseDto> findAllWaiting(){
         List<Waiting> all = waitingRepository.findAll();
-        return all.stream().map(waiting -> WaitingResponseDto.from(waiting)).toList();
+        return all.stream().map(WaitingResponseDto::from).toList();
     }
 }
