@@ -5,7 +5,6 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,7 +23,7 @@ import org.springframework.test.context.ActiveProfiles;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
+import roomescape.dto.reservationmember.MyReservationResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.integrate.fixture.RequestFixture;
 import roomescape.repository.reservation.ReservationRepository;
@@ -147,9 +146,9 @@ class ReservationIntegrateTest {
                 .body("size()", is(2))
                 .extract().response();
 
-        List<MyReservationMemberResponseDto> myReservationMemberResponseDtos = response.jsonPath()
-                .getList("", MyReservationMemberResponseDto.class);
+        List<MyReservationResponseDto> myReservationResponseDtos = response.jsonPath()
+                .getList("", MyReservationResponseDto.class);
 
-        assertThat(myReservationMemberResponseDtos.getFirst().status()).contains("Reserved");
+        assertThat(myReservationResponseDtos.getFirst().status()).contains("Reserved");
     }
 }

@@ -18,6 +18,7 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.dto.member.SignupRequestDto;
 import roomescape.dto.reservation.AddReservationDto;
+import roomescape.dto.reservationmember.MyReservationResponseDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.theme.AddThemeDto;
@@ -154,21 +155,22 @@ class ReserveTicketServiceTest {
     }
 
     @Test
-    void 멤버_별_예약_정보를_확인할_수_있다() {
+    void 멤버_별_예약_정보와_예약대기_정보를_확인할_수_있다() {
         long memberId = memberService.signup(new SignupRequestDto("email@email.com", "password", "name"));
         long timeId = reservationTimeService.addReservationTime(new AddReservationTimeDto(LocalTime.of(10, 0)));
         long themeId = themeService.addTheme(new AddThemeDto("name", "description", "thumbnail"));
-        long firstId = reserveTicketService.addReservationIfWaitingNotExists(
+        long firstReservationId = reserveTicketService.addReservationIfWaitingNotExists(
                 new AddReservationDto(LocalDate.now().plusDays(1), timeId, themeId), memberId);
-        long secondId = reserveTicketService.addReservationIfWaitingNotExists(
+        long secondReservationId = reserveTicketService.addReservationIfWaitingNotExists(
                 new AddReservationDto(LocalDate.now().plusDays(2), timeId, themeId), memberId);
+        long firstWaitingId = waitingService.addWaiting(new AddReservationDto(LocalDate.now().plusDays(1), timeId, themeId), memberId);
+        long secondWaitingId = waitingService.addWaiting(new AddReservationDto(LocalDate.now().plusDays(2), timeId, themeId), memberId);
 
-        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(memberId);
-        List<Long> reservationMemberIds = reserveTickets.stream()
-                .map(ReserveTicket::getReservationId)
+        List<MyReservationResponseDto> responses = reserveTicketService.memberReservationsAndWaitings(memberId);
+        List<Long> ids = responses.stream()
+                .map(MyReservationResponseDto::id)
                 .toList();
-
-        assertThat(reservationMemberIds).containsAnyElementsOf(List.of(firstId, secondId));
+        assertThat(ids).containsExactlyInAnyOrder(firstReservationId, secondReservationId, firstWaitingId, secondWaitingId);
     }
 
     @Test

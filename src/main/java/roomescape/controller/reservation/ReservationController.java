@@ -22,6 +22,7 @@ import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
+import roomescape.dto.reservationmember.MyReservationResponseDto;
 import roomescape.dto.reservationmember.ReservationMemberResponseDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
@@ -116,6 +117,12 @@ public class ReservationController {
                         theme.getName(), theme.getThumbnail()))
                 .toList();
         return ResponseEntity.ok(themeResponseDtos);
+    }
+
+    @GetMapping("/mine")
+    public ResponseEntity<List<MyReservationResponseDto>> myReservations(@AuthenticationPrincipal UserInfo userInfo) {
+        List<MyReservationResponseDto> myReservationResponseDtos = reserveTicketService.memberReservationsAndWaitings(userInfo.id());
+        return ResponseEntity.ok(myReservationResponseDtos);
     }
 
     @PostMapping("/apply-waiting")

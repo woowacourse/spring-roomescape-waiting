@@ -2,6 +2,8 @@ package roomescape.service.reserveticket;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
@@ -10,7 +12,9 @@ import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.waiting.Waiting;
+import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.AddReservationDto;
+import roomescape.dto.reservationmember.MyReservationResponseDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.waiting.ApplyWaitingRequestDto;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
@@ -86,8 +90,16 @@ public class ReserveTicketService {
         return new ReservationSlotTimes(times, alreadyReservedReservations, alreadyWaitings);
     }
 
-    public List<ReserveTicket> memberReservations(long memberId) {
-        return reserveTicketRepository.findAllByMemberId(memberId);
+    public List<MyReservationResponseDto> memberReservationsAndWaitings(long memberId) {
+        List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByMemberId(memberId);
+        List<MyReservationResponseDto> reservationDtos = reserveTickets.stream()
+                .map(MyReservationResponseDto::from)
+                .collect(Collectors.toList());
+        List<WaitingWithRank> waitingsWithRank = waitingService.getWaitingsWithRankByMemberId(memberId);
+        for (WaitingWithRank waitingWithRank : waitingsWithRank) {
+            reservationDtos.add(MyReservationResponseDto.from(waitingWithRank));
+        }
+        return reservationDtos;
     }
 
     @Transactional
