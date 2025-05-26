@@ -106,15 +106,18 @@ public class ReservationService {
         validateWaitInfoExistsByReservationId(reservation.getId());
         validateWaitInfoIsNotDuplicate(memberId, reservation.getId());
 
-        final Long rank = waitInfoRepository.countByReservationId(reservation.getId()) + 1;
-        final WaitInfo waitInfo = new WaitInfo(member, reservation, rank);
+        final WaitInfo waitInfo = new WaitInfo(member, reservation, getNextRank(reservation.getId()));
         waitInfoRepository.save(waitInfo);
         return new WaitInfoResponse(
                 waitInfo.getId(),
                 waitInfo.getMember().getId(),
                 waitInfo.getMember().getName(),
-                rank
+                waitInfo.getRank()
         );
+    }
+
+    private Long getNextRank(final Long reservationId) {
+        return waitInfoRepository.countByReservationId(reservationId) + 1;
     }
 
     private void validateMemberIdExists(final Long memberId) {
@@ -230,15 +233,18 @@ public class ReservationService {
     private void reassignRanks(final List<WaitInfo> waitInfos) {
         for (int i = 0; i < waitInfos.size(); i++) {
             final WaitInfo waitInfo = waitInfos.get(i);
-            final Long newRank = (long) (i + 1);
             final WaitInfo updatedWaitInfo = new WaitInfo(
                     waitInfo.getId(),
                     waitInfo.getMember(),
                     waitInfo.getReservation(),
-                    newRank
+                    calculateRank(i)
             );
             waitInfoRepository.save(updatedWaitInfo);
         }
+    }
+
+    private Long calculateRank(int index) {
+        return (long) index + 1L;
     }
 
     public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
