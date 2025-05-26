@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -7,6 +8,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -33,10 +35,13 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
+    @OneToOne(mappedBy = "reservation", cascade = CascadeType.REMOVE)
+    private ReservationWaitingTicket reservationWaitingTicket;
+
     @Enumerated(value = EnumType.STRING)
     private ReservationStatus status;
 
-    public Reservation(
+      public Reservation(
             final Long id,
             final Member member,
             final LocalDate date,
@@ -107,6 +112,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationWaitingTicket getReservationWaitingTicket() {
+        return reservationWaitingTicket;
     }
 
     public ReservationStatus getStatus() {

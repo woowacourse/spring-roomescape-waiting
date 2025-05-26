@@ -1,9 +1,11 @@
 package roomescape.service.command;
 
+import jakarta.persistence.EntityManager;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -33,6 +35,9 @@ public class ReservationWaitingCommandService {
     private final JpaThemeRepository themeRepository;
     private final JpaMemberRepository memberRepository;
     private final Clock clock;
+
+    @Autowired
+    private EntityManager entityManager;
 
     public ReservationWaitingCommandService(JpaReservationWaitingTicketRepository reservationWaitingTicketRepository,
                                             JpaReservationRepository reservationRepository,
@@ -77,7 +82,6 @@ public class ReservationWaitingCommandService {
             throw new UnauthorizationException("예약자만 예약 대기 취소가 가능합니다.");
         }
 
-        reservationWaitingTicketRepository.delete(reservationWaitingTicketRepository.findByReservationId(id).get());
         reservationRepository.delete(reservationWaiting);
     }
 
