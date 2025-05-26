@@ -27,6 +27,5 @@ public class AuthConfiguration implements WebMvcConfigurer {
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new CheckLoginInterceptor(authService))
                 .addPathPatterns("/admin/**");
-
     }
 }
