@@ -73,6 +73,19 @@ class JpaReservationTimeRepositoryTest {
         );
     }
 
+    @Test
+    void 예약_시간_ID_로_예약_시간_찾기() {
+        Long timeId = time.getId();
+        ReservationTime findReservationTime = jpaReservationTimeRepository.findById(timeId).orElse(null);
+        assertThat(time).isEqualTo(findReservationTime);
+    }
+
+    @Test
+    void 예약_시간_ID_로_예약_시간_삭제하기() {
+        Long timeId = time.getId();
+        jpaReservationTimeRepository.deleteById(timeId);
+        assertThat(jpaReservationTimeRepository.findById(timeId).orElse(null)).isNull();
+    }
 
     private List<ReservationTime> createTimes() {
         return List.of(

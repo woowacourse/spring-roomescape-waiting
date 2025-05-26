@@ -64,7 +64,8 @@ class ReservationTimeControllerTest {
         for (ReservationTimeCreateRequest createTimeRequest : createTimeRequests) {
             reservationTimeController.create(createTimeRequest);
         }
-        List<ReservationTimeResponse> reservationTimes = reservationTimeServiceFacade.findAll();
+        ResponseEntity<List<ReservationTimeResponse>> reservationTimesResponseEntity = reservationTimeController.getReservationTimes();
+        List<ReservationTimeResponse> reservationTimes = reservationTimesResponseEntity.getBody();
         assertThat(reservationTimes).hasSize(3);
     }
 
