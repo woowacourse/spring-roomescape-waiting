@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
@@ -44,12 +43,6 @@ public class ThemeController {
                 .toList();
     }
 
-    @DeleteMapping("/admin/themes/{id}")
-    @ResponseStatus(NO_CONTENT)
-    public void removeTheme(@PathVariable final long id) {
-        themeService.removeById(id);
-    }
-
     @GetMapping("/themes/popular")
     public List<ThemeResponse> findPopularThemes(
             @RequestParam final LocalDate startDate,
@@ -60,5 +53,11 @@ public class ThemeController {
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
+    }
+
+    @DeleteMapping("/admin/themes/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void removeTheme(@PathVariable final long id) {
+        themeService.removeById(id);
     }
 }
