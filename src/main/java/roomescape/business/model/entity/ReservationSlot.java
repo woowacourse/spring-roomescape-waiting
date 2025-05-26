@@ -17,6 +17,7 @@ import roomescape.exception.business.NotFoundException;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ public class ReservationSlot {
         reservations.add(reservation);
     }
 
-    public static Map<Reservation, Integer> toWaitingNumberAndReservation(List<ReservationSlot> slots, Id userId) {
+    public static Map<Reservation, Integer> toWaitingNumberAndReservation(final List<ReservationSlot> slots, Id userId) {
         return slots.stream()
                 .collect(Collectors.toMap(
                         slot -> slot.reservationOf(userId),
@@ -59,7 +60,7 @@ public class ReservationSlot {
                 ));
     }
 
-    public static Map<Reservation, Integer> toWaitingNumberAndReservation(List<ReservationSlot> slots) {
+    public static Map<Reservation, Integer> toWaitingNumberAndReservation(final List<ReservationSlot> slots) {
         return slots.stream()
                 .flatMap(slot -> slot.reservations.stream()
                         .map(reservation -> Map.entry(reservation, slot.reservations.indexOf(reservation))))
@@ -67,8 +68,12 @@ public class ReservationSlot {
     }
 
     private int waitingNumberOf(final Id userId) {
-        for (int i = 0; i < reservations.size(); i++) {
-            if (reservations.get(i).isSameReserver(userId.value())) {
+        List<Reservation> sortedReservations = new ArrayList<>(reservations).stream()
+                .sorted(Comparator.comparing(Reservation::getCreatedAt))
+                .toList();
+
+        for (int i = 0; i < sortedReservations.size(); i++) {
+            if (sortedReservations.get(i).isSameReserver(userId.value())) {
                 return i;
             }
         }
