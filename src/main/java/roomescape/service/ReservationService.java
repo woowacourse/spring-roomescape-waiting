@@ -3,36 +3,33 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTheme;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationThemeRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ReservationWaitingRepository;
 import roomescape.service.dto.MyPageReservationResponse;
 import roomescape.service.dto.ReservationRecipe;
 import roomescape.service.dto.ReservationResponse;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationThemeRepository reservationThemeRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
-                              final ReservationTimeRepository reservationTimeRepository,
-                              final ReservationThemeRepository reservationThemeRepository,
-                              final MemberRepository memberRepository) {
-        this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationThemeRepository = reservationThemeRepository;
-        this.memberRepository = memberRepository;
-    }
 
     public ReservationResponse addReservation(final ReservationRecipe recipe) {
         long timeId = recipe.timeId();
@@ -69,13 +66,20 @@ public class ReservationService {
         }
     }
 
-    public List<MyPageReservationResponse> getReservationsByMemberId(Long memberId) {
+    public List<MyPageReservationResponse> getReservationsByMemberId(final Long memberId) {
         final Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하지 않는 사용자 입니다."));
-        List<Reservation> myReservations = reservationRepository.findByMemberId(member.getId());
-        return myReservations.stream()
+        final List<Reservation> myReservations = reservationRepository.findByMemberId(member.getId());
+        final List<ReservationWaiting> myReservationWaitings = reservationWaitingRepository.findByMemberId(member.getId());
+        final List<MyPageReservationResponse> myPageReservationResponses = myReservations.stream()
                 .map(MyPageReservationResponse::from)
+                .collect(Collectors.toList());
+        List<MyPageReservationResponse> myPageReservationWaitingResponses = myReservationWaitings.stream()
+                .map(myReservationWaiting -> MyPageReservationResponse.of(myReservationWaiting,
+                        getWaitingOrderByMember(myReservationWaiting.getMember())))
                 .toList();
+        myPageReservationResponses.addAll(myPageReservationWaitingResponses);
+        return myPageReservationResponses;
     }
 
     public void removeReservation(final long id) {
@@ -83,5 +87,9 @@ public class ReservationService {
             throw new NoSuchElementException("[ERROR] 존재하지 않는 예약 입니다.");
         }
         reservationRepository.deleteById(id);
+    }
+
+    private long getWaitingOrderByMember(final Member member) {
+        return reservationWaitingRepository.findWaitingOrderById(member.getId());
     }
 }
