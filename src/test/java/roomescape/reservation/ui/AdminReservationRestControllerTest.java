@@ -11,7 +11,6 @@ import static roomescape.fixture.ui.ThemeApiFixture.createThemes;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -26,9 +25,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.auth.ui.dto.LoginRequest;
 import roomescape.fixture.ui.LoginApiFixture;
+import roomescape.member.ui.dto.MemberResponse;
 import roomescape.member.ui.dto.SignUpRequest;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.ui.dto.request.CreateBookedReservationRequest;
 import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
+import roomescape.reservation.ui.dto.response.ReservationTimeResponse;
+import roomescape.theme.ui.dto.ThemeResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
@@ -36,10 +39,10 @@ import roomescape.reservation.ui.dto.response.ReservationStatusResponse;
 @DisplayName("관리자 예약 관리 API 테스트")
 class AdminReservationRestControllerTest {
 
-    private final String date = LocalDate.now().plusDays(1).toString();
-    private List<ValidatableResponse> createReservationTimeResponses;
-    private List<ValidatableResponse> createThemeResponses;
-    private List<ValidatableResponse> createMemberResponses;
+    private final LocalDate date = LocalDate.now().plusDays(1);
+    private List<ReservationTimeResponse> createReservationTimeResponses;
+    private List<ThemeResponse> createThemeResponses;
+    private List<MemberResponse> createMemberResponses;
 
     @BeforeEach
     void setUp() {
@@ -55,12 +58,12 @@ class AdminReservationRestControllerTest {
     @Test
     void 예약을_추가한다() {
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final CreateBookedReservationRequest createBookedReservationRequest = bookedReservationRequest1();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(reservationParams)
+                .body(createBookedReservationRequest)
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -68,12 +71,12 @@ class AdminReservationRestControllerTest {
 
     @Test
     void 관리자_권한이_아니면_예약을_추가할_수_없다() {
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final CreateBookedReservationRequest createBookedReservationRequest = bookedReservationRequest1();
 
         // public 권한
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(reservationParams)
+                .body(createBookedReservationRequest)
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.UNAUTHORIZED.value());
@@ -85,7 +88,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)
-                .body(reservationParams)
+                .body(createBookedReservationRequest)
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -97,13 +100,13 @@ class AdminReservationRestControllerTest {
         final Map<String, String> memberCookies = memberLoginAndGetCookies(
                 new LoginRequest(signUpRequest.email(), signUpRequest.password()));
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final CreateBookedReservationRequest createBookedReservationRequest = bookedReservationRequest1();
 
         // member 예약 추가
         final Integer reservationId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)
-                .body(reservationParams)
+                .body(createBookedReservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
@@ -120,13 +123,13 @@ class AdminReservationRestControllerTest {
 
     @Test
     void 관리자_권한이_아니면_예약을_삭제_할_수_없다() {
-        final Map<String, String> reservationParams = confirmedReservationParams();
+        final CreateBookedReservationRequest createBookedReservationRequest = bookedReservationRequest1();
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(reservationParams)
+                .body(createBookedReservationRequest)
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -145,7 +148,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(memberCookies)
-                .body(reservationParams)
+                .body(createBookedReservationRequest)
                 .when().delete("/admin/reservations/1")
                 .then().log().all()
                 .statusCode(HttpStatus.FORBIDDEN.value());
@@ -158,7 +161,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(confirmedReservationParams())
+                .body(bookedReservationRequest1())
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -166,7 +169,7 @@ class AdminReservationRestControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(adminCookies)
-                .body(waitingReservationParams())
+                .body(bookedReservationRequest2())
                 .when().post("/admin/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -196,50 +199,19 @@ class AdminReservationRestControllerTest {
         assertThat(responses).hasSize(ReservationStatus.values().length);
     }
 
-    private Map<String, String> confirmedReservationParams() {
-        final String memberId = createMemberResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String timeId = createReservationTimeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String themeId = createThemeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String status = ReservationStatus.CONFIRMED.name();
+    private CreateBookedReservationRequest bookedReservationRequest1() {
+        final Long memberId = createMemberResponses.get(0).id();
+        final Long timeId = createReservationTimeResponses.get(0).id();
+        final Long themeId = createThemeResponses.get(0).id();
 
-        return createReservationParams(memberId, date, timeId, themeId, status);
+        return new CreateBookedReservationRequest(memberId, date, timeId, themeId);
     }
 
-    private Map<String, String> waitingReservationParams() {
-        final String memberId = createMemberResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String timeId = createReservationTimeResponses.get(1).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String themeId = createThemeResponses.get(0).extract().body()
-                .as(Map.class)
-                .get("id").toString();
-        final String status = ReservationStatus.WAITING.name();
+    private CreateBookedReservationRequest bookedReservationRequest2() {
+        final Long memberId = createMemberResponses.get(0).id();
+        final Long timeId = createReservationTimeResponses.get(0).id();
+        final Long themeId = createThemeResponses.get(1).id();
 
-        return createReservationParams(memberId, date, timeId, themeId, status);
-    }
-
-
-    private Map<String, String> createReservationParams(
-            final String memberId,
-            final String date,
-            final String timeId,
-            final String themeId,
-            final String status
-    ) {
-        return Map.ofEntries(
-                Map.entry("memberId", memberId),
-                Map.entry("date", date),
-                Map.entry("timeId", timeId),
-                Map.entry("themeId", themeId),
-                Map.entry("status", status)
-        );
+        return new CreateBookedReservationRequest(memberId, date, timeId, themeId);
     }
 }

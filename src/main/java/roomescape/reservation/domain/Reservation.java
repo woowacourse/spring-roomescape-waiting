@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -10,87 +11,69 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.ToString;
 import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
 
 @Entity
 @Table(name = "reservations")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
 @EqualsAndHashCode(of = {"id"})
-@ToString
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
+    @Embedded
+    private ReservationSlot reservationSlot;
 
     @ManyToOne
-    @JoinColumn(name = "time_id")
-    private ReservationTime time;
-
-    @ManyToOne
-    @JoinColumn(name = "theme_id")
-    private Theme theme;
-
-    @ManyToOne
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private ReservationStatus status;
 
-    public Reservation(final Long id, final LocalDate date, final ReservationTime time,
-                       final Theme theme, final Member member, final ReservationStatus status) {
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
+    private Reservation(
+            final ReservationSlot reservationSlot,
+            final Member member,
+            final ReservationStatus status
+    ) {
+        validateReservationSlot(reservationSlot);
         validateMember(member);
         validateStatus(status);
 
-        this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationSlot = reservationSlot;
         this.member = member;
         this.status = status;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member,
-                       final ReservationStatus status) {
-        this(null, date, time, theme, member, status);
+    public static Reservation of(
+            final ReservationSlot reservationSlot,
+            final Member member,
+            final ReservationStatus status
+    ) {
+        return new Reservation(reservationSlot, member, status);
+    }
+
+    public void updateMember(final Member member) {
+        this.member = member;
+    }
+
+    private void validateReservationSlot(final ReservationSlot reservationSlot) {
+        if (reservationSlot == null) {
+            throw new IllegalArgumentException("예약 슬롯은 null이면 안됩니다.");
+        }
     }
 
     private void validateMember(final Member member) {
         if (member == null) {
             throw new IllegalArgumentException("멤버는 null이면 안됩니다.");
-        }
-    }
-
-    private void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("날짜는 null이면 안됩니다.");
-        }
-    }
-
-    private void validateTime(final ReservationTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("시간은 null이면 안됩니다.");
-        }
-    }
-
-    private void validateTheme(final Theme theme) {
-        if (theme == null) {
-            throw new IllegalArgumentException("테마는 null이면 안됩니다.");
         }
     }
 

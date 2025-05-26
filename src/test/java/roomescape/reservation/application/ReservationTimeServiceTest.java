@@ -14,7 +14,7 @@ import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 
 @DataJpaTest
@@ -45,7 +45,7 @@ class ReservationTimeServiceTest {
     void 예약_시간을_삭제한다() {
         // given
         final LocalTime startAt = LocalTime.of(20, 28);
-        final Long id = reservationTimeRepository.save(new ReservationTime(startAt)).getId();
+        final Long id = reservationTimeRepository.save(ReservationTime.from(startAt)).getId();
 
         // when & then
         Assertions.assertThatCode(() -> reservationTimeService.deleteById(id))
@@ -56,7 +56,7 @@ class ReservationTimeServiceTest {
     void 이미_존재하는_예약_시간을_추가하면_예외가_발생한다() {
         // given
         final LocalTime startAt = LocalTime.of(19, 55);
-        reservationTimeRepository.save(new ReservationTime(startAt));
+        reservationTimeRepository.save(ReservationTime.from(startAt));
 
         final CreateReservationTimeRequest request = new CreateReservationTimeRequest(startAt);
 

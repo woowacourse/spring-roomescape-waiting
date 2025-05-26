@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.fixture.domain.MemberFixture;
 import roomescape.member.domain.Member;
@@ -59,7 +60,7 @@ class MemberServiceTest {
         memberService.delete(savedMember.getId());
 
         // then
-        final Member foundMember = memberRepository.findById(savedMember.getId()).orElse(null);
-        Assertions.assertThat(foundMember).isNull();
+        Assertions.assertThatThrownBy(() -> memberRepository.getById(savedMember.getId()))
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }

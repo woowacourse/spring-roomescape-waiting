@@ -20,7 +20,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -33,7 +33,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -46,7 +46,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -59,7 +59,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -72,7 +72,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -85,7 +85,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -98,7 +98,7 @@ class MemberTest {
         final AuthRole role = AuthRole.MEMBER;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -111,7 +111,7 @@ class MemberTest {
         final AuthRole role = null;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Member(name, email, password, role))
+        Assertions.assertThatThrownBy(() -> Member.of(name, email, password, role))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

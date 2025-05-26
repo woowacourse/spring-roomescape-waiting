@@ -3,6 +3,7 @@ package roomescape.theme.application;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import static roomescape.fixture.domain.MemberFixture.notSavedMember1;
+import static roomescape.reservation.domain.ReservationStatus.BOOKED;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -20,10 +21,10 @@ import roomescape.fixture.domain.ThemeFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
@@ -69,7 +70,7 @@ class ThemeServiceTest {
         final String name = "우가우가";
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
-        final Theme theme = new Theme(name, description, thumbnail);
+        final Theme theme = Theme.of(name, description, thumbnail);
         final Long id = themeRepository.save(theme).getId();
 
         // when & then
@@ -83,13 +84,13 @@ class ThemeServiceTest {
         final String name1 = "우가우가";
         final String description1 = "우가우가 설명";
         final String thumbnail1 = "따봉우가.jpg";
-        final Theme theme1 = new Theme(name1, description1, thumbnail1);
+        final Theme theme1 = Theme.of(name1, description1, thumbnail1);
         themeRepository.save(theme1);
 
         final String name2 = "우가우가2";
         final String description2 = "우가우가2 설명";
         final String thumbnail2 = "따봉우가2.jpg";
-        final Theme theme2 = new Theme(name2, description2, thumbnail2);
+        final Theme theme2 = Theme.of(name2, description2, thumbnail2);
         themeRepository.save(theme2);
 
         // when
@@ -113,7 +114,7 @@ class ThemeServiceTest {
         final String name = "우가우가";
         final String description = "우가우가 설명";
         final String thumbnail = "따봉우가.jpg";
-        final Theme theme = new Theme(name, description, thumbnail);
+        final Theme theme = Theme.of(name, description, thumbnail);
         themeRepository.save(theme);
 
         final CreateThemeRequest request = new CreateThemeRequest(name, description, thumbnail);
@@ -147,9 +148,11 @@ class ThemeServiceTest {
         for (int themeIndex = 0; themeIndex < 5; themeIndex++) {
             for (int timeIndex = 0; timeIndex < themeCounts.get(themeIndex); timeIndex++) {
                 reservationRepository.save(
-                        new Reservation(
-                                now.minusDays(themeIndex), times.get(timeIndex), themes.get(themeIndex), member,
-                                ReservationStatus.CONFIRMED
+                        Reservation.of(
+                                ReservationSlot.of(now.minusDays(themeIndex), times.get(timeIndex),
+                                        themes.get(themeIndex)),
+                                member,
+                                BOOKED
                         )
                 );
             }
@@ -158,9 +161,9 @@ class ThemeServiceTest {
         // theme.get(5)는 weekAgo보다 이전 날짜로 예약 10개 추가 -> weekAgo~now 기간에는 예약 0개로 취급되어야 함
         for (int timeIndex = 0; timeIndex < 10; timeIndex++) {
             reservationRepository.save(
-                    new Reservation(
-                            weekAgo.minusDays(2), times.get(timeIndex), themes.get(5), member,
-                            ReservationStatus.CONFIRMED
+                    Reservation.of(ReservationSlot.of(weekAgo.minusDays(2), times.get(timeIndex), themes.get(5)),
+                            member,
+                            BOOKED
                     )
             );
         }
@@ -168,9 +171,10 @@ class ThemeServiceTest {
         // theme.get(6) 테마는 now날짜에 예약 1개, now보다 이후 날짜에 예약 10개 -> weekAgo~now 기간에는 예약 1개로 취급되어야 함
         for (int timeIndex = 0; timeIndex < 11; timeIndex++) {
             reservationRepository.save(
-                    new Reservation(
-                            now.plusDays(timeIndex), times.get(timeIndex), themes.get(6), member,
-                            ReservationStatus.CONFIRMED
+                    Reservation.of(
+                            ReservationSlot.of(now.plusDays(timeIndex), times.get(timeIndex), themes.get(6)),
+                            member,
+                            BOOKED
                     )
             );
         }

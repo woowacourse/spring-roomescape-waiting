@@ -3,9 +3,9 @@ package roomescape.member.application;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.AuthRole;
 import roomescape.exception.auth.AuthorizationException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.ui.dto.MemberResponse;
@@ -18,8 +18,9 @@ public class MemberService {
 
     private final MemberRepository memberRepository;
 
+    @Transactional
     public MemberResponse.IdName create(final SignUpRequest request) {
-        final Member member = new Member(
+        final Member member = Member.of(
                 request.name(),
                 request.email(),
                 request.password(),
@@ -30,16 +31,17 @@ public class MemberService {
         return new MemberResponse.IdName(saved.getId(), saved.getName());
     }
 
-    public void delete(final Long id) {
-        final Member found = memberRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다."));
+    @Transactional
+    public void delete(final Long memberId) {
+        final Member found = memberRepository.getById(memberId);
 
         if (found.getRole() == AuthRole.ADMIN) {
-            throw new AuthorizationException("관리자는 삭제할 수 없습니다.");
+            throw new AuthorizationException("관리자 계정은 삭제할 수 없습니다.");
         }
-        memberRepository.deleteById(id);
+        memberRepository.deleteById(memberId);
     }
 
+    @Transactional(readOnly = true)
     public List<IdName> findAllNames() {
         return memberRepository.findAll().stream()
                 .map(IdName::from)

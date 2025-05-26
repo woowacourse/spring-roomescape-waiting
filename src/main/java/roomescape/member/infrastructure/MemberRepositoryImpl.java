@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
@@ -25,19 +25,17 @@ public class MemberRepositoryImpl implements MemberRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
     public Optional<Member> findByEmail(final String email) {
         return jpaMemberRepository.findByEmail(email);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Optional<Member> findById(final Long id) {
-        return jpaMemberRepository.findById(id);
+    public Member getById(final Long memberId) {
+        return jpaMemberRepository.findById(memberId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 회원을 찾을 수 없습니다. id = " + memberId));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Member> findAll() {
         return jpaMemberRepository.findAll();
     }

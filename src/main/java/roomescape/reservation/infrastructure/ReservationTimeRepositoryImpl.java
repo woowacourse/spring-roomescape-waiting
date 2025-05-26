@@ -2,12 +2,11 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
 
 
 @Repository
@@ -22,24 +21,22 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     }
 
     @Override
-    public void deleteById(final Long id) {
-        jpaRepository.deleteById(id);
+    public void deleteById(final Long timeId) {
+        jpaRepository.deleteById(timeId);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Optional<ReservationTime> findById(final Long id) {
-        return jpaRepository.findById(id);
+    public ReservationTime getById(final Long timeId) {
+        return jpaRepository.findById(timeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약 시간이 존재하지 않습니다. id = " + timeId));
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ReservationTime> findAllByStartAt(final LocalTime startAt) {
         return jpaRepository.findAllByStartAt(startAt);
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<ReservationTime> findAll() {
         return jpaRepository.findAll();
     }

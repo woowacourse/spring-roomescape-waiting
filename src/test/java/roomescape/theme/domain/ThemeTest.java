@@ -16,7 +16,7 @@ class ThemeTest {
         final String thumbnail = "테마 썸네일";
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Theme(name, description, thumbnail))
+        Assertions.assertThatThrownBy(() -> Theme.of(name, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -28,7 +28,7 @@ class ThemeTest {
         final String thumbnail = "테마 썸네일";
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Theme(name, description, thumbnail))
+        Assertions.assertThatThrownBy(() -> Theme.of(name, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -40,7 +40,7 @@ class ThemeTest {
         final String thumbnail = "테마 썸네일";
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Theme(name, description, thumbnail))
+        Assertions.assertThatThrownBy(() -> Theme.of(name, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -52,7 +52,7 @@ class ThemeTest {
         final String thumbnail = "테마 썸네일";
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Theme(name, description, thumbnail))
+        Assertions.assertThatThrownBy(() -> Theme.of(name, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -64,7 +64,7 @@ class ThemeTest {
         final String thumbnail = null;
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Theme(name, description, thumbnail))
+        Assertions.assertThatThrownBy(() -> Theme.of(name, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 
@@ -76,7 +76,7 @@ class ThemeTest {
         final String thumbnail = "";
 
         // when & then
-        Assertions.assertThatThrownBy(() -> new Theme(name, description, thumbnail))
+        Assertions.assertThatThrownBy(() -> Theme.of(name, description, thumbnail))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

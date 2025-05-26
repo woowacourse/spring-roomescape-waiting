@@ -5,9 +5,9 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceInUseException;
-import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
@@ -19,19 +19,20 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
 
+    @Transactional
     public ThemeResponse create(final CreateThemeRequest request) {
         if (themeRepository.existsByName(request.name())) {
             throw new AlreadyExistException("해당 테마명이 이미 존재합니다. name = " + request.name());
         }
 
-        final Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
+        final Theme theme = Theme.of(request.name(), request.description(), request.thumbnail());
 
         return ThemeResponse.from(themeRepository.save(theme));
     }
 
+    @Transactional
     public void delete(final Long id) {
-        themeRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 테마가 존재하지 않습니다. id = " + id));
+        themeRepository.getById(id);
 
         try {
             themeRepository.deleteById(id);
@@ -40,6 +41,7 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         return themeRepository.findAll()
                 .stream()
@@ -47,6 +49,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
         final LocalDate dateTo = LocalDate.now();
         final LocalDate dateFrom = dateTo.minusDays(7);

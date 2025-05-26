@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.resource.ResourceNotFoundException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.theme.domain.Theme;
 
 @Repository
 @RequiredArgsConstructor
@@ -25,34 +28,29 @@ public class ReservationRepositoryImpl implements ReservationRepository {
         jpaReservationRepository.deleteById(id);
     }
 
-    @Override
-    public boolean existsById(Long id) {
-        return jpaReservationRepository.existsById(id);
-    }
-
-    @Override
-    public boolean existsByDateAndTimeIdAndThemeId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId
+    public boolean existsByReservationSlot(
+            final ReservationSlot reservationSlot
     ) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return jpaReservationRepository.existsByReservationSlot(reservationSlot);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public Optional<Reservation> findById(final Long id) {
-        return jpaReservationRepository.findById(id);
+    public Reservation getById(final Long reservationId) {
+        return jpaReservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다. id = " + reservationId));
     }
 
     @Override
-    @Transactional(readOnly = true)
+    public Optional<Reservation> findByReservationSlot(final ReservationSlot reservationSlot) {
+        return jpaReservationRepository.findByReservationSlot(reservationSlot);
+    }
+
+    @Override
     public List<Reservation> findAll() {
         return jpaReservationRepository.findAll();
     }
 
     @Override
-    @Transactional(readOnly = true)
     public List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(
             final Long themeId,
             final Long memberId,
@@ -63,17 +61,15 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllByDateAndThemeId(
+    public List<Reservation> findAllByDateAndTheme(
             final LocalDate date,
-            final Long themeId
+            final Theme theme
     ) {
-        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId);
+        return jpaReservationRepository.findAllByDateAndTheme(date, theme);
     }
 
     @Override
-    @Transactional(readOnly = true)
-    public List<Reservation> findAllByMemberId(final Long memberId) {
-        return jpaReservationRepository.findAllByMemberId(memberId);
+    public List<Reservation> findAllByMember(final Member member) {
+        return jpaReservationRepository.findAllByMember(member);
     }
 }

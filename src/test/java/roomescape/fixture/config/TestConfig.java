@@ -8,14 +8,19 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.member.infrastructure.MemberRepositoryImpl;
 import roomescape.reservation.application.AdminReservationService;
+import roomescape.reservation.application.AdminWaitingService;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.application.ReservationTimeService;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationTimeRepository;
+import roomescape.reservation.application.WaitingService;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.infrastructure.JpaReservationTimeRepository;
+import roomescape.reservation.infrastructure.JpaWaitingRepository;
 import roomescape.reservation.infrastructure.ReservationRepositoryImpl;
 import roomescape.reservation.infrastructure.ReservationTimeRepositoryImpl;
+import roomescape.reservation.infrastructure.WaitingRepositoryImpl;
 import roomescape.theme.application.ThemeService;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
@@ -60,6 +65,13 @@ public class TestConfig {
     }
 
     @Bean
+    public WaitingRepository waitingRepository(
+            final JpaWaitingRepository jpaWaitingRepository
+    ) {
+        return new WaitingRepositoryImpl(jpaWaitingRepository);
+    }
+
+    @Bean
     public ReservationTimeService reservationTimeService(
             final ReservationTimeRepository reservationTimeRepository
     ) {
@@ -81,32 +93,68 @@ public class TestConfig {
     }
 
     @Bean
-    public ReservationService reservationService(
-            final ReservationRepository reservationRepository,
+    public AdminReservationService adminReservationService(
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository
     ) {
-        return new ReservationService(
-                reservationRepository,
+        return new AdminReservationService(
                 reservationTimeRepository,
                 themeRepository,
-                memberRepository
+                memberRepository,
+                reservationRepository,
+                waitingRepository
         );
     }
 
     @Bean
-    public AdminReservationService adminReservationService(
-            final ReservationRepository reservationRepository,
+    public AdminWaitingService adminWaitingService(
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository
     ) {
-        return new AdminReservationService(
-                reservationRepository,
+        return new AdminWaitingService(
                 reservationTimeRepository,
                 themeRepository,
-                memberRepository
+                memberRepository,
+                reservationRepository,
+                waitingRepository
+        );
+    }
+
+    @Bean
+    public ReservationService reservationService(
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository
+    ) {
+        return new ReservationService(
+                reservationTimeRepository,
+                themeRepository,
+                memberRepository,
+                reservationRepository
+        );
+    }
+
+    @Bean
+    public WaitingService waitingService(
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository,
+            final WaitingRepository waitingRepository
+    ) {
+        return new WaitingService(
+                reservationTimeRepository,
+                themeRepository,
+                memberRepository,
+                reservationRepository,
+                waitingRepository
         );
     }
 }

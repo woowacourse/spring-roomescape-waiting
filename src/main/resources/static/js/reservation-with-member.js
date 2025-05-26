@@ -1,26 +1,25 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/admin/reservations';
+const ADMIN_RESERVATION_API_ENDPOINT = '/admin/reservations';
+const ADMIN_WAITING_API_ENDPOINT = '/admin/waitings';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
-const STATUS_API_ENDPOINT = '/admin/reservations/statuses';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
-const statusesOptions = [];
+const statusesOptions = [{id: 'WAITING', name: '예약 대기'}, {id: 'BOOKED', name: '예약'}];
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead(ADMIN_RESERVATION_API_ENDPOINT)
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
     fetchTimes();
     fetchThemes();
     fetchMembers();
-    fetchStatuses();
 });
 
 function render(data) {
@@ -39,7 +38,7 @@ function render(data) {
         row.insertCell(2).textContent = item.theme.name;      // 테마 name
         row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
-        row.insertCell(5).textContent = item.status;          // 예약 상태 status
+        row.insertCell(5).textContent = item.status;          // 예약 or 예약 대기
 
         const actionCell = row.insertCell(row.cells.length);
         actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
@@ -68,15 +67,6 @@ function fetchMembers() {
         .then(data => {
             membersOptions.push(...data);
             populateSelect('member', membersOptions, 'name');
-        })
-        .catch(error => console.error('Error fetching member:', error));
-}
-
-function fetchStatuses() {
-    requestRead(STATUS_API_ENDPOINT)
-        .then(data => {
-            statusesOptions.push(...data);
-            populateSelect('status', statusesOptions, 'name');
         })
         .catch(error => console.error('Error fetching member:', error));
 }
@@ -178,19 +168,36 @@ function saveRow(event) {
     const timeSelect = row.querySelector('#time-select');
     const statusSelect = row.querySelector('#status-select');
 
-    const reservation = {
-        date: dateInput.value,
-        themeId: themeSelect.value,
-        timeId: timeSelect.value,
-        memberId: memberSelect.value,
-        status: statusSelect.value
-    };
+    if (statusSelect.value == 'BOOKED') {
+        const reservation = {
+            date: dateInput.value,
+            themeId: themeSelect.value,
+            timeId: timeSelect.value,
+            memberId: memberSelect.value,
+            status: statusSelect.value
+        };
 
-    requestCreate(reservation)
-        .then(() => {
-            location.reload();
-        })
-        .catch(error => console.error('Error:', error));
+        requestCreateReservation(reservation)
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+    }
+
+    if (statusSelect.value == 'WAITING') {
+        const waiting = {
+            date: dateInput.value,
+            timeId: timeSelect.value,
+            themeId: themeSelect.value,
+            memberId: memberSelect.value
+        };
+
+        requestCreateWaiting(waiting)
+            .then(() => {
+                location.reload();
+            })
+            .catch(error => console.error('Error:', error));
+    }
 
     isEditing = false;  // isEditing 값을 false로 설정
 }
@@ -218,7 +225,7 @@ function applyFilter(event) {
     */
     const queryParams = new URLSearchParams({themeId, memberId, dateFrom, dateTo}).toString();
 
-    fetch(`${RESERVATION_API_ENDPOINT}/filtered?${queryParams}`, { // 예약 검색 API 호출
+    fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/filtered?${queryParams}`, { // 예약 검색 API 호출
         method: 'GET',
         credentials: 'include'
     }).then(response => {
@@ -228,14 +235,27 @@ function applyFilter(event) {
         .catch(error => console.error("Error fetching available times:", error));
 }
 
-function requestCreate(reservation) {
+function requestCreateReservation(reservation) {
     const requestOptions = {
         method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify(reservation)
     };
+    return fetch(`${ADMIN_RESERVATION_API_ENDPOINT}`, requestOptions)
+        .then(response => {
+            if (response.status === 201) return response.json();
+            throw new Error('Create failed');
+        });
+}
 
-    return fetch(`${RESERVATION_API_ENDPOINT}`, requestOptions)
+function requestCreateWaiting(waiting) {
+    const requestOptions = {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(waiting)
+    };
+
+    return fetch(`${ADMIN_WAITING_API_ENDPOINT}`, requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
@@ -247,7 +267,7 @@ function requestDelete(id) {
         method: 'DELETE',
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+    return fetch(`${ADMIN_RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 204) throw new Error('Delete failed');
         });

@@ -3,9 +3,9 @@ package roomescape.reservation.ui;
 import static roomescape.auth.domain.AuthRole.ADMIN;
 
 import jakarta.validation.Valid;
+import java.net.URI;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -20,8 +20,8 @@ import roomescape.reservation.ui.dto.request.CreateReservationTimeRequest;
 import roomescape.reservation.ui.dto.response.ReservationTimeResponse;
 
 @RestController
-@RequiredArgsConstructor
 @RequestMapping("/times")
+@RequiredArgsConstructor
 public class ReservationTimeRestController {
 
     private final ReservationTimeService reservationTimeService;
@@ -33,7 +33,7 @@ public class ReservationTimeRestController {
     ) {
         final ReservationTimeResponse response = reservationTimeService.create(request);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
+        return ResponseEntity.created(URI.create("/times/" + response.id()))
                 .body(response);
     }
 
