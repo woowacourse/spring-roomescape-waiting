@@ -3,7 +3,7 @@ package roomescape.theme.domain;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public final class ThemeDescription {
+public class ThemeDescription {
 
     private String description;
 

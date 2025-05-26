@@ -16,8 +16,8 @@ public class FakeReservationDao implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        Reservation newReservation = new Reservation(index++, reservation.getMember(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme());
+        Reservation newReservation = new Reservation(index++, reservation.getMember(), reservation.getDate(), reservation.getTheme(),
+                reservation.getTime());
         reservations.add(newReservation);
         return newReservation;
     }

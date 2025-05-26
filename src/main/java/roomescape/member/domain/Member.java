@@ -5,14 +5,20 @@ import jakarta.persistence.*;
 import java.util.Objects;
 
 @Entity
-public final class Member {
+public class Member {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Embedded
     private MemberName name;
+
+    @Embedded
     private MemberEmail email;
+
     private String password;
+
     @Enumerated(value = EnumType.STRING)
     private Role role;
 

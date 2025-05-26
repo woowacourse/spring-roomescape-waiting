@@ -1,12 +1,14 @@
 package roomescape.theme.domain;
 
 import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 @Embeddable
-public final class ThemeThumbnail {
+public class ThemeThumbnail {
 
     public static final int THUMBNAIL_LENGTH_LIMIT = 255;
+
     private String thumbnail;
 
     public ThemeThumbnail(final String thumbnail) {

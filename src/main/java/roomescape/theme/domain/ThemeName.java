@@ -1,10 +1,11 @@
 package roomescape.theme.domain;
 
 import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 @Embeddable
-public final class ThemeName {
+public class ThemeName {
 
     public static final int THEME_NAME_LENGTH_LIMIT = 20;
     private String name;

@@ -11,27 +11,30 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
-public final class Reservation {
+public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    private LocalDate date;
-    @ManyToOne
-    private ReservationTime time;
+
     @ManyToOne
     private Member member;
+
+    private LocalDate date;
+
     @ManyToOne
     private Theme theme;
 
-    public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
-                       final Theme theme) {
-        validateNotNull(member, date, time, theme);
+    @ManyToOne
+    private ReservationTime time;
+
+    public Reservation(Long id, Member member, LocalDate date, Theme theme, ReservationTime time) {
+        validateNotNull(member, date, theme, time);
         this.id = id;
-        this.date = date;
-        this.time = time;
         this.member = member;
+        this.date = date;
         this.theme = theme;
+        this.time = time;
     }
 
     protected Reservation() {
@@ -51,11 +54,11 @@ public final class Reservation {
         if (isBefore) {
             throw new BadRequestException("지나간 날짜와 시간은 예약 불가합니다.");
         }
-        return new Reservation(null, member, date, time, theme);
+        return new Reservation(null, member, date, theme, time);
     }
 
-    private void validateNotNull(final Member member, final LocalDate date, final ReservationTime time,
-                                 final Theme theme) {
+    private void validateNotNull(final Member member, final LocalDate date,
+                                 final Theme theme, final ReservationTime time) {
         if (member == null) {
             throw new IllegalArgumentException("사용자를 입력해야 합니다.");
         }

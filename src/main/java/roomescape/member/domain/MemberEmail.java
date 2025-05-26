@@ -1,10 +1,11 @@
 package roomescape.member.domain;
 
 import jakarta.persistence.Embeddable;
+
 import java.util.Objects;
 
 @Embeddable
-public final class MemberEmail {
+public class MemberEmail {
 
     private String email;
 

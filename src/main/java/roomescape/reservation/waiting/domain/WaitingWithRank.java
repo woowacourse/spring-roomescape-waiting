@@ -3,6 +3,7 @@ package roomescape.reservation.waiting.domain;
 import roomescape.reservation.domain.ReservationStatus;
 
 public class WaitingWithRank {
+
     private final Waiting waiting;
     private final long rank;
 

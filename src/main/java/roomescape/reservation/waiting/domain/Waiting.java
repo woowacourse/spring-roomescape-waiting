@@ -14,14 +14,19 @@ public class Waiting {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private LocalDateTime createdAt;
-    private LocalDate date;
-    @ManyToOne
-    private ReservationTime time;
+
     @ManyToOne
     private Member member;
+
+    private LocalDate date;
+
     @ManyToOne
     private Theme theme;
+
+    @ManyToOne
+    private ReservationTime time;
 
     public Waiting(final Long id, final LocalDateTime createdAt, final LocalDate date, final ReservationTime time, final Member member, final Theme theme) {
         this.id = id;

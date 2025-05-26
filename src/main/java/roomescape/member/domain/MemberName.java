@@ -5,9 +5,10 @@ import jakarta.persistence.Embeddable;
 import java.util.Objects;
 
 @Embeddable
-public final class MemberName {
+public class MemberName {
 
     public static final int NAME_LENGTH_LIMIT = 5;
+    
     private String name;
 
     public MemberName(final String name) {
