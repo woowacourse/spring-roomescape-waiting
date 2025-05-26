@@ -37,8 +37,13 @@ public class ReserveTicketService {
     }
 
     @Transactional
-    public long addReservation(AddReservationDto newReservationDto, long memberId) {
+    public long addReservationIfWaitingNotExists(AddReservationDto newReservationDto, long memberId) {
         validateIfWaitingExists(newReservationDto);
+        return addReservation(newReservationDto, memberId);
+    }
+
+    @Transactional
+    public long addReservation(AddReservationDto newReservationDto, long memberId) {
         Member member = memberService.getMemberById(memberId);
         long reservationId = reservationService.addReservation(newReservationDto, member.getName());
         Reservation reservation = reservationService.getReservationById(reservationId);

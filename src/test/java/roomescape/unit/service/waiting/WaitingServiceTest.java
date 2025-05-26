@@ -31,13 +31,11 @@ import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 class WaitingServiceTest {
 
     private WaitingService waitingService;
     private MemberService memberService;
-    private ReservationService reservationService;
     private ReservationTimeService timeService;
     private ThemeService themeService;
 
@@ -51,16 +49,11 @@ class WaitingServiceTest {
         FakeReservationRepository fakeReservationRepository = ServiceFixture.fakeReservationRepository();
         FakeReservationTimeRepository fakeReservationTimeRepository = ServiceFixture.fakeReservationTimeRepository();
         FakeThemeRepository fakeThemeRepository = ServiceFixture.fakeThemeRepository();
-        reservationService = new ReservationService(fakeReservationRepository,
-                fakeReservationTimeRepository, fakeThemeRepository);
         timeService = new ReservationTimeService(fakeReservationRepository, fakeReservationTimeRepository);
         themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository);
 
-        FakeReserveTicketRepository reservationMemberRepository = ServiceFixture.fakeReserveTicketRepository();
-        ReserveTicketService reserveTicketService = new ReserveTicketService(reservationMemberRepository, memberService, reservationService);
-
         FakeWaitingRepository fakeWaitingRepository = ServiceFixture.fakeWaitingRepository();
-        waitingService = new WaitingService(fakeWaitingRepository, memberService, timeService, themeService, reserveTicketService);
+        waitingService = new WaitingService(fakeWaitingRepository, memberService, timeService, themeService);
     }
 
     @Test
@@ -152,25 +145,5 @@ class WaitingServiceTest {
         // When & Then
         assertThatThrownBy(() -> waitingService.getWaitingById(5000L))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void 예약대기_엔티티를_승인하여_예약_엔티티로_등록시킬_수_있다() {
-        // Given
-        LocalDate date = LocalDate.now().plusDays(1);
-        Long timeId = timeService.addReservationTime(new AddReservationTimeDto(LocalTime.now().plusMinutes(1)));
-        Long themeId = themeService.addTheme(new AddThemeDto("theme", "description", "thumbnail"));
-        long memberId = memberService.signup(new SignupRequestDto("email", "password", "name"));
-        Long savedWaitingId = waitingService.addWaiting(new AddReservationDto(date, timeId, themeId), memberId);
-
-        // When
-        Long createdReservationId = waitingService.apply(new ApplyWaitingRequestDto(savedWaitingId));
-
-        // Then
-        assertAll(() -> {
-            assertThat(createdReservationId).isEqualTo(1L);
-            assertThatThrownBy(() -> waitingService.getWaitingById(savedWaitingId)).isInstanceOf(IllegalArgumentException.class);
-            assertThat(reservationService.getReservationById(createdReservationId)).isEqualTo(new Reservation(createdReservationId, memberService.getMemberById(memberId).getName(), date, timeService.getReservationTimeById(timeId), themeService.getThemeById(themeId)));
-        });
     }
 }

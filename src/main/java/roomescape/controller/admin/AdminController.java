@@ -37,7 +37,7 @@ public class AdminController {
                 newReservationDto.timeId(),
                 newReservationDto.themeId());
 
-        long id = reserveTicketService.addReservation(addReservationDto, newReservationDto.memberId());
+        long id = reserveTicketService.addReservationIfWaitingNotExists(addReservationDto, newReservationDto.memberId());
         Reservation reservation = reservationService.getReservationById(id);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),

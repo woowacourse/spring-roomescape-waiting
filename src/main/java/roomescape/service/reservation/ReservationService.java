@@ -33,7 +33,7 @@ public class ReservationService {
 
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeRepository reservationTimeRepository,
-                              ThemeRepository themeRepository, WaitingService waitingService) {
+                              ThemeRepository themeRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;

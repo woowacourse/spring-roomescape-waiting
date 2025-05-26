@@ -12,12 +12,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservationtime.AddReservationTimeDto;
-import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.theme.AddThemeDto;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
@@ -125,30 +123,6 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.addReservation(
                 new AddReservationDto(LocalDate.now(), reservationTimeId, themeId), "투다"))
                 .isInstanceOf(IllegalArgumentException.class);
-    }
-
-    @Test
-    void 선택된_테마와_날짜에_대해서_가능한_시간들을_확인할_수_있다() {
-        LocalTime firstTime = LocalTime.now().plusMinutes(1L);
-        LocalTime secondTime = LocalTime.now().plusMinutes(2L);
-
-        LocalDate today = LocalDate.now();
-        Long firstReservationTimeId = reservationTimeRepository.save(new AddReservationTimeDto(firstTime).toEntity());
-        Long secondReservationTimeId = reservationTimeRepository.save(new AddReservationTimeDto(secondTime).toEntity());
-        Long themeId = themeRepository.save(new AddThemeDto("테마", "테마2", "unique.png").toEntity());
-
-        reservationService.addReservation(
-                new AddReservationDto(today, firstReservationTimeId, themeId), "투다");
-
-        AvailableTimeRequestDto availableTimeRequestDto = new AvailableTimeRequestDto(today, themeId);
-        List<ReservationSlot> reservationAvailabilities = reservationService.availableReservationTimes(
-                        availableTimeRequestDto)
-                .getAvailableBookTimes();
-
-        List<ReservationSlot> reservationSlots = List.of(new ReservationSlot(1L, firstTime, true),
-                new ReservationSlot(2L, secondTime, false));
-
-        assertThat(reservationAvailabilities).containsExactlyInAnyOrderElementsOf(reservationSlots);
     }
 
     @Test

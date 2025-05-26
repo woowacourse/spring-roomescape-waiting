@@ -1,5 +1,6 @@
 package roomescape.unit.repository.waiting;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -36,6 +37,13 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public List<Waiting> findByDateAndThemeId(LocalDate date, Long themeId) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getDate().isEqual(date) && waiting.getTheme().getId().equals(themeId))
+                .toList();
+    }
+
+    @Override
     public List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId) {
         return waitings.stream()
                 .filter(waiting -> waiting.getMember().getId().equals(memberId))
@@ -49,6 +57,14 @@ public class FakeWaitingRepository implements WaitingRepository {
                     return new WaitingWithRank(waiting, rank);
                 })
                 .collect(Collectors.toList());
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return waitings.stream()
+                .anyMatch(waiting -> waiting.getDate().isEqual(date)
+                    && waiting.getTime().getId().equals(timeId)
+                    && waiting.getTheme().getId().equals(themeId));
     }
 
     @Override
