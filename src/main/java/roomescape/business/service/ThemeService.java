@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ThemeDto;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.ReservationRepository;
@@ -16,6 +17,7 @@ import roomescape.exception.business.NotFoundException;
 import roomescape.exception.business.RelatedEntityExistException;
 
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ThemeService {
 
@@ -31,11 +33,13 @@ public class ThemeService {
         return ThemeDto.fromEntity(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeDto> getAll() {
         final List<Theme> themes = themeRepository.findAll();
         return ThemeDto.fromEntities(themes);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeDto> getPopular(int size) {
         LocalDate now = LocalDate.now();
         final List<Theme> popularThemes = themeRepository.findPopularThemes(

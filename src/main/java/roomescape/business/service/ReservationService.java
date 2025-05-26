@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
 import roomescape.business.model.entity.ReservationTime;
@@ -28,6 +29,7 @@ import roomescape.business.dto.ReservationWithAheadDto;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationService {
     private final WaitingService waitingService;
 
@@ -56,6 +58,7 @@ public class ReservationService {
         return ReservationDto.fromEntity(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom,
                                        final LocalDate dateTo) {
         List<Reservation> reservations = reservationRepository.findAllReservationWithFilter(Id.create(themeIdValue),
@@ -75,11 +78,13 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWithAheadDto> getMyReservations(final String userIdValue) {
         Id userId = Id.create(userIdValue);
         return reservationRepository.findReservationsWithAhead(userId);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllWaitingReservations() {
         return waitingService.getAllWaitingReservations();
     }

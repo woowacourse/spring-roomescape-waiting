@@ -1,6 +1,5 @@
 package roomescape.infrastructure;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -60,7 +59,6 @@ public interface JpaReservationDao extends JpaRepository<Reservation, Id> {
 
     boolean existsByThemeId(Id themeId);
 
-    @Transactional
     @Modifying
     @Query("""
               UPDATE Reservation r
