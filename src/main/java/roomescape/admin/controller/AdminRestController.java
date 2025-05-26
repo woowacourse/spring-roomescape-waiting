@@ -16,9 +16,7 @@ import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.AdminReservationResponse;
 import roomescape.admin.dto.ReservationSearchRequest;
 import roomescape.admin.dto.ReservationWaitingResponse;
-import roomescape.admin.service.AdminService;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Waiting;
+import roomescape.admin.service.facade.AdminService;
 
 @RequestMapping("/admin")
 @RequiredArgsConstructor
@@ -31,42 +29,24 @@ public class AdminRestController {
     public ResponseEntity<AdminReservationResponse> createReservation(
             @RequestBody final AdminReservationRequest adminReservationRequest
     ) {
-        final Long id = adminService.saveByAdmin(
-                adminReservationRequest.date(),
-                adminReservationRequest.themeId(),
-                adminReservationRequest.timeId(),
-                adminReservationRequest.memberId()
-        );
-        final Reservation found = adminService.getById(id);
+        final AdminReservationResponse adminReservationResponse = adminService.saveByAdmin(adminReservationRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(AdminReservationResponse.from(found));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminReservationResponse);
     }
 
     @GetMapping("/searchable-reservations")
     public ResponseEntity<List<AdminReservationResponse>> getReservationsBySearch(
             @ModelAttribute ReservationSearchRequest searchRequest
     ) {
-        final List<Reservation> searchedReservations = adminService.findByInFromTo(
-                searchRequest.themeId(),
-                searchRequest.memberId(),
-                searchRequest.dateFrom(),
-                searchRequest.dateTo()
-        );
-
-        final List<AdminReservationResponse> searchedResponses = searchedReservations.stream()
-                .map(AdminReservationResponse::from)
-                .toList();
+        final List<AdminReservationResponse> searchedResponses = adminService.findByInFromTo(searchRequest);
 
         return ResponseEntity.ok(searchedResponses);
     }
 
-    @GetMapping("/waiting-management")
+    @GetMapping("/waitings")
     public ResponseEntity<List<ReservationWaitingResponse>> waitingManagement(
     ) {
-        final List<Waiting> waitings = adminService.findAllWaitingReservations();
-        final List<ReservationWaitingResponse> waitingResponses = waitings.stream()
-                .map(ReservationWaitingResponse::from)
-                .toList();
+        final List<ReservationWaitingResponse> waitingResponses = adminService.findAllWaitingReservations();
 
         return ResponseEntity.ok(waitingResponses);
     }

@@ -1,4 +1,4 @@
-package roomescape.admin.service;
+package roomescape.admin.service.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -11,25 +11,22 @@ import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
-import roomescape.reservation.repository.WaitingRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
 @RequiredArgsConstructor
 @Service
-public class AdminService {
+public class AdminReservationService {
 
     private final ReservationRepositoryInterface reservationRepository;
     private final ReservationTimeRepositoryInterface reservationTimeRepository;
     private final ThemeRepositoryInterface themeRepository;
     private final MemberRepositoryInterface memberRepository;
-    private final WaitingRepositoryInterface waitingRepository;
 
     @Transactional
-    public Long saveByAdmin(final LocalDate date, final Long themeId, final Long timeId, final Long memberId) {
+    public Reservation saveByAdmin(final LocalDate date, final Long themeId, final Long timeId, final Long memberId) {
         final ReservationTime reservationTime = findReservationTimeById(timeId);
         final Theme theme = findThemeById(themeId);
         final Member member = findMemberById(memberId);
@@ -39,18 +36,7 @@ public class AdminService {
         final Reservation reservation = new Reservation(member, date, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
 
-        return savedReservation.getId();
-    }
-
-    @Transactional
-    public void deleteWaitingById(final Long id) {
-        waitingRepository.findById(id)
-                .ifPresentOrElse(
-                        waiting -> waitingRepository.deleteById(id),
-                        () -> {
-                            throw new DataNotFoundException("해당 대기 데이터가 존재하지 않습니다. id = " + id);
-                        }
-                );
+        return savedReservation;
     }
 
     @Transactional(readOnly = true)
@@ -63,15 +49,7 @@ public class AdminService {
                                             final LocalDate dateTo) {
         final Theme theme = findThemeById(themeId);
         final Member member = findMemberById(memberId);
-        final List<Reservation> searchedReservations = reservationRepository
-                .findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
-
-        return searchedReservations;
-    }
-
-    @Transactional(readOnly = true)
-    public List<Waiting> findAllWaitingReservations() {
-        return waitingRepository.findAll();
+        return reservationRepository.findByThemeAndMemberAndDateBetween(theme, member, dateFrom, dateTo);
     }
 
     private ReservationTime findReservationTimeById(final Long timeId) {
