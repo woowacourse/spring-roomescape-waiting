@@ -3,9 +3,9 @@ package roomescape.reservation.application.service;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.application.repository.ReservationRepository;
-import roomescape.reservation.application.repository.ThemeRepository;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.presentation.dto.ThemeRequest;
 import roomescape.reservation.presentation.dto.ThemeResponse;
 
@@ -29,9 +29,17 @@ public class ThemeService {
         return new ThemeResponse(themeRepository.save(theme));
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getThemes() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
+                .map(ThemeResponse::new)
+                .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> getPopularThemes() {
+        return themeRepository.findPopularThemes().stream()
                 .map(ThemeResponse::new)
                 .toList();
     }
@@ -46,14 +54,8 @@ public class ThemeService {
         themeRepository.delete(theme);
     }
 
-    public List<ThemeResponse> getPopularThemes() {
-        return themeRepository.findPopularThemes().stream()
-                .map(ThemeResponse::new)
-                .toList();
-    }
-
     private void validateIsReservationExist(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByReservationInfoThemeId(id)) {
             throw new IllegalStateException("예약이 이미 존재하는 테마입니다.");
         }
     }

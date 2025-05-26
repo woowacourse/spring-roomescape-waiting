@@ -1,4 +1,4 @@
-package roomescape.reservation.application.repository;
+package roomescape.reservation.domain.repository;
 
 import java.time.LocalTime;
 import org.springframework.data.repository.ListCrudRepository;

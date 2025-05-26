@@ -1,5 +1,7 @@
 package roomescape.reservation.presentation;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
@@ -15,12 +17,12 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.DatabaseCleaner;
 import roomescape.member.presentation.fixture.MemberFixture;
-import roomescape.reservation.presentation.dto.AdminReservationRequest;
+import roomescape.reservation.presentation.dto.WaitingRequest;
 import roomescape.reservation.presentation.fixture.ReservationFixture;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class AdminReservationControllerTest {
+public class WaitingControllerTest {
 
     private final DatabaseCleaner databaseCleaner;
     private final ReservationFixture reservationFixture = new ReservationFixture();
@@ -30,7 +32,7 @@ class AdminReservationControllerTest {
     int port;
 
     @Autowired
-    AdminReservationControllerTest(final DatabaseCleaner databaseCleaner) {
+    WaitingControllerTest(final DatabaseCleaner databaseCleaner) {
         this.databaseCleaner = databaseCleaner;
     }
 
@@ -42,8 +44,8 @@ class AdminReservationControllerTest {
     }
 
     @Test
-    @DisplayName("어드민 예약 추가 테스트")
-    void createReservationTest() {
+    @DisplayName("예약 대기 추가 테스트")
+    void createWaitingTest() {
         // given
         final Map<String, String> cookies = memberFixture.loginAdmin();
         reservationFixture.createReservationTime(LocalTime.of(10, 30), cookies);
@@ -55,23 +57,22 @@ class AdminReservationControllerTest {
                 cookies
         );
 
-        final AdminReservationRequest reservation = reservationFixture.createAdminReservationRequest(
-                LocalDate.of(2025, 8, 5), 1L,
-                1L, 1L);
+        final WaitingRequest waitingRequest = reservationFixture.createWaitingRequest(LocalDate.of(2025, 8, 5), 1L,
+                1L);
 
         // when - then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservation)
-                .when().post("/admin/reservations")
+                .body(waitingRequest)
+                .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(201);
     }
 
     @Test
-    @DisplayName("과거 날짜로 예약 추가 시 실패 테스트")
-    void createReservationWithPastDateTest() {
+    @DisplayName("예약 대기 삭제 테스트")
+    void deleteWaitingTest() {
         // given
         final Map<String, String> cookies = memberFixture.loginAdmin();
         reservationFixture.createReservationTime(LocalTime.of(10, 30), cookies);
@@ -83,16 +84,23 @@ class AdminReservationControllerTest {
                 cookies
         );
 
-        final AdminReservationRequest reservation = reservationFixture.createAdminReservationRequest(
-                LocalDate.of(2020, 1, 1), 1L, 1L, 1L);
+        reservationFixture.createWaiting(LocalDate.of(2025, 8, 5), 1L, 1L, cookies);
 
-        // when - then
-        RestAssured.given()
+        // when
+        RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookies(cookies)
-                .body(reservation)
-                .when().post("/admin/reservations")
-                .then()
-                .statusCode(400);
+                .when().delete("/reservations/waiting/1")
+                .then().log().all()
+                .statusCode(204);
+
+        // then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookies(cookies)
+                .when().get("/reservations/waiting")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
 }

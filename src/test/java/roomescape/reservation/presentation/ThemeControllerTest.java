@@ -7,21 +7,40 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.DatabaseCleaner;
 import roomescape.member.presentation.fixture.MemberFixture;
 import roomescape.reservation.presentation.dto.ThemeRequest;
 import roomescape.reservation.presentation.fixture.ReservationFixture;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ThemeControllerTest {
+    private final DatabaseCleaner databaseCleaner;
     private final ReservationFixture reservationFixture = new ReservationFixture();
     private final MemberFixture memberFixture = new MemberFixture();
+
+    @LocalServerPort
+    int port;
+
+    @Autowired
+    ThemeControllerTest(final DatabaseCleaner databaseCleaner) {
+        this.databaseCleaner = databaseCleaner;
+    }
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        databaseCleaner.clear();
+        databaseCleaner.setUserInfo();
+    }
 
     @Test
     @DisplayName("테마 추가 테스트")

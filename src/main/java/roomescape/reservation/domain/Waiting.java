@@ -15,8 +15,8 @@ import roomescape.member.domain.Member;
 
 @Entity
 @SQLRestriction("deleted_at is NULL")
-@SQLDelete(sql = "UPDATE reservation SET deleted_at = NOW() WHERE id = ?")
-public class Reservation extends TimeStamp {
+@SQLDelete(sql = "UPDATE waiting SET deleted_at = NOW() WHERE id = ?")
+public class Waiting extends TimeStamp {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,11 +29,11 @@ public class Reservation extends TimeStamp {
     @Embedded
     private ReservationInfo reservationInfo;
 
-    public Reservation() {
+    public Waiting() {
     }
 
-    public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime) {
+    public Waiting(final Long id, final Member member, final Theme theme, final LocalDate date,
+                   final ReservationTime reservationTime) {
         this.id = id;
         this.member = member;
         this.reservationInfo = new ReservationInfo(
@@ -41,15 +41,13 @@ public class Reservation extends TimeStamp {
         );
     }
 
-    public Reservation(final Member member, final Theme theme, final LocalDate date,
-                       final ReservationTime reservationTime) {
-        this(null, member, theme, date, reservationTime);
-    }
-
-    public Reservation(final Member member, final ReservationInfo reservationInfo) {
+    public Waiting(final Member member, final Theme theme, final LocalDate date,
+                   final ReservationTime reservationTime) {
         this.id = null;
         this.member = member;
-        this.reservationInfo = reservationInfo;
+        this.reservationInfo = new ReservationInfo(
+                theme, date, reservationTime
+        );
     }
 
     public Long getId() {

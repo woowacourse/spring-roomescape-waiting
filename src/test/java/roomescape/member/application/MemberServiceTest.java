@@ -5,13 +5,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.global.jwt.JwtTokenProvider;
-import roomescape.member.application.MemberServiceTest.MemberConfig;
-import roomescape.member.application.repository.MemberRepository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.service.MemberService;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.SignUpRequest;
@@ -19,8 +16,8 @@ import roomescape.member.presentation.dto.SignUpResponse;
 import roomescape.member.presentation.dto.TokenRequest;
 
 @ActiveProfiles("test")
-@DataJpaTest
-@Import(MemberConfig.class)
+@Transactional
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class MemberServiceTest {
 
     @Autowired
@@ -77,16 +74,5 @@ class MemberServiceTest {
     @DisplayName("유저 조회 테스트")
     void getMembersTest() {
         assertThat(memberService.getMembers().size()).isEqualTo(2);
-    }
-
-    static class MemberConfig {
-        @Bean
-        public MemberService memberService(
-                MemberRepository memberRepository
-        ) {
-            return new MemberService(
-                    memberRepository, new JwtTokenProvider()
-            );
-        }
     }
 }

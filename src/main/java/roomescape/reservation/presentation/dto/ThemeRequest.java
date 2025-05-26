@@ -4,13 +4,13 @@ import jakarta.validation.constraints.NotBlank;
 
 public class ThemeRequest {
 
-    @NotBlank
+    @NotBlank(message = "이름은 공백일 수 없습니다")
     private final String name;
 
-    @NotBlank
+    @NotBlank(message = "설명은 공백일 수 없습니다")
     private final String description;
 
-    @NotBlank
+    @NotBlank(message = "썸네일은 공백일 수 없습니다")
     private final String thumbnail;
 
     public ThemeRequest(String name, String description, String thumbnail) {

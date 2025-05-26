@@ -3,21 +3,40 @@ package roomescape.member.presentation;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.DatabaseCleaner;
 import roomescape.member.presentation.dto.TokenRequest;
 import roomescape.member.presentation.fixture.MemberFixture;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class LoginControllerTest {
+    private final DatabaseCleaner databaseCleaner;
     private final MemberFixture memberFixture = new MemberFixture();
+
+    @LocalServerPort
+    int port;
+
+    @Autowired
+    LoginControllerTest(final DatabaseCleaner databaseCleaner) {
+        this.databaseCleaner = databaseCleaner;
+    }
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        databaseCleaner.clear();
+        databaseCleaner.setUserInfo();
+    }
 
     @Test
     @DisplayName("로그인 테스트")

@@ -5,16 +5,20 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.member.application.repository.MemberRepository;
 import roomescape.member.domain.Member;
-import roomescape.reservation.application.repository.ReservationRepository;
-import roomescape.reservation.application.repository.ReservationTimeRepository;
-import roomescape.reservation.application.repository.ThemeRepository;
+import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.ReservationTimeRepository;
+import roomescape.reservation.domain.repository.ThemeRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
@@ -23,15 +27,18 @@ import roomescape.reservation.presentation.dto.UserReservationsResponse;
 @Service
 public class ReservationService {
 
+    private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository,
+    public ReservationService(final WaitingRepository waitingRepository,
+                              final ReservationRepository reservationRepository,
                               final ReservationTimeRepository reservationTimeRepository,
                               final ThemeRepository themeRepository,
                               final MemberRepository memberRepository) {
+        this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
@@ -63,21 +70,7 @@ public class ReservationService {
         );
     }
 
-    private ReservationResponse createReservation(Long timeId, Long themeId, LocalDate date, Member member) {
-        ReservationTime reservationTime = getReservationTime(timeId);
-        Theme theme = getTheme(themeId);
-        validateReservationDateTime(date, reservationTime);
-
-        final Reservation reservation = new Reservation(
-                member,
-                theme,
-                date,
-                reservationTime
-        );
-
-        return new ReservationResponse(reservationRepository.save(reservation));
-    }
-
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getReservations(Long memberId, Long themeId, LocalDate dateFrom,
                                                      LocalDate dateTo) {
 
@@ -91,12 +84,23 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<UserReservationsResponse> getUserReservations(final Long memberId) {
         findMemberById(memberId);
 
-        return reservationRepository.findByMemberId(memberId).stream()
+        final List<UserReservationsResponse> reservations = reservationRepository.findByMemberId(memberId).stream()
                 .map(UserReservationsResponse::new)
                 .toList();
+
+        final List<UserReservationsResponse> waitings = waitingRepository.findWaitingWithRankByMemberId(
+                        memberId).stream()
+                .map(UserReservationsResponse::new)
+                .toList();
+
+        return Stream.concat(
+                reservations.stream(),
+                waitings.stream()
+        ).toList();
     }
 
     @Transactional
@@ -106,6 +110,34 @@ public class ReservationService {
                 .orElseThrow(() -> new IllegalStateException("이미 삭제되어 있는 리소스입니다."));
 
         reservationRepository.delete(reservation);
+
+        final Optional<Waiting> waiting = waitingRepository.findFirstByReservationInfoOrderByIdAsc(
+                reservation.getReservationInfo()
+        );
+
+        waiting.ifPresent(value -> {
+            reservationRepository.save(new Reservation(
+                    value.getMember(),
+                    value.getReservationInfo()
+            ));
+
+            waitingRepository.delete(waiting.get());
+        });
+    }
+
+    private ReservationResponse createReservation(Long timeId, Long themeId, LocalDate date, Member member) {
+        ReservationTime reservationTime = getReservationTime(timeId);
+        Theme theme = getTheme(themeId);
+        validateReservationDateTime(date, reservationTime);
+
+        final Reservation reservation = new Reservation(
+                member,
+                theme,
+                date,
+                reservationTime
+        );
+
+        return new ReservationResponse(reservationRepository.save(reservation));
     }
 
     private ReservationTime getReservationTime(Long timeId) {
@@ -132,7 +164,7 @@ public class ReservationService {
     }
 
     private void validateIsDuplicate(final LocalDate reservationDate, final ReservationTime reservationTime) {
-        if (reservationRepository.existsByDateAndReservationTimeStartAt(reservationDate,
+        if (reservationRepository.existsByReservationInfoDateAndReservationInfoReservationTimeStartAt(reservationDate,
                 reservationTime.getStartAt())) {
             throw new IllegalStateException("중복된 일시의 예약은 불가능합니다.");
         }

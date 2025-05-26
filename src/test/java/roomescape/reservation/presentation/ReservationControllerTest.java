@@ -7,21 +7,40 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.context.ActiveProfiles;
+import roomescape.DatabaseCleaner;
 import roomescape.member.presentation.fixture.MemberFixture;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.fixture.ReservationFixture;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class ReservationControllerTest {
+    private final DatabaseCleaner databaseCleaner;
     private final ReservationFixture reservationFixture = new ReservationFixture();
     private final MemberFixture memberFixture = new MemberFixture();
+
+    @LocalServerPort
+    int port;
+
+    @Autowired
+    ReservationControllerTest(final DatabaseCleaner databaseCleaner) {
+        this.databaseCleaner = databaseCleaner;
+    }
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+        databaseCleaner.clear();
+        databaseCleaner.setUserInfo();
+    }
 
     @Test
     @DisplayName("예약 추가 테스트")
@@ -236,6 +255,8 @@ class ReservationControllerTest {
         reservationFixture.createReservation(LocalDate.of(2025, 8, 5), 1L, 1L, adminCookies);
         reservationFixture.createReservation(LocalDate.of(2025, 8, 12), 1L, 1L, userCookies);
 
+        reservationFixture.createWaiting(LocalDate.of(2025, 8, 12), 1L, 1L, adminCookies);
+
         // when - then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -243,6 +264,6 @@ class ReservationControllerTest {
                 .when().get("/reservations/mine")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 }

@@ -15,7 +15,7 @@ import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 
 @RestController
-@RequestMapping("/admin")
+@RequestMapping("/admin/reservations")
 public class AdminReservationController {
     private final ReservationService reservationService;
 
@@ -24,7 +24,7 @@ public class AdminReservationController {
     }
 
     @Auth(Role.ADMIN)
-    @PostMapping("/reservations")
+    @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(
             final @RequestBody @Valid AdminReservationRequest adminReservationRequest
     ) {
