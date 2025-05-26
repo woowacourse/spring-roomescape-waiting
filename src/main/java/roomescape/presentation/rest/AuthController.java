@@ -15,11 +15,11 @@ import roomescape.presentation.request.LoginRequest;
 import roomescape.presentation.response.UserResponse;
 
 @RestController
-public class LoginController {
+public class AuthController {
 
     private final AuthenticationService authenticationService;
 
-    public LoginController(final AuthenticationService authenticationService) {
+    public AuthController(final AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
