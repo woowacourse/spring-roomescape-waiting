@@ -43,14 +43,14 @@ class ReservationWaitQueryUseCaseTest {
                 1L,
                 MemberName.from("member1"),
                 MemberEmail.from("11@gmail.com"),
-                Role.USER
+                Role.MEMBER
         );
 
         final Member member2 = new Member(
                 2L,
                 MemberName.from("member2"),
                 MemberEmail.from("22@gmail.com"),
-                Role.USER
+                Role.MEMBER
         );
 
         final ReservationDate reservationDate = ReservationDate.from(LocalDate.MAX);
