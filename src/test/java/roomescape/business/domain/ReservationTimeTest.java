@@ -1,7 +1,6 @@
 package roomescape.business.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
@@ -16,11 +15,7 @@ class ReservationTimeTest {
         final LocalTime invalidStartAt = null;
 
         // when & then
-        assertAll(
-                () -> assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
-                        .isInstanceOf(IllegalArgumentException.class),
-                () -> assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
-                        .isInstanceOf(IllegalArgumentException.class)
-        );
+        assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 }
