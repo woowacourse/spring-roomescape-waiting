@@ -33,7 +33,7 @@ public class ReservationsMineController {
     }
 
     @DeleteMapping("/{waitInfoId}")
-    public ResponseEntity<List<ReservationMineResponse>> deleteReservation(
+    public ResponseEntity<Void> deleteReservation(
             @AuthenticationPrincipal final LoginMember loginMember,
             @PathVariable("waitInfoId") final Long waitInfoId
     ) {
