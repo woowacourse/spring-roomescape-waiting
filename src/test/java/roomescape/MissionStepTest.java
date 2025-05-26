@@ -28,7 +28,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.controller.ReservationController;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.repository.WaitingRepository;
+import roomescape.reservation.repository.ReservationStatusRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -51,7 +51,7 @@ class MissionStepTest {
     private ThemeRepository themeRepository;
 
     @Autowired
-    private WaitingRepository waitingRepository;
+    private ReservationStatusRepository reservationStatusRepository;
 
     @BeforeEach
     void setUp() {
@@ -198,7 +198,7 @@ class MissionStepTest {
         // given
         reservationTimeRepository.save(ReservationTime.from(LocalTime.of(10, 00)));
         themeRepository.save(Theme.of("name", "desc", "thumb"));
-        waitingRepository.save(ReservationStatus.booked());
+        reservationStatusRepository.save(ReservationStatus.booked());
 
         Map<String, String> adminUser = Map.of("email", "admin@naver.com", "password", "1234");
         String token = RestAssured.given().log().all()
