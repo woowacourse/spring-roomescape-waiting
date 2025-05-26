@@ -28,8 +28,17 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
         reservation.fetch("member");
         reservation.fetch("theme");
 
-        List<Predicate> predicates = new ArrayList<>();
+        List<Predicate> predicates = getConditions(cb, reservation, condition);
 
+        cq.select(reservation)
+                .where(cb.and(predicates.toArray(new Predicate[0])));
+
+        return entityManager.createQuery(cq).getResultList();
+    }
+
+    private static List<Predicate> getConditions(CriteriaBuilder cb, Root<Reservation> reservation,
+                                                 ReservationCondition condition) {
+        List<Predicate> predicates = new ArrayList<>();
         if (condition.memberId() != null) {
             predicates.add(cb.equal(reservation.get("member").get("id"), condition.memberId()));
         }
@@ -43,10 +52,6 @@ public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
         if (condition.dateTo() != null) {
             predicates.add(cb.lessThanOrEqualTo(reservation.get("reservationTime").get("date"), condition.dateTo()));
         }
-
-        cq.select(reservation)
-                .where(cb.and(predicates.toArray(new Predicate[0])));
-
-        return entityManager.createQuery(cq).getResultList();
+        return predicates;
     }
 }

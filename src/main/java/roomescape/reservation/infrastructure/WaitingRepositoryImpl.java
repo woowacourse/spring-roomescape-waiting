@@ -8,6 +8,7 @@ import roomescape.reservation.dto.response.WaitingWithRankResponse;
 public class WaitingRepositoryImpl implements WaitingRepositoryCustom {
 
     private static final int WAITING_RANK_OFFSET = 1;
+
     private final EntityManager entityManager;
 
     public WaitingRepositoryImpl(EntityManager entityManager) {
