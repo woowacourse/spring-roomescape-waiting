@@ -85,7 +85,6 @@ public class WaitingService {
     }
 
     public void approveWaiting(final Long id) {
-
         Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("[ERROR] 등록된 예약 대기 번호만 승인할 수 있습니다. 입력된 번호는 " + id + "입니다."));
         reservationService.validateDuplicate(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId());
