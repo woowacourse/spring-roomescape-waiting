@@ -142,6 +142,30 @@ class ReservationServiceTest {
                 .isInstanceOf(AlreadyInUseException.class);
     }
 
+    @DisplayName("해당 날짜, 시간, 테마에 예약 대기가 존재하는 상황에서 예약을 생성할 수 없다.")
+    @Test
+    void createReservationInWaitingExists() {
+        // given
+        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
+        Long themeId = savedTheme.getId();
+
+        LocalTime time = LocalTime.of(8, 0);
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+        Long timeId = savedTime.getId();
+        Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
+        Member savedMember = memberRepository.save(member);
+        LocalDate date = nextDay();
+
+        waitingRepository.save(new Waiting(date, savedMember, savedTime, savedTheme));
+
+        ReservationCreateRequest requestDto =
+                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.create(requestDto))
+                .isInstanceOf(AlreadyInUseException.class);
+    }
+
     @DisplayName("과거 날짜에 예약을 추가하면 예외가 발생한다.")
     @Test
     void test5() {

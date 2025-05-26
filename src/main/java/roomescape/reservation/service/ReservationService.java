@@ -94,17 +94,24 @@ public class ReservationService {
     @Transactional
     public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
-            throw new AlreadyInUseException("reservation is already in use");
+            throw new AlreadyInUseException("이미 예약이 존재합니다..");
         }
-        // TODO: 예약 대기가 존재하는 경우 예약을 생성할 수 없다
+        if (hasAlreadyWaiting(request)) {
+            throw new AlreadyInUseException("예약 대기가 존재해 예약을 생성할 수 없습니다.");
+        }
 
         Reservation reservation = getReservation(request, request.loginMember());
-        LocalDateTime now = LocalDateTime.now();
-        validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
+        validateDateTime(LocalDateTime.now(), reservation.getDate(), reservation.getTime().getStartAt());
 
         Reservation savedReservation = reservationRepository.save(reservation);
 
         return ReservationResponse.from(savedReservation);
+    }
+
+    private boolean hasAlreadyWaiting(final ReservationCreateRequest request) {
+        return waitingRepository.existsByDateAndTimeIdAndThemeId(
+                request.date(), request.timeId(), request.themeId()
+        );
     }
 
     public List<ReservationResponse> findReservationByFiltering(final FilteringReservationRequest request) {
@@ -126,7 +133,7 @@ public class ReservationService {
     }
 
     private Reservation getReservation(final ReservationCreateRequest request, final LoginMember loginMember) {
-        ReservationTime reservationTime = gerReservationTime(request);
+        ReservationTime reservationTime = getReservationTime(request);
         Theme theme = getTheme(request);
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
@@ -139,7 +146,7 @@ public class ReservationService {
                 .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
     }
 
-    private ReservationTime gerReservationTime(final ReservationCreateRequest request) {
+    private ReservationTime getReservationTime(final ReservationCreateRequest request) {
         Long timeId = request.timeId();
         return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
@@ -172,7 +179,7 @@ public class ReservationService {
             reservationRepository.save(new Reservation(
                     value.getMember(), value.getDate(), value.getTime(), value.getTheme()
             ));
-            waitingRepository.delete(waiting.get());
+            waitingRepository.delete(value);
         });
     }
 
