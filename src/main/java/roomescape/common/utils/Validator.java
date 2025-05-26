@@ -2,6 +2,7 @@ package roomescape.common.utils;
 
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import roomescape.common.exception.InvalidInputException;
 
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

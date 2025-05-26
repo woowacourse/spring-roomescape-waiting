@@ -1,10 +1,13 @@
 package roomescape.time.service.converter;
 
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import roomescape.time.controller.dto.ReservationTimeWebResponse;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationTimeConverter {
 
     public static ReservationTime toDomain(final CreateReservationTimeServiceRequest request) {

@@ -1,11 +1,11 @@
 package roomescape.reservation.service.converter;
 
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberConverter;
 import roomescape.reservation.controller.dto.ReservationWaitWebResponse;
-import roomescape.reservation.controller.dto.ReservationWebResponse;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationWait;
 import roomescape.reservation.service.dto.CreateReservationServiceRequest;
@@ -14,6 +14,7 @@ import roomescape.theme.service.converter.ThemeConverter;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.converter.ReservationTimeConverter;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationWaitConverter {
 
     public static ReservationWait toDomain(

@@ -1,8 +1,11 @@
 package roomescape.common.utils;
 
 import java.net.URI;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.web.util.UriComponentsBuilder;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class UriFactory {
 
     public static URI buildPath(final String basePath, final String... pathSegments) {
