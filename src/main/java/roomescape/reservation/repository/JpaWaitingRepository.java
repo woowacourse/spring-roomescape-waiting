@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.repository.dto.WaitingWithRankDto;
@@ -15,13 +16,7 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(ReservationDate reservationDate, Long timeId, Long themeId,
                                                        Long memberId);
 
-    @Query("""
-                 SELECT w FROM Waiting w
-                 WHERE w.date = :date AND w.time.id = :timeId AND w.theme.id = :themeId
-                 ORDER BY w.createdAt ASC
-                 LIMIT 1
-            """)
-    Optional<Waiting> findEarliestByDateAndTimeIdAndThemeId(
+    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByCreatedAtAsc(
             ReservationDate date,
             Long timeId,
             Long themeId
