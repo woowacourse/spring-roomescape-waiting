@@ -30,7 +30,9 @@ class ReservationTimeRepositoryTest {
     @Test
     void save() {
         // given
+        // 오전 10시로 시작 시간 설정
         LocalTime startAt = LocalTime.of(10, 0);
+        // 예약 시간 객체 생성
         ReservationTime time = new ReservationTime(startAt);
 
         // when
@@ -45,8 +47,11 @@ class ReservationTimeRepositoryTest {
     @Test
     void existsByStartAt() {
         // given
+        // 오전 10시로 시작 시간 설정
         LocalTime startAt = LocalTime.of(10, 0);
+        // 예약 시간 객체 생성
         ReservationTime time = new ReservationTime(startAt);
+        // 예약 시간 저장
         timeRepository.save(time);
 
         // when
@@ -60,9 +65,11 @@ class ReservationTimeRepositoryTest {
     @Test
     void findAll() {
         // given
+        // 오전 10시 예약 시간 객체 생성 및 저장
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         timeRepository.save(time1);
 
+        // 오후 12시 예약 시간 객체 생성 및 저장
         ReservationTime time2 = new ReservationTime(LocalTime.of(12, 0));
         timeRepository.save(time2);
 
@@ -79,8 +86,11 @@ class ReservationTimeRepositoryTest {
     @Test
     void findById() {
         // given
+        // 오전 10시로 시작 시간 설정
         LocalTime startAt = LocalTime.of(10, 0);
+        // 예약 시간 객체 생성
         ReservationTime time = new ReservationTime(startAt);
+        // 예약 시간 저장 및 저장된 객체 참조
         ReservationTime savedTime = timeRepository.save(time);
 
         // when
@@ -96,9 +106,13 @@ class ReservationTimeRepositoryTest {
     @Test
     void deleteById() {
         // given
+        // 오전 10시로 시작 시간 설정
         LocalTime startAt = LocalTime.of(10, 0);
+        // 예약 시간 객체 생성
         ReservationTime time = new ReservationTime(startAt);
+        // 예약 시간 저장 및 저장된 객체 참조
         ReservationTime savedTime = timeRepository.save(time);
+        // 저장된 예약 시간의 ID 추출
         Long timeId = savedTime.getId();
 
         // when

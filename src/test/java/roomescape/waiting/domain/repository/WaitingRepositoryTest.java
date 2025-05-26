@@ -38,16 +38,21 @@ class WaitingRepositoryTest {
     @Test
     void save() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "test@test.com", "1234");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(reservationTime);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
         entityManager.persist(theme);
 
+        // 예약 스펙 생성 (오늘 날짜, 예약 시간, 테마)
         ReservationSpec spec = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
+        // 대기 객체 생성
         Waiting waiting = new Waiting(member, spec);
 
         // when
@@ -63,19 +68,26 @@ class WaitingRepositoryTest {
     @Test
     void deleteById() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "test@test.com", "1234");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(reservationTime);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
         entityManager.persist(theme);
 
+        // 예약 스펙 생성 (오늘 날짜, 예약 시간, 테마)
         ReservationSpec spec = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
+        // 대기 객체 생성
         Waiting waiting = new Waiting(member, spec);
 
+        // 대기 저장 및 저장된 객체 참조
         Waiting savedWaiting = waitingRepository.save(waiting);
+        // 저장된 대기의 ID 추출
         Long waitingId = savedWaiting.getId();
 
         // when
@@ -90,23 +102,31 @@ class WaitingRepositoryTest {
     @Test
     void findAll() {
         // given
+        // 첫 번째 회원 생성 및 저장
         Member member1 = MemberFixture.createMember("에드", "test1@test.com", "1234");
         entityManager.persist(member1);
 
+        // 두 번째 회원 생성 및 저장
         Member member2 = MemberFixture.createMember("김진우", "test2@test.com", "1234");
         entityManager.persist(member2);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(reservationTime);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
         entityManager.persist(theme);
 
+        // 첫 번째 예약 스펙 생성 (오늘 날짜)
         ReservationSpec spec1 = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
+        // 첫 번째 대기 객체 생성 및 저장
         Waiting waiting1 = new Waiting(member1, spec1);
         waitingRepository.save(waiting1);
 
+        // 두 번째 예약 스펙 생성 (내일 날짜)
         ReservationSpec spec2 = ReservationSpecFixture.createSpec(LocalDate.now().plusDays(1), reservationTime, theme);
+        // 두 번째 대기 객체 생성 및 저장
         Waiting waiting2 = new Waiting(member2, spec2);
         waitingRepository.save(waiting2);
 
@@ -121,17 +141,23 @@ class WaitingRepositoryTest {
     @Test
     void findById() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "test@test.com", "1234");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(reservationTime);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "테마 설명", "thumbnail.jpg");
         entityManager.persist(theme);
 
+        // 예약 스펙 생성 (오늘 날짜, 예약 시간, 테마)
         ReservationSpec spec = ReservationSpecFixture.createSpec(LocalDate.now(), reservationTime, theme);
+        // 대기 객체 생성
         Waiting waiting = new Waiting(member, spec);
+        // 대기 저장 및 저장된 객체 참조
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         // when

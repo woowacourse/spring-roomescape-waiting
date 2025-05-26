@@ -67,31 +67,40 @@ class PromoteServiceTest {
     @Test
     void promoteWaiting_withWaitings() {
         // given
+        // 예약한 회원 생성 및 저장
         Member reservationMember = MemberFixture.createMember("에드", "ed@example.com", "password123");
         memberRepository.save(reservationMember);
 
+        // 첫 번째 대기 회원 생성 및 저장
         Member waitingMember1 = MemberFixture.createMember("김진우", "jinu@example.com", "password456");
         memberRepository.save(waitingMember1);
 
+        // 두 번째 대기 회원 생성 및 저장
         Member waitingMember2 = MemberFixture.createMember("홍길동", "hong@example.com", "password789");
         memberRepository.save(waitingMember2);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         timeRepository.save(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         themeRepository.save(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
 
+        // 예약 회원으로 예약 생성 및 저장
         Reservation reservation = new Reservation(reservationMember, spec);
         reservationRepository.save(reservation);
 
-        // Create two waitings
+        // 첫 번째 대기 회원으로 대기 생성 및 저장
         Waiting waiting1 = new Waiting(waitingMember1, spec);
         waitingRepository.save(waiting1);
 
+        // 두 번째 대기 회원으로 대기 생성 및 저장
         Waiting waiting2 = new Waiting(waitingMember2, spec);
         waitingRepository.save(waiting2);
 

@@ -38,9 +38,13 @@ class MemberServiceTest {
     @Test
     void create_success() {
         // given
+        // 회원 이름 설정
         String name = "에드";
+        // 회원 이메일 설정
         String email = "ed@example.com";
+        // 회원 비밀번호 설정
         String password = "password123";
+        // 회원 생성 요청 객체 생성
         MemberRequest request = new MemberRequest(email, password, name);
 
         // when
@@ -57,13 +61,18 @@ class MemberServiceTest {
     @Test
     void create_duplicateEmail() {
         // given
+        // 회원 이름 설정
         String name = "에드";
+        // 회원 이메일 설정
         String email = "ed@example.com";
+        // 회원 비밀번호 설정
         String password = "password123";
 
+        // 동일한 이메일을 가진 회원 생성 및 저장 (중복 이메일 상황 만들기)
         Member member = MemberFixture.createMember(name, email, password);
         memberRepository.save(member);
 
+        // 동일한 이메일로 새 회원 생성 요청 객체 생성
         MemberRequest request = new MemberRequest(email, password, name);
 
         // when & then
@@ -75,9 +84,11 @@ class MemberServiceTest {
     @Test
     void findAll_success() {
         // given
+        // 첫 번째 회원 생성 및 저장
         Member member1 = MemberFixture.createMember("에드", "ed@example.com", "password123");
         memberRepository.save(member1);
 
+        // 두 번째 회원 생성 및 저장
         Member member2 = MemberFixture.createMember("김진우", "jinu@example.com", "password456");
         memberRepository.save(member2);
 

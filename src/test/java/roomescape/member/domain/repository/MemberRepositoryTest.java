@@ -30,9 +30,13 @@ class MemberRepositoryTest {
     @Test
     void save() {
         // given
+        // 회원 이름 설정
         String name = "에드";
+        // 회원 이메일 설정
         String email = "ed@example.com";
+        // 회원 비밀번호 설정
         String password = "password123";
+        // 회원 객체 생성
         Member member = MemberFixture.createMember(name, email, password);
 
         // when
@@ -48,10 +52,15 @@ class MemberRepositoryTest {
     @Test
     void findByEmail() {
         // given
+        // 회원 이름 설정
         String name = "에드";
+        // 회원 이메일 설정
         String email = "ed@example.com";
+        // 회원 비밀번호 설정
         String password = "password123";
+        // 회원 객체 생성
         Member member = MemberFixture.createMember(name, email, password);
+        // 회원 저장
         memberRepository.save(member);
 
         // when
@@ -67,10 +76,15 @@ class MemberRepositoryTest {
     @Test
     void existsByEmail() {
         // given
+        // 회원 이름 설정
         String name = "에드";
+        // 회원 이메일 설정
         String email = "ed@example.com";
+        // 회원 비밀번호 설정
         String password = "password123";
+        // 회원 객체 생성
         Member member = MemberFixture.createMember(name, email, password);
+        // 회원 저장
         memberRepository.save(member);
 
         // when
@@ -84,9 +98,11 @@ class MemberRepositoryTest {
     @Test
     void findAll() {
         // given
+        // 첫 번째 회원 생성 및 저장
         Member member1 = MemberFixture.createMember("에드", "ed@example.com", "password123");
         memberRepository.save(member1);
 
+        // 두 번째 회원 생성 및 저장
         Member member2 = MemberFixture.createMember("김진우", "jinu@example.com", "password456");
         memberRepository.save(member2);
 
@@ -101,10 +117,15 @@ class MemberRepositoryTest {
     @Test
     void findById() {
         // given
+        // 회원 이름 설정
         String name = "에드";
+        // 회원 이메일 설정
         String email = "ed@example.com";
+        // 회원 비밀번호 설정
         String password = "password123";
+        // 회원 객체 생성
         Member member = MemberFixture.createMember(name, email, password);
+        // 회원 저장 및 저장된 객체 참조
         Member savedMember = memberRepository.save(member);
 
         // when

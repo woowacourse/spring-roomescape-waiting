@@ -37,17 +37,23 @@ class ReservationRepositoryTest {
     @Test
     void save() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        // 회원으로 예약 생성
         Reservation reservation = new Reservation(member, spec);
 
         // when
@@ -65,18 +71,25 @@ class ReservationRepositoryTest {
     @Test
     void findById() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        // 회원으로 예약 생성
         Reservation reservation = new Reservation(member, spec);
+        // 예약 저장 및 저장된 객체 참조
         Reservation savedReservation = reservationRepository.save(reservation);
 
         // when
@@ -95,25 +108,35 @@ class ReservationRepositoryTest {
     @Test
     void findAllByMemberId() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장 (첫 번째 예약용)
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time1);
 
+        // 오후 12시 예약 시간 생성 및 저장 (두 번째 예약용)
         ReservationTime time2 = new ReservationTime(LocalTime.of(12, 0));
         entityManager.persist(time2);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 첫 번째 예약 날짜 설정
         LocalDate date1 = LocalDate.now().plusDays(1);
+        // 첫 번째 예약 스펙 생성 (날짜1, 시간1, 테마)
         ReservationSpec spec1 = new ReservationSpec(new ReservationDate(date1), time1, theme);
+        // 회원으로 첫 번째 예약 생성 및 저장
         Reservation reservation1 = new Reservation(member, spec1);
         reservationRepository.save(reservation1);
 
+        // 모레 날짜로 두 번째 예약 날짜 설정
         LocalDate date2 = LocalDate.now().plusDays(2);
+        // 두 번째 예약 스펙 생성 (날짜2, 시간2, 테마)
         ReservationSpec spec2 = new ReservationSpec(new ReservationDate(date2), time2, theme);
+        // 동일 회원으로 두 번째 예약 생성 및 저장
         Reservation reservation2 = new Reservation(member, spec2);
         reservationRepository.save(reservation2);
 
@@ -130,25 +153,35 @@ class ReservationRepositoryTest {
     @Test
     void findAll() {
         // given
+        // 첫 번째 회원 생성 및 저장
         Member member1 = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member1);
 
+        // 두 번째 회원 생성 및 저장
         Member member2 = MemberFixture.createMember("김진우", "jinu@example.com", "password456");
         entityManager.persist(member2);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 첫 번째 예약 날짜 설정
         LocalDate date1 = LocalDate.now().plusDays(1);
+        // 첫 번째 예약 스펙 생성 (날짜1, 시간, 테마)
         ReservationSpec spec1 = new ReservationSpec(new ReservationDate(date1), time, theme);
+        // 첫 번째 회원으로 첫 번째 예약 생성 및 저장
         Reservation reservation1 = new Reservation(member1, spec1);
         reservationRepository.save(reservation1);
 
+        // 모레 날짜로 두 번째 예약 날짜 설정
         LocalDate date2 = LocalDate.now().plusDays(2);
+        // 두 번째 예약 스펙 생성 (날짜2, 시간, 테마)
         ReservationSpec spec2 = new ReservationSpec(new ReservationDate(date2), time, theme);
+        // 두 번째 회원으로 두 번째 예약 생성 및 저장
         Reservation reservation2 = new Reservation(member2, spec2);
         reservationRepository.save(reservation2);
 
@@ -163,28 +196,39 @@ class ReservationRepositoryTest {
     @Test
     void findFiltered() {
         // given
+        // 첫 번째 회원 생성 및 저장
         Member member1 = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member1);
 
+        // 두 번째 회원 생성 및 저장
         Member member2 = MemberFixture.createMember("김진우", "jinu@example.com", "password456");
         entityManager.persist(member2);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 첫 번째 테마 생성 및 저장
         Theme theme1 = new Theme("테마1", "설명1", "썸네일1");
         entityManager.persist(theme1);
 
+        // 두 번째 테마 생성 및 저장
         Theme theme2 = new Theme("테마2", "설명2", "썸네일2");
         entityManager.persist(theme2);
 
+        // 내일 날짜로 첫 번째 예약 날짜 설정
         LocalDate date1 = LocalDate.now().plusDays(1);
+        // 첫 번째 예약 스펙 생성 (날짜1, 시간, 테마1)
         ReservationSpec spec1 = new ReservationSpec(new ReservationDate(date1), time, theme1);
+        // 첫 번째 회원으로 첫 번째 예약 생성 및 저장
         Reservation reservation1 = new Reservation(member1, spec1);
         reservationRepository.save(reservation1);
 
+        // 모레 날짜로 두 번째 예약 날짜 설정
         LocalDate date2 = LocalDate.now().plusDays(2);
+        // 두 번째 예약 스펙 생성 (날짜2, 시간, 테마2)
         ReservationSpec spec2 = new ReservationSpec(new ReservationDate(date2), time, theme2);
+        // 두 번째 회원으로 두 번째 예약 생성 및 저장
         Reservation reservation2 = new Reservation(member2, spec2);
         reservationRepository.save(reservation2);
 
@@ -215,18 +259,25 @@ class ReservationRepositoryTest {
     @Test
     void deleteById() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        // 회원으로 예약 생성
         Reservation reservation = new Reservation(member, spec);
+        // 예약 저장 및 저장된 객체 참조
         Reservation savedReservation = reservationRepository.save(reservation);
 
         // when
@@ -241,17 +292,23 @@ class ReservationRepositoryTest {
     @Test
     void existsBySpec() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        // 회원으로 예약 생성 및 저장
         Reservation reservation = new Reservation(member, spec);
         reservationRepository.save(reservation);
 
@@ -269,24 +326,33 @@ class ReservationRepositoryTest {
     @Test
     void findTimeIdsByDateAndTheme() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장 (첫 번째 예약용)
         ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time1);
 
+        // 오후 12시 예약 시간 생성 및 저장 (두 번째 예약용)
         ReservationTime time2 = new ReservationTime(LocalTime.of(12, 0));
         entityManager.persist(time2);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 첫 번째 예약 스펙 생성 (날짜, 시간1, 테마)
         ReservationSpec spec1 = new ReservationSpec(new ReservationDate(date), time1, theme);
+        // 회원으로 첫 번째 예약 생성 및 저장
         Reservation reservation1 = new Reservation(member, spec1);
         reservationRepository.save(reservation1);
 
+        // 두 번째 예약 스펙 생성 (동일 날짜, 시간2, 동일 테마)
         ReservationSpec spec2 = new ReservationSpec(new ReservationDate(date), time2, theme);
+        // 동일 회원으로 두 번째 예약 생성 및 저장
         Reservation reservation2 = new Reservation(member, spec2);
         reservationRepository.save(reservation2);
 
@@ -302,17 +368,23 @@ class ReservationRepositoryTest {
     @Test
     void existsByTimeId() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        // 회원으로 예약 생성 및 저장
         Reservation reservation = new Reservation(member, spec);
         reservationRepository.save(reservation);
 
@@ -329,17 +401,23 @@ class ReservationRepositoryTest {
     @Test
     void existsByThemeId() {
         // given
+        // 회원 생성 및 저장
         Member member = MemberFixture.createMember("에드", "ed@example.com", "password123");
         entityManager.persist(member);
 
+        // 오전 10시 예약 시간 생성 및 저장
         ReservationTime time = new ReservationTime(LocalTime.of(10, 0));
         entityManager.persist(time);
 
+        // 테마 생성 및 저장
         Theme theme = new Theme("테마", "설명", "썸네일");
         entityManager.persist(theme);
 
+        // 내일 날짜로 예약 날짜 설정
         LocalDate date = LocalDate.now().plusDays(1);
+        // 예약 스펙 생성 (날짜, 시간, 테마)
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
+        // 회원으로 예약 생성 및 저장
         Reservation reservation = new Reservation(member, spec);
         reservationRepository.save(reservation);
 
