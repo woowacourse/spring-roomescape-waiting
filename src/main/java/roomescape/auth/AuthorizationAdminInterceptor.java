@@ -5,6 +5,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
@@ -13,6 +14,7 @@ import roomescape.member.MemberRole;
 import java.util.Arrays;
 import java.util.Objects;
 
+@Component
 @AllArgsConstructor
 public class AuthorizationAdminInterceptor implements HandlerInterceptor {
 
