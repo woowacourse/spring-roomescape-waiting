@@ -60,8 +60,8 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    private void validateIsDuplicate(final LocalDate date, final Long playTimeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, playTimeId, themeId)) {
+    private void validateIsDuplicate(final LocalDate date, final Long timeId, final Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new DuplicateException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
         }
     }

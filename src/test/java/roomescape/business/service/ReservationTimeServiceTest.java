@@ -24,7 +24,7 @@ import roomescape.presentation.dto.ReservationTimeResponse;
 
 @SpringBootTest
 @Transactional
-@Sql("classpath:data-playTimeService.sql")
+@Sql("classpath:data-reservationTimeService.sql")
 class ReservationTimeServiceTest {
 
     @Autowired
@@ -42,10 +42,10 @@ class ReservationTimeServiceTest {
         final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
 
         // when
-        final ReservationTimeResponse playTimeResponse = reservationTimeService.insert(reservationTimeRequest);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
 
         // then
-        assertThat(playTimeResponse.startAt()).isEqualTo(startAt);
+        assertThat(reservationTimeResponse.startAt()).isEqualTo(startAt);
     }
 
     @Test
@@ -65,14 +65,14 @@ class ReservationTimeServiceTest {
     @DisplayName("모든 방탈출 예약 시간을 조회한다")
     void findAll() {
         // given
-        // data-playTimeService.sql
+        // data-reservationTimeService.sql
         // 2개의 방탈출 예약 시간이 주어진다.
 
         // when
-        final List<ReservationTimeResponse> playTimeResponses = reservationTimeService.findAll();
+        final List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.findAll();
 
         // then
-        assertThat(playTimeResponses).hasSize(2);
+        assertThat(reservationTimeResponses).hasSize(2);
     }
 
     @Test
@@ -81,16 +81,16 @@ class ReservationTimeServiceTest {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
         final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
-        final ReservationTimeResponse playTimeResponse = reservationTimeService.insert(reservationTimeRequest);
-        final Long id = playTimeResponse.id();
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
+        final Long id = reservationTimeResponse.id();
 
         // when
-        final ReservationTimeResponse findPlayTimeResponse = reservationTimeService.findById(id);
+        final ReservationTimeResponse findReservationTimeResponse = reservationTimeService.findById(id);
 
         // then
         assertAll(
-                () -> assertThat(findPlayTimeResponse.id()).isEqualTo(id),
-                () -> assertThat(findPlayTimeResponse.startAt()).isEqualTo(startAt)
+                () -> assertThat(findReservationTimeResponse.id()).isEqualTo(id),
+                () -> assertThat(findReservationTimeResponse.startAt()).isEqualTo(startAt)
         );
     }
 
@@ -111,15 +111,15 @@ class ReservationTimeServiceTest {
         // given
         final LocalTime startAt = LocalTime.of(14, 0);
         final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
-        final ReservationTimeResponse playTimeResponse = reservationTimeService.insert(reservationTimeRequest);
-        final Long id = playTimeResponse.id();
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
+        final Long id = reservationTimeResponse.id();
 
         // when
         reservationTimeService.deleteById(id);
 
         // then
-        final Optional<ReservationTime> findPlayTime = reservationTimeRepository.findById(id);
-        assertThat(findPlayTime).isEmpty();
+        final Optional<ReservationTime> findReservationTime = reservationTimeRepository.findById(id);
+        assertThat(findReservationTime).isEmpty();
     }
 
     @Test
@@ -137,7 +137,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 가능 시간 목록을 조회한다")
     void findAvailableTimes() {
         // given
-        // data-playTimeService.sql
+        // data-reservationTimeService.sql
         // 2개의 방탈출 예약 시간, 1개의 테마, 1개의 예약이 주어진다.
 
         // when
