@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
@@ -33,6 +34,7 @@ public class AdminReservationFacade {
         this.scheduleService = scheduleService;
     }
 
+    @Transactional
     public ReservationResponse create(AdminReservationCreateRequest adminReservationCreateRequest) {
         ReservationTime reservationTime = reservationTimeService.getReservationTimeByTimeId(adminReservationCreateRequest.timeId());
         Theme theme = themeService.getByThemeId(adminReservationCreateRequest.themeId());
@@ -48,6 +50,7 @@ public class AdminReservationFacade {
         return reservationService.createAdminReservation(adminReservationCreateRequest, member, availableTimes, savedSchedule);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findByCondition(
             ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {

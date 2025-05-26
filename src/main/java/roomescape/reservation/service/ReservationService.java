@@ -2,6 +2,7 @@ package roomescape.reservation.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
@@ -29,6 +30,7 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(
             Member member,
             List<ReservationTime> availableTimes,
@@ -48,18 +50,19 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationTimeConflict(List<ReservationTime> availableTimes,
-                                                 ReservationTime reservationTime) {
+    private void validateReservationTimeConflict(List<ReservationTime> availableTimes, ReservationTime reservationTime) {
         if (!availableTimes.contains(reservationTime)) {
             throw new ConflictException("이미 해당 시간과 테마에 예약이 존재하여 예약할 수 없습니다.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream().map(ReservationResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findByCondition(
             ReservationSearchConditionRequest reservationSearchConditionRequest) {
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateBetween(
@@ -74,34 +77,41 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservationById(Long id) {
         reservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByScheduleTimeId(Long id) {
         return reservationRepository.existsByScheduleTimeId(id);
     }
 
+    @Transactional(readOnly = true)
     public void validateReservationNonExistenceByTimeId(Long reservationTimeId) {
         if (existsByScheduleTimeId(reservationTimeId)) {
             throw new ConflictException("해당 예약 시간을 사용하는 예약이 존재합니다.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationAndWaitingResponse> findAllByMember(Member member) {
         return reservationRepository.findAllByMember(member).stream()
                 .map(MyReservationAndWaitingResponse::fromReservationAndStatus)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
         return reservationRepository.existsByMemberAndSchedule(member, schedule);
     }
 
+    @Transactional(readOnly = true)
     public boolean existsBySchedule(Schedule schedule) {
         return reservationRepository.existsBySchedule(schedule);
     }
 
+    @Transactional
     public ReservationResponse createAdminReservation(
             AdminReservationCreateRequest adminReservationCreateRequest,
             Member member,
