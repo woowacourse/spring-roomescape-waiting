@@ -57,8 +57,7 @@ class WaitingServiceTest {
         themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository);
 
         FakeReserveTicketRepository reservationMemberRepository = ServiceFixture.fakeReserveTicketRepository();
-        ReserveTicketService reserveTicketService = new ReserveTicketService(memberService, reservationService,
-                reservationMemberRepository);
+        ReserveTicketService reserveTicketService = new ReserveTicketService(reservationMemberRepository, memberService, reservationService);
 
         FakeWaitingRepository fakeWaitingRepository = ServiceFixture.fakeWaitingRepository();
         waitingService = new WaitingService(fakeWaitingRepository, memberService, timeService, themeService, reserveTicketService);

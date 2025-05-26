@@ -11,19 +11,22 @@ import roomescape.dto.reservation.AddReservationDto;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
+import roomescape.service.waiting.WaitingService;
 
 @Service
 public class ReserveTicketService {
 
+    private final ReserveTicketRepository reserveTicketRepository;
     private final MemberService memberService;
     private final ReservationService reservationService;
-    private final ReserveTicketRepository reserveTicketRepository;
 
-    public ReserveTicketService(MemberService memberService, ReservationService reservationService,
-                                ReserveTicketRepository reserveTicketRepository) {
+
+    public ReserveTicketService(ReserveTicketRepository reserveTicketRepository,
+                                MemberService memberService,
+                                ReservationService reservationService) {
+        this.reserveTicketRepository = reserveTicketRepository;
         this.memberService = memberService;
         this.reservationService = reservationService;
-        this.reserveTicketRepository = reserveTicketRepository;
     }
 
     public long addReservation(AddReservationDto newReservationDto, long memberId) {
