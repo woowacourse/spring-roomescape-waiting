@@ -21,6 +21,7 @@ class ReservationTest {
     @Test
     @DisplayName("과거 날짜와 시간에 대한 예약 생성은 불가능하다.")
     void validatePast() {
+        // given
         final Theme theme = Theme.withoutId(ThemeName.from("공포"),
                 ThemeDescription.from("지구별 방탈출 최고"),
                 ThemeThumbnail.from("www.making.com"));
@@ -29,17 +30,24 @@ class ReservationTest {
                 MemberEmail.from("123@gmail.com"),
                 Role.MEMBER);
 
+        final ReservationDate validDate = ReservationDate.from(LocalDate.now());
+        final ReservationDate invalidDate = ReservationDate.from(LocalDate.now().minusDays(1L));
+
+        final ReservationTime validTime = ReservationTime.withoutId(LocalTime.now());
+        final ReservationTime invalidTime = ReservationTime.withoutId(LocalTime.now().minusMinutes(1L));
+
+        // when & then
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThatThrownBy(() -> Reservation.withoutId(
                     member,
-                    ReservationDate.from(LocalDate.now().minusDays(1L)),
-                    ReservationTime.withoutId(LocalTime.now()),
+                    invalidDate,
+                    validTime,
                     theme
             )).isInstanceOf(BadRequestException.class);
             softAssertions.assertThatThrownBy(() -> Reservation.withoutId(
                     member,
-                    ReservationDate.from(LocalDate.now()),
-                    ReservationTime.withoutId(LocalTime.now().minusMinutes(1L)),
+                    validDate,
+                    invalidTime,
                     theme
             )).isInstanceOf(BadRequestException.class);
         });

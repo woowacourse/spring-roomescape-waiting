@@ -99,9 +99,12 @@ class ReservationWaitQueryUseCaseTest {
     @DisplayName("index가 음수일 경우 예외가 발생한다.")
     @Test
     void validateIndexPositive() {
+        // given
+        final ReservationDate date = ReservationDate.from(LocalDate.MAX);
+
         // when & then
         assertThatThrownBy(() -> reservationWaitQueryUseCase.findByParamsAt(
-                ReservationDate.from(LocalDate.MAX),
+                date,
                 1L,
                 1L,
                 -1

@@ -138,5 +138,4 @@ class ReservationTimeCommandUseCaseTest {
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("추가하려는 시간이 이미 존재합니다.");
     }
-
 }

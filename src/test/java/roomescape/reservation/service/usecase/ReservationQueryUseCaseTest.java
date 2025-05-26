@@ -129,11 +129,12 @@ class ReservationQueryUseCaseTest {
 
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
 
-        final Reservation reservation = reservationRepository.save(Reservation.withoutId(
+        reservationRepository.save(Reservation.withoutId(
                 member,
                 date,
                 booked,
-                theme));
+                theme)
+        );
 
         // when
         final List<AvailableReservationTimeServiceResponse> timesWithAvailability = reservationQueryUseCase.getTimesWithAvailability(
