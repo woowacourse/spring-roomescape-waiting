@@ -75,7 +75,7 @@ public class ReservationService {
     public void delete(final Long id, LoginMember loginMember) {
         Reservation reservation = getAuthorizedReservation(id, loginMember);
         reservationRepository.deleteById(id);
-        promoteFirstWaitingToReservation(reservation);
+        promoteFirstWaitingFor(reservation);
     }
 
     private Reservation getAuthorizedReservation(final Long id, LoginMember loginMember) {
@@ -87,7 +87,7 @@ public class ReservationService {
         };
     }
 
-    private void promoteFirstWaitingToReservation(Reservation reservation) {
+    private void promoteFirstWaitingFor(Reservation reservation) {
         Waiting firstWaiting = waitingRepository.findFirstByReservationInfo(
                 reservation.getDate(), reservation.getTime(), reservation.getTheme()
         );
