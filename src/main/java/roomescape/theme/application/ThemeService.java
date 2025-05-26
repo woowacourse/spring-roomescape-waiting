@@ -14,22 +14,21 @@ import roomescape.theme.exception.UsingThemeException;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public ThemeResponse create(ThemeRequest request) {
         Theme theme = new Theme(request.name(), request.description(), request.thumbnail());
         return ThemeResponse.from(themeRepository.save(theme));
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         return ThemeResponse.from(themeRepository.findAll());
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> findRankedByPeriod() {
         List<Theme> topRankedThemes = themeRepository.findRankedByPeriod(
                 LocalDate.now().minusDays(7),
@@ -39,6 +38,7 @@ public class ThemeService {
         return ThemeResponse.from(topRankedThemes);
     }
 
+    @Transactional
     public void deleteById(final Long id) {
         validateUnUsedTheme(id);
         themeRepository.deleteById(id);

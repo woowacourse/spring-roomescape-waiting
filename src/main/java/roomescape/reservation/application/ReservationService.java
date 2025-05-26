@@ -35,7 +35,7 @@ import roomescape.waiting.domain.Waitings;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
@@ -44,7 +44,7 @@ public class ReservationService {
     private final WaitingRepository waitingRepository;
     private final ApplicationEventPublisher eventPublisher;
 
-    @Transactional(readOnly = true)
+
     public List<MyReservationResponse> findAllByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
         List<Waiting> myWaitings = waitingRepository.findByMemberId(memberId);
@@ -62,7 +62,6 @@ public class ReservationService {
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> findFiltered(AdminReservationSearchRequest request) {
         Long memberId = request.memberId();
         Long themeId = request.themeId();
@@ -72,10 +71,12 @@ public class ReservationService {
         return ReservationResponse.from(reservationRepository.findFiltered(memberId, themeId, from, to));
     }
 
+    @Transactional
     public ReservationResponse createByUser(Long memberId, UserReservationRequest request) {
         return create(memberId, request.date(), request.timeId(), request.themeId());
     }
 
+    @Transactional
     public ReservationResponse createByAdmin(AdminReservationRequest request) {
         return create(request.memberId(), request.date(), request.timeId(), request.themeId());
     }
@@ -108,6 +109,7 @@ public class ReservationService {
         }
     }
 
+    @Transactional
     public void deleteById(Long id) {
         Optional<Reservation> reservation = reservationRepository.findById(id);
         reservationRepository.deleteById(id);

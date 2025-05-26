@@ -32,7 +32,7 @@ import roomescape.waiting.exception.WaitingNotFoundException;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class WaitingService {
     private static final int MAX_WAITING_COUNT = 100;
 
@@ -42,6 +42,7 @@ public class WaitingService {
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
 
+    @Transactional
     public WaitingResponse create(Long memberId, WaitingRequest request) {
         Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
 
@@ -92,6 +93,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void deleteByUser(Long id, Long memberId) {
         Waiting waiting = waitingRepository.findById(id).orElseThrow(WaitingNotFoundException::new);
         validateIsOwner(memberId, waiting);
@@ -104,6 +106,7 @@ public class WaitingService {
         }
     }
 
+    @Transactional
     public void deleteByAdmin(Long id) {
         deleteById(id);
     }
@@ -112,7 +115,6 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     public List<WaitingResponse> findAll() {
         List<Waiting> waitings = waitingRepository.findAll();
         return WaitingResponse.from(waitings);

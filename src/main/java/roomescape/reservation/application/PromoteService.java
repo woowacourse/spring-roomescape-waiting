@@ -13,12 +13,13 @@ import roomescape.waiting.domain.Waitings;
 
 @Service
 @AllArgsConstructor
-@Transactional(propagation = Propagation.REQUIRES_NEW)
+@Transactional
 public class PromoteService {
 
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
 
+    @Transactional(propagation = Propagation.REQUIRES_NEW)
     public void promoteWaiting(Reservation reservation) {
         ReservationSpec spec = reservation.getSpec();
         Waitings waitings = new Waitings(waitingRepository.findBySpec(spec));

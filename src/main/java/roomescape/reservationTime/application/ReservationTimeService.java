@@ -18,11 +18,12 @@ import roomescape.reservationTime.exception.UsingTimeException;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public TimeResponse create(TimeRequest request) {
         LocalTime startedAt = request.startAt();
         validateTimeNotExists(startedAt);
@@ -37,12 +38,10 @@ public class ReservationTimeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<TimeResponse> findAll() {
         return TimeResponse.from(timeRepository.findAll());
     }
 
-    @Transactional(readOnly = true)
     public List<AvailableTimeResponse> findAvailableTimes(AvailableTimeRequest request) {
         List<Long> bookedTimeIds = reservationRepository.findTimeIdsByDateAndTheme(request.date(), request.themeId());
         Collection<ReservationTime> times = timeRepository.findAll();
@@ -55,6 +54,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         validateUnUsedTime(id);
         timeRepository.deleteById(id);

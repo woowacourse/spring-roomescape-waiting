@@ -16,11 +16,12 @@ import roomescape.member.exception.EmailAlreadyExistsException;
 
 @Service
 @AllArgsConstructor
-@Transactional
+@Transactional(readOnly = true)
 public class MemberService {
     private final MemberRepository memberRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Transactional
     public MemberResponse create(MemberRequest request) {
         validateEmailDuplicated(request);
 
@@ -38,7 +39,6 @@ public class MemberService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
