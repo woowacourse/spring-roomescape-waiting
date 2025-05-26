@@ -65,14 +65,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByReservationTimeDateBetween(LocalDate dateFrom, LocalDate dateTo) {
-        return reservations.stream()
-                .filter(reservation -> reservation.getReservationTime().getDate().plusDays(1).isAfter(dateFrom))
-                .filter(reservation -> reservation.getReservationTime().getDate().minusDays(1).isBefore(dateTo))
-                .toList();
-    }
-
-    @Override
     public List<Reservation> findByReservationTimeDateAndTheme(LocalDate date, Theme theme) {
         return reservations.stream()
                 .filter(reservation -> reservation.getReservationTime().getDate().equals(date))

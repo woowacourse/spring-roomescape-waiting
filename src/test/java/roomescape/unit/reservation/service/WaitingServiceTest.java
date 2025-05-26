@@ -46,10 +46,10 @@ class WaitingServiceTest {
 
     public WaitingServiceTest() {
         this.waitingRepository = new FakeWaitingRepository();
-        this.themeRepository = new FakeThemeRepository();
+        this.reservationRepository = new FakeReservationRepository();
+        this.themeRepository = new FakeThemeRepository(reservationRepository);
         this.timeSlotRepository = new FakeTimeSlotRepository();
         this.memberRepository = new FakeMemberRepository();
-        this.reservationRepository = new FakeReservationRepository();
         this.waitingService = new WaitingService(waitingRepository, themeRepository, timeSlotRepository,
                 memberRepository, reservationRepository);
     }

@@ -11,7 +11,7 @@ import roomescape.reservation.infrastructure.ThemeRepository;
 
 class FakeThemeRepositoryTest {
 
-    private final ThemeRepository themeRepository = new FakeThemeRepository();
+    private final ThemeRepository themeRepository = new FakeThemeRepository(new FakeReservationRepository());
 
     @Test
     void 테마를_생성한다() {

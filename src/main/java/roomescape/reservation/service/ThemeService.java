@@ -2,15 +2,13 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ExistedReservationException;
 import roomescape.exception.ExistedThemeException;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.dto.request.ThemeRequest;
 import roomescape.reservation.dto.response.ThemeResponse;
@@ -62,22 +60,7 @@ public class ThemeService {
     public List<ThemeResponse> getTopThemes() {
         LocalDate startDate = LocalDate.now().minusDays(DAYS_BEFORE_START);
         LocalDate endDate = LocalDate.now().minusDays(DAYS_BEFORE_END);
-        List<Reservation> reservations = reservationRepository.findByReservationTimeDateBetween(startDate, endDate);
-
-        Map<Theme, Long> themeCount = countTheme(reservations);
-        List<Theme> themes = themeCount
-                .entrySet().stream()
-                .sorted(Entry.<Theme, Long>comparingByValue().reversed())
-                .limit(TOP_THEMES_COUNT)
-                .map(Entry::getKey)
-                .toList();
-
-        return themes.stream().map(theme -> new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(),
-                theme.getThumbnail())).toList();
-    }
-
-    private Map<Theme, Long> countTheme(List<Reservation> reservations) {
-        return reservations.stream()
-                .collect(Collectors.groupingBy(Reservation::getTheme, Collectors.counting()));
+        Pageable page = PageRequest.ofSize(10);
+        return themeRepository.findByDateBetweenOrderByReservationCountDescNameAsc(startDate, endDate, page);
     }
 }

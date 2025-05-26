@@ -30,8 +30,8 @@ public class ThemeServiceTest {
     private final ReservationRepository reservationRepository;
 
     public ThemeServiceTest() {
-        this.themeRepository = new FakeThemeRepository();
         this.reservationRepository = new FakeReservationRepository();
+        this.themeRepository = new FakeThemeRepository(reservationRepository);
         this.themeService = new ThemeService(themeRepository, reservationRepository);
     }
 

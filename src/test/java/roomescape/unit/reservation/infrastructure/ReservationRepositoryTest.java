@@ -99,49 +99,6 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    void 날짜범위를_기준으로_예약을_조회한다() {
-        // given
-        Member member = Member.builder()
-                .name("name1")
-                .email("email1@domain.com")
-                .password("password1")
-                .role(Role.MEMBER).build();
-        entityManager.persist(member);
-        TimeSlot time = TimeSlot.builder()
-                .startAt(LocalTime.of(9, 0)).build();
-        entityManager.persist(time);
-        Theme theme = Theme.builder()
-                .name("theme1")
-                .description("desc1")
-                .thumbnail("thumb1").build();
-        entityManager.persist(theme);
-        entityManager.persist(
-                Reservation.builder()
-                        .member(member)
-                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 1), time))
-                        .theme(theme).build()
-        );
-        entityManager.persist(
-                Reservation.builder()
-                        .member(member)
-                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 9), time))
-                        .theme(theme).build()
-        );
-        entityManager.persist(
-                Reservation.builder()
-                        .member(member)
-                        .reservationTime(new ReservationTime(LocalDate.of(2025, 1, 10), time))
-                        .theme(theme).build()
-        );
-        // when
-        List<Reservation> reservations = reservationRepository.findByReservationTimeDateBetween(
-                LocalDate.of(2025, 1, 1), LocalDate.of(2025, 1, 9)
-        );
-        // then
-        assertThat(reservations).hasSize(2);
-    }
-
-    @Test
     void 테마와_날짜를_기준으로_예약을_조회한다() {
         // given
         Member member = Member.builder()

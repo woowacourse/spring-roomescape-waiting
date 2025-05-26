@@ -23,8 +23,6 @@ public interface ReservationRepository extends Repository<Reservation, Long>, Re
 
     Optional<Reservation> findByReservationTimeAndTheme(ReservationTime time, Theme theme);
 
-    List<Reservation> findByReservationTimeDateBetween(LocalDate dateFrom, LocalDate dateTo);
-
     List<Reservation> findByReservationTimeDateAndTheme(LocalDate date, Theme theme);
 
     @Query("""
