@@ -64,7 +64,7 @@ class ReservationControllerTest {
     }
 
     @Nested
-    @DisplayName("DELECT /reservations/{reservationId} 요청")
+    @DisplayName("DELETE /reservations/{reservationId} 요청")
     class cancelAndApproveWaiting {
 
         private Reservation createAndSaveDefaultReservationByBookedStatus(LocalDate date) {
