@@ -88,4 +88,9 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     public void delete(Reservation reservation) {
         jpaReservationRepository.delete(reservation);
     }
+
+    @Override
+    public List<Reservation> findHighestPriorityReservations() {
+        return jpaReservationRepository.findHighestPriorityReservations();
+    }
 }

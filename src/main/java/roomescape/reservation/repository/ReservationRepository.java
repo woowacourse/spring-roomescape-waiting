@@ -37,4 +37,6 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
 
     void delete(Reservation reservation);
+
+    List<Reservation> findHighestPriorityReservations();
 }

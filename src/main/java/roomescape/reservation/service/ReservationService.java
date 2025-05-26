@@ -162,4 +162,11 @@ public class ReservationService {
 
         reservationRepository.delete(reservation);
     }
+
+    public List<ReservationResponse> findHighestPriorityReservations() {
+        List<Reservation> reservations = reservationRepository.findHighestPriorityReservations();
+        return reservations.stream()
+            .map(ReservationResponse::from)
+            .toList();
+    }
 }

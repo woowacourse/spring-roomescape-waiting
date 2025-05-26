@@ -55,4 +55,8 @@ public class AdminReservationFacade {
     ) {
         return reservationService.findByCondition(reservationSearchConditionRequest);
     }
+
+    public List<ReservationResponse> findHighestPriorityReservations() {
+        return reservationService.findHighestPriorityReservations();
+    }
 }

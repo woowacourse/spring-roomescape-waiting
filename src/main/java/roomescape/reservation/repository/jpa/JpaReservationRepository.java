@@ -72,4 +72,16 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
         Theme theme,
         long priority
     );
+
+    @Query("""
+            SELECT r FROM Reservation r
+            WHERE NOT EXISTS (
+                SELECT 1 FROM Reservation r2
+                WHERE r2.date = r.date
+                  AND r2.time = r.time
+                  AND r2.theme = r.theme
+                  AND r2.priority.value < r.priority.value
+            )
+        """)
+    List<Reservation> findHighestPriorityReservations();
 }

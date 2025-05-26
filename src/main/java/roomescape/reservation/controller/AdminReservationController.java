@@ -40,4 +40,10 @@ public class AdminReservationController {
         );
         return ResponseEntity.ok(reservations);
     }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<ReservationResponse>> readWaitingLists() {
+        List<ReservationResponse> waitingReservations = adminReservationService.findHighestPriorityReservations();
+        return ResponseEntity.ok(waitingReservations);
+    }
 }
