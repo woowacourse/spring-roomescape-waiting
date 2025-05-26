@@ -1,9 +1,8 @@
-const RESERVATION_WAITING_API_ENDPOINT = '/reservations/waitings';
 const ADMIN_RESERVATION_WAITING_API_ENDPOINT = '/admin/reservations/waitings';
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    fetch(RESERVATION_WAITING_API_ENDPOINT) // 내 예약 목록 조회 API 호출
+    fetch(ADMIN_RESERVATION_WAITING_API_ENDPOINT) // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');

@@ -78,11 +78,4 @@ public class ReservationController {
 
         return ResponseEntity.noContent().build();
     }
-
-    @GetMapping("/waitings")
-    public ResponseEntity<List<WaitingResponse>> getWaitings() {
-        List<WaitingResponse> responses = waitingService.getWaitings();
-
-        return ResponseEntity.ok(responses);
-    }
 }

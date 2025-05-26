@@ -15,6 +15,7 @@ import roomescape.application.ReservationService;
 import roomescape.application.WaitingService;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.presentation.dto.response.ReservationResponse;
+import roomescape.presentation.dto.response.WaitingResponse;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -62,5 +63,12 @@ public class AdminReservationController {
         waitingService.deleteWaitingById(id);
 
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<WaitingResponse>> getWaitings() {
+        List<WaitingResponse> responses = waitingService.getWaitings();
+
+        return ResponseEntity.ok(responses);
     }
 }
