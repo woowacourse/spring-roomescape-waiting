@@ -1,4 +1,4 @@
-package roomescape.reservation.service;
+package roomescape.reservation.service.reservation;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -7,14 +7,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DataExistException;
-import roomescape.common.exception.DataNotFoundException;
 import roomescape.common.exception.PastDateException;
-import roomescape.common.exception.ReservationNotAllowedException;
-import roomescape.common.exception.WaitingNotAllowedException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.AvailableReservationTime;
 import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
@@ -26,8 +22,6 @@ import roomescape.theme.repository.ThemeRepositoryInterface;
 @Service
 public class ReservationService {
 
-    private static final int WAITING_COUNT = 1;
-
     private final ReservationRepositoryInterface reservationRepository;
     private final ReservationTimeRepositoryInterface reservationTimeRepository;
     private final ThemeRepositoryInterface themeRepository;
@@ -37,8 +31,8 @@ public class ReservationService {
     public Reservation save(final Member member, final LocalDate date, final Long timeId, final Long themeId) {
         validatePastDate(date);
 
-        final ReservationTime reservationTime = findReservationTimeById(timeId);
-        final Theme theme = findThemeById(themeId);
+        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId);
+        final Theme theme = themeRepository.findById(themeId);
 
         validateExistReservation(date, reservationTime, theme);
         validateExistWaiting(date, reservationTime, theme);
@@ -49,7 +43,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteById(final Long id) {
-        final Reservation reservation = findReservationById(id);
+        final Reservation reservation = reservationRepository.findById(id);
         final Theme theme = reservation.getTheme();
         final LocalDate date = reservation.getDate();
         final ReservationTime time = reservation.getTime();
@@ -79,9 +73,10 @@ public class ReservationService {
     public List<AvailableReservationTime> findAvailableReservationTimes(final LocalDate date, final Long themeId) {
         final List<AvailableReservationTime> availableReservationTimes = new ArrayList<>();
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final Theme theme = findThemeById(themeId);
+        final Theme theme = themeRepository.findById(themeId);
 
         for (ReservationTime reservationTime : reservationTimes) {
+            reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme);
             availableReservationTimes.add(new AvailableReservationTime(
                     reservationTime.getId(),
                     reservationTime.getStartAt(),
@@ -97,79 +92,17 @@ public class ReservationService {
         return reservationRepository.findByMember(member);
     }
 
-    @Transactional(readOnly = true)
-    public List<Waiting> findWaitingByMember(final Member member) {
-        return waitingRepository.findByMember(member);
-    }
-
-    @Transactional
-    public void deleteWaitingById(final Long id) {
-        waitingRepository.findById(id)
-                .ifPresentOrElse(
-                        waiting -> waitingRepository.deleteById(id),
-                        () -> {
-                            throw new DataNotFoundException("해당 대기 데이터가 존재하지 않습니다. id = " + id);
-                        }
-                );
-    }
-
-    @Transactional(readOnly = true)
-    public long getRankInWaiting(final Waiting waiting) {
-        return waitingRepository.countBefore(
-                waiting.getTheme(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getId()
-        ) + WAITING_COUNT;
-    }
-
-    @Transactional
-    public Waiting createWaitingReservation(
-            final Member member,
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId) {
-
-        validatePastDate(date);
-
-        final ReservationTime reservationTime = findReservationTimeById(timeId);
-        final Theme theme = findThemeById(themeId);
-        final boolean reservationExists = reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime,
-                theme);
-
-        if (reservationExists) {
-            final Waiting waiting = new Waiting(member, reservationTime, theme, date);
-            return waitingRepository.save(waiting);
+    private void validateExistReservation(final LocalDate date, final ReservationTime reservationTime,
+                                          final Theme theme) {
+        if (reservationRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
+            throw new DataExistException("이미 예약이 존재해 예약을 할 수 없습니다.");
         }
-
-        throw new WaitingNotAllowedException("예약이 존재하지 않아 대기열에 등록 할 수 없습니다.");
     }
 
     private void validateExistWaiting(final LocalDate date, final ReservationTime reservationTime, final Theme theme) {
         if (waitingRepository.existsByDateAndTimeAndTheme(date, reservationTime, theme)) {
-            throw new ReservationNotAllowedException("예약 대기가 존재해 예약을 할 수 없습니다.");
+            throw new DataExistException("예약 대기가 존재해 예약을 할 수 없습니다.");
         }
-    }
-
-    private void validateExistReservation(final LocalDate date, final ReservationTime time, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeAndTheme(date, time, theme)) {
-            throw new DataExistException("해당 시간에 이미 예약된 테마입니다.");
-        }
-    }
-
-    private ReservationTime findReservationTimeById(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + timeId));
-    }
-
-    private Theme findThemeById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
-    }
-
-    private Reservation findReservationById(final Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + reservationId));
     }
 
     private void validatePastDate(final LocalDate date) {
