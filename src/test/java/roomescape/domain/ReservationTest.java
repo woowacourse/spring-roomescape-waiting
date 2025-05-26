@@ -3,9 +3,11 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.testFixture.Fixture.MEMBER1_ADMIN;
 import static roomescape.testFixture.Fixture.MEMBER2_USER;
+import static roomescape.testFixture.Fixture.RESERVATION_TIME_1;
 import static roomescape.testFixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -159,5 +161,51 @@ class ReservationTest {
 
         // then
         Assertions.assertThat(waiting).isFalse();
+    }
+
+    @DisplayName("예약이 과거 시간일 경우 true를 반환한다")
+    @Test
+    void isPast_true() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime past = now.minusDays(1);
+        Status status = Status.statusWithoutId(past, ReservationStatus.RESERVED);
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                past.toLocalDate(),
+                RESERVATION_TIME_1,
+                status
+        );
+
+        // when
+        boolean result = reservation.isPast(now);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("예약이 미래 시간일 경우 false를 반환한다")
+    @Test
+    void isPast_false() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime future = now.plusDays(1);
+        Status status = Status.statusWithoutId(future, ReservationStatus.RESERVED);
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                future.toLocalDate(),
+                RESERVATION_TIME_1,
+                status
+        );
+
+        // when
+        boolean result = reservation.isPast(now);
+
+        // then
+        assertThat(result).isFalse();
     }
 }
