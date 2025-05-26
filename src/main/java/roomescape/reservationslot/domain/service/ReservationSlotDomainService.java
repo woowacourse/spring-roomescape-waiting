@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.member.domain.Member;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
@@ -44,8 +44,8 @@ public class ReservationSlotDomainService {
                 memberId);
     }
 
-    public ReservationSlot save(final Member member, final LocalDate date, final ReservationTime time, final Theme theme,
-                                final LocalDateTime now) {
+    public ReservationSlot save(final Member member, final LocalDate date, final ReservationTime time,
+                                final Theme theme, final LocalDateTime now) {
         return reservationSlotRepository.save(
                 ReservationSlot.createUpcomingReservation(member, date, time, theme, now));
     }

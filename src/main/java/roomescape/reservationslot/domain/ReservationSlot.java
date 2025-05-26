@@ -19,14 +19,14 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import roomescape.member.domain.Member;
-import roomescape.reservationslot.exception.InvalidReservationSlotException;
-import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservationslot.exception.InvalidReservationSlotException;
+import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.exception.ReservationNotFoundException;
 
 @Entity
 @Table(name = "reservation_slots")
@@ -49,7 +49,6 @@ public class ReservationSlot {
     private Theme theme;
 
     @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    @Column(name = "waiting_id", nullable = false)
     private List<Reservation> reservations = new ArrayList<>();
 
     public ReservationSlot(final Member member, final LocalDate date, final ReservationTime time,
@@ -78,13 +77,13 @@ public class ReservationSlot {
     }
 
     public Reservation addMemberToWaiting(final Member member) {
-        boolean alreadyWaiting = this.reservations.stream()
+        boolean alreadyWaiting = reservations.stream()
                 .anyMatch(waiting -> waiting.getMember().getId().equals(member.getId()));
         if (alreadyWaiting) {
             throw new ReservationSlotAlreadyExistsException("이미 예약 대기중입니다.");
         }
         Reservation reservation = new Reservation(ReservationStatus.WAITING, member, this);
-        this.reservations.add(reservation);
+        reservations.add(reservation);
         return reservation;
     }
 

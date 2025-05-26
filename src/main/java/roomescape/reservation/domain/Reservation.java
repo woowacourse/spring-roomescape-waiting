@@ -19,7 +19,7 @@ import roomescape.reservationslot.domain.ReservationSlot;
 
 @Entity
 @Table(name = "reservations",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"booking_slot_id", "member_id"})
+        uniqueConstraints = @UniqueConstraint(columnNames = {"reservation_slot_id", "member_id"})
 )
 public class Reservation {
 
@@ -29,7 +29,7 @@ public class Reservation {
     private Long id;
 
     @Enumerated(EnumType.STRING)
-    @Column(name = "waiting_status", nullable = false)
+    @Column(name = "reservation_status", nullable = false)
     private ReservationStatus reservationStatus;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
@@ -37,13 +37,14 @@ public class Reservation {
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "booking_slot_id", nullable = false)
+    @JoinColumn(name = "reservation_slot_id", nullable = false)
     private ReservationSlot reservationSlot;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt = LocalDateTime.now();
 
-    public Reservation(final ReservationStatus reservationStatus, final Member member, final ReservationSlot reservationSlot) {
+    public Reservation(final ReservationStatus reservationStatus, final Member member,
+                       final ReservationSlot reservationSlot) {
         this.reservationStatus = reservationStatus;
         this.member = member;
         this.reservationSlot = reservationSlot;
