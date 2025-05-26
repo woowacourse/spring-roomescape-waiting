@@ -1,9 +1,9 @@
 package roomescape.theme.repository;
 
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DataNotFoundException;
 import roomescape.theme.domain.Theme;
 
 @RequiredArgsConstructor
@@ -23,8 +23,9 @@ public class JpaThemeRepository implements ThemeRepositoryInterface {
     }
 
     @Override
-    public Optional<Theme> findById(final Long id) {
-        return themeRepository.findById(id);
+    public Theme findById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + id));
     }
 
     @Override

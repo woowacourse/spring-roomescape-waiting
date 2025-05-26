@@ -2,10 +2,10 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DataNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -23,7 +23,7 @@ public class JpaReservationRepository implements ReservationRepositoryInterface 
     }
 
     @Override
-    public boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+    public boolean existsByDateAndTimeAndTheme(final LocalDate date, final ReservationTime time, final Theme theme) {
         return reservationRepository.existsByDateAndTimeAndTheme(date, time, theme);
     }
 
@@ -39,8 +39,9 @@ public class JpaReservationRepository implements ReservationRepositoryInterface 
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
-        return reservationRepository.findById(id);
+    public Reservation findById(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
     }
 
     @Override

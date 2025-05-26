@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
@@ -54,8 +53,8 @@ public class FakeReservationRepository implements ReservationRepositoryInterface
     }
 
     @Override
-    public Optional<Reservation> findById(final Long id) {
-        return Optional.ofNullable(reservations.get(id));
+    public Reservation findById(final Long id) {
+        return reservations.get(id);
     }
 
     @Override

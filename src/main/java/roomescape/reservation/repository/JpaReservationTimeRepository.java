@@ -2,9 +2,9 @@ package roomescape.reservation.repository;
 
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+import roomescape.common.exception.DataNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
 
 @RequiredArgsConstructor
@@ -19,8 +19,9 @@ public class JpaReservationTimeRepository implements ReservationTimeRepositoryIn
     }
 
     @Override
-    public Optional<ReservationTime> findById(Long id) {
-        return reservationTimeRepository.findById(id);
+    public ReservationTime findById(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new DataNotFoundException("해당 예약 시간 데이터가 존재하지 않습니다. id = " + id));
     }
 
     @Override
