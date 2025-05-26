@@ -57,4 +57,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
         return jpaWaitingRepository.existsByMember_IdAndDateAndTime_IdAndStatus(
                 memberId, date, timeId, status);
     }
+
+    @Override
+    public List<Waiting> findAll() {
+        return jpaWaitingRepository.findAll();
+    }
 }

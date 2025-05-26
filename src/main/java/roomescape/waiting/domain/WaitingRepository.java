@@ -28,4 +28,6 @@ public interface WaitingRepository {
     Optional<Waiting> findById(Long id);
 
     boolean existsByMemberIdAndDateAndTimeIdAndStatus(Long id, LocalDate date, Long aLong, WaitingStatus waitingStatus);
+
+    List<Waiting> findAll();
 }

@@ -83,4 +83,8 @@ public class Waiting {
     public void cancel() {
         this.status = WaitingStatus.CANCELED;
     }
+
+    public void approve() {
+        this.status = WaitingStatus.APPROVED;
+    }
 }
