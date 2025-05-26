@@ -47,8 +47,8 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<Reservation> findReservationsByFilters(
-            final long themeId,
             final long memberId,
+            final long themeId,
             final LocalDate dateFrom,
             final LocalDate dateTo
     ) {
