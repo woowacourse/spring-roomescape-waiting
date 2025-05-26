@@ -119,13 +119,14 @@ class ReservationCommandUseCaseTest {
         final ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.withoutId(LocalTime.of(12, 27)));
 
-        final Reservation savedReservation = reservationCommandUseCase.create(
+        reservationCommandUseCase.create(
                 new CreateReservationServiceRequest(
                         member.getId(),
                         LocalDate.of(2025, 8, 10),
                         reservationTime.getId(),
                         theme.getId()
-                ));
+                )
+        );
 
         // when & then
         assertThatThrownBy(() -> reservationCommandUseCase.create(

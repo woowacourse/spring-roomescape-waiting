@@ -63,7 +63,7 @@ class ReservationWaitQueryUseCaseTest {
                 ThemeThumbnail.from("www.theme1.com")
         );
 
-        final ReservationWait reservationWait1 = reservationWaitRepository.save(
+        reservationWaitRepository.save(
                 ReservationWait.withoutId(
                         member1,
                         reservationDate,
@@ -72,7 +72,7 @@ class ReservationWaitQueryUseCaseTest {
                 )
         );
 
-        final ReservationWait reservationWait2 = reservationWaitRepository.save(
+        final ReservationWait reservationWait = reservationWaitRepository.save(
                 ReservationWait.withoutId(
                         member2,
                         reservationDate,
@@ -92,7 +92,7 @@ class ReservationWaitQueryUseCaseTest {
         // then
         assertAll(
                 () -> assertThat(actual).isPresent(),
-                () -> assertThat(actual.get()).isEqualTo(reservationWait2)
+                () -> assertThat(actual.get()).isEqualTo(reservationWait)
         );
     }
 
