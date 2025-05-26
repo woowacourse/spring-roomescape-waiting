@@ -207,7 +207,7 @@ public class ReservationService {
         waitInfoRepository.deleteById(waitInfoId);
 
         final Long reservationId = waitInfo.getReservation().getId();
-        updateWaitInfoRank(reservationId);
+        updateWaitInfosRankAfterDelete(reservationId);
     }
 
     private void validateWaitInfoExistsById(final Long waitInfoId) {
@@ -216,14 +216,27 @@ public class ReservationService {
         }
     }
 
-    private void updateWaitInfoRank(final Long reservationId) {
-        final List<WaitInfo> waitInfos = waitInfoRepository.findByReservationId(reservationId);
-        final List<WaitInfo> sortedWaitInfos = waitInfos.stream()
+    private void updateWaitInfosRankAfterDelete(final Long reservationId) {
+        final List<WaitInfo> waitInfos = getSortedWaitInfosByCreatedAt(reservationId);
+        reassignRanks(waitInfos);
+    }
+
+    private List<WaitInfo> getSortedWaitInfosByCreatedAt(final Long reservationId) {
+        return waitInfoRepository.findByReservationId(reservationId).stream()
                 .sorted((w1, w2) -> w1.getCreatedAt().compareTo(w2.getCreatedAt()))
                 .toList();
-        for (int i = 0; i < sortedWaitInfos.size(); i++) {
-            final WaitInfo updatedWaitInfo = sortedWaitInfos.get(i);
-            updatedWaitInfo.setRank((long) (i + 1));
+    }
+
+    private void reassignRanks(final List<WaitInfo> waitInfos) {
+        for (int i = 0; i < waitInfos.size(); i++) {
+            final WaitInfo waitInfo = waitInfos.get(i);
+            final Long newRank = (long) (i + 1);
+            final WaitInfo updatedWaitInfo = new WaitInfo(
+                    waitInfo.getId(),
+                    waitInfo.getMember(),
+                    waitInfo.getReservation(),
+                    newRank
+            );
             waitInfoRepository.save(updatedWaitInfo);
         }
     }

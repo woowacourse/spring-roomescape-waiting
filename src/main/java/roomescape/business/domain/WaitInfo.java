@@ -35,11 +35,16 @@ public class WaitInfo {
     @Column(name = "created_at")
     private String createdAt;
 
-    public WaitInfo(final Member member, final Reservation reservation, final Long rank) {
+    public WaitInfo(final Long id, final Member member, final Reservation reservation, final Long rank) {
+        this.id = id;
         this.member = member;
         this.reservation = reservation;
         this.rank = rank;
         this.createdAt = LocalDateTime.now().format(DATE_TIME_FORMATTER);
+    }
+
+    public WaitInfo(final Member member, final Reservation reservation, final Long rank) {
+        this(null, member, reservation, rank);
     }
 
     protected WaitInfo() {
@@ -63,9 +68,5 @@ public class WaitInfo {
 
     public String getCreatedAt() {
         return createdAt;
-    }
-
-    public void setRank(final Long rank) {
-        this.rank = rank;
     }
 }
