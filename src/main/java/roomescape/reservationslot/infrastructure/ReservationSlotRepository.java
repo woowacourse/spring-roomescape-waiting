@@ -26,13 +26,10 @@ public interface ReservationSlotRepository extends JpaRepository<ReservationSlot
                                                                             LocalDate startDate, LocalDate endDate,
                                                                             Long memberId);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM ReservationSlot r WHERE r.time.id = :timeId) ")
     boolean existsByTimeId(Long timeId);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM ReservationSlot r WHERE r.theme.id = :themeId) ")
     boolean existsByThemeId(Long themeId);
 
-    @Query("SELECT EXISTS (SELECT 1 FROM ReservationSlot r WHERE (r.date, r.time.id, r.theme.id) = (:date, :timeId, :themeId)) ")
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     @Query("""
