@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationWaiting;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.service.dto.AdminReservationWaitingResponse;
 import roomescape.service.dto.ReservationWaitingRequest;
@@ -16,13 +17,15 @@ import roomescape.service.dto.ReservationWaitingResponse;
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationRepository reservationRepository;
     private final MemberService memberService;
     private final ReservationTimeService reservationTimeService;
     private final ReservationThemeService reservationThemeService;
 
     public ReservationWaitingResponse addReservationWaiting(final ReservationWaitingRequest request, final long memberId) {
         final Member member = memberService.getMemberById(memberId);
-        validateDuplicate(request, memberId);
+        validateDuplicateWaiting(request, memberId);
+        validateExistsReservation(request, memberId);
         final ReservationWaiting reservation = new ReservationWaiting(member, request.date(),
                 reservationTimeService.getById(request.timeId()), reservationThemeService.getById(request.themeId()));
         return ReservationWaitingResponse.from(reservationWaitingRepository.save(reservation));
@@ -39,7 +42,14 @@ public class ReservationWaitingService {
         }
     }
 
-    private void validateDuplicate(final ReservationWaitingRequest request, final long memberId) {
+    public List<AdminReservationWaitingResponse> getAllReservationWaiting() {
+        final List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findAll();
+        return reservationWaitings.stream()
+                .map(AdminReservationWaitingResponse::from)
+                .toList();
+    }
+
+    private void validateDuplicateWaiting(final ReservationWaitingRequest request, final long memberId) {
         if (reservationWaitingRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
                 memberId,
                 request.themeId(),
@@ -50,10 +60,10 @@ public class ReservationWaitingService {
         }
     }
 
-    public List<AdminReservationWaitingResponse> getAllReservationWaiting() {
-        final List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findAll();
-        return reservationWaitings.stream()
-                .map(AdminReservationWaitingResponse::from)
-                .toList();
+    private void validateExistsReservation(final ReservationWaitingRequest request, final long memberId) {
+        if (reservationRepository.existsByMemberIdAndDateAndThemeIdAndTimeId(memberId, request.date(), request.themeId(), request.timeId())) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약이 존재합니다.");
+        }
+
     }
 }
