@@ -9,9 +9,21 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error fetching reservations:', error));
 });
 
+const RESERVATION_STATUS = {
+    RESERVED: '예약',
+    WAITING: (rank) => `${rank}번째 예약 대기`
+};
+
 function render(data) {
     const tableBody = document.getElementById('table-body');
     tableBody.innerHTML = '';
+
+    function makeStatusMessage(isReserved, waitingRank) {
+        if (isReserved) {
+            return RESERVATION_STATUS.RESERVED;
+        }
+        return RESERVATION_STATUS.WAITING(waitingRank);
+    }
 
     data.forEach(item => {
         const row = tableBody.insertRow();
@@ -19,7 +31,9 @@ function render(data) {
         const theme = item.theme;
         const date = item.date;
         const time = item.time;
-        const status = item.status;
+        const isReserved = item.isReserved;
+        const waitingRank = item.waitingRank;
+        const status = makeStatusMessage(isReserved, waitingRank);
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;

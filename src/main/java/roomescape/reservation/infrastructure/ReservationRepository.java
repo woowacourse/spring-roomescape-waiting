@@ -1,13 +1,12 @@
 package roomescape.reservation.infrastructure;
 
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 
-public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Query("""
             SELECT w 
@@ -30,12 +29,17 @@ public interface ReservationRepository extends ListCrudRepository<Reservation, L
     boolean existsByReservationSlotIdAndMemberId(Long reservationId, Long memberId);
 
     @Query("""
-            SELECT w 
-            FROM Reservation w 
-            JOIN FETCH w.reservationSlot r            
-            JOIN FETCH r.time t 
-            JOIN FETCH r.theme th                   
-            WHERE w.reservationStatus = :reservationStatus
+            SELECT r 
+            FROM Reservation r 
+            JOIN FETCH r.reservationSlot rs            
+            JOIN FETCH rs.time t 
+            JOIN FETCH rs.theme th      
+            WHERE r.id NOT IN (
+            SELECT MIN(r2.id)
+            FROM Reservation r2
+            GROUP BY r2.reservationSlot.id
+            )             
+            ORDER BY rs.id, r.createdAt asc 
             """)
-    List<Reservation> findAllByReservationStatus(ReservationStatus reservationStatus);
+    List<Reservation> findAllWaitingReservations();
 }

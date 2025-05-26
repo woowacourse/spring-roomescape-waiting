@@ -6,6 +6,7 @@ import static roomescape.fixture.IntegrationFixture.ADMIN_EMAIL;
 import static roomescape.fixture.IntegrationFixture.FUTURE_DATE;
 import static roomescape.fixture.IntegrationFixture.PASSWORD;
 import static roomescape.fixture.IntegrationFixture.TOKEN;
+import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
 import static roomescape.fixture.IntegrationFixture.findThemesBySize;
@@ -23,6 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -73,6 +75,31 @@ public class AdminTest {
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    @Test
+    void deleteReservation() {
+        createReservationTime();
+        createTheme("추리");
+        createRegularReservation(1L);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(1));
+
+        RestAssured.given().log().all()
+                .cookie(TOKEN, ADMIN_TOKEN)
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
 
     @Test
@@ -130,7 +157,7 @@ public class AdminTest {
     @Test
     void findWaitingReservation() {
         makeWaitingReservations();
-        List<roomescape.reservation.presentation.dto.ReservationResponse> responses = RestAssured.given().log().all()
+        List<WaitingResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
                 .when().get("/admin/waiting-reservations")
@@ -153,7 +180,7 @@ public class AdminTest {
                 .then().log().all()
                 .statusCode(204);
 
-        List<roomescape.reservation.presentation.dto.ReservationResponse> responses = RestAssured.given().log().all()
+        List<WaitingResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
                 .when().get("/admin/waiting-reservations")

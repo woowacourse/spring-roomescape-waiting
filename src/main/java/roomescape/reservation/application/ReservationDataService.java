@@ -4,11 +4,10 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.exception.ReservationOwnerException;
 
 @Service
 public class ReservationDataService {
@@ -44,10 +43,14 @@ public class ReservationDataService {
     }
 
     public List<Reservation> findAllWaitingReservations() {
-        return reservationRepository.findAllByReservationStatus(ReservationStatus.WAITING);
+        return reservationRepository.findAllWaitingReservations();
     }
 
     public void removeWaitingReservation(final Long waitingId) {
         reservationRepository.deleteById(waitingId);
+    }
+
+    public void deleteById(final Long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 }

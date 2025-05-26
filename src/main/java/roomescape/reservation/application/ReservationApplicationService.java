@@ -3,6 +3,7 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.member.domain.Member;
@@ -39,14 +40,18 @@ public class ReservationApplicationService {
         reservationDataService.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
     }
 
-    public List<roomescape.reservation.presentation.dto.ReservationResponse> findAllWaitingReservations() {
+    public List<WaitingResponse> findAllWaitingReservations() {
         List<Reservation> reservations = reservationDataService.findAllWaitingReservations();
         return reservations.stream()
-                .map(roomescape.reservation.presentation.dto.ReservationResponse::from)
+                .map(WaitingResponse::from)
                 .toList();
     }
 
     public void removeWaitingReservation(final Long waitingId) {
         reservationDataService.removeWaitingReservation(waitingId);
+    }
+
+    public void delete(final Long reservationId) {
+        reservationDataService.deleteById(reservationId);
     }
 }

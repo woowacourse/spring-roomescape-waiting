@@ -1,15 +1,12 @@
 package roomescape.reservationslot.presentation.dto.response;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 
 public record ReservationResponse(
         Long reservationId,
-        Long waitingId,
-        ReservationStatus reservationStatus
+        Long waitingId
 ) {
     public static ReservationResponse from(Reservation reservation) {
-        return new ReservationResponse(reservation.getReservation().getId(), reservation.getId(),
-                reservation.getWaitingStatus());
+        return new ReservationResponse(reservation.getReservationSlot().getId(), reservation.getId());
     }
 }

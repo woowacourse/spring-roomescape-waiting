@@ -30,7 +30,6 @@ import roomescape.common.security.dto.request.LoginRequest;
 import roomescape.common.security.dto.response.CheckLoginResponse;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
-import roomescape.reservation.domain.ReservationStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -74,7 +73,7 @@ public class RegularTest {
 
 
     @Test
-    void createAndDeleteReservation() {
+    void createReservation() {
         createReservationTime();
         createTheme("추리");
         createRegularReservation(1L);
@@ -84,18 +83,6 @@ public class RegularTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
-
-        RestAssured.given().log().all()
-                .cookie(TOKEN, REGULAR_TOKEN)
-                .when().delete("/reservations/1")
-                .then().log().all()
-                .statusCode(204);
-
-        RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
     }
 
     @Test
@@ -119,7 +106,7 @@ public class RegularTest {
     void createWaitingReservations() {
         ReservationResponse reservationResponse = makeWaitingReservations();
 
-        assertThat(reservationResponse.reservationStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(reservationResponse).isNotNull();
     }
 
     @Test
@@ -138,7 +125,7 @@ public class RegularTest {
 
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(responses.size()).isEqualTo(1);
-            softAssertions.assertThat(responses.getFirst().status()).isEqualTo("1번째 예약대기");
+            softAssertions.assertThat(responses.getFirst().isReserved()).isFalse();
         });
     }
 

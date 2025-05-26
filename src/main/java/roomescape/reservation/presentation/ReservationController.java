@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 import roomescape.reservationslot.presentation.dto.request.ReservationSlotCreateRequest;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 import roomescape.reservation.application.ReservationApplicationService;
@@ -23,6 +24,15 @@ public class ReservationController {
 
     public ReservationController(final ReservationApplicationService reservationApplicationService) {
         this.reservationApplicationService = reservationApplicationService;
+    }
+
+    @RequireRole(MemberRole.ADMIN)
+    @DeleteMapping("/reservations/{reservationId}")
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable("reservationId") Long reservationId
+    ) {
+        reservationApplicationService.delete(reservationId);
+        return ResponseEntity.noContent().build();
     }
 
     @RequireRole(MemberRole.REGULAR)
@@ -48,9 +58,9 @@ public class ReservationController {
 
     @RequireRole(MemberRole.ADMIN)
     @GetMapping("/admin/waiting-reservations")
-    public ResponseEntity<List<roomescape.reservation.presentation.dto.ReservationResponse>> findAllWaitingReservations(
+    public ResponseEntity<List<WaitingResponse>> findAllWaitingReservations(
     ) {
-        List<roomescape.reservation.presentation.dto.ReservationResponse> responses = reservationApplicationService.findAllWaitingReservations();
+        List<WaitingResponse> responses = reservationApplicationService.findAllWaitingReservations();
         return ResponseEntity.ok(responses);
     }
 
