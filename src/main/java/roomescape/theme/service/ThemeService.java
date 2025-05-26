@@ -1,7 +1,7 @@
 package roomescape.theme.service;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
@@ -15,38 +15,43 @@ import java.util.List;
 public class ThemeService {
     private final ThemeRepository themeRepository;
 
-    @Autowired
     public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public ThemeResponse createTheme(ThemeCreateRequest request) {
         Theme theme = themeRepository.save(request.toTheme());
         return ThemeResponse.from(theme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         List<Theme> themes = themeRepository.findAll();
-        return toThemeResponses(themes);
+        return convertThemesToThemeResponses(themes);
     }
 
+    @Transactional
     public void deleteThemeById(Long id) {
         themeRepository.deleteById(id);
     }
 
+
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findLimitedThemesByPopularDesc() {
         LocalDate fromDate = LocalDate.now().minusDays(7);
         LocalDate toDate = LocalDate.now().minusDays(1);
         List<Theme> themes = themeRepository.findTopByReservationCountDesc(fromDate, toDate, 10L);
-        return toThemeResponses(themes);
+        return convertThemesToThemeResponses(themes);
     }
 
-    private List<ThemeResponse> toThemeResponses(List<Theme> themes) {
+    private List<ThemeResponse> convertThemesToThemeResponses(List<Theme> themes) {
         return themes.stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Theme getByThemeId(Long id) {
         return themeRepository.findById(id).orElseThrow(() -> new BadRequestException("올바른 방탈출 테마가 없습니다."));
     }
