@@ -9,8 +9,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.ReservationTime;
@@ -19,10 +20,11 @@ import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.WaitingRequest;
+import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @ActiveProfiles("test")
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class WaitingServiceTest {
     @Autowired
     private ReservationService reservationService;
@@ -86,10 +88,10 @@ class WaitingServiceTest {
                 reservationTime.getId()
         );
 
-        waitingService.createWaiting(waitingRequest, 2L);
+        final WaitingResponse waiting = waitingService.createWaiting(waitingRequest, 2L);
 
         // when
-        waitingService.deleteWaiting(1L);
+        waitingService.deleteWaiting(waiting.getId());
 
         // then
         assertThat(reservationService.getUserReservations(2L).size()).isEqualTo(1);

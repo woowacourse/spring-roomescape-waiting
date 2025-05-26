@@ -9,14 +9,13 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.reservation.application.ReservationTimeServiceTest.ReservationTimeConfig;
-import roomescape.reservation.application.ThemeServiceTest.ThemeConfig;
 import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.service.ThemeService;
 import roomescape.reservation.domain.Reservation;
@@ -25,12 +24,13 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
+import roomescape.reservation.presentation.dto.ReservationTimeResponse;
 import roomescape.reservation.presentation.dto.ThemeRequest;
 import roomescape.reservation.presentation.dto.ThemeResponse;
 
 @ActiveProfiles("test")
-@DataJpaTest
-@Import({ReservationTimeConfig.class, ThemeConfig.class})
+@Transactional
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ThemeServiceTest {
 
     @Autowired
@@ -56,7 +56,7 @@ class ThemeServiceTest {
         ThemeResponse theme = themeService.createTheme(themeRequest);
 
         // then
-        assertThat(theme.getId()).isEqualTo(1L);
+        assertThat(theme.getId()).isNotNull();
     }
 
     @Test
@@ -122,7 +122,8 @@ class ThemeServiceTest {
         ThemeResponse theme = themeService.createTheme(themeRequest2);
 
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(15, 40));
-        reservationTimeService.createReservationTime(reservationTimeRequest);
+        final ReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(
+                reservationTimeRequest);
 
         reservationRepository.save(new Reservation(
                 new Member(2L, "admin@admin.com", "admin", "어드민", Role.ADMIN),
@@ -130,7 +131,7 @@ class ThemeServiceTest {
                         "우테코 레벨3를 탈출하는 내용입니다.",
                         "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"),
                 LocalDate.now().minusDays(3),
-                new ReservationTime(1L, LocalTime.of(15, 40))
+                new ReservationTime(reservationTime.getId(), LocalTime.of(15, 40))
         ));
 
         // when

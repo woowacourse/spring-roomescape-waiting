@@ -11,12 +11,12 @@ import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.ReservationTime;
@@ -30,8 +30,8 @@ import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.WaitingRequest;
 
 @ActiveProfiles("test")
-@DataJpaTest
-@Import(ReservationConfig.class)
+@Transactional
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;

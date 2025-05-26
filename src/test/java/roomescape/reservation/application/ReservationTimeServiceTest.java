@@ -9,13 +9,11 @@ import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.reservation.application.ReservationServiceTest.ReservationConfig;
-import roomescape.reservation.application.ReservationTimeServiceTest.ReservationTimeConfig;
-import roomescape.reservation.application.ThemeServiceTest.ThemeConfig;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.service.ThemeService;
@@ -29,8 +27,8 @@ import roomescape.reservation.presentation.dto.ThemeRequest;
 import roomescape.reservation.presentation.dto.ThemeResponse;
 
 @ActiveProfiles("test")
-@DataJpaTest
-@Import({ReservationTimeConfig.class, ReservationConfig.class, ThemeConfig.class})
+@Transactional
+@SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ReservationTimeServiceTest {
 
     @Autowired
@@ -50,7 +48,7 @@ class ReservationTimeServiceTest {
         ReservationTimeResponse reservationTime = reservationTimeService.createReservationTime(reservationTimeRequest);
 
         // then
-        assertThat(reservationTime.getId()).isEqualTo(1L);
+        assertThat(reservationTime.getId()).isNotNull();
     }
 
     @Test
@@ -93,11 +91,11 @@ class ReservationTimeServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
         );
-        themeService.createTheme(themeRequest);
+        final ThemeResponse theme = themeService.createTheme(themeRequest);
 
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(
                 LocalDate.of(2025, 8, 5),
-                1L,
+                theme.getId(),
                 reservationTime.getId(),
                 2L
         );
@@ -105,7 +103,7 @@ class ReservationTimeServiceTest {
 
         // when
         List<AvailableReservationTimeResponse> reservationTimes = reservationTimeService.getReservationTimes(
-                LocalDate.of(2025, 8, 5), 1L);
+                LocalDate.of(2025, 8, 5), theme.getId());
 
         // then
         assertThat(reservationTimes.stream()
