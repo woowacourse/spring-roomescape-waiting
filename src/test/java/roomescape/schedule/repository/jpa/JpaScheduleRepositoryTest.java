@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.member.repository.jpa.JpaMemberRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.jpa.JpaReservationTimeRepository;
 import roomescape.schedule.domain.Schedule;
@@ -27,9 +26,6 @@ public class JpaScheduleRepositoryTest {
 
     @Autowired
     private JpaThemeRepository jpaThemeRepository;
-
-    @Autowired
-    private JpaMemberRepository jpaMemberRepository;
 
     @Autowired
     private JpaScheduleRepository jpaScheduleRepository;
