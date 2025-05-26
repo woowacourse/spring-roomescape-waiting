@@ -63,7 +63,7 @@ class MemberReservationApiControllerTest {
                 .thenReturn("test-token");
         when(memberService.findByToken("test-token"))
                 .thenReturn(memberResponse);
-        when(myReservationService.findAllMyReservationByMemberId(1L))
+        when(myReservationService.findAllMyReservationByMember(1L))
                 .thenReturn(List.of(myReservationResponse));
 
         mockMvc.perform(get(URI)

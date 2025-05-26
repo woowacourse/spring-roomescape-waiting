@@ -74,7 +74,7 @@ public class Reservation {
         return this.theme.getId().equals(themeId);
     }
 
-    public boolean isWaitingStatus() {
+    public boolean isWaiting() {
         return this.status.equals(Status.WAITING);
     }
 }

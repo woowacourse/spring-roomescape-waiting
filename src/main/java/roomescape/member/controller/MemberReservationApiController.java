@@ -23,6 +23,6 @@ public class MemberReservationApiController {
     public ResponseEntity<List<MyReservationResponse>> findAllByMemberId(
             @AuthenticationPrincipal MemberResponse memberResponse
     ) {
-        return ResponseEntity.ok(myReservationService.findAllMyReservationByMemberId(memberResponse.id()));
+        return ResponseEntity.ok(myReservationService.findAllMyReservationByMember(memberResponse.id()));
     }
 }

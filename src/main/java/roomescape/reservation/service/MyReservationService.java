@@ -19,17 +19,17 @@ public class MyReservationService {
         this.waitingOrder = waitingOrder;
     }
 
-    public List<MyReservationResponse> findAllMyReservationByMemberId(final Long memberId) {
+    public List<MyReservationResponse> findAllMyReservationByMember(final Long memberId) {
         waitingOrder.resetWaitingOrder();
-        
+
         return reservationRepository.findAllByMemberId(memberId)
                 .stream()
                 .map(this::generateMyReservation)
                 .toList();
     }
 
-    private MyReservationResponse generateMyReservation(Reservation reservation) {
-        if (reservation.isWaitingStatus()) {
+    private MyReservationResponse generateMyReservation(final Reservation reservation) {
+        if (reservation.isWaiting()) {
             return MyReservationResponse.from(reservation, waitingOrder.issueNextWaitingOrder());
         }
         return MyReservationResponse.from(reservation, WAITING_ORDER_START_VALUE);

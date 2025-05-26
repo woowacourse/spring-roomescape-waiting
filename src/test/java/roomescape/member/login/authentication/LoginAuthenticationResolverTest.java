@@ -21,7 +21,6 @@ class LoginAuthenticationResolverTest {
         String token = "valid-token";
         MemberResponse expectedMember = new MemberResponse(1L, "name", "email");
 
-        AuthenticationPrincipal authenticationPrincipal = mock(AuthenticationPrincipal.class);
         TokenAuthorizationHandler authorizationHandler = mock(TokenAuthorizationHandler.class);
         MemberService memberService = mock(MemberService.class);
 
@@ -33,8 +32,6 @@ class LoginAuthenticationResolverTest {
         when(authorizationHandler.extractToken(httpRequest)).thenReturn(token);
         when(memberService.findByToken(token)).thenReturn(expectedMember);
         when(methodParameter.hasParameterAnnotation(AuthenticationPrincipal.class)).thenReturn(true);
-        when(methodParameter.getParameterAnnotation(AuthenticationPrincipal.class)).thenReturn(authenticationPrincipal);
-        when(authenticationPrincipal.required()).thenReturn(true);
 
         LoginAuthenticationResolver resolver = new LoginAuthenticationResolver(memberService, authorizationHandler);
         Object result = resolver.resolveArgument(methodParameter, null, webRequest, null);

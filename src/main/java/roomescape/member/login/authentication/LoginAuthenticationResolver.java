@@ -7,8 +7,6 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.common.exception.AuthenticationException;
-import roomescape.common.exception.message.LoginExceptionMessage;
 import roomescape.member.login.authorization.AuthorizationHandler;
 import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
@@ -39,12 +37,6 @@ public class LoginAuthenticationResolver implements HandlerMethodArgumentResolve
             WebDataBinderFactory binderFactory
     ) {
         HttpServletRequest httpServletRequest = (HttpServletRequest) webRequest.getNativeRequest();
-        AuthenticationPrincipal annotation = parameter.getParameterAnnotation(AuthenticationPrincipal.class);
-
-        if (!annotation.required()) {
-            throw new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_MISSING.getMessage());
-        }
-
         String token = authorizationHandler.extractToken(httpServletRequest);
         return memberService.findByToken(token);
     }
