@@ -265,18 +265,13 @@ public class ReservationService {
                         waitInfo.getReservation().getTheme().getName(),
                         waitInfo.getReservation().getDate(),
                         waitInfo.getReservation().getReservationTime().getStartAt(),
-                        calculateStatus(waitInfo),
+                        calculateStatus(waitInfo.getRank()),
                         waitInfo.getId()
                 ))
                 .toList();
     }
 
-    private String calculateStatus(final WaitInfo waitInfo) {
-        final Long rank = waitInfoRepository.countByIdLessThanEqualAndReservationId(
-                waitInfo.getId(),
-                waitInfo.getReservation().getId()
-        );
-
+    private String calculateStatus(final Long rank) {
         if (rank == 1) {
             return "예약";
         }
