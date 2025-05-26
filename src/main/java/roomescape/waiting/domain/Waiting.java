@@ -86,17 +86,16 @@ public class Waiting {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+    public final boolean equals(final Object o) {
+        if (!(o instanceof final Waiting waiting)) {
             return false;
         }
 
-        final Waiting waiting = (Waiting) o;
-        return Objects.equals(id, waiting.id);
+        return Objects.equals(getId(), waiting.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 }
