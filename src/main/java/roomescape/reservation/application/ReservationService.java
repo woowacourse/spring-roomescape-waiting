@@ -65,8 +65,6 @@ public class ReservationService {
 
         final ReservationSlot reservationSlot = reservation.getReservationSlot();
         reservation.delete();
-        reservationRepository.delete(reservation);
-
         resolveSlotAfterChange(reservationSlot);
     }
 

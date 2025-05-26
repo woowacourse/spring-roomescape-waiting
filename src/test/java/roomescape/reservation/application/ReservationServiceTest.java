@@ -199,22 +199,25 @@ class ReservationServiceTest {
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final ReservationSlot reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
-
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final Reservation confirmedReservation = reservationRepository.save(new Reservation(member1, reservationSlot));
+        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
+        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme);
+
+        final Reservation confirmedReservation = new Reservation(member1, reservationSlot);
         reservationSlot.addReservation(confirmedReservation);
         reservationSlot.assignConfirmedIfEmpty();
 
-        final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
-        final Reservation waitingReservation = reservationRepository.save(new Reservation(member2, reservationSlot));
+        final Reservation waitingReservation = new Reservation(member2, reservationSlot);
         reservationSlot.addReservation(waitingReservation);
         reservationSlot.assignConfirmedIfEmpty();
+
+        reservationSlotRepository.save(reservationSlot);
 
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
         // when
         reservationService.deleteReservation(confirmedReservation.getId(), member1AuthInfo);
+        reservationRepository.flush();
 
         // then
         assertAll(() -> assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty(),

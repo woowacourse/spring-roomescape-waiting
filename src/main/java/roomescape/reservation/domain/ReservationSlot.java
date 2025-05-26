@@ -54,7 +54,7 @@ public class ReservationSlot {
     @JoinColumn(name = "confirmed_reservation_id")
     private Reservation confirmedReservation;
 
-    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Reservation> allReservations = new ArrayList<>();
 
     public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme) {
