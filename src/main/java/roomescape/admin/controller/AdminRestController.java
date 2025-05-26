@@ -16,14 +16,14 @@ import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.AdminReservationResponse;
 import roomescape.admin.dto.ReservationSearchRequest;
 import roomescape.admin.dto.ReservationWaitingResponse;
-import roomescape.admin.service.facade.AdminService;
+import roomescape.admin.service.facade.AdminServiceFacade;
 
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @RestController
 public class AdminRestController {
 
-    private final AdminService adminService;
+    private final AdminServiceFacade adminService;
 
     @PostMapping("/reservations")
     public ResponseEntity<AdminReservationResponse> createReservation(
@@ -51,7 +51,7 @@ public class AdminRestController {
         return ResponseEntity.ok(waitingResponses);
     }
 
-    @DeleteMapping("/waiting-deny/{id}")
+    @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> deleteWaiting(
             @PathVariable final Long id
     ) {
