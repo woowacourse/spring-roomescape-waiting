@@ -55,20 +55,15 @@ public class ReservationWaitingCommandService {
         Member member = memberRepository.findById(request.memberId())
                 .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
 
-        List<Reservation> duplicatedReservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
+        List<Reservation> alreadyBookedReservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
                 request.date(),
                 request.timeId(),
                 request.themeId());
-        if (duplicatedReservations.isEmpty()) {
-            throw new IllegalArgumentException("현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
-        }
-        if (duplicatedReservations.stream()
-                .anyMatch(reservation -> reservation.getMember().equals(member))) {
-            throw new IllegalArgumentException("이미 예약한 이력이 있습니다.");
-        }
+        validateReservationWaitingAvailable(alreadyBookedReservations, member);
 
         Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.WAITING);
         requestReservation.validateReservableTime(LocalDateTime.now(clock));
+
         Reservation newReservation = reservationRepository.save(requestReservation);
         reservationWaitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
         return ReservationResponseDto.of(newReservation);
@@ -78,11 +73,21 @@ public class ReservationWaitingCommandService {
         Reservation reservationWaiting = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다."));
 
-        if (reservationWaiting.getMember().getId() != loginInfo.id()) {
+        if (!reservationWaiting.getMember().isSameIdWith(loginInfo.id())) {
             throw new UnauthorizationException("예약자만 예약 대기 취소가 가능합니다.");
         }
 
         reservationWaitingTicketRepository.delete(reservationWaitingTicketRepository.findByReservationId(id).get());
         reservationRepository.delete(reservationWaiting);
+    }
+
+    private static void validateReservationWaitingAvailable(List<Reservation> alreadyBookedReservations, Member member) {
+        if (alreadyBookedReservations.isEmpty()) {
+            throw new IllegalArgumentException("현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
+        }
+        if (alreadyBookedReservations.stream()
+                .anyMatch(reservation -> reservation.getMember().equals(member))) {
+            throw new IllegalArgumentException("이미 예약한 이력이 있습니다.");
+        }
     }
 }

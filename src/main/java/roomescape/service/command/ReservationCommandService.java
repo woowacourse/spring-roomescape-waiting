@@ -93,9 +93,9 @@ public class ReservationCommandService {
 
         Reservation earliestWaiting = reservationWaitings.stream()
                 .map(waiting -> waitingTicketRepository.findByReservationId(waiting.getId())
-                        .orElseThrow(() -> new NotFoundException("예약 대기 티켓을 찾을 수 없습니다. 예약 ID: " + waiting.getId())))
+                        .orElseThrow(() -> new NotFoundException("예약 대기표를 찾을 수 없습니다. 예약 ID: " + waiting.getId())))
                 .min(Comparator.comparing(ReservationWaitingTicket::getCreatedAt))
-                .orElseThrow(() -> new NotFoundException("가장 오래된 예약 대기 티켓을 찾을 수 없습니다."))
+                .orElseThrow(() -> new NotFoundException("첫번째 예약 대기표를 찾을 수 없습니다."))
                 .getReservation();
 
         waitingTicketRepository.deleteByReservationId(earliestWaiting.getId());

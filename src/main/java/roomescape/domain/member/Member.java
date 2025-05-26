@@ -89,6 +89,10 @@ public class Member {
         return Objects.hash(id, name, email, role, password);
     }
 
+    public boolean isSameIdWith(long id) {
+        return this.id.equals(id);
+    }
+
     public Long getId() {
         return id;
     }

@@ -24,21 +24,20 @@ public class ReservationTimeCommandService {
     }
 
     public ReservationTimeResponseDto createReservationTime(final ReservationTimeCreateRequestDto requestDto) {
-        ReservationTime requestTime = requestDto.createWithoutId();
-        try {
-            ReservationTime savedTime = reservationTimeRepository.save(requestTime);
-            return new ReservationTimeResponseDto(savedTime);
-        } catch (IllegalStateException e) {
-            throw new DuplicateContentException(e.getMessage());
+        if (reservationTimeRepository.existsByStartAt(requestDto.startAt())) {
+            throw new DuplicateContentException("해당 시간이 이미 존재합니다.");
         }
+        ReservationTime requestTime = requestDto.createWithoutId();
+        ReservationTime savedTime = reservationTimeRepository.save(requestTime);
+        return new ReservationTimeResponseDto(savedTime);
     }
 
     public void deleteReservationTimeById(final Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
-            throw new IllegalStateException("이 시간의 예약이 이미 존재합니다. id : " + id);
-        }
         if (!reservationTimeRepository.existsById(id)) {
             throw new NotFoundException("등록된 시간만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
+        }
+        if (reservationRepository.existsByTimeId(id)) {
+            throw new IllegalStateException("이 시간의 예약이 이미 존재합니다. id : " + id);
         }
 
         reservationTimeRepository.deleteById(id);

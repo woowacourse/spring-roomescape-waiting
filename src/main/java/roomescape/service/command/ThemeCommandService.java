@@ -23,6 +23,9 @@ public class ThemeCommandService {
     }
 
     public ThemeResponseDto createTheme(final ThemeCreateRequestDto requestDto) {
+        if (themeRepository.existsByName(requestDto.name())) {
+            throw new DuplicateContentException("해당 이름의 테마가 이미 존재합니다.");
+        }
         Theme requestTheme = requestDto.createWithoutId();
         Theme savedTheme = themeRepository.save(requestTheme);
         return ThemeResponseDto.from(savedTheme);
@@ -32,7 +35,6 @@ public class ThemeCommandService {
         if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalStateException("이 테마는 이미 예약이 존재합니다. id : " + id);
         }
-
         if (!themeRepository.existsById(id)) {
             throw new NotFoundException("등록된 테마만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }

@@ -9,6 +9,8 @@ import roomescape.domain.Theme;
 
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
+    boolean existsByName(String name);
+
     @Query(value = """
             SELECT th.*
             FROM theme th
