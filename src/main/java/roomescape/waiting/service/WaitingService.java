@@ -12,7 +12,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingStatus;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
 
@@ -40,19 +39,18 @@ public class WaitingService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("테마를 찾을 수 없습니다"));
 
-        if (waitingRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
+        if (waitingRepository.existsByMemberIdAndDateAndTimeId(
                 loginMember.id(),
                 request.date(),
-                request.timeId(),
-                WaitingStatus.PENDING)) {
+                request.timeId()
+        )) {
             throw new IllegalStateException("해당 날짜와 시간에 이미 대기가 존재합니다.");
         }
 
-        long currentWaitingCounts = waitingRepository.countByDateAndThemeIdAndTimeIdAndStatus(
+        long currentWaitingCounts = waitingRepository.countByDateAndThemeIdAndTimeId(
                 request.date(),
                 request.themeId(),
-                request.timeId(),
-                WaitingStatus.PENDING
+                request.timeId()
         );
 
         if (currentWaitingCounts >= MAX_WAITING_COUNT) {
@@ -63,7 +61,6 @@ public class WaitingService {
                 request.date(),
                 time,
                 theme,
-                WaitingStatus.PENDING,
                 LocalDateTime.now()
         );
         Waiting savedWaiting = waitingRepository.save(waiting);

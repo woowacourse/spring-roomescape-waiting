@@ -9,7 +9,6 @@ import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingStatus;
 
 public class FakeWaitingRepository implements WaitingRepository {
     private final List<Waiting> waitings;
@@ -31,31 +30,28 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByMemberIdAndStatus(Long memberId, WaitingStatus status) {
+    public List<Waiting> findByMemberId(Long memberId) {
         return waitings.stream()
                 .filter(w -> w.getMember().getId().equals(memberId))
-                .filter(w -> w.getStatus() == status)
                 .toList();
     }
 
     @Override
-    public long countByDateAndThemeIdAndTimeIdAndStatusAndCreatedAtBefore(LocalDate date, Long themeId, Long timeId, WaitingStatus status, LocalDateTime createdAt) {
+    public long countByDateAndThemeIdAndTimeIdAndCreatedAtBefore(LocalDate date, Long themeId, Long timeId, LocalDateTime createdAt) {
         return waitings.stream()
                 .filter(w -> w.getDate().equals(date))
                 .filter(w -> w.getTheme().getId().equals(themeId))
                 .filter(w -> w.getTime().getId().equals(timeId))
-                .filter(w -> w.getStatus() == status)
                 .filter(w -> w.getCreatedAt().isBefore(createdAt))
                 .count();
     }
 
     @Override
-    public long countByDateAndThemeIdAndTimeIdAndStatus(LocalDate date, Long themeId, Long timeId, WaitingStatus status) {
+    public long countByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId) {
         return waitings.stream()
                 .filter(w -> w.getDate().equals(date))
                 .filter(w -> w.getTheme().getId().equals(themeId))
                 .filter(w -> w.getTime().getId().equals(timeId))
-                .filter(w -> w.getStatus() == status)
                 .count();
     }
 
@@ -67,12 +63,11 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByMemberIdAndDateAndTimeIdAndStatus(Long memberId, LocalDate date, Long timeId, WaitingStatus status) {
+    public boolean existsByMemberIdAndDateAndTimeId(Long memberId, LocalDate date, Long timeId) {
         return waitings.stream()
                 .anyMatch(w -> w.getMember().getId().equals(memberId)
                         && w.getDate().equals(date)
-                        && w.getTime().getId().equals(timeId)
-                        && w.getStatus() == status);
+                        && w.getTime().getId().equals(timeId));
     }
 
     @Override
@@ -81,12 +76,11 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(LocalDate date, Long themeId, Long timeId, WaitingStatus status) {
+    public List<Waiting> findByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(LocalDate date, Long themeId, Long timeId) {
         return waitings.stream()
                 .filter(w -> w.getDate().equals(date))
                 .filter(w -> w.getTheme().getId().equals(themeId))
                 .filter(w -> w.getTime().getId().equals(timeId))
-                .filter(w -> w.getStatus() == status)
                 .sorted((w1, w2) -> w1.getCreatedAt().compareTo(w2.getCreatedAt()))
                 .toList();
     }

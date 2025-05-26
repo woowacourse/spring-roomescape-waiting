@@ -1,8 +1,6 @@
 package roomescape.waiting.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -31,25 +29,21 @@ public class Waiting {
     @ManyToOne
     private Theme theme;
 
-    @Enumerated(EnumType.STRING)
-    private WaitingStatus status;
-
     private LocalDateTime createdAt;
 
     protected Waiting() {
     }
 
-    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme, WaitingStatus status, LocalDateTime createdAt) {
+    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
         this.createdAt = createdAt;
     }
 
-    public static Waiting createWithoutId(Member member, LocalDate date, ReservationTime time, Theme theme, WaitingStatus status, LocalDateTime createdAt) {
-        return new Waiting(member, date, time, theme, status, createdAt);
+    public static Waiting createWithoutId(Member member, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+        return new Waiting(member, date, time, theme, createdAt);
     }
 
     public Long getId() {
@@ -70,10 +64,6 @@ public class Waiting {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public WaitingStatus getStatus() {
-        return status;
     }
 
     public LocalDateTime getCreatedAt() {

@@ -8,34 +8,31 @@ import java.util.Optional;
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
 
-    List<Waiting> findByMemberIdAndStatus(Long id, WaitingStatus status);
+    List<Waiting> findByMemberId(Long id);
 
-    long countByDateAndThemeIdAndTimeIdAndStatusAndCreatedAtBefore(
+    long countByDateAndThemeIdAndTimeIdAndCreatedAtBefore(
             LocalDate date,
             Long themeId,
             Long timeId,
-            WaitingStatus status,
             LocalDateTime createdAt
     );
 
-    long countByDateAndThemeIdAndTimeIdAndStatus(
+    long countByDateAndThemeIdAndTimeId(
             LocalDate date,
             Long themeId,
-            Long timeId,
-            WaitingStatus status
+            Long timeId
     );
 
     Optional<Waiting> findById(Long id);
 
-    boolean existsByMemberIdAndDateAndTimeIdAndStatus(Long id, LocalDate date, Long aLong, WaitingStatus waitingStatus);
+    boolean existsByMemberIdAndDateAndTimeId(Long id, LocalDate date, Long aLong);
 
     List<Waiting> findAll();
 
-    List<Waiting> findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
+    List<Waiting> findByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
             LocalDate date,
             Long themeId,
-            Long timeId,
-            WaitingStatus status
+            Long timeId
     );
 
     void delete(Waiting waiting);

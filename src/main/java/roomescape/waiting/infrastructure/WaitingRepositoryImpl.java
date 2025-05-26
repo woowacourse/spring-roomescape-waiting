@@ -6,7 +6,6 @@ import java.util.List;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingStatus;
 
 @Repository
 public class WaitingRepositoryImpl implements WaitingRepository {
@@ -23,24 +22,23 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByMemberIdAndStatus(Long id, WaitingStatus status) {
-        return jpaWaitingRepository.findByMember_IdAndStatus(id, status);
+    public List<Waiting> findByMemberId(Long id) {
+        return jpaWaitingRepository.findByMember_Id(id);
     }
 
     @Override
-    public long countByDateAndThemeIdAndTimeIdAndStatusAndCreatedAtBefore(
+    public long countByDateAndThemeIdAndTimeIdAndCreatedAtBefore(
             LocalDate date,
             Long themeId,
             Long timeId,
-            WaitingStatus status,
             LocalDateTime createdAt
     ) {
-        return jpaWaitingRepository.countByDateAndTheme_IdAndTime_IdAndStatusAndCreatedAtBefore(date, themeId, timeId, status, createdAt);
+        return jpaWaitingRepository.countByDateAndTheme_IdAndTime_IdAndCreatedAtBefore(date, themeId, timeId, createdAt);
     }
 
     @Override
-    public long countByDateAndThemeIdAndTimeIdAndStatus(LocalDate date, Long themeId, Long timeId, WaitingStatus status) {
-        return jpaWaitingRepository.countByDateAndTheme_IdAndTime_IdAndStatus(date, themeId, timeId, status);
+    public long countByDateAndThemeIdAndTimeId(LocalDate date, Long themeId, Long timeId) {
+        return jpaWaitingRepository.countByDateAndTheme_IdAndTime_Id(date, themeId, timeId);
     }
 
     @Override
@@ -49,13 +47,12 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByMemberIdAndDateAndTimeIdAndStatus(
+    public boolean existsByMemberIdAndDateAndTimeId(
             Long memberId,
             LocalDate date,
-            Long timeId,
-            WaitingStatus status) {
-        return jpaWaitingRepository.existsByMember_IdAndDateAndTime_IdAndStatus(
-                memberId, date, timeId, status);
+            Long timeId
+    ) {
+        return jpaWaitingRepository.existsByMember_IdAndDateAndTime_Id(memberId, date, timeId);
     }
 
     @Override
@@ -64,13 +61,12 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public List<Waiting> findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
+    public List<Waiting> findByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
             LocalDate date,
             Long themeId,
-            Long timeId,
-            WaitingStatus status
+            Long timeId
     ) {
-        return jpaWaitingRepository.findByDateAndTheme_IdAndTime_IdAndStatusOrderByCreatedAtAsc(date, themeId, timeId, status);
+        return jpaWaitingRepository.findByDateAndTheme_IdAndTime_IdOrderByCreatedAtAsc(date, themeId, timeId);
     }
 
     @Override

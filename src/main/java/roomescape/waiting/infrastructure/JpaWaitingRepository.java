@@ -5,36 +5,32 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingStatus;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
-    List<Waiting> findByMember_IdAndStatus(Long id, WaitingStatus status);
+    List<Waiting> findByMember_Id(Long id);
 
-    long countByDateAndTheme_IdAndTime_IdAndStatusAndCreatedAtBefore(
+    long countByDateAndTheme_IdAndTime_IdAndCreatedAtBefore(
             LocalDate date,
             Long themeId,
             Long timeId,
-            WaitingStatus status,
             LocalDateTime createdAt
     );
 
-    long countByDateAndTheme_IdAndTime_IdAndStatus(
+    long countByDateAndTheme_IdAndTime_Id(
             LocalDate date,
             Long themeId,
-            Long timeId,
-            WaitingStatus status
+            Long timeId
     );
 
-    boolean existsByMember_IdAndDateAndTime_IdAndStatus(
+    boolean existsByMember_IdAndDateAndTime_Id(
             Long memberId,
             LocalDate date,
-            Long timeId,
-            WaitingStatus status);
+            Long timeId
+    );
 
-    List<Waiting> findByDateAndTheme_IdAndTime_IdAndStatusOrderByCreatedAtAsc(
+    List<Waiting> findByDateAndTheme_IdAndTime_IdOrderByCreatedAtAsc(
             LocalDate date,
             Long themeId,
-            Long timeId,
-            WaitingStatus status
+            Long timeId
     );
 }

@@ -34,7 +34,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingStatus;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -172,7 +171,7 @@ class ReservationServiceMockTest {
         when(reservationRepository.findByMemberId(1L))
                 .thenReturn(reservations);
         List<Waiting> waitings = createWaitings();
-        when(waitingRepository.findByMemberIdAndStatus(1L, WaitingStatus.PENDING))
+        when(waitingRepository.findByMemberId(1L))
                 .thenReturn(waitings);
         MyReservationResponse expected1 = MyReservationResponse.from(reservations.get(0));
         MyReservationResponse expected2 = MyReservationResponse.from(reservations.get(1));
@@ -217,7 +216,6 @@ class ReservationServiceMockTest {
                 LocalDate.of(2024, 10, 6),
                 reservationTime1,
                 theme1,
-                WaitingStatus.PENDING,
                 LocalDateTime.of(2025, 5, 22, 10, 0
                 )
         );

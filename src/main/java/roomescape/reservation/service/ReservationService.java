@@ -20,7 +20,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingStatus;
 
 @Service
 public class ReservationService {
@@ -84,11 +83,10 @@ public class ReservationService {
 
         reservationRepository.deleteById(id);
 
-        List<Waiting> waitings = waitingRepository.findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
+        List<Waiting> waitings = waitingRepository.findByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(
                 reservation.getDate(),
                 reservation.getThemeId(),
-                reservation.getTimeId(),
-                WaitingStatus.PENDING
+                reservation.getTimeId()
         );
 
         if (!waitings.isEmpty()) {
@@ -118,7 +116,7 @@ public class ReservationService {
                 .map(MyReservationResponse::from)
                 .toList();
 
-        List<Waiting> waitingReservations = waitingRepository.findByMemberIdAndStatus(id, WaitingStatus.PENDING);
+        List<Waiting> waitingReservations = waitingRepository.findByMemberId(id);
         List<MyReservationResponse> waitingResponses = waitingReservations.stream()
                 .map(waiting -> {
                     long rank = calculateWaitingRank(waiting);
@@ -132,11 +130,10 @@ public class ReservationService {
     }
 
     private long calculateWaitingRank(Waiting waiting) {
-        return waitingRepository.countByDateAndThemeIdAndTimeIdAndStatusAndCreatedAtBefore(
+        return waitingRepository.countByDateAndThemeIdAndTimeIdAndCreatedAtBefore(
                 waiting.getDate(),
                 waiting.getTheme().getId(),
                 waiting.getTime().getId(),
-                WaitingStatus.PENDING,
                 waiting.getCreatedAt()
         ) + 1;
     }
