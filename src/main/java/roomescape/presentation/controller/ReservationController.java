@@ -73,7 +73,7 @@ public class ReservationController {
             @PathVariable("id") Long id,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
-        commandService.deleteReservation(id, memberIdDto.id());
+        commandService.cancelReservation(id, memberIdDto.id());
         return ResponseEntity.noContent().build();
     }
 

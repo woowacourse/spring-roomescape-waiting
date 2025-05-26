@@ -107,7 +107,7 @@ public class ReservationCommandService {
         return ReservationDto.from(reservation);
     }
 
-    public void deleteReservation(Long reservationId, Long memberId) {
+    public void cancelReservation(Long reservationId, Long memberId) {
         Member member = memberService.getMemberEntityById(memberId);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
