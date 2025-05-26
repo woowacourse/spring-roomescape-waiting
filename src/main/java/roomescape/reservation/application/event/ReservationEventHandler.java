@@ -13,9 +13,6 @@ public class ReservationEventHandler {
 
     @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDeleteEvent(ReservationDeletedEvent event) {
-        if (event.getReservation().isEmpty()) {
-            return;
-        }
-        promoteService.promoteWaiting(event.getReservation().get());
+        promoteService.promoteWaiting(event.reservation());
     }
 }

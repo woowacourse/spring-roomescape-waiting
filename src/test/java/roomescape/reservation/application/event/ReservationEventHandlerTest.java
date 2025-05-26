@@ -1,14 +1,9 @@
 package roomescape.reservation.application.event;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -47,25 +42,12 @@ class ReservationEventHandlerTest {
         ReservationSpec spec = new ReservationSpec(new ReservationDate(date), time, theme);
 
         Reservation reservation = new Reservation(member, spec);
-        ReservationDeletedEvent event = new ReservationDeletedEvent(Optional.of(reservation));
+        ReservationDeletedEvent event = new ReservationDeletedEvent(reservation);
 
         // when
         eventHandler.handleDeleteEvent(event);
 
         // then
         verify(promoteService).promoteWaiting(reservation);
-    }
-
-    @DisplayName("예약 삭제 이벤트 처리 - 예약이 없는 경우 아무 작업도 수행하지 않음")
-    @Test
-    void handleDeleteEvent_withoutReservation() {
-        // given
-        ReservationDeletedEvent event = new ReservationDeletedEvent(Optional.empty());
-
-        // when
-        eventHandler.handleDeleteEvent(event);
-
-        // then
-        verify(promoteService, never()).promoteWaiting(any());
     }
 }

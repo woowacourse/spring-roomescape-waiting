@@ -113,6 +113,12 @@ public class ReservationService {
     public void deleteById(Long id) {
         Optional<Reservation> reservation = reservationRepository.findById(id);
         reservationRepository.deleteById(id);
-        eventPublisher.publishEvent(new ReservationDeletedEvent(reservation));
+        publishDeleteEvent(reservation);
+    }
+
+    private void publishDeleteEvent(Optional<Reservation> reservation) {
+        if (reservation.isPresent()) {
+            eventPublisher.publishEvent(new ReservationDeletedEvent(reservation.get()));
+        }
     }
 }
