@@ -20,8 +20,6 @@ import roomescape.service.reserveticket.ReserveTicketService;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private static final String ADMIN_CREATED_MESSAGE = "어드민이 생성한 예약입니다.";
-
     private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
 
