@@ -119,7 +119,7 @@ public class ReservationServiceTest {
                 ReservationTimeResponse.from(savedReservationTime),
                 ThemeResponse.from(savedTheme),
                 ReservationStatus.WAITING,
-                1L);
+                1);
         when(waitingService.findAllByMemberId(any(Long.class))).thenReturn(List.of(
                 response
         ));

@@ -59,6 +59,16 @@ public class WaitingService {
     }
 
     @Transactional
+    public void deleteOwnedWaiting(Long memberId, Long id) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));
+        if (!waiting.getMember().isSameId(memberId)) {
+            throw new IllegalArgumentException("[ERROR] 삭제할 권한이 없는 회원입니다.");
+        }
+        waitingRepository.deleteById(id);
+    }
+
+    @Transactional
     public void deleteById(Long id) {
         waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 대기를 찾을 수 없습니다."));

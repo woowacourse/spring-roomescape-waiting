@@ -157,4 +157,21 @@ class WaitingServiceTest {
                 .hasMessage("[ERROR] 이미 예약을 한 회원입니다. 예약을 취소 후 대기를 신청해 주세요.");
     }
 
+    @Test
+    void id가_다른_회원은_대기를_취소할_수_없다() {
+        //given
+        Member savedMember = new Member(1L, new Name("매트"), new Email("matt.kakao"), new Password("1234"), Role.MEMBER);
+        ReservationTime savedReservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme savedTheme = new Theme(1L, "test", "test", "test");
+        Waiting savedWaiting = new Waiting(1L, 예약날짜_내일, savedReservationTime, savedTheme,
+                savedMember);
+        when(waitingRepository.findById(any(Long.class))).thenReturn(Optional.of(savedWaiting));
+
+        //when - then
+        assertThatThrownBy(() ->
+                waitingService.deleteOwnedWaiting(2L, 1L))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("[ERROR] 삭제할 권한이 없는 회원입니다.");
+    }
+
 }

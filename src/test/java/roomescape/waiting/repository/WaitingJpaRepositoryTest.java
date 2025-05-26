@@ -60,8 +60,8 @@ public class WaitingJpaRepositoryTest {
                 member.getId());
 
         //then
-        assertThat(allWaitingWithRankByMemberId.getFirst().getRank()).isEqualTo(1);
-        assertThat(allWaitingWithRankByMemberId.get(1).getRank()).isEqualTo(2);
+        assertThat(allWaitingWithRankByMemberId.getFirst().getAdjustedRank()).isEqualTo(1);
+        assertThat(allWaitingWithRankByMemberId.get(1).getAdjustedRank()).isEqualTo(2);
     }
 
     @Test
@@ -103,8 +103,8 @@ public class WaitingJpaRepositoryTest {
         List<WaitingWithRank> allWaitingWithRankByMemberId = waitingRepository.findAllWithRank();
 
         //then
-        assertThat(allWaitingWithRankByMemberId.getFirst().getRank()).isEqualTo(1);
-        assertThat(allWaitingWithRankByMemberId.get(1).getRank()).isEqualTo(2);
+        assertThat(allWaitingWithRankByMemberId.getFirst().getAdjustedRank()).isEqualTo(1);
+        assertThat(allWaitingWithRankByMemberId.get(1).getAdjustedRank()).isEqualTo(2);
     }
 
     @Test

@@ -29,7 +29,7 @@ public class AdminWaitingApiController {
         return ResponseEntity.ok().body(reservationResponses);
     }
 
-    @PostMapping("{id}")
+    @PostMapping("{id}/approve")
     public ResponseEntity<ReservationResponse> approveWaiting(
             @PathVariable Long id
     ) {
@@ -44,6 +44,6 @@ public class AdminWaitingApiController {
             @PathVariable Long id
     ) {
         waitingService.deleteById(id);
-        return ResponseEntity.ok().build();
+        return ResponseEntity.noContent().build();
     }
 }

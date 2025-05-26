@@ -37,9 +37,10 @@ public class WaitingApiController {
 
     @DeleteMapping("{id}")
     public ResponseEntity<Void> deleteWaitingReservation(
+            @LoginMember MemberResponse memberResponse,
             @PathVariable Long id
     ) {
-        waitingService.deleteById(id);
+        waitingService.deleteOwnedWaiting(memberResponse.id(), id);
         return ResponseEntity.noContent().build();
     }
 }
