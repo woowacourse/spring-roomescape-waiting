@@ -79,7 +79,7 @@ class ReservationWaitingServiceTest {
                 savedTheme.getId()
         );
 
-        ReservationResponse response = reservationWaitingService.createReservation(1L, reservationRequest);
+        ReservationResponse response = reservationWaitingService.createReservationById(1L, reservationRequest);
         assertThat(response.id()).isEqualTo(1L);
         assertThat(response.member().getName()).isEqualTo(MATT.getName());
         assertThat(response.date()).isEqualTo(예약날짜_내일.getDate());
@@ -100,7 +100,7 @@ class ReservationWaitingServiceTest {
                 savedReservationTime.getId(),
                 savedTheme.getId()
         );
-        assertThatThrownBy(() -> reservationWaitingService.createReservation(MATT.getId(), request))
+        assertThatThrownBy(() -> reservationWaitingService.createReservationById(MATT.getId(), request))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 

@@ -5,6 +5,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
+import java.util.NoSuchElementException;
 import roomescape.member.domain.Member;
 
 @Entity
@@ -22,6 +23,7 @@ public class Waiting {
     }
 
     public Waiting(Long id, Reservation reservation, Member member) {
+        validateReservationNotNull(reservation);
         this.id = id;
         this.reservation = reservation;
         this.member = member;
@@ -33,6 +35,12 @@ public class Waiting {
 
     public static Waiting create(Reservation reservation, Member member) {
         return new Waiting(null, reservation, member);
+    }
+
+    private void validateReservationNotNull(Reservation reservation) {
+        if (reservation == null) {
+            throw new NoSuchElementException("[ERROR] 예약 정보를 찾지 못했습니다.");
+        }
     }
 
     public Long getId() {
