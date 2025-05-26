@@ -19,7 +19,9 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationFindFilteredRequest;
+import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
+import roomescape.reservation.entity.Waiting;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.WaitingRepository;
@@ -199,38 +201,57 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("예약을 삭제한다.")
-    void deleteReservation() {
-        // given
-        var member = memberRepository.save(new Member("테스트", "test@test.com", "password", RoleType.USER));
-        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme("테마1", "테마1 설명", "테마1 썸네일"));
-        var date = LocalDate.now().plusDays(1);
-        var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
-        var response = reservationService.createReservation(member.getId(), request);
-
-        // when
-        reservationService.deleteReservation(response.id());
-
-        // then
-        assertThat(reservationService.getAllReservations()).isEmpty();
-    }
-
-    @Test
-    @DisplayName("유저 예약 기록을 확인한다.")
+    @DisplayName("멤버의 예약과 대기 목록을 조회한다.")
     void getReservationsByMember() {
         // given
         var member = memberRepository.save(new Member("테스트", "test@test.com", "password", RoleType.USER));
         var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        var theme = themeRepository.save(new Theme("테마1", "테마1 설명", "테마1 썸네일"));
+        var theme1 = themeRepository.save(new Theme("테마1", "테마1 설명", "테마1 썸네일"));
+        var theme2 = themeRepository.save(new Theme("테마2", "테마2 설명", "테마2 썸네일"));
         var date = LocalDate.now().plusDays(1);
-        var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
+        var otherMember = memberRepository.save(new Member("크루", "other@email.com", "1234", RoleType.USER));
+        var waiting = new Waiting(date, time, theme1, member);
+        reservationRepository.save(new Reservation(date, time, theme1, otherMember));
+        waitingRepository.save(waiting);
+        var request = new ReservationCreateRequest(date, time.getId(), theme2.getId());
         reservationService.createReservation(member.getId(), request);
 
         // when
-        var response = reservationService.getReservationsByMember(member.getId());
+        var responses = reservationService.getReservationsByMember(member.getId());
 
         // then
-        assertThat(response).hasSize(1);
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).theme()).isEqualTo("테마2"),
+                () -> assertThat(responses.get(0).date()).isEqualTo(date),
+                () -> assertThat(responses.get(0).time()).isEqualTo(LocalTime.of(10, 0)),
+                () -> assertThat(responses.get(0).status()).isEqualTo("예약"),
+                () -> assertThat(responses.get(1).theme()).isEqualTo("테마1"),
+                () -> assertThat(responses.get(1).status()).contains("번째 예약대기")
+        );
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하고 대기 예약을 승인한다.")
+    void deleteReservationAndApproveWaiting() {
+        // given
+        var member = memberRepository.save(new Member("테스트", "test@test.com", "password", RoleType.USER));
+        var time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        var theme = themeRepository.save(new Theme("테마1", "테마1 설명", "테마1 썸네일"));
+        var date = LocalDate.now().plusDays(1);
+        var otherMember = memberRepository.save(new Member("크루", "other@email.com", "1234", RoleType.USER));
+        var reservation = reservationRepository.save(new Reservation(date, time, theme, otherMember));
+        var waiting = new Waiting(date, time, theme, member);
+        waitingRepository.save(waiting);
+
+        // when
+        reservationService.deleteReservation(reservation.getId());
+
+        // then
+        assertAll(
+                () -> assertThat(waitingRepository.findAll()).isEmpty(),
+                () -> assertThat(reservationRepository.findAll()).hasSize(1),
+                () -> assertThat(reservationRepository.findAll().get(0).getMember().getId()).isEqualTo(member.getId())
+        );
     }
 }
