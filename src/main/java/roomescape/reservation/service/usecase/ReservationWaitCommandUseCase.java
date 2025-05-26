@@ -1,7 +1,9 @@
 package roomescape.reservation.service.usecase;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.usecase.MemberQueryUseCase;
@@ -30,9 +32,12 @@ public class ReservationWaitCommandUseCase {
         validateReservationExists(createReservationServiceRequest);
         validateReservationWaitNotExistsForMember(createReservationServiceRequest);
 
+        final ReservationDate reservationDate = ReservationDate.from(createReservationServiceRequest.date());
         final ReservationTime reservationTime = reservationTimeQueryUseCase.get(
                 createReservationServiceRequest.timeId()
         );
+        validatePast(reservationDate, reservationTime);
+
         final Theme theme = themeQueryUseCase.get(createReservationServiceRequest.themeId());
         final Member member = memberQueryUseCase.get(createReservationServiceRequest.memberId());
 
@@ -67,6 +72,19 @@ public class ReservationWaitCommandUseCase {
                 createReservationServiceRequest.memberId()
         )) {
             throw new ConflictException("이미 해당 예약 대기를 한 사용자입니다.");
+        }
+    }
+
+    private void validatePast(final ReservationDate date, final ReservationTime time) {
+        final LocalDateTime now = LocalDateTime.now();
+        if (date.isAfter(now.toLocalDate())) {
+            return;
+        }
+        if (date.isBefore(now.toLocalDate())) {
+            throw new BadRequestException("지난 날짜는 예약할 수 없습니다.");
+        }
+        if (time.isBefore(now.toLocalTime())) {
+            throw new BadRequestException("이미 지난 시간에는 예약할 수 없습니다.");
         }
     }
 

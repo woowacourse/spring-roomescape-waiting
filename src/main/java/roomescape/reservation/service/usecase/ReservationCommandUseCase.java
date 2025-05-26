@@ -1,8 +1,10 @@
 package roomescape.reservation.service.usecase;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.usecase.MemberQueryUseCase;
@@ -34,11 +36,13 @@ public class ReservationCommandUseCase {
     public Reservation create(final CreateReservationServiceRequest createReservationServiceRequest) {
         validateReservationNotExists(createReservationServiceRequest);
 
+        final ReservationDate reservationDate = ReservationDate.from(createReservationServiceRequest.date());
         final ReservationTime reservationTime = reservationTimeQueryUseCase.get(
                 createReservationServiceRequest.timeId());
 
-        final Theme theme = themeQueryUseCase.get(createReservationServiceRequest.themeId());
+        validatePast(reservationDate, reservationTime);
 
+        final Theme theme = themeQueryUseCase.get(createReservationServiceRequest.themeId());
         final Member member = memberQueryUseCase.get(createReservationServiceRequest.memberId());
 
         return reservationRepository.save(
@@ -53,6 +57,19 @@ public class ReservationCommandUseCase {
                 createReservationServiceRequest.themeId())) {
 
             throw new ConflictException("추가하려는 예약이 이미 존재합니다.");
+        }
+    }
+
+    private void validatePast(final ReservationDate date, final ReservationTime time) {
+        final LocalDateTime now = LocalDateTime.now();
+        if (date.isAfter(now.toLocalDate())) {
+            return;
+        }
+        if (date.isBefore(now.toLocalDate())) {
+            throw new BadRequestException("지난 날짜는 예약할 수 없습니다.");
+        }
+        if (time.isBefore(now.toLocalTime())) {
+            throw new BadRequestException("이미 지난 시간에는 예약할 수 없습니다.");
         }
     }
 

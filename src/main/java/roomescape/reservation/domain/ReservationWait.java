@@ -52,7 +52,6 @@ public class ReservationWait {
             ReservationTime time,
             Theme theme
     ) {
-        Reservation.validatePast(date, time);
         final ReservationInfo info = ReservationInfo.of(member, date, time, theme);
         return of(null, info);
     }

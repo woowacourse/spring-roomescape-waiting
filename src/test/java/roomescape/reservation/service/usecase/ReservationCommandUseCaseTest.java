@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.BadRequestException;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.member.domain.Member;
@@ -79,7 +80,7 @@ class ReservationCommandUseCaseTest {
 
         final CreateReservationServiceRequest requestDto = new CreateReservationServiceRequest(
                 member.getId(),
-                LocalDate.of(2025, 8, 5),
+                LocalDate.MAX,
                 reservationTime.getId(),
                 theme.getId());
 
@@ -122,7 +123,7 @@ class ReservationCommandUseCaseTest {
         reservationCommandUseCase.create(
                 new CreateReservationServiceRequest(
                         member.getId(),
-                        LocalDate.of(2025, 8, 10),
+                        LocalDate.MAX,
                         reservationTime.getId(),
                         theme.getId()
                 )
@@ -132,11 +133,56 @@ class ReservationCommandUseCaseTest {
         assertThatThrownBy(() -> reservationCommandUseCase.create(
                 new CreateReservationServiceRequest(
                         member.getId(),
-                        LocalDate.of(2025, 8, 10),
+                        LocalDate.MAX,
                         reservationTime.getId(),
                         theme.getId())))
                 .isInstanceOf(ConflictException.class)
                 .hasMessage("추가하려는 예약이 이미 존재합니다.");
+    }
+
+    @DisplayName("과거 날짜와 시간에 대한 예약 생성은 불가능하다.")
+    @Test
+    void validatePast() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+
+        final Member member = memberRepository.save(Member.withoutId(
+                MemberName.from("호떡"),
+                MemberEmail.from("123@gmail.com"),
+                Role.MEMBER));
+
+        final LocalDate today = LocalDate.now();
+        final LocalDate yesterday = LocalDate.now().minusDays(1);
+        
+        final ReservationTime futureTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.MAX)
+        );
+        final ReservationTime pastTime = reservationTimeRepository.save(
+                ReservationTime.withoutId(LocalTime.MIN)
+        );
+
+        // when & then
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThatThrownBy(() -> reservationCommandUseCase.create(
+                    new CreateReservationServiceRequest(
+                            member.getId(),
+                            yesterday,
+                            futureTime.getId(),
+                            theme.getId()
+                    )
+            )).isInstanceOf(BadRequestException.class);
+            softAssertions.assertThatThrownBy(() -> reservationCommandUseCase.create(
+                    new CreateReservationServiceRequest(
+                            member.getId(),
+                            today,
+                            pastTime.getId(),
+                            theme.getId()
+                    )
+            )).isInstanceOf(BadRequestException.class);
+        });
     }
 
     @Test
