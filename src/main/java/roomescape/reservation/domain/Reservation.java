@@ -49,19 +49,6 @@ public class Reservation {
         }
     }
 
-    @Override
-    public boolean equals(final Object object) {
-        if (!(object instanceof final Reservation that)) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getInfo(), that.getInfo());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getInfo());
-    }
-
     public Long getId() {
         return id;
     }
@@ -72,5 +59,18 @@ public class Reservation {
 
     public ReservationInfo getInfo() {
         return info;
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Reservation that)) {
+            return false;
+        }
+        return Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }
