@@ -1,7 +1,9 @@
 package roomescape.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -119,6 +121,12 @@ public class ThemeApiTest {
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         Theme theme3 = themeRepository.findById(3L).get();
+
+        assertAll(
+                () -> assertThat(theme1.getName()).isEqualTo("테마1"),
+                () -> assertThat(theme2.getName()).isEqualTo("테마2"),
+                () -> assertThat(theme3.getName()).isEqualTo("테마3")
+        );
 
         reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme1));
         reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme1));
