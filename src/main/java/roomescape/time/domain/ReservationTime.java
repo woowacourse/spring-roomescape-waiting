@@ -5,7 +5,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -27,18 +26,5 @@ public class ReservationTime {
 
     public static ReservationTime open(LocalTime time) {
         return new ReservationTime(null, time);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof ReservationTime that)) {
-            return false;
-        }
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }
