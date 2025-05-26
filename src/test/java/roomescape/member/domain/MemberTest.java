@@ -13,6 +13,7 @@ class MemberTest {
         // given
         Long primaryKey = 1L;
         Member memberWithoutPrimaryKey = new Member(
+            null,
             "name",
             "email@email.com",
             MemberRole.USER,

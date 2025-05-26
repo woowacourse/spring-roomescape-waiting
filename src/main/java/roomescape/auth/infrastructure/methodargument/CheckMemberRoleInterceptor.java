@@ -2,13 +2,12 @@ package roomescape.auth.infrastructure.methodargument;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.infrastructure.AuthorizationPayload;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.MemberRole;
 
-@Component
 public class CheckMemberRoleInterceptor implements HandlerInterceptor {
 
     @Override
@@ -19,8 +18,7 @@ public class CheckMemberRoleInterceptor implements HandlerInterceptor {
             throw new UnauthorizedException("로그인 정보가 없습니다.");
         }
         if (!authorizationPayload.role().equals(MemberRole.ADMIN)) {
-            response.setStatus(403);
-            return false;
+            throw new ForbiddenException("관리자 권한이 필요합니다.");
         }
         return true;
     }

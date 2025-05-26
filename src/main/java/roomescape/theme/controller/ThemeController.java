@@ -2,7 +2,7 @@ package roomescape.theme.controller;
 
 import java.net.URI;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -16,14 +16,11 @@ import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.service.ThemeServiceFacade;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/themes")
 public class ThemeController {
-    private final ThemeServiceFacade themeService;
 
-    @Autowired
-    public ThemeController(ThemeServiceFacade themeService) {
-        this.themeService = themeService;
-    }
+    private final ThemeServiceFacade themeService;
 
     @PostMapping
     public ResponseEntity<ThemeResponse> create(@RequestBody ThemeCreateRequest themeCreateRequest) {
@@ -33,7 +30,7 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> read() {
+    public ResponseEntity<List<ThemeResponse>> findAll() {
         List<ThemeResponse> themes = themeService.findAll();
         return ResponseEntity.ok(themes);
     }
@@ -45,8 +42,8 @@ public class ThemeController {
     }
 
     @GetMapping("/lists")
-    public ResponseEntity<List<ThemeResponse>> readLists() {
-        List<ThemeResponse> listedTheme = themeService.findLimitedThemesByPopularDesc();
+    public ResponseEntity<List<ThemeResponse>> findPopular() {
+        List<ThemeResponse> listedTheme = themeService.findPopular();
         return ResponseEntity.ok(listedTheme);
     }
 }

@@ -8,11 +8,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import roomescape.auth.dto.request.MemberSignUpRequest;
-import roomescape.auth.dto.response.MemberSignUpResponse;
+import roomescape.auth.dto.request.MemberCreationRequest;
+import roomescape.auth.dto.response.MemberCreationUpResponse;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.member.dto.response.MemberNameSelectResponse;
+import roomescape.member.dto.response.MemberNameResponse;
 import roomescape.member.fixture.MemberFixture;
 
 @SpringBootTest
@@ -29,17 +29,17 @@ class MemberServiceFacadeTest {
 
         // given
         Member member = MemberFixture.createWithoutId(MemberRole.USER);
-        MemberSignUpRequest signUpRequest = new MemberSignUpRequest(
+        MemberCreationRequest signUpRequest = new MemberCreationRequest(
             member.getName(),
             member.getEmail(),
             member.getPassword()
         );
-        MemberSignUpResponse expected = new MemberSignUpResponse(member.getEmail(), true);
-        when(memberService.signup(signUpRequest))
+        MemberCreationUpResponse expected = new MemberCreationUpResponse(member.getEmail(), true);
+        when(memberService.create(signUpRequest))
             .thenReturn(expected);
 
         // when
-        MemberSignUpResponse actual = memberServiceFacade.signup(signUpRequest);
+        MemberCreationUpResponse actual = memberServiceFacade.create(signUpRequest);
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -51,15 +51,15 @@ class MemberServiceFacadeTest {
         // given
         Member member1 = MemberFixture.createWithoutId(MemberRole.USER);
         Member member2 = MemberFixture.createWithoutId(MemberRole.USER);
-        List<MemberNameSelectResponse> expected = List.of(
-            new MemberNameSelectResponse(member1.getId(), member1.getName()),
-            new MemberNameSelectResponse(member2.getId(), member2.getName())
+        List<MemberNameResponse> expected = List.of(
+            new MemberNameResponse(member1.getId(), member1.getName()),
+            new MemberNameResponse(member2.getId(), member2.getName())
         );
-        when(memberService.findMemberNames())
+        when(memberService.findNames())
             .thenReturn(expected);
 
         // when
-        List<MemberNameSelectResponse> actual = memberServiceFacade.findMemberNames();
+        List<MemberNameResponse> actual = memberServiceFacade.findNames();
 
         // then
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);

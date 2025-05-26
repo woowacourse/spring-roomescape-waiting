@@ -2,6 +2,7 @@ package roomescape.reservationtime.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
@@ -9,18 +10,14 @@ import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponseWithBookedStatus;
 
 @Service
+@AllArgsConstructor
 public class ReservationTimeServiceFacade {
+
     private final ReservationTimeService reservationTimeService;
     private final ReservationService reservationService;
 
-    public ReservationTimeServiceFacade(ReservationTimeService reservationTimeService,
-                                        ReservationService reservationService) {
-        this.reservationTimeService = reservationTimeService;
-        this.reservationService = reservationService;
-    }
-
     public ReservationTimeResponse createReservationTime(ReservationTimeCreateRequest request) {
-        return reservationTimeService.createReservationTime(request);
+        return reservationTimeService.create(request);
     }
 
     public List<ReservationTimeResponse> findAll() {
@@ -29,7 +26,7 @@ public class ReservationTimeServiceFacade {
 
     public void deleteReservationTimeById(Long id) {
         reservationService.validateReservationNonExistenceByTimeId(id);
-        reservationTimeService.deleteReservationTimeById(id);
+        reservationTimeService.deleteById(id);
     }
 
     public List<ReservationTimeResponseWithBookedStatus> findAvailableReservationTimesByDateAndThemeId(

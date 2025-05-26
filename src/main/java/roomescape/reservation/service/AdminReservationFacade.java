@@ -1,8 +1,8 @@
 package roomescape.reservation.service;
 
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
@@ -14,43 +14,35 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
 @Service
+@AllArgsConstructor
 public class AdminReservationFacade {
+
     private final ReservationService reservationService;
     private final MemberService memberService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
-    public AdminReservationFacade(ReservationService reservationService, MemberService memberService,
-                                  ReservationTimeService reservationTimeService, ThemeService themeService) {
-        this.reservationService = reservationService;
-        this.memberService = memberService;
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
-    }
-
     public ReservationResponse create(AdminReservationCreateRequest adminReservationCreateRequest) {
-        ReservationTime reservationTime = reservationTimeService.findById(adminReservationCreateRequest.timeId())
-            .orElseThrow(() -> new BadRequestException("올바른 예약 시간을 찾을 수 없습니다."));
-
-        Theme theme = themeService.findById(adminReservationCreateRequest.themeId())
-            .orElseThrow(() -> new BadRequestException("올바른 방탈출 테마가 없습니다."));
-
-        Member member = memberService.findExistingMemberById(adminReservationCreateRequest.memberId());
+        ReservationTime reservationTime = reservationTimeService.findByIdOrThrow(
+            adminReservationCreateRequest.timeId()
+        );
+        Theme theme = themeService.findByIdOrThrow(adminReservationCreateRequest.themeId());
+        Member member = memberService.findByIdOrThrow(adminReservationCreateRequest.memberId());
 
         List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
             adminReservationCreateRequest.date(),
             adminReservationCreateRequest.themeId()
         );
-        return reservationService.createReservation(
+        return reservationService.create(
             reservationTime,
+            adminReservationCreateRequest.date(),
             theme,
             member,
-            availableTimes,
-            adminReservationCreateRequest.toReservationCreateRequest()
+            availableTimes
         );
     }
 
-    public List<ReservationResponse> findByCondition(
+    public List<ReservationResponse> findAllByCondition(
         ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {
         return reservationService.findByCondition(reservationSearchConditionRequest);

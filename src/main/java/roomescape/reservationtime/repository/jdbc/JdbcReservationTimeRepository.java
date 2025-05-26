@@ -32,7 +32,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         Map<String, Object> parameters = Map.ofEntries(Map.entry("start_at", reservationTime.getStartAt()));
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
 
-        return ReservationTime.generateWithPrimaryKey(reservationTime, generatedKey);
+        return ReservationTime.createWithPrimaryKey(reservationTime, generatedKey);
     }
 
     @Override
@@ -69,7 +69,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservationTime> findByReservationDateAndThemeId(LocalDate localDate, Long themeId) {
+    public List<ReservationTime> findAllByDateAndThemeId(LocalDate localDate, Long themeId) {
         final String query = """
             SELECT id, start_at
             FROM reservation_time

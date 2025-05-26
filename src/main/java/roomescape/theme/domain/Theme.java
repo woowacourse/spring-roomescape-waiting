@@ -7,11 +7,17 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.util.Objects;
-import roomescape.exception.DomainValidationException;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import roomescape.exception.BadRequestException;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "theme")
 public class Theme {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -22,9 +28,6 @@ public class Theme {
     @Column
     private String thumbnail;
 
-    public Theme() {
-    }
-
     public Theme(Long id, String name, String description, String thumbnail) {
         validate(name);
         this.id = id;
@@ -33,56 +36,28 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    Theme(String name, String description, String thumbnail) {
-        validate(name);
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-    }
-
-    public static Theme generateWithPrimaryKey(Theme theme, Long newPrimaryKey) {
+    public static Theme createWithPrimaryKey(Theme theme, Long newPrimaryKey) {
         return new Theme(newPrimaryKey, theme.name, theme.description, theme.thumbnail);
     }
 
     private void validate(String name) {
         if (name == null || name.isBlank()) {
-            throw new DomainValidationException("테마 이름은 비워둘 수 없습니다.");
+            throw new BadRequestException("테마 이름은 비워둘 수 없습니다.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof Theme theme)) {
             return false;
         }
-        Theme theme = (Theme) o;
-        if (theme.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), theme.getId());
+        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name)
+            && Objects.equals(description, theme.description) && Objects.equals(thumbnail,
+            theme.thumbnail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hash(id, name, description, thumbnail);
     }
 }

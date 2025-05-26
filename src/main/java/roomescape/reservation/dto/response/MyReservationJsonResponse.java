@@ -72,4 +72,15 @@ public class MyReservationJsonResponse implements MyReservationResponse {
     public int hashCode() {
         return Objects.hash(id, themeName, date, time, status);
     }
+
+    @Override
+    public String toString() {
+        return "MyReservationJsonResponse{" +
+            "id=" + id +
+            ", themeName='" + themeName + '\'' +
+            ", date=" + date +
+            ", time=" + time +
+            ", status='" + status + '\'' +
+            '}';
+    }
 }

@@ -8,7 +8,8 @@ public record ThemeResponse(
     String description,
     String thumbnail
 ) {
-    public static ThemeResponse from(Theme theme) {
+
+    public static ThemeResponse fromTheme(Theme theme) {
         return new ThemeResponse(
             theme.getId(),
             theme.getName(),

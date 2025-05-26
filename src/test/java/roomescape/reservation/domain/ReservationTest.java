@@ -14,7 +14,7 @@ class ReservationTest {
         Reservation reservationWithoutPrimaryKey = ReservationFixture.createWithoutId();
 
         // when
-        Reservation reservation = Reservation.generateWithPrimaryKey(reservationWithoutPrimaryKey, primaryKey);
+        Reservation reservation = Reservation.createWithPrimaryKey(reservationWithoutPrimaryKey, primaryKey);
 
         // then
         assertThat(reservationWithoutPrimaryKey.getId()).isNull();

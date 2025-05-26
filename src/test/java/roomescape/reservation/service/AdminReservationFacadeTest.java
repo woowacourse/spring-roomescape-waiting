@@ -76,7 +76,8 @@ class AdminReservationFacadeTest {
             reservationDate,
             reservationTimeToReserve,
             theme,
-            member
+            member,
+            1
         );
 
         when(reservationTimeService.findById(reservationTimeToReserve.getId()))
@@ -85,7 +86,7 @@ class AdminReservationFacadeTest {
         when(themeService.findById(theme.getId()))
             .thenReturn(Optional.of(theme));
 
-        when(memberService.findExistingMemberById(member.getId()))
+        when(memberService.findByIdOrThrow(member.getId()))
             .thenReturn(member);
 
         when(reservationTimeService.findByReservationDateAndThemeId(
@@ -94,16 +95,16 @@ class AdminReservationFacadeTest {
             )
         ).thenReturn(availableTimes);
 
-        when(reservationService.createReservation(
+        when(reservationService.create(
                 reservationTimeToReserve,
                 theme,
                 member,
                 availableTimes,
                 request.toReservationCreateRequest()
             )
-        ).thenReturn(ReservationResponse.from(savedReservation));
+        ).thenReturn(ReservationResponse.fromReservation(savedReservation));
 
-        ReservationResponse expected = ReservationResponse.from(savedReservation);
+        ReservationResponse expected = ReservationResponse.fromReservation(savedReservation);
 
         // when
         ReservationResponse actual = adminReservationFacade.create(request);
@@ -121,7 +122,7 @@ class AdminReservationFacadeTest {
             .toList();
 
         List<ReservationResponse> expected = reservations.stream()
-            .map(ReservationResponse::from)
+            .map(ReservationResponse::fromReservation)
             .toList();
 
         long themeId = 1L;

@@ -3,19 +3,18 @@ package roomescape.reservationtime.repository.jpa;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @Repository
+@AllArgsConstructor
 @ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
 public class JpaReservationTimeRepositoryComposite implements ReservationTimeRepository {
-    private final JpaReservationTimeRepository jpaReservationTimeRepository;
 
-    public JpaReservationTimeRepositoryComposite(JpaReservationTimeRepository jpaReservationTimeRepository) {
-        this.jpaReservationTimeRepository = jpaReservationTimeRepository;
-    }
+    private final JpaReservationTimeRepository jpaReservationTimeRepository;
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
@@ -38,7 +37,7 @@ public class JpaReservationTimeRepositoryComposite implements ReservationTimeRep
     }
 
     @Override
-    public List<ReservationTime> findByReservationDateAndThemeId(LocalDate date, Long themeId) {
-        return jpaReservationTimeRepository.findAllByReservationDateAndThemeId(date, themeId);
+    public List<ReservationTime> findAllByDateAndThemeId(LocalDate date, Long themeId) {
+        return jpaReservationTimeRepository.findAllByDateAndThemeId(date, themeId);
     }
 }

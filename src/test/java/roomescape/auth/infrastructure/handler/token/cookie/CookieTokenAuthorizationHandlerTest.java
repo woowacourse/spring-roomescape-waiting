@@ -9,7 +9,6 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 
 @SpringBootTest
@@ -17,12 +16,9 @@ class CookieTokenAuthorizationHandlerTest {
 
     private static final String TOKEN_NAME = "token";
     private static final String TOKEN_VALUE = "testToken";
-
+    private final int maxAge = 3600;
     @Autowired
     private CookieTokenAuthorizationHandler cookieTokenAuthorizationHandler;
-
-    @Value("${jwt.validity-in-milliseconds}")
-    private int maxAge;
 
     @Test
     void 쿠키에서_인증_정보를_추출한다() {
@@ -33,7 +29,7 @@ class CookieTokenAuthorizationHandlerTest {
         when(httpServletRequest.getCookies()).thenReturn(new Cookie[]{cookieWithToken});
 
         // when
-        String token = cookieTokenAuthorizationHandler.getToken(httpServletRequest);
+        String token = cookieTokenAuthorizationHandler.getToken(httpServletRequest).get();
 
         // then
         assertThat(token).isEqualTo(TOKEN_VALUE);

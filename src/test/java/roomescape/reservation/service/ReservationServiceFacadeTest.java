@@ -79,7 +79,8 @@ class ReservationServiceFacadeTest {
             reservationDate,
             reservationTimeToReserve,
             theme,
-            member
+            member,
+            1
         );
 
         when(reservationTimeService.findById(reservationTimeToReserve.getId()))
@@ -88,7 +89,7 @@ class ReservationServiceFacadeTest {
         when(themeService.findById(theme.getId()))
             .thenReturn(Optional.of(theme));
 
-        when(memberService.findExistingMemberByPrincipal(memberPrincipal))
+        when(memberService.findByPrincipalOrThrow(memberPrincipal))
             .thenReturn(member);
 
         when(reservationTimeService.findByReservationDateAndThemeId(
@@ -97,16 +98,16 @@ class ReservationServiceFacadeTest {
             )
         ).thenReturn(availableTimes);
 
-        when(reservationService.createReservation(
+        when(reservationService.create(
                 reservationTimeToReserve,
                 theme,
                 member,
                 availableTimes,
                 request
             )
-        ).thenReturn(ReservationResponse.from(savedReservation));
+        ).thenReturn(ReservationResponse.fromReservation(savedReservation));
 
-        ReservationResponse expected = ReservationResponse.from(savedReservation);
+        ReservationResponse expected = ReservationResponse.fromReservation(savedReservation);
 
         // when
         ReservationResponse actual = reservationServiceFacade.createReservation(request, memberPrincipal);
@@ -122,7 +123,7 @@ class ReservationServiceFacadeTest {
         Reservation reservation1 = ReservationFixture.create();
         Reservation reservation2 = ReservationFixture.create();
         List<ReservationResponse> expected = Stream.of(reservation1, reservation2)
-            .map(ReservationResponse::from)
+            .map(ReservationResponse::fromReservation)
             .toList();
 
         when(reservationService.findAll()).thenReturn(expected);
@@ -138,11 +139,11 @@ class ReservationServiceFacadeTest {
     void 예약을_삭제할_수_있다() {
 
         // when
-        reservationServiceFacade.deleteReservationById(1L);
+        reservationServiceFacade.deleteById(1L);
 
         // then
         verify(reservationService)
-            .deleteReservationById(1L);
+            .deleteById(1L);
     }
 
     @Test
@@ -157,13 +158,13 @@ class ReservationServiceFacadeTest {
             .map(reservation -> MyReservationJsonResponse.fromReservationAndStatus(reservation, "예약"))
             .collect(Collectors.toList());
 
-        when(memberService.findExistingMemberByPrincipal(memberPrincipal))
+        when(memberService.findByPrincipalOrThrow(memberPrincipal))
             .thenReturn(member);
 
         when(reservationService.findAllByMember(member)).thenReturn(expected);
 
         // when
-        List<MyReservationResponse> actual = reservationServiceFacade.findMyReservations(memberPrincipal);
+        List<MyReservationResponse> actual = reservationServiceFacade.findMine(memberPrincipal);
 
         // then
         assertThat(actual).containsExactlyInAnyOrderElementsOf(expected);

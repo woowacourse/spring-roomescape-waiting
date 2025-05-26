@@ -18,6 +18,7 @@ public class ReservationTimeFixture {
     public static ReservationTime createWithoutId() {
         long id = identifier.getAndIncrement();
         return new ReservationTime(
+            null,
             NOW.plusSeconds(id)
         );
     }

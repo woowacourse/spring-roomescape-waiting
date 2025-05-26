@@ -4,6 +4,7 @@ import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.infrastructure.handler.token.TokenAuthorizationHandler;
@@ -21,15 +22,15 @@ public class CookieTokenAuthorizationHandler extends TokenAuthorizationHandler {
     }
 
     @Override
-    public String getToken(HttpServletRequest request) {
+    public Optional<String> getToken(HttpServletRequest request) {
         Cookie[] cookies = request.getCookies();
         if (cookies == null) {
-            return null;
+            return Optional.empty();
         }
-        return Arrays.stream(cookies).filter(cookie -> cookie.getName().equals(TOKEN_NAME))
+        return Arrays.stream(cookies)
+            .filter(cookie -> cookie.getName().equals(TOKEN_NAME))
             .map(Cookie::getValue)
-            .findFirst()
-            .orElse(null);
+            .findFirst();
     }
 
     @Override

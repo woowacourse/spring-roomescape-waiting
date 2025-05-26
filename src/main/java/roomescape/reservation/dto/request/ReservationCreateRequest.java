@@ -13,4 +13,5 @@ public record ReservationCreateRequest(
     @NotNull(message = "예약 테마가 올바르지 않습니다")
     Long themeId
 ) {
+
 }

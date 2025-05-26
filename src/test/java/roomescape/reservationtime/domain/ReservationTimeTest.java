@@ -15,7 +15,7 @@ class ReservationTimeTest {
         Long primaryKey = 1L;
 
         // when
-        ReservationTime reservationTime = ReservationTime.generateWithPrimaryKey(reservationTimeWithoutId, primaryKey);
+        ReservationTime reservationTime = ReservationTime.createWithPrimaryKey(reservationTimeWithoutId, primaryKey);
 
         // then
         assertAll(

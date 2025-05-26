@@ -3,6 +3,7 @@ package roomescape.reservation.repository.jpa;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import lombok.AllArgsConstructor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
@@ -12,13 +13,11 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Repository
+@AllArgsConstructor
 @ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
 public class JpaReservationRepositoryComposite implements ReservationRepository {
-    private final JpaReservationRepository jpaReservationRepository;
 
-    public JpaReservationRepositoryComposite(JpaReservationRepository jpaReservationRepository) {
-        this.jpaReservationRepository = jpaReservationRepository;
-    }
+    private final JpaReservationRepository jpaReservationRepository;
 
     @Override
     public Reservation save(Reservation reservation) {
@@ -61,16 +60,16 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     }
 
     @Override
-    public Optional<Reservation> findByLastPriorityByDateAndTimeAndTheme(
+    public Optional<Reservation> findByLowestPriorityByDateAndTimeAndTheme(
         LocalDate date,
         ReservationTime time,
         Theme theme
     ) {
-        return jpaReservationRepository.findByLastPriorityByDateAndTimeAndTheme(date, time, theme);
+        return jpaReservationRepository.findByLowestPriorityByDateAndTimeAndTheme(date, time, theme);
     }
 
     @Override
-    public long findOrder(Reservation reservation) {
+    public long findWaitingOrder(Reservation reservation) {
         return jpaReservationRepository.findOrder(
             reservation.getDate(),
             reservation.getTime(),

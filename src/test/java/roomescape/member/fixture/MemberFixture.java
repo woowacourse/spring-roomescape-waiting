@@ -23,6 +23,7 @@ public class MemberFixture {
     public static Member createWithoutId(MemberRole role) {
         long id = identifier.getAndIncrement();
         return new Member(
+            null,
             "testUser" + id,
             id + "testEmail@naver.com",
             role,

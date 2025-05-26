@@ -76,6 +76,11 @@ public class JdbcMemberRepository implements MemberRepository {
     }
 
     @Override
+    public boolean existsByEmail(String email) {
+        return false;
+    }
+
+    @Override
     public List<Member> findAll() {
         String query = "SELECT id, name, email, role, password FROM member";
         return jdbcTemplate.query(
@@ -104,5 +109,23 @@ public class JdbcMemberRepository implements MemberRepository {
         } catch (DataAccessException exception) {
             return Optional.empty();
         }
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcMemberRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public Optional<Member> findByEmailAndPassword(String email, String password) {
+        return Optional.empty();
+    }
+
+    @Override
+    public boolean existsById(Long id) {
+        return false;
+    }
+
+    @Override
+    public boolean existsByName(String name) {
+        return false;
     }
 }

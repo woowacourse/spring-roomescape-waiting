@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,13 +19,11 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.AdminReservationFacade;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
-    private final AdminReservationFacade adminReservationService;
 
-    public AdminReservationController(AdminReservationFacade adminReservationService) {
-        this.adminReservationService = adminReservationService;
-    }
+    private final AdminReservationFacade adminReservationService;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
@@ -34,17 +33,17 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> readLists(
+    public ResponseEntity<List<ReservationResponse>> findAll(
         @ModelAttribute ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {
-        List<ReservationResponse> reservations = adminReservationService.findByCondition(
+        List<ReservationResponse> reservations = adminReservationService.findAllByCondition(
             reservationSearchConditionRequest
         );
         return ResponseEntity.ok(reservations);
     }
 
     @GetMapping("/waitings")
-    public ResponseEntity<List<ReservationResponse>> readWaitingLists() {
+    public ResponseEntity<List<ReservationResponse>> findAllWaitings() {
         List<ReservationResponse> waitingReservations = adminReservationService.findHighestPriorityWaitings();
         return ResponseEntity.ok(waitingReservations);
     }

@@ -25,6 +25,7 @@ public class ReservationFixture {
     public static Reservation createWithoutId() {
         long id = identifier.getAndIncrement();
         return new Reservation(
+            null,
             LocalDate.now(),
             ReservationTimeFixture.create(),
             ThemeFixture.create(),

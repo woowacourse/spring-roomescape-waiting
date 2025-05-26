@@ -19,5 +19,5 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
                 ORDER BY COUNT(r) DESC
             )
         """)
-    List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum);
+    List<Theme> findTopReservedThemesInPeriod(LocalDate from, LocalDate to, int size);
 }

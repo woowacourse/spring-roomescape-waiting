@@ -1,27 +1,23 @@
 package roomescape.member.service;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.auth.dto.request.MemberSignUpRequest;
-import roomescape.auth.dto.response.MemberSignUpResponse;
-import roomescape.member.dto.response.MemberNameSelectResponse;
+import roomescape.auth.dto.request.MemberCreationRequest;
+import roomescape.auth.dto.response.MemberCreationUpResponse;
+import roomescape.member.dto.response.MemberNameResponse;
 
 @Service
+@AllArgsConstructor
 public class MemberServiceFacade {
 
     private final MemberService memberService;
 
-    @Autowired
-    public MemberServiceFacade(MemberService memberService) {
-        this.memberService = memberService;
+    public MemberCreationUpResponse create(MemberCreationRequest request) {
+        return memberService.create(request);
     }
 
-    public MemberSignUpResponse signup(MemberSignUpRequest request) {
-        return memberService.signup(request);
-    }
-
-    public List<MemberNameSelectResponse> findMemberNames() {
-        return memberService.findMemberNames();
+    public List<MemberNameResponse> findNames() {
+        return memberService.findNames();
     }
 }

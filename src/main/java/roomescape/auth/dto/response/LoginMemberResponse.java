@@ -7,6 +7,7 @@ public record LoginMemberResponse(
     String name,
     String email
 ) {
+
     public static LoginMemberResponse from(Member member) {
         return new LoginMemberResponse(member.getId(), member.getName(), member.getEmail());
     }

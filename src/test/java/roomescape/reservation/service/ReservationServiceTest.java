@@ -64,7 +64,8 @@ class ReservationServiceTest {
             theme.getId()
         );
 
-        Reservation reservationWillBeSaved = reservationCreateRequest.toReservation(
+        Reservation reservationWillBeSaved = Reservation.createFirstWaiting(
+            reservationCreateRequest.date(),
             reservationTimeToReserve,
             theme,
             member
@@ -75,14 +76,15 @@ class ReservationServiceTest {
             reservationDate,
             reservationTimeToReserve,
             theme,
-            member
+            member,
+            1
         );
 
         when(reservationRepository.save(reservationWillBeSaved))
             .thenReturn(savedReservation);
 
         // when
-        ReservationResponse actual = reservationService.createReservation(
+        ReservationResponse actual = reservationService.create(
             reservationTimeToReserve,
             theme,
             member,
@@ -90,7 +92,7 @@ class ReservationServiceTest {
             reservationCreateRequest
         );
 
-        ReservationResponse expected = ReservationResponse.from(savedReservation);
+        ReservationResponse expected = ReservationResponse.fromReservation(savedReservation);
 
         // then
         assertThat(actual).isEqualTo(expected);
@@ -105,7 +107,7 @@ class ReservationServiceTest {
             .toList();
 
         List<ReservationResponse> expected = reservations.stream()
-            .map(ReservationResponse::from)
+            .map(ReservationResponse::fromReservation)
             .toList();
 
         when(reservationRepository.findAll())
@@ -127,7 +129,7 @@ class ReservationServiceTest {
             .toList();
 
         List<ReservationResponse> expected = reservations.stream()
-            .map(ReservationResponse::from)
+            .map(ReservationResponse::fromReservation)
             .toList();
 
         long themeId = 1L;
@@ -164,7 +166,7 @@ class ReservationServiceTest {
         Reservation reservation = ReservationFixture.create();
 
         // when
-        reservationService.deleteReservationById(reservation.getId());
+        reservationService.deleteById(reservation.getId());
 
         // then
         verify(reservationRepository).deleteById(reservation.getId());
@@ -193,7 +195,7 @@ class ReservationServiceTest {
             .mapToObj(i -> ReservationFixture.create())
             .toList();
         List<MyReservationResponse> expected = reservations.stream()
-            .map(reservation -> MyReservationJsonResponse.fromReservationAndStatus(reservation, "예약"))
+            .map(reservation -> MyReservationJsonResponse.fromReservationAndStatus(reservation, "0번째 예약대기"))
             .collect(Collectors.toList());
 
         when(reservationRepository.findAllByMember(member))

@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -19,13 +20,11 @@ import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationServiceFacade;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/reservations")
 public class ReservationController {
-    private final ReservationServiceFacade reservationService;
 
-    public ReservationController(ReservationServiceFacade reservationService) {
-        this.reservationService = reservationService;
-    }
+    private final ReservationServiceFacade reservationService;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
@@ -52,16 +51,16 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> read() {
+    public ResponseEntity<List<ReservationResponse>> findAll() {
         List<ReservationResponse> responses = reservationService.findAll();
         return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<MyReservationResponse>> readMyReservations(
+    public ResponseEntity<List<MyReservationResponse>> findMyReservation(
         @AuthorizedMember MemberPrincipal memberPrincipal
     ) {
-        List<MyReservationResponse> responses = reservationService.findMyReservations(memberPrincipal);
+        List<MyReservationResponse> responses = reservationService.findMine(memberPrincipal);
         return ResponseEntity.ok(responses);
     }
 
@@ -76,7 +75,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationService.deleteReservationById(id);
+        reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 }

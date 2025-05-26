@@ -6,6 +6,7 @@ import java.util.Optional;
 import roomescape.theme.domain.Theme;
 
 public interface ThemeRepository {
+
     Theme save(Theme theme);
 
     List<Theme> findAll();
@@ -14,5 +15,5 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(Long id);
 
-    List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum);
+    List<Theme> findTopReservedThemesInPeriod(LocalDate from, LocalDate to, int size);
 }

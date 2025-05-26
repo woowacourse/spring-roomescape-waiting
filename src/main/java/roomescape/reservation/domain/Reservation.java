@@ -12,7 +12,12 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.exception.DomainValidationException;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.ToString;
+import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -24,9 +29,14 @@ import roomescape.theme.domain.Theme;
         columnNames = {"date", "time_id", "theme_id", "priority"}
     )
 )
+@Getter
+@ToString
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 public class Reservation {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
 
     @ManyToOne
@@ -47,25 +57,14 @@ public class Reservation {
     @Embedded
     private Priority priority;
 
-    protected Reservation() {
-    }
-
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, Priority priority) {
+    private Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, Priority priority) {
         validate(date, time, theme, member);
+        this.id = null;
         this.member = member;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.priority = priority;
-    }
-
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validate(date, time, theme, member);
-        this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.priority = Priority.first();
     }
 
     public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member, Integer priority) {
@@ -75,36 +74,30 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.priority = new Priority(priority);
+        this.priority = Priority.valueOf(priority);
     }
 
-    Reservation(LocalDate date, ReservationTime time, Theme theme, Member member, Integer priority) {
-        validate(date, time, theme, member);
-        this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.priority = new Priority(priority);
-    }
-
-    public static Reservation first(LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public static Reservation createFirstWaiting(LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validatePast(date);
         return new Reservation(date, time, theme, member, Priority.first());
     }
 
-    public static Reservation makeWaiting(
+    public static Reservation makeNextWaiting(
         Reservation reservation,
         Member member
     ) {
+        validatePast(reservation.date);
         return new Reservation(
             reservation.date,
             reservation.time,
             reservation.theme,
             member,
-            reservation.priority.getValue() + 1
+            Priority.next(reservation.priority)
         );
     }
 
-    public static Reservation generateWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
+    public static Reservation createWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
+        validatePast(reservation.date);
         return new Reservation(
             newPrimaryKey,
             reservation.date,
@@ -115,9 +108,15 @@ public class Reservation {
         );
     }
 
+    private static void validatePast(LocalDate date) {
+        if (date.isBefore(LocalDate.now())) {
+            throw new BadRequestException("예약 날짜는 과거일 수 없습니다.");
+        }
+    }
+
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
         if (date == null || time == null || theme == null || member == null) {
-            throw new DomainValidationException("예약 정보가 비어있습니다.");
+            throw new BadRequestException("예약 정보가 비어있습니다.");
         }
     }
 
@@ -129,28 +128,8 @@ public class Reservation {
         return !priority.isHighest();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
-    }
-
-    public Integer getPriority() {
+    public long getPriority() {
         return priority.getValue();
-    }
-
-    public Member getMember() {
-        return member;
     }
 
     @Override

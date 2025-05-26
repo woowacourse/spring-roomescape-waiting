@@ -25,7 +25,7 @@ class AuthServiceTest {
         LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
 
         // when
-        AuthorizationPrincipal authorizationPrincipal = authService.login(member, request);
+        AuthorizationPrincipal authorizationPrincipal = authService.createMemberPrincipal(member, request);
 
         // then
         assertThat(authorizationPrincipal).isNotNull();

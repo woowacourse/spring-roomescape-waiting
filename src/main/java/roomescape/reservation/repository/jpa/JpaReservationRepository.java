@@ -52,7 +52,7 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
                     AND r2.theme = :theme
               )
         """)
-    Optional<Reservation> findByLastPriorityByDateAndTimeAndTheme(
+    Optional<Reservation> findByLowestPriorityByDateAndTimeAndTheme(
         LocalDate date,
         ReservationTime time,
         Theme theme

@@ -3,26 +3,36 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
 import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.exception.BadRequestException;
 
+@Getter
 @Embeddable
-public class Priority implements Comparable<Priority> {
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+class Priority {
 
     private static final Priority HIGHEST = new Priority(0);
 
     @Column(name = "priority", nullable = false)
     private Integer value;
 
-    protected Priority() {
-    }
-
-    Priority(Integer value) {
+    private Priority(Integer value) {
         validate(value);
         this.value = value;
     }
 
+    static Priority valueOf(Integer value) {
+        return new Priority(value);
+    }
+
     static Priority first() {
         return new Priority(1);
+    }
+
+    static Priority next(Priority current) {
+        return new Priority(current.value + 1);
     }
 
     private void validate(Integer value) {
@@ -37,10 +47,6 @@ public class Priority implements Comparable<Priority> {
 
     public boolean isHighest() {
         return this.equals(HIGHEST);
-    }
-
-    public Integer getValue() {
-        return value;
     }
 
     @Override
@@ -61,10 +67,5 @@ public class Priority implements Comparable<Priority> {
         return "Priority{" +
             "value=" + value +
             '}';
-    }
-
-    @Override
-    public int compareTo(Priority o) {
-        return value.compareTo(o.value);
     }
 }

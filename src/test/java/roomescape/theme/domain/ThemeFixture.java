@@ -18,6 +18,7 @@ public class ThemeFixture {
     public static Theme createWithoutId() {
         long id = identifier.getAndIncrement();
         return new Theme(
+            null,
             "testTheme" + id,
             "testDescription" + id,
             "testImage" + id

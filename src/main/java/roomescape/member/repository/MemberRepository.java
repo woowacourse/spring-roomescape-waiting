@@ -5,13 +5,22 @@ import java.util.Optional;
 import roomescape.member.domain.Member;
 
 public interface MemberRepository {
+
     Member save(Member member);
 
     Optional<Member> findById(Long id);
+
+    boolean existsByEmail(String email);
 
     Optional<Member> findByEmail(String email);
 
     List<Member> findAll();
 
     Optional<Member> findByName(String name);
+
+    Optional<Member> findByEmailAndPassword(String email, String password);
+
+    boolean existsById(Long id);
+
+    boolean existsByName(String name);
 }

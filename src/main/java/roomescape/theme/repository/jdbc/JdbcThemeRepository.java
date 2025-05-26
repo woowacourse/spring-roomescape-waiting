@@ -37,7 +37,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         );
 
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return Theme.generateWithPrimaryKey(theme, id);
+        return Theme.createWithPrimaryKey(theme, id);
     }
 
     @Override
@@ -52,7 +52,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum) {
+    public List<Theme> findTopReservedThemesInPeriod(LocalDate from, LocalDate to, int size) {
         final String query = """
             SELECT t.id, t.name, t.description, t.thumbnail, rc.reservation_count
             FROM (
@@ -74,7 +74,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 resultSet.getString("description"),
                 resultSet.getString("thumbnail")
             ),
-            fromDate, toDate, listNum
+            from, to, size
         );
 
         return listedTheme;
