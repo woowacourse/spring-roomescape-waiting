@@ -67,6 +67,7 @@ public class ThemeApiTest {
         themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
         themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
         themeRepository.save(Theme.createWithoutId("theme3", "desc", "thumb3"));
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -81,6 +82,7 @@ public class ThemeApiTest {
         // given
         themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
         Theme savedTheme = themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -101,6 +103,7 @@ public class ThemeApiTest {
         ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
         Member member = memberRepository.save(new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER));
         reservationRepository.save(Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme));
+        
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -109,7 +112,6 @@ public class ThemeApiTest {
                 .statusCode(400)
                 .body("message", equalTo("예약이 존재합니다."));
     }
-
 
     @Test
     @Sql(value = "/sql/data.sql")
