@@ -12,7 +12,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
-import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
@@ -31,21 +30,19 @@ import java.util.Optional;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberService memberService;
     private final CurrentTimeService currentTimeService;
-    private final WaitingRepository waitingRepository;
-    private final MemberRepository memberRepository;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationTimeService reservationTimeService, ThemeService themeService, MemberService memberService, CurrentTimeService currentTimeService, WaitingRepository waitingRepository, MemberRepository memberRepository) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationTimeService reservationTimeService, ThemeService themeService, MemberService memberService, CurrentTimeService currentTimeService, WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.memberService = memberService;
         this.currentTimeService = currentTimeService;
         this.waitingRepository = waitingRepository;
-        this.memberRepository = memberRepository;
     }
 
     public List<ReservationResponse> getReservations() {
@@ -56,7 +53,6 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(ReservationCreateRequest request, LoginMember loginMember) {
-        validateDuplicateReservation(request.date(), request.themeId(), request.timeId(), loginMember.id());
         ReservationDate reservationDate = new ReservationDate(request.date());
         Long timeId = request.timeId();
         Long themeId = request.themeId();
@@ -133,14 +129,7 @@ public class ReservationService {
 
     private void validateExistsReservation(ReservationDate reservationDate, ReservationTime time, Theme theme) {
         if (reservationRepository.existsByDateAndTimeAndTheme(reservationDate.getDate(), time, theme)) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약이 찼습니다.");
-        }
-    }
-
-    private void validateDuplicateReservation(LocalDate date, Long themeId, Long timeId, Long memberId) {
-        boolean isAlreadyReserved = reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
-        if (isAlreadyReserved) {
-            throw new DuplicateReservationException("[ERROR] 이미 예약을 요청한 상태입니다.");
+            throw new DuplicateReservationException("[ERROR] 이미 예약이 찼습니다.");
         }
     }
 

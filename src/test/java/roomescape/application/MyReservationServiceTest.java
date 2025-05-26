@@ -69,7 +69,7 @@ class MyReservationServiceTest extends BaseTest {
         Theme theme = themeDbFixture.공포();
         Member member = memberDbFixture.한스_사용자();
 
-        Waiting waiting = waitingDbFixture.예약_대기_한스_25_4_22_10시_공포(member, reservationTime, theme);
+        Waiting waiting = waitingDbFixture.예약_대기_제임스_25_4_22_10시_공포(member, reservationTime, theme);
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
         List<MyReservationWithWaitingResponse> myReservationsWithWaitings = myReservationService.getMyReservationsWithWaitings(loginMember);

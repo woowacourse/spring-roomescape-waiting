@@ -2,6 +2,9 @@ package roomescape.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
+import roomescape.domain.Member;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.presentation.dto.response.WaitingWithRank;
 
@@ -33,7 +36,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, Long themeId, Long timeId, Long memberId);
+    boolean existsByDateAndThemeAndTimeAndMember(LocalDate date, Theme theme, ReservationTime time, Member member);
 
     Optional<Waiting> findFirstByDateAndThemeIdAndTimeIdOrderByCreatedAtAsc(LocalDate date, Long themeId, Long timeId);
 }

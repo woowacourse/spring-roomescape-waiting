@@ -35,10 +35,11 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest, LoginMember loginMember) {
-        validateDuplicateWaiting(waitingRequest.date(), waitingRequest.themeId(), waitingRequest.timeId(), loginMember.id());
         Member member = memberService.findMemberById(loginMember.id());
         Theme theme = themeService.findThemeById(waitingRequest.themeId());
         ReservationTime reservationTime = timeService.findReservationTimeById(waitingRequest.timeId());
+
+        validateDuplicateWaiting(waitingRequest.date(), theme, reservationTime, member);
 
         Waiting waiting = Waiting.from(waitingRequest.date(), member, theme, reservationTime);
         Waiting savedWaiting = waitingRepository.save(waiting);
@@ -67,8 +68,8 @@ public class WaitingService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기를 찾을 수 없습니다. : " + id));
     }
 
-    private void validateDuplicateWaiting(LocalDate date, Long themeId, Long timeId, Long memberId) {
-        boolean isAlreadyWaited = waitingRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(date, themeId, timeId, memberId);
+    private void validateDuplicateWaiting(LocalDate date, Theme theme, ReservationTime time, Member member) {
+        boolean isAlreadyWaited = waitingRepository.existsByDateAndThemeAndTimeAndMember(date, theme, time, member);
         if (isAlreadyWaited) {
             throw new DuplicateWaitingException("[ERROR] 이미 예약 대기를 요청한 상태입니다.");
         }

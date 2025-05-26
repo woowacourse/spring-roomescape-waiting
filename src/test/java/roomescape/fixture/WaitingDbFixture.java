@@ -19,13 +19,13 @@ public class WaitingDbFixture {
         this.waitingRepository = waitingRepository;
     }
 
-    public Waiting 예약_대기_한스_25_4_22_10시_공포(Member member, ReservationTime reservationTime, Theme theme) {
+    public Waiting 예약_대기_제임스_25_4_22_10시_공포(Member member, ReservationTime reservationTime, Theme theme) {
         LocalDate date = ReservationDateFixture.예약날짜_25_4_22.getDate();
 
         return waitingRepository.save(Waiting.from(date, member, theme, reservationTime));
     }
 
-    public Waiting 예약_대기_생성_한스(Member member, ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
+    public Waiting 예약_대기_생성_제임스(Member member, ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         LocalDate date = reservationDate.getDate();
 
         return waitingRepository.save(Waiting.from(date, member, theme, reservationTime));
