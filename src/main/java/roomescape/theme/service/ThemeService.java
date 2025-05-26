@@ -36,8 +36,9 @@ public class ThemeService {
     }
 
     public List<PopularThemeResponse> findAllPopular() {
-        final LocalDate startDate = java.time.LocalDate.now(clock).minusDays(7);
-        final LocalDate endDate = LocalDate.now(clock).minusDays(1);
+        final LocalDate nowDate = LocalDate.now(clock);
+        final LocalDate startDate = nowDate.minusDays(7);
+        final LocalDate endDate = nowDate.minusDays(1);
         return themeRepository.findAllPopular(startDate, endDate)
                 .stream()
                 .map(PopularThemeResponse::new)
