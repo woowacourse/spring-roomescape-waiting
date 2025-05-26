@@ -39,7 +39,7 @@ public class ReservationController {
         return new ResponseEntity<>(response, HttpStatus.CREATED);
     }
 
-    @PostMapping("/waiting")
+    @PostMapping("/waitings")
     public ResponseEntity<ReservationResponse> createWaiting(
         @RequestBody @Valid ReservationCreateRequest reservationCreateRequest,
         @AuthorizedMember MemberPrincipal memberPrincipal
@@ -65,8 +65,8 @@ public class ReservationController {
         return ResponseEntity.ok(responses);
     }
 
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteMyReservation(
+    @DeleteMapping("/{id}/waitings")
+    public ResponseEntity<Void> deleteWaiting(
         @PathVariable Long id,
         @AuthorizedMember MemberPrincipal memberPrincipal
     ) {
