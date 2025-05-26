@@ -7,6 +7,7 @@ import static roomescape.testFixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -78,5 +79,85 @@ class ReservationTest {
 
         // then
         assertThat(duplicated).isFalse();
+    }
+
+    @DisplayName("예약을 삭제 상태로 변경시킬 수 있다")
+    @Test
+    void changeReservedReservation() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.RESERVED)
+        );
+
+        // when
+        reservation.cancel();
+
+        // then
+        assertThat(reservation.getStatus().getStatus()).isEqualTo(ReservationStatus.CANCELED);
+    }
+
+    @DisplayName("대기중인 예약을 예약된 상태로 변경시킬 수 있다")
+    @Test
+    void changeCanceledReservation() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.WAITING)
+        );
+
+        // when
+        reservation.reserve();
+
+        // then
+        assertThat(reservation.getStatus().getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @DisplayName("예약 대기중일 때 대기중임을 확인한다")
+    @Test
+    void isWaiting() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.WAITING)
+        );
+
+        // when
+        boolean waiting = reservation.isWaiting();
+
+        // then
+        Assertions.assertThat(waiting).isTrue();
+    }
+
+    @DisplayName("예약 대기중이 아닐 때 대기중이 아을 확인한다")
+    @Test
+    void isNotWaiting() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.RESERVED)
+        );
+
+        // when
+        boolean waiting = reservation.isWaiting();
+
+        // then
+        Assertions.assertThat(waiting).isFalse();
     }
 }
