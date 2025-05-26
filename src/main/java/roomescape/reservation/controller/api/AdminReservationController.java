@@ -15,7 +15,7 @@ public class AdminReservationController {
 
     private final ReservationService reservationService;
 
-    private AdminReservationController(final ReservationService reservationService) {
+    public AdminReservationController(final ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
@@ -30,7 +30,7 @@ public class AdminReservationController {
                         member,
                         request.date(),
                         request.themeId(),
-                        request.themeId()
+                        request.timeId()
                 )
         );
     }
