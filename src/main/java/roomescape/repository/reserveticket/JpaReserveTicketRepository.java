@@ -9,7 +9,12 @@ import roomescape.domain.reserveticket.ReserveTicket;
 
 public interface JpaReserveTicketRepository extends JpaRepository<ReserveTicket, Long> {
 
-    @Query("SELECT rm FROM ReserveTicket rm WHERE rm.member.id = :memberId")
+    @Query("""
+        select rt from ReserveTicket rt
+        join fetch rt.reservation
+        join fetch rt.member
+        where rt.member.id = :memberId
+    """)
     @Transactional(readOnly = true)
     List<ReserveTicket> findAllByMemberId(Long memberId);
 }

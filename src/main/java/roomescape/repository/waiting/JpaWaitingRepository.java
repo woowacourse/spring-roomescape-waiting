@@ -15,6 +15,14 @@ import java.util.List;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
 
+    @Query("""
+        select w from Waiting w
+        join fetch w.time
+        join fetch w.theme
+        join fetch w.member
+        where w.date = :date and w.theme.id = :themeId
+    """)
+    @Transactional(readOnly = true)
     List<Waiting> findByDateAndThemeId(LocalDate date, Long themeId);
 
     @Query("SELECT new roomescape.domain.waiting.WaitingWithRank(" +
