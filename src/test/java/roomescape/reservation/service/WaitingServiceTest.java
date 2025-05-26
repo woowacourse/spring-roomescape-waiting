@@ -16,8 +16,6 @@ import roomescape.fixture.FakeWaitingRepositoryFixture;
 import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.repository.FakeTokenProvider;
-import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.NameResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
@@ -38,7 +36,7 @@ class WaitingServiceTest {
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
     private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository, themeRepository, memberRepository);
     private final WaitingRepository waitingRepository = FakeWaitingRepositoryFixture.create();
-    private final WaitingService waitingService = new WaitingService(waitingRepository, reservationChecker, new FakeTokenProvider());
+    private final WaitingService waitingService = new WaitingService(waitingRepository, reservationChecker);
 
     @Nested
     @DisplayName("예약대기 조회")
@@ -61,27 +59,6 @@ class WaitingServiceTest {
                             .containsExactly(new ThemeResponse(1L, "우테코", "방탈출", "https://")),
                     () -> assertThat(responses).extracting("time")
                             .containsExactly(new ReservationTimeResponse(1L, LocalTime.of(10, 0)))
-            );
-        }
-
-        @DisplayName("주어진 사용자 토큰으로 특정 멤버 id의 Waiting을 조회할 수 있다")
-        @Test
-        void findAllMemberWaitingsTest() {
-            // given
-            String token = "test";
-
-            // when
-            List<MemberReservationResponse> responses = waitingService.findAllMemberWaitings(token);
-
-            // then
-            assertAll(
-                    () -> assertThat(responses).hasSize(1),
-                    () -> assertThat(responses).extracting("theme")
-                            .containsExactly("우테코"),
-                    () -> assertThat(responses).extracting("time")
-                            .containsExactly(LocalTime.of(10, 0)),
-                    () -> assertThat(responses).extracting("status")
-                            .containsExactly("1번째 예약대기")
             );
         }
     }

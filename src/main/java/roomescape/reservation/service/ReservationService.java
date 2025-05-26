@@ -9,12 +9,10 @@ import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.util.TokenProvider;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,12 +20,10 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationChecker reservationChecker;
-    private final TokenProvider tokenProvider;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker, TokenProvider tokenProvider) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker) {
         this.reservationRepository = reservationRepository;
         this.reservationChecker = reservationChecker;
-        this.tokenProvider = tokenProvider;
     }
 
     @Transactional
@@ -76,13 +72,5 @@ public class ReservationService {
 
         reservationRepository.deleteById(id);
         return reservation.get();
-    }
-
-    public List<MemberReservationResponse> findAllMemberReservations(String token) {
-        Long memberId = tokenProvider.getMemberIdFromToken(token);
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        return reservations.stream()
-                .map(MemberReservationResponse::from)
-                .toList();
     }
 }

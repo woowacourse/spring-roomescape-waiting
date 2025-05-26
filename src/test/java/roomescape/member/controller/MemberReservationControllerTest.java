@@ -18,7 +18,7 @@ import static org.hamcrest.Matchers.is;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 @Sql("/test-data.sql")
-class MemberControllerTest {
+class MemberReservationControllerTest {
 
     private String adminCookie;
 

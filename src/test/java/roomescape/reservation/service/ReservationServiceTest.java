@@ -14,7 +14,6 @@ import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeReservationTimeRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
 import roomescape.member.repository.MemberRepository;
-import roomescape.repository.FakeTokenProvider;
 import roomescape.reservation.dto.NameResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -35,7 +34,7 @@ class ReservationServiceTest {
     private final ThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
     private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository, themeRepository, memberRepository);
-    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationChecker, new FakeTokenProvider());
+    private final ReservationService reservationService = new ReservationService(reservationRepository, reservationChecker);
 
     @Nested
     @DisplayName("예약 조회")

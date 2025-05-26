@@ -7,12 +7,9 @@ import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.WaitingWithRank;
-import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.WaitingRequest;
 import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.repository.WaitingRepository;
-import roomescape.util.TokenProvider;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,12 +17,10 @@ public class WaitingService {
 
     private final WaitingRepository waitingRepository;
     private final ReservationChecker reservationChecker;
-    private final TokenProvider tokenProvider;
 
-    public WaitingService(WaitingRepository waitingRepository, ReservationChecker reservationChecker, TokenProvider tokenProvider) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationChecker reservationChecker) {
         this.waitingRepository = waitingRepository;
         this.reservationChecker = reservationChecker;
-        this.tokenProvider = tokenProvider;
     }
 
     public List<WaitingResponse> findAll() {
@@ -43,12 +38,6 @@ public class WaitingService {
         }
         Waiting newWaiting = waitingRepository.save(waiting);
         return WaitingResponse.from(newWaiting, newWaiting.getTime(), newWaiting.getTheme());
-    }
-
-    public List<MemberReservationResponse> findAllMemberWaitings(String token) {
-        Long memberId = tokenProvider.getMemberIdFromToken(token);
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
-        return waitingWithRanks.stream().map(MemberReservationResponse::from).toList();
     }
 
     @Transactional
