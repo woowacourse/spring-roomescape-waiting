@@ -76,31 +76,6 @@ class AdminWaitingControllerTest {
                 .statusCode(401);
     }
 
-    @DisplayName("예약대기를 승인한다.")
-    @Test
-    void approveWaiting() {
-        int timeId = addReservationTime("10:00");
-        int themeId = addTheme();
-        String tokenValue = getAdminLoginTokenValue();
-        Map<String, Object> params = Map.of(
-                "date", getTomorrow(),
-                "timeId", timeId,
-                "themeId", themeId
-        );
-        int waitingId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .cookie("token", tokenValue)
-                .body(params)
-                .when().post("reservations/waiting")
-                .then().extract().path("id");
-
-        RestAssured.given().log().all()
-                .cookie("token", tokenValue)
-                .when().post("/admin/reservations/waiting/approve/" + waitingId)
-                .then().log().all()
-                .statusCode(201);
-    }
-
     @DisplayName("예약대기를 거절한다.")
     @Test
     void denyWaiting() {

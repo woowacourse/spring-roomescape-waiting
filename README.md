@@ -62,7 +62,6 @@
 | HTTP Method 	 | Role 	  |         Endpoint                   	         |    Response  	     | Description           	 |
 |:-------------:|:-------:|:--------------------------------------------:|:------------------:|:-----------------------:|
 |   GET    	    |  Admin  |       `/admin/reservations/waiting` 	        |     200 OK   	     |    전체 예약 대기 목록 조회 	     |
-|   POST    	   | Admin 	 | `/admin/reservations/waiting/approve/{id}` 	 |  201 Created   	   |       예약 대기 승인 	        |
 |  DELETE    	  | Admin 	 |  `/admin/reservations/waiting/deny/{id}` 	   | 204 No Content   	 |       예약 대기 거절 	        |
 
 # 📌 Auth API
