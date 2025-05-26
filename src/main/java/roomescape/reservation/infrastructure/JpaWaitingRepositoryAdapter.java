@@ -18,7 +18,7 @@ public class JpaWaitingRepositoryAdapter implements WaitingRepository {
     }
 
     @Override
-    public boolean exists(Long reservationId, Long memberId) {
+    public boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId) {
         return jpaWaitingRepository.existsByReservationIdAndMemberId(reservationId, memberId);
     }
 

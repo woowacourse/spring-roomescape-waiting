@@ -53,7 +53,7 @@ public class ReservationTimeService {
     }
 
     public List<TimeConditionResponse> getTimesWithCondition(final TimeConditionRequest request) {
-        List<Reservation> reservations = reservationRepository.findAllBy(request.date(), request.themeId());
+        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(request.date(), request.themeId());
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
         return times.stream().map(time -> {

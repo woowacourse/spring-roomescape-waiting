@@ -65,7 +65,7 @@ public class ReservationService {
         Member member = memberRepository.findById(memberId)
             .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
 
-        List<Reservation> reservations = reservationRepository.findAllBy(request.date(), request.themeId());
+        List<Reservation> reservations = reservationRepository.findAllByDateAndThemeId(request.date(), request.themeId());
         validateExistDuplicateReservation(reservations, time);
 
         Reservation reservation = Reservation.createWithoutId(request.date(), time, theme, member, Status.RESERVED);
@@ -98,7 +98,7 @@ public class ReservationService {
     }
 
     private void validateDuplicateWaiting(Reservation reservation, Member member) {
-        if (waitingRepository.exists(reservation.getId(), member.getId())) {
+        if (waitingRepository.existsByReservationIdAndMemberId(reservation.getId(), member.getId())) {
             throw new ReservationException("이미 예약대기 중입니다.");
         }
     }
@@ -150,7 +150,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> searchReservationWithCondition(final SearchCondition condition) {
-        List<Reservation> reservations = reservationRepository.findAllBy(
+        List<Reservation> reservations = reservationRepository.findAllByMemberIdAndThemeIdAndDateBetween(
             condition.memberId(), condition.themeId(),
             condition.dateFrom(), condition.dateTo()
         );
@@ -171,7 +171,7 @@ public class ReservationService {
         Member member = memberRepository.findById(loginMemberInfo.id())
             .orElseThrow(() -> new MemberNotFound("멤버를 찾을 수 없습니다."));
 
-        List<Reservation> reservations = reservationRepository.findAllBy(loginMemberInfo.id());
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMemberInfo.id());
 
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findByMemberId(loginMemberInfo.id());
 

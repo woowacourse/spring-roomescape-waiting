@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public interface WaitingRepository {
 
-    boolean exists(Long reservationId, Long memberId);
+    boolean existsByReservationIdAndMemberId(Long reservationId, Long memberId);
 
     Waiting save(Waiting withoutId);
 
