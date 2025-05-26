@@ -3,8 +3,10 @@ package roomescape.booking.waiting;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.auth.dto.LoginMember;
 import roomescape.booking.reservation.ReservationService;
 import roomescape.booking.waiting.dto.WaitingRequest;
@@ -28,6 +30,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static roomescape.util.TestFactory.*;
 
+@ExtendWith(MockitoExtension.class)
 public class WaitingCreateServiceTest {
 
     @Mock
