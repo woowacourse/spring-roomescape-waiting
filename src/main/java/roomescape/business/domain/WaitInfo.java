@@ -37,15 +37,17 @@ public class WaitInfo {
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
-    public WaitInfo(final Long id, final Member member, final Reservation reservation, final Long rank) {
+    public WaitInfo(final Long id, final Member member, final Reservation reservation, final Long rank,
+                    final LocalDateTime createdAt) {
         this.id = id;
         this.member = member;
         this.reservation = reservation;
         this.rank = rank;
+        this.createdAt = createdAt;
     }
 
     public WaitInfo(final Member member, final Reservation reservation, final Long rank) {
-        this(null, member, reservation, rank);
+        this(null, member, reservation, rank, null);
     }
 
     protected WaitInfo() {

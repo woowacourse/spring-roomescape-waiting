@@ -235,7 +235,8 @@ public class ReservationService {
                     waitInfo.getId(),
                     waitInfo.getMember(),
                     waitInfo.getReservation(),
-                    calculateRank(i)
+                    calculateRank(i),
+                    waitInfo.getCreatedAt()
             );
             waitInfoRepository.save(updatedWaitInfo);
         }
