@@ -40,6 +40,7 @@ class ThemeRepositoryTest {
     @BeforeEach
     void setUp() {
         entityManager.createQuery("DELETE FROM Reservation").executeUpdate();
+        entityManager.createQuery("DELETE FROM Waiting").executeUpdate();
         entityManager.createQuery("DELETE FROM GameSchedule").executeUpdate();
         entityManager.createQuery("DELETE FROM Member").executeUpdate();
         entityManager.createQuery("DELETE FROM Theme").executeUpdate();

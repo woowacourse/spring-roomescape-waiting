@@ -119,20 +119,18 @@ public class ReservationService {
     public void deleteReservation(Long id) {
         Reservation reservation = getReservationEntityById(id);
         GameSchedule gameSchedule = reservation.getGameSchedule();
-        approveWaitingOf(gameSchedule);
+        Optional<Waiting> firstWaiting = waitingService.findFirstWaitingEntityByGameSchedule(gameSchedule);
         reservationRepository.deleteById(id);
+        firstWaiting.ifPresent(this::approveWaiting);
     }
 
-    private void approveWaitingOf(GameSchedule gameSchedule) {
-        Optional<Waiting> firstWaiting = waitingService.findFirstWaitingEntityByGameSchedule(gameSchedule);
-        if (firstWaiting.isPresent()) {
-            Reservation reservationWithoutId = Reservation.withoutId(
-                    firstWaiting.get().getMember(),
-                    firstWaiting.get().getGameSchedule(),
-                    ReservationStatus.RESERVED
-            );
-            reservationRepository.save(reservationWithoutId);
-            waitingService.deleteWaiting(firstWaiting.get().getId());
-        }
+    private void approveWaiting(Waiting waiting) {
+        Reservation reservationWithoutId = Reservation.withoutId(
+                waiting.getMember(),
+                waiting.getGameSchedule(),
+                ReservationStatus.RESERVED
+        );
+        reservationRepository.save(reservationWithoutId);
+        waitingService.deleteWaiting(waiting.getId());
     }
 }

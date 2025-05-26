@@ -56,6 +56,8 @@ public class Fixture {
                 statement.execute("SET REFERENTIAL_INTEGRITY FALSE");
                 statement.execute("TRUNCATE TABLE reservation");
                 statement.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+                statement.execute("TRUNCATE TABLE waiting");
+                statement.execute("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
                 statement.execute("TRUNCATE TABLE game_schedule");
                 statement.execute("ALTER TABLE game_schedule ALTER COLUMN id RESTART WITH 1");
                 statement.execute("TRUNCATE TABLE reservation_time");
