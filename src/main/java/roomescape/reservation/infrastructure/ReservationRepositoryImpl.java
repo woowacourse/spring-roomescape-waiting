@@ -21,6 +21,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     private final JpaReservationRepository jpaReservationRepository;
 
     @Override
+    public void updateUserId(final Long id, final Long userId) {
+        jpaReservationRepository.updateUserId(id, userId);
+    }
+
+    @Override
     public boolean existsById(final Long id) {
         return jpaReservationRepository.existsById(id);
     }

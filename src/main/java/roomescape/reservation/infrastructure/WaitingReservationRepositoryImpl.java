@@ -28,6 +28,11 @@ public class WaitingReservationRepositoryImpl implements WaitingReservationRepos
     }
 
     @Override
+    public Optional<Long> findUserIdById(final Long id) {
+        return jpaWaitingReservationRepository.findUserIdById(id);
+    }
+
+    @Override
     public int decrementWaitingOrderAfter(
             final ReservationDate date,
             final ReservationTime time,

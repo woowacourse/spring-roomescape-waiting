@@ -10,6 +10,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface JpaWaitingReservationRepository extends JpaRepository<WaitingReservation, Long> {
 
@@ -39,5 +40,7 @@ public interface JpaWaitingReservationRepository extends JpaRepository<WaitingRe
                                    @Param("date") ReservationDate date,
                                    @Param("waitingOrder") int waitingOrder);
 
+    @Query("SELECT w.userId FROM WaitingReservation w WHERE w.id = :id")
+    Optional<Long> findUserIdById(@Param("id") Long id);
 }
 

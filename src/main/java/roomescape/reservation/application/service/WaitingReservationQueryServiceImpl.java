@@ -3,6 +3,8 @@ package roomescape.reservation.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.domain.WaitingReservationRepository;
 
@@ -18,5 +20,12 @@ public class WaitingReservationQueryServiceImpl implements WaitingReservationQue
     @Override
     public List<WaitingReservation> getAll() {
         return waitingReservationRepository.findAll();
+    }
+
+    @Override
+    public Long findUserIdById(final Long id) {
+        return waitingReservationRepository.findUserIdById(id).orElseThrow(
+                () -> new NotFoundException(DomainTerm.USER_ID, id)
+        );
     }
 }

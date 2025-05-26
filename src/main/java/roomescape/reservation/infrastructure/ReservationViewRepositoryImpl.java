@@ -7,6 +7,7 @@ import roomescape.reservation.domain.ReservationView;
 import roomescape.reservation.domain.ReservationViewRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -22,5 +23,10 @@ public class ReservationViewRepositoryImpl implements ReservationViewRepository 
     @Override
     public List<ReservationView> findAllByUserId(final Long userId) {
         return jpaReservationViewRepository.findAllByUserId(userId);
+    }
+
+    @Override
+    public Optional<Long> findFirstWaitingByReservationId(final Long id) {
+        return jpaReservationViewRepository.findFirstWaitingByReservationId(id);
     }
 }

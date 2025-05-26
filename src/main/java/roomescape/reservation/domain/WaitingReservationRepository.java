@@ -21,4 +21,6 @@ public interface WaitingReservationRepository {
     void deleteById(Long id);
 
     int decrementWaitingOrderAfter(ReservationDate date, ReservationTime time, Theme theme, int waitingOrder);
+
+    Optional<Long> findUserIdById(Long id);
 }

@@ -8,6 +8,7 @@ import roomescape.reservation.domain.ReservationView;
 import roomescape.reservation.domain.ReservationViewRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,5 +25,10 @@ public class ReservationViewQueryServiceImpl implements ReservationViewQueryServ
     @Override
     public boolean existsByParams(final CreateReservationServiceRequest request, final Long userId) {
         return viewRepository.existsByParams(request.date(), request.timeId(), request.themeId(), userId);
+    }
+
+    @Override
+    public Optional<Long> findFirstWaitingByReservationId(final Long id) {
+        return viewRepository.findFirstWaitingByReservationId(id);
     }
 }

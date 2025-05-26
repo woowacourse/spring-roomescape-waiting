@@ -7,4 +7,6 @@ import java.util.List;
 public interface WaitingReservationQueryService {
 
     List<WaitingReservation> getAll();
+
+    Long findUserIdById(Long id);
 }

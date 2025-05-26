@@ -3,6 +3,7 @@ package roomescape.reservation.infrastructure;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
@@ -36,5 +37,9 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             @Param("startDate") ReservationDate startDate,
             @Param("endDate") ReservationDate endDate,
             Pageable pageable);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Reservation r SET r.userId = :userId WHERE r.id = :id")
+    void updateUserId(@Param("id") Long id, @Param("userId") Long userId);
 }
 

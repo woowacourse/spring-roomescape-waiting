@@ -8,4 +8,6 @@ public interface ReservationCommandService {
     Reservation create(CreateReservationServiceRequest createReservationServiceRequest);
 
     void delete(Long id);
+
+    void updateUserId(Long id, Long userId);
 }
