@@ -62,6 +62,10 @@ public class ReservationService {
         if (!reservationRepository.existsConfirmedReservationBySlot(slot)) {
             throw new DataExistException("해당 시간에 예약 가능한 테마입니다. 일반 예약을 진행해주세요.");
         }
+        if (reservationRepository.existsReservationBySlotAndMemberAndStatus(slot, member, ReservationStatus.CONFIRMED)
+                || reservationRepository.existsReservationBySlotAndMemberAndStatus(slot, member, ReservationStatus.WAITING)) {
+            throw new DataExistException("해당 시간에 이미 예약 또는 대기가 존재합나다");
+        }
 
         return reservationRepository.save(new Reservation(member, slot, ReservationStatus.WAITING));
     }

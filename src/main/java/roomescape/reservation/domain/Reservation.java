@@ -11,14 +11,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import roomescape.common.exception.ReservationException;
 import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
 
 @Getter
 @ToString
