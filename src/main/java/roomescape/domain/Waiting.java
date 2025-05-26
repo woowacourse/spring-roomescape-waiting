@@ -36,8 +36,8 @@ public class Waiting {
         return new Waiting(null, reservationInfo, member, rank);
     }
 
-    public void updateRankAndReservationInfo(ReservationInfo reservationInfo) {
-        this.rank -= 1;
+    public void updateRankAndReservationInfo(ReservationInfo reservationInfo, long newRank) {
+        this.rank = newRank;
         this.reservationInfo = reservationInfo;
     }
 

@@ -103,7 +103,9 @@ public class WaitingService {
     @Transactional
     public void updateWaitings(ReservationInfo reservationInfo, ReservationInfo newReservationInfo) {
         List<Waiting> waitings = waitingRepository.findAllByReservationInfo(reservationInfo);
-        waitings.forEach(waiting ->
-                waiting.updateRankAndReservationInfo(newReservationInfo));
+        waitings.forEach(waiting -> {
+            long newRank = waiting.getRank() - 1;
+            waiting.updateRankAndReservationInfo(newReservationInfo, newRank);
+        });
     }
 }

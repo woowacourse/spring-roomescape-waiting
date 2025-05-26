@@ -26,11 +26,12 @@ class WaitingTest {
 
         Reservation newReservation = createNewReservation();
         ReservationInfo newReservationInfo = ReservationInfo.create(newReservation);
+        long newRank = 1L;
 
-        waiting.updateRankAndReservationInfo(newReservationInfo);
+        waiting.updateRankAndReservationInfo(newReservationInfo, newRank);
 
         assertAll(
-                () -> assertThat(waiting.getRank()).isEqualTo(1L),
+                () -> assertThat(waiting.getRank()).isEqualTo(newRank),
                 () -> assertThat(waiting.getReservationInfo().getDate()).isEqualTo(now.toLocalDate().minusDays(1L)),
                 () -> assertThat(waiting.getReservationInfo().getTime().getStartAt()).isEqualTo(now.toLocalTime().minusHours(1L)),
                 () -> assertThat(waiting.getReservationInfo().getTheme().getName()).isEqualTo("테마2")
