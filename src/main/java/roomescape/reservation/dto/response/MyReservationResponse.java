@@ -26,7 +26,7 @@ public record MyReservationResponse(
                 waiting.getTheme().getName(),
                 waiting.getDate().toString(),
                 waiting.getTime().getStartAt().toString(),
-                "대기 " + rank + "번째"
+                String.valueOf(rank)
         );
     }
 }
