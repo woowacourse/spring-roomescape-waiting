@@ -93,25 +93,30 @@ public class ReservationServiceFacade {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         return reservationService.findAll();
     }
 
+    @Transactional
     public void deleteReservationById(Long id) {
         reservationService.deleteReservationById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationAndWaitingResponse> findAllMyReservationAndWaiting(MemberPrincipal memberPrincipal) {
         return Stream.of(findAllMyReservation(memberPrincipal), findAllMyWaitingWithRank(memberPrincipal))
                 .flatMap(Collection::stream)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationAndWaitingResponse> findAllMyWaitingWithRank(MemberPrincipal memberPrincipal) {
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
         return waitingService.getMyReservationAndWaitingResponseByMemberId(member.getId());
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationAndWaitingResponse> findAllMyReservation(MemberPrincipal memberPrincipal) {
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
         return reservationService.findAllByMember(member);
