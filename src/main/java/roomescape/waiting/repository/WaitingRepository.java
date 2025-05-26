@@ -16,13 +16,16 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     Optional<Waiting> findByIdAndMemberId(Long id, Long memberId);
 
-    @Query("SELECT w FROM Waiting w JOIN FETCH w.time JOIN FETCH w.theme JOIN FETCH w.member")
+    @Query("SELECT w FROM Waiting w JOIN FETCH w.reservationInformation.time JOIN FETCH w.reservationInformation.theme JOIN FETCH w.member")
     List<Waiting> findAll();
 
     @Query("""
     SELECT w
     FROM Waiting w
-    WHERE w.theme = :theme AND w.time = :time AND w.date = :date
+    WHERE
+        w.reservationInformation.theme = :theme
+        AND w.reservationInformation.time = :time
+        AND w.reservationInformation.date = :date
     ORDER BY w.createdAt ASC
     LIMIT 1
     """)
@@ -36,7 +39,11 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
         )
     FROM Waiting w
     LEFT JOIN Waiting w2
-    ON w2.createdAt < w.createdAt AND w2.date = w.date AND w2.time.id = w.time.id AND w2.theme.id = w.theme.id
+    ON
+        w2.createdAt < w.createdAt
+        AND w2.reservationInformation.date = w.reservationInformation.date
+        AND w2.reservationInformation.time.id = w.reservationInformation.time.id
+        AND w2.reservationInformation.theme.id = w.reservationInformation.theme.id
     WHERE w.member.id = :memberId
     GROUP BY w
     ORDER BY w.createdAt ASC

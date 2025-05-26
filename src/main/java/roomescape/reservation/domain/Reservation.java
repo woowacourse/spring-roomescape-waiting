@@ -1,6 +1,6 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.Column;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -11,11 +11,11 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import roomescape.member.domain.Member;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.domain.ReservationInformation;
 import roomescape.waiting.domain.Waiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Objects;
 
 @Entity
 @Table(uniqueConstraints = {
@@ -27,54 +27,48 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Embedded
+    private ReservationInformation reservationInformation;
+
     @ManyToOne
     @JoinColumn(nullable = false)
     private Member member;
-
-    @Column(nullable = false)
-    private LocalDate date;
-
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private ReservationTime time;
-
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private Theme theme;
 
     protected Reservation() {
     }
 
     public Reservation(
-            final Long id,
             final Member member,
             final LocalDate date,
             final ReservationTime time,
             final Theme theme
     ) {
-        this.id = id;
-        this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this(member, new ReservationInformation(date, time, theme));
     }
 
-    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, member, date, time, theme);
+    public Reservation(
+            final Long id,
+            final Member member,
+            final ReservationInformation reservationInformation
+    ) {
+        this.id = id;
+        this.member = member;
+        this.reservationInformation = reservationInformation;
+    }
+
+    public Reservation(Member member, ReservationInformation reservationInformation) {
+        this(null, member, reservationInformation);
     }
 
     public static Reservation of(Waiting waiting) {
         return new Reservation(
                 waiting.getMember(),
-                waiting.getDate(),
-                waiting.getTime(),
-                waiting.getTheme()
+                waiting.getReservationInformation()
         );
     }
 
     public boolean isBefore(LocalDateTime compare) {
-        LocalDateTime dateTime = LocalDateTime.of(date, time.getStartAt());
-        return dateTime.isBefore(compare);
+        return reservationInformation.isBefore(compare);
     }
 
     public Long getId() {
@@ -86,28 +80,14 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return reservationInformation.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationInformation.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
+        return reservationInformation.getTheme();
     }
 }

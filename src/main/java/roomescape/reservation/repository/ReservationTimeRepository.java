@@ -23,7 +23,10 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
     )
     FROM ReservationTime t
     LEFT JOIN Reservation r
-    ON r.time = t AND r.date = :date AND r.theme.id = :themeId
+    ON
+        r.reservationInformation.time = t
+        AND r.reservationInformation.date = :date
+        AND r.reservationInformation.theme.id = :themeId
     GROUP BY t
     """)
     List<ReservationTimeWithBooked> findAllWithBooked(LocalDate date, Long themeId);

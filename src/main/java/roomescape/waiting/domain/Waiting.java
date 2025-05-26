@@ -14,16 +14,8 @@ public class Waiting {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
-
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private ReservationTime time;
-
-    @ManyToOne
-    @JoinColumn(nullable = false)
-    private Theme theme;
+    @Embedded
+    private ReservationInformation reservationInformation;
 
     @ManyToOne
     @JoinColumn(nullable = false)
@@ -34,10 +26,18 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(LocalDate date, ReservationTime time, Theme theme, Member member, LocalDateTime createdAt) {
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+    public Waiting(
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme,
+            final Member member,
+            final LocalDateTime createdAt
+    ) {
+        this(new ReservationInformation(date, time, theme), member, createdAt);
+    }
+
+    public Waiting(ReservationInformation reservationInformation, Member member, LocalDateTime createdAt) {
+        this.reservationInformation = reservationInformation;
         this.member = member;
         this.createdAt = createdAt;
     }
@@ -46,16 +46,20 @@ public class Waiting {
         return id;
     }
 
+    public ReservationInformation getReservationInformation() {
+        return reservationInformation;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return reservationInformation.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationInformation.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationInformation.getTheme();
     }
 
     public Member getMember() {
