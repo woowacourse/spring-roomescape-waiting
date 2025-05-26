@@ -148,8 +148,8 @@ class AdminReservationControllerTest {
                 .andExpect(jsonPath("$.length()").value(1))
                 .andExpect(jsonPath("$[0].id").value(1))
                 .andExpect(jsonPath("$[0].member.name").value("슬링키"))
-                .andExpect(jsonPath("$[0].theme").value("테마이름"))
+                .andExpect(jsonPath("$[0].theme.name").value("테마이름"))
                 .andExpect(jsonPath("$[0].date").value(LocalDate.now().plusDays(1).toString()))
-                .andExpect(jsonPath("$[0].time").value("10:00"));
+                .andExpect(jsonPath("$[0].time.startAt").value("10:00:00"));
     }
 } 
