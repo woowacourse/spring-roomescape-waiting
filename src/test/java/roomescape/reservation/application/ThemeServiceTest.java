@@ -11,7 +11,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
@@ -22,7 +21,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.ThemeRepository;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.presentation.dto.ReservationTimeResponse;
 import roomescape.reservation.presentation.dto.ThemeRequest;
@@ -142,17 +140,5 @@ class ThemeServiceTest {
                 .map(ThemeResponse::getId)
                 .toList()
         ).isEqualTo(List.of(theme.getId()));
-    }
-
-    static class ThemeConfig {
-        @Bean
-        public ThemeService themeService(
-                ReservationRepository reservationRepository,
-                ThemeRepository themeRepository
-        ) {
-            return new ThemeService(
-                    reservationRepository, themeRepository
-            );
-        }
     }
 }

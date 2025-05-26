@@ -11,14 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.ReservationTimeService;
 import roomescape.reservation.application.service.ThemeService;
-import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.presentation.dto.ReservationTimeRequest;
@@ -160,17 +157,5 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 삭제되어 있는 리소스입니다.");
-    }
-
-    static class ReservationTimeConfig {
-        @Bean
-        public ReservationTimeService reservationTimeService(
-                ReservationTimeRepository reservationTimeRepository,
-                ReservationRepository reservationRepository
-        ) {
-            return new ReservationTimeService(
-                    reservationTimeRepository, reservationRepository
-            );
-        }
     }
 }

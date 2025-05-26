@@ -13,18 +13,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.application.service.ReservationService;
 import roomescape.reservation.application.service.WaitingService;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
-import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.reservation.domain.repository.ThemeRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.presentation.dto.AdminReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.WaitingRequest;
@@ -221,33 +217,5 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteReservation(1L))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("이미 삭제되어 있는 리소스입니다.");
-    }
-
-    static class ReservationConfig {
-        @Bean
-        public ReservationService reservationService(
-                ReservationRepository reservationRepository,
-                ReservationTimeRepository reservationTimeRepository,
-                ThemeRepository themeRepository,
-                MemberRepository memberRepository,
-                WaitingRepository waitingRepository
-        ) {
-            return new ReservationService(
-                    waitingRepository, reservationRepository, reservationTimeRepository, themeRepository,
-                    memberRepository
-            );
-        }
-
-        @Bean
-        public WaitingService waitingService(
-                ReservationTimeRepository reservationTimeRepository,
-                ThemeRepository themeRepository,
-                MemberRepository memberRepository,
-                WaitingRepository waitingRepository,
-                ReservationRepository reservationRepository
-        ) {
-            return new WaitingService(waitingRepository, reservationRepository, reservationTimeRepository,
-                    themeRepository, memberRepository);
-        }
     }
 }

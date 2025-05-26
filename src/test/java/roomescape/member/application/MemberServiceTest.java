@@ -7,12 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.global.jwt.JwtTokenProvider;
 import roomescape.member.application.service.MemberService;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.presentation.dto.MemberResponse;
 import roomescape.member.presentation.dto.SignUpRequest;
 import roomescape.member.presentation.dto.SignUpResponse;
@@ -77,16 +74,5 @@ class MemberServiceTest {
     @DisplayName("유저 조회 테스트")
     void getMembersTest() {
         assertThat(memberService.getMembers().size()).isEqualTo(2);
-    }
-
-    static class MemberConfig {
-        @Bean
-        public MemberService memberService(
-                MemberRepository memberRepository
-        ) {
-            return new MemberService(
-                    memberRepository, new JwtTokenProvider()
-            );
-        }
     }
 }
