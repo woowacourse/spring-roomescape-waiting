@@ -14,8 +14,8 @@ import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.global.auth.dto.LoginMember;
 import roomescape.member.entity.RoleType;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationCreateResponse;
-import roomescape.reservation.dto.response.ReservationReadMemberResponse;
+import roomescape.reservation.dto.response.ReservationAndWaitingResponse;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -27,20 +27,20 @@ public class ReservationController {
 
     @PostMapping
     @RoleRequired(roleType = {RoleType.ADMIN, RoleType.USER})
-    public ResponseEntity<ReservationCreateResponse> createReservation(
+    public ResponseEntity<ReservationResponse> createReservation(
             @AuthenticationPrincipal LoginMember loginMember,
             @RequestBody @Valid ReservationCreateRequest request
     ) {
-        ReservationCreateResponse response = reservationService.createReservation(loginMember.id(), request);
+        ReservationResponse response = reservationService.createReservation(loginMember.id(), request);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping("/mine")
     @RoleRequired(roleType = {RoleType.ADMIN, RoleType.USER})
-    public ResponseEntity<List<ReservationReadMemberResponse>> getMyReservations(
+    public ResponseEntity<List<ReservationAndWaitingResponse>> getMyReservations(
             @AuthenticationPrincipal LoginMember loginMember
     ) {
-        List<ReservationReadMemberResponse> responses = reservationService.getReservationsByMember(loginMember.id());
+        List<ReservationAndWaitingResponse> responses = reservationService.getReservationsByMember(loginMember.id());
         return ResponseEntity.ok(responses);
     }
 }

@@ -11,8 +11,7 @@ import roomescape.global.error.exception.UnauthorizedException;
 import roomescape.member.entity.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
-import roomescape.reservation.dto.response.WaitingCreateResponse;
-import roomescape.reservation.dto.response.WaitingReadResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.entity.Waiting;
@@ -33,7 +32,7 @@ public class WaitingService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public WaitingCreateResponse createWaiting(Long memberId, WaitingCreateRequest request) {
+    public WaitingResponse createWaiting(Long memberId, WaitingCreateRequest request) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 멤버 입니다."));
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
@@ -47,7 +46,7 @@ public class WaitingService {
         validateDateTime(newWaiting);
 
         Waiting waiting = waitingRepository.save(newWaiting);
-        return WaitingCreateResponse.from(waiting);
+        return WaitingResponse.from(waiting);
     }
 
     @Transactional
@@ -68,9 +67,9 @@ public class WaitingService {
     }
 
     @Transactional(readOnly = true)
-    public List<WaitingReadResponse> getAllWaitings() {
+    public List<WaitingResponse> getAllWaitings() {
         return waitingRepository.findAll().stream()
-                .map(WaitingReadResponse::from)
+                .map(WaitingResponse::from)
                 .toList();
     }
 

@@ -7,8 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.theme.dto.request.ThemeCreateRequest;
-import roomescape.theme.dto.response.ThemeCreateResponse;
-import roomescape.theme.dto.response.ThemeReadResponse;
+import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.entity.Theme;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -19,28 +18,28 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
 
     @Transactional
-    public ThemeCreateResponse createTheme(ThemeCreateRequest request) {
+    public ThemeResponse createTheme(ThemeCreateRequest request) {
         Theme newTheme = request.toEntity();
         validateDuplicateThemeName(newTheme);
         Theme saved = themeRepository.save(newTheme);
-        return ThemeCreateResponse.from(saved);
+        return ThemeResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeReadResponse> getAllThemes() {
+    public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll()
                 .stream()
-                .map(ThemeReadResponse::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeReadResponse> getPopularThemes(int limit) {
+    public List<ThemeResponse> getPopularThemes(int limit) {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusWeeks(1);
         return themeRepository.findPopularDescendingUpTo(startDate, endDate, limit)
                 .stream()
-                .map(ThemeReadResponse::from)
+                .map(ThemeResponse::from)
                 .toList();
     }
 

@@ -9,8 +9,7 @@ import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
-import roomescape.reservation.dto.response.ReservationTimeReadResponse;
+import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -23,18 +22,18 @@ public class ReservationTimeService {
     private final ReservationRepository reservationRepository;
 
     @Transactional
-    public ReservationTimeCreateResponse createTime(ReservationTimeCreateRequest request) {
+    public ReservationTimeResponse createTime(ReservationTimeCreateRequest request) {
         ReservationTime time = request.toEntity();
         validateOperatingTime(time);
         validateDuplicated(time);
         ReservationTime saved = reservationTimeRepository.save(time);
-        return ReservationTimeCreateResponse.from(saved);
+        return ReservationTimeResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTimeReadResponse> getAllTimes() {
+    public List<ReservationTimeResponse> getAllTimes() {
         return reservationTimeRepository.findAll().stream()
-                .map(ReservationTimeReadResponse::from)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 

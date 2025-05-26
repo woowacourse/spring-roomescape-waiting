@@ -3,7 +3,7 @@ package roomescape.reservation.dto.request;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 
-public record ReservationReadFilteredRequest(
+public record ReservationFindFilteredRequest(
         @NotNull Long themeId,
         @NotNull Long memberId,
         @NotNull LocalDate dateFrom,

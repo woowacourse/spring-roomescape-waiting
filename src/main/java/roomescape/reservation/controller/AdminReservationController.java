@@ -16,10 +16,8 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.entity.RoleType;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
-import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
-import roomescape.reservation.dto.response.ReservationAdminCreateResponse;
-import roomescape.reservation.dto.response.ReservationReadFilteredResponse;
-import roomescape.reservation.dto.response.ReservationReadResponse;
+import roomescape.reservation.dto.request.ReservationFindFilteredRequest;
+import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -31,26 +29,26 @@ public class AdminReservationController {
 
     @PostMapping
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<ReservationAdminCreateResponse> createReservationByAdmin(
+    public ResponseEntity<ReservationResponse> createReservationByAdmin(
             @RequestBody @Valid ReservationAdminCreateRequest request
     ) {
-        ReservationAdminCreateResponse response = reservationService.createReservationByAdmin(request);
+        ReservationResponse response = reservationService.createReservationByAdmin(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<List<ReservationReadResponse>> getAllReservations() {
-        List<ReservationReadResponse> responses = reservationService.getAllReservations();
+    public ResponseEntity<List<ReservationResponse>> getAllReservations() {
+        List<ReservationResponse> responses = reservationService.getAllReservations();
         return ResponseEntity.ok().body(responses);
     }
 
     @GetMapping("/filtered")
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<List<ReservationReadFilteredResponse>> getFilteredReservationsByAdmin(
-            @ModelAttribute @Valid ReservationReadFilteredRequest request
+    public ResponseEntity<List<ReservationResponse>> getFilteredReservationsByAdmin(
+            @ModelAttribute @Valid ReservationFindFilteredRequest request
     ) {
-        List<ReservationReadFilteredResponse> responses = reservationService.getFilteredReservations(request);
+        List<ReservationResponse> responses = reservationService.getFilteredReservations(request);
         return ResponseEntity.ok(responses);
     }
 

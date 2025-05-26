@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.entity.RoleType;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
+import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.service.ReservationTimeService;
 
 @RestController
@@ -25,10 +25,10 @@ public class AdminReservationTimeController {
 
     @PostMapping
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<ReservationTimeCreateResponse> createTimeByAdmin(
+    public ResponseEntity<ReservationTimeResponse> createTimeByAdmin(
             @RequestBody @Valid ReservationTimeCreateRequest request
     ) {
-        ReservationTimeCreateResponse response = reservationTimeService.createTime(request);
+        ReservationTimeResponse response = reservationTimeService.createTime(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

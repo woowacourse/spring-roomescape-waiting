@@ -13,8 +13,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.dto.request.MemberCreateRequest;
-import roomescape.member.dto.response.MemberCreateResponse;
-import roomescape.member.dto.response.MemberReadResponse;
+import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.entity.RoleType;
 import roomescape.member.service.MemberService;
 
@@ -26,16 +25,16 @@ public class MemberController {
     private final MemberService memberService;
 
     @PostMapping
-    public ResponseEntity<MemberCreateResponse> createMember(
+    public ResponseEntity<MemberResponse> createMember(
             @RequestBody @Valid MemberCreateRequest request
     ) {
-        MemberCreateResponse response = memberService.createMember(request);
+        MemberResponse response = memberService.createMember(request);
         return ResponseEntity.ok().body(response);
     }
 
     @GetMapping
-    public ResponseEntity<List<MemberReadResponse>> getAllMembers() {
-        List<MemberReadResponse> responses = memberService.getAllMembers();
+    public ResponseEntity<List<MemberResponse>> getAllMembers() {
+        List<MemberResponse> responses = memberService.getAllMembers();
         return ResponseEntity.ok().body(responses);
     }
 

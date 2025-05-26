@@ -6,8 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.member.dto.request.MemberCreateRequest;
-import roomescape.member.dto.response.MemberCreateResponse;
-import roomescape.member.dto.response.MemberReadResponse;
+import roomescape.member.dto.response.MemberResponse;
 import roomescape.member.entity.Member;
 import roomescape.member.repository.MemberRepository;
 
@@ -18,17 +17,17 @@ public class MemberService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public MemberCreateResponse createMember(MemberCreateRequest request) {
+    public MemberResponse createMember(MemberCreateRequest request) {
         validateDuplicateEmail(request.email());
         Member member = request.toEntity();
         Member saved = memberRepository.save(member);
-        return MemberCreateResponse.from(saved);
+        return MemberResponse.from(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<MemberReadResponse> getAllMembers() {
+    public List<MemberResponse> getAllMembers() {
         return memberRepository.findAll().stream()
-                .map(MemberReadResponse::from)
+                .map(MemberResponse::from)
                 .toList();
     }
 

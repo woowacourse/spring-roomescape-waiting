@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservation.dto.response.ReservationTimeReadResponse;
+import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.service.ReservationTimeService;
 
 @RestController
@@ -20,8 +20,8 @@ public class ReservationTimeController {
     private final ReservationTimeService reservationTimeService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeReadResponse>> getAllTimes() {
-        List<ReservationTimeReadResponse> responses = reservationTimeService.getAllTimes();
+    public ResponseEntity<List<ReservationTimeResponse>> getAllTimes() {
+        List<ReservationTimeResponse> responses = reservationTimeService.getAllTimes();
         return ResponseEntity.ok().body(responses);
     }
 

@@ -4,11 +4,11 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalTime;
 import roomescape.reservation.entity.ReservationTime;
 
-public record ReservationTimeReadResponse(
+public record ReservationTimeResponse(
         Long id,
         @JsonFormat(pattern = "HH:mm") LocalTime startAt
 ) {
-    public static ReservationTimeReadResponse from(ReservationTime reservationTime) {
-        return new ReservationTimeReadResponse(reservationTime.getId(), reservationTime.getStartAt());
+    public static ReservationTimeResponse from(ReservationTime reservationTime) {
+        return new ReservationTimeResponse(reservationTime.getId(), reservationTime.getStartAt());
     }
 }

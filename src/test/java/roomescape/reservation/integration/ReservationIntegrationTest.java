@@ -20,7 +20,7 @@ import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.dto.request.ReservationFindFilteredRequest;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
@@ -156,7 +156,7 @@ class ReservationIntegrationTest {
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
 
-        var filterRequest = new ReservationReadFilteredRequest(
+        var filterRequest = new ReservationFindFilteredRequest(
                 theme.getId(),
                 member.getId(),
                 date,

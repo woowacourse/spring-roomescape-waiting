@@ -5,15 +5,15 @@ import java.time.LocalTime;
 import roomescape.reservation.entity.Reservation;
 import roomescape.reservation.entity.Waiting;
 
-public record ReservationReadMemberResponse(
+public record ReservationAndWaitingResponse(
         Long id,
         String theme,
         LocalDate date,
         LocalTime time,
         String status
 ) {
-    public static ReservationReadMemberResponse from(Reservation reservation) {
-        return new ReservationReadMemberResponse(
+    public static ReservationAndWaitingResponse from(Reservation reservation) {
+        return new ReservationAndWaitingResponse(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
@@ -22,8 +22,8 @@ public record ReservationReadMemberResponse(
         );
     }
 
-    public static ReservationReadMemberResponse from(Waiting waiting, int position) {
-        return new ReservationReadMemberResponse(
+    public static ReservationAndWaitingResponse from(Waiting waiting, int position) {
+        return new ReservationAndWaitingResponse(
                 waiting.getId(),
                 waiting.getTheme().getName(),
                 waiting.getDate(),

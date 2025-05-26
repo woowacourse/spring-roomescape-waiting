@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.entity.RoleType;
 import roomescape.theme.dto.request.ThemeCreateRequest;
-import roomescape.theme.dto.response.ThemeCreateResponse;
+import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -25,10 +25,10 @@ public class AdminThemeController {
 
     @PostMapping
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<ThemeCreateResponse> createTheme(
+    public ResponseEntity<ThemeResponse> createTheme(
             @RequestBody @Valid ThemeCreateRequest request
     ) {
-        ThemeCreateResponse response = themeService.createTheme(request);
+        ThemeResponse response = themeService.createTheme(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

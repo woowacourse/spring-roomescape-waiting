@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RoleRequired;
 import roomescape.member.entity.RoleType;
-import roomescape.reservation.dto.response.WaitingReadResponse;
+import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.WaitingService;
 
 @RestController
@@ -32,8 +32,8 @@ public class AdminWaitingController {
 
     @GetMapping
     @RoleRequired(roleType = RoleType.ADMIN)
-    public ResponseEntity<List<WaitingReadResponse>> getAllWaitings() {
-        List<WaitingReadResponse> responses = waitingService.getAllWaitings();
+    public ResponseEntity<List<WaitingResponse>> getAllWaitings() {
+        List<WaitingResponse> responses = waitingService.getAllWaitings();
         return ResponseEntity.ok().body(responses);
     }
 
