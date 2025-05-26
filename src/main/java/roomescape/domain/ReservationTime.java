@@ -43,18 +43,6 @@ public class ReservationTime {
                 .anyMatch(reservation -> reservation.isAlreadyBookedTime(date, themeId, this.id));
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
-    }
-
-    public List<Reservation> getReservations() {
-        return reservations;
-    }
-
     void addReservation(Reservation reservation) {
         this.reservations.add(reservation);
         reservation.setTime(this);
@@ -67,5 +55,17 @@ public class ReservationTime {
 
     public boolean compareEqualId(ReservationTime time) {
         return this.id.equals(time.id);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalTime getStartAt() {
+        return startAt;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 }

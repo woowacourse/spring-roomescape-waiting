@@ -33,6 +33,10 @@ public class Theme {
         return new Theme(null, name, description, thumbnail);
     }
 
+    public boolean compareEqualId(Theme theme) {
+        return this.id.equals(theme.id);
+    }
+
     public Long getId() {
         return id;
     }
@@ -47,9 +51,5 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
-    }
-
-    public boolean compareEqualId(Theme theme) {
-        return this.id.equals(theme.id);
     }
 }
