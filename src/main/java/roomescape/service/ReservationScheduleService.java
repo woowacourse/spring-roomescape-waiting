@@ -44,24 +44,28 @@ public class ReservationScheduleService {
     @Scheduled(cron = "0 0 0 * * *")
     @Transactional
     public void createSchedule() {
-        Set<LocalDate> scheduledDates = existingScheduledDates();
-        List<ReservationSchedule> newSchedules = generateNewSchedules(scheduledDates);
+        LocalDate start = LocalDate.now(clock);
+        LocalDate end = start.plusMonths(2);
+        Set<LocalDate> scheduledDates = existingScheduledDates(start, end);
+        List<ReservationSchedule> newSchedules = generateNewSchedules(scheduledDates, start, end);
         reservationScheduleRepository.saveAll(newSchedules);
     }
 
-    private Set<LocalDate> existingScheduledDates() {
-        return reservationScheduleRepository.findAll().stream()
+    private Set<LocalDate> existingScheduledDates(LocalDate start, LocalDate end) {
+        return reservationScheduleRepository.findSchedulesBetweenDates(start, end).stream()
                 .map(ReservationSchedule::getDate)
                 .collect(Collectors.toSet());
     }
 
-    private List<ReservationSchedule> generateNewSchedules(final Set<LocalDate> scheduledDates) {
+    private List<ReservationSchedule> generateNewSchedules(
+            final Set<LocalDate> scheduledDates,
+            final LocalDate start,
+            final LocalDate end
+    ) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
         List<Theme> themes = themeRepository.findAll();
-        LocalDate now = LocalDate.now(clock);
-        LocalDate end = now.plusMonths(2);
 
-        return now.datesUntil(end)
+        return start.datesUntil(end)
                 .filter(date -> !scheduledDates.contains(date))
                 .flatMap(date -> themeTimeCombinations(date, times, themes).stream())
                 .toList();

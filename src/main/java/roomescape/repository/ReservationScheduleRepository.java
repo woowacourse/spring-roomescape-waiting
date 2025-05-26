@@ -33,4 +33,13 @@ public interface ReservationScheduleRepository extends JpaRepository<Reservation
             @Param("themeId") Long themeId
     );
 
+    @Query("""
+            SELECT rs
+            FROM ReservationSchedule rs
+            WHERE rs.reservationDate.date BETWEEN :startDate AND :endDate
+            """)
+    List<ReservationSchedule> findSchedulesBetweenDates(
+            @Param("startDate") LocalDate startDate,
+            @Param("endDate") LocalDate endDate);
+
 }
