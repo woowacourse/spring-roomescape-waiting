@@ -68,7 +68,7 @@ public class ThemeController {
 
     @DeleteMapping("/{id}")
     @CheckRole(value = Role.ADMIN)
-    public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteTheme(@PathVariable("id") Long id) {
         themeService.deleteThemeById(id);
 
         return ResponseEntity.noContent().build();

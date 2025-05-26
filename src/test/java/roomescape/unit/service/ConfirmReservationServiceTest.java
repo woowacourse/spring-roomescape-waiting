@@ -14,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.LoginMemberRequest;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.Member;
 import roomescape.entity.Reservation;
 import roomescape.entity.ReservationTime;
@@ -22,10 +23,10 @@ import roomescape.exception.custom.InvalidReservationException;
 import roomescape.global.ReservationStatus;
 import roomescape.global.Role;
 import roomescape.repository.MemberRepository;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ConfirmReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.ReservationService;
+import roomescape.service.ConfirmReservationService;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,13 +37,13 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
-class ReservationServiceTest {
+class ConfirmReservationServiceTest {
 
     @Mock
     private MemberRepository memberRepository;
 
     @Mock
-    private ReservationRepository reservationRepository;
+    private ConfirmReservationRepository confirmReservationRepository;
 
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
@@ -51,7 +52,7 @@ class ReservationServiceTest {
     private ThemeRepository themeRepository;
 
     @InjectMocks
-    private ReservationService reservationService;
+    private ConfirmReservationService confirmReservationService;
 
     private Member member;
     private LoginMemberRequest loginMemberRequest;
@@ -70,13 +71,14 @@ class ReservationServiceTest {
     void 예약_전체를_조회할_수_있다() {
         //given
 
-        Reservation reservation = new Reservation(1L, member, LocalDate.now(), time, theme, ReservationStatus.RESERVED);
-        Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER), LocalDate.now(), time, theme, ReservationStatus.RESERVED);
+        ConfirmedReservation reservation = new ConfirmedReservation(1L, member, LocalDate.now(), time, theme);
+        ConfirmedReservation reservation2 = new ConfirmedReservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER)
+                , LocalDate.now(), time, theme);
 
-        when(reservationRepository.findAll())
+        when(confirmReservationRepository.findAll())
                 .thenReturn(List.of(reservation, reservation2));
         //when
-        List<Reservation> actual = reservationService.findAll();
+        List<ConfirmedReservation> actual = confirmReservationService.findAll();
 
         //then
         assertThat(actual).hasSize(2);
@@ -86,15 +88,15 @@ class ReservationServiceTest {
     @Test
     void 예약을_추가한다() {
         //given
-        when(reservationRepository.save(any(Reservation.class)))
-                    .thenReturn(new Reservation(1L, member, LocalDate.now().plusDays(1), time, theme, ReservationStatus.RESERVED));
+        when(confirmReservationRepository.save(any(ConfirmedReservation.class)))
+                    .thenReturn(new ConfirmedReservation(1L, member, LocalDate.now().plusDays(1), time, theme));
 
         CreateReservationRequest request = new CreateReservationRequest(LocalDate.now().plusDays(1), time.getId(), theme.getId());
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(member));
         when(reservationTimeRepository.findById(any(Long.class))).thenReturn(Optional.of(time));
         when(themeRepository.findById(any(Long.class))).thenReturn(Optional.of(theme));
         //when
-        Reservation actual = reservationService.addReservation(request, loginMemberRequest);
+        ConfirmedReservation actual = confirmReservationService.addReservation(request, loginMemberRequest);
 
         //then
         assertThat(actual.getReservationTime().getId()).isEqualTo(time.getId());
@@ -105,23 +107,23 @@ class ReservationServiceTest {
     @Test
     void 예약을_삭제할_수_있다() {
         //when
-        reservationService.deleteReservation(1L);
+        confirmReservationService.deleteReservation(1L);
 
         //then
-        verify(reservationRepository, times(1)).deleteById(1L);
+        verify(confirmReservationRepository, times(1)).deleteById(1L);
     }
 
     @Test
     void 중복_예약은_불가능하다() {
         //given
-        when(reservationRepository.existsByTimeIdAndThemeIdAndDate(any(Long.class), any(Long.class), any(LocalDate.class)))
+        when(confirmReservationRepository.existsByTimeIdAndThemeIdAndDate(any(Long.class), any(Long.class), any(LocalDate.class)))
                 .thenReturn(true);
         when(memberRepository.findById(any(Long.class))).thenReturn(Optional.of(member));
         when(reservationTimeRepository.findById(any(Long.class))).thenReturn(Optional.of(time));
         when(themeRepository.findById(any(Long.class))).thenReturn(Optional.of(theme));
 
         //when & then
-        assertThatThrownBy(() -> reservationService.addReservation(
+        assertThatThrownBy(() -> confirmReservationService.addReservation(
                 new CreateReservationRequest(LocalDate.now(), time.getId(), theme.getId()), loginMemberRequest))
                 .isInstanceOf(InvalidReservationException.class);
     }
@@ -130,13 +132,15 @@ class ReservationServiceTest {
     void 대상_유저의_예약_전체를_조회할_수_있다() {
         //given
 
-        Reservation reservation = new Reservation(1L, member, LocalDate.now(), time, theme, ReservationStatus.RESERVED);
-        Reservation reservation2 = new Reservation(2L, new Member(2L, "test2", "test2@email.com", "1234", Role.USER), LocalDate.now(), time, theme, ReservationStatus.RESERVED);
+        ConfirmedReservation reservation = new ConfirmedReservation(1L, member, LocalDate.now(), time, theme);
+        ConfirmedReservation reservation2 = new ConfirmedReservation(2L,
+                new Member(2L, "test2", "test2@email.com", "1234", Role.USER),
+                LocalDate.now(), time, theme);
 
-        when(reservationRepository.findAllByMemberId(1L))
+        when(confirmReservationRepository.findAllByMemberId(1L))
                 .thenReturn(List.of(reservation));
         //when
-        List<Reservation> actual = reservationService.findAllReservationByMember(1L);
+        List<ConfirmedReservation> actual = confirmReservationService.findAllReservationByMember(1L);
 
         //then
         assertThat(actual).hasSize(1);

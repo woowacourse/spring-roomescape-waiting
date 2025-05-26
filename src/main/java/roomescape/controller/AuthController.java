@@ -30,7 +30,7 @@ public class AuthController {
             @RequestBody @Valid LoginRequest request,
             HttpServletResponse response
     ) {
-        Member member = memberService.findByEmailAndPassword(request);
+        Member member = memberService.getMemberByEmailAndPassword(request);
         String accessToken = authService.createTokenByMember(member);
 
         CookieUtil.addCookie("token", accessToken, response);

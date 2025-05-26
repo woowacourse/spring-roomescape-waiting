@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dto.request.LoginRequest;
@@ -17,6 +18,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public Member addMember(SignupRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
             throw new InvalidMemberException("동일한 이메일로 추가할 수 없습니다.");
@@ -28,7 +30,7 @@ public class MemberService {
         return memberRepository.findAll();
     }
 
-    public Member findByEmailAndPassword(LoginRequest request) {
+    public Member getMemberByEmailAndPassword(LoginRequest request) {
         return memberRepository.findByEmailAndPassword(request.email(), request.password())
                 .orElseThrow(() -> new InvalidMemberException("유효하지 않은 로그인 정보입니다."));
     }

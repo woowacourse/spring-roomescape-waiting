@@ -1,30 +1,32 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationSlots;
-import roomescape.dto.request.AvailableTimeRequest;
 import roomescape.dto.request.CreateReservationTimeRequest;
-import roomescape.entity.Reservation;
+import roomescape.entity.ConfirmedReservation;
 import roomescape.entity.ReservationTime;
 import roomescape.exception.custom.InvalidReservationTimeException;
-import roomescape.repository.ReservationRepository;
+import roomescape.repository.ConfirmReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeService {
 
-    private final ReservationRepository reservationRepository;
+    private final ConfirmReservationRepository confirmReservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
     public ReservationTimeService(
-            ReservationRepository reservationRepository,
+            ConfirmReservationRepository confirmReservationRepository,
             ReservationTimeRepository reservationTimeRepository
     ) {
-        this.reservationRepository = reservationRepository;
+        this.confirmReservationRepository = confirmReservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
     }
 
+    @Transactional
     public ReservationTime addReservationTime(CreateReservationTimeRequest request) {
         ReservationTime reservationTime = request.toReservationTime();
         if (reservationTimeRepository.existsByStartAt(reservationTime.getStartAt())) {
@@ -37,18 +39,19 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
+    @Transactional
     public void deleteReservationTime(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (confirmReservationRepository.existsByTimeId(id)) {
             throw new InvalidReservationTimeException("예약이 되어있는 시간은 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);
     }
 
-    public ReservationSlots getReservationSlots(AvailableTimeRequest request) {
+    @Transactional(readOnly = true)
+    public ReservationSlots getReservationSlots(Long themeId, LocalDate date) {
         List<ReservationTime> times = reservationTimeRepository.findAll();
 
-        List<Reservation> alreadyReservedReservations = reservationRepository.findAllByDateAndTheme_Id(request.date(),
-                request.themeId());
+        List<ConfirmedReservation> alreadyReservedReservations = confirmReservationRepository.findAllByDateAndThemeId(date, themeId);
 
         return new ReservationSlots(times, alreadyReservedReservations);
     }

@@ -2,15 +2,16 @@ package roomescape.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.annotation.CheckRole;
@@ -46,9 +47,10 @@ public class ReservationTimeController {
 
     @GetMapping("/available")
     public ResponseEntity<List<ReservationTimeSlotResponse>> getAvailableReservationTimes(
-            @ModelAttribute @Valid AvailableTimeRequest request
+            @RequestParam("themeId") Long themeId,
+            @RequestParam("date") LocalDate date
     ) {
-        ReservationSlots reservationSlotTimes = reservationTimeService.getReservationSlots(request);
+        ReservationSlots reservationSlotTimes = reservationTimeService.getReservationSlots(themeId, date);
         List<ReservationSlot> reservationSlots = reservationSlotTimes.getReservationSlots();
         List<ReservationTimeSlotResponse> responses = reservationSlots.stream()
                 .map(ReservationTimeSlotResponse::from)
@@ -75,7 +77,7 @@ public class ReservationTimeController {
 
     @DeleteMapping("/{id}")
     @CheckRole(value = Role.ADMIN)
-    public ResponseEntity<Void> deleteReservationTime(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteReservationTime(@PathVariable("id") Long id) {
         reservationTimeService.deleteReservationTime(id);
 
         return ResponseEntity.noContent().build();
