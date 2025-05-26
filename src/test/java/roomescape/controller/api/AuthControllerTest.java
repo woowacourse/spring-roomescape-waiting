@@ -101,16 +101,16 @@ class AuthControllerTest {
 
     private Map<String, String> getTestParamsWithLogin() {
         return Map.of(
-            "email", "sa123",
-            "password", "na123"
+            "email", "le@lemon.com",
+            "password", "1234"
         );
     }
 
     private Map<String, String> getTestParamsWithSignup() {
         return Map.of(
             "name", "Lemon",
-            "email", "sa123",
-            "password", "na123"
+            "email", "le@lemon.com",
+            "password", "1234"
         );
     }
 }

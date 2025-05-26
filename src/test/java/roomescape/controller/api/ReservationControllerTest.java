@@ -21,26 +21,6 @@ class ReservationControllerTest {
 
     private String authToken;
 
-    //TODO: 테스트 공부하기
-/*
-    @Test
-    @DisplayName("예약 생성 테스트")
-    void createReservations(){
-        authToken = authService.createToken(new LoginRequest("admin", "1234"));
-
-        ReservationRequest request = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                1,
-                1
-        );
-
-        RestAssured.given().log().all()
-                .cookie()
-                .body(request)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(204);
-    }*/
 
     @Test
     @DisplayName("/reservations 요청 시 예약 정보 조회")
@@ -51,24 +31,6 @@ class ReservationControllerTest {
             .statusCode(200);
     }
 
-    //TODO: 테스트 공부하기
-/*
-    @Test
-    @DisplayName("예약 관리 페이지 내에서 예약 삭제")
-    void deleteReservation() {
-
-
-        RestAssured.given().log().all()
-            .when().delete("/reservations/1")
-            .then().log().all()
-            .statusCode(204);
-
-        RestAssured.given().log().all()
-            .when().get("/reservations")
-            .then().log().all()
-            .statusCode(200);
-    }
-*/
 
     private Map<String, String> getTestParamsWithMember() {
         return Map.of(

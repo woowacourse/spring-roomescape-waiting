@@ -25,8 +25,8 @@ class MemberControllerTest {
 
     private Map<String, String> getTestParamsWithMember() {
         return Map.of(
-            "name", "이름",
-            "email", "이메일",
+            "name", "lemon",
+            "email", "leo@lemon.com",
             "password", "비밀번호"
         );
     }
