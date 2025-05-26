@@ -44,6 +44,6 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
 
     private String extractToken(HttpServletRequest request) {
         return CookieManager.extractByName("token", request)
-                .orElseThrow(() -> new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS));
+                .orElseThrow(() -> new UnauthorizedException(ExceptionCause.UNAUTHORIZED_ACCESS));
     }
 }

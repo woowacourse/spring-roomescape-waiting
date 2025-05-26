@@ -31,9 +31,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations(Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
+        member.validateAdminOrThrow();
         List<ReservationResponse> allReservations = reservationService.findAllReservations();
         return ResponseEntity.ok(allReservations);
     }
@@ -48,9 +46,7 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id, Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
+        member.validateAdminOrThrow();
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }

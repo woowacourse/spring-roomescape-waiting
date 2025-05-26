@@ -32,12 +32,9 @@ public class AdminReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody AdminReservationCreateRequest request,
                                                               Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
-
-        ReservationResponse responseDto = reservationService.createAdminReservation(request, member);
-        return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
+        member.validateAdminOrThrow();
+        ReservationResponse response = reservationService.createAdminReservation(request, member);
+        return ResponseEntity.created(URI.create("reservations/" + response.id())).body(response);
     }
 
     @GetMapping
@@ -47,10 +44,8 @@ public class AdminReservationController {
             @RequestParam(value = "from", required = false) LocalDate from,
             @RequestParam(value = "to", required = false) LocalDate to,
             Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
-
-        return ResponseEntity.ok(reservationService.searchReservations(memberId, themeId, from, to));
+        member.validateAdminOrThrow();
+        List<ReservationResponse> response = reservationService.searchReservations(memberId, themeId, from, to);
+        return ResponseEntity.ok(response);
     }
 }

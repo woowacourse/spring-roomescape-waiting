@@ -11,6 +11,7 @@ import jakarta.persistence.Table;
 import java.util.regex.Pattern;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ExceptionCause;
+import roomescape.exception.UnauthorizedException;
 
 @Entity
 @Table(name = "member")
@@ -79,6 +80,12 @@ public class Member {
         int nameLength = name.length();
         if (nameLength < 1 || nameLength > 5) {
             throw new BadRequestException(ExceptionCause.MEMBER_NAME_INVALID_INPUT);
+        }
+    }
+
+    public void validateAdminOrThrow() {
+        if (!Role.isAdmin(role)) {
+            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_ACCESS);
         }
     }
 

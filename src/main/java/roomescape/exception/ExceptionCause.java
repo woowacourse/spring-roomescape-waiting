@@ -31,7 +31,7 @@ public enum ExceptionCause {
     WAITING_NOTFOUND("예약 대기를 찾을 수 없습니다."),
     WAITING_TIME_AND_DATE_DUPLICATE("날짜와 시간이 겹치는 예약 대기가 존재합니다."),
 
-    UNAUTHORIZED_PAGE_ACCESS("접근 권한이 없습니다."),
+    UNAUTHORIZED_ACCESS("접근 권한이 없습니다."),
     UNAUTHORIZED_LOGIN_ACCESS("로그인 정보를 다시 확인해 주세요."),
 
     INPUT_INVALID("값이 잘못되었습니다"),
