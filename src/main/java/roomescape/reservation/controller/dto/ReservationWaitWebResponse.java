@@ -26,7 +26,7 @@ public record ReservationWaitWebResponse(
                           final LocalDate date,
                           final ReservationTimeWebResponse time,
                           final ThemeWebResponse theme) {
-        Validator.of(ReservationWebResponse.class)
+        Validator.of(ReservationWaitWebResponse.class)
                 .notNullField(Fields.id, id)
                 .notNullField(Fields.memberInfo, memberInfo)
                 .notNullField(Fields.date, date)
