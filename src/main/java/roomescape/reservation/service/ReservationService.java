@@ -26,6 +26,8 @@ import roomescape.theme.repository.ThemeRepositoryInterface;
 @Service
 public class ReservationService {
 
+    private static final int WAITING_COUNT = 1;
+
     private final ReservationRepositoryInterface reservationRepository;
     private final ReservationTimeRepositoryInterface reservationTimeRepository;
     private final ThemeRepositoryInterface themeRepository;
@@ -118,7 +120,7 @@ public class ReservationService {
                 waiting.getDate(),
                 waiting.getTime(),
                 waiting.getId()
-        ) + 1;
+        ) + WAITING_COUNT;
     }
 
     @Transactional
