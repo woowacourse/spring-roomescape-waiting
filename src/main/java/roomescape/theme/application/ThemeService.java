@@ -1,5 +1,6 @@
 package roomescape.theme.application;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import roomescape.theme.ui.dto.ThemeResponse;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
+    private final Clock clock;
 
     @Transactional
     public ThemeResponse create(final CreateThemeRequest request) {
@@ -44,21 +46,16 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
-        return themeRepository.findAll()
-                .stream()
-                .map(ThemeResponse::from)
-                .toList();
+        return themeRepository.findAll().stream().map(ThemeResponse::from).toList();
     }
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
-        final LocalDate dateTo = LocalDate.now();
+        final LocalDate dateTo = LocalDate.now(clock);
         final LocalDate dateFrom = dateTo.minusDays(7);
         final int limit = 10;
 
-        return themeRepository.getTopNThemesInPeriod(dateFrom, dateTo, limit)
-                .stream()
-                .map(ThemeResponse::from)
+        return themeRepository.getTopNThemesInPeriod(dateFrom, dateTo, limit).stream().map(ThemeResponse::from)
                 .toList();
     }
 }

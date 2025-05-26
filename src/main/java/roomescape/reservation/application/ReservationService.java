@@ -1,6 +1,8 @@
 package roomescape.reservation.application;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -36,6 +38,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final Clock clock;
 
     @Transactional
     public MemberReservationResponse createForMember(final MemberCreateReservationRequest request,
@@ -134,7 +137,7 @@ public class ReservationService {
         final ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
         final Theme theme = themeRepository.getByIdOrThrow(themeId);
 
-        return reservationSlotRepository.save(new ReservationSlot(date, time, theme));
+        return reservationSlotRepository.save(new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
     }
 
     private void resolveSlotAfterChange(final ReservationSlot reservationSlot) {

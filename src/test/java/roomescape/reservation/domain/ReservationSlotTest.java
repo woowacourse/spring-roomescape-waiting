@@ -9,6 +9,7 @@ import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVA
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Member;
@@ -25,8 +26,8 @@ class ReservationSlotTest {
         final ReservationTime reservationTime = NOT_SAVED_RESERVATION_TIME_1();
         final Theme theme = NOT_SAVED_THEME_1();
 
-        final ReservationSlot reservationSlot = new ReservationSlot(LocalDate.now().plusDays(1), reservationTime,
-                theme);
+        final ReservationSlot reservationSlot = new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme,
+                LocalDateTime.now());
 
         reservationSlot.addReservation(new Reservation(1L, member1, reservationSlot));
         reservationSlot.addReservation(new Reservation(2L, member2, reservationSlot));
@@ -37,11 +38,9 @@ class ReservationSlotTest {
         final List<Reservation> waitingReservations = reservationSlot.getWaitingReservations();
 
         // then
-        assertAll(
-                () -> assertThat(waitingReservations).hasSize(2),
+        assertAll(() -> assertThat(waitingReservations).hasSize(2),
                 () -> assertThat(waitingReservations).extracting(Reservation::getMember)
-                        .containsExactly(member1, member2)
-        );
+                        .containsExactly(member1, member2));
     }
 
     @Test
@@ -53,8 +52,8 @@ class ReservationSlotTest {
         final ReservationTime reservationTime = NOT_SAVED_RESERVATION_TIME_1();
         final Theme theme = NOT_SAVED_THEME_1();
 
-        final ReservationSlot reservationSlot = new ReservationSlot(LocalDate.now().plusDays(1), reservationTime,
-                theme);
+        final ReservationSlot reservationSlot = new ReservationSlot(LocalDate.now().plusDays(1), reservationTime, theme,
+                LocalDateTime.now());
 
         final Reservation reservation1 = new Reservation(1L, member1, reservationSlot);
         final Reservation reservation2 = new Reservation(2L, member2, reservationSlot);
@@ -68,12 +67,9 @@ class ReservationSlotTest {
         reservationSlot.removeReservation(reservation1);
 
         // then
-        assertAll(
-                () -> assertThat(reservationSlot.getConfirmedReservation()).isNull(),
+        assertAll(() -> assertThat(reservationSlot.getConfirmedReservation()).isNull(),
                 () -> assertThat(reservationSlot.getAllReservations()).containsExactlyInAnyOrder(reservation2,
-                        reservation3),
-                () -> assertThat(reservationSlot.getAllReservations()).hasSize(2)
-        );
+                        reservation3), () -> assertThat(reservationSlot.getAllReservations()).hasSize(2));
     }
 
 }

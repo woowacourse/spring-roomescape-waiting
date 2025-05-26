@@ -33,34 +33,29 @@ import roomescape.theme.domain.Theme;
 public class ReservationSlot {
 
     private static final int MAX_WAITING_COUNT = 20;
-
+    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    private final List<Reservation> allReservations = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
-
     @Column(nullable = false)
     private LocalDate date;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
     private Theme theme;
-
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "confirmed_reservation_id")
     private Reservation confirmedReservation;
 
-    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Reservation> allReservations = new ArrayList<>();
-
-    public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme) {
+    public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
+                           final LocalDateTime now) {
         validateDate(date);
         validateTime(time);
-        validateFutureReservation(date, time);
+        validateFutureReservation(date, time, now);
         validateTheme(theme);
         this.id = id;
         this.date = date;
@@ -68,34 +63,9 @@ public class ReservationSlot {
         this.theme = theme;
     }
 
-    public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
-        this(null, date, time, theme);
-    }
-
-    private static void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("날짜는 null이면 안됩니다.");
-        }
-    }
-
-    private static void validateFutureReservation(final LocalDate date, final ReservationTime time) {
-        final LocalDateTime now = LocalDateTime.now();
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        if (reservationDateTime.isBefore(now)) {
-            throw new IllegalArgumentException("예약 시간은 현재 시간보다 이후여야 합니다.");
-        }
-    }
-
-    private static void validateTime(final ReservationTime time) {
-        if (time == null) {
-            throw new IllegalArgumentException("시간은 null이면 안됩니다.");
-        }
-    }
-
-    private static void validateTheme(final Theme theme) {
-        if (theme == null) {
-            throw new IllegalArgumentException("테마는 null이면 안됩니다.");
-        }
+    public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme,
+                           final LocalDateTime now) {
+        this(null, date, time, theme, now);
     }
 
     public List<Reservation> getWaitingReservations() {
@@ -118,6 +88,31 @@ public class ReservationSlot {
 
     public boolean shouldBeDeleted() {
         return this.confirmedReservation == null && this.allReservations.isEmpty();
+    }
+
+    private void validateDate(final LocalDate date) {
+        if (date == null) {
+            throw new IllegalArgumentException("날짜는 null이면 안됩니다.");
+        }
+    }
+
+    private void validateFutureReservation(final LocalDate date, final ReservationTime time, final LocalDateTime now) {
+        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (reservationDateTime.isBefore(now)) {
+            throw new IllegalArgumentException("예약 시간은 현재 시간보다 이후여야 합니다.");
+        }
+    }
+
+    private void validateTime(final ReservationTime time) {
+        if (time == null) {
+            throw new IllegalArgumentException("시간은 null이면 안됩니다.");
+        }
+    }
+
+    private void validateTheme(final Theme theme) {
+        if (theme == null) {
+            throw new IllegalArgumentException("테마는 null이면 안됩니다.");
+        }
     }
 
     private Reservation getFirstRankWaiting() {

@@ -7,7 +7,9 @@ import static roomescape.fixture.domain.MemberFixture.NOT_SAVED_MEMBER_1;
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_2;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -52,6 +54,9 @@ class ThemeRepositoryTest {
     @Autowired
     MemberRepository memberRepository;
 
+    @Autowired
+    Clock clock;
+
     @Test
     void ID_값에_해당하는_테마를_반환한다() {
         // given
@@ -79,9 +84,12 @@ class ThemeRepositoryTest {
 
     @MethodSource
     @ParameterizedTest
-    void 기간_내_예약이_많은_순서대로_테마를_조회한다(final LocalDate from, final LocalDate to, final int topN,
+    void 기간_내_예약이_많은_순서대로_테마를_조회한다(final int fromPlusDays, final int toPlusDays, final int topN,
                                    final List<String> expectedNames) {
         // given
+        final LocalDate from = LocalDate.now(clock).plusDays(fromPlusDays);
+        final LocalDate to = LocalDate.now(clock).plusDays(toPlusDays);
+
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
@@ -94,23 +102,23 @@ class ThemeRepositoryTest {
         final ReservationTime time3 = reservationTimeRepository.save(
                 ReservationTimeFixture.NOT_SAVED_RESERVATION_TIME_3());
 
-        final LocalDate date1 = LocalDate.now().plusDays(1);
-        final LocalDate date2 = LocalDate.now().plusDays(5);
+        final LocalDate date1 = LocalDate.now(clock).plusDays(1);
+        final LocalDate date2 = LocalDate.now(clock).plusDays(5);
 
         final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date1, time1, theme1));
+                new ReservationSlot(date1, time1, theme1, LocalDateTime.now(clock)));
         final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date1, time2, theme2));
+                new ReservationSlot(date1, time2, theme2, LocalDateTime.now(clock)));
         final ReservationSlot reservationSlot3 = reservationSlotRepository.save(
-                new ReservationSlot(date1, time3, theme1));
+                new ReservationSlot(date1, time3, theme1, LocalDateTime.now(clock)));
         final ReservationSlot reservationSlot4 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time1, theme2));
+                new ReservationSlot(date2, time1, theme2, LocalDateTime.now(clock)));
         final ReservationSlot reservationSlot5 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time2, theme1));
+                new ReservationSlot(date2, time2, theme1, LocalDateTime.now(clock)));
         final ReservationSlot reservationSlot6 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time2, theme2));
+                new ReservationSlot(date2, time2, theme2, LocalDateTime.now(clock)));
         final ReservationSlot reservationSlot7 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time3, theme2));
+                new ReservationSlot(date2, time3, theme2, LocalDateTime.now(clock)));
 
         reservationRepository.save(new Reservation(member, reservationSlot1));
         reservationRepository.save(new Reservation(member, reservationSlot2));
@@ -128,11 +136,8 @@ class ThemeRepositoryTest {
     }
 
     static Stream<Arguments> 기간_내_예약이_많은_순서대로_테마를_조회한다() {
-        return Stream.of(
-                Arguments.of(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5), 10, List.of("테마2", "테마1")),
-                Arguments.of(LocalDate.now().plusDays(2), LocalDate.now().plusDays(5), 10, List.of("테마2", "테마1")),
-                Arguments.of(LocalDate.now().plusDays(1), LocalDate.now().plusDays(3), 10, List.of("테마1", "테마2")),
-                Arguments.of(LocalDate.now().plusDays(1), LocalDate.now().plusDays(4), 1, List.of("테마1")),
-                Arguments.of(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5), 1, List.of("테마2")));
+        return Stream.of(Arguments.of(1, 5, 10, List.of("테마2", "테마1")), Arguments.of(2, 5, 10, List.of("테마2", "테마1")),
+                Arguments.of(1, 3, 10, List.of("테마1", "테마2")), Arguments.of(1, 4, 1, List.of("테마1")),
+                Arguments.of(1, 5, 1, List.of("테마2")));
     }
 }
