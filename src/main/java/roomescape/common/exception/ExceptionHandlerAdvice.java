@@ -39,4 +39,9 @@ public class ExceptionHandlerAdvice {
     public ResponseEntity<String> handleForbiddenException(final ForbiddenException e) {
         return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
     }
+
+    @ExceptionHandler(DuplicatedException.class)
+    public ResponseEntity<String> handleDuplicatedException(final DuplicatedException e) {
+        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+    }
 }

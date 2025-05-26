@@ -2,7 +2,7 @@ package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.auth.service.dto.LoginMember;
-import roomescape.common.exception.AlreadyInUseException;
+import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -33,7 +33,7 @@ public class CreateReservationService {
 
     public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
-            throw new AlreadyInUseException("중복되는 예약이 존재합니다.");
+            throw new DuplicatedException("중복되는 예약이 존재합니다.");
         }
 
         Reservation reservation = createReservation(request);

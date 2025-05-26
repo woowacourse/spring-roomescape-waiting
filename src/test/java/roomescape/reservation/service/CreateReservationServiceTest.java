@@ -1,6 +1,8 @@
 package roomescape.reservation.service;
 
-import org.assertj.core.api.SoftAssertions;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,25 +10,23 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.service.dto.LoginMember;
-import roomescape.common.exception.AlreadyInUseException;
+import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.service.dto.request.ReservationCreateRequest;
 import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.service.dto.response.ReservationTimeResponse;
-import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.dto.response.ThemeResponse;
-import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 @ActiveProfiles("test")
 @DataJpaTest
@@ -34,89 +34,71 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class CreateReservationServiceTest {
 
     private final LocalDateTime now = LocalDateTime.now();
+    private final Theme theme = new Theme("포스티", "공포", "wwww.um.com");
+    private final ReservationTime time = new ReservationTime(LocalTime.of(8, 0));
+    private final Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
+
+    @PersistenceContext
+    private EntityManager entityManager;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
-    @Autowired
-    private ThemeRepository themeRepository;
-    @Autowired
-    private MemberRepository memberRepository;
-    @Autowired
     private CreateReservationService reservationService;
+
+    @BeforeEach
+    void setup() {
+        entityManager.persist(theme);
+        entityManager.persist(time);
+        entityManager.persist(member);
+    }
 
     @DisplayName("예약을 추가한다.")
     @Test
     void test3() {
         // given
-        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
-        Long themeId = savedTheme.getId();
-
-        LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
-        Long timeId = savedTime.getId();
-        Member savedMember = memberRepository.save(new Member("포스티", "test@test.com", "12341234", Role.MEMBER));
-
         LocalDate date = nextDay();
-
-        ReservationCreateRequest requestDto =
-                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
+        ReservationCreateRequest request = new ReservationCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
 
         // when
-        ReservationResponse result = reservationService.create(requestDto);
+        ReservationResponse result = reservationService.create(request);
 
         // then
-        SoftAssertions softAssertions = new SoftAssertions();
-
-        softAssertions.assertThat(result.member().name()).isEqualTo("포스티");
-        softAssertions.assertThat(result.date()).isEqualTo(date);
-        softAssertions.assertThat(result.time()).isEqualTo(new ReservationTimeResponse(timeId, time));
-        softAssertions.assertThat(result.theme())
-                .isEqualTo(new ThemeResponse(themeId, savedTheme.getName(), savedTheme.getDescription(),
-                        savedTheme.getThumbnail()));
-
-        softAssertions.assertAll();
+        assertSoftly(softly -> {
+            softly.assertThat(result.member().name()).isEqualTo("포스티");
+            softly.assertThat(result.date()).isEqualTo(date);
+            softly.assertThat(result.time()).isEqualTo(new ReservationTimeResponse(time.getId(), time.getStartAt()));
+            softly.assertThat(result.theme()).isEqualTo(new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnail()));
+        });
     }
 
-    @DisplayName("이미 존재하는 예약과 동일하면 예외가 발생한다.")
+    @DisplayName("이미 존재하는 예약과 날짜, 시간, 테마가 동일하면 예외가 발생한다.")
     @Test
     void test4() {
         // given
-        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
-        Long themeId = savedTheme.getId();
-
-        LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
-        Long timeId = savedTime.getId();
-        Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberRepository.save(member);
         LocalDate date = nextDay();
 
-        ReservationCreateRequest requestDto =
-                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
-        reservationService.create(requestDto);
+        Member otherMember = new Member("밍곰", "test@test.com", "12341234", Role.MEMBER);
+        entityManager.persist(otherMember);
+
+        ReservationCreateRequest request = new ReservationCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+        reservationService.create(request);
+
+        ReservationCreateRequest duplicatedRequest = new ReservationCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(otherMember));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.create(requestDto))
-                .isInstanceOf(AlreadyInUseException.class);
+        assertThatThrownBy(() -> reservationService.create(duplicatedRequest))
+                .isInstanceOf(DuplicatedException.class);
     }
 
     @DisplayName("과거 날짜에 예약을 추가하면 예외가 발생한다.")
     @Test
     void test5() {
         // given
-        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
-        Long themeId = savedTheme.getId();
-        Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberRepository.save(member);
-
         LocalDate date = now.toLocalDate();
-        LocalTime pastTime = now.toLocalTime().minusMinutes(1);
 
-        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(pastTime));
-        Long timeId = savedTime.getId();
+        ReservationTime pastTime = new ReservationTime(now.toLocalTime().minusMinutes(1));
+        entityManager.persist(pastTime);
 
-        ReservationCreateRequest requestDto =
-                new ReservationCreateRequest(date, timeId, themeId, LoginMember.of(savedMember));
+        ReservationCreateRequest requestDto = new ReservationCreateRequest(date, pastTime.getId(), theme.getId(), LoginMember.of(member));
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(requestDto))
@@ -126,16 +108,11 @@ class CreateReservationServiceTest {
     @DisplayName("존재하지 않는 예약 시간 ID로 저장하면 예외를 반환한다.")
     @Test
     void test6() {
-        Theme savedTheme = themeRepository.save(new Theme("포스티", "공포", "wwww.um.com"));
-        Long themeId = savedTheme.getId();
-        Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberRepository.save(member);
-
         LocalDate date = nextDay();
 
         Long notExistId = 1000L;
         ReservationCreateRequest requestDto =
-                new ReservationCreateRequest(date, notExistId, themeId, LoginMember.of(savedMember));
+                new ReservationCreateRequest(date, notExistId, theme.getId(), LoginMember.of(member));
 
         assertThatThrownBy(() -> reservationService.create(requestDto))
                 .isInstanceOf(EntityNotFoundException.class);
@@ -146,15 +123,11 @@ class CreateReservationServiceTest {
     void notExistThemeId() {
         LocalDate date = now.toLocalDate().plusDays(1);
 
-        LocalTime time = LocalTime.of(8, 0);
-        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
-        Long timeId = savedTime.getId();
-        Member member = new Member("포스티", "test@test.com", "12341234", Role.MEMBER);
-        Member savedMember = memberRepository.save(member);
+        ReservationTime time = new ReservationTime(LocalTime.of(8, 0));
+        entityManager.persist(time);
 
         Long notExistId = 1000L;
-        ReservationCreateRequest requestDto =
-                new ReservationCreateRequest(date, timeId, notExistId, LoginMember.of(savedMember));
+        ReservationCreateRequest requestDto = new ReservationCreateRequest(date, time.getId(), notExistId, LoginMember.of(member));
 
         assertThatThrownBy(() -> reservationService.create(requestDto))
                 .isInstanceOf(EntityNotFoundException.class);
