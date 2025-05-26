@@ -61,4 +61,16 @@ public class Waiting extends TimeStamp {
     public ReservationInfo getReservationInfo() {
         return reservationInfo;
     }
+
+    public Theme getTheme() {
+        return reservationInfo.getTheme();
+    }
+
+    public LocalDate getDate() {
+        return reservationInfo.getDate();
+    }
+
+    public ReservationTime getReservationTime() {
+        return reservationInfo.getReservationTime();
+    }
 }

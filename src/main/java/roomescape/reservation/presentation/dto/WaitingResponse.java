@@ -18,8 +18,8 @@ public class WaitingResponse {
         this.id = waiting.getId();
         this.date = waiting.getReservationInfo().getDate();
         this.member = new MemberResponse(waiting.getMember());
-        this.theme = new ThemeResponse(waiting.getReservationInfo().getTheme());
-        this.time = new ReservationTimeResponse(waiting.getReservationInfo().getReservationTime());
+        this.theme = new ThemeResponse(waiting.getTheme());
+        this.time = new ReservationTimeResponse(waiting.getReservationTime());
     }
 
     public Long getId() {
