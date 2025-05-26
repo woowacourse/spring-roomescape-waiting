@@ -55,12 +55,12 @@ public class ReservationTime {
         return reservations;
     }
 
-    protected void addReservation(Reservation reservation) {
+    void addReservation(Reservation reservation) {
         this.reservations.add(reservation);
         reservation.setTime(this);
     }
 
-    protected void removeReservation(Reservation reservation) {
+    void removeReservation(Reservation reservation) {
         this.reservations.remove(reservation);
         reservation.setTime(null);
     }

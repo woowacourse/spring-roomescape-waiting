@@ -67,7 +67,7 @@ public class WaitingService {
         Member member = memberService.getMemberEntityById(memberId);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
-        if (!member.isAdmin() && !member.isEqual(reservation.getMember())) {
+        if (!member.isAdmin() && member.isNotEqual(reservation.getMember())) {
             throw new AuthorizationException("권한이 없습니다.");
         }
         reservation.deleteSelf();
