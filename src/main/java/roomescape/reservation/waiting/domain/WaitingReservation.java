@@ -74,8 +74,4 @@ public class WaitingReservation {
 
         return date.isEqual(dateTime.toLocalDate()) && time.isBefore(dateTime.toLocalTime());
     }
-
-    public boolean isSameTime(final ReservationTime time) {
-        return this.time.isEqual(time.getStartAt());
-    }
 }
