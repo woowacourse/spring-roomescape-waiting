@@ -170,10 +170,10 @@ public class ReservationService {
     }
 
     private void approveFirstWaiting(final Reservation reservation) {
-        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeIdAndThemeIdOrderByIdAsc(
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByIdAsc(
                 reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
+                reservation.getTime(),
+                reservation.getTheme()
         );
         waiting.ifPresent(value -> {
             reservationRepository.save(new Reservation(

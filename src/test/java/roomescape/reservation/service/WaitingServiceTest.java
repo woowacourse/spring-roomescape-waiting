@@ -21,11 +21,13 @@ import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
 import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
@@ -44,6 +46,8 @@ class WaitingServiceTest {
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
     private WaitingService waitingService;
 
     @DisplayName("예약 대기를 생성한다.")
@@ -54,6 +58,7 @@ class WaitingServiceTest {
         Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        reservationRepository.save(new Reservation(member, date, time, theme));
 
         WaitingCreateRequest request =
                 new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
@@ -79,14 +84,32 @@ class WaitingServiceTest {
         Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
-        Waiting waiting = waitingRepository.save(new Waiting(date, member, time, theme));
+        reservationRepository.save(new Reservation(member, date, time, theme));
+
+        WaitingCreateRequest request =
+                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+        waitingService.createWaiting(request);
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.createWaiting(request))
+                .isInstanceOf(AlreadyInUseException.class);
+    }
+
+    @DisplayName("예약이 존재하지 않으면 예약 대기를 생성할 수 없다.")
+    @Test
+    void createWaitingInNonExistsReservation() {
+        // given
+        LocalDate date = getTomorrow();
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
 
         WaitingCreateRequest request =
                 new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
 
         // when & then
         assertThatThrownBy(() -> waitingService.createWaiting(request))
-                .isInstanceOf(AlreadyInUseException.class);
+                .isInstanceOf(EntityNotFoundException.class);
     }
 
     @DisplayName("예약대기를 삭제한다.")

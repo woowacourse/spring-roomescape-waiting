@@ -56,7 +56,7 @@ function requestDeleteWaiting(id) {
       [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
        */
   console.log(id);
-  return fetch(`/reservations/waiting/${id}`, {
+  return fetch(`/waitings/${id}`, {
     method: "DELETE",
   }).then((response) => {
     if (response.status === 204) return;

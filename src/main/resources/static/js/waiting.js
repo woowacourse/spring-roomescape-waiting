@@ -3,7 +3,7 @@ document.addEventListener('DOMContentLoaded', () => {
     [4단계] 예약 대기 관리 기능
     예약 대기 목록 조회 endpoint 설정
      */
-    fetch('/admin/reservations/waiting') // 내 예약 목록 조회 API 호출
+    fetch('/admin/waitings') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -54,7 +54,7 @@ function render(data) {
 //     [4단계] 예약 대기 목록 관리 기능
 //     예약 대기 승인 API 호출
 //      */
-//     return fetch('/admin/reservations/waiting/approve/' + id, {
+//     return fetch('/admin/waitings/approve/' + id, {
 //         method: 'POST'
 //     }).then(response => {
 //         if (response.status === 201) return;
@@ -70,7 +70,7 @@ function deny(event) {
     [4단계] 예약 대기 목록 관리 기능
     예약 대기 거절 API 호출
      */
-    return fetch('/admin/waiting/' + id, {
+    return fetch('/admin/waitings/' + id, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;

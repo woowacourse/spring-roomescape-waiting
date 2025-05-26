@@ -87,6 +87,14 @@ class AdminWaitingControllerTest {
                 "timeId", timeId,
                 "themeId", themeId
         );
+
+        RestAssured.given()
+                .cookie("token", tokenValue)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then();
+
         int waitingId = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .cookie("token", tokenValue)

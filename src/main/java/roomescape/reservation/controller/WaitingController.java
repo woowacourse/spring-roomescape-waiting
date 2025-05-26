@@ -35,7 +35,7 @@ public class WaitingController {
         WaitingCreateRequest createRequest = WaitingCreateRequest.from(request, loginMember);
         WaitingResponse response = waitingService.createWaiting(createRequest);
 
-        return ResponseEntity.created(URI.create("/reservations/waiting/" + response.id()))
+        return ResponseEntity.created(URI.create("/waitings/" + response.id()))
                 .body(response);
     }
 

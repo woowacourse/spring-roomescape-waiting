@@ -7,6 +7,8 @@ import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 
@@ -48,5 +50,9 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             """)
     List<WaitingWithRank> findAllWaitingWithRankByMemberId(Long memberId);
 
-    Optional<Waiting> findFirstByDateAndTimeIdAndThemeIdOrderByIdAsc(LocalDate date, Long themeId, Long timeId);
+    Optional<Waiting> findFirstByDateAndTimeAndThemeOrderByIdAsc(
+            LocalDate date,
+            ReservationTime time,
+            Theme theme
+    );
 }

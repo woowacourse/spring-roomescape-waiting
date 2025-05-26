@@ -17,6 +17,7 @@ import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
 import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
 import roomescape.reservation.repository.WaitingRepository;
@@ -28,17 +29,20 @@ public class WaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(
             final WaitingRepository waitingRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public List<WaitingResponse> getAll() {
@@ -53,7 +57,9 @@ public class WaitingService {
         if (hasAlreadyWaiting(request)) {
             throw new AlreadyInUseException("이미 예약 대기가 존재합니다.");
         }
-        // TODO: 예약이 존재하지 않으면 예약 대기를 생성할 수 없다
+        if (canCreateReservation(request)) {
+            throw new EntityNotFoundException("예약이 존재하지 않습니다.");
+        }
 
         Waiting waiting = getWaiting(request);
         LocalDateTime now = LocalDateTime.now();
@@ -66,6 +72,12 @@ public class WaitingService {
     private boolean hasAlreadyWaiting(final WaitingCreateRequest request) {
         return waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
                 request.date(), request.timeId(), request.themeId(), request.loginMember().id()
+        );
+    }
+
+    private boolean canCreateReservation(final WaitingCreateRequest request) {
+        return !reservationRepository.existsByDateAndTimeIdAndThemeId(
+                request.date(), request.timeId(), request.themeId()
         );
     }
 

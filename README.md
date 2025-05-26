@@ -25,7 +25,7 @@
 |   GET     	   |  Admin    	   | `/admin/reservation` 	 | 200 OK  	  |    관리자 예약 관리 페이지                  	    |
 |   GET     	   |  Admin    	   |   `/admin/time`    	   | 200 OK  	  |   관리자 예약 시간 관리 페이지                	    |
 |   GET     	   |  Admin    	   |  `/admin/theme`    	   | 200 OK  	  |   관리자 예약 테마 관리 페이지                	    |
-|   GET     	   |  Admin    	   |  `/admin/waiting`   	  | 200 OK  	  |   관리자 예약 대기 관리 페이지                	    |
+|   GET     	   |  Admin    	   | `/admin/waitings`   	  | 200 OK  	  |   관리자 예약 대기 관리 페이지                	    |
 |   GET     	   | User, Admin 	 |  `/reservation`    	   | 200 OK  	  |   관리자 및 사용자 예약 생성 페이지             	    |
 |   GET     	   | User, Admin 	 | `/reservation-mine` 	  | 200 OK  	  |  관리자 및 사용자 내 예약/예약 대기 조회 페이지       	   |
 |   GET     	   |       	       |    `/login`       	    | 200 OK  	  |    로그인 페이지                       	     |
@@ -44,11 +44,11 @@
 |   POST    	   |   User, Admin 	    |     `/reservations`         	     |  201 Created  	  |          예약 생성                             	           |
 |   POST    	   |      Admin 	       |        `/times`         	         |  201 Created  	  |         예약 시간 생성                             	         |
 |   POST    	   |      Admin 	       |        `/themes`         	        |  201 Created  	  |          테마 생성                             	           |
-|   POST    	   |   User, Admin 	    |   `/reservations/waiting`     	   |  201 Created  	  |          예약 대기 생성                           	          |
+|   POST    	   |   User, Admin 	    |         `/waitings`     	         |  201 Created  	  |          예약 대기 생성                           	          |
 |  DELETE   	   |      Admin 	       |      `/reservations/{id}`  	      | 204 No Content 	 |           예약 삭제                           	            |
 |  DELETE   	   |      Admin 	       |         `/times/{id}`  	          | 204 No Content 	 |         예약 시간 삭제                             	         |
 |  DELETE   	   |      Admin 	       |         `/themes/{id}`  	         | 204 No Content 	 |          테마 삭제                             	           |
-|  DELETE   	   |   User, Admin 	    |  `/reservations/waiting/{id}` 	   | 204 No Content 	 |          예약 대기 삭제                           	          |
+|  DELETE   	   |   User, Admin 	    |        `/waitings/{id}` 	         | 204 No Content 	 |          예약 대기 삭제                           	          |
 
 # 📌 Member API
 
@@ -59,10 +59,10 @@
 
 # 📌 Admin API
 
-| HTTP Method 	 | Role 	  |         Endpoint                   	         |    Response  	     | Description           	 |
-|:-------------:|:-------:|:--------------------------------------------:|:------------------:|:-----------------------:|
-|   GET    	    |  Admin  |       `/admin/reservations/waiting` 	        |     200 OK   	     |    전체 예약 대기 목록 조회 	     |
-|  DELETE    	  | Admin 	 |  `/admin/reservations/waiting/deny/{id}` 	   | 204 No Content   	 |       예약 대기 거절 	        |
+| HTTP Method 	 | Role 	  | Endpoint                   	  |    Response  	     | Description           	 |
+|:-------------:|:-------:|:-----------------------------:|:------------------:|:-----------------------:|
+|   GET    	    |  Admin  |      `/admin/waitings` 	      |     200 OK   	     |    전체 예약 대기 목록 조회 	     |
+|  DELETE    	  | Admin 	 | `/admin/waitings/{id}` 	 | 204 No Content   	 |       예약 대기 거절 	        |
 
 # 📌 Auth API
 

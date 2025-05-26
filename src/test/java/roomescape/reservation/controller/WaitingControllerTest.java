@@ -30,6 +30,13 @@ class WaitingControllerTest {
                 "themeId", themeId
         );
 
+        RestAssured.given()
+                .cookie("token", tokenValue)
+                .contentType(ContentType.JSON)
+                .body(waitingParams)
+                .when().post("/reservations")
+                .then();
+
         RestAssured.given().log().all()
                 .cookie("token", tokenValue)
                 .contentType(ContentType.JSON)
@@ -49,7 +56,16 @@ class WaitingControllerTest {
                 "date", getTomorrow(),
                 "timeId", timeId,
                 "themeId", themeId
+
+
         );
+
+        RestAssured.given()
+                .cookie("token", tokenValue)
+                .contentType(ContentType.JSON)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then();
 
         int waitingId = RestAssured.given()
                 .cookie("token", tokenValue)
