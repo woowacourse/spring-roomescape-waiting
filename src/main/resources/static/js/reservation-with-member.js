@@ -1,8 +1,10 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
-const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
 const MEMBER_API_ENDPOINT = '/members';
+const RESERVATION_API_ENDPOINT = '/reservations';
+const ADMIN_THEME_API_ENDPOINT = '/admin/themes';
+const ADMIN_MEMBER_API_ENDPOINT = '/admin/members';
+const ADMIN_RESERVATION_API_ENDPOINT = '/admin/reservations';
 const timesOptions = [];
 const themesOptions = [];
 const membersOptions = [];
@@ -11,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);
     document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-    requestRead(RESERVATION_API_ENDPOINT)
+    requestRead(ADMIN_RESERVATION_API_ENDPOINT)
         .then(render)
         .catch(error => console.error('Error fetching reservations:', error));
 
@@ -200,7 +202,7 @@ function applyFilter(event) {
     TODO: [6단계] 예약 검색 - 조건에 따른 예약 조회 API 호출
       요청 포맷에 맞게 설정
     */
-    const filteredUrl = `/reservations/filtered?themeId=${themeId}&memberId=${memberId}&dateFrom=${dateFrom}&dateTo=${dateTo}`;
+    const filteredUrl = `/admin/reservations/filtered?themeId=${themeId}&memberId=${memberId}&dateFrom=${dateFrom}&dateTo=${dateTo}`;
 
     fetch(filteredUrl, {
         method: 'GET',
@@ -221,7 +223,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch('/reservations/admin', requestOptions)
+    return fetch(ADMIN_RESERVATION_API_ENDPOINT, requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');
@@ -233,7 +235,7 @@ function requestDelete(id) {
         method: 'DELETE',
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+    return fetch(`/admin/reservations/${id}`, requestOptions)
         .then(response => {
             if (response.status !== 204) throw new Error('Delete failed');
         });
