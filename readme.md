@@ -18,18 +18,18 @@
     - [x] 만약 해당 예약이 없다면 404 NOT FOUND 상태 코드가 반환된다.
     - [x] 삭제 대상 예약에 대한 예약 대기가 있다면 우선순위 예약대기를 예약으로 등록한다.
 - [x] "/admin/reservations" post 요청 시 관리자 예약을 할 수 있다.
-- [x] "/reservation-mine" get 요청 시 특정 사용자의 예약과 예약 대기를 조회 할 수 있다.
+- [x] "/reservations/me" get 요청 시 특정 사용자의 예약과 예약 대기를 조회 할 수 있다.
 
 ### 예약 대기
-- [x] "/reservations/waiting" post 요청으로 사용자 예약 대기를 할 수 있다.
+- [x] "/reservations/waitings" post 요청으로 사용자 예약 대기를 할 수 있다.
   - [x] 같은 테마, 같은 날짜와 시간에 예약이 존재하지 않을 때
   - [x] 예약대기 요청 사용자가 존재하지 않을 때
   - [x] 과거 날짜에 대한 예약 대기를 생성할 때
   - [x] 예약한 사용자가 예약 대기를 생성할 때
   - [x] 동일한 사용자가 중복 예약 대기를 생성할 때
-- [x] "/reservations/waiting/{id}" delete 요청으로 예약 대기를 삭제 할 수 있다.
+- [x] "/reservations/waitings/{id}" delete 요청으로 예약 대기를 삭제 할 수 있다.
 - [x] "/admin/waitings" get 요청을 통해 관리자는 모든 예약 대기를 조회 할 수 있다.
-- [x] "/admin/waiting/{id}" delete 요청을 통해 관리자는 예약 대기를 취소 할 수 있다.
+- [x] "/admin/waitings/{id}" delete 요청을 통해 관리자는 예약 대기를 취소 할 수 있다.
 
 ### 예약 시간
 - [x] "/times" post 요청으로 startAt 을 body로 전송하여 추가 할 수 있다.
