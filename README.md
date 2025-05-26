@@ -25,3 +25,7 @@
    ├── page : Page 컨트롤러
    └── dto : 프레젠테이션 계층 DTO
 ```
+
+## 아키텍쳐
+
+![아키텍쳐](architecture.png)
