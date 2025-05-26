@@ -42,12 +42,6 @@ public class WaitInfo {
         this.createdAt = LocalDateTime.now().format(DATE_TIME_FORMATTER);
     }
 
-    public WaitInfo(final Member member, final Reservation reservation) {
-        this.member = member;
-        this.reservation = reservation;
-        this.createdAt = LocalDateTime.now().format(DATE_TIME_FORMATTER);
-    }
-
     protected WaitInfo() {
     }
 
