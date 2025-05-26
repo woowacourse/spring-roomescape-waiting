@@ -14,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.infrastructure.MemberRepository;
@@ -155,16 +154,42 @@ public class ThemeApiTest {
 
 
     @Test
-    @Sql(value = "/sql/data.sql")
     void 인기테마_상위10개_조회_테스트() {
         // given
-        Member member1 = memberRepository.findById(1L).get();
-        Member member2 = memberRepository.findById(2L).get();
-        TimeSlot time1 = timeSlotRepository.findById(1L).get();
-        Theme theme1 = themeRepository.findById(1L).get();
-        Theme theme2 = themeRepository.findById(2L).get();
-        Theme theme3 = themeRepository.findById(3L).get();
-
+        Member member1 = memberRepository.save(
+                Member.builder()
+                        .name("짱구")
+                        .email("email1@domain.com")
+                        .password("password1")
+                        .role(Role.MEMBER)
+                        .build()
+        );
+        TimeSlot time1 = timeSlotRepository.save(
+                TimeSlot.builder()
+                        .startAt(LocalTime.of(9, 0))
+                        .build()
+        );
+        Theme theme1 = themeRepository.save(
+                Theme.builder()
+                        .name("theme1")
+                        .description("description1")
+                        .thumbnail("thumbnail1")
+                        .build()
+        );
+        Theme theme2 = themeRepository.save(
+                Theme.builder()
+                        .name("theme2")
+                        .description("description1")
+                        .thumbnail("thumbnail1")
+                        .build()
+        );
+        Theme theme3 = themeRepository.save(
+                Theme.builder()
+                        .name("theme3")
+                        .description("description1")
+                        .thumbnail("thumbnail1")
+                        .build()
+        );
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
@@ -184,7 +209,6 @@ public class ThemeApiTest {
                         .reservationTime(new ReservationTime(LocalDate.now().minusDays(3), time1))
                         .theme(theme1).build()
         );
-
         reservationRepository.save(
                 Reservation.builder()
                         .member(member1)
@@ -211,8 +235,8 @@ public class ThemeApiTest {
                 .then().statusCode(200)
                 .log().all()
                 .body("size()", is(3))
-                .body("[0].name", equalTo("테마1"))
-                .body("[1].name", equalTo("테마2"))
-                .body("[2].name", equalTo("테마3"));
+                .body("[0].name", equalTo("theme1"))
+                .body("[1].name", equalTo("theme2"))
+                .body("[2].name", equalTo("theme3"));
     }
 }
