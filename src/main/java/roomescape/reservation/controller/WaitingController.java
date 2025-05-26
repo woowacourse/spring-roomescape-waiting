@@ -17,7 +17,7 @@ import roomescape.reservation.dto.request.WaitingCreateRequest;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.WaitingService;
 
-@RequestMapping("/reservations/waiting")
+@RequestMapping("/waitings")
 @RestController
 public class WaitingController {
 

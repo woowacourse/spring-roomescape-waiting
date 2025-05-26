@@ -70,7 +70,7 @@ function deny(event) {
     [4단계] 예약 대기 목록 관리 기능
     예약 대기 거절 API 호출
      */
-    return fetch('/admin/reservations/waiting/deny/' + id, {
+    return fetch('/admin/waiting/' + id, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;

@@ -13,7 +13,7 @@ import roomescape.auth.annotation.RequiredAdmin;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.service.WaitingService;
 
-@RequestMapping("/admin/reservations/waiting")
+@RequestMapping("/admin/waitings")
 @RestController
 public class AdminWaitingController {
 
@@ -32,7 +32,7 @@ public class AdminWaitingController {
     }
 
     @RequiredAdmin
-    @DeleteMapping("/deny/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<Void> deny(@PathVariable final Long id) {
         waitingService.deleteWaiting(id);
 

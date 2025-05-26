@@ -34,7 +34,7 @@ class WaitingControllerTest {
                 .cookie("token", tokenValue)
                 .contentType(ContentType.JSON)
                 .body(waitingParams)
-                .when().post("/reservations/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -55,11 +55,11 @@ class WaitingControllerTest {
                 .cookie("token", tokenValue)
                 .contentType(ContentType.JSON)
                 .body(reservationParams)
-                .when().post("/reservations/waiting")
+                .when().post("/waitings")
                 .then().extract().path("id");
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/waiting/" + waitingId)
+                .when().delete("/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);
     }
@@ -68,7 +68,7 @@ class WaitingControllerTest {
     @Test
     void deleteNonExistsReservationWaiting() {
         RestAssured.given().log().all()
-                .when().delete("/reservations/waiting/0")
+                .when().delete("/waitings/0")
                 .then().log().all()
                 .statusCode(404);
     }

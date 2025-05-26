@@ -36,12 +36,12 @@ class AdminWaitingControllerTest {
                         "date", LocalDate.now().plusDays(1L),
                         "timeId", 1,
                         "themeId", 1
-                )).when().post("/reservations/waiting")
+                )).when().post("/waitings")
                 .then();
 
         RestAssured.given().log().all()
                 .cookie("token", tokenValue)
-                .when().get("/admin/reservations/waiting")
+                .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
@@ -71,7 +71,7 @@ class AdminWaitingControllerTest {
 
         RestAssured.given().log().all()
                 .cookie("token", tokenValue)
-                .when().get("/admin/reservations/waiting")
+                .when().get("/admin/waitings")
                 .then().log().all()
                 .statusCode(401);
     }
@@ -91,12 +91,12 @@ class AdminWaitingControllerTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", tokenValue)
                 .body(params)
-                .when().post("reservations/waiting")
+                .when().post("/waitings")
                 .then().extract().path("id");
 
         RestAssured.given().log().all()
                 .cookie("token", tokenValue)
-                .when().delete("/admin/reservations/waiting/deny/" + waitingId)
+                .when().delete("/admin/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);
     }
