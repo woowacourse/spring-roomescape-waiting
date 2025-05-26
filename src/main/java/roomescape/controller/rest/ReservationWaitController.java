@@ -52,7 +52,7 @@ public class ReservationWaitController {
             @PathVariable("id") final Long waitId,
             final SessionMember sessionMember
     ) {
-        reservationWaitService.deleteReservationWait(waitId, sessionMember.id());
+        reservationWaitService.deleteReservationWait(waitId, sessionMember.id(), sessionMember.role());
         return ResponseEntity.noContent().build();
     }
 

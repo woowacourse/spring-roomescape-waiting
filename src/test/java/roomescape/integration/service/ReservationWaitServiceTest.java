@@ -19,6 +19,7 @@ import roomescape.domain.reservation.ReservationWait;
 import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
+import roomescape.global.exception.AccessDeniedException;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.integration.fixture.ReservationDbFixture;
 import roomescape.integration.fixture.ReservationScheduleDbFixture;
@@ -135,7 +136,7 @@ class ReservationWaitServiceTest {
         ReservationWait wait = waitDbFixture.createReservationWait(schedule, member);
 
         // when
-        service.deleteReservationWait(wait.getId(), member.getId());
+        service.deleteReservationWait(wait.getId(), member.getId(), member.getRole());
 
         // then
         assertThat(waitRepository.findById(wait.getId())).isNotPresent();
@@ -144,12 +145,13 @@ class ReservationWaitServiceTest {
     @Test
     void 다른_사람_예약대기를_삭제하면_예외() {
         // given
-        Member anotherMember = memberDbFixture.leehyeonsu48888_지메일_gustn111느낌표두개_어드민();
+        Member anotherMember = memberDbFixture.leehyeonsu48888_지메일_gustn111느낌표두개_멤버();
         ReservationWait wait = waitDbFixture.createReservationWait(schedule, member);
 
         // when & then
-        assertThatThrownBy(() -> service.deleteReservationWait(wait.getId(), anotherMember.getId()))
-                .isInstanceOf(roomescape.global.exception.AccessDeniedException.class);
+        assertThatThrownBy(
+                () -> service.deleteReservationWait(wait.getId(), anotherMember.getId(), anotherMember.getRole()))
+                .isInstanceOf(AccessDeniedException.class);
     }
 
     @Test

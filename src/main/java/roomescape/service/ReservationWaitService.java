@@ -7,6 +7,7 @@ import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWait;
 import roomescape.domain.reservation.schedule.ReservationSchedule;
@@ -75,12 +76,15 @@ public class ReservationWaitService {
 
     public void deleteReservationWait(
             final Long waitId,
-            final Long memberId
+            final Long memberId,
+            final MemberRole role
     ) {
         ReservationWait reservationWait = reservationWaitRepository.findById(waitId)
                 .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 대기 입니다."));
-        if (!Objects.equals(reservationWait.getMember().getId(), memberId)) {
-            throw new AccessDeniedException("본인의 예약 대기가 아닙니다.");
+        if (role != MemberRole.ADMIN &&
+                !Objects.equals(reservationWait.getMember().getId(), memberId)
+        ) {
+            throw new AccessDeniedException("예약 대기는 어드민 또는 본인만 취소 가능합니다.");
         }
         reservationWaitRepository.deleteById(waitId);
     }
