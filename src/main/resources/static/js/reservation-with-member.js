@@ -1,5 +1,4 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
 const ADMIN_RESERVATION_API_ENDPOINT = '/admin/reservations';
 const TIME_API_ENDPOINT = '/times';
 const THEME_API_ENDPOINT = '/themes';
@@ -12,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(ADMIN_RESERVATION_API_ENDPOINT)
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -200,7 +199,7 @@ function applyFilter(event) {
   if (dateFrom) params.append('dateFrom', dateFrom);
   if (dateTo) params.append('dateTo', dateTo);
 
-  let url = RESERVATION_API_ENDPOINT;
+  let url = ADMIN_RESERVATION_API_ENDPOINT;
 
   if (params.toString() !== '') {
     url += "?" + params.toString();

@@ -7,9 +7,11 @@ import static roomescape.TestFixture.DEFAULT_DATE;
 import static roomescape.TestFixture.createAdminMember;
 import static roomescape.TestFixture.createDefaultReservationTime;
 import static roomescape.TestFixture.createDefaultReservation_1;
+import static roomescape.TestFixture.createDefaultReservation_2;
 import static roomescape.TestFixture.createDefaultTheme;
 
 import io.restassured.RestAssured;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -57,6 +59,29 @@ class AdminReservationControllerTest {
     @BeforeEach
     void clean() {
         databaseCleaner.clean();
+    }
+
+    @Test
+    @DisplayName("관리자가 예약 목록을 조회한다")
+    void getReservations() {
+        // given
+        Member admin = createAdminMember();
+        dbHelper.insertMember(admin);
+        String token = jwtTokenProvider.createToken(MemberResult.from(admin));
+
+        dbHelper.insertReservation(createDefaultReservation_1());
+        dbHelper.insertReservation(createDefaultReservation_2());
+
+        // when & then
+        List<BookingResponse> responses = given().log().all()
+                .cookie("token", token)
+                .when()
+                .get("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().jsonPath().getList(".", BookingResponse.class);
+
+        assertThat(responses).hasSize(2);
     }
 
     @Test
