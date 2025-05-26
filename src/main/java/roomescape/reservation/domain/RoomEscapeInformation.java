@@ -54,14 +54,14 @@ public class RoomEscapeInformation {
             @NonNull final ReservationTime time,
             @NonNull final Theme theme
     ) {
-        validateFutureOrPresent();
+        validateFutureOrPresent(date, time);
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    private void validateFutureOrPresent() {
+    private void validateFutureOrPresent(final LocalDate date, final ReservationTime time) {
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
         final LocalDateTime currentDateTime = LocalDateTime.now();
         if (reservationDateTime.isBefore(currentDateTime)) {
