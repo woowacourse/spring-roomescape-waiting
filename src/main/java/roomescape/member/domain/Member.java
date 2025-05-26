@@ -13,8 +13,8 @@ import java.util.regex.Pattern;
 public class Member {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
-    public static final int MIN_PASSWORD_SIZE = 8;
-    public static final int MAX_PASSWORD_SIZE = 50;
+    private static final int MIN_PASSWORD_SIZE = 8;
+    private static final int MAX_PASSWORD_SIZE = 50;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
