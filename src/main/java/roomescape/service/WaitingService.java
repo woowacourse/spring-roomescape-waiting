@@ -24,7 +24,7 @@ import roomescape.repository.WaitingRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
-    private final ReservationTimeRepository ReservationTimeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingQueryRepository waitingQueryRepository;
@@ -37,7 +37,7 @@ public class WaitingService {
                           final WaitingQueryRepository waitingQueryRepository,
                           final ReservationService reservationService) {
         this.waitingRepository = WaitingRepository;
-        this.ReservationTimeRepository = ReservationTimeRepository;
+        this.reservationTimeRepository = ReservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.waitingQueryRepository = waitingQueryRepository;
@@ -45,7 +45,7 @@ public class WaitingService {
     }
 
     public WaitingResponse createWaiting(WaitingCreateRequest request) {
-        ReservationTime ReservationTime = ReservationTimeRepository.findById(request.timeId())
+        ReservationTime ReservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
 
         validateReservableTime(request.date(), ReservationTime.getStartAt());
@@ -79,7 +79,9 @@ public class WaitingService {
 
     public List<MyReservationAndWaitingsResponse> findMyWaitings(Long id) {
         List<WaitingWithRank> waitingsWithRank = waitingQueryRepository.findWaitingsWithRankByMemberId(id);
-        return waitingsWithRank.stream().map(MyReservationAndWaitingsResponse::from).toList();
+        return waitingsWithRank.stream()
+                .map(MyReservationAndWaitingsResponse::from)
+                .toList();
     }
 
     public void approveWaiting(final Long id) {
