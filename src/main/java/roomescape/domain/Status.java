@@ -54,6 +54,14 @@ public class Status {
         return new Status(dateTime, status);
     }
 
+    public void cancelStatus() {
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void reserveStatus() {
+        this.status = ReservationStatus.RESERVED;
+    }
+
     public Long getId() {
         return id;
     }
@@ -64,13 +72,5 @@ public class Status {
 
     public ReservationStatus getStatus() {
         return status;
-    }
-
-    public void cancelStatus() {
-        this.status = ReservationStatus.CANCELED;
-    }
-
-    public void reserveStatus() {
-        this.status = ReservationStatus.RESERVED;
     }
 }
