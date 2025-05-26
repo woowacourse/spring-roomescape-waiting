@@ -8,6 +8,6 @@ import roomescape.domain.reservationtime.ReservationTime;
 
 public interface JpaReservationTimeRepository extends JpaRepository<ReservationTime, Long> {
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     boolean existsByTime(LocalTime time);
 }

@@ -36,6 +36,7 @@ public class ReserveTicketService {
         this.waitingService = waitingService;
     }
 
+    @Transactional
     public long addReservation(AddReservationDto newReservationDto, long memberId) {
         validateIfWaitingExists(newReservationDto);
         Member member = memberService.getMemberById(memberId);
@@ -58,6 +59,7 @@ public class ReserveTicketService {
         reserveTicketRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReserveTicket> searchReservations(Long themeId, Long memberId, LocalDate dateFrom,
                                                   LocalDate dateTo) {
         List<ReserveTicket> reserveTickets = reserveTicketRepository.findAllByMemberId(memberId);
@@ -71,6 +73,7 @@ public class ReserveTicketService {
         return reserveTickets;
     }
 
+    @Transactional(readOnly = true)
     public ReservationSlotTimes availableReservationTimes(AvailableTimeRequestDto availableTimeRequestDto) {
         List<ReservationTime> times = reservationService.getAllReservationTimes();
         List<Reservation> alreadyReservedReservations = reservationService.getAllByDateAndThemeId(availableTimeRequestDto.date(), availableTimeRequestDto.themeId());

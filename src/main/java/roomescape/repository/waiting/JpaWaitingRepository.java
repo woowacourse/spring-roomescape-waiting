@@ -27,11 +27,12 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             "       AND w2.id < w.id)) " +
             "FROM Waiting w " +
             "WHERE w.member.id = :memberId")
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
+    @Transactional(readOnly = true)
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     boolean existsByDateAndTimeAndThemeAndMember(LocalDate date, ReservationTime time, Theme theme, Member member);
 }

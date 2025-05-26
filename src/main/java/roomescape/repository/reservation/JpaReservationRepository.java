@@ -11,18 +11,18 @@ import roomescape.domain.theme.Theme;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long> {
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     boolean existsByTimeId(Long id);
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     List<Reservation> findAllByDateAndThemeId(LocalDate date, Long themeId);
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     List<Reservation> findAllByDateBetween(LocalDate dateBefore, LocalDate dateAfter);
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
 
-    @Transactional(readOnly = true, propagation = Propagation.SUPPORTS)
+    @Transactional(readOnly = true)
     boolean existsByThemeId(long themeId);
 }

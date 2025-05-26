@@ -1,6 +1,7 @@
 package roomescape.service.waiting;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -32,6 +33,7 @@ public class WaitingService {
         this.themeService = themeService;
     }
 
+    @Transactional
     public long addWaiting(AddReservationDto newReservationDto, Long memberId) {
         Member member = memberService.getMemberById(memberId);
         ReservationTime reservationTime = reservationTimeService.getReservationTimeById(newReservationDto.timeId());
