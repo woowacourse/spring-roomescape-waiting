@@ -26,7 +26,6 @@ import roomescape.presentation.dto.WaitResponse;
 @Service
 public class ReservationService {
 
-    private static final Long FIRST_RANK = 1L;
     private static final Long RANK_START_VALUE = 1L;
 
     private final ReservationRepository reservationRepository;
@@ -64,9 +63,7 @@ public class ReservationService {
         final Reservation reservation = findOrCreateReservation(date, reservationTime, theme);
 
         validateWaitInfoEmpty(reservation.getId());
-        final WaitInfo waitInfo = new WaitInfo(member, reservation, FIRST_RANK);
-        waitInfoRepository.save(waitInfo);
-
+        final WaitInfo waitInfo = createWaitInfo(member, reservation, RANK_START_VALUE);
         return new ReservationResponse(
                 waitInfo.getId(),
                 member.getName(),
@@ -93,8 +90,8 @@ public class ReservationService {
         validateWaitInfoExistsByReservationId(reservation.getId());
         validateWaitInfoIsNotDuplicate(memberId, reservation.getId());
 
-        final WaitInfo waitInfo = new WaitInfo(member, reservation, getNextRank(reservation.getId()));
-        waitInfoRepository.save(waitInfo);
+        final Long nextRank = getNextRank(reservation.getId());
+        final WaitInfo waitInfo = createWaitInfo(member, reservation, nextRank);
         return new WaitInfoResponse(
                 waitInfo.getId(),
                 waitInfo.getMember().getId(),
@@ -165,6 +162,12 @@ public class ReservationService {
         }
     }
 
+    private WaitInfo createWaitInfo(final Member member, final Reservation reservation, final Long rank) {
+        final WaitInfo waitInfo = new WaitInfo(member, reservation, rank);
+        waitInfoRepository.save(waitInfo);
+        return waitInfo;
+    }
+
     public List<ReservationResponse> findAll() {
         final List<WaitInfo> waitInfos = waitInfoRepository.findByRank(1L);
         return waitInfos.stream()
@@ -204,18 +207,16 @@ public class ReservationService {
     }
 
     public void deleteById(final Long waitInfoId) {
-        validateWaitInfoExistsById(waitInfoId);
-        final WaitInfo waitInfo = waitInfoRepository.findById(waitInfoId).get();
+        final WaitInfo waitInfo = getWaitInfoOrThrow(waitInfoId);
         waitInfoRepository.deleteById(waitInfoId);
 
         final Long reservationId = waitInfo.getReservation().getId();
         updateWaitInfosRankAfterDelete(reservationId);
     }
 
-    private void validateWaitInfoExistsById(final Long waitInfoId) {
-        if (!waitInfoRepository.existsById(waitInfoId)) {
-            throw new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d".formatted(waitInfoId));
-        }
+    private WaitInfo getWaitInfoOrThrow(final Long waitInfoId) {
+        return waitInfoRepository.findById(waitInfoId)
+                .orElseThrow(() -> new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d".formatted(waitInfoId)));
     }
 
     private void updateWaitInfosRankAfterDelete(final Long reservationId) {
