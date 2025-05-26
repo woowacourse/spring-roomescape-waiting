@@ -4,18 +4,19 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
-import roomescape.member.domain.Member;
 import roomescape.member.application.MemberDataService;
+import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationDataService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.ReservationTimeDataService;
-import roomescape.theme.domain.Theme;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.application.ThemeDataService;
+import roomescape.theme.domain.Theme;
 
 @Service
 public class ReservationSlotApplicationService {
@@ -49,8 +50,9 @@ public class ReservationSlotApplicationService {
         Theme theme = themeDataService.findTheme(themeId);
         Member member = memberDataService.getMember(memberId);
         ReservationSlot reservationSlot = reservationSlotDataService.save(member, date, time, theme, now);
-        Reservation reservation = reservationDataService.save(new Reservation(member, reservationSlot));
-
+        Reservation reservation = reservationDataService.findByReservationSlot(reservationSlot)
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+//        Reservation reservation = reservationDataService.save(new Reservation(member, reservationSlot));
         return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }
 

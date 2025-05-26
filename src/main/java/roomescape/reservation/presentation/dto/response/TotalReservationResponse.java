@@ -17,7 +17,8 @@ public record TotalReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme
 ) {
-    public static TotalReservationResponse of(Reservation reservation, ReservationSlot reservationSlot, ReservationTime reservationTime, Theme theme,
+    public static TotalReservationResponse of(Reservation reservation, ReservationSlot reservationSlot,
+                                              ReservationTime reservationTime, Theme theme,
                                               Member member) {
         return new TotalReservationResponse(reservation.getId(), MemberResponse.from(member), reservationSlot.getDate(),
                 ReservationTimeResponse.from(reservationTime), ThemeResponse.from(theme)

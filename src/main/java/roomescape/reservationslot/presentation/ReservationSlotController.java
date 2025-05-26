@@ -44,8 +44,7 @@ public class ReservationSlotController {
             @RequestBody AdminReservationSlotCreateRequest request
     ) {
         TotalReservationResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
-                request.themeId(),
-                request.memberId(), LocalDateTime.now());
+                request.themeId(), request.memberId(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 

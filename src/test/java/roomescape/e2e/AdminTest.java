@@ -175,7 +175,7 @@ public class AdminTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
-                .pathParam("reservationId", waitingResponse.waitingId())
+                .pathParam("waitingId", waitingResponse.waitingId())
                 .when().delete("/admin/waiting-reservations/{waitingId}")
                 .then().log().all()
                 .statusCode(204);

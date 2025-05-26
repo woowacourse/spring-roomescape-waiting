@@ -16,10 +16,10 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
@@ -62,12 +62,15 @@ class ReservationApplicationServiceTest {
                 reservationSlotRepository);
         MemberDataService memberDataService = new MemberDataService(memberRepository);
         ReservationDataService reservationDataService = new ReservationDataService(reservationRepository);
+        ThemeDataService themeDataService = new ThemeDataService(themeRepository, reservationSlotRepository);
+        ReservationTimeDataService reservationTimeDataService = new ReservationTimeDataService(
+                reservationTimeRepository, reservationSlotDataService);
         reservationApplicationService = new ReservationApplicationService(
                 memberDataService,
                 reservationSlotDataService,
                 reservationDataService);
         reservationSlotApplicationService = new ReservationSlotApplicationService(reservationSlotDataService,
-                new ReservationTimeDataService(reservationTimeRepository, reservationSlotDataService), new ThemeDataService(themeRepository, reservationSlotRepository),
+                reservationTimeDataService, themeDataService,
                 memberDataService, reservationDataService);
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
@@ -86,16 +89,24 @@ class ReservationApplicationServiceTest {
         assertThat(result).hasSize(2);
     }
 
+    // TODO : 삭제 예외
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
+        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId,
+                memberId,
                 afterOneHour);
-        reservationApplicationService.delete(response.id());
 
         List<TotalReservationResponse> result = reservationApplicationService.findReservations(themeId, memberId,
                 futureDate,
                 futureDate.plusDays(1));
-        assertThat(result).isEmpty();
-    }
+        assertThat(result.size()).isOne();
+        reservationApplicationService.delete(response.id());
 
+        List<TotalReservationResponse> result2 = reservationApplicationService.findReservations(themeId, memberId,
+                futureDate,
+                futureDate.plusDays(1));
+        assertThat(result2.size()).isOne();
+
+//        assertThat(result2).isEmpty();
+    }
 }

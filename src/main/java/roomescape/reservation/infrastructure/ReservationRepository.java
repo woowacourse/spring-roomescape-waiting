@@ -2,10 +2,12 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservationslot.domain.ReservationSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -29,6 +31,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findByThemeIdAndDateBetweenAndReservationMemberId(Long themeId, LocalDate startDate,
                                                                         LocalDate endDate, Long memberId);
+
     @Query("""
             SELECT w 
             FROM Reservation w 
@@ -63,4 +66,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ORDER BY rs.id, r.createdAt asc 
             """)
     List<Reservation> findAllWaitingReservations();
+
+    Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 }

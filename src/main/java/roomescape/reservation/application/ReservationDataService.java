@@ -2,12 +2,14 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
 
 @Service
@@ -59,5 +61,9 @@ public class ReservationDataService {
 
     public void deleteById(final Long reservationId) {
         reservationRepository.deleteById(reservationId);
+    }
+
+    public Optional<Reservation> findByReservationSlot(final ReservationSlot reservationSlot) {
+        return reservationRepository.findByReservationSlot(reservationSlot);
     }
 }

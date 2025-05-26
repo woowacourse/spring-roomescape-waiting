@@ -40,8 +40,8 @@ public class ReservationSlotDataService {
 
     public ReservationSlot save(final Member member, final LocalDate date, final ReservationTime time,
                                 final Theme theme, final LocalDateTime now) {
-        return reservationSlotRepository.save(
-                ReservationSlot.createUpcomingReservation(member, date, time, theme, now));
+        ReservationSlot reservationSlot = ReservationSlot.createUpcomingReservation(member, date, time, theme, now);
+        return reservationSlotRepository.save(reservationSlot);
     }
 
     public boolean existsByTimeId(final Long timeId) {
