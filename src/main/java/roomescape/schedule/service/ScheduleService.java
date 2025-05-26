@@ -1,6 +1,7 @@
 package roomescape.schedule.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.schedule.domain.Schedule;
@@ -18,6 +19,7 @@ public class ScheduleService {
         this.scheduleRepository = scheduleRepository;
     }
 
+    @Transactional
     public Schedule createAndSaveSchedule(LocalDate date, ReservationTime reservationTime, Theme theme) {
         Schedule schedule = new Schedule(null, date, reservationTime, theme);
         return scheduleRepository.save(schedule);
