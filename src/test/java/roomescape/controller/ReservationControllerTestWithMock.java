@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.data.jpa.mapping.JpaMetamodelMappingContext;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
@@ -32,6 +33,9 @@ public class ReservationControllerTestWithMock {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private JpaMetamodelMappingContext jpaMetamodelMappingContext;
 
     @MockitoBean
     private AuthInterceptor authInterceptor;

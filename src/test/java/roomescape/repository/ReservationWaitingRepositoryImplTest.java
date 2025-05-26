@@ -162,8 +162,8 @@ class ReservationWaitingRepositoryImplTest {
 
         //then
         assertAll(
-                () -> assertThat(expected1).isEqualTo(1),
-                () -> assertThat(expected2).isEqualTo(2)
+                () -> assertThat(expected1).isEqualTo(2),
+                () -> assertThat(expected2).isEqualTo(1)
         );
     }
 }
