@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.reservation.presentation.dto.WaitingResponse;
+import roomescape.reservation.presentation.dto.response.WaitingResponse;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -175,7 +175,7 @@ public class AdminTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
-                .pathParam("waitingId", waitingResponse.waitingId())
+                .pathParam("reservationId", waitingResponse.waitingId())
                 .when().delete("/admin/waiting-reservations/{waitingId}")
                 .then().log().all()
                 .statusCode(204);

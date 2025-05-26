@@ -38,12 +38,6 @@ public class ReservationSlotDataService {
                 .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간에 예약이 존재하지 않습니다."));
     }
 
-    public List<ReservationSlot> findFilteredReservations(final Long themeId, final Long memberId,
-                                                          final LocalDate startDate, final LocalDate endDate) {
-        return reservationSlotRepository.findByThemeIdAndDateBetweenAndReservationMemberId(themeId, startDate, endDate,
-                memberId);
-    }
-
     public ReservationSlot save(final Member member, final LocalDate date, final ReservationTime time,
                                 final Theme theme, final LocalDateTime now) {
         return reservationSlotRepository.save(

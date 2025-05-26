@@ -10,22 +10,6 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 
 public interface ReservationSlotRepository extends JpaRepository<ReservationSlot, Long> {
 
-    @Query("""
-            SELECT DISTINCT rs
-            FROM ReservationSlot rs
-            JOIN FETCH rs.time t
-            JOIN FETCH rs.theme th
-            JOIN FETCH rs.reservations r
-            JOIN FETCH r.member m
-            WHERE (:themeId IS NULL OR th.id = :themeId)
-              AND (:memberId IS NULL OR m.id = :memberId)
-              AND (:startDate IS NULL OR rs.date >= :startDate)
-              AND (:endDate IS NULL OR rs.date <= :endDate)
-            """)
-    List<ReservationSlot> findByThemeIdAndDateBetweenAndReservationMemberId(Long themeId,
-                                                                            LocalDate startDate, LocalDate endDate,
-                                                                            Long memberId);
-
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);

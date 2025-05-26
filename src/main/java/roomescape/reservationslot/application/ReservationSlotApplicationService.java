@@ -8,9 +8,10 @@ import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.application.MemberDataService;
 import roomescape.reservation.application.ReservationDataService;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
-import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.theme.domain.Theme;
@@ -37,35 +38,20 @@ public class ReservationSlotApplicationService {
         this.reservationDataService = slotReservationDataService;
     }
 
-    public List<ReservationSlotResponse> findReservations(final Long themeId, final Long memberId,
-                                                          final LocalDate startDate,
-                                                          final LocalDate endDate) {
-        List<ReservationSlot> filteredReservations = reservationSlotDataService.findFilteredReservations(themeId,
-                memberId, startDate, endDate);
-        return filteredReservations
-                .stream()
-                .map(reservationSlot -> {
-                    ReservationTime time = reservationSlot.getTime();
-                    Theme theme = reservationSlot.getTheme();
-                    Member member = reservationSlot.findReservedMember();
-                    return ReservationSlotResponse.of(reservationSlot, time, theme, member);
-                })
-                .toList();
-    }
-
     public void delete(Long id) {
         reservationSlotDataService.delete(id);
     }
 
-    public ReservationSlotResponse create(final LocalDate date, final Long timeId, final Long themeId,
-                                          final Long memberId, final LocalDateTime now) {
+    public TotalReservationResponse create(final LocalDate date, final Long timeId, final Long themeId,
+                                           final Long memberId, final LocalDateTime now) {
         reservationSlotDataService.checkIfReservationDoesNotExists(date, timeId, themeId);
         ReservationTime time = reservationTimeDataService.findReservationTime(timeId);
         Theme theme = themeDataService.findTheme(themeId);
         Member member = memberDataService.getMember(memberId);
+        ReservationSlot reservationSlot = reservationSlotDataService.save(member, date, time, theme, now);
+        Reservation reservation = reservationDataService.save(new Reservation(member, reservationSlot));
 
-        ReservationSlot newReservationSlot = reservationSlotDataService.save(member, date, time, theme, now);
-        return ReservationSlotResponse.of(newReservationSlot, time, theme, member);
+        return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }
 
     public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {

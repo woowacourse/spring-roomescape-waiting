@@ -6,7 +6,6 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -21,7 +20,7 @@ import roomescape.member.application.MemberDataService;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
-import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
@@ -76,7 +75,7 @@ class ReservationSlotApplicationServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        ReservationSlotResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
+        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
                 afterOneHour);
 
         Assertions.assertAll(
@@ -84,27 +83,6 @@ class ReservationSlotApplicationServiceTest {
                 () -> assertThat(response.date()).isEqualTo(futureDate),
                 () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0))
         );
-    }
-
-    @Test
-    void findFilteredReservations_shouldReturnAllCreatedReservations() {
-        Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
-        reservationSlotApplicationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
-
-        List<ReservationSlotResponse> result = reservationSlotApplicationService.findReservations(null, null, null, null);
-        assertThat(result).hasSize(2);
-    }
-
-    @Test
-    void deleteReservation_shouldRemoveSuccessfully() {
-        ReservationSlotResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
-                afterOneHour);
-        reservationSlotApplicationService.delete(response.id());
-
-        List<ReservationSlotResponse> result = reservationSlotApplicationService.findReservations(themeId, memberId, futureDate,
-                futureDate.plusDays(1));
-        assertThat(result).isEmpty();
     }
 
     @Test

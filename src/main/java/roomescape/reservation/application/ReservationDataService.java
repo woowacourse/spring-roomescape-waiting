@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -44,6 +45,12 @@ public class ReservationDataService {
 
     public List<Reservation> findAllWaitingReservations() {
         return reservationRepository.findAllWaitingReservations();
+    }
+
+    public List<Reservation> findFilteredReservations(final Long themeId, final Long memberId,
+                                                      final LocalDate startDate, final LocalDate endDate) {
+        return reservationRepository.findByThemeIdAndDateBetweenAndReservationMemberId(themeId, startDate, endDate,
+                memberId);
     }
 
     public void removeWaitingReservation(final Long waitingId) {

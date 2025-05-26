@@ -3,13 +3,16 @@ package roomescape.reservation.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.presentation.dto.WaitingResponse;
-import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.reservationslot.application.ReservationSlotDataService;
-import roomescape.member.domain.Member;
 import roomescape.member.application.MemberDataService;
-import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.presentation.dto.response.WaitingResponse;
+import roomescape.reservationslot.application.ReservationSlotDataService;
+import roomescape.reservationslot.domain.ReservationSlot;
+import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Service
 public class ReservationApplicationService {
@@ -26,9 +29,27 @@ public class ReservationApplicationService {
         this.reservationDataService = reservationDataService;
     }
 
+    public List<TotalReservationResponse> findReservations(final Long themeId, final Long memberId,
+                                                           final LocalDate startDate,
+                                                           final LocalDate endDate) {
+        List<Reservation> filteredReservations = reservationDataService.findFilteredReservations(themeId,
+                memberId, startDate, endDate);
+        return filteredReservations
+                .stream()
+                .map(reservation -> {
+                    ReservationSlot reservationSlot = reservation.getReservationSlot();
+                    ReservationTime time = reservationSlot.getTime();
+                    Theme theme = reservationSlot.getTheme();
+                    Member member = reservationSlot.findReservedMember();
+                    return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
+                })
+                .toList();
+    }
+
     public ReservationResponse addWaiting(final LocalDate date, final Long timeId, final Long themeId,
                                           final Long memberId) {
-        ReservationSlot reservationSlot = reservationSlotDataService.getReservationByDateAndTimeAndTheme(date, timeId, themeId);
+        ReservationSlot reservationSlot = reservationSlotDataService.getReservationByDateAndTimeAndTheme(date, timeId,
+                themeId);
         Member member = memberDataService.getMember(memberId);
         Reservation reservation = reservationSlot.addMemberToWaiting(member);
         reservationDataService.save(reservation);

@@ -13,9 +13,10 @@ function render(data) {
     tableBody.innerHTML = '';
 
     data.forEach(item => {
+        console.log(item);
         const row = tableBody.insertRow();
-
-        const id = item.waitingId;
+        const id = item.reservationId;
+        console.log(item.name);
         const name = item.name;
         const theme = item.themeName;
         const date = item.date;
