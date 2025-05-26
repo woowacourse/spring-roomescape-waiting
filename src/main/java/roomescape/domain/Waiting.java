@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Index;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -32,12 +33,15 @@ public class Waiting {
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
     private LocalDateTime createdAt;
