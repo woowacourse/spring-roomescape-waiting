@@ -73,7 +73,7 @@ public class UserService {
         List<ReservationWithStateDto> dtos = new ArrayList<>();
         for (Waiting waiting : waitings) {
             WaitingWithRank waitingWithRank = waitingWithRanks.stream()
-                    .filter(o -> o.getWaiting().equals(waiting))
+                    .filter(o -> o.waiting().equals(waiting))
                     .findAny()
                     .get();
             dtos.add(ReservationWithStateDto.of(waitingWithRank));

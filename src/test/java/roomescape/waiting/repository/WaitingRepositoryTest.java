@@ -91,9 +91,9 @@ class WaitingRepositoryTest {
             // then
             org.junit.jupiter.api.Assertions.assertAll(
                     () -> Assertions.assertThat(waitings).hasSize(2),
-                    () -> Assertions.assertThat(waitings.get(0).getRank()).isEqualTo(0L),
-                    () -> Assertions.assertThat(waitings.get(1).getRank()).isEqualTo(1L),
-                    () -> Assertions.assertThat(waitings.get(0).getWaiting().getMember().getId())
+                    () -> Assertions.assertThat(waitings.get(0).rank()).isEqualTo(0L),
+                    () -> Assertions.assertThat(waitings.get(1).rank()).isEqualTo(1L),
+                    () -> Assertions.assertThat(waitings.get(0).waiting().getMember().getId())
                             .isEqualTo(savedUser.getId())
             );
         }

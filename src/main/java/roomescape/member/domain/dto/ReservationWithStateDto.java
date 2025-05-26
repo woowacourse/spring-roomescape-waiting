@@ -27,10 +27,10 @@ public record ReservationWithStateDto(
     }
 
     public static ReservationWithStateDto of (WaitingWithRank waitingWithRank) {
-        Waiting waiting = waitingWithRank.getWaiting();
+        Waiting waiting = waitingWithRank.waiting();
         return new ReservationWithStateDto(waiting.getId(),
                 waiting.getDate(),
-                String.format(STATE_TEXT, waitingWithRank.getRank() + 1),
+                String.format(STATE_TEXT, waitingWithRank.rank() + 1),
                 ReservationTimeResponseDto.of(waiting.getTime()),
                 ThemeResponseDto.of(waiting.getTheme())
         );
