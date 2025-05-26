@@ -10,6 +10,7 @@ import roomescape.domain.member.Member;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.MyReservationAndWaitingsResponse;
+import roomescape.dto.reservation.ReservationCreateRequest;
 import roomescape.dto.waiting.WaitingCreateRequest;
 import roomescape.dto.waiting.WaitingResponse;
 import roomescape.exception.NotFoundException;
@@ -27,17 +28,20 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
     private final WaitingQueryRepository waitingQueryRepository;
+    private final ReservationService reservationService;
 
     public WaitingService(final WaitingRepository WaitingRepository,
                           final ReservationTimeRepository ReservationTimeRepository,
                           final ThemeRepository themeRepository,
                           final MemberRepository memberRepository, final WaitingRepository waitingRepository,
-                          final WaitingQueryRepository waitingQueryRepository) {
+                          final WaitingQueryRepository waitingQueryRepository,
+                          final ReservationService reservationService) {
         this.waitingRepository = WaitingRepository;
         this.ReservationTimeRepository = ReservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
         this.waitingQueryRepository = waitingQueryRepository;
+        this.reservationService = reservationService;
     }
 
     public WaitingResponse createWaiting(WaitingCreateRequest request) {
@@ -76,5 +80,15 @@ public class WaitingService {
     public List<MyReservationAndWaitingsResponse> findMyWaitings(Long id) {
         List<WaitingWithRank> waitingsWithRank = waitingQueryRepository.findWaitingsWithRankByMemberId(id);
         return waitingsWithRank.stream().map(MyReservationAndWaitingsResponse::from).toList();
+    }
+
+    public void approveWaiting(final Long id) {
+
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("[ERROR] 등록된 예약 대기 번호만 승인할 수 있습니다. 입력된 번호는 " + id + "입니다."));
+        reservationService.validateDuplicate(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId());
+
+        waitingRepository.deleteById(id);
+        reservationService.createReservation(ReservationCreateRequest.from(waiting));
     }
 }

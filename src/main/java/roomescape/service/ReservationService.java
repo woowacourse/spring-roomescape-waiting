@@ -54,7 +54,7 @@ public class ReservationService {
         return ReservationResponse.from(newReservation);
     }
 
-    private void validateDuplicate(LocalDate date, Long timeId, Long themeId) {
+    public void validateDuplicate(LocalDate date, Long timeId, Long themeId) {
         List<Reservation> reservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(date, timeId,
                 themeId);
         if (!reservations.isEmpty()) {

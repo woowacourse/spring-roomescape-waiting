@@ -36,9 +36,10 @@ public class MemberReservationController {
         List<MyReservationAndWaitingsResponse> reservations = reservationService.findMyReservations(loginInfo.id());
         List<MyReservationAndWaitingsResponse> waitings = waitingService.findMyWaitings(loginInfo.id());
         List<MyReservationAndWaitingsResponse> responses = new ArrayList<>();
+
         responses.addAll(reservations);
         responses.addAll(waitings);
-        responses.sort(Comparator.comparing(MyReservationAndWaitingsResponse::date));
+        responses.sort(Comparator.comparing(MyReservationAndWaitingsResponse::date).thenComparing(MyReservationAndWaitingsResponse::time));
 
         return ResponseEntity.ok(responses);
     }

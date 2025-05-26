@@ -7,7 +7,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingWithRank;
-import roomescape.dto.waiting.WaitingWithRankResponse;
 
 @Repository
 public interface WaitingQueryRepository extends JpaRepository<Waiting, Long> {
