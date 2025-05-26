@@ -6,10 +6,10 @@ import jakarta.persistence.criteria.Root;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import org.springframework.data.jpa.domain.Specification;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.reservation.ReservationStatus;
-import roomescape.domain.reservation.RoomescapeSchedule;
 
 public class ReservationSpecs {
 

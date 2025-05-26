@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;

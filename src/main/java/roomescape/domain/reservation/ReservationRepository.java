@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.BaseRepository;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.exception.NotFoundException;
 
 public interface ReservationRepository extends BaseRepository<Reservation, Long> {

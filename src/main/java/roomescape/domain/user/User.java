@@ -16,8 +16,8 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.NotFoundException;
 

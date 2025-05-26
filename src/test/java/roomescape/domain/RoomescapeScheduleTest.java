@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import static roomescape.DateUtils.yesterday;

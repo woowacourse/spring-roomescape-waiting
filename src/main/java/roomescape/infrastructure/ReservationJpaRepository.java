@@ -6,11 +6,11 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationQueues;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.Reservations;
-import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.exception.NotFoundException;
 
 public interface ReservationJpaRepository extends ReservationRepository, Repository<Reservation, Long> {

@@ -7,9 +7,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWithOrder;
-import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.domain.user.User;
 
 @Import(UserService.class)

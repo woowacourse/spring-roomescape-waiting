@@ -6,6 +6,7 @@ import static java.util.stream.Collectors.groupingBy;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotBookStatus;
