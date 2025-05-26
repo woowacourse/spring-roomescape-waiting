@@ -26,7 +26,6 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingWithRank;
-import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.WaitingNotFoundException;
 import roomescape.reservation.fixture.TestFixture;
@@ -37,12 +36,12 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.reservationtime.service.ReservationTimeModuleService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.ThemeModuleService;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-    "spring.sql.init.mode=never"
+        "spring.sql.init.mode=never"
 })
 class ReservationServiceTest {
 
@@ -56,7 +55,7 @@ class ReservationServiceTest {
     private ReservationModuleService reservationModuleService;
     private ReservationCompositeService reservationCompositeService;
     private MemberModuleService memberModuleService;
-    private ThemeService themeService;
+    private ThemeModuleService themeModuleService;
     private ReservationTimeModuleService reservationTimeModuleService;
     private WaitingModuleService waitingModuleService;
 
@@ -82,7 +81,7 @@ class ReservationServiceTest {
         reservationCompositeService = new ReservationCompositeService(reservationModuleService,
                 new WaitingModuleService(waitingRepository),
                 new MemberModuleService(memberRepository, new MyPasswordEncoder()),
-                new ThemeService(themeRepository, reservationRepository),
+                new ThemeModuleService(themeRepository, reservationRepository),
                 new ReservationTimeModuleService(reservationTimeRepository, reservationRepository));
 
         waitingModuleService = new WaitingModuleService(waitingRepository);
@@ -95,7 +94,8 @@ class ReservationServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        ReservationResponse response = reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(),
+        ReservationResponse response = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+                member.getId(),
                 afterOneHour);
 
         Assertions.assertAll(
@@ -117,26 +117,31 @@ class ReservationServiceTest {
 
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        ReservationResponse response = reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(),
+        ReservationResponse response = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+                member.getId(),
                 afterOneHour);
         reservationModuleService.delete(response.id());
 
-        List<ReservationResponse> result = reservationModuleService.findReservations(theme.getId(), member.getId(), futureDate,
+        List<ReservationResponse> result = reservationModuleService.findReservations(theme.getId(), member.getId(),
+                futureDate,
                 futureDate.plusDays(1));
         assertThat(result).isEmpty();
     }
 
     @Test
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
-        assertThatThrownBy(() -> reservationCompositeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
+        assertThatThrownBy(
+                () -> reservationCompositeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
 
     @Test
     void createWaiting_shouldReturnWaitingResponseWhenReservationExists() {
-        ReservationResponse reservation = reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        ReservationResponse waiting = reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        ReservationResponse reservation = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+                member.getId(), afterOneHour);
+        ReservationResponse waiting = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+                member.getId(), afterOneHour);
 
         assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
         Assertions.assertAll(
@@ -147,13 +152,16 @@ class ReservationServiceTest {
 
     @Test
     void deleteReservation_shouldPromoteFirstWaiting() {
-        ReservationResponse reserved = reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        ReservationResponse waiting = reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        ReservationResponse reserved = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+                member.getId(), afterOneHour);
+        ReservationResponse waiting = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+                member.getId(), afterOneHour);
         assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
 
         reservationCompositeService.deleteReservation(reserved.id());
 
-        List<ReservationResponse> all = reservationModuleService.findReservations(theme.getId(), member.getId(), futureDate, futureDate.plusDays(1));
+        List<ReservationResponse> all = reservationModuleService.findReservations(theme.getId(), member.getId(),
+                futureDate, futureDate.plusDays(1));
         assertThat(all).hasSize(1)
                 .extracting(ReservationResponse::reservedStatus)
                 .containsExactly(ReservationStatus.RESERVED.getName());
@@ -165,7 +173,6 @@ class ReservationServiceTest {
         reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
         reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
         reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-
 
         List<ReservationResponse> waitings = waitingModuleService.findWaitings();
         assertThat(waitings).hasSize(2)
@@ -231,7 +238,7 @@ class ReservationServiceTest {
         ReservationInfo notExist =
                 new ReservationInfo(futureDate.plusDays(1),
                         time,
-                       theme);
+                        theme);
         assertThatThrownBy(() -> waitingModuleService.findFirstWaitingOfInfo(notExist))
                 .isInstanceOf(WaitingNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 대기 정보가 없습니다.");

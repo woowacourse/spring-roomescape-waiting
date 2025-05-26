@@ -20,7 +20,7 @@ import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeModuleService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.ThemeModuleService;
 
 @Service
 public class ReservationCompositeService {
@@ -28,30 +28,28 @@ public class ReservationCompositeService {
     private final ReservationModuleService reservationModuleService;
     private final WaitingModuleService waitingModuleService;
     private final MemberModuleService memberModuleService;
-    private final ThemeService themeService;
+    private final ThemeModuleService themeModuleService;
     private final ReservationTimeModuleService reservationTimeModuleService;
 
     public ReservationCompositeService(final ReservationModuleService reservationModuleService,
-                                       final WaitingModuleService waitingModuleService, MemberModuleService memberModuleService,
-                                       ThemeService themeService, ReservationTimeModuleService reservationTimeModuleService) {
+                                       final WaitingModuleService waitingModuleService,
+                                       MemberModuleService memberModuleService,
+                                       ThemeModuleService themeModuleService,
+                                       ReservationTimeModuleService reservationTimeModuleService) {
         this.reservationModuleService = reservationModuleService;
         this.waitingModuleService = waitingModuleService;
         this.memberModuleService = memberModuleService;
-        this.themeService = themeService;
+        this.themeModuleService = themeModuleService;
         this.reservationTimeModuleService = reservationTimeModuleService;
     }
 
     public List<MyReservationResponse> findMyReservations(final UserInfo userInfo) {
         List<Reservation> myReservations = reservationModuleService.findMyReservations(userInfo);
         List<WaitingWithRank> waitingWithRanks = waitingModuleService.findMyWaitingsWithRank(userInfo);
-
         List<MyReservationResponse> myReservationResponses = new ArrayList<>();
-        return Stream.concat(
-                        myReservations.stream().map(
-                                MyReservationResponse::from),
-                        waitingWithRanks.stream().map(MyReservationResponse::from)
-                )
-                .collect(Collectors.toList());
+        return Stream.concat(myReservations.stream().map(MyReservationResponse::from),
+                waitingWithRanks.stream().map(MyReservationResponse::from)
+        ).collect(Collectors.toList());
     }
 
     @Transactional
@@ -68,7 +66,7 @@ public class ReservationCompositeService {
                                                   final LocalDateTime now) {
         reservationModuleService.checkIfReservationExists(date, timeId, themeId);
         ReservationTime time = reservationTimeModuleService.findReservationTime(timeId);
-        Theme theme = themeService.findTheme(themeId);
+        Theme theme = themeModuleService.findTheme(themeId);
         Member member = memberModuleService.findUserByMemberId(memberId);
         Reservation newReservation = reservationModuleService.save(
                 Reservation.createUpcomingReservationWithUnassignedId(
@@ -80,7 +78,7 @@ public class ReservationCompositeService {
     private ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
                                               final Long memberId, final LocalDateTime now) {
         ReservationTime time = reservationTimeModuleService.findReservationTime(timeId);
-        Theme theme = themeService.findTheme(themeId);
+        Theme theme = themeModuleService.findTheme(themeId);
         Member member = memberModuleService.findUserByMemberId(memberId);
         int turn = waitingModuleService.findMaxOrderByDateAndTimeAndTheme(date, timeId,
                 themeId);
@@ -113,6 +111,5 @@ public class ReservationCompositeService {
         );
         waitingModuleService.delete(waiting.getId());
     }
-
 
 }

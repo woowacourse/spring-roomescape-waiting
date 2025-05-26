@@ -11,30 +11,29 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RequireRole;
-import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.ThemeModuleService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService themeService;
+    private final ThemeModuleService themeModuleService;
 
-    public ThemeController(final ThemeService themeService) {
-        this.themeService = themeService;
+    public ThemeController(final ThemeModuleService themeModuleService) {
+        this.themeModuleService = themeModuleService;
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getThemes() {
-        return ResponseEntity.ok(themeService.getThemes());
+        return ResponseEntity.ok(themeModuleService.getThemes());
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeService.getPopularThemes());
+        return ResponseEntity.ok(themeModuleService.getPopularThemes());
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -42,7 +41,7 @@ public class ThemeController {
     public ResponseEntity<ThemeResponse> createTheme(
             @RequestBody ThemeCreateRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(themeService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(themeModuleService.create(request));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -50,7 +49,7 @@ public class ThemeController {
     public ResponseEntity<Void> deleteTheme(
             @PathVariable("id") Long id
     ) {
-        themeService.delete(id);
+        themeModuleService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

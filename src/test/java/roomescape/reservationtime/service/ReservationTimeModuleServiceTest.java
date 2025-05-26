@@ -32,12 +32,12 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.ThemeModuleService;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-    "spring.sql.init.mode=never"
+        "spring.sql.init.mode=never"
 })
 class ReservationTimeModuleServiceTest {
 
@@ -67,15 +67,16 @@ class ReservationTimeModuleServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeModuleService = new ReservationTimeModuleService(reservationTimeRepository, reservationRepository);
+        reservationTimeModuleService = new ReservationTimeModuleService(reservationTimeRepository,
+                reservationRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
         reservationCompositeService = new ReservationCompositeService(
                 new ReservationModuleService(reservationRepository),
                 new WaitingModuleService(waitingRepository),
-                new MemberModuleService(memberRepository,new MyPasswordEncoder()),
-                new ThemeService(themeRepository,reservationRepository),
-                new ReservationTimeModuleService(reservationTimeRepository,reservationRepository)
+                new MemberModuleService(memberRepository, new MyPasswordEncoder()),
+                new ThemeModuleService(themeRepository, reservationRepository),
+                new ReservationTimeModuleService(reservationTimeRepository, reservationRepository)
         );
     }
 
