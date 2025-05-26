@@ -2,6 +2,8 @@ package roomescape.application;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -69,6 +71,15 @@ public class WaitingService {
         return memberWaitings.stream()
                 .map(this::createReservationStatusDto)
                 .toList();
+    }
+
+    public Optional<Waiting> findFirstWaitingEntityByGameSchedule(GameSchedule gameSchedule) {
+        List<Waiting> waitings = waitingRepository.findByGameSchedule(gameSchedule);
+        try {
+            return Optional.of(waitings.getFirst());
+        } catch (NoSuchElementException e) {
+            return Optional.empty();
+        }
     }
 
     private ReservationStatusServiceResponse createReservationStatusDto(Waiting waiting) {

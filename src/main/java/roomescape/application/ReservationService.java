@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import org.springframework.dao.EmptyResultDataAccessException;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
@@ -14,6 +14,7 @@ import roomescape.domain.ReservationStatus;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
+import roomescape.domain.entity.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.NotFoundException;
 
@@ -67,7 +68,7 @@ public class ReservationService {
 
     public Reservation getReservationEntityById(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id));
+                .orElseThrow(() -> new NotFoundException("해당하는 예약 id가 존재하지 않습니다. id: " + id));
     }
 
     public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
@@ -116,10 +117,22 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservation(Long id) {
-        try {
-            reservationRepository.deleteById(id);
-        } catch (EmptyResultDataAccessException e) {
-            throw new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + id);
+        Reservation reservation = getReservationEntityById(id);
+        GameSchedule gameSchedule = reservation.getGameSchedule();
+        approveWaitingOf(gameSchedule);
+        reservationRepository.deleteById(id);
+    }
+
+    private void approveWaitingOf(GameSchedule gameSchedule) {
+        Optional<Waiting> firstWaiting = waitingService.findFirstWaitingEntityByGameSchedule(gameSchedule);
+        if (firstWaiting.isPresent()) {
+            Reservation reservationWithoutId = Reservation.withoutId(
+                    firstWaiting.get().getMember(),
+                    firstWaiting.get().getGameSchedule(),
+                    ReservationStatus.RESERVED
+            );
+            reservationRepository.save(reservationWithoutId);
+            waitingService.deleteWaiting(firstWaiting.get().getId());
         }
     }
 }
