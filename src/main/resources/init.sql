@@ -26,6 +26,8 @@ VALUES (1, '2025-04-28', 1, 1);
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (1, '2025-05-28', 1, 1);
 INSERT INTO reservation (member_id, date, time_id, theme_id)
+VALUES (1, '2025-05-29', 1, 1);
+INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, '2025-05-28', 2, 2);
 INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (1, '2025-04-28', 2, 1);
@@ -35,6 +37,8 @@ INSERT INTO reservation (member_id, date, time_id, theme_id)
 VALUES (2, '2025-04-18', 1, 2);
 
 INSERT INTO waiting (member_id, date, time_id, theme_id, status, created_at)
-VALUES (1, '2025-05-28', 1, 1, 'PENDING', CURRENT_TIMESTAMP);
-INSERT INTO waiting (member_id, date, time_id, theme_id, status, created_at)
 VALUES (2, '2025-05-28', 1, 1, 'PENDING', CURRENT_TIMESTAMP);
+INSERT INTO waiting (member_id, date, time_id, theme_id, status, created_at)
+VALUES (2, '2025-05-29', 1, 1, 'PENDING', CURRENT_TIMESTAMP);
+INSERT INTO waiting (member_id, date, time_id, theme_id, status, created_at)
+VALUES (3, '2025-05-28', 1, 1, 'PENDING', CURRENT_TIMESTAMP);

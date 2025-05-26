@@ -78,7 +78,7 @@ function cancel(event) {
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
-        if (response.status === 200) return;
+        if (response.status === 204) return;
         throw new Error('Delete failed');
     }).then(() => location.reload());
 }

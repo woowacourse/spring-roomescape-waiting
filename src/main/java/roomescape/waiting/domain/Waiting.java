@@ -79,12 +79,4 @@ public class Waiting {
     public LocalDateTime getCreatedAt() {
         return createdAt;
     }
-
-    public void cancel() {
-        this.status = WaitingStatus.CANCELED;
-    }
-
-    public void approve() {
-        this.status = WaitingStatus.APPROVED;
-    }
 }

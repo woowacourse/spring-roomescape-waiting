@@ -33,23 +33,4 @@ public class WaitingTest {
         assertThat(waiting.getStatus()).isEqualTo(WaitingStatus.PENDING);
         assertThat(waiting.getCreatedAt()).isEqualTo(createdAt);
     }
-
-    @Test
-    void 대기를_취소하면_상태가_CANCELED로_변경된다() {
-        // given
-        Waiting waiting = Waiting.createWithoutId(
-                member,
-                LocalDate.of(2024, 3, 20),
-                time,
-                theme,
-                WaitingStatus.PENDING,
-                LocalDateTime.now()
-        );
-
-        // when
-        waiting.cancel();
-
-        // then
-        assertThat(waiting.getStatus()).isEqualTo(WaitingStatus.CANCELED);
-    }
 }

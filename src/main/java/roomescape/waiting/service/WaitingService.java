@@ -73,20 +73,12 @@ public class WaitingService {
     public void cancelWaiting(Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다."));
-        waiting.cancel();
-        waitingRepository.save(waiting);
+        waitingRepository.delete(waiting);
     }
 
     public List<WaitingResponse> getAllWaitings() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::from)
                 .toList();
-    }
-
-    public void approveWaiting(Long waitingId) {
-        Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다."));
-        waiting.approve();
-        waitingRepository.save(waiting);
     }
 }
