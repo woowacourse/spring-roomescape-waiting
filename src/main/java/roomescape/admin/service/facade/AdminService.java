@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.AdminReservationResponse;
 import roomescape.admin.dto.ReservationSearchRequest;
@@ -20,6 +21,7 @@ public class AdminService {
     private final AdminReservationService reservationService;
     private final AdminWaitingService waitingService;
 
+    @Transactional
     public AdminReservationResponse saveByAdmin(final AdminReservationRequest adminReservationRequest) {
         final LocalDate date = adminReservationRequest.date();
         final Long themeId = adminReservationRequest.themeId();
@@ -31,6 +33,12 @@ public class AdminService {
         return AdminReservationResponse.from(savedReservation);
     }
 
+    @Transactional
+    public void deleteWaitingById(final Long id) {
+        waitingService.deleteWaitingById(id);
+    }
+
+    @Transactional(readOnly = true)
     public List<AdminReservationResponse> findByInFromTo(final ReservationSearchRequest searchRequest) {
         final Long themeId = searchRequest.themeId();
         final Long memberId = searchRequest.memberId();
@@ -44,6 +52,7 @@ public class AdminService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWaitingResponse> findAllWaitingReservations() {
         final List<Waiting> waitingReservations = waitingService.findAllWaitingReservations();
 
@@ -51,9 +60,4 @@ public class AdminService {
                 .map(ReservationWaitingResponse::from)
                 .toList();
     }
-
-    public void deleteWaitingById(final Long id) {
-        waitingService.deleteWaitingById(id);
-    }
 }
-
