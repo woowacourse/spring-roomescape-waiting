@@ -41,6 +41,10 @@ public class Waiting {
         this.reservationInfo = reservationInfo;
     }
 
+    public boolean isMyWaiting(Member member) {
+        return this.member.equals(member);
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (o == null || getClass() != o.getClass()) return false;

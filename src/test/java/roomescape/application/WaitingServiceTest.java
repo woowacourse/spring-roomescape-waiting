@@ -145,38 +145,93 @@ class WaitingServiceTest extends BaseTest {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
-        waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
 
-        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        List<Waiting> waitings = waitingService.findWaitingsByMember(waitingMember);
 
         assertThat(waitings).hasSize(1);
     }
 
     @Test
-    void 예약대기를_취소한다() {
+    void 사용자가_본인의_예약대기를_취소한다() {
         Member member = memberDbFixture.한스_사용자();
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
-        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        LoginMember loginMember = new LoginMember(waitingMember.getId(), waitingMember.getName(), Role.USER, waitingMember.getEmail());
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
 
-        waitingService.deleteWaitingById(waiting.getId());
+        waitingService.deleteWaitingByIdAndMember(waiting.getId(), loginMember);
 
-        List<Waiting> waitings = waitingService.findWaitingsByMember(member);
+        List<Waiting> waitings = waitingService.findWaitingsByMember(waitingMember);
 
         assertThat(waitings).isEmpty();
     }
 
     @Test
-    void 존재하지_않는_예약대기를_취소하면_예외가_발생한다() {
+    void 사용자가_본인의_예약대기가_아닌_예약대기를_취소하면_예외가_발생한다() {
+        Member member = memberDbFixture.한스_사용자();
+        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        Theme theme = themeDbFixture.공포();
+
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
+
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        LoginMember notLoginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
+
+        assertThatThrownBy(() -> waitingService.deleteWaitingByIdAndMember(waiting.getId(), notLoginMember))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 사용자가_존재하지_않는_예약대기를_취소하면_예외가_발생한다() {
+        Member member = memberDbFixture.한스_사용자();
+        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        Theme theme = themeDbFixture.공포();
+
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
+
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        LoginMember notLoginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
+        Long notExistsWaitingId = waiting.getId() + 1L;
+
+        assertThatThrownBy(() -> waitingService.deleteWaitingByIdAndMember(notExistsWaitingId, notLoginMember))
+                .isInstanceOf(NoSuchElementException.class);
+    }
+
+    @Test
+    void 관리자가_예약대기를_취소한다() {
+        Member member = memberDbFixture.한스_사용자();
+        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        Theme theme = themeDbFixture.공포();
+
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
+
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
+
+        waitingService.deleteWaitingById(waiting.getId());
+
+        List<Waiting> waitings = waitingService.findWaitingsByMember(waitingMember);
+
+        assertThat(waitings).isEmpty();
+    }
+
+    @Test
+    void 관리자가_존재하지_않는_예약대기를_취소하면_예외가_발생한다() {
         assertThatThrownBy(() -> waitingService.deleteWaitingById(3L))
                 .isInstanceOf(NoSuchElementException.class);
     }
@@ -187,11 +242,11 @@ class WaitingServiceTest extends BaseTest {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
-        waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
 
         List<WaitingResponse> waitings = waitingService.getWaitings();
         WaitingResponse response = waitings.getFirst();
@@ -202,7 +257,7 @@ class WaitingServiceTest extends BaseTest {
                 () -> assertThat(response.date()).isEqualTo(ReservationDateFixture.예약날짜_25_4_23.getDate()),
                 () -> assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationTime)),
                 () -> assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme)),
-                () -> assertThat(response.member()).isEqualTo(MemberResponse.from(member))
+                () -> assertThat(response.member()).isEqualTo(MemberResponse.from(waitingMember))
         );
     }
 
@@ -212,22 +267,22 @@ class WaitingServiceTest extends BaseTest {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
-        waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
 
         assertThat(waitingService.existsWaitings(reservationInfo)).isTrue();
     }
 
     @Test
     void 예약대기가_존재하지_않으면_false를_반환한다() {
+        Member member = memberDbFixture.듀이_사용자();
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
         assertThat(waitingService.existsWaitings(reservationInfo)).isFalse();
@@ -239,11 +294,11 @@ class WaitingServiceTest extends BaseTest {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
-        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+        Member waitingMember = memberDbFixture.듀이_사용자();
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, waitingMember);
 
         assertThat(waitingService.findFirstRankWaitingByReservationInfo(reservationInfo)).isEqualTo(waiting);
     }
@@ -251,16 +306,16 @@ class WaitingServiceTest extends BaseTest {
     @Test
     @Transactional
     void 예약대기의_순번을_업데이트한다() {
+        Member member = memberDbFixture.듀이_사용자();
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
 
-        Member alreadyReservedMember = memberDbFixture.듀이_사용자();
-        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(member, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
 
-        Member firstMember = memberDbFixture.한스_사용자();
-        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, firstMember);
-        Reservation newReservation = reservationDbFixture.예약_생성(firstMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
+        Member firstWaitingMember = memberDbFixture.한스_사용자();
+        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, firstWaitingMember);
+        Reservation newReservation = reservationDbFixture.예약_생성(firstWaitingMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo newReservationInfo = ReservationInfo.create(newReservation);
 
         waitingService.updateWaitings(reservationInfo, newReservationInfo);

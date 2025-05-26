@@ -1,4 +1,6 @@
 const RESERVATION_WAITING_API_ENDPOINT = '/reservations/waitings';
+const ADMIN_RESERVATION_WAITING_API_ENDPOINT = '/admin/reservations/waitings';
+
 
 document.addEventListener('DOMContentLoaded', () => {
     fetch(RESERVATION_WAITING_API_ENDPOINT) // 내 예약 목록 조회 API 호출
@@ -39,7 +41,7 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = `${RESERVATION_WAITING_API_ENDPOINT}/${id}`;
+    const endpoint = `${ADMIN_RESERVATION_WAITING_API_ENDPOINT}/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

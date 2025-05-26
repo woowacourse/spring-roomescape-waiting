@@ -75,14 +75,28 @@ public class WaitingService {
     }
 
     @Transactional
-    public void deleteWaitingById(Long id) {
+    public void deleteWaitingByIdAndMember(Long id, LoginMember loginMember) {
+        Member member = memberService.findMemberById(loginMember.id());
         Waiting waiting = findWaitingById(id);
+        validateWaitingByMember(waiting, member);
         waitingRepository.deleteById(waiting.getId());
     }
 
     public Waiting findWaitingById(Long id) {
         return waitingRepository.findById(id)
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기 건이 존재하지 않습니다."));
+    }
+
+    private void validateWaitingByMember(Waiting waiting, Member member) {
+        if (!waiting.isMyWaiting(member)) {
+            throw new IllegalArgumentException("[ERROR] 본인의 예약 대기만 취소할 수 있습니다.");
+        }
+    }
+
+    @Transactional
+    public void deleteWaitingById(Long id) {
+        Waiting waiting = findWaitingById(id);
+        waitingRepository.deleteById(waiting.getId());
     }
 
     public List<WaitingResponse> getWaitings() {

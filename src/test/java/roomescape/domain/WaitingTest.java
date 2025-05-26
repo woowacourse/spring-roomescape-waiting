@@ -38,6 +38,30 @@ class WaitingTest {
         );
     }
 
+    @Test
+    void 내_대기이면_true를_반환한다() {
+        Reservation reservation = createReservation();
+        ReservationInfo reservationInfo = ReservationInfo.create(reservation);
+
+        Member waitingMember = Member.create("제로", Role.USER, "zero.test.com", "zero");
+        Waiting waiting = Waiting.create(reservationInfo, waitingMember, 1L);
+
+        assertThat(waiting.isMyWaiting(waitingMember)).isTrue();
+    }
+
+    @Test
+    void 내_대기가_아니면_false를_반환한다() {
+        Reservation reservation = createReservation();
+        ReservationInfo reservationInfo = ReservationInfo.create(reservation);
+
+        Member waitingMember = Member.create("제로", Role.USER, "zero.test.com", "zero");
+        Waiting waiting = Waiting.create(reservationInfo, waitingMember, 1L);
+
+        Member notWaitingMember = Member.create("브라운", Role.USER, "brown.test.com", "brown");
+
+        assertThat(waiting.isMyWaiting(notWaitingMember)).isFalse();
+    }
+
     private Reservation createReservation() {
         Member member = Member.create("듀이", Role.USER, "test@test.com", "password");
         LocalDate date = now.toLocalDate();
