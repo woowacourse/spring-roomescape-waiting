@@ -33,9 +33,6 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Theme theme;
-    @Enumerated(EnumType.STRING)
-    @Column(length = 15, nullable = false)
-    private ReservationStatus reservationStatus;
 
     protected Reservation() {
 
@@ -48,7 +45,6 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.reservationStatus = ReservationStatus.RESERVATION;
     }
 
     private void validate(String name, LocalDate date, ReservationTime time) {
@@ -107,10 +103,6 @@ public class Reservation {
 
     public String getThemeName() {
         return theme.getName();
-    }
-
-    public String getReservationStatus() {
-        return reservationStatus.getStatus();
     }
 
     @Override

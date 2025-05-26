@@ -58,10 +58,6 @@ public class ReserveTicket {
         return member.getName();
     }
 
-    public String getStatus() {
-        return reservation.getReservationStatus();
-    }
-
     public long getId() {
         return id;
     }
