@@ -69,11 +69,9 @@ class ReservationRepositoryTest {
         final Reservation found = reservationRepository.getByIdOrThrow(saved.getId());
 
         // then
-        assertAll(
-                () -> assertThat(found.getId()).isEqualTo(saved.getId()),
+        assertAll(() -> assertThat(found.getId()).isEqualTo(saved.getId()),
                 () -> assertThat(found.getReservationSlot()).isEqualTo(saved.getReservationSlot()),
-                () -> assertThat(found.getMember()).isEqualTo(saved.getMember())
-        );
+                () -> assertThat(found.getMember()).isEqualTo(saved.getMember()));
     }
 
     @Test
@@ -82,8 +80,7 @@ class ReservationRepositoryTest {
         final Long id = 1L;
 
         // when & then
-        assertThatThrownBy(() -> reservationRepository.getByIdOrThrow(id))
-                .isInstanceOf(ResourceNotFoundException.class)
+        assertThatThrownBy(() -> reservationRepository.getByIdOrThrow(id)).isInstanceOf(ResourceNotFoundException.class)
                 .hasMessage("해당 예약을 찾을 수 없습니다.");
     }
 
@@ -110,10 +107,7 @@ class ReservationRepositoryTest {
                 member.getId());
 
         // then
-        assertAll(
-                () -> assertThat(reservedResult).isTrue(),
-                () -> assertThat(notReservedResult).isFalse()
-        );
+        assertAll(() -> assertThat(reservedResult).isTrue(), () -> assertThat(notReservedResult).isFalse());
     }
 
     @Test
@@ -144,13 +138,11 @@ class ReservationRepositoryTest {
         final List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
 
         // then
-        assertAll(
-                () -> assertThat(reservations).hasSize(3),
+        assertAll(() -> assertThat(reservations).hasSize(3),
                 () -> assertThat(reservations).extracting(Reservation::getReservationSlot)
                         .containsExactlyInAnyOrder(reservationSlot1, reservationSlot2, reservationSlot3),
                 () -> assertThat(reservations).extracting(Reservation::getMember)
-                        .containsExactlyInAnyOrder(member, member, member)
-        );
+                        .containsExactlyInAnyOrder(member, member, member));
     }
 
     @MethodSource
@@ -175,17 +167,14 @@ class ReservationRepositoryTest {
         reservationRepository.save(new Reservation(member, reservationSlot2));
 
         // when
-        final List<Reservation> found = reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(
-                theme.getId(), member.getId(), from, to);
+        final List<Reservation> found = reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(theme.getId(),
+                member.getId(), from, to);
 
         // then
-        assertAll(
-                () -> assertThat(found).extracting(reservation -> reservation.getReservationSlot().getDate())
-                        .containsExactlyInAnyOrderElementsOf(dates),
-                () -> assertThat(found).extracting(
-                                reservation -> reservation.getReservationSlot().getTime().getStartAt())
-                        .containsExactlyInAnyOrderElementsOf(times)
-        );
+        assertAll(() -> assertThat(found).extracting(reservation -> reservation.getReservationSlot().getDate())
+                .containsExactlyInAnyOrderElementsOf(dates), () -> assertThat(found).extracting(
+                        reservation -> reservation.getReservationSlot().getTime().getStartAt())
+                .containsExactlyInAnyOrderElementsOf(times));
 
     }
 
@@ -195,65 +184,33 @@ class ReservationRepositoryTest {
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final ReservationSlot reservationSlot = reservationSlotRepository.save(new ReservationSlot(date, time, theme));
-
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
         final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
         final Member member3 = memberRepository.save(NOT_SAVED_MEMBER_3());
 
-        reservationRepository.save(new Reservation(member1, reservationSlot));
-        final Reservation target = reservationRepository.save(new Reservation(member2, reservationSlot));
-        reservationRepository.save(new Reservation(member3, reservationSlot));
+        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme);
+        final Reservation target = new Reservation(member2, reservationSlot);
+        reservationSlot.addReservation(new Reservation(member1, reservationSlot));
+        reservationSlot.addReservation(target);
+        reservationSlot.addReservation(new Reservation(member3, reservationSlot));
+        reservationSlotRepository.save(reservationSlot);
+        reservationSlot.assignConfirmedIfEmpty();
 
         // when
         final Long rank = reservationRepository.getReservationRankById(target.getId());
 
         // then
-        assertThat(rank).isEqualTo(2);
+        assertThat(rank).isEqualTo(1);
     }
 
     static Stream<Arguments> 테마ID_사용자ID_날짜_범위에_해당하는_예약_목록을_조회한다() {
-        return Stream.of(
-                Arguments.of(
-                        LocalDate.now().plusDays(1),
-                        LocalDate.now().plusDays(5),
-                        List.of(
-                                LocalTime.of(10, 0),
-                                LocalTime.of(11, 0)
-                        ),
-                        List.of(
-                                LocalDate.now().plusDays(1),
-                                LocalDate.now().plusDays(5)
-                        )
-                ),
-                Arguments.of(
-                        LocalDate.now().plusDays(2),
-                        LocalDate.now().plusDays(4),
-                        List.of(
-                        ),
-                        List.of(
-                        )
-                ),
-                Arguments.of(
-                        LocalDate.now().plusDays(2),
-                        LocalDate.now().plusDays(5),
-                        List.of(
-                                LocalTime.of(11, 0)
-                        ),
-                        List.of(
-                                LocalDate.now().plusDays(5)
-                        )
-                ),
-                Arguments.of(
-                        LocalDate.now().minusDays(3),
-                        LocalDate.now().plusDays(1),
-                        List.of(
-                                LocalTime.of(10, 0)
-                        ),
-                        List.of(
-                                LocalDate.now().plusDays(1)
-                        )
-                )
-        );
+        return Stream.of(Arguments.of(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5),
+                        List.of(LocalTime.of(10, 0), LocalTime.of(11, 0)),
+                        List.of(LocalDate.now().plusDays(1), LocalDate.now().plusDays(5))),
+                Arguments.of(LocalDate.now().plusDays(2), LocalDate.now().plusDays(4), List.of(), List.of()),
+                Arguments.of(LocalDate.now().plusDays(2), LocalDate.now().plusDays(5), List.of(LocalTime.of(11, 0)),
+                        List.of(LocalDate.now().plusDays(5))),
+                Arguments.of(LocalDate.now().minusDays(3), LocalDate.now().plusDays(1), List.of(LocalTime.of(10, 0)),
+                        List.of(LocalDate.now().plusDays(1))));
     }
 }

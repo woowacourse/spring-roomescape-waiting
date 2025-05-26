@@ -80,12 +80,10 @@ class ReservationServiceTest {
         final MemberReservationResponse response = reservationService.createForMember(request, memberAuthInfo.id());
 
         // then
-        assertAll(
-                () -> assertThat(response.theme()).isEqualTo(theme.getName()),
+        assertAll(() -> assertThat(response.theme()).isEqualTo(theme.getName()),
                 () -> assertThat(response.date()).isEqualTo(date),
                 () -> assertThat(response.time()).isEqualTo(time.getStartAt()),
-                () -> assertThat(response.rank()).isEqualTo(1L)
-        );
+                () -> assertThat(response.rank()).isEqualTo(0L));
     }
 
     @Test
@@ -105,12 +103,10 @@ class ReservationServiceTest {
         final MemberReservationResponse response = reservationService.createForMember(request, member2.getId());
 
         // then
-        assertAll(
-                () -> assertThat(response.theme()).isEqualTo(theme.getName()),
+        assertAll(() -> assertThat(response.theme()).isEqualTo(theme.getName()),
                 () -> assertThat(response.date()).isEqualTo(date),
                 () -> assertThat(response.time()).isEqualTo(time.getStartAt()),
-                () -> assertThat(response.rank()).isEqualTo(2L)
-        );
+                () -> assertThat(response.rank()).isEqualTo(1L));
     }
 
     @Test
@@ -127,11 +123,9 @@ class ReservationServiceTest {
         final AdminReservationResponse response = reservationService.createForAdmin(request);
 
         // then
-        assertAll(
-                () -> assertThat(response.theme().name()).isEqualTo(theme.getName()),
+        assertAll(() -> assertThat(response.theme().name()).isEqualTo(theme.getName()),
                 () -> assertThat(response.date()).isEqualTo(date),
-                () -> assertThat(response.time().startAt()).isEqualTo(time.getStartAt())
-        );
+                () -> assertThat(response.time().startAt()).isEqualTo(time.getStartAt()));
     }
 
     @Test
@@ -171,9 +165,9 @@ class ReservationServiceTest {
         final MemberAuthInfo member2AuthInfo = new MemberAuthInfo(member2.getId(), member2.getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteReservation(savedReservation.getId(), member2AuthInfo))
-                .isInstanceOf(AuthorizationException.class)
-                .hasMessage("삭제할 권한이 없습니다.");
+        assertThatThrownBy(
+                () -> reservationService.deleteReservation(savedReservation.getId(), member2AuthInfo)).isInstanceOf(
+                AuthorizationException.class).hasMessage("삭제할 권한이 없습니다.");
     }
 
     @Test
@@ -223,10 +217,8 @@ class ReservationServiceTest {
         reservationService.deleteReservation(confirmedReservation.getId(), member1AuthInfo);
 
         // then
-        assertAll(
-                () -> assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty(),
-                () -> assertThat(reservationSlot.getConfirmedReservation()).isEqualTo(waitingReservation)
-        );
+        assertAll(() -> assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty(),
+                () -> assertThat(reservationSlot.getConfirmedReservation()).isEqualTo(waitingReservation));
     }
 
     @Test
@@ -255,15 +247,13 @@ class ReservationServiceTest {
         final int afterCount = reservations.size();
 
         // then
-        assertAll(
-                () -> assertThat(afterCount - beforeCount).isEqualTo(2),
+        assertAll(() -> assertThat(afterCount - beforeCount).isEqualTo(2),
                 () -> assertThat(reservations).extracting(AdminReservationResponse::date)
                         .containsExactlyInAnyOrder(date1, date2),
                 () -> assertThat(reservations).extracting(reservation -> reservation.time().startAt())
                         .containsExactlyInAnyOrder(time1.getStartAt(), time2.getStartAt()),
                 () -> assertThat(reservations).extracting(reservation -> reservation.theme().name())
-                        .containsExactlyInAnyOrder(theme1.getName(), theme2.getName())
-        );
+                        .containsExactlyInAnyOrder(theme1.getName(), theme2.getName()));
     }
 
     @Test
@@ -291,14 +281,12 @@ class ReservationServiceTest {
         final List<AvailableReservationTimeResponse> after = reservationService.findAvailableReservationTimes(request);
 
         // then
-        assertAll(
-                () -> assertThat(before).extracting(AvailableReservationTimeResponse::alreadyBooked)
+        assertAll(() -> assertThat(before).extracting(AvailableReservationTimeResponse::alreadyBooked)
                         .containsExactlyInAnyOrder(false, false),
                 () -> assertThat(after).extracting(AvailableReservationTimeResponse::alreadyBooked)
                         .containsExactlyInAnyOrder(true, true),
                 () -> assertThat(after).extracting(AvailableReservationTimeResponse::startAt)
-                        .containsExactly(LocalTime.of(10, 0), LocalTime.of(11, 0))
-        );
+                        .containsExactly(LocalTime.of(10, 0), LocalTime.of(11, 0)));
     }
 
     @Test
@@ -318,9 +306,8 @@ class ReservationServiceTest {
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id()))
-                .isInstanceOf(AlreadyExistException.class)
-                .hasMessage("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
+        assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id())).isInstanceOf(
+                AlreadyExistException.class).hasMessage("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
     }
 
     @Test
@@ -339,9 +326,8 @@ class ReservationServiceTest {
         reservationRepository.save(new Reservation(member, reservationSlot));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id()))
-                .isInstanceOf(AlreadyExistException.class)
-                .hasMessage("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
+        assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id())).isInstanceOf(
+                AlreadyExistException.class).hasMessage("해당 날짜와 시간에 이미 해당 테마에 대한 예약이 있습니다.");
     }
 
     @Test
@@ -368,18 +354,9 @@ class ReservationServiceTest {
         final List<MemberReservationResponse> founds = reservationService.findReservationsByMemberId(member.getId());
 
         // then
-        assertAll(
-                () -> assertThat(founds).hasSize(2),
-                () -> assertThat(founds)
-                        .containsExactlyInAnyOrder(
-                                new MemberReservationResponse(saved1.getId(), theme1.getName(), date1,
-                                        time1.getStartAt(),
-                                        1L),
-                                new MemberReservationResponse(saved2.getId(), theme2.getName(), date2,
-                                        time2.getStartAt(),
-                                        1L)
-                        )
-        );
+        assertAll(() -> assertThat(founds).hasSize(2), () -> assertThat(founds).containsExactlyInAnyOrder(
+                new MemberReservationResponse(saved1.getId(), theme1.getName(), date1, time1.getStartAt(), 0L),
+                new MemberReservationResponse(saved2.getId(), theme2.getName(), date2, time2.getStartAt(), 0L)));
     }
 
     @Test
@@ -411,14 +388,12 @@ class ReservationServiceTest {
         final List<AdminReservationWaitingResponse> responses = reservationService.findReservationWaitings();
 
         // then
-        assertAll(
-                () -> assertThat(responses).hasSize(2),
+        assertAll(() -> assertThat(responses).hasSize(2),
                 () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationId)
                         .containsExactlyInAnyOrder(waitingReservation1.getId(), waitingReservation2.getId()),
                 () -> assertThat(responses).extracting(AdminReservationWaitingResponse::memberName)
                         .containsExactlyInAnyOrder(member1.getName(), member2.getName()),
                 () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationDate)
-                        .containsExactlyInAnyOrder(date, date)
-        );
+                        .containsExactlyInAnyOrder(date, date));
     }
 }

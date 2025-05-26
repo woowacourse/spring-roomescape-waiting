@@ -38,10 +38,9 @@ public class ReservationService {
     private final MemberRepository memberRepository;
 
     @Transactional
-    public MemberReservationResponse createForMember(
-            final MemberCreateReservationRequest request,
-            final Long memberId
-    ) {
+    public MemberReservationResponse createForMember(final MemberCreateReservationRequest request,
+                                                     final Long memberId) {
+
         final Reservation reservation = registerReservation(request.date(), request.timeId(), request.themeId(),
                 memberId);
 
@@ -77,10 +76,7 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<AdminReservationResponse> findAll() {
-        return reservationSlotRepository.findAll()
-                .stream()
-                .map(this::mapSlotReservations)
-                .flatMap(List::stream)
+        return reservationSlotRepository.findAll().stream().map(this::mapSlotReservations).flatMap(List::stream)
                 .toList();
     }
 
@@ -91,55 +87,35 @@ public class ReservationService {
             throw new IllegalArgumentException("시작 날짜는 종료 날짜보다 이전이어야 합니다.");
         }
 
-        return reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(
-                        request.themeId(), request.memberId(), request.dateFrom(), request.dateTo()
-                )
-                .stream()
-                .map(reservation ->
-                        AdminReservationResponse.from(
-                                reservation,
-                                reservationRepository.getReservationRankById(reservation.getId())))
-                .toList();
+        return reservationRepository.findAllByThemeIdAndMemberIdAndDateRange(request.themeId(), request.memberId(),
+                        request.dateFrom(), request.dateTo()).stream()
+                .map(reservation -> AdminReservationResponse.from(reservation,
+                        reservationRepository.getReservationRankById(reservation.getId()))).toList();
     }
 
     @Transactional(readOnly = true)
     public List<AvailableReservationTimeResponse> findAvailableReservationTimes(
-            final AvailableReservationTimeRequest request
-    ) {
+            final AvailableReservationTimeRequest request) {
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        final List<LocalTime> bookedTimes = reservationSlotRepository.findAllByDateAndThemeId(
-                        request.date(),
-                        request.themeId()
-                ).stream()
-                .map(reservationSlot -> reservationSlot.getTime().getStartAt())
-                .toList();
+        final List<LocalTime> bookedTimes = reservationSlotRepository.findAllByDateAndThemeId(request.date(),
+                request.themeId()).stream().map(reservationSlot -> reservationSlot.getTime().getStartAt()).toList();
 
         return reservationTimes.stream()
-                .map(reservationTime ->
-                        new AvailableReservationTimeResponse(
-                                reservationTime.getId(),
-                                reservationTime.getStartAt(),
-                                bookedTimes.contains(reservationTime.getStartAt())
-                        )
-                )
-                .toList();
+                .map(reservationTime -> new AvailableReservationTimeResponse(reservationTime.getId(),
+                        reservationTime.getStartAt(), bookedTimes.contains(reservationTime.getStartAt()))).toList();
     }
 
     @Transactional(readOnly = true)
     public List<MemberReservationResponse> findReservationsByMemberId(final Long memberId) {
         return reservationRepository.findAllByMemberId(memberId).stream()
                 .map(reservation -> MemberReservationResponse.from(reservation,
-                        reservationRepository.getReservationRankById(reservation.getId())))
-                .toList();
+                        reservationRepository.getReservationRankById(reservation.getId()))).toList();
     }
 
     @Transactional(readOnly = true)
     public List<AdminReservationWaitingResponse> findReservationWaitings() {
-        return reservationSlotRepository.findAll().stream()
-                .map(ReservationSlot::getWaitingReservations)
-                .flatMap(List::stream)
-                .map(AdminReservationWaitingResponse::from)
-                .toList();
+        return reservationSlotRepository.findAll().stream().map(ReservationSlot::getWaitingReservations)
+                .flatMap(List::stream).map(AdminReservationWaitingResponse::from).toList();
     }
 
     private Reservation registerReservation(final LocalDate date, final Long timeId, final Long themeId,
@@ -152,7 +128,7 @@ public class ReservationService {
         final Reservation reservation = new Reservation(member, reservationSlot);
         reservationSlot.addReservation(reservation);
         resolveSlotAfterChange(reservationSlot);
-        return reservation;
+        return reservationRepository.save(reservation);
     }
 
     private ReservationSlot getReservationSlot(final LocalDate date, final Long timeId, final Long themeId) {
@@ -177,10 +153,8 @@ public class ReservationService {
 
     private List<AdminReservationResponse> mapSlotReservations(final ReservationSlot reservationSlot) {
         return reservationSlot.getAllReservations().stream()
-                .map(reservation -> AdminReservationResponse.from(
-                        reservation,
-                        reservationRepository.getReservationRankById(reservation.getId())))
-                .toList();
+                .map(reservation -> AdminReservationResponse.from(reservation,
+                        reservationRepository.getReservationRankById(reservation.getId()))).toList();
     }
 
     private void validateMemberDuplicateReservation(final ReservationSlot reservationSlot, final Long memberId) {

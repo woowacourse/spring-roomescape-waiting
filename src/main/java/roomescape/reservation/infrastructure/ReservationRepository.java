@@ -12,8 +12,7 @@ import roomescape.reservation.domain.ReservationSlot;
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     default Reservation getByIdOrThrow(final Long id) {
-        return this.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
+        return this.findById(id).orElseThrow(() -> new ResourceNotFoundException("해당 예약을 찾을 수 없습니다."));
     }
 
     Boolean existsByReservationSlotAndMemberId(ReservationSlot reservationSlot, Long memberId);
@@ -29,18 +28,10 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                   AND r.member.id = :memberId
                   AND rs.date BETWEEN :dateFrom AND :dateTo
             """)
-    List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(
-            final Long themeId,
-            final Long memberId,
-            final LocalDate dateFrom,
-            final LocalDate dateTo
-    );
+    List<Reservation> findAllByThemeIdAndMemberIdAndDateRange(final Long themeId, final Long memberId,
+                                                              final LocalDate dateFrom, final LocalDate dateTo);
 
-    @EntityGraph(attributePaths = {
-            "reservationSlot",
-            "reservationSlot.time",
-            "reservationSlot.theme"
-    })
+    @EntityGraph(attributePaths = {"reservationSlot", "reservationSlot.time", "reservationSlot.theme"})
     List<Reservation> findAllByMemberId(Long memberId);
 
     @Query("""
@@ -48,8 +39,13 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             (
                 SELECT COUNT(r2)
                 FROM Reservation r2
-                WHERE r2.reservationSlot = r1.reservationSlot
+                WHERE r2.reservationSlot.id = r1.reservationSlot.id
                 AND   r2.id <= r1.id
+                AND   r2.id <> (
+                          SELECT rs.confirmedReservation.id
+                          FROM ReservationSlot rs
+                          WHERE rs.id = r1.reservationSlot.id
+                      )
             )
             FROM Reservation r1
             WHERE r1.id = :reservationId
