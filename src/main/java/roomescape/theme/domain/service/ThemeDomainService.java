@@ -6,11 +6,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
-import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
+import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
-import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
 public class ThemeDomainService {

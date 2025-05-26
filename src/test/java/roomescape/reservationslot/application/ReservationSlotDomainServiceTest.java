@@ -13,22 +13,22 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
+import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
-import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
 import roomescape.reservation.domain.service.ReservationDomainService;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.theme.domain.Theme;
 
-public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
+public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
             SELECT th FROM Theme th 

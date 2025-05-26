@@ -14,16 +14,15 @@ import org.springframework.data.domain.PageRequest;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class JpaThemeRepositoryTest {
+class ThemeRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;

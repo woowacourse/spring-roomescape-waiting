@@ -16,24 +16,24 @@ import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
+import roomescape.member.infrastructure.MemberRepository;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.SignUpResponse;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.application.MemberApplicationService;
 import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
 import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
+import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 import roomescape.reservationtime.application.ReservationTimeApplicationService;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.service.ThemeDomainService;
+import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
 import roomescape.theme.presentation.dto.response.ThemeResponse;
-import roomescape.theme.domain.repository.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)

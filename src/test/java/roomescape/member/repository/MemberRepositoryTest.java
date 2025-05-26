@@ -11,12 +11,12 @@ import org.springframework.context.annotation.Import;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.MemberRole;
+import roomescape.member.infrastructure.MemberRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class JpaMemberRepositoryTest {
+class MemberRepositoryTest {
 
     private static Member MEMBER;
 

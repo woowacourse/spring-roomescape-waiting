@@ -12,30 +12,30 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.repository.MemberRepository;
 import roomescape.member.domain.service.MemberDomainService;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
-import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
+import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.ThemeRepository;
 import roomescape.theme.domain.service.ThemeDomainService;
 import roomescape.reservation.domain.service.ReservationDomainService;
-import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class ReservationSlotTimeDomainServiceTest {
+class ReservationTimeDomainServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeFutureDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();

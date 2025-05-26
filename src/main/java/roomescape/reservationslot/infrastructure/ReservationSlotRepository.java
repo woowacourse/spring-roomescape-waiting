@@ -8,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 
-public interface JpaReservationSlotRepository extends JpaRepository<ReservationSlot, Long> {
+public interface ReservationSlotRepository extends JpaRepository<ReservationSlot, Long> {
 
     @Query("""
             SELECT DISTINCT rs

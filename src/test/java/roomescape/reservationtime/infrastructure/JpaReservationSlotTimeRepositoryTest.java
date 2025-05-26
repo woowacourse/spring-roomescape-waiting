@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)

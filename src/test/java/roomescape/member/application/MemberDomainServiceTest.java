@@ -13,10 +13,10 @@ import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.common.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.service.MemberDomainService;
+import roomescape.member.infrastructure.MemberRepository;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.MemberResponse;
 import roomescape.member.presentation.dto.response.SignUpResponse;
-import roomescape.member.domain.repository.MemberRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)

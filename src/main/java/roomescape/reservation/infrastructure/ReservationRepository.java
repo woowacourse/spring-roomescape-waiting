@@ -7,7 +7,7 @@ import org.springframework.data.repository.ListCrudRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 
-public interface JpaReservationRepository extends ListCrudRepository<Reservation, Long> {
+public interface ReservationRepository extends ListCrudRepository<Reservation, Long> {
 
     @Query("""
             SELECT w 

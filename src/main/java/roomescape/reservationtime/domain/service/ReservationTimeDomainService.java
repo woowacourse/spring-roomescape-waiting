@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
 
 @Service
 public class ReservationTimeDomainService {

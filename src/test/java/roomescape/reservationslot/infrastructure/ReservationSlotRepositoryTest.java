@@ -11,21 +11,20 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.repository.MemberRepository;
-import roomescape.reservationslot.domain.repository.ReservationSlotRepository;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
+import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.ThemeRepository;
+import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class JpaReservationSlotRepositoryTest {
+class ReservationSlotRepositoryTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -61,7 +60,8 @@ class JpaReservationSlotRepositoryTest {
         ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
         reservationTime2 = reservationTimeRepository.save(reservationTime2);
 
-        ReservationSlot reservationSlot2 = ReservationSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime2, theme2,
+        ReservationSlot reservationSlot2 = ReservationSlot.createUpcomingReservation(member, FUTURE_DATE,
+                reservationTime2, theme2,
                 NOW_DATETIME);
         reservationSlotRepository.save(reservationSlot2);
 
