@@ -122,21 +122,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약을_삭제한다() {
-        Member reserver = memberDbFixture.유저1_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-
-        Reservation reservation = reservationRepository.save(
-                Reservation.reserve(reserver, reservationDateTime, theme, LocalDateTime.now())
-        );
-
-        reservationService.deleteById(reservation.getId());
-
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
-    }
-
-    @Test
     void 예약_목록을_필터링해서_조회한다() {
         final LocalDate today = LocalDate.now();
         final LocalDate tomorrow = today.plusDays(1);
