@@ -14,7 +14,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
-import org.springframework.data.annotation.CreatedDate;
+import roomescape.common.BaseEntity;
 import roomescape.common.exception.BadRequestException;
 import roomescape.common.utils.Validator;
 import roomescape.member.domain.Member;
@@ -26,8 +26,8 @@ import roomescape.time.domain.ReservationTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-@EqualsAndHashCode(of = "id")
-public class Waiting {
+@EqualsAndHashCode(of = "id", callSuper = false)
+public class Waiting extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -45,9 +45,6 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY)
     private Theme theme;
 
-    @CreatedDate
-    private LocalDateTime createdAt;
-
     private static Waiting of(
             final Long id,
             final Member member,
@@ -56,7 +53,7 @@ public class Waiting {
             final Theme theme
     ) {
         validate(member, date, time, theme);
-        return new Waiting(id, member, date, time, theme, LocalDateTime.now());
+        return new Waiting(id, member, date, time, theme);
     }
 
     public static Waiting withId(
