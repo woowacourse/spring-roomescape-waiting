@@ -29,6 +29,7 @@ public class ReservationQueryServiceTest {
 
     @InjectMocks
     private ReservationQueryService reservationService;
+
     @Mock
     private ReservationRepository reservationRepository;
     @Mock
