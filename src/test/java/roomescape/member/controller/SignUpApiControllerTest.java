@@ -1,30 +1,36 @@
 package roomescape.member.controller;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import roomescape.common.BaseTest;
-import roomescape.member.service.MemberService;
+import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
-class SignUpApiControllerTest extends BaseTest {
-
-    @LocalServerPort
-    private int port;
+@SpringBootTest
+@AutoConfigureMockMvc
+@Transactional
+class SignUpApiControllerTest {
 
     @Autowired
-    MemberService memberService;
+    private MockMvc mockMvc;
+
+    @Autowired
+    private ObjectMapper objectMapper;
 
     private Map<String, String> member;
 
     @BeforeEach
     void setUp() {
-        RestAssured.port = port;
         member = new HashMap<>();
         member.put("name", "matt");
         member.put("email", "matt@kakao.com");
@@ -33,63 +39,55 @@ class SignUpApiControllerTest extends BaseTest {
 
     @Test
     @DisplayName("회원 가입을 진행한다.")
-    void signUpTest() {
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(member)
-                .when().post("/members")
-                .then().log().all()
-                .statusCode(201);
+    void signUpTest() throws Exception {
+        mockMvc.perform(post("/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(member)))
+                .andExpect(status().isCreated());
     }
 
     @Test
     @DisplayName("이름이 공백이면 회원 가입에 실패한다.")
-    void nameNullSignUpTest() {
+    void nameNullSignUpTest() throws Exception {
         Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "", "email", "matt.kakao", "password", "1234"
                 )
         );
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(failMap)
-                .when().post("/members")
-                .then().log().all()
-                .statusCode(400);
+        mockMvc.perform(post("/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(failMap)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("이메일이 공백이면 회원 가입에 실패한다.")
-    void emailNullSignUpTest() {
+    void emailNullSignUpTest() throws Exception {
         Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "matt", "email", "", "password", "1234"
                 )
         );
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(failMap)
-                .when().post("/members")
-                .then().log().all()
-                .statusCode(400);
+        mockMvc.perform(post("/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(failMap)))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
     @DisplayName("비밀번호가 공백이면 회원 가입에 실패한다.")
-    void passwordNullSignUpTest() {
+    void passwordNullSignUpTest() throws Exception {
         Map<String, String> failMap = new HashMap<>(
                 Map.of(
                         "name", "matt", "email", "matt.kakao", "password", ""
                 )
         );
 
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(failMap)
-                .when().post("/members")
-                .then().log().all()
-                .statusCode(400);
+        mockMvc.perform(post("/members")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(failMap)))
+                .andExpect(status().isBadRequest());
     }
 }

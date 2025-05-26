@@ -17,7 +17,6 @@ import roomescape.member.domain.Password;
 import roomescape.member.role.Role;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
@@ -37,7 +36,6 @@ class ReservationTimeRepositoryTest {
     private Member member;
     private ReservationTime time1;
     private ReservationTime time2;
-    private ReservationStatus reservationStatus;
 
     @BeforeEach
     void setUp() {
@@ -50,8 +48,6 @@ class ReservationTimeRepositoryTest {
 
         time1 = new ReservationTime(null, LocalTime.of(10, 0));
         time2 = new ReservationTime(null, LocalTime.of(11, 0));
-        reservationStatus = ReservationStatus.RESERVE;
-
         em.persist(theme);
         em.persist(member);
         em.persist(time1);
@@ -61,8 +57,7 @@ class ReservationTimeRepositoryTest {
                 date,
                 time1,
                 theme,
-                member,
-                reservationStatus
+                member
         );
         em.persist(reservation);
 

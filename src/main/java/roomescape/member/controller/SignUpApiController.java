@@ -24,7 +24,6 @@ public class SignUpApiController {
     @PostMapping
     public ResponseEntity<Member> createUser(@RequestBody @Valid SignUpRequest request) {
         Member member = service.save(request);
-
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(member);

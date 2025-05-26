@@ -15,7 +15,7 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
 
     }
 
