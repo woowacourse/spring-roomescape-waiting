@@ -33,6 +33,7 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addViewController("/reservation").setViewName("reservation");
         registry.addViewController("/admin").setViewName("admin/index");
         registry.addViewController("/reservation-mine").setViewName("reservation-mine");
+        registry.addViewController("/admin/reservation-waiting").setViewName("admin/waiting");
     }
 
     @Override

@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationWaiting;
 import roomescape.repository.jpa.ReservationWaitingJpaRepository;
@@ -22,8 +23,8 @@ public class ReservationWaitingRepositoryImpl implements
     }
 
     @Override
-    public ReservationWaiting findByThemeIdAndTimeIdAndDate(final long themeId, final long timeId,
-                                                            final LocalDate date) {
+    public Optional<ReservationWaiting> findByThemeIdAndTimeIdAndDate(final long themeId, final long timeId,
+                                                                      final LocalDate date) {
         return reservationWaitingJpaRepository.findByThemeIdAndTimeIdAndDate(themeId, timeId, date);
     }
 
@@ -51,5 +52,17 @@ public class ReservationWaitingRepositoryImpl implements
     @Override
     public int findWaitingOrderById(final long id) {
         return reservationWaitingJpaRepository.findWaitingOrderById(id);
+    }
+
+    @Override
+    public List<ReservationWaiting> findAll() {
+        return reservationWaitingJpaRepository.findAll();
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findFirstByThemeIdAndTimeIdAndDateOrderByCreatedAtAsc(final long themeId,
+                                                                                              final long timeId,
+                                                                                              final LocalDate date) {
+        return reservationWaitingJpaRepository.findFirstByThemeIdAndTimeIdAndDateOrderByCreatedAtAsc(themeId, timeId, date);
     }
 }

@@ -66,7 +66,7 @@ class ReservationWaitingRepositoryImplTest {
 
         //when
         final ReservationWaiting expected = reservationWaitingRepository.findByThemeIdAndTimeIdAndDate(
-                reservationTheme.getId(), reservationTime.getId(), LocalDate.of(2025, 5, 23));
+                reservationTheme.getId(), reservationTime.getId(), LocalDate.of(2025, 5, 23)).get();
 
 
         //then

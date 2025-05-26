@@ -1,11 +1,13 @@
 package roomescape.service;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationWaiting;
 import roomescape.repository.ReservationWaitingRepository;
+import roomescape.service.dto.AdminReservationWaitingResponse;
 import roomescape.service.dto.ReservationWaitingRequest;
 import roomescape.service.dto.ReservationWaitingResponse;
 
@@ -46,5 +48,12 @@ public class ReservationWaitingService {
         )) {
             throw new IllegalArgumentException("[ERROR] 중복된 예약 대기 입니다.");
         }
+    }
+
+    public List<AdminReservationWaitingResponse> getAllReservationWaiting() {
+        final List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findAll();
+        return reservationWaitings.stream()
+                .map(AdminReservationWaitingResponse::from)
+                .toList();
     }
 }

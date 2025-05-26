@@ -2,6 +2,7 @@ package roomescape.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
@@ -21,11 +22,17 @@ public interface ReservationWaitingJpaRepository extends JpaRepository<Reservati
         """)
     int findWaitingOrderById(final long id);
 
-    ReservationWaiting findByThemeIdAndTimeIdAndDate(long themeId, long timeId, LocalDate date);
+    Optional<ReservationWaiting> findByThemeIdAndTimeIdAndDate(long themeId, long timeId, final LocalDate date);
+
+    Optional<ReservationWaiting> findFirstByThemeIdAndTimeIdAndDateOrderByCreatedAtAsc(
+            long themeId, long timeId, final LocalDate date
+    );
 
     boolean existsById(final long id);
 
     boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(long memberId, long themeId, long timeId, LocalDate date);
 
     List<ReservationWaiting> findByMemberId(long memberId);
+
+    List<ReservationWaiting> findAll();
 }

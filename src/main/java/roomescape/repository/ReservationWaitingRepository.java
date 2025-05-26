@@ -2,13 +2,14 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import roomescape.domain.ReservationWaiting;
 
 public interface ReservationWaitingRepository {
 
     ReservationWaiting save(final ReservationWaiting reservationWaiting);
 
-    ReservationWaiting findByThemeIdAndTimeIdAndDate(final long themeId, final long timeId, final LocalDate date);
+    Optional<ReservationWaiting> findByThemeIdAndTimeIdAndDate(final long themeId, final long timeId, final LocalDate date);
 
     void deleteById(final long id);
 
@@ -20,4 +21,7 @@ public interface ReservationWaitingRepository {
 
     boolean existsById(final long id);
 
+    List<ReservationWaiting> findAll();
+
+    Optional<ReservationWaiting> findFirstByThemeIdAndTimeIdAndDateOrderByCreatedAtAsc(final long themeId, final long timeId, final LocalDate date);
 }
