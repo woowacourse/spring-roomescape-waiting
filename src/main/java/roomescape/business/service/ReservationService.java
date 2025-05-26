@@ -59,7 +59,6 @@ public class ReservationService {
         final Theme theme = getThemeOrThrow(themeId);
 
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
-
         final Reservation reservation = findOrCreateReservation(date, reservationTime, theme);
 
         validateWaitInfoEmpty(reservation.getId());
@@ -84,7 +83,6 @@ public class ReservationService {
         final Theme theme = getThemeOrThrow(themeId);
 
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
-
         final Reservation reservation = findOrCreateReservation(date, reservationTime, theme);
 
         validateWaitInfoExistsByReservationId(reservation.getId());
@@ -136,7 +134,6 @@ public class ReservationService {
 
     private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
         final LocalDateTime now = LocalDateTime.now();
-
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
         if (reservationDateTime.isBefore(now)) {
             throw new InvalidDateAndTimeException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
@@ -225,7 +222,8 @@ public class ReservationService {
     }
 
     private List<WaitInfo> getSortedWaitInfosByCreatedAt(final Long reservationId) {
-        return waitInfoRepository.findByReservationId(reservationId).stream()
+        return waitInfoRepository.findByReservationId(reservationId)
+                .stream()
                 .sorted((w1, w2) -> w1.getCreatedAt().compareTo(w2.getCreatedAt()))
                 .toList();
     }
@@ -249,7 +247,6 @@ public class ReservationService {
 
     public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
         validateWaitInfoExistsByIdAndMemberId(waitInfoId, memberId);
-
         deleteById(waitInfoId);
     }
 
@@ -269,14 +266,16 @@ public class ReservationService {
                         waitInfo.getReservation().getDate(),
                         waitInfo.getReservation().getReservationTime().getStartAt(),
                         calculateStatus(waitInfo),
-                        waitInfo.getId()))
+                        waitInfo.getId()
+                ))
                 .toList();
     }
 
     private String calculateStatus(final WaitInfo waitInfo) {
         final Long rank = waitInfoRepository.countByIdLessThanEqualAndReservationId(
                 waitInfo.getId(),
-                waitInfo.getReservation().getId());
+                waitInfo.getReservation().getId()
+        );
 
         if (rank == 1) {
             return "예약";
@@ -293,7 +292,8 @@ public class ReservationService {
                         waitInfo.getMember().getName(),
                         waitInfo.getReservation().getTheme().getName(),
                         waitInfo.getReservation().getDate(),
-                        waitInfo.getReservation().getReservationTime().getStartAt()))
+                        waitInfo.getReservation().getReservationTime().getStartAt()
+                ))
                 .toList();
     }
 }
