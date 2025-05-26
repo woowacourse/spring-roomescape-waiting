@@ -15,18 +15,6 @@ import java.util.Optional;
 
 public interface JpaWaitingRepository extends JpaRepository<Waiting,Long> {
 
-    @Query("SELECT COUNT(w) FROM Waiting w " +
-            "WHERE w.member = :member " +
-            "  AND w.theme = :theme " +
-            "  AND w.date = :date " +
-            "  AND w.time = :time")
-    long countByMemberIdAndThemeIdAndDateAndTime(
-            @Param("member") Member member,
-            @Param("date") LocalDate date,
-            @Param("theme") Theme theme,
-            @Param("time") ReservationTime time
-    );
-
     @Query("SELECT new roomescape.waiting.entity.WaitingWithRank(" +
             "    w, " +
             "    (SELECT COUNT(w2) " +

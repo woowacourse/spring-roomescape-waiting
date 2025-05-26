@@ -50,7 +50,7 @@ public class Member {
     }
 
     public void validPassword(final String password) {
-        if (password.equals(this.password)) {
+        if (!password.equals(this.password)) {
             throw new AuthenticatedException();
         }
     }

@@ -75,6 +75,12 @@ public class ReservationService {
         return reservationRepository.save(new Reservation(member, date, time, theme));
     }
 
+    public void validateDuplicatedReservation(long memberId) {
+        if (reservationRepository.existsByMemberId(memberId)) {
+            throw new DuplicatedException("reservation");
+        }
+    }
+
     private void validateDateTimeAfterNow(final LocalDate date, final ReservationTime time) {
         LocalDateTime now = LocalDateTime.now();
 

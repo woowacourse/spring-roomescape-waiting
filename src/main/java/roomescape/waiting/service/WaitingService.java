@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.member.entity.Member;
@@ -37,6 +38,8 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
+
+
     public List<WaitingWithRank> findAllWaiting() {
         return jpaWaitingRepository.findAllWaitingWithRank();
     }
@@ -45,7 +48,7 @@ public class WaitingService {
         return jpaWaitingRepository.findWaitingsWithRankByMemberId(member.getId());
     }
 
-    @Transactional
+
     public Waiting addWaiting(final Member member, WaitingRequest request) {
         LocalDate date = request.date();
 

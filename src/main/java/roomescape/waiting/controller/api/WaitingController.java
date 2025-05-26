@@ -18,14 +18,6 @@ public class WaitingController {
         this.waitingService = waitingService;
     }
 
-    @PostMapping("/waiting")
-    @ResponseStatus(HttpStatus.CREATED)
-    public WaitingResponse createReservationWaiting(
-            @AuthMember Member member,
-            @RequestBody @Valid WaitingRequest request
-    ) {
-        return WaitingResponse.from(waitingService.addWaiting(member, request));
-    }
 
     @DeleteMapping("/waiting/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

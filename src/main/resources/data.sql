@@ -1,6 +1,6 @@
-INSERT INTO member (name, email, password, role) VALUES ('admin', 'admin@admin', '1234', 'ADMIN');
-INSERT INTO member (name, email, password, role) VALUES ('lemon', 'lemon@lemon', '1234', 'USER');
-INSERT INTO member (name, email, password, role) VALUES ('zero', 'zero@zero', '1234', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('admin', 'admin@admin.com', '1234', 'ADMIN');
+INSERT INTO member (name, email, password, role) VALUES ('lemon', 'lemon@lemon.com', '1234', 'USER');
+INSERT INTO member (name, email, password, role) VALUES ('zero', 'zero@zero.com', '1234', 'USER');
 
 INSERT INTO reservation_time (start_at) VALUES ('10:00');
 INSERT INTO reservation_time (start_at) VALUES ('12:00');

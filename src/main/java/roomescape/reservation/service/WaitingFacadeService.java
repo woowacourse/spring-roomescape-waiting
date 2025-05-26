@@ -1,13 +1,16 @@
 package roomescape.reservation.service;
 
 
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.config.annotation.AuthMember;
+import roomescape.exception.custom.DuplicatedException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.member.entity.Member;
 import roomescape.reservation.controller.dto.response.MyReservationAndWaitingResponse;
 import roomescape.reservation.entity.Reservation;
+import roomescape.waiting.controller.dto.request.WaitingRequest;
 import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.service.WaitingService;
 
@@ -27,6 +30,12 @@ public class WaitingFacadeService {
     ) {
         this.reservationService = reservationService;
         this.waitingService = waitingService;
+    }
+
+    @Transactional
+    public Waiting addWaiting(final Member member, final @Valid WaitingRequest request) {
+        reservationService.validateDuplicatedReservation(member.getId());
+        return waitingService.addWaiting(member, request);
     }
 
     @Transactional(readOnly = true)
