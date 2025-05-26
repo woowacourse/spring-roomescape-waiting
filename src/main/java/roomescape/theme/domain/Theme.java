@@ -25,20 +25,11 @@ public class Theme {
     private Theme() {
     }
 
-    public Theme(String name, String description, String thumbnail) {
-        validateName(name);
-        validateDescription(description);
-        validateThumbnail(thumbnail);
-
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-    }
-
     public Theme(Long id, String name, String description, String thumbnail) {
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);
+
         this.id = id;
         this.name = name;
         this.description = description;
