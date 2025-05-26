@@ -4,6 +4,8 @@ package roomescape.waiting.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -126,12 +128,15 @@ public class WaitingServiceTest {
         Waiting waiting = new Waiting(member, date, time, theme, LocalDateTime.of(2025, 1, 1, 10, 0));
         ReflectionTestUtils.setField(waiting, "id", 1L);
 
-        when(waitingRepository.findById(waitingId)).thenReturn(Optional.of(waiting));
+        when(waitingRepository.findById(waitingId))
+                .thenReturn(Optional.of(waiting));
+        doNothing().when(waitingRepository).delete(waiting);
 
         // when
         waitingService.cancelWaiting(waitingId);
 
         // then
-        // TODO: 다시작성
+        verify(waitingRepository, times(1)).findById(waitingId);
+        verify(waitingRepository, times(1)).delete(waiting);
     }
 }
