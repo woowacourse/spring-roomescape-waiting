@@ -37,8 +37,15 @@ public class Waiting {
     }
 
     public void updateRankAndReservationInfo(ReservationInfo reservationInfo, long newRank) {
+        validateRank(newRank);
         this.rank = newRank;
         this.reservationInfo = reservationInfo;
+    }
+
+    private void validateRank(long rank) {
+        if (rank <= 0) {
+            throw new IllegalArgumentException("[ERROR] 순위는 0 이상이어야 합니다.");
+        }
     }
 
     public boolean isMyWaiting(Member member) {

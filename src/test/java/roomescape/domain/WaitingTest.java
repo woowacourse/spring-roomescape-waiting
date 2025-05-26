@@ -9,6 +9,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DisplayNameGeneration(DisplayNameGenerator.ReplaceUnderscores.class)
@@ -36,6 +37,22 @@ class WaitingTest {
                 () -> assertThat(waiting.getReservationInfo().getTime().getStartAt()).isEqualTo(now.toLocalTime().minusHours(1L)),
                 () -> assertThat(waiting.getReservationInfo().getTheme().getName()).isEqualTo("테마2")
         );
+    }
+
+    @Test
+    void 변경하려는_대기순위가_0이하이면_예외가_발생한다() {
+        Reservation reservation = createReservation();
+        ReservationInfo reservationInfo = ReservationInfo.create(reservation);
+
+        Member waitingMember = Member.create("제로", Role.USER, "zero@test.com", "zero");
+        Waiting waiting = Waiting.create(reservationInfo, waitingMember, 1L);
+
+        Reservation newReservation = createNewReservation();
+        ReservationInfo newReservationInfo = ReservationInfo.create(newReservation);
+        long newRank = 0L;
+
+        assertThatThrownBy(() -> waiting.updateRankAndReservationInfo(newReservationInfo, newRank))
+                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
