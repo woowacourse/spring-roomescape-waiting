@@ -8,8 +8,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationWithOrder;
+import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.domain.user.User;
 
 @Import(UserService.class)
@@ -51,7 +51,7 @@ class UserServiceTest extends ServiceTest {
     private Reservation reserveWithUser(final User user) {
         var savedTimeSlot = repositoryHelper.saveAnyTimeSlot();
         var savedTheme = repositoryHelper.saveAnyTheme();
-        var reservation = new Reservation(user, ReservationSlot.forReserve(tomorrow(), savedTimeSlot, savedTheme));
+        var reservation = new Reservation(user, RoomescapeSchedule.forReserve(tomorrow(), savedTimeSlot, savedTheme));
         return repositoryHelper.saveReservation(reservation);
     }
 }

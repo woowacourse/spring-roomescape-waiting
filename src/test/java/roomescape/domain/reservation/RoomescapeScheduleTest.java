@@ -10,16 +10,16 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.BusinessRuleViolationException;
 
-class ReservationSlotTest {
+class RoomescapeScheduleTest {
 
     @Test
-    @DisplayName("새로운 예약 일시가 현재 일시보다 이전이면 예외가 발생한다.")
+    @DisplayName("예약하려는 방탈출 일정의 일시가 현재 일시보다 이전이면 예외가 발생한다.")
     void isBefore() {
         var yesterday = yesterday();
         var timeSlot = new TimeSlot(LocalTime.of(10, 0));
         var theme = anyThemeWithNewId();
 
-        assertThatThrownBy(() -> ReservationSlot.forReserve(yesterday, timeSlot, theme))
+        assertThatThrownBy(() -> RoomescapeSchedule.forReserve(yesterday, timeSlot, theme))
             .isInstanceOf(BusinessRuleViolationException.class);
     }
 }

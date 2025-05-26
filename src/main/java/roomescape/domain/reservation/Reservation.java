@@ -30,28 +30,28 @@ public class Reservation {
     @ManyToOne
     private User user;
     @Embedded
-    private ReservationSlot slot;
+    private RoomescapeSchedule reservedSchedule;
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
     private final Timestamp createdAt = new Timestamp(System.currentTimeMillis());
 
-    public Reservation(final long id, final User user, final ReservationSlot slot, final ReservationStatus status) {
+    public Reservation(final long id, final User user, final RoomescapeSchedule schedule, final ReservationStatus status) {
         this.id = id;
         this.user = user;
-        this.slot = slot;
+        this.reservedSchedule = schedule;
         this.status = status;
     }
 
-    public Reservation(final User user, final ReservationSlot slot) {
-        this(0L, user, slot, ReservationStatus.RESERVED);
+    public Reservation(final User user, final RoomescapeSchedule schedule) {
+        this(0L, user, schedule, ReservationStatus.RESERVED);
     }
 
-    public Reservation(final User user, final ReservationSlot slot, final ReservationStatus status) {
-        this(0L, user, slot, status);
+    public Reservation(final User user, final RoomescapeSchedule schedule, final ReservationStatus status) {
+        this(0L, user, schedule, status);
     }
 
     public final boolean sameSlotWith(final Reservation reservation) {
-        return this.slot.equals(reservation.slot);
+        return this.reservedSchedule.equals(reservation.reservedSchedule);
     }
 
     public boolean isReserved() {
@@ -81,7 +81,7 @@ public class Reservation {
         return "Reservation{" +
                "id=" + id +
                ", userId=" + user.id() +
-               ", slot=" + slot +
+               ", reservedSchedule=" + reservedSchedule +
                ", status=" + status +
                '}';
     }

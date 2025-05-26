@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.exception.InUseException;
 
 @Import(TimeSlotService.class)
@@ -57,7 +57,7 @@ class TimeSlotServiceTest extends ServiceTest {
         var theme = repositoryHelper.saveAnyTheme();
         var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
 
-        var reservationWithTheTimeSlot = new Reservation(user, ReservationSlot.forReserve(tomorrow(), timeSlotToBeRemoved, theme));
+        var reservationWithTheTimeSlot = new Reservation(user, RoomescapeSchedule.forReserve(tomorrow(), timeSlotToBeRemoved, theme));
         repositoryHelper.saveReservation(reservationWithTheTimeSlot);
 
         // when & then

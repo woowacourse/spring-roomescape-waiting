@@ -22,7 +22,7 @@ import roomescape.exception.BusinessRuleViolationException;
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Embeddable
-public class ReservationSlot {
+public class RoomescapeSchedule {
 
     @Column(nullable = false)
     private LocalDate date;
@@ -32,21 +32,21 @@ public class ReservationSlot {
     @ManyToOne
     private Theme theme;
 
-    private ReservationSlot(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
+    private RoomescapeSchedule(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         this.date = date;
         this.timeSlot = timeSlot;
         this.theme = theme;
     }
 
-    public static ReservationSlot of(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        return new ReservationSlot(date, timeSlot, theme);
+    public static RoomescapeSchedule of(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
+        return new RoomescapeSchedule(date, timeSlot, theme);
     }
 
-    public static ReservationSlot forReserve(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
+    public static RoomescapeSchedule forReserve(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
         if (isBeforeNow(date, timeSlot)) {
             throw new BusinessRuleViolationException("지나간 일시로 예약할 수 없습니다.");
         }
-        return new ReservationSlot(date, timeSlot, theme);
+        return new RoomescapeSchedule(date, timeSlot, theme);
     }
 
     private static boolean isBeforeNow(final LocalDate date, final TimeSlot timeSlot) {

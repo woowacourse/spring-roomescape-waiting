@@ -17,7 +17,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.exception.AlreadyExistedException;
 import roomescape.exception.NotFoundException;
 
@@ -63,21 +63,21 @@ public class User {
         return role == UserRole.ADMIN;
     }
 
-    public List<ReservationSlot> reservedSlots() {
+    public List<RoomescapeSchedule> reservedSlots() {
         return reservations.stream()
-            .map(Reservation::slot)
+            .map(Reservation::reservedSchedule)
             .toList();
     }
 
     public void reserve(final Reservation reservation) {
-        if (alreadyReservedAt(reservation.slot())) {
+        if (alreadyReservedAt(reservation.reservedSchedule())) {
             throw new AlreadyExistedException("이미 해당 예약 슬롯에 예약 또는 대기하셨습니다.");
         }
         reservations.add(reservation);
     }
 
-    private boolean alreadyReservedAt(final ReservationSlot slot) {
-        return reservedSlots().contains(slot);
+    private boolean alreadyReservedAt(final RoomescapeSchedule schedule) {
+        return reservedSlots().contains(schedule);
     }
 
     public void cancelReservation(final Reservation reservation) {

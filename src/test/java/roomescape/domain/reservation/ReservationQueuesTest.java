@@ -47,23 +47,23 @@ public class ReservationQueuesTest {
     @DisplayName("대기열의 예약들과 비교해 주어진 모든 예약의 대기 순번을 계산한다.")
     void orderOfAll() {
         // given
-        var slot1_first = reservationOf(theme, date, time1, ReservationStatus.WAITING);
-        var slot1_second = reservationOf(theme, date, time1, ReservationStatus.WAITING);
-        var slot1_third = reservationOf(theme, date, time1, ReservationStatus.WAITING);
+        var schedule1_first = reservationOf(theme, date, time1, ReservationStatus.WAITING);
+        var schedule1_second = reservationOf(theme, date, time1, ReservationStatus.WAITING);
+        var schedule1_third = reservationOf(theme, date, time1, ReservationStatus.WAITING);
 
-        var slot2_first = reservationOf(theme, date, time2, ReservationStatus.WAITING);
-        var slot2_second = reservationOf(theme, date, time2, ReservationStatus.WAITING);
+        var schedule2_first = reservationOf(theme, date, time2, ReservationStatus.WAITING);
+        var schedule2_second = reservationOf(theme, date, time2, ReservationStatus.WAITING);
 
-        var queues = new ReservationQueues(List.of(slot1_first, slot1_second, slot1_third, slot2_first, slot2_second));
+        var queues = new ReservationQueues(List.of(schedule1_first, schedule1_second, schedule1_third, schedule2_first, schedule2_second));
 
         // when
-        var reservationsToOrder = List.of(slot1_third, slot2_second);
+        var reservationsToOrder = List.of(schedule1_third, schedule2_second);
         var reservationWithOrders = queues.orderOfAll(reservationsToOrder);
 
         // then
         assertThat(reservationWithOrders).contains(
-            new ReservationWithOrder(slot1_third, 3),
-            new ReservationWithOrder(slot2_second, 2)
+            new ReservationWithOrder(schedule1_third, 3),
+            new ReservationWithOrder(schedule2_second, 2)
         );
     }
 
@@ -91,7 +91,7 @@ public class ReservationQueuesTest {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
             user,
-            ReservationSlot.of(date, timeSlot, theme),
+            RoomescapeSchedule.of(date, timeSlot, theme),
             status
         );
     }

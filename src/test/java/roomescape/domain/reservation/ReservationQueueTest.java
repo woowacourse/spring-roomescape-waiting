@@ -26,8 +26,8 @@ class ReservationQueueTest {
     private final LocalDate tomorrow = tomorrow();
     private final TimeSlot timeSlot = anyTimeSlotWithNewId();
     private final Theme theme = anyThemeWithNewId();
-    private final ReservationSlot slot = ReservationSlot.of(tomorrow, timeSlot, theme);
-    private final ReservationSlot otherSlot = ReservationSlot.of(today(), timeSlot, theme);
+    private final RoomescapeSchedule schedule = RoomescapeSchedule.of(tomorrow, timeSlot, theme);
+    private final RoomescapeSchedule otherSchedule = RoomescapeSchedule.of(today(), timeSlot, theme);
 
     private final User user1 = TestFixtures.anyUserWithNewId();
     private final User user2 = TestFixtures.anyUserWithNewId();
@@ -37,9 +37,9 @@ class ReservationQueueTest {
     @DisplayName("주어진 예약의 대기 순번을 알 수 있다.")
     void orderOf() {
         // given
-        var reservation1 = reservationOf(slot, user1);
-        var reservation2 = reservationOf(slot, user2);
-        var reservation3 = reservationOf(slot, user3);
+        var reservation1 = reservationOf(schedule, user1);
+        var reservation2 = reservationOf(schedule, user2);
+        var reservation3 = reservationOf(schedule, user3);
 
         var queue = new ReservationQueue(List.of(reservation1, reservation2, reservation3));
 
@@ -55,7 +55,7 @@ class ReservationQueueTest {
     @DisplayName("대기열에 존재하지 않는 예약의 순번을 조회하려하면 예외가 발생한다.")
     void orderOfNotWaiting() {
         var queue = new ReservationQueue(emptyList());
-        var reservation = reservationOf(slot, user1);
+        var reservation = reservationOf(schedule, user1);
 
         assertThatThrownBy(() -> queue.orderOf(reservation))
             .isInstanceOf(IllegalArgumentException.class);
@@ -65,7 +65,7 @@ class ReservationQueueTest {
     @DisplayName("다른 슬롯의 예약 순번을 조회하려하면 예외가 발생한다.")
     void orderOfMismatchSlot() {
         var queue = new ReservationQueue(emptyList());
-        var reservation = reservationOf(otherSlot, user1);
+        var reservation = reservationOf(otherSchedule, user1);
 
         assertThatThrownBy(() -> queue.orderOf(reservation))
             .isInstanceOf(IllegalArgumentException.class);
@@ -75,9 +75,9 @@ class ReservationQueueTest {
     @DisplayName("주어진 예약 다음 순번의 예약을 찾는다.")
     void findNext() {
         // given
-        var reservation1 = reservationOf(slot, user1);
-        var reservation2 = reservationOf(slot, user2);
-        var reservation3 = reservationOf(slot, user3);
+        var reservation1 = reservationOf(schedule, user1);
+        var reservation2 = reservationOf(schedule, user2);
+        var reservation3 = reservationOf(schedule, user3);
 
         var queue = new ReservationQueue(List.of(reservation1, reservation2, reservation3));
 
@@ -89,11 +89,11 @@ class ReservationQueueTest {
         );
     }
 
-    private Reservation reservationOf(final ReservationSlot slot, final User user) {
+    private Reservation reservationOf(final RoomescapeSchedule schedule, final User user) {
         return new Reservation(
             DUMMY_ID_GENERATOR.incrementAndGet(),
             user,
-            slot,
+            schedule,
             ReservationStatus.RESERVED
         );
     }

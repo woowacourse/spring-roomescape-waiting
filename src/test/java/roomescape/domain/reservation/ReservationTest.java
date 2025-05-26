@@ -25,9 +25,9 @@ public class ReservationTest {
     @Test
     @DisplayName("주어진 예약과 같은 예약 슬롯인 지 비교할 수 있다.")
     void sameSlotWith() {
-        var slot = ReservationSlot.of(date, timeSlot, theme);
-        var reservation1 = new Reservation(1L, user1, slot, ReservationStatus.RESERVED);
-        var reservation2 = new Reservation(2L, user2, slot, ReservationStatus.RESERVED);
+        var schedule = RoomescapeSchedule.of(date, timeSlot, theme);
+        var reservation1 = new Reservation(1L, user1, schedule, ReservationStatus.RESERVED);
+        var reservation2 = new Reservation(2L, user2, schedule, ReservationStatus.RESERVED);
 
         assertThat(reservation1.sameSlotWith(reservation2)).isTrue();
     }
@@ -82,6 +82,6 @@ public class ReservationTest {
     }
 
     private Reservation reservationOf(final ReservationStatus status) {
-        return new Reservation(1L, user1, ReservationSlot.of(date, timeSlot, theme), status);
+        return new Reservation(1L, user1, RoomescapeSchedule.of(date, timeSlot, theme), status);
     }
 }

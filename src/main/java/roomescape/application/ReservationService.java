@@ -13,9 +13,9 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationQueues;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
-import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.ReservationWithOrder;
+import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.UserRepository;
@@ -33,22 +33,22 @@ public class ReservationService {
 
     @Transactional
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
-        var slot = toReservationSlot(date, timeId, themeId);
-        if (reservationRepository.exists(bySlot(slot))) {
+        var schedule = toRoomescapeSchedule(date, timeId, themeId);
+        if (reservationRepository.exists(bySlot(schedule))) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
 
-        return reserve(userId, slot, ReservationStatus.RESERVED);
+        return reserve(userId, schedule, ReservationStatus.RESERVED);
     }
 
     @Transactional
     public Reservation waitFor(final long userId, final LocalDate date, final long timeId, final long themeId) {
-        var slot = toReservationSlot(date, timeId, themeId);
-        if (!reservationRepository.exists(bySlot(slot))) {
+        var schedule = toRoomescapeSchedule(date, timeId, themeId);
+        if (!reservationRepository.exists(bySlot(schedule))) {
             throw new BusinessRuleViolationException("해당 날짜, 시간, 테마에 예약이 없습니다. 바로 예약해 주세요.");
         }
 
-        return reserve(userId, slot, ReservationStatus.WAITING);
+        return reserve(userId, schedule, ReservationStatus.WAITING);
     }
 
     public List<Reservation> findAllReservations(ReservationSearchFilter filter) {
@@ -65,7 +65,7 @@ public class ReservationService {
     public void removeById(final long id) {
         var reservation = reservationRepository.getById(id);
         if (reservation.isReserved()) {
-            var queues = reservationRepository.findQueuesBySlots(List.of(reservation.slot()));
+            var queues = reservationRepository.findQueuesBySlots(List.of(reservation.reservedSchedule()));
             var nextReservation = queues.findNext(reservation);
             nextReservation.ifPresent(Reservation::confirm);
         }
@@ -79,16 +79,16 @@ public class ReservationService {
         user.cancelReservation(reservation);
     }
 
-    private Reservation reserve(final long userId, final ReservationSlot slot, final ReservationStatus status) {
+    private Reservation reserve(final long userId, final RoomescapeSchedule schedule, final ReservationStatus status) {
         var user = userRepository.getById(userId);
-        var reservation = new Reservation(user, slot, status);
+        var reservation = new Reservation(user, schedule, status);
         user.reserve(reservation);
         return reservationRepository.save(reservation);
     }
 
-    private ReservationSlot toReservationSlot(final LocalDate date, final long timeId, final long themeId) {
+    private RoomescapeSchedule toRoomescapeSchedule(final LocalDate date, final long timeId, final long themeId) {
         var timeSlot = timeSlotRepository.getById(timeId);
         var theme = themeRepository.getById(themeId);
-        return ReservationSlot.forReserve(date, timeSlot, theme);
+        return RoomescapeSchedule.forReserve(date, timeSlot, theme);
     }
 }

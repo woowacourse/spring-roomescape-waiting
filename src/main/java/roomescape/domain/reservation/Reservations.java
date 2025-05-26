@@ -26,8 +26,8 @@ public class Reservations {
 
     private List<TimeSlot> reservedTimeSlots() {
         return reservations.stream()
-            .map(Reservation::slot)
-            .map(ReservationSlot::timeSlot)
+            .map(Reservation::reservedSchedule)
+            .map(RoomescapeSchedule::timeSlot)
             .toList();
     }
 
@@ -42,16 +42,16 @@ public class Reservations {
 
     public List<Theme> findPopularThemes(final int maxCount) {
         var themeReservationCounts = reservations.stream()
-            .map(Reservation::slot)
-            .collect(groupingBy(ReservationSlot::theme, counting()));
+            .map(Reservation::reservedSchedule)
+            .collect(groupingBy(RoomescapeSchedule::theme, counting()));
         var count = Math.min(maxCount, MAX_POPULAR_THEME_COUNT);
         return toPopularThemeList(count, themeReservationCounts);
     }
 
     private List<Theme> toPopularThemeList(final int maxCount, final Map<Theme, Long> themeReservationCounts) {
         return reservations.stream()
-            .map(Reservation::slot)
-            .map(ReservationSlot::theme)
+            .map(Reservation::reservedSchedule)
+            .map(RoomescapeSchedule::theme)
             .distinct()
             .sorted(Comparator.comparing(themeReservationCounts::get).reversed())
             .limit(maxCount)

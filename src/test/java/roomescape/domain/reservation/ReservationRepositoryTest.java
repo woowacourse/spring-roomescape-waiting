@@ -35,7 +35,7 @@ class ReservationRepositoryTest {
         var timeSlot = repositoryHelper.saveAnyTimeSlot();
         var theme = repositoryHelper.saveAnyTheme();
 
-        var reservation = new Reservation(user, ReservationSlot.forReserve(date, timeSlot, theme));
+        var reservation = new Reservation(user, RoomescapeSchedule.forReserve(date, timeSlot, theme));
         savedReservation = reservationRepository.save(reservation);
         repositoryHelper.flushAndClear();
     }
@@ -82,7 +82,7 @@ class ReservationRepositoryTest {
     @Test
     @DisplayName("예약 슬롯 별 대기열로 이루어진 대기열들을 불러온다.")
     void findQueuesBySlots() {
-        var queues = reservationRepository.findQueuesBySlots(List.of(savedReservation.slot()));
+        var queues = reservationRepository.findQueuesBySlots(List.of(savedReservation.reservedSchedule()));
         assertThat(queues).isInstanceOf(ReservationQueues.class);
     }
 }

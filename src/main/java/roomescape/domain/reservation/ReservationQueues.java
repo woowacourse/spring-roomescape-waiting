@@ -12,12 +12,12 @@ import java.util.Optional;
 
 public class ReservationQueues {
 
-    private final Map<ReservationSlot, ReservationQueue> queues;
+    private final Map<RoomescapeSchedule, ReservationQueue> queues;
 
     public ReservationQueues(final List<Reservation> reservations) {
         this.queues = reservations.stream()
             .collect(groupingBy(
-                Reservation::slot,
+                Reservation::reservedSchedule,
                 collectingAndThen(toList(), ReservationQueue::new)
             ));
     }
@@ -26,7 +26,7 @@ public class ReservationQueues {
         if (!reservation.isWaiting()) {
             return ReservationQueue.ORDERING_START_INDEX;
         }
-        var queue = queueOfSlot(reservation.slot());
+        var queue = queueOfSlot(reservation.reservedSchedule());
         return queue.orderOf(reservation);
     }
 
@@ -38,11 +38,11 @@ public class ReservationQueues {
     }
 
     public Optional<Reservation> findNext(final Reservation reservation) {
-        var queue = queueOfSlot(reservation.slot());
+        var queue = queueOfSlot(reservation.reservedSchedule());
         return queue.findNext(reservation);
     }
 
-    private ReservationQueue queueOfSlot(final ReservationSlot slot) {
-        return queues.getOrDefault(slot, new ReservationQueue(Collections.emptyList()));
+    private ReservationQueue queueOfSlot(final RoomescapeSchedule schedule) {
+        return queues.getOrDefault(schedule, new ReservationQueue(Collections.emptyList()));
     }
 }

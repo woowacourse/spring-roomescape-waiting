@@ -10,8 +10,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.TestFixtures;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.RoomescapeSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.AlreadyExistedException;
@@ -22,7 +22,7 @@ class UserTest {
     private final LocalDate date = LocalDate.of(2020, 1, 1);
     private final TimeSlot timeSlot = TestFixtures.anyTimeSlotWithNewId();
     private final Theme theme = TestFixtures.anyThemeWithNewId();
-    private final ReservationSlot slot = ReservationSlot.of(date, timeSlot, theme);
+    private final RoomescapeSchedule schedule = RoomescapeSchedule.of(date, timeSlot, theme);
 
     @Test
     @DisplayName("사용자가 ADMIN인 지 알 수 있다.")
@@ -41,7 +41,7 @@ class UserTest {
     void reserve() {
         // given
         var user = anyUserWithNewId();
-        var reservation = new Reservation(1L, user, slot, ReservationStatus.RESERVED);
+        var reservation = new Reservation(1L, user, schedule, ReservationStatus.RESERVED);
 
         // when
         user.reserve(reservation);
@@ -55,10 +55,10 @@ class UserTest {
     void reserveDuplicateSlot() {
         // given
         var user = anyUserWithNewId();
-        var reservation = new Reservation(1L, user, slot, ReservationStatus.RESERVED);
+        var reservation = new Reservation(1L, user, schedule, ReservationStatus.RESERVED);
         user.reserve(reservation);
 
-        var reservationWithDuplicatedSlot = new Reservation(2L, user, slot, ReservationStatus.WAITING);
+        var reservationWithDuplicatedSlot = new Reservation(2L, user, schedule, ReservationStatus.WAITING);
 
         // when & then
         assertThatThrownBy(() -> user.reserve(reservationWithDuplicatedSlot))
@@ -70,7 +70,7 @@ class UserTest {
     void cancelReservation() {
         // given
         var user = anyUserWithNewId();
-        var reservation = new Reservation(1L, user, slot, ReservationStatus.WAITING);
+        var reservation = new Reservation(1L, user, schedule, ReservationStatus.WAITING);
         user.reserve(reservation);
 
         // when
@@ -85,9 +85,9 @@ class UserTest {
     void cancelReservationCanOnlyMine() {
         // given
         var user = anyUserWithNewId();
-        user.reserve(new Reservation(1L, user, slot, ReservationStatus.RESERVED));
+        user.reserve(new Reservation(1L, user, schedule, ReservationStatus.RESERVED));
 
-        var othersReservation = new Reservation(2L, anyUserWithNewId(), slot, ReservationStatus.RESERVED);
+        var othersReservation = new Reservation(2L, anyUserWithNewId(), schedule, ReservationStatus.RESERVED);
 
         // when & then
         assertThatThrownBy(() -> user.cancelReservation(othersReservation))

@@ -8,8 +8,8 @@ import java.util.ArrayList;
 import org.springframework.data.jpa.domain.Specification;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationSearchFilter;
-import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.RoomescapeSchedule;
 
 public class ReservationSpecs {
 
@@ -33,8 +33,8 @@ public class ReservationSpecs {
         return (reservation, query, cb) -> cb.equal(statusOf(reservation), status);
     }
 
-    public static Specification<Reservation> bySlot(final ReservationSlot slot) {
-        return allOf(byDate(slot.date()), byTimeSlotId(slot.timeSlot().id()), byThemeId(slot.theme().id()));
+    public static Specification<Reservation> bySlot(final RoomescapeSchedule schedule) {
+        return allOf(byDate(schedule.date()), byTimeSlotId(schedule.timeSlot().id()), byThemeId(schedule.theme().id()));
     }
 
     public static Specification<Reservation> byFilter(final ReservationSearchFilter filter) {
@@ -61,20 +61,20 @@ public class ReservationSpecs {
         return Specification.allOf(specifications);
     }
 
-    private static Path<ReservationSlot> slotOf(final Root<Reservation> reservation) {
-        return reservation.get("slot");
+    private static Path<RoomescapeSchedule> roomescapeScheduleOf(final Root<Reservation> reservation) {
+        return reservation.get("reservedSchedule");
     }
 
     private static Path<LocalDate> dateOf(final Root<Reservation> reservation) {
-        return slotOf(reservation).get("date");
+        return roomescapeScheduleOf(reservation).get("date");
     }
 
     private static Path<Long> timeSlotIdOf(final Root<Reservation> reservation) {
-        return slotOf(reservation).get("timeSlot").get("id");
+        return roomescapeScheduleOf(reservation).get("timeSlot").get("id");
     }
 
     private static Path<Long> themeIdOf(final Root<Reservation> reservation) {
-        return slotOf(reservation).get("theme").get("id");
+        return roomescapeScheduleOf(reservation).get("theme").get("id");
     }
 
     private static Path<ReservationStatus> statusOf(final Root<Reservation> reservation) {
