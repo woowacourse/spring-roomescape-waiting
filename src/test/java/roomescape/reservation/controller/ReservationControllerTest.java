@@ -108,7 +108,7 @@ class ReservationControllerTest {
 
 
     @Test
-    void 동시_요청으로_동일한_시간대에_예약을_추가한다() throws InterruptedException {
+    void 여러건의_동일_조건에_대한_동시_요청이_들어올_때_하나의_예약만_생성된다() throws InterruptedException {
         int threadCount = 5;
         CountDownLatch latch = new CountDownLatch(threadCount);
 
@@ -179,14 +179,13 @@ class ReservationControllerTest {
             }).start();
         }
 
-        latch.await(); // 모든 Thread가 끝날 때까지 대기
+        latch.await();
 
         // then
         Thread.sleep(1000);
 
         long booked = reservationRepository.findByMember(member)
-                .stream()
-                .count();
+                .size();
 
         assertThat(booked).isEqualTo(3); // 기존 2건 + 예약 1건 = 3건
     }

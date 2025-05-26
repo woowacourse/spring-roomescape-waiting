@@ -129,12 +129,20 @@ public class ReservationService {
     public void approveWaitingReservation(final Long id) {
         final WaitingReservation waitingReservation = waitingReservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("예약 대기가 존재하지 않습니다."));
+
         waitingReservationRepository.deleteById(waitingReservation.getId());
 
         final Reservation reservation = Reservation.builder()
                 .roomEscapeInformation(waitingReservation.getRoomEscapeInformation())
                 .member(waitingReservation.getMember())
                 .build();
+        if (hasReservation(
+                reservation.getRoomEscapeInformation().getDate(),
+                reservation.getRoomEscapeInformation().getTime(),
+                reservation.getRoomEscapeInformation().getTheme())
+        ) {
+            throw new ReservationException("이미 해당 날짜에 예약이 존재합니다.");
+        }
         reservationRepository.save(reservation);
     }
 
