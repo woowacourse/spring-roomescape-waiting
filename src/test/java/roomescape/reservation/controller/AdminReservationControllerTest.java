@@ -49,7 +49,7 @@ class AdminReservationControllerTest {
                     .param("member", 1)
                     .param("theme", 1)
                     .param("from", "2025-05-05")
-                    .param("to", "2025-05-30")
+                    .param("to", "2025-07-30")
                     .when().get("/admin/reservations")
                     .then().log().all()
                     .statusCode(200)

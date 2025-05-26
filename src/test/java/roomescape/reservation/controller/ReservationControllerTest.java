@@ -124,12 +124,36 @@ class ReservationControllerTest {
 
         @DisplayName("존재하는 예약을 삭제할 수 있다")
         @Test
-        void deleteReservationTest() {
+        void deleteReservationTest1() {
             RestAssured.given().log().all()
                     .header("Cookie", adminCookie)
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(204);
+        }
+
+        @DisplayName("예약 삭제 시 해당 날짜, 시간, 테마로 예약대기가 있을 경우 해당 대기 내역으로 새 예약을 생성한다")
+        @Test
+        void deleteReservationTest2() {
+            RestAssured.given().log().all()
+                    .header("Cookie", adminCookie)
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+
+            RestAssured.given().log().all()
+                    .header("Cookie", adminCookie)
+                    .when().delete("/reservations/1")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", adminCookie)
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
         }
 
         @DisplayName("존재하지 않는 예약을 삭제할 수 없다")
