@@ -24,15 +24,10 @@ public class AuthService {
     public String createToken(final LoginRequest request) {
         Member member = memberRepository.findByEmail(request.email())
                 .orElseThrow(() -> new NotFoundException("member"));
-        validatePassword(request.password(), member);
+
+        member.validPassword(request.password());
 
         return jwtTokenProvider.createToken(member);
-    }
-
-    private void validatePassword(final String password,final Member member) {
-        if (!password.equals(member.getPassword())) {
-            throw new AuthenticatedException();
-        }
     }
 
     @Transactional(readOnly = true)

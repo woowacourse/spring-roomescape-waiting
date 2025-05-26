@@ -1,6 +1,8 @@
 package roomescape.member.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import roomescape.exception.custom.AuthenticatedException;
 import roomescape.reservation.entity.Role;
 
 @Entity
@@ -46,6 +48,12 @@ public class Member {
             String password
     ) {
         return new Member(name, email, password, Role.USER);
+    }
+
+    public void validPassword(final String password) {
+        if (password.equals(this.password)) {
+            throw new AuthenticatedException();
+        }
     }
 
     public Long getId() {
