@@ -6,7 +6,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationWaiting;
 
 public record MyPageReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
         LocalTime time,
