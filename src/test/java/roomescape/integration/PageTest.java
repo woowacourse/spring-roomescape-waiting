@@ -24,13 +24,26 @@ class PageTest extends BaseTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private static final Map<String, String> member = new HashMap<>();
+    private static final Map<String, Object> authOfMember = new HashMap<>();
+
     private static final Map<String, String> admin = new HashMap<>();
     private static final Map<String, Object> authOfAdmin = new HashMap<>();
 
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        setUpMemberAndLogin();
         setUpAdminAndLogin();
+    }
+
+    private void setUpMemberAndLogin() {
+        member.put("name", "브라운");
+        member.put("email", "test@email.com");
+        member.put("password", "pass1");
+
+        authOfMember.put("email", "test@email.com");
+        authOfMember.put("password", "pass1");
     }
 
     private void setUpAdminAndLogin() {
@@ -68,6 +81,26 @@ class PageTest extends BaseTest {
                 .when().get("/admin")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    @Test
+    void 로그인하지_않고_관리자_페이지에_접근하면_예외를_응답한다() {
+        RestAssured.given().log().all()
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(HttpStatus.UNAUTHORIZED.value());
+    }
+
+    @Test
+    void 사용자가_관리자_페이지에_접근하면_예외를_응답한다() {
+        givenCreatedMember();
+        String token = givenMemberLoginToken();
+
+        RestAssured.given().log().all()
+                .cookie("token", token)
+                .when().get("/admin")
+                .then().log().all()
+                .statusCode(HttpStatus.FORBIDDEN.value());
     }
 
     @Test
@@ -132,6 +165,22 @@ class PageTest extends BaseTest {
                 .when().get("/reservation-mine")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
+    }
+
+    private void givenCreatedMember() {
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(member)
+                .when().post("/members");
+    }
+
+    private String givenMemberLoginToken() {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(authOfMember)
+                .when().post("/login")
+                .then()
+                .extract().response().cookie("token");
     }
 
     private void givenCreatedAdmin() {
