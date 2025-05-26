@@ -34,6 +34,19 @@ import org.junit.jupiter.api.extension.ExtendWith;
 
 @ExtendWith(MockitoExtension.class)
 public class WaitingServiceTest {
+    private final Member member = TestFixture.createMember("fora", "fora@gmail.com", "1234");
+    private final ReservationTime time = TestFixture.createTime(10, 0);
+    private final Theme theme = TestFixture.createTheme("테마1", "설명", "썸네일");
+
+    private void setUp(Long memberId, Long timeId, Long themeId) {
+        when(memberRepository.findById(memberId))
+                .thenReturn(Optional.of(member));
+        when(reservationTimeRepository.findById(timeId))
+                .thenReturn(Optional.of(time));
+        when(themeRepository.findById(themeId))
+                .thenReturn(Optional.of(theme));
+    }
+
     @Mock
     private WaitingRepository waitingRepository;
 
@@ -56,22 +69,14 @@ public class WaitingServiceTest {
         Long timeId = 1L;
         Long themeId = 1L;
         Long memberId = 1L;
+        setUp(memberId, timeId, themeId);
 
         WaitingRequest request = new WaitingRequest(date, timeId, themeId);
         LoginMember loginMember = new LoginMember(memberId, "포라");
 
-        Member member = TestFixture.createMember("fora", "fora@gmail.com", "1234");
-        ReservationTime time = TestFixture.createTime(10, 0);
-        Theme theme = TestFixture.createTheme("테마1", "설명", "썸네일");
         Waiting waiting = new Waiting(member, date, time, theme, WaitingStatus.PENDING, LocalDateTime.of(2025, 1, 1, 10, 0));
         ReflectionTestUtils.setField(waiting, "id", 1L);
 
-        when(memberRepository.findById(memberId))
-                .thenReturn(Optional.of(member));
-        when(reservationTimeRepository.findById(timeId))
-                .thenReturn(Optional.of(time));
-        when(themeRepository.findById(themeId))
-                .thenReturn(Optional.of(theme));
         when(waitingRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
                 memberId, date, timeId, WaitingStatus.PENDING))
                 .thenReturn(false);
@@ -102,18 +107,10 @@ public class WaitingServiceTest {
         WaitingRequest request = new WaitingRequest(date, timeId, themeId);
         LoginMember loginMember = new LoginMember(memberId, "포라");
 
-        Member member = TestFixture.createMember("fora", "fora@gmail.com", "1234");
-        ReservationTime time = TestFixture.createTime(10, 0);
-        Theme theme = TestFixture.createTheme("테마1", "설명", "썸네일");
         Waiting waiting = new Waiting(member, date, time, theme, WaitingStatus.PENDING, LocalDateTime.of(2025, 1, 1, 10, 0));
         ReflectionTestUtils.setField(waiting, "id", 1L);
 
-        when(memberRepository.findById(memberId))
-                .thenReturn(Optional.of(member));
-        when(reservationTimeRepository.findById(timeId))
-                .thenReturn(Optional.of(time));
-        when(themeRepository.findById(themeId))
-                .thenReturn(Optional.of(theme));
+        setUp(memberId, timeId, themeId);
         when(waitingRepository.existsByMemberIdAndDateAndTimeIdAndStatus(
                 memberId, date, timeId, WaitingStatus.PENDING)).thenReturn(true);
 
@@ -128,9 +125,6 @@ public class WaitingServiceTest {
         Long waitingId = 1L;
         LocalDate date = LocalDate.of(2025, 1, 1);
 
-        Member member = TestFixture.createMember("fora", "fora@gmail.com", "1234");
-        ReservationTime time = TestFixture.createTime(10, 0);
-        Theme theme = TestFixture.createTheme("테마1", "설명", "썸네일");
         Waiting waiting = new Waiting(member, date, time, theme, WaitingStatus.PENDING, LocalDateTime.of(2025, 1, 1, 10, 0));
         ReflectionTestUtils.setField(waiting, "id", 1L);
 
