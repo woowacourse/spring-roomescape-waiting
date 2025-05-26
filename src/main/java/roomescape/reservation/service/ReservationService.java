@@ -15,7 +15,7 @@ import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.AvailableReservationTime;
-import roomescape.reservation.dto.ReservationsResponse;
+import roomescape.reservation.dto.ReservationsWithRankResponse;
 import roomescape.reservation.dto.ReservationWithRank;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -89,7 +89,6 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 대기 데이터가 존재하지 않습니다. id = " + id));
 
-
         reservation.cancelWaiting();
     }
 
@@ -110,14 +109,18 @@ public class ReservationService {
         return reservationRepository.findAllReservations(ReservationStatus.CONFIRMED);
     }
 
-    public List<ReservationsResponse> findReservationsByMember(final Member member) {
+    public List<ReservationWithRank> findAllWaitingReservations() {
+        return reservationRepository.findAllReservationsWithRankByStatus(ReservationStatus.WAITING);
+    }
+
+    public List<ReservationsWithRankResponse> findReservationsByMember(final Member member) {
         List<ReservationWithRank> confirmedReservations = reservationRepository
                 .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.CONFIRMED);
         List<ReservationWithRank> waitingReservations = reservationRepository
                 .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.WAITING);
 
         return Stream.concat(
-                confirmedReservations.stream().map(ReservationsResponse::from),
-                waitingReservations.stream().map(ReservationsResponse::from)).toList();
+                confirmedReservations.stream().map(ReservationsWithRankResponse::from),
+                waitingReservations.stream().map(ReservationsWithRankResponse::from)).toList();
     }
 }

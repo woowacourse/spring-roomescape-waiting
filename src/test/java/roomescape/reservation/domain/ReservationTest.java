@@ -28,7 +28,7 @@ class ReservationTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Reservation(member, date, reservationTime, theme);
+            new Reservation(member, new ReservationSlot(date, reservationTime, theme));
         }).isInstanceOf(ReservationException.class);
     }
 
@@ -46,7 +46,7 @@ class ReservationTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Reservation(member, date, reservationTime, theme);
+            new Reservation(member, new ReservationSlot(date, reservationTime, theme));
         }).isInstanceOf(ReservationException.class);
     }
 
@@ -64,7 +64,7 @@ class ReservationTest {
 
         // when & then
         Assertions.assertThatThrownBy(() -> {
-            new Reservation(member, date, reservationTime, theme);
+            new Reservation(member, new ReservationSlot(date, reservationTime, theme));
         }).isInstanceOf(ReservationException.class);
     }
 }

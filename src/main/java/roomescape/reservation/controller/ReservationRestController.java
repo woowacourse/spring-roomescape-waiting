@@ -18,7 +18,8 @@ import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationResponse;
-import roomescape.reservation.dto.ReservationsResponse;
+import roomescape.reservation.dto.ReservationWithRank;
+import roomescape.reservation.dto.ReservationsWithRankResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -27,6 +28,26 @@ import roomescape.reservation.service.ReservationService;
 public class ReservationRestController {
 
     private final ReservationService reservationService;
+
+    @GetMapping
+    public ResponseEntity<List<CreateReservationResponse>> getReservations() {
+        final List<Reservation> reservations = reservationService.findAllConfirmReservations();
+        final List<CreateReservationResponse> createReservationResponse = reservations.stream()
+                .map(CreateReservationResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(createReservationResponse);
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<ReservationsWithRankResponse>> getWaiting() {
+        final List<ReservationWithRank> waitings = reservationService.findAllWaitingReservations();
+        final List<ReservationsWithRankResponse> waitingsResponse = waitings.stream()
+                .map(ReservationsWithRankResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(waitingsResponse);
+    }
 
     @PostMapping
     public ResponseEntity<CreateReservationResponse> createConfirmReservation(
@@ -58,21 +79,10 @@ public class ReservationRestController {
         return ResponseEntity.noContent().build();
     }
 
-    @DeleteMapping("waiting/{id}")
+    @DeleteMapping("/waiting/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@PathVariable final Long id) {
         reservationService.cancelWaitingById(id);
         return ResponseEntity.noContent().build();
-    }
-
-    @GetMapping
-    public ResponseEntity<List<CreateReservationResponse>> getReservations() {
-        final List<Reservation> reservations = reservationService.findAllConfirmReservations();
-        final List<CreateReservationResponse> createReservationResponse =
-                reservations.stream()
-                        .map(CreateReservationResponse::from)
-                        .toList();
-
-        return ResponseEntity.ok(createReservationResponse);
     }
 
     @GetMapping("/available-times")
@@ -89,8 +99,8 @@ public class ReservationRestController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationsResponse>> getMyReservations(final Member member) {
-        final List<ReservationsResponse> reservations = reservationService.findReservationsByMember(member);
+    public ResponseEntity<List<ReservationsWithRankResponse>> getMyReservations(final Member member) {
+        final List<ReservationsWithRankResponse> reservations = reservationService.findReservationsByMember(member);
 
         return ResponseEntity.ok(reservations);
     }

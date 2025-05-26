@@ -1,11 +1,13 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
@@ -13,7 +15,6 @@ import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
-import roomescape.common.exception.PastDateException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberName;
@@ -21,8 +22,10 @@ import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.dto.AvailableReservationTime;
+import roomescape.reservation.dto.ReservationsWithRankResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -46,185 +49,118 @@ class ReservationServiceTest {
         @Autowired
         private ReservationRepository reservationRepository;
 
+        private LocalDate now = LocalDate.now();
+
+        @TestConfiguration
+        static class TestConfig {
+                @Bean
+                public ReservationService reservationService(
+                                final ReservationRepository reservationRepository,
+                                final ReservationTimeRepository reservationTimeRepository,
+                                final ThemeRepository themeRepository,
+                                final ReservationSlotService reservationSlotService) {
+                        return new ReservationService(
+                                        reservationSlotService,
+                                        reservationRepository,
+                                        reservationTimeRepository,
+                                        themeRepository);
+                }
+
+                @Bean
+                public ReservationSlotService reservationSlotService(
+                                final ReservationTimeRepository reservationTimeRepository,
+                                final ThemeRepository themeRepository,
+                                final ReservationRepository reservationRepository) {
+                        return new ReservationSlotService(reservationTimeRepository, themeRepository,
+                                        reservationRepository);
+                }
+        }
+
         @Test
         void 예약_정보_목록을_조회한다() {
                 // given
-                final String themeName = "공포";
-                final String description = "무섭다";
-                final String thumbnail = "귀신사진";
-                final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-                final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
-                final Member savedMember = memberRepository.save(member);
-                final LocalDate date = LocalDate.parse("2025-08-01");
-                final LocalTime time = LocalTime.parse("20:00");
-                final ReservationTime savedReservationTime1 = reservationTimeRepository.save(new ReservationTime(time));
-
-                final Member member2 = new Member(
-                                new MemberName("머피"),
-                                new Email("muffy@email.com"),
-                                new Password("1234"),
-                                Role.USER);
-                final Member savedMember2 = memberRepository.save(member2);
-                final LocalDate date2 = LocalDate.parse("2025-08-01");
-                final LocalTime time2 = LocalTime.parse("21:00");
-                final ReservationTime savedReservationTime2 = reservationTimeRepository
-                                .save(new ReservationTime(time2));
-
-                reservationRepository.save(
-                                new Reservation(
-                                                savedMember,
-                                                date,
-                                                savedReservationTime1,
-                                                savedTheme));
-
-                reservationRepository.save(
-                                new Reservation(
-                                                savedMember2,
-                                                date2,
-                                                savedReservationTime2,
-                                                savedTheme));
+                ReservationSlot slot = new ReservationSlot(date, time, theme);
+                Reservation reservation = new Reservation(member, slot, ReservationStatus.CONFIRMED);
+                reservationRepository.save(reservation);
 
                 // when
-                final List<Reservation> reservations = reservationService.findAllConfirmReservations();
+                List<ReservationsWithRankResponse> responses = reservationService.findReservationsByMember(member);
 
                 // then
-                assertThat(reservations.size()).isEqualTo(2);
+                assertThat(responses).hasSize(1);
+                ReservationsWithRankResponse response = responses.get(0);
+                assertThat(response.reservationId()).isEqualTo(reservation.getId());
+                assertThat(response.theme()).isEqualTo(theme.getName());
+                assertThat(response.date()).isEqualTo(date);
+                assertThat(response.time()).isEqualTo(time.getStartAt());
+                assertThat(response.status()).isEqualTo(ReservationStatus.CONFIRMED.getDescription());
         }
 
         @Test
         void 예약_정보를_저장한다() {
                 // given
-                final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
-                final Member savedMember = memberRepository.save(member);
-                final LocalTime time = LocalTime.parse("20:00");
-                final LocalDate date = LocalDate.parse("2025-11-28");
-                final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-                final String themeName = "공포";
-                final String description = "무섭다";
-                final String thumbnail = "귀신사진";
-                final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
+                // when
+                Reservation savedReservation = reservationService.saveConfirm(member, date, time.getId(),
+                                theme.getId());
 
-                // when & then
-                Assertions.assertThatCode(
-                                () -> reservationService.saveReservedReservation(savedMember, date, savedTime.getId(), savedTheme.getId()))
-                                .doesNotThrowAnyException();
+                // then
+                assertThat(savedReservation.getId()).isNotNull();
+                assertThat(savedReservation.getMember()).isEqualTo(member);
+                assertThat(savedReservation.getSlot().getDate()).isEqualTo(date);
+                assertThat(savedReservation.getSlot().getTime()).isEqualTo(time);
+                assertThat(savedReservation.getSlot().getTheme()).isEqualTo(theme);
+                assertThat(savedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
         }
 
         @Test
         void 예약_정보를_삭제한다() {
                 // given
-                final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
-                final Member savedMember = memberRepository.save(member);
-                final LocalTime time = LocalTime.parse("20:00");
-                final LocalDate date = LocalDate.parse("2025-11-28");
-                final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 10)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-                final String themeName = "공포";
-                final String description = "무섭다";
-                final String thumbnail = "귀신사진";
-                final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
-
-                Reservation savedReservation = reservationRepository.save(new Reservation(
-                                savedMember,
-                                date,
-                                savedTime,
-                                savedTheme));
-
-                // when & then
-                Assertions.assertThatCode(() -> reservationService.cancelById(savedReservation.getId()))
-                                .doesNotThrowAnyException();
-        }
-
-        @Test
-        void 이용가능한_예약_시간을_조회한다() {
-                // given
-                final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
-                final Member savedMember = memberRepository.save(member);
-                final LocalTime time = LocalTime.parse("20:00");
-                final LocalDate date = LocalDate.parse("2025-11-28");
-                final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
-
-                final String themeName = "공포";
-                final String description = "무섭다";
-                final String thumbnail = "귀신사진";
-                final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
-
-                reservationRepository.save(new Reservation(
-                                savedMember,
-                                date,
-                                savedTime,
-                                savedTheme));
-
-                final LocalTime time2 = LocalTime.parse("21:00");
-                reservationTimeRepository.save(new ReservationTime(time2));
+                ReservationSlot slot = new ReservationSlot(date, time, theme);
+                Reservation reservation = new Reservation(member, slot, ReservationStatus.CONFIRMED);
+                reservationRepository.save(reservation);
 
                 // when
-                final long count = reservationService.findAvailableReservationTimes(date, savedTheme.getId())
-                                .stream()
-                                .filter(AvailableReservationTime::alreadyBooked)
-                                .count();
+                reservationService.cancelById(reservation.getId());
 
                 // then
-                assertThat(count).isEqualTo(1);
-        }
-
-        @Test
-        void 예약_정보를_저장할_때_과거_시간이면_예외가_발생한다() {
-                // given
-                final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
-                memberRepository.save(member);
-                final LocalTime time = LocalTime.parse("20:00");
-                final LocalDate date = LocalDate.parse("2024-11-28");
-                final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
-
-                final String themeName = "공포";
-                final String description = "무섭다";
-                final String thumbnail = "귀신사진";
-                final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
-
-                reservationRepository.save(
-                                new Reservation(
-                                                member,
-                                                date,
-                                                savedTime,
-                                                savedTheme));
-
-                // when & then
-                Assertions.assertThatThrownBy(
-                                () -> reservationService.saveReservedReservation(member, date, savedTime.getId(), savedTheme.getId()))
-                                .isInstanceOf(PastDateException.class);
+                assertThat(reservationRepository.findById(reservation.getId()).get().getStatus()).isEqualTo(ReservationStatus.CANCELED);
         }
 
         @Test
         void 예약_정보를_저장할_때_이미_예약된_시간이면_예외가_발생한다() {
                 // given
                 final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
+                        new MemberName("이스트"),
+                        new Email("east@email.com"),
+                        new Password("1234"),
+                        Role.ADMIN);
                 memberRepository.save(member);
                 final LocalTime time = LocalTime.parse("20:00");
                 final LocalDate date = LocalDate.parse("2025-11-28");
@@ -236,26 +172,24 @@ class ReservationServiceTest {
                 final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
 
                 reservationRepository.save(
-                                new Reservation(
-                                                member,
-                                                date,
-                                                savedTime,
-                                                savedTheme));
+                        new Reservation(
+                                member,
+                                new ReservationSlot(date, savedTime, savedTheme)));
 
                 // when & then
                 Assertions.assertThatThrownBy(
-                                () -> reservationService.saveReservedReservation(member, date, savedTime.getId(), savedTheme.getId()))
-                                .isInstanceOf(DataExistException.class);
+                                () -> reservationService.saveConfirm(member, date, savedTime.getId(), savedTheme.getId()))
+                        .isInstanceOf(DataExistException.class);
         }
 
         @Test
         void 예약_정보를_저장할_때_예약시간이_존재하지않으면_예외가_발생한다() {
                 // given
                 final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
+                        new MemberName("이스트"),
+                        new Email("east@email.com"),
+                        new Password("1234"),
+                        Role.ADMIN);
                 final Member savedMember = memberRepository.save(member);
                 final LocalDate date = LocalDate.parse("2025-11-28");
                 final Long timeId = Long.MAX_VALUE;
@@ -267,18 +201,18 @@ class ReservationServiceTest {
 
                 // when & then
                 Assertions.assertThatThrownBy(
-                                () -> reservationService.saveReservedReservation(savedMember, date, timeId, savedTheme.getId()))
-                                .isInstanceOf(DataNotFoundException.class);
+                                () -> reservationService.saveConfirm(savedMember, date, timeId, savedTheme.getId()))
+                        .isInstanceOf(DataNotFoundException.class);
         }
 
         @Test
         void 한_테마의_날짜와_시간이_중복_될_수_없다() {
                 // given
                 final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("east@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
+                        new MemberName("이스트"),
+                        new Email("east@email.com"),
+                        new Password("1234"),
+                        Role.ADMIN);
                 final Member savedMember = memberRepository.save(member);
                 final LocalTime time = LocalTime.parse("20:00");
                 final LocalDate date = LocalDate.parse("2025-11-28");
@@ -290,63 +224,18 @@ class ReservationServiceTest {
                 final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
 
                 reservationRepository.save(
-                                new Reservation(
-                                                member,
-                                                date,
-                                                savedTime,
-                                                savedTheme));
+                        new Reservation(
+                                member, new ReservationSlot(date, savedTime, savedTheme)
+                        ));
 
                 // when & then
-                Assertions.assertThatThrownBy(() -> reservationService.saveReservedReservation(
+                Assertions.assertThatThrownBy(() -> reservationService.saveConfirm(
                                 new Member(
-                                                new MemberName("WooGa"),
-                                                new Email("bowook316@gmail.com"),
-                                                new Password("1234"),
-                                                Role.USER),
+                                        new MemberName("WooGa"),
+                                        new Email("bowook316@gmail.com"),
+                                        new Password("1234"),
+                                        Role.USER),
                                 date, savedTime.getId(), savedTheme.getId()))
-                                .isInstanceOf(DataExistException.class);
-        }
-
-        @Test
-        void 멤버_기준으로_예약_정보_가져오기() {
-                // given
-                final Member member = new Member(
-                                new MemberName("이스트"),
-                                new Email("email@email.com"),
-                                new Password("1234"),
-                                Role.ADMIN);
-                final Member savedMember = memberRepository.save(member);
-                final LocalTime time = LocalTime.parse("20:00");
-                final LocalDate date = LocalDate.parse("2025-11-28");
-                final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
-                final String themeName = "공포";
-                final String description = "무섭다";
-                final String thumbnail = "귀신사진";
-                final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
-                reservationRepository.save(
-                                new Reservation(
-                                                savedMember,
-                                                date,
-                                                savedTime,
-                                                savedTheme));
-
-                // when
-                final List<Reservation> reservations = reservationService.findReservationsByMember(savedMember);
-
-                // then
-                assertThat(reservations.size()).isEqualTo(1);
-        }
-
-        @TestConfiguration
-        static class TestConfig {
-                @Bean
-                public ReservationService themeService(
-                                final ReservationRepository reservationRepository,
-                                final ReservationWithStatusRepository reservationWithStatusRepository,
-                                final ReservationTimeRepository reservationTimeRepository,
-                                final ThemeRepository themeRepository) {
-                        return new ReservationService(reservationRepository, reservationWithStatusRepository,
-                                reservationTimeRepository, themeRepository);
-                }
+                        .isInstanceOf(DataExistException.class);
         }
 }
