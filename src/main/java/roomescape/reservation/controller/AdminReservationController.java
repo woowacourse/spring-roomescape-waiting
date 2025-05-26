@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.AdminReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingReservationService;
 
 
 @RestController
@@ -27,6 +28,7 @@ import roomescape.reservation.service.ReservationService;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingReservationService waitingReservationService;
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
@@ -47,6 +49,6 @@ public class AdminReservationController {
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteWaitingReservation(@PathVariable @NotNull final Long id) {
-        reservationService.deleteById(id);
+        waitingReservationService.deleteById(id);
     }
 }
