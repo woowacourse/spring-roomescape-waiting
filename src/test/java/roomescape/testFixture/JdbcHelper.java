@@ -48,8 +48,8 @@ public class JdbcHelper {
         jdbcTemplate.execute("DELETE FROM reservation");
         jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
 
-        jdbcTemplate.execute("DELETE FROM waiting");
-        jdbcTemplate.execute("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("DELETE FROM status");
+        jdbcTemplate.execute("ALTER TABLE status ALTER COLUMN id RESTART WITH 1");
 
         jdbcTemplate.execute("DELETE FROM theme");
         jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");

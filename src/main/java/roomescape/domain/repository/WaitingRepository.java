@@ -1,7 +1,7 @@
 package roomescape.domain.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import roomescape.domain.Waiting;
+import roomescape.domain.Status;
 
-public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+public interface WaitingRepository extends JpaRepository<Status, Long> {
 }

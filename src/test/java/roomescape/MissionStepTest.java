@@ -57,7 +57,7 @@ public class MissionStepTest {
         RestAssured.port = port;
 
         jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM waiting");
+        jdbcTemplate.update("DELETE FROM status");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
         jdbcTemplate.update("DELETE FROM member");
@@ -144,10 +144,10 @@ public class MissionStepTest {
                 "INSERT INTO theme (id, name, description, thumbnail) VALUES (1L, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)",
                 1L, "10:00");
-        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO status (id, saved_date_time, status) VALUES (?, ?, ?)",
                 1L, LocalDateTime.now(), "RESERVED");
         jdbcTemplate.update(
-                "INSERT INTO reservation (member_id, date, time_id, theme_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO reservation (member_id, date, time_id, theme_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 1L, "2023-08-05", 1L, 1L, 1L
         );
         RestAssured.given().log().all()
@@ -178,10 +178,10 @@ public class MissionStepTest {
                 "INSERT INTO theme (id, name, description, thumbnail) VALUES (1L, '테마1', '테마 1입니다.', '썸네일입니다.')");
         jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)",
                 1L, "10:00");
-        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO status (id, saved_date_time, status) VALUES (?, ?, ?)",
                 1L, LocalDateTime.now(), "RESERVED");
         jdbcTemplate.update(
-                "INSERT INTO reservation (member_id, date, time_id, theme_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO reservation (member_id, date, time_id, theme_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 1L, "2023-08-05", 1L, 1L, 1L
         );
 
@@ -225,7 +225,7 @@ public class MissionStepTest {
                 .statusCode(204);
 
         String status = jdbcTemplate.queryForObject(
-                "SELECT status FROM waiting WHERE id = (SELECT waiting_id FROM reservation WHERE id = ?)",
+                "SELECT status FROM status WHERE id = (SELECT status_id FROM reservation WHERE id = ?)",
                 String.class, 1L);
         assertThat(status).isEqualTo("CANCELED");
     }

@@ -21,8 +21,8 @@ public class Reservation {
     private LocalDate date;
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    @JoinColumn(name = "waiting_id")
-    private Waiting waiting;
+    @JoinColumn(name = "status_id")
+    private Status status;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
@@ -39,14 +39,14 @@ public class Reservation {
             Theme theme,
             LocalDate date,
             ReservationTime time,
-            Waiting waiting
+            Status status
     ) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
-        this.waiting = waiting;
+        this.status = status;
         addReservationInTime();
     }
 
@@ -63,9 +63,9 @@ public class Reservation {
             Theme theme,
             LocalDate date,
             ReservationTime time,
-            Waiting waiting
+            Status status
     ) {
-        return new Reservation(id, member, theme, date, time, waiting);
+        return new Reservation(id, member, theme, date, time, status);
     }
 
     public static Reservation withoutId(
@@ -73,9 +73,9 @@ public class Reservation {
             Theme theme,
             LocalDate reservationDate,
             ReservationTime reservationTime,
-            Waiting waiting
+            Status status
     ) {
-        return new Reservation(null, member, theme, reservationDate, reservationTime, waiting);
+        return new Reservation(null, member, theme, reservationDate, reservationTime, status);
     }
 
     public boolean isPast(LocalDateTime comparedDateTime) {
@@ -102,15 +102,15 @@ public class Reservation {
     }
 
     public boolean isWaiting() {
-        return this.waiting.getStatus() == ReservationStatus.WAITING;
+        return this.status.getStatus() == ReservationStatus.WAITING;
     }
 
     public void reserve() {
-        this.waiting.setStatus(ReservationStatus.RESERVED);
+        this.status.reserveStatus();
     }
 
     public void cancel() {
-        this.waiting.setStatus(ReservationStatus.CANCELED);
+        this.status.cancelStatus();
     }
 
     public void setTime(ReservationTime time) {
@@ -137,7 +137,7 @@ public class Reservation {
         return time;
     }
 
-    public Waiting getWaiting() {
-        return waiting;
+    public Status getStatus() {
+        return status;
     }
 }

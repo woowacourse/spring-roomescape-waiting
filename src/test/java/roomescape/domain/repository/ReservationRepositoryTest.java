@@ -18,10 +18,9 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.testFixture.JdbcHelper;
-
 
 @DataJpaTest
 @Import(JpaAuditingConfiguration.class)
@@ -56,17 +55,17 @@ class ReservationRepositoryTest {
 
     @DisplayName("이미 예약이 존재하는지 확인한다")
     @Test
-    void existsByDateAndTimeIdAndThemeIdAndWaitingStatus() {
+    void existsByDateAndTimeIdAndThemeIdAndStatusStatus() {
         // given
-        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
-        waitingRepository.saveAndFlush(waiting);
+        Status status = Status.statusWithoutId(ReservationStatus.RESERVED);
+        waitingRepository.saveAndFlush(status);
 
         reservationRepository.save(
-                Reservation.withoutId(member, theme, date, time, waiting)
+                Reservation.withoutId(member, theme, date, time, status)
         );
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatusStatus(
                 date, time.getId(), theme.getId(), ReservationStatus.RESERVED
         );
 
@@ -78,10 +77,10 @@ class ReservationRepositoryTest {
     @Test
     void findByMemberAndThemeAndDateRange() {
         // given
-        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
-        waitingRepository.saveAndFlush(waiting);
+        Status status = Status.statusWithoutId(ReservationStatus.RESERVED);
+        waitingRepository.saveAndFlush(status);
 
-        reservationRepository.save(Reservation.withoutId(member, theme, date, time, waiting));
+        reservationRepository.save(Reservation.withoutId(member, theme, date, time, status));
 
         // when
         List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateRange(
@@ -97,22 +96,22 @@ class ReservationRepositoryTest {
 
     @DisplayName("예약 대기 순번을 조회한다")
     @Test
-    void countByReservationWaitingOrderByCreatedAt() {
+    void countByReservationStatusOrderByCreatedAt() {
         // given
         LocalDateTime now = LocalDateTime.now();
-        Waiting waiting1 = waitingRepository.saveAndFlush(
-                Waiting.waitingWithoutId(now.minusMinutes(2), ReservationStatus.WAITING));
-        Waiting waiting2 = waitingRepository.saveAndFlush(
-                Waiting.waitingWithoutId(now.minusMinutes(1), ReservationStatus.WAITING));
-        Waiting waiting3 = waitingRepository.saveAndFlush(
-                Waiting.waitingWithoutId(now, ReservationStatus.WAITING));
+        Status status1 = waitingRepository.saveAndFlush(
+                Status.statusWithoutId(now.minusMinutes(2), ReservationStatus.WAITING));
+        Status status2 = waitingRepository.saveAndFlush(
+                Status.statusWithoutId(now.minusMinutes(1), ReservationStatus.WAITING));
+        Status status3 = waitingRepository.saveAndFlush(
+                Status.statusWithoutId(now, ReservationStatus.WAITING));
 
-        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, waiting1));
-        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, waiting2));
-        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, waiting3));
+        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, status1));
+        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, status2));
+        reservationRepository.saveAndFlush(Reservation.withoutId(member, theme, date, time, status3));
 
         // when
-        long order = reservationRepository.countByReservationWaitingOrderByCreatedAt(
+        long order = reservationRepository.countByReservationStatusOrderByCreatedAt(
                 theme, date, time, now.plusMinutes(10)
         );
 

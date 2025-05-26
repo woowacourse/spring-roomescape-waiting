@@ -25,7 +25,7 @@ public class WaitingService {
 
     @Transactional(readOnly = true)
     public List<ReservationDto> getAllWaitings() {
-        List<Reservation> waitings = reservationRepository.findByWaitingStatus(ReservationStatus.WAITING);
+        List<Reservation> waitings = reservationRepository.findByStatusStatus(ReservationStatus.WAITING);
         return ReservationDto.from(waitings);
     }
 
@@ -34,11 +34,11 @@ public class WaitingService {
         if (!reservation.isWaiting()) {
             throw new IllegalArgumentException("예약 대기 상태가 아닙니다.");
         }
-        return reservationRepository.countByReservationWaitingOrderByCreatedAt(
+        return reservationRepository.countByReservationStatusOrderByCreatedAt(
                 reservation.getTheme(),
                 reservation.getDate(),
                 reservation.getTime(),
-                reservation.getWaiting().getSavedDateTime()
+                reservation.getStatus().getSavedDateTime()
         );
     }
 
@@ -55,7 +55,7 @@ public class WaitingService {
     }
 
     private boolean isDateTimeAlreadyReserved(Reservation reservation) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
+        return reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatusStatus(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
@@ -67,7 +67,7 @@ public class WaitingService {
         Member member = memberService.getMemberEntityById(memberId);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
-        if (!member.isAdmin() && !member.isSame(reservation.getMember())) {
+        if (!member.isAdmin() && !member.isEqual(reservation.getMember())) {
             throw new AuthorizationException("권한이 없습니다.");
         }
         reservation.deleteSelf();

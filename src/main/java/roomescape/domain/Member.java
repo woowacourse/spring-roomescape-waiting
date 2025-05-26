@@ -50,7 +50,7 @@ public class Member {
         return this.role == Role.ADMIN;
     }
 
-    public boolean isSame(Member member) {
+    public boolean isEqual(Member member) {
         return member.getId().equals(this.getId());
     }
 

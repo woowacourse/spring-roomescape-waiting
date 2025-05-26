@@ -15,8 +15,8 @@ import roomescape.application.dto.ReservationDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.testFixture.StubHelper;
 
@@ -43,9 +43,9 @@ public class ReservationCommandServiceTest {
         Theme theme = StubHelper.stubTheme(1L, themeService);
         ReservationTime time = StubHelper.stubTime(1L, timeService);
         Member member = StubHelper.stubMember(1L, memberService);
-        Waiting waiting = Mockito.mock(Waiting.class);
+        Status status = Mockito.mock(Status.class);
 
-        Reservation reservation = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, waiting);
+        Reservation reservation = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, status);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
         Mockito.doReturn(LocalDateTime.now()).when(clockProvider).now();
 

@@ -27,7 +27,7 @@ public class ReservationQueryService {
     }
 
     public List<ReservationDto> getAllReservations() {
-        List<Reservation> reservations = reservationRepository.findByWaitingStatus(ReservationStatus.RESERVED);
+        List<Reservation> reservations = reservationRepository.findByStatusStatus(ReservationStatus.RESERVED);
         return ReservationDto.from(reservations);
     }
 
@@ -36,7 +36,7 @@ public class ReservationQueryService {
         List<Reservation> memberReservations = reservationRepository.findByMember(member);
         return memberReservations.stream()
                 .map(reservation -> {
-                            String displayStatus = ReservationStatus.name(reservation.getWaiting().getStatus());
+                            String displayStatus = ReservationStatus.name(reservation.getStatus().getStatus());
                             if (reservation.isWaiting()) {
                                 displayStatus = waitingService.countWaitingReservation(reservation) + "번째 예약대기";
                             }

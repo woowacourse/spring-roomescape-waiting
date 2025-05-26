@@ -21,7 +21,7 @@ VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN'),
        ('브리', 'brie@email.com', 'brie', 'USER'),
        ('솔라', 'solar@email.com', 'solar', 'USER');
 
-INSERT INTO waiting (saved_date_time, status)
+INSERT INTO status (saved_date_time, status)
 VALUES ('2025-01-01 10:00', 'RESERVED'),
        ('2025-01-01 10:00', 'RESERVED'),
        ('2025-01-01 10:00', 'RESERVED'),
@@ -36,7 +36,7 @@ VALUES ('2025-01-01 10:00', 'RESERVED'),
        ('2025-01-01 10:00', 'RESERVED'),
        ('2025-01-01 10:00', 'RESERVED');
 
-INSERT INTO reservation (member_id, theme_id, date, time_id, waiting_id)
+INSERT INTO reservation (member_id, theme_id, date, time_id, status_id)
 VALUES (2, 1, '2025-05-07', 1, 1),
        (4, 1, '2025-05-08', 2, 2),
        (3, 1, '2025-05-09', 1, 3),

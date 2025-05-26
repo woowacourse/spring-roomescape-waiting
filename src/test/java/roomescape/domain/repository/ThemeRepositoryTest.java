@@ -42,18 +42,18 @@ class ThemeRepositoryTest {
 
         LocalDateTime date = LocalDateTime.now();
 
-        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)", 1L, date, "RESERVED");
-        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)", 2L, date, "RESERVED");
-        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)", 3L, date, "RESERVED");
-        jdbcTemplate.update("INSERT INTO waiting (id, saved_date_time, status) VALUES (?, ?, ?)", 4L, date, "RESERVED");
+        jdbcTemplate.update("INSERT INTO status (id, saved_date_time, status) VALUES (?, ?, ?)", 1L, date, "RESERVED");
+        jdbcTemplate.update("INSERT INTO status (id, saved_date_time, status) VALUES (?, ?, ?)", 2L, date, "RESERVED");
+        jdbcTemplate.update("INSERT INTO status (id, saved_date_time, status) VALUES (?, ?, ?)", 3L, date, "RESERVED");
+        jdbcTemplate.update("INSERT INTO status (id, saved_date_time, status) VALUES (?, ?, ?)", 4L, date, "RESERVED");
 
-        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 1L, 1L, date.toLocalDate(), 1L, 1L);
-        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 1L, 1L, date.toLocalDate(), 1L, 2L);
-        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 1L, 1L, date.toLocalDate(), 1L, 3L);
-        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, waiting_id) VALUES (?, ?, ?, ?, ?)",
+        jdbcTemplate.update("INSERT INTO reservation (member_id, theme_id, date, time_id, status_id) VALUES (?, ?, ?, ?, ?)",
                 1L, 2L, date.toLocalDate(), 1L, 4L);
 
         // when

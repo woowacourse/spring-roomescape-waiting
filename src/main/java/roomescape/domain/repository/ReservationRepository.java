@@ -14,7 +14,7 @@ import roomescape.domain.Theme;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
+    boolean existsByDateAndTimeIdAndThemeIdAndStatusStatus(
             LocalDate date,
             Long timeId,
             Long themeId,
@@ -23,7 +23,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     List<Reservation> findByMember(Member member);
 
-    List<Reservation> findByWaitingStatus(ReservationStatus reservationStatus);
+    List<Reservation> findByStatusStatus(ReservationStatus reservationStatus);
 
     @Query("""
             SELECT r
@@ -43,14 +43,14 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("""
             SELECT COUNT(r) + 1
             FROM Reservation r
-            JOIN r.waiting w
+            JOIN r.status w
             WHERE r.theme = :theme
                 AND r.date = :date
                 AND r.time = :time
                 AND w.status = roomescape.domain.ReservationStatus.WAITING
                 AND w.savedDateTime < :myCreatedAt
             """)
-    long countByReservationWaitingOrderByCreatedAt(
+    long countByReservationStatusOrderByCreatedAt(
             @Param("theme") Theme theme,
             @Param("date") LocalDate date,
             @Param("time") ReservationTime time,

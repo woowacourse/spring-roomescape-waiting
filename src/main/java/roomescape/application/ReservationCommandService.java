@@ -12,8 +12,8 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
@@ -50,8 +50,8 @@ public class ReservationCommandService {
         Theme theme = themeService.getThemeById(request.themeId());
         ReservationTime reservationTime = timeService.getTimeEntityById(request.timeId());
         Member member = memberService.getMemberEntityById(request.memberId());
-        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
-        Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, waiting);
+        Status status = Status.statusWithoutId(ReservationStatus.RESERVED);
+        Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, status);
         return ReservationDto.from(reservation);
     }
 
@@ -67,7 +67,7 @@ public class ReservationCommandService {
     }
 
     private boolean isDuplicated(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeIdAndWaitingStatus(
+        return reservationRepository.existsByDateAndTimeIdAndThemeIdAndStatusStatus(
                 date,
                 timeId,
                 themeId,
@@ -76,13 +76,13 @@ public class ReservationCommandService {
     }
 
     private Reservation saveReservation(Member member, Theme theme, LocalDate request, ReservationTime reservationTime,
-                                        Waiting waiting) {
+                                        Status status) {
         Reservation reservationWithoutId = Reservation.withoutId(
                 member,
                 theme,
                 request,
                 reservationTime,
-                waiting
+                status
         );
         LocalDateTime now = clockProvider.now();
         validateNotPast(reservationWithoutId, now);
@@ -102,8 +102,8 @@ public class ReservationCommandService {
         Theme theme = themeService.getThemeById(request.theme());
         ReservationTime reservationTime = timeService.getTimeEntityById(request.time());
         Member member = memberService.getMemberEntityById(memberId);
-        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.WAITING);
-        Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, waiting);
+        Status status = Status.statusWithoutId(ReservationStatus.WAITING);
+        Reservation reservation = saveReservation(member, theme, request.date(), reservationTime, status);
         return ReservationDto.from(reservation);
     }
 
@@ -111,7 +111,7 @@ public class ReservationCommandService {
         Member member = memberService.getMemberEntityById(memberId);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 id가 존재하지 않습니다. id: " + reservationId));
-        if (!member.isAdmin() && !member.isSame(reservation.getMember())) {
+        if (!member.isAdmin() && !member.isEqual(reservation.getMember())) {
             throw new AuthorizationException("권한이 없습니다.");
         }
         reservation.cancel();

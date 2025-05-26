@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Waiting {
+public class Status {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,32 +26,32 @@ public class Waiting {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    @OneToOne(mappedBy = "waiting")
+    @OneToOne(mappedBy = "status")
     private Reservation reservation;
 
-    private Waiting(Long id, LocalDateTime savedDateTime, ReservationStatus status) {
+    private Status(Long id, LocalDateTime savedDateTime, ReservationStatus status) {
         this.id = id;
         this.savedDateTime = savedDateTime;
         this.status = status;
     }
 
-    protected Waiting() {
+    protected Status() {
     }
 
-    private Waiting(ReservationStatus status) {
+    private Status(ReservationStatus status) {
         this(null, null, status);
     }
 
-    private Waiting(LocalDateTime savedDateTime, ReservationStatus status) {
+    private Status(LocalDateTime savedDateTime, ReservationStatus status) {
         this(null, savedDateTime, status);
     }
 
-    public static Waiting waitingWithoutId(ReservationStatus status) {
-        return new Waiting(status);
+    public static Status statusWithoutId(ReservationStatus status) {
+        return new Status(status);
     }
 
-    public static Waiting waitingWithoutId(LocalDateTime dateTime, ReservationStatus status) {
-        return new Waiting(dateTime, status);
+    public static Status statusWithoutId(LocalDateTime dateTime, ReservationStatus status) {
+        return new Status(dateTime, status);
     }
 
     public Long getId() {
@@ -66,7 +66,11 @@ public class Waiting {
         return status;
     }
 
-    public void setStatus(ReservationStatus reservationStatus) {
-        this.status = reservationStatus;
+    public void cancelStatus() {
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void reserveStatus() {
+        this.status = ReservationStatus.RESERVED;
     }
 }

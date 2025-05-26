@@ -1,10 +1,8 @@
 package roomescape.application;
 
 import static org.junit.jupiter.api.Assertions.assertAll;
-import static roomescape.domain.Role.USER;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -16,15 +14,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.application.dto.ReservationCreateDto;
-import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.testFixture.StubHelper;
 
@@ -47,10 +43,10 @@ public class ReservationQueryServiceTest {
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Waiting waiting = Waiting.waitingWithoutId(ReservationStatus.RESERVED);
+        Status status = Status.statusWithoutId(ReservationStatus.RESERVED);
 
-        Reservation reservation1 = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, waiting);
-        Reservation reservation2 = Reservation.of(2L, member, theme, LocalDate.now().plusDays(1), time, waiting);
+        Reservation reservation1 = Reservation.of(1L, member, theme, LocalDate.now().plusDays(1), time, status);
+        Reservation reservation2 = Reservation.of(2L, member, theme, LocalDate.now().plusDays(1), time, status);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
