@@ -23,9 +23,11 @@ import roomescape.auth.Role;
 import roomescape.dto.request.AdminReservationCreateRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.WaitingResponse;
 import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.presentation.AdminController;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @WebMvcTest(value = {AdminController.class, AuthorizationExtractor.class})
 class AdminControllerTest {
@@ -38,6 +40,9 @@ class AdminControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private WaitingService waitingService;
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;
@@ -79,6 +84,29 @@ class AdminControllerTest {
         given(jwtTokenProvider.extractRole("token")).willReturn(Role.ADMIN);
         // when & then
         mockMvc.perform(get("/api/admin/reservations")
+                        .cookie(new Cookie("token", "token"))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andExpect(content().string(objectMapper.writeValueAsString(response)));
+    }
+
+    @Test
+    void 관리자가_예약대기를_삭제한다() throws Exception {
+        // given
+
+        WaitingResponse waitingResponse = new WaitingResponse(
+                1L,
+                "name1",
+                LocalDate.of(2025, 1, 1),
+                new ReservationTimeResponse(1L, LocalTime.of(9, 0)),
+                "themeName1"
+        );
+
+        List<WaitingResponse> response = List.of(waitingResponse);
+        given(waitingService.findAll()).willReturn(response);
+        given(jwtTokenProvider.extractRole("token")).willReturn(Role.ADMIN);
+        // when & then
+        mockMvc.perform(get("/api/admin/waitings")
                         .cookie(new Cookie("token", "token"))
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())

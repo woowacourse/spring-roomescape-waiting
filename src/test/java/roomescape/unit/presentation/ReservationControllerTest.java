@@ -86,6 +86,4 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
-
-
 }
