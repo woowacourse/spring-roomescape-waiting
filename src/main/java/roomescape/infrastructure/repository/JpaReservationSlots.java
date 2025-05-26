@@ -1,4 +1,4 @@
-package roomescape.infrastructure.jpa;
+package roomescape.infrastructure.repository;
 
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Repository;
@@ -6,7 +6,7 @@ import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.repository.ReservationSlots;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.ReservationDate;
-import roomescape.infrastructure.jpa.dao.JpaReservationSlotDao;
+import roomescape.infrastructure.repository.dao.JpaReservationSlotDao;
 
 import java.time.LocalDate;
 import java.util.Optional;

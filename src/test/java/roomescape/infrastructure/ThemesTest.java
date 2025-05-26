@@ -8,8 +8,8 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.Theme;
 import roomescape.business.model.repository.Themes;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.jpa.JpaReservationSlots;
-import roomescape.infrastructure.jpa.JpaThemes;
+import roomescape.infrastructure.repository.JpaReservationSlots;
+import roomescape.infrastructure.repository.JpaThemes;
 import roomescape.test_util.JpaTestUtil;
 
 import java.util.Optional;

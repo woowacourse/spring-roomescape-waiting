@@ -1,4 +1,4 @@
-package roomescape.infrastructure.jpa;
+package roomescape.infrastructure.repository;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Primary;
@@ -8,8 +8,8 @@ import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.repository.Reservations;
 import roomescape.business.model.vo.Id;
-import roomescape.infrastructure.jpa.dao.JpaReservationDao;
-import roomescape.infrastructure.jpa.dao.JpaReservationSlotDao;
+import roomescape.infrastructure.repository.dao.JpaReservationDao;
+import roomescape.infrastructure.repository.dao.JpaReservationSlotDao;
 
 import java.time.LocalDate;
 import java.util.List;

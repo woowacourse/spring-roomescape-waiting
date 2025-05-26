@@ -1,4 +1,4 @@
-package roomescape.infrastructure.jpa.dao;
+package roomescape.infrastructure.repository.dao;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
