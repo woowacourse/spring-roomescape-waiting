@@ -40,11 +40,6 @@ public class AdminReservationService {
     }
 
     @Transactional(readOnly = true)
-    public Reservation getById(final Long id) {
-        return findReservationById(id);
-    }
-
-    @Transactional(readOnly = true)
     public List<Reservation> findByInFromTo(final Long themeId, final Long memberId, final LocalDate dateFrom,
                                             final LocalDate dateTo) {
         final Theme theme = findThemeById(themeId);
