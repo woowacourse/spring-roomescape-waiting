@@ -49,10 +49,10 @@ public class WaitingService {
     }
 
     public void deleteMyWaiting(final long waitingId, final LoginMember loginMember) {
-        final Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(() -> new BadRequestException("id를 찾을 수 없습니다."));
         final Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new BadRequestException("회원 정보를 찾을 수 없습니다."));
+        final Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new BadRequestException("id를 찾을 수 없습니다."));
         if (!waiting.hasOwner(member)) {
             throw new ForbiddenException("본인의 예약대기만 삭제할 수있습니다.");
         }
