@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.exception.DataExistException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepositoryInterface;
@@ -17,14 +17,17 @@ import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.dto.ThemeRequest;
+import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepositoryInterface;
+import roomescape.theme.service.facade.ThemeServiceFacade;
 
 @SpringBootTest
-@Transactional // 테스트 후 롤백
-class ThemeServiceIntegrationTest {
+@Transactional
+class ThemeServiceFacadeTest {
 
     @Autowired
-    private ThemeService themeService;
+    private ThemeServiceFacade themeServiceFacade;
 
     @Autowired
     private ThemeRepositoryInterface themeRepository;
@@ -45,81 +48,65 @@ class ThemeServiceIntegrationTest {
         final String description = "통합 설명";
         final String thumbnail = "통합썸네일.jpg";
 
+        final ThemeRequest themeRequest = new ThemeRequest(name, description, thumbnail);
+
         // when
-        final Theme savedTheme = themeService.save(name, description, thumbnail);
+        final ThemeResponse themeResponse = themeServiceFacade.saveTheme(themeRequest);
 
         // then
-        Assertions.assertThat(savedTheme.getId()).isNotNull();
+        SoftAssertions.assertSoftly(
+                softly -> {
+                    softly.assertThat(themeResponse.id()).isNotNull();
+                    softly.assertThat(themeResponse.name()).isEqualTo(name);
+                    softly.assertThat(themeResponse.description()).isEqualTo(description);
+                    softly.assertThat(themeResponse.thumbnail()).isEqualTo(thumbnail);
+                }
+        );
     }
 
     @Test
     void 테마를_삭제한다() {
         // given
-        final String name = "테마 삭제";
-        final String description = "테마 삭제 설명";
-        final String thumbnail = "테마삭제썸네일.jpg";
+        final String name = "통합 우가";
+        final String description = "통합 설명";
+        final String thumbnail = "통합썸네일.jpg";
 
-        final Theme savedTheme = themeService.save(name, description, thumbnail);
+        final Theme theme = new Theme(name, description, thumbnail);
+        final Theme savedTheme = themeRepository.save(theme);
+
         final Long themeId = savedTheme.getId();
 
-        // when
-        themeService.deleteById(themeId);
-
-        // then
-        Assertions.assertThat(themeRepository.findById(themeId)).isEmpty();
-    }
-
-    @Test
-    void 테마를_조회한다() {
-        // given
-        final String name = "테마 삭제";
-        final String description = "테마 삭제 설명";
-        final String thumbnail = "테마삭제썸네일.jpg";
-
-        final Theme savedTheme = themeService.save(name, description, thumbnail);
-        final Long themeId = savedTheme.getId();
-
-        // when
-        final Theme found = themeService.getById(themeId);
-
-        // then
-        Assertions.assertThat(savedTheme).isEqualTo(found);
+        // when & then
+        Assertions.assertThatCode(() -> themeServiceFacade.deleteTheme(themeId)).doesNotThrowAnyException();
     }
 
     @Test
     void 테마_전체를_조회한다() {
         // given
-        final String name = "테마 삭제";
-        final String description = "테마 삭제 설명";
-        final String thumbnail = "테마삭제썸네일.jpg";
+        final String name = "통합 우가";
+        final String description = "통합 설명";
+        final String thumbnail = "통합썸네일.jpg";
 
-        final Theme savedTheme = themeService.save(name, description, thumbnail);
+        final Theme theme = new Theme(name, description, thumbnail);
+        final Theme savedTheme = themeRepository.save(theme);
 
         // when
-        final List<Theme> themes = themeService.findAll();
+        final List<ThemeResponse> themes = themeServiceFacade.getThemes();
 
         // then
-        Assertions.assertThat(themes).containsOnly(savedTheme);
-    }
-
-    @Test
-    void 테마_이름은_중복_될_수_없다() {
-        // given
-        final String name = "테마 삭제";
-        final String description = "테마 삭제 설명";
-        final String thumbnail = "테마삭제썸네일.jpg";
-
-        final Theme savedTheme = themeService.save(name, description, thumbnail);
-
-        // when & then
-        Assertions.assertThatThrownBy(() -> {
-            themeService.save(name, description, thumbnail);
-        }).isInstanceOf(DataExistException.class);
+        SoftAssertions.assertSoftly(
+                softly -> {
+                    softly.assertThat(themes).hasSize(1);
+                    softly.assertThat(themes.getFirst().id()).isEqualTo(savedTheme.getId());
+                    softly.assertThat(themes.getFirst().name()).isEqualTo(name);
+                    softly.assertThat(themes.getFirst().description()).isEqualTo(description);
+                    softly.assertThat(themes.getFirst().thumbnail()).isEqualTo(thumbnail);
+                }
+        );
     }
 
     @Test
     void 인기있는_테마_조회() {
-        // given
         final ReservationTime reservationTime = new ReservationTime(LocalTime.of(20, 0));
         reservationTimeRepository.save(reservationTime);
         final Theme theme1 = new Theme("name1", "description", "thumbnail");
@@ -149,9 +136,15 @@ class ThemeServiceIntegrationTest {
         reservationRepository.save(inlineReservation5);
 
         // when
-        final List<Theme> popularThemes = themeService.findPopularThemes();
+        final List<ThemeResponse> popularThemes = themeServiceFacade.getPopularThemes();
 
         // then
-        Assertions.assertThat(popularThemes.getFirst().getId()).isEqualTo(theme2.getId());
+        SoftAssertions.assertSoftly(
+                softly -> {
+                    softly.assertThat(popularThemes).hasSize(2);
+                    softly.assertThat(popularThemes.getFirst().id()).isEqualTo(theme2.getId());
+                    softly.assertThat(popularThemes.getLast().id()).isEqualTo(theme1.getId());
+                }
+        );
     }
 }

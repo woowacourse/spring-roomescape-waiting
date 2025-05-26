@@ -21,6 +21,7 @@ import roomescape.reservation.repository.ReservationRepositoryInterface;
 import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
+import roomescape.theme.service.theme.ThemeService;
 
 class ThemeServiceTest {
 
