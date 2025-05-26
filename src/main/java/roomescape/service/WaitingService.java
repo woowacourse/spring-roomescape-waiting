@@ -33,7 +33,7 @@ public class WaitingService {
     public WaitingService(final WaitingRepository WaitingRepository,
                           final ReservationTimeRepository ReservationTimeRepository,
                           final ThemeRepository themeRepository,
-                          final MemberRepository memberRepository, final WaitingRepository waitingRepository,
+                          final MemberRepository memberRepository,
                           final WaitingQueryRepository waitingQueryRepository,
                           final ReservationService reservationService) {
         this.waitingRepository = WaitingRepository;
