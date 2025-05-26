@@ -4,9 +4,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.WaitingDto;
-import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.service.reader.WaitingReader;
+import roomescape.infrastructure.repository.dao.JpaReservationSlotDao;
 
 import java.util.List;
 
@@ -15,11 +15,14 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class JpaWaitingReader implements WaitingReader {
 
-    private final Reservations reservations;
+    private final JpaReservationSlotDao slotDao;
 
     @Override
     public List<WaitingDto> getAll() {
-        List<Reservation> reservations = this.reservations.findAllNotReserved();
-        return WaitingDto.fromEntities(reservations);
+        List<ReservationSlot> slots = slotDao.findAll();
+        return slots.stream()
+                .flatMap(slot -> slot.getWaitingReservations().stream())
+                .map(WaitingDto::fromEntity)
+                .toList();
     }
 }

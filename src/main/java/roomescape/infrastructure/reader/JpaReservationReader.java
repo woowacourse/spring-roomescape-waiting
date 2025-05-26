@@ -6,9 +6,10 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.MyReservationDto;
 import roomescape.business.dto.ReservationDto;
 import roomescape.business.model.entity.Reservation;
-import roomescape.business.model.repository.Reservations;
+import roomescape.business.model.entity.ReservationSlot;
 import roomescape.business.model.vo.Id;
 import roomescape.business.service.reader.ReservationReader;
+import roomescape.infrastructure.repository.dao.JpaReservationSlotDao;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -19,17 +20,28 @@ import java.util.Map;
 @Transactional(readOnly = true)
 public class JpaReservationReader implements ReservationReader {
 
-    private final Reservations reservations;
+    private final JpaReservationSlotDao slotDao;
 
     @Override
     public List<ReservationDto> getAll(final String themeIdValue, final String userIdValue, final LocalDate dateFrom, final LocalDate dateTo) {
-        List<Reservation> reservations = this.reservations.findAllReservedWithFilter(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
-        return ReservationDto.fromEntities(reservations);
+        List<ReservationSlot> slots = slotDao.findAllBy(Id.create(themeIdValue), Id.create(userIdValue), dateFrom, dateTo);
+        return slots.stream()
+                .map(ReservationSlot::getReservedReservation)
+                .filter(reservation -> {
+                    if (userIdValue == null) {
+                        return true;
+                    } else {
+                        return reservation.isSameReserver(userIdValue);
+                    }
+                })
+                .map(ReservationDto::fromEntity)
+                .toList();
     }
 
     @Override
     public List<MyReservationDto> getMyReservations(final String userIdValue) {
-        Map<Reservation, Integer> reservationsWithWaitingNumber = this.reservations.findAllWithWaitingNumberByUserId(Id.create(userIdValue));
-        return MyReservationDto.fromMap(reservationsWithWaitingNumber);
+        List<ReservationSlot> slots = slotDao.findAllBy(null, Id.create(userIdValue), null, null);
+        Map<Reservation, Integer> waitingNumberAndReservation = ReservationSlot.toWaitingNumberAndReservation(slots, Id.create(userIdValue));
+        return MyReservationDto.fromMap(waitingNumberAndReservation);
     }
 }
