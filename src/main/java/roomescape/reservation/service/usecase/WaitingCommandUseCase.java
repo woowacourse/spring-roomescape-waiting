@@ -2,6 +2,7 @@ package roomescape.reservation.service.usecase;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.AlreadyExistException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.usecase.MemberQueryUseCase;
@@ -16,6 +17,7 @@ import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class WaitingCommandUseCase {
 
     private final WaitingRepository waitingRepository;

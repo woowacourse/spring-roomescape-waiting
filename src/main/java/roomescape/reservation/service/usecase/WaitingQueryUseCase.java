@@ -3,6 +3,7 @@ package roomescape.reservation.service.usecase;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.Waiting;
@@ -11,6 +12,7 @@ import roomescape.reservation.repository.dto.WaitingWithRankDto;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class WaitingQueryUseCase {
 
     private final WaitingRepository waitingRepository;

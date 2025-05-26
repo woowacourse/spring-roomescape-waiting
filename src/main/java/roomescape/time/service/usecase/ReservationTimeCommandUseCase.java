@@ -2,6 +2,7 @@ package roomescape.time.service.usecase;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.AlreadyExistException;
 import roomescape.common.exception.ReferencedByOtherException;
 import roomescape.reservation.service.usecase.ReservationQueryUseCase;
@@ -12,6 +13,7 @@ import roomescape.time.service.dto.CreateReservationTimeServiceRequest;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class ReservationTimeCommandUseCase {
 
     private final ReservationTimeRepository reservationTimeRepository;
