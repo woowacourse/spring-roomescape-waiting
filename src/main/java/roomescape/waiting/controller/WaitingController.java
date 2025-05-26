@@ -39,7 +39,7 @@ public class WaitingController {
             @PathVariable("id") final long id,
             @AuthMember LoginMember loginMember
     ) {
-        waitingService.deleteWaitingById(id, loginMember);
+        waitingService.deleteMyWaiting(id, loginMember);
         return ResponseEntity.noContent().build();
     }
 }

@@ -48,7 +48,7 @@ public class WaitingService {
                 .toList();
     }
 
-    public void deleteWaitingById(final long waitingId, final LoginMember loginMember) {
+    public void deleteMyWaiting(final long waitingId, final LoginMember loginMember) {
         final Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new BadRequestException("id를 찾을 수 없습니다."));
         final Member member = memberRepository.findById(loginMember.id())
@@ -59,7 +59,7 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
-    public void deleteWaitingById(final long id) {
+    public void deleteWaitingByAdmin(final long id) {
         waitingRepository.deleteById(id);
     }
 
