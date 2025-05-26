@@ -10,6 +10,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class AutoReserveService {
 
     private final ReservationRepository reservationRepository;
