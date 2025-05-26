@@ -1,7 +1,6 @@
 package roomescape.unit.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -23,8 +22,7 @@ public class WaitingTest {
                         null,
                         LocalDate.now().plusDays(1),
                         ReservationTime.createWithoutId(LocalTime.of(9, 0)),
-                        Theme.createWithoutId("themeName", "des", "th"),
-                        LocalDateTime.now()
+                        Theme.createWithoutId("themeName", "des", "th")
                 )).isInstanceOf(ArgumentNullException.class);
 
     }
@@ -39,8 +37,7 @@ public class WaitingTest {
                                 member,
                                 null,
                                 ReservationTime.createWithoutId(LocalTime.of(9, 0)),
-                                Theme.createWithoutId("themeName", "des", "th"),
-                                LocalDateTime.now()
+                                Theme.createWithoutId("themeName", "des", "th")
                         ))
                 .isInstanceOf(ArgumentNullException.class);
     }
@@ -55,8 +52,7 @@ public class WaitingTest {
                                 member,
                                 LocalDate.of(2025, 1, 1),
                                 null,
-                                Theme.createWithoutId("themeName", "des", "th"),
-                                LocalDateTime.now()
+                                Theme.createWithoutId("themeName", "des", "th")
                         ))
                 .isInstanceOf(ArgumentNullException.class);
     }
@@ -70,8 +66,7 @@ public class WaitingTest {
                 member,
                 LocalDate.of(2024, 1, 1),
                 new ReservationTime(1L, LocalTime.of(9, 0)),
-                Theme.createWithoutId("themeName", "des", "th"),
-                LocalDateTime.now()
+                Theme.createWithoutId("themeName", "des", "th")
         );
         Assertions.assertThatThrownBy(waiting::validateDateTime)
                 .isInstanceOf(PastDateTimeReservationException.class);
@@ -87,8 +82,7 @@ public class WaitingTest {
                                 member,
                                 LocalDate.now().plusDays(1),
                                 ReservationTime.createWithoutId(LocalTime.of(9, 0)),
-                                null,
-                                LocalDateTime.now()
+                                null
                         ))
                 .isInstanceOf(ArgumentNullException.class);
 

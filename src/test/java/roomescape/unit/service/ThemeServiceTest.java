@@ -14,6 +14,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
 import roomescape.exception.ExistedReservationException;
@@ -21,17 +22,20 @@ import roomescape.exception.ExistedThemeException;
 import roomescape.service.ThemeService;
 import roomescape.unit.fake.FakeReservationRepository;
 import roomescape.unit.fake.FakeThemeRepository;
+import roomescape.unit.fake.FakeWaitingRepository;
 
 public class ThemeServiceTest {
 
-    private ThemeService themeService;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
+    private final ThemeService themeService;
 
     public ThemeServiceTest() {
         this.themeRepository = new FakeThemeRepository();
         this.reservationRepository = new FakeReservationRepository();
-        this.themeService = new ThemeService(themeRepository, reservationRepository);
+        this.waitingRepository = new FakeWaitingRepository();
+        this.themeService = new ThemeService(themeRepository, reservationRepository, waitingRepository);
     }
 
     @Test

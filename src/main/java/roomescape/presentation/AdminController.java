@@ -47,6 +47,6 @@ public class AdminController {
 
     @GetMapping("/waitings")
     public List<WaitingResponse> getWaitings() {
-        return waitingService.findWaitings();
+        return waitingService.findAll();
     }
 }

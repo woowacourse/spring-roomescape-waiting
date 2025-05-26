@@ -19,6 +19,7 @@ import roomescape.domain.repository.MemberRepository;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.dto.request.ReservationCondition;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationWithStatusResponse;
@@ -29,6 +30,7 @@ import roomescape.unit.fake.FakeMemberRepository;
 import roomescape.unit.fake.FakeReservationRepository;
 import roomescape.unit.fake.FakeReservationTimeRepository;
 import roomescape.unit.fake.FakeThemeRepository;
+import roomescape.unit.fake.FakeWaitingRepository;
 
 class ReservationServiceTest {
 
@@ -36,6 +38,7 @@ class ReservationServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
     private MemberRepository memberRepository;
+    private WaitingRepository waitingRepository;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -44,8 +47,9 @@ class ReservationServiceTest {
         reservationTimeRepository = new FakeReservationTimeRepository(reservationRepository);
         themeRepository = new FakeThemeRepository();
         memberRepository = new FakeMemberRepository();
+        waitingRepository = new FakeWaitingRepository();
         reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
-                memberRepository);
+                memberRepository, waitingRepository);
     }
 
     @Test

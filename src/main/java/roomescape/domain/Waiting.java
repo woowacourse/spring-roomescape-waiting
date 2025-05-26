@@ -34,32 +34,30 @@ public class Waiting {
     private LocalDateTime createAt;
 
     public Waiting(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
-                   final Theme theme, final LocalDateTime createAt) {
-        validateNull(member, date, reservationTime, theme, createAt);
+                   final Theme theme) {
+        validateNull(member, date, reservationTime, theme);
         this.id = id;
         this.member = member;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
-        this.createAt = createAt;
+        this.createAt = LocalDateTime.now();
     }
 
     protected Waiting() {
     }
 
     public static Waiting of(final Long id, final Member member, final LocalDate date,
-                             final ReservationTime reservationTime, final Theme theme, final LocalDateTime createAt) {
-        return new Waiting(id, member, date, reservationTime, theme, createAt);
+                             final ReservationTime reservationTime, final Theme theme) {
+        return new Waiting(id, member, date, reservationTime, theme);
     }
 
     public static Waiting createWithoutId(final Member member, final LocalDate date,
-                                          final ReservationTime reservationTime, final Theme theme,
-                                          final LocalDateTime createAt) {
-        return new Waiting(null, member, date, reservationTime, theme, createAt);
+                                          final ReservationTime reservationTime, final Theme theme) {
+        return new Waiting(null, member, date, reservationTime, theme);
     }
 
-    private static void validateNull(Member member, LocalDate date, ReservationTime reservationTime, Theme theme,
-                                     LocalDateTime createAt) {
+    private static void validateNull(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
         if (member == null) {
             throw new ArgumentNullException("member");
         }
@@ -71,9 +69,6 @@ public class Waiting {
         }
         if (theme == null) {
             throw new ArgumentNullException("theme");
-        }
-        if (createAt == null) {
-            throw new ArgumentNullException("createAt");
         }
     }
 
