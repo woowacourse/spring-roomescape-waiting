@@ -14,7 +14,7 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class WaitingQueryService {
 
-    JpaWaitingRepository waitingRepository;
+    private final JpaWaitingRepository waitingRepository;
 
     public WaitingQueryService(JpaWaitingRepository jpaWaitingRepository) {
         this.waitingRepository = jpaWaitingRepository;
