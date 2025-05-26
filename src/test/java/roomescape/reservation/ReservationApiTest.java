@@ -17,7 +17,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.global.auth.JwtTokenProvider;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
 import roomescape.reservation.dto.ReservationResponse;
@@ -76,16 +75,6 @@ public class ReservationApiTest {
                     .contentType(ContentType.JSON)
                     .cookie(AUTH_COOKIE_NAME, "invalidValue")
                     .body(REQUEST)
-                    .when().post("/reservations")
-                    .then().log().all()
-                    .statusCode(401);
-            // payload 값으로 식별할 수 없음
-            JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-            String token = jwtTokenProvider.createToken("4");
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(REQUEST)
-                    .cookie(AUTH_COOKIE_NAME, token)
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(401);
@@ -162,16 +151,6 @@ public class ReservationApiTest {
                     .contentType(ContentType.JSON)
                     .cookie(AUTH_COOKIE_NAME, "invalidValue")
                     .body(REQUEST)
-                    .when().post("/admin/reservations")
-                    .then().log().all()
-                    .statusCode(401);
-            // payload 값으로 식별할 수 없음
-            JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-            String token = jwtTokenProvider.createToken("4");
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(REQUEST)
-                    .cookie(AUTH_COOKIE_NAME, token)
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(401);

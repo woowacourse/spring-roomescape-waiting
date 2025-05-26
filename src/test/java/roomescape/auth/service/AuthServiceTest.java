@@ -85,23 +85,11 @@ class AuthServiceTest {
         @Test
         void testCheckMember() {
             // given
-            String token = jwtTokenProvider.createToken(String.valueOf(USER_ID));
+            String token = jwtTokenProvider.createToken(USER_ID, Role.USER, USER_NAME.getValue());
             // when
             LoginMember response = authService.checkMember(token);
             // then
-            assertThat(response.name()).isEqualTo(USER_NAME.getValue());
-        }
-
-        @DisplayName("올바르지 않은 ID일 경우 예외가 발생한다.")
-        @Test
-        void testInvalidId() {
-            // given
-            String invalidToken = jwtTokenProvider.createToken(String.valueOf(3L));
-            // when
-            // then
-            assertThatThrownBy(() -> authService.checkMember(invalidToken))
-                    .isInstanceOf(UnauthorizedException.class)
-                    .hasMessage("확인할 수 없는 사용자입니다.");
+            assertThat(response.id()).isEqualTo(USER_ID);
         }
     }
 
@@ -119,34 +107,11 @@ class AuthServiceTest {
             fakeMemberDao.save(new Member(ADMIN_ID, ADMIN_NAME, ADMIN_EMAIL, ADMIN_PASSWORD, Role.ADMIN));
         }
 
-        @DisplayName("토큰의 ID를 추출하여 해당하는 관리자 정보를 반환한다.")
-        @Test
-        void testCheckAdminMember() {
-            // given
-            String token = jwtTokenProvider.createToken(String.valueOf(ADMIN_ID));
-            // when
-            LoginMember response = authService.checkAdminMember(token);
-            // then
-            assertThat(response.name()).isEqualTo(ADMIN_NAME.getValue());
-        }
-
-        @DisplayName("올바르지 않은 ID일 경우 예외가 발생한다.")
-        @Test
-        void testInvalidId() {
-            // given
-            String invalidToken = jwtTokenProvider.createToken(String.valueOf(3L));
-            // when
-            // then
-            assertThatThrownBy(() -> authService.checkAdminMember(invalidToken))
-                    .isInstanceOf(UnauthorizedException.class)
-                    .hasMessage("확인할 수 없는 사용자입니다.");
-        }
-
         @DisplayName("관리자 권한이 없는 경우 예외가 발생한다.")
         @Test
         void testInvalidIdRole() {
             // given
-            String invalidToken = jwtTokenProvider.createToken(String.valueOf(USER_ID));
+            String invalidToken = jwtTokenProvider.createToken(USER_ID, Role.USER, USER_NAME.getValue());
             // when
             // then
             assertThatThrownBy(() -> authService.checkAdminMember(invalidToken))

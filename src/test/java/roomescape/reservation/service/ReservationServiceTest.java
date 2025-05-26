@@ -171,9 +171,11 @@ class ReservationServiceTest {
     @Disabled
     void testGetMyReservations() {
         // given
-        LoginMember loginMember = new LoginMember(MEMBER.getId(), MEMBER.getName().getValue(),
-                MEMBER.getEmail().getValue(),
-                MEMBER.getRole().name());
+        LoginMember loginMember = new LoginMember(
+                MEMBER.getId(),
+                MEMBER.getRole(),
+                MEMBER.getName().getValue()
+        );
         // when
         List<MyReservationResponse> myReservations = reservationQueryService.getMyReservations(loginMember);
         // then

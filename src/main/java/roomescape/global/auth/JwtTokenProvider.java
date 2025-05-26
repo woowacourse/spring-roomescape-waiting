@@ -8,15 +8,20 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import org.springframework.stereotype.Component;
 import roomescape.global.exception.custom.UnauthorizedException;
+import roomescape.member.domain.Role;
 
 @Component
 public class JwtTokenProvider {
 
     private static final String secretKey = "secret";
     private static final long validityInMilliseconds = 300000;
+    private static final String ROLE_CLAIM = "role";
+    private static final String NAME_CLAIM = "name";
 
-    public String createToken(final String payload) {
-        final Claims claims = Jwts.claims().setSubject(payload);
+    public String createToken(final Long id, final Role role, final String name) {
+        final Claims claims = Jwts.claims().setSubject(id.toString());
+        claims.put(ROLE_CLAIM, role.name());
+        claims.put(NAME_CLAIM, name);
         final Date now = new Date();
         final Date validity = new Date(now.getTime() + validityInMilliseconds);
         return Jwts.builder()
@@ -28,23 +33,33 @@ public class JwtTokenProvider {
     }
 
     public long getId(final String token) {
-        final String payload = getPayload(token);
+        final Claims claims = getClaims(token);
         try {
-            return Long.parseLong(payload);
+            return Long.parseLong(claims.getSubject());
         } catch (ArithmeticException e) {
             throw new UnauthorizedException("올바르지 않은 토큰 정보입니다.");
         }
     }
 
-    private String getPayload(final String token) {
-        validateToken(token);
-        return Jwts.parser().setSigningKey(secretKey)
-                .parseClaimsJws(token)
-                .getBody()
-                .getSubject();
+    public Role getRole(final String token) {
+        final Claims claims = getClaims(token);
+        return Role.valueOf(claims.get(ROLE_CLAIM, String.class));
     }
 
-    private boolean validateToken(String token) {
+    public String getName(final String token) {
+        final Claims claims = getClaims(token);
+        return claims.get(NAME_CLAIM, String.class);
+    }
+
+    private Claims getClaims(final String token) {
+        validateToken(token);
+        return Jwts.parser()
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
+    public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parser().setSigningKey(secretKey).parseClaimsJws(token);
             return !claims.getBody().getExpiration().before(new Date());
