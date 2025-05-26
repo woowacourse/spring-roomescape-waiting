@@ -290,7 +290,7 @@ public class ReservationServiceTest {
 
         @Test
         @DisplayName("예약 대기 대상 시간이 현재를 기준으로 과거라면 예외가 발생한다")
-        void insertWaitWhenNotExistTheme() {
+        void insertWaitWhenDateAndTimeIsPast() {
             // given
             final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
             memberRepository.save(member);
@@ -674,7 +674,7 @@ public class ReservationServiceTest {
 
         // then
         assertAll(
-                ()->assertThat(notApproveWaitInfos).hasSize(1),
+                () -> assertThat(notApproveWaitInfos).hasSize(1),
                 () -> assertThat(notApproveWaitInfos.get(0).memberName()).isEqualTo("브라운"),
                 () -> assertThat(notApproveWaitInfos.get(0).themeName()).isEqualTo("테마"),
                 () -> assertThat(notApproveWaitInfos.get(0).date()).isEqualTo(MAX_DATE_FIXTURE),
