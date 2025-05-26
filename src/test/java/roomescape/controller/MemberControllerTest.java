@@ -44,6 +44,7 @@ class MemberControllerTest {
         mockMvc.perform(get("/members"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$[*].id").exists())
+                .andExpect(jsonPath("$[*].name").value("슬링키"))
                 .andExpect(jsonPath("$.length()").value(1));
     }
 
@@ -58,6 +59,7 @@ class MemberControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isCreated())
                 .andExpect(header().exists("Location"))
+                .andExpect(jsonPath("$.id").exists())
                 .andExpect(jsonPath("$.name").value("테스트유저"));
     }
 } 

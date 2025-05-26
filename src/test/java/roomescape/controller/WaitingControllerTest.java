@@ -94,8 +94,9 @@ class WaitingControllerTest {
         // when & then
         mockMvc.perform(get("/waiting"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id").exists())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].name").value("대기자B"))
+                .andExpect(jsonPath("$[0].theme").value("테스트 테마"));
     }
 
     @Test
@@ -109,6 +110,9 @@ class WaitingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request))
                         .cookie(new Cookie("token", fakeJwtToken)))
+                .andExpect(jsonPath("$.id").value(2L))
+                .andExpect(jsonPath("$.member.name").value("대기자B"))
+                .andExpect(jsonPath("$.theme.name").value("테스트 테마"))
                 .andExpect(status().isCreated());
     }
 

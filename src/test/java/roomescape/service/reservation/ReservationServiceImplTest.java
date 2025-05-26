@@ -24,10 +24,12 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.enums.Role;
 import roomescape.dto.admin.AdminReservationRequest;
+import roomescape.dto.reservation.MemberReservationResponse;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
+import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
 import roomescape.repository.member.MemberRepository;
@@ -214,7 +216,8 @@ class ReservationServiceImplTest {
         List<ReservationResponse> responses = reservationService.getAll();
 
         // then
-        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).member().name()).isEqualTo("일반유저");
+        assertThat(responses.get(0).theme().name()).isEqualTo("일반 테마");
     }
 
     @DisplayName("예약 삭제 시 대기자가 있으면 대기자를 예약으로 승격한다")
@@ -243,6 +246,31 @@ class ReservationServiceImplTest {
         verify(waitingRepository).deleteById(any());
     }
 
+    @DisplayName("예약 삭제 시 없는 예약 Id 일 경우 예외가 발생한다.")
+    @Test
+    void deleteById_notExistsId() {
+
+        // given
+        Long reservationId = 1L;
+        LocalDate date = LocalDate.now().plusDays(2);
+        ReservationTime time = new ReservationTime(1L, LocalTime.now());
+        Theme theme = new Theme(1L, "테마", "설명", "url");
+        Member member = new Member(1L, "유저", "이메일", "비밀번호", Role.USER);
+        Reservation reservation = new Reservation(reservationId, date, time, theme, member);
+        Long notExistId = 2L;
+        when(reservationRepository.findById(anyLong())).thenAnswer(invocation -> {
+            Long id = invocation.getArgument(0);
+            if (id.equals(reservationId)) {
+                return Optional.of(reservation);
+            }
+            return Optional.empty();
+        });
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.deleteById(notExistId)).isInstanceOf(
+                ReservationNotFoundException.class);
+    }
+
     @DisplayName("조건별 예약 조회가 가능하다")
     @Test
     void getReservationsByConditions() {
@@ -266,6 +294,9 @@ class ReservationServiceImplTest {
 
         // then
         assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).id()).isEqualTo(100L);
+        assertThat(responses.get(0).theme().id()).isEqualTo(3L);
+        assertThat(responses.get(0).member().name()).isEqualTo("일반유저");
     }
 
     @DisplayName("회원별 예약 조회가 가능하다")
@@ -285,10 +316,13 @@ class ReservationServiceImplTest {
         when(reservationRepository.findAllByMember(member)).thenReturn(List.of(reservation));
 
         // when
-        List<roomescape.dto.reservation.MemberReservationResponse> responses = reservationService.getReservationByMember(
+        List<MemberReservationResponse> responses = reservationService.getReservationByMember(
                 member);
 
         // then
         assertThat(responses).hasSize(1);
+        assertThat(responses).hasSize(1);
+        assertThat(responses.get(0).id()).isEqualTo(100L);
+        assertThat(responses.get(0).theme()).isEqualTo("일반 테마");
     }
 }

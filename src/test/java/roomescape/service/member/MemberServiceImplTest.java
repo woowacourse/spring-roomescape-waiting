@@ -48,7 +48,10 @@ class MemberServiceImplTest {
 
         // then
         assertThat(responses).hasSize(2);
+        assertThat(responses.get(0).id()).isEqualTo(1L);
         assertThat(responses.get(0).name()).isEqualTo("슬링키");
+        assertThat(responses.get(1).id()).isEqualTo(2L);
+        assertThat(responses.get(1).name()).isEqualTo("에드");
     }
 
     @Test

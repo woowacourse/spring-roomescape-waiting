@@ -67,7 +67,7 @@ class ReservationControllerTest {
     @BeforeEach
     void beforeEach() {
         reservationTime = new ReservationTime(LocalTime.of(10, 0));
-        theme = new Theme("이름", "설명", "썸네일");
+        theme = new Theme("무서운테마", "설명", "썸네일");
         member = new Member(null, "슬링키", "email", "password", Role.USER);
         reservation = new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member);
         waiter = new Member(null, "키링슬", "email", "password", Role.USER);
@@ -87,8 +87,8 @@ class ReservationControllerTest {
         // when & then
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id").exists())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].member.name").value("슬링키"));
     }
 
     @Test
@@ -102,6 +102,8 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(new Cookie("token", fakeJwtToken))
                         .content(objectMapper.writeValueAsString(request)))
+                .andExpect(jsonPath("$.theme.name").value("무서운테마"))
+                .andExpect(jsonPath("$.member.name").value("슬링키"))
                 .andExpect(status().isCreated());
     }
 
@@ -133,6 +135,15 @@ class ReservationControllerTest {
     }
 
     @Test
+    @DisplayName("[실패] 예약 삭제 테스트 - 없는 예약 삭제시 예외 발생")
+    void deleteReservationNotExist() throws Exception {
+        Long id = 100L;
+        // when & then
+        mockMvc.perform(delete("/reservations/" + id))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
     @DisplayName("내 예약 조회 - 인증 필요")
     void getMyReservations() throws Exception {
         //given
@@ -141,6 +152,9 @@ class ReservationControllerTest {
         mockMvc.perform(get("/reservations-mine")
                         .cookie(new Cookie("token", fakeJwtToken)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].theme").value("무서운테마"))
+                .andExpect(jsonPath("$[0].status").value("예약"));
+
     }
 } 

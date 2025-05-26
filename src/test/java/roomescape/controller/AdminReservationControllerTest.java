@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -59,7 +60,7 @@ class AdminReservationControllerTest {
     @BeforeEach
     void beforeEach() {
         reservationTime = new ReservationTime(LocalTime.of(10, 0));
-        theme = new Theme("이름", "설명", "썸네일");
+        theme = new Theme("테마이름", "설명", "썸네일");
         member = new Member(null, "슬링키", "email", "password", Role.ADMIN);
         reservation = new Reservation(LocalDate.now().plusDays(1), reservationTime, theme, member);
 
@@ -82,7 +83,9 @@ class AdminReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .cookie(new Cookie("token", faketoken))
                         .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(2L))
+                .andExpect(jsonPath("$.theme.name").value("테마이름"));
     }
 
     @Test
@@ -97,7 +100,10 @@ class AdminReservationControllerTest {
                         .param("memberId", member.getId().toString())
                         .param("dateFrom", LocalDate.now().toString())
                         .param("dateTo", LocalDate.now().plusDays(7).toString()))
-                .andExpect(status().isOk());
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].member.name").value("슬링키"))
+                .andExpect(jsonPath("$[0].theme.name").value("테마이름"));
     }
 
     @Test
@@ -128,5 +134,22 @@ class AdminReservationControllerTest {
                         .cookie(new Cookie("token", userToken))
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    @DisplayName("관리자 예약 전체 조회 테스트")
+    void getAllReservations() throws Exception {
+        // given
+        Member savedMember = memberRepository.findById(member.getId()).orElseThrow();
+        String faketoken = jwtTokenProvider.createToken(savedMember);
+        // when & then
+        mockMvc.perform(get("/reservations").cookie(new Cookie("token", faketoken)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].member.name").value("슬링키"))
+                .andExpect(jsonPath("$[0].theme").value("테마이름"))
+                .andExpect(jsonPath("$[0].date").value(LocalDate.now().plusDays(1).toString()))
+                .andExpect(jsonPath("$[0].time").value("10:00"));
     }
 } 

@@ -92,7 +92,8 @@ class ReservationTimeControllerTest {
 
         mockMvc.perform(get("/times"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id").exists());
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].startAt").value("10:00:00"));
     }
 
     @Test
@@ -137,6 +138,8 @@ class ReservationTimeControllerTest {
                         .param("date", reservation.getDate().toString())
                         .param("themeId", theme.getId().toString()))
                 .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].startAt").value("10:00:00"))
+                .andExpect(jsonPath("$[1].startAt").value("11:00:00"))
                 .andExpect(jsonPath("$[0].alreadyBooked").value(true))
                 .andExpect(jsonPath("$[1].alreadyBooked").value(false));
     }

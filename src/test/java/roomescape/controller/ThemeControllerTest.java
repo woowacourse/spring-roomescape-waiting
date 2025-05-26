@@ -73,8 +73,9 @@ class ThemeControllerTest {
         // when & then
         mockMvc.perform(get("/themes"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$[*].id").exists())
-                .andExpect(jsonPath("$.size()").value(1));
+                .andExpect(jsonPath("$[0].id").value(1L))
+                .andExpect(jsonPath("$[0].name").value("제목"))
+                .andExpect(jsonPath("$[0].description").value("설명"));
     }
 
     @Test
@@ -110,6 +111,8 @@ class ThemeControllerTest {
         // when & then
         mockMvc.perform(get("/themes/popular"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1));
+                .andExpect(jsonPath("$[0].name").value("이름"))
+                .andExpect(jsonPath("$[0].description").value("설명"))
+                .andExpect(jsonPath("$[0].thumbnail").value("썸네일"));
     }
 }
