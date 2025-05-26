@@ -6,6 +6,7 @@ import roomescape.member.domain.Member;
 import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
 import roomescape.schedule.domain.Schedule;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingWithRank;
 import roomescape.waiting.dto.request.WaitingCreateRequest;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -21,13 +22,17 @@ public class WaitingService {
     }
 
     public Waiting createWaiting(WaitingCreateRequest waitingCreateRequest, Schedule schedule, Member member) {
-        // todo 퍼사드 내에 있는 로직들 Service 로 내려야함....
         Waiting waiting = waitingCreateRequest.toWaiting(schedule, member);
         return waitingRepository.save(waiting);
     }
 
-    public List<MyReservationAndWaitingResponse> findWaitingWithRankByMemberId(Long memberId) {
-        return waitingRepository.findWaitingWithRankByMemberId(memberId).stream()
+    public List<MyReservationAndWaitingResponse> getMyReservationAndWaitingResponseByMemberId(Long memberId) {
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+        return convertMyReservationAndWaitingResponseTo(waitingWithRanks);
+    }
+
+    private List<MyReservationAndWaitingResponse> convertMyReservationAndWaitingResponseTo(List<WaitingWithRank> waitingWithRanks) {
+        return waitingWithRanks.stream()
                 .map(MyReservationAndWaitingResponse::fromWaitingAndStatus)
                 .toList();
     }
@@ -44,7 +49,7 @@ public class WaitingService {
         return waitingRepository.findAll();
     }
 
-    public Waiting findById(Long id) {
+    public Waiting getScheduleByWaitingId(Long id) {
         return waitingRepository.findById(id).orElseThrow(() -> new BadRequestException("존재하지 않는 일정입니다."));
     }
 
@@ -52,7 +57,7 @@ public class WaitingService {
         return waitingRepository.existsBySchedule(schedule);
     }
 
-    public Waiting findFirstWaitingBySchedule(Schedule schedule) {
+    public Waiting getFirstWaitingBySchedule(Schedule schedule) {
         return waitingRepository.findFirstWaiting(schedule).orElseThrow(() -> new BadRequestException("대기를 찾을 수 없습니다."));
     }
 }

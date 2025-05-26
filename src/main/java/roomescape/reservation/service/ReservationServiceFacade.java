@@ -109,7 +109,7 @@ public class ReservationServiceFacade {
 
     public List<MyReservationAndWaitingResponse> findAllMyWaitingWithRank(MemberPrincipal memberPrincipal) {
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
-        return waitingService.findWaitingWithRankByMemberId(member.getId());
+        return waitingService.getMyReservationAndWaitingResponseByMemberId(member.getId());
     }
 
     public List<MyReservationAndWaitingResponse> findAllMyReservation(MemberPrincipal memberPrincipal) {

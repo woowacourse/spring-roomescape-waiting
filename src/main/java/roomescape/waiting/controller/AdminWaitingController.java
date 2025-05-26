@@ -19,7 +19,7 @@ public class AdminWaitingController {
 
     @GetMapping
     public ResponseEntity<List<AdminWaitingResponse>> read() {
-        List<AdminWaitingResponse> adminWaitingResponses = waitingService.getAdminWaitingResponses();
+        List<AdminWaitingResponse> adminWaitingResponses = waitingService.getAdminWaitings();
         return ResponseEntity.ok(adminWaitingResponses);
     }
 

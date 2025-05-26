@@ -1,7 +1,6 @@
 package roomescape.theme.service;
 
 import org.springframework.stereotype.Service;
-import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
 
@@ -31,9 +30,5 @@ public class ThemeServiceFacade {
 
     public List<ThemeResponse> findLimitedThemesByPopularDesc() {
         return themeService.findLimitedThemesByPopularDesc();
-    }
-
-    public Theme getById(Long id) {
-        return themeService.getByThemeId(id);
     }
 }

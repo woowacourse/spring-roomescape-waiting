@@ -40,13 +40,15 @@ public class WaitingServiceFacade {
 
     public WaitingCreateResponse createWaiting(WaitingCreateRequest waitingCreateRequest, MemberPrincipal memberPrincipal) {
         ReservationTime reservationTime = reservationTimeService.getReservationTimeByTimeId(waitingCreateRequest.timeId());
-
         Theme theme = themeService.getByThemeId(waitingCreateRequest.themeId());
-
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
-
         Schedule schedule = scheduleService.getScheduleByDateAndTimeIdAndThemeId(waitingCreateRequest.date(), reservationTime.getId(), theme.getId());
+        validateConflict(member, schedule);
+        Waiting waiting = waitingService.createWaiting(waitingCreateRequest, schedule, member);
+        return WaitingCreateResponse.from(waiting);
+    }
 
+    private void validateConflict(Member member, Schedule schedule) {
         boolean isConflictReservation = reservationService.existsByMemberAndSchedule(member, schedule);
         if (isConflictReservation) {
             throw new ConflictException("내 예약에 대기 요청 할 수 없습니다.");
@@ -56,45 +58,49 @@ public class WaitingServiceFacade {
         if (isConflictWaiting) {
             throw new ConflictException("이미 대기 내역이 존재합니다.");
         }
-
-        Waiting waiting = waitingService.createWaiting(waitingCreateRequest, schedule, member);
-
-        return WaitingCreateResponse.from(waiting);
     }
 
-    public List<AdminWaitingResponse> getAdminWaitingResponses() {
+    public List<AdminWaitingResponse> getAdminWaitings() {
         return waitingService.findAll().stream()
                 .map(AdminWaitingResponse::from)
                 .toList();
     }
 
-    public void deleteWaiting(Long id) {
-        waitingService.deleteWaitingById(id);
+    public void deleteWaiting(Long waitingId) {
+        waitingService.deleteWaitingById(waitingId);
     }
 
-    public void acceptWaiting(Long id) {
-        // todo : !!!!!!!! 해당 작업 진행하면 된다 !!!!!!!!!!!!
-        // 수동
-        // 대기 승인이 들어온다.
-        // 해당 스케줄에 예약이 존재하는지 확인한다.
-        Waiting findWaiting = waitingService.findById(id);
-        Schedule schedule = findWaiting.getSchedule();
+    public void acceptWaiting(Long waitingId) {
+        Schedule schedule = getScheduleByWaitingId(waitingId);
+        validateScheduleConflictInReservation(schedule);
+        Waiting nextWaitingInfo = waitingService.getFirstWaitingBySchedule(schedule);
+        createReservationFromNextWaitingInfo(nextWaitingInfo);
+        waitingService.deleteWaitingById(nextWaitingInfo.getId());
+    }
 
-        boolean existsSchedule = reservationService.existsBySchedule(schedule);
-        // 예약이 존재하는 경우 대기 승인이 불가능하다.
-        if (existsSchedule) {
-            throw new ConflictException("예약이 존재합니다.");
-        }
-        // 예약이 존재하지 않는 경우 첫번째 대기자가 예약으로 변경된다.
-        Waiting nextWaitingInfo = waitingService.findFirstWaitingBySchedule(schedule);
+    private void createReservationFromNextWaitingInfo(Waiting nextWaitingInfo) {
         Schedule nextWaitingInfoSchedule = nextWaitingInfo.getSchedule();
         ReservationCreateRequest request = new ReservationCreateRequest(nextWaitingInfoSchedule.getDate(), nextWaitingInfoSchedule.getTime().getId(), nextWaitingInfoSchedule.getTheme().getId());
-        List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
+        List<ReservationTime> availableTimes = findAvailableTimes(request);
+        reservationService.createReservation(nextWaitingInfo.getMember(), availableTimes, nextWaitingInfoSchedule, request);
+    }
+
+    private List<ReservationTime> findAvailableTimes(ReservationCreateRequest request) {
+        return reservationTimeService.findByReservationDateAndThemeId(
                 request.date(),
                 request.themeId()
         );
-        reservationService.createReservation(nextWaitingInfo.getMember(), availableTimes, nextWaitingInfoSchedule, request);
+    }
 
-        waitingService.deleteWaitingById(nextWaitingInfo.getId());
+    private void validateScheduleConflictInReservation(Schedule schedule) {
+        boolean existsSchedule = reservationService.existsBySchedule(schedule);
+        if (existsSchedule) {
+            throw new ConflictException("예약이 존재합니다.");
+        }
+    }
+
+    private Schedule getScheduleByWaitingId(Long waitingId) {
+        Waiting findWaiting = waitingService.getScheduleByWaitingId(waitingId);
+        return findWaiting.getSchedule();
     }
 }
