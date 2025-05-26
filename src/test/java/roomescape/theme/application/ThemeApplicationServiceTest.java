@@ -20,17 +20,16 @@ import roomescape.member.infrastructure.MemberRepository;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.SignUpResponse;
 import roomescape.member.application.MemberApplicationService;
-import roomescape.member.domain.service.MemberDomainService;
-import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
+import roomescape.member.application.MemberDataService;
+import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.application.ReservationTimeApplicationService;
-import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
+import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.service.ThemeDomainService;
 import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
 import roomescape.theme.presentation.dto.response.ThemeResponse;
@@ -62,14 +61,14 @@ class ThemeApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationSlotDomainService reservationSlotDomainService = new ReservationSlotDomainService(reservationSlotRepository);
-        themeApplicationService = new ThemeApplicationService(new ThemeDomainService(themeRepository,
+        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(reservationSlotRepository);
+        themeApplicationService = new ThemeApplicationService(new ThemeDataService(themeRepository,
                 reservationSlotRepository),
-                reservationSlotDomainService);
-        MemberDomainService memberDomainService = new MemberDomainService(memberRepository);
-        memberApplicationService = new MemberApplicationService(memberDomainService, myPasswordEncoder);
-        reservationTimeApplicationService = new ReservationTimeApplicationService(new ReservationTimeDomainService(reservationTimeRepository,
-                reservationSlotDomainService), reservationSlotDomainService);
+                reservationSlotDataService);
+        MemberDataService memberDataService = new MemberDataService(memberRepository);
+        memberApplicationService = new MemberApplicationService(memberDataService, myPasswordEncoder);
+        reservationTimeApplicationService = new ReservationTimeApplicationService(new ReservationTimeDataService(reservationTimeRepository,
+                reservationSlotDataService), reservationSlotDataService);
     }
 
     @Test

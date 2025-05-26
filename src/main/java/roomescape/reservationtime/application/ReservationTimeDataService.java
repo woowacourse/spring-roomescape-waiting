@@ -1,9 +1,9 @@
-package roomescape.reservationtime.domain.service;
+package roomescape.reservationtime.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
-import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
+import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
@@ -11,15 +11,15 @@ import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsExceptio
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 
 @Service
-public class ReservationTimeDomainService {
+public class ReservationTimeDataService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationSlotDomainService reservationSlotDomainService;
+    private final ReservationSlotDataService reservationSlotDataService;
 
-    public ReservationTimeDomainService(final ReservationTimeRepository reservationTimeRepository,
-                                        final ReservationSlotDomainService reservationSlotDomainService) {
+    public ReservationTimeDataService(final ReservationTimeRepository reservationTimeRepository,
+                                      final ReservationSlotDataService reservationSlotDataService) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationSlotDomainService = reservationSlotDomainService;
+        this.reservationSlotDataService = reservationSlotDataService;
     }
 
     public List<ReservationTime> findAll() {
@@ -27,7 +27,7 @@ public class ReservationTimeDomainService {
     }
 
     public void delete(Long id) {
-        if (reservationSlotDomainService.existsByTimeId(id)) {
+        if (reservationSlotDataService.existsByTimeId(id)) {
             throw new ReservationTimeInUseException("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
         }
         reservationTimeRepository.deleteById(id);

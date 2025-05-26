@@ -1,4 +1,4 @@
-package roomescape.member.domain.service;
+package roomescape.member.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -8,11 +8,11 @@ import roomescape.member.exception.MemberNotFoundException;
 import roomescape.member.infrastructure.MemberRepository;
 
 @Service
-public class MemberDomainService {
+public class MemberDataService {
 
     private final MemberRepository memberRepository;
 
-    public MemberDomainService(final MemberRepository memberRepository) {
+    public MemberDataService(final MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 

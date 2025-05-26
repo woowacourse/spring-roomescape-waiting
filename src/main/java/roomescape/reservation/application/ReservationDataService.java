@@ -1,4 +1,4 @@
-package roomescape.reservation.domain.service;
+package roomescape.reservation.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -11,11 +11,11 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.exception.ReservationOwnerException;
 
 @Service
-public class ReservationDomainService {
+public class ReservationDataService {
 
     private final ReservationRepository reservationRepository;
 
-    public ReservationDomainService(final ReservationRepository reservationRepository) {
+    public ReservationDataService(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 

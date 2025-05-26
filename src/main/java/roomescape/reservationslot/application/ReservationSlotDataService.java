@@ -1,4 +1,4 @@
-package roomescape.reservationslot.domain.service;
+package roomescape.reservationslot.application;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,11 +14,11 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 import roomescape.theme.domain.Theme;
 
 @Service
-public class ReservationSlotDomainService {
+public class ReservationSlotDataService {
 
     private final ReservationSlotRepository reservationSlotRepository;
 
-    public ReservationSlotDomainService(final ReservationSlotRepository reservationSlotRepository) {
+    public ReservationSlotDataService(final ReservationSlotRepository reservationSlotRepository) {
         this.reservationSlotRepository = reservationSlotRepository;
     }
 

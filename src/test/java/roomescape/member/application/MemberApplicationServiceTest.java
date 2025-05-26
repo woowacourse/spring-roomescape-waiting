@@ -12,7 +12,6 @@ import org.springframework.context.annotation.Import;
 import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.common.config.TestConfig;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.service.MemberDomainService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.MemberResponse;
@@ -20,7 +19,7 @@ import roomescape.member.presentation.dto.response.SignUpResponse;
 
 @DataJpaTest
 @Import(TestConfig.class)
-public class MemberDomainServiceTest {
+public class MemberApplicationServiceTest {
 
     private MemberApplicationService memberApplicationService;
 
@@ -32,7 +31,7 @@ public class MemberDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberApplicationService = new MemberApplicationService(new MemberDomainService(memberRepository),
+        memberApplicationService = new MemberApplicationService(new MemberDataService(memberRepository),
                 myPasswordEncoder);
     }
 

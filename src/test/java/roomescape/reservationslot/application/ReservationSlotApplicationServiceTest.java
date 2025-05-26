@@ -15,24 +15,23 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
-import roomescape.member.domain.service.MemberDomainService;
+import roomescape.member.application.MemberDataService;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationslot.presentation.dto.response.ReservationSlotResponse;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
+import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.theme.domain.service.ThemeDomainService;
-import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.theme.application.ThemeDataService;
+import roomescape.reservation.application.ReservationDataService;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class ReservationSlotDomainServiceTest {
+class ReservationSlotApplicationServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeFutureDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
@@ -60,13 +59,13 @@ class ReservationSlotDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationSlotDomainService reservationSlotDomainService = new ReservationSlotDomainService(reservationSlotRepository);
+        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(reservationSlotRepository);
         reservationSlotApplicationService = new ReservationSlotApplicationService(
-                reservationSlotDomainService,
-                new ReservationTimeDomainService(reservationTimeRepository, reservationSlotDomainService),
-                new ThemeDomainService(themeRepository, reservationSlotRepository),
-                new MemberDomainService(memberRepository),
-                new ReservationDomainService(reservationRepository)
+                reservationSlotDataService,
+                new ReservationTimeDataService(reservationTimeRepository, reservationSlotDataService),
+                new ThemeDataService(themeRepository, reservationSlotRepository),
+                new MemberDataService(memberRepository),
+                new ReservationDataService(reservationRepository)
         );
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));

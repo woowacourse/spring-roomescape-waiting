@@ -15,7 +15,7 @@ import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.common.security.infrastructure.CookieManager;
 import roomescape.common.security.application.AuthService;
 import roomescape.member.domain.MemberRole;
-import roomescape.member.domain.service.MemberDomainService;
+import roomescape.member.application.MemberDataService;
 
 @RestController
 public class AuthController {
@@ -23,13 +23,13 @@ public class AuthController {
     private static final String TOKEN = "token";
 
     private final AuthService authService;
-    private final MemberDomainService memberDomainService;
+    private final MemberDataService memberDataService;
     private final CookieManager cookieManager;
 
-    public AuthController(final AuthService authService, final MemberDomainService memberDomainService,
+    public AuthController(final AuthService authService, final MemberDataService memberDataService,
                           final CookieManager cookieManager) {
         this.authService = authService;
-        this.memberDomainService = memberDomainService;
+        this.memberDataService = memberDataService;
         this.cookieManager = cookieManager;
     }
 
@@ -44,7 +44,7 @@ public class AuthController {
     @RequireRole(MemberRole.REGULAR)
     @GetMapping("/login/check")
     public ResponseEntity<CheckLoginResponse> checkLogin(final MemberInfo memberInfo) {
-        return ResponseEntity.ok(CheckLoginResponse.from(memberDomainService.getMember(memberInfo.id())));
+        return ResponseEntity.ok(CheckLoginResponse.from(memberDataService.getMember(memberInfo.id())));
     }
 
     @RequireRole(MemberRole.REGULAR)

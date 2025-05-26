@@ -1,4 +1,4 @@
-package roomescape.theme.domain.service;
+package roomescape.theme.application;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -13,15 +13,15 @@ import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
 
 @Service
-public class ThemeDomainService {
+public class ThemeDataService {
 
     private static final int DAYS_TO_SUBTRACT = 1;
 
     private final ThemeRepository themeRepository;
     private final ReservationSlotRepository reservationSlotRepository;
 
-    public ThemeDomainService(final ThemeRepository themeRepository,
-                              final ReservationSlotRepository reservationSlotRepository) {
+    public ThemeDataService(final ThemeRepository themeRepository,
+                            final ReservationSlotRepository reservationSlotRepository) {
         this.themeRepository = themeRepository;
         this.reservationSlotRepository = reservationSlotRepository;
     }

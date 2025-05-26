@@ -3,9 +3,8 @@ package roomescape.reservationtime.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
+import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
@@ -13,32 +12,32 @@ import roomescape.reservationtime.presentation.dto.response.ReservationTimeRespo
 @Service
 public class ReservationTimeApplicationService {
 
-    private final ReservationTimeDomainService reservationTimeDomainService;
-    private final ReservationSlotDomainService reservationSlotDomainService;
+    private final ReservationTimeDataService reservationTimeDataService;
+    private final ReservationSlotDataService reservationSlotDataService;
 
-    public ReservationTimeApplicationService(final ReservationTimeDomainService reservationTimeDomainService,
-                                             final ReservationSlotDomainService reservationSlotDomainService) {
-        this.reservationTimeDomainService = reservationTimeDomainService;
-        this.reservationSlotDomainService = reservationSlotDomainService;
+    public ReservationTimeApplicationService(final ReservationTimeDataService reservationTimeDataService,
+                                             final ReservationSlotDataService reservationSlotDataService) {
+        this.reservationTimeDataService = reservationTimeDataService;
+        this.reservationSlotDataService = reservationSlotDataService;
     }
 
     public List<ReservationTimeResponse> getReservationTimes() {
-        return reservationTimeDomainService.findAll().stream()
+        return reservationTimeDataService.findAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList();
     }
 
     public void delete(Long id) {
-        reservationTimeDomainService.delete(id);
+        reservationTimeDataService.delete(id);
     }
 
     public ReservationTimeResponse create(final ReservationTimeCreateRequest request) {
-        ReservationTime newReservationTime = reservationTimeDomainService.save(request.toReservationTime());
+        ReservationTime newReservationTime = reservationTimeDataService.save(request.toReservationTime());
         return ReservationTimeResponse.from(newReservationTime);
     }
 
     public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date,
                                                                                final Long themeId) {
-        return reservationSlotDomainService.findBookedTimesByDateAndThemeId(date, themeId);
+        return reservationSlotDataService.findBookedTimesByDateAndThemeId(date, themeId);
     }
 }

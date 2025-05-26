@@ -14,14 +14,13 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservationslot.domain.service.ReservationSlotDomainService;
+import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.service.MemberDomainService;
+import roomescape.member.application.MemberDataService;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
-import roomescape.reservationtime.domain.service.ReservationTimeDomainService;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
@@ -29,13 +28,13 @@ import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreate
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.service.ThemeDomainService;
-import roomescape.reservation.domain.service.ReservationDomainService;
+import roomescape.theme.application.ThemeDataService;
+import roomescape.reservation.application.ReservationDataService;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class ReservationTimeDomainServiceTest {
+class ReservationTimeApplicationServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeFutureDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
@@ -63,18 +62,18 @@ class ReservationTimeDomainServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationSlotDomainService reservationSlotDomainService = new ReservationSlotDomainService(reservationSlotRepository);
-        ReservationTimeDomainService reservationTimeDomainService = new ReservationTimeDomainService(
-                reservationTimeRepository, reservationSlotDomainService);
-        reservationTimeApplicationService = new ReservationTimeApplicationService(reservationTimeDomainService,
-                reservationSlotDomainService);
-        ThemeDomainService themeDomainService = new ThemeDomainService(themeRepository, reservationSlotRepository);
-        MemberDomainService memberDomainService = new MemberDomainService(memberRepository);
+        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(reservationSlotRepository);
+        ReservationTimeDataService reservationTimeDataService = new ReservationTimeDataService(
+                reservationTimeRepository, reservationSlotDataService);
+        reservationTimeApplicationService = new ReservationTimeApplicationService(reservationTimeDataService,
+                reservationSlotDataService);
+        ThemeDataService themeDataService = new ThemeDataService(themeRepository, reservationSlotRepository);
+        MemberDataService memberDataService = new MemberDataService(memberRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
-        ReservationDomainService slotReservationDomainService = new ReservationDomainService(reservationRepository);
-        reservationSlotApplicationService = new ReservationSlotApplicationService(reservationSlotDomainService,
-                reservationTimeDomainService, themeDomainService, memberDomainService, slotReservationDomainService);
+        ReservationDataService slotReservationDataService = new ReservationDataService(reservationRepository);
+        reservationSlotApplicationService = new ReservationSlotApplicationService(reservationSlotDataService,
+                reservationTimeDataService, themeDataService, memberDataService, slotReservationDataService);
     }
 
     @Test
