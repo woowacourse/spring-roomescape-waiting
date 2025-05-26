@@ -75,7 +75,6 @@ public class ReservationService {
         return reservationRepository.save(new Reservation(member, date, time, theme));
     }
 
-
     private void validateDateTimeAfterNow(final LocalDate date, final ReservationTime time) {
         LocalDateTime now = LocalDateTime.now();
 
@@ -85,7 +84,6 @@ public class ReservationService {
         }
     }
 
-    @Transactional(readOnly = true)
     private void validateDuplicateReservation(
             final LocalDate date,
             final long timeId,

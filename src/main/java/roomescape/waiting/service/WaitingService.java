@@ -5,6 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.InvalidInputException;
 import roomescape.exception.custom.NotFoundException;
 import roomescape.member.entity.Member;
+import roomescape.reservation.controller.dto.response.MyReservationAndWaitingResponse;
 import roomescape.reservationTime.entity.ReservationTime;
 import roomescape.reservationTime.repository.JpaReservationTimeRepository;
 import roomescape.theme.entity.Theme;
@@ -67,7 +68,7 @@ public class WaitingService {
         }
     }
 
-    public Optional<Waiting> removeWaiting(
+    public Optional<Waiting> removeFirstWaiting(
             final Theme theme,
             final LocalDate date,
             final ReservationTime time
@@ -78,5 +79,13 @@ public class WaitingService {
                     jpaWaitingRepository.delete(waiting);
                     return waiting;
                 });
+    }
+
+    @Transactional
+    public void removeWaiting(final long id) {
+        if (!jpaWaitingRepository.existsById(id)) {
+            throw new NotFoundException("waiting");
+        }
+        jpaWaitingRepository.deleteById(id);
     }
 }

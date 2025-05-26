@@ -48,7 +48,7 @@ public class WaitingFacadeService {
     public void removeReservation(final long id) {
         Reservation reservation = reservationService.removeReservation(id);
 
-        Optional<Waiting> waiting = waitingService.removeWaiting(
+        Optional<Waiting> waiting = waitingService.removeFirstWaiting(
                 reservation.getTheme(),
                 reservation.getDate(),
                 reservation.getTime()

@@ -9,7 +9,7 @@ import roomescape.waiting.entity.Waiting;
 import roomescape.waiting.entity.WaitingWithRank;
 
 public record MyReservationAndWaitingResponse(
-    Long reservationId,
+    Long id,
     String theme,
     @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
     @JsonFormat(pattern = "HH:mm") LocalTime time,
