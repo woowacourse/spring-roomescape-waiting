@@ -62,6 +62,9 @@ public class WaitingService {
     }
 
     public void cancelWaiting(Long waitingId) {
-        // 대기 취소
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다."));
+        waiting.cancel();
+        waitingRepository.save(waiting);
     }
 }

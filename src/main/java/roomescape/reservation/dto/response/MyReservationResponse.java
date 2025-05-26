@@ -4,7 +4,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.waiting.domain.Waiting;
 
 public record MyReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         String date,
         String time,

@@ -42,4 +42,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     public long countByDateAndThemeIdAndTimeIdAndStatus(LocalDate date, Long themeId, Long timeId, WaitingStatus status) {
         return jpaWaitingRepository.countByDateAndTheme_IdAndTime_IdAndStatus(date, themeId, timeId, status);
     }
+
+    @Override
+    public java.util.Optional<Waiting> findById(Long id) {
+        return jpaWaitingRepository.findById(id);
+    }
 }

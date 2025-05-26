@@ -3,6 +3,7 @@ package roomescape.waiting.domain;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
@@ -23,4 +24,6 @@ public interface WaitingRepository {
             Long timeId,
             WaitingStatus status
     );
+
+    Optional<Waiting> findById(Long id);
 }
