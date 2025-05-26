@@ -31,4 +31,3 @@ public interface ReservationRepository {
 
     List<Reservation> findByMemberId(Long memberId);
 }
-
