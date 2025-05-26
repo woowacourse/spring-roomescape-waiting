@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 
@@ -21,8 +22,10 @@ public class FakeMemberRepository implements MemberRepository {
     public Member save(Member member) {
         long currentIndex = index.incrementAndGet();
 
-        members.add(member.assignId(currentIndex));
-        return member.assignId(currentIndex);
+        ReflectionTestUtils.setField(member, "id", currentIndex);
+
+        members.add(member);
+        return member;
     }
 
     @Override

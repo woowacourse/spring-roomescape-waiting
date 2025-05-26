@@ -39,8 +39,7 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, WaitingStatus status, LocalDateTime createdAt) {
-        this.id = id;
+    public Waiting(Member member, LocalDate date, ReservationTime time, Theme theme, WaitingStatus status, LocalDateTime createdAt) {
         this.member = member;
         this.date = date;
         this.time = time;
@@ -49,12 +48,8 @@ public class Waiting {
         this.createdAt = createdAt;
     }
 
-    public static Waiting createWithId(Long id, Member member, LocalDate date, ReservationTime time, Theme theme, WaitingStatus status, LocalDateTime createdAt) {
-        return new Waiting(id, member, date, time, theme, status, createdAt);
-    }
-
     public static Waiting createWithoutId(Member member, LocalDate date, ReservationTime time, Theme theme, WaitingStatus status, LocalDateTime createdAt) {
-        return new Waiting(null, member, date, time, theme, status, createdAt);
+        return new Waiting(member, date, time, theme, status, createdAt);
     }
 
     public Long getId() {

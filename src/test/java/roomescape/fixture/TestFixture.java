@@ -1,6 +1,7 @@
 package roomescape.fixture;
 
 import java.time.LocalTime;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -21,15 +22,19 @@ public class TestFixture {
     }
 
     public static ReservationTime createTime(int hour, int min) {
-        return ReservationTime.createWithId(1L, LocalTime.of(hour, min));
+        return ReservationTime.createWithoutId(LocalTime.of(hour, min));
     }
 
     public static Theme createTheme(String name, String description, String thumbnail) {
-        return Theme.createWithId(1L, name, description, thumbnail);
+        Theme theme = Theme.createWithoutId(name, description, thumbnail);
+        ReflectionTestUtils.setField(theme, "id", 1L);
+        return theme;
     }
 
     public static Member createMember(String name, String email, String password) {
-        return Member.createWithId(1L, name, email, password, Role.USER);
+        Member member = Member.createWithoutId(name, email, password, Role.USER);
+        ReflectionTestUtils.setField(member, "id", 1L);
+        return member;
     }
 
 }

@@ -28,8 +28,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private Role role;
 
-    private Member(Long id, String name, String email, String password, Role role) {
-        this.id = id;
+    private Member(String name, String email, String password, Role role) {
         this.name = new MemberName(name);
         this.email = email;
         this.password = password;
@@ -40,16 +39,8 @@ public class Member {
 
     }
 
-    public static Member createWithId(Long id, String name, String email, String password, Role role) {
-        return new Member(id, name, email, password, role);
-    }
-
     public static Member createWithoutId(String name, String email, String password, Role role) {
-        return new Member(null, name, email, password, role);
-    }
-
-    public Member assignId(Long id) {
-        return new Member(id, name.getName(), email, password, role);
+        return new Member(name, email, password, role);
     }
 
     public String getName() {

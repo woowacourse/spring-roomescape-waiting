@@ -18,6 +18,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.common.util.DateTime;
+import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Role;
@@ -85,15 +86,15 @@ class ReservationServiceMockTest {
         // given
         when(reservationTimeRepository.findById(1L))
                 .thenReturn(
-                        Optional.of(ReservationTime.createWithId(1L, LocalTime.of(10, 0)))
+                        Optional.of(ReservationTime.createWithoutId(LocalTime.of(10, 0)))
                 );
         when(themeRepository.findById(1L))
                 .thenReturn(Optional.of(
-                        Theme.createWithId(1L, "테마", "설명", "썸넬")
+                        TestFixture.createTheme("테마", "설명", "썸넬")
                 ));
         when(memberRepository.findById(1L))
                 .thenReturn(Optional.of(
-                        Member.createWithId(1L, "멤버", "a", "1234", Role.USER)
+                        Member.createWithoutId("멤버", "a", "1234", Role.USER)
                 ));
         when(dateTime.now())
                 .thenReturn(LocalDateTime.of(2024, 9, 6, 19, 23));
@@ -186,12 +187,12 @@ class ReservationServiceMockTest {
     }
 
     private List<Reservation> createReservations() {
-        Theme theme1 = Theme.createWithId(1L, "테스트1", "설명", "localhost:8080");
-        Theme theme2 = Theme.createWithId(2L, "테스트2", "설명", "localhost:8080");
+        Theme theme1 = Theme.createWithoutId("테스트1", "설명", "localhost:8080");
+        Theme theme2 = Theme.createWithoutId("테스트2", "설명", "localhost:8080");
 
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
 
-        Member member = Member.createWithId(1L, "홍길동", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("홍길동", "a", "a", Role.USER);
 
         Reservation reservation1 = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
                 LocalDate.of(2024, 10, 6),
@@ -207,9 +208,9 @@ class ReservationServiceMockTest {
     }
 
     private List<Waiting> createWaitings() {
-        Theme theme1 = Theme.createWithId(1L, "테스트1", "설명", "localhost:8080");
+        Theme theme1 = Theme.createWithoutId("테스트1", "설명", "localhost:8080");
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
-        Member member = Member.createWithId(1L, "홍길동", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("홍길동", "a", "a", Role.USER);
 
         Waiting waiting = Waiting.createWithoutId(
                 member,

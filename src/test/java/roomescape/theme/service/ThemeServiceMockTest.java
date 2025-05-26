@@ -55,8 +55,8 @@ class ThemeServiceMockTest {
         // given
         when(themeRepository.findPopularThemes(any(ReservationPeriod.class), eq(10)))
                 .thenReturn(List.of(
-                        Theme.createWithId(1L, "테스트1", "설명", "썸네일"),
-                        Theme.createWithId(2L, "테스트3", "설명", "썸네일")
+                        Theme.createWithoutId("테스트1", "설명", "썸네일"),
+                        Theme.createWithoutId("테스트3", "설명", "썸네일")
                 ));
         when(dateTime.nowDate())
                 .thenReturn(LocalDate.now());

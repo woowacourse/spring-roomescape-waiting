@@ -35,10 +35,6 @@ public class ReservationTime {
         return new ReservationTime(Objects.requireNonNull(id), startAt);
     }
 
-    public ReservationTime assignId(final Long id) {
-        return new ReservationTime(Objects.requireNonNull(id), startAt);
-    }
-
     public boolean isSameTime(final ReservationTime time) {
         return startAt.equals(time.startAt);
     }

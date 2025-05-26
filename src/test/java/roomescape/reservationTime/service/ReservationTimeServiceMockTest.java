@@ -2,8 +2,10 @@ package roomescape.reservationTime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.mockito.InjectMocks;
@@ -49,21 +51,23 @@ class ReservationTimeServiceMockTest {
     @Test
     void time_condition_test() {
         // given
-        LocalDate localDate = LocalDate.of(2024, 10, 6);
-        Member member1 = Member.createWithId(1L, "a", "a", "a", Role.USER);
+        LocalDate localDate = LocalDate.of(2025, 10, 6);
+        Member member1 = Member.createWithoutId("a", "a", "a", Role.USER);
         Long themeId = 1L;
         Mockito.when(reservationRepository.findByDateAndThemeId(localDate, themeId))
                 .thenReturn(
                         List.of(
-                                Reservation.createWithId(1L, member1, localDate,
-                                        ReservationTime.createWithId(1L, LocalTime.of(10, 0)),
-                                        Theme.createWithId(1L, "a", "a", "a"))
+                                Reservation.createWithoutId(
+                                        LocalDateTime.of(2025, 9, 25, 10, 0),
+                                        member1, localDate,
+                                        ReservationTime.createWithoutId(LocalTime.of(10, 0)),
+                                        Theme.createWithoutId("a", "a", "a"))
                         )
                 );
         Mockito.when(reservationTimeRepository.findAll())
                 .thenReturn(
                         List.of(
-                                ReservationTime.createWithId(1L, LocalTime.of(10, 0)),
+                                ReservationTime.createWithoutId(LocalTime.of(10, 0)),
                                 ReservationTime.createWithId(2L, LocalTime.of(11, 0))
                         )
                 );
@@ -71,9 +75,11 @@ class ReservationTimeServiceMockTest {
         List<TimeConditionResponse> responses = reservationTimeService.getTimesWithCondition(
                 new TimeConditionRequest(localDate, themeId));
         // then
-        assertThat(responses).containsExactlyInAnyOrder(
-                new TimeConditionResponse(1L, LocalTime.of(10, 0), true),
-                new TimeConditionResponse(2L, LocalTime.of(11, 0), false)
-        );
+        assertThat(responses)
+                .extracting(TimeConditionResponse::startAt, TimeConditionResponse::alreadyBooked)
+                .containsExactlyInAnyOrder(
+                        tuple(LocalTime.of(10, 0), true),
+                        tuple(LocalTime.of(11, 0), false)
+                );
     }
 }

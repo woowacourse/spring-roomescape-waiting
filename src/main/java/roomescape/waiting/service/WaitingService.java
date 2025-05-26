@@ -57,25 +57,11 @@ public class WaitingService {
                 WaitingStatus.PENDING,
                 LocalDateTime.now()
         );
-
         Waiting savedWaiting = waitingRepository.save(waiting);
-//        long rank = calculateWaitingRank(savedWaiting);
-
         return WaitingResponse.from(savedWaiting);
     }
 
-//    private long calculateWaitingRank(Waiting waiting) {
-//        return 0;
-//    }
-
-    public void confirmWaiting(Long waitingId) {
-        // 1. 대기 정보 조회
-        // 2. 예약 생성
-        // 3. 대기 상태 업데이트
-    }
-
     public void cancelWaiting(Long waitingId) {
-        // 1. 대기 취소
-        // 2. 다음 대기자에게 알림
+        // 대기 취소
     }
 }

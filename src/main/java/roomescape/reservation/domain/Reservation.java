@@ -34,10 +34,9 @@ public class Reservation {
     protected Reservation() {
     }
 
-    private Reservation(final Long id, final Member member, final LocalDate date,
+    private Reservation(final Member member, final LocalDate date,
                         final ReservationTime time, final Theme theme
     ) {
-        this.id = id;
         this.member = member;
         this.date = date;
         this.time = time;
@@ -49,7 +48,7 @@ public class Reservation {
                                               final ReservationTime time, final Theme theme
     ) {
         validateReservationDateTime(now, reservationDate, time);
-        return new Reservation(null, member, reservationDate, time, theme);
+        return new Reservation(member, reservationDate, time, theme);
     }
 
     private static void validateReservationDateTime(final LocalDateTime now, final LocalDate reservationDate,
@@ -63,16 +62,6 @@ public class Reservation {
         if (nowDate.isEqual(reservationDate) && time.isBeforeTime(nowTime)) {
             throw new IllegalArgumentException("예약할 수 없는 날짜와 시간입니다.");
         }
-    }
-
-    public static Reservation createWithId(final Long id, final Member member, final LocalDate date,
-                                           final ReservationTime time, final Theme theme
-    ) {
-        return new Reservation(Objects.requireNonNull(id), member, date, time, theme);
-    }
-
-    public Reservation assignId(final Long id) {
-        return new Reservation(Objects.requireNonNull(id), member, date, time, theme);
     }
 
     public boolean isSameTime(final ReservationTime time) {

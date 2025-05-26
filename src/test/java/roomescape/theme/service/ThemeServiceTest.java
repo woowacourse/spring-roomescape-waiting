@@ -42,10 +42,10 @@ public class ThemeServiceTest {
 
     @BeforeEach
     void beforeEach() {
-        Theme theme1 = Theme.createWithId(1L, "테스트1", "설명", "썸네일");
-        Theme theme2 = Theme.createWithId(2L, "테스트2", "설명", "썸네일");
-        Theme theme3 = Theme.createWithId(3L, "테스트3", "설명", "썸네일");
-        Member member = Member.createWithId(1L, "a", "a@com", "a", Role.USER);
+        Theme theme1 = Theme.createWithoutId("테스트1", "설명", "썸네일");
+        Theme theme2 = Theme.createWithoutId("테스트2", "설명", "썸네일");
+        Theme theme3 = Theme.createWithoutId("테스트3", "설명", "썸네일");
+        Member member = Member.createWithoutId("a", "a@com", "a", Role.USER);
         reservationRepository.save(
                 Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2025, 12, 5),
                         null, theme1));

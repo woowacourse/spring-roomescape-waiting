@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 
@@ -66,8 +67,10 @@ public class FakeReservationRepository implements ReservationRepository {
     public Reservation save(Reservation reservation) {
         long currentIndex = index.incrementAndGet();
 
-        reservations.add(reservation.assignId(currentIndex));
-        return reservation.assignId(currentIndex);
+        ReflectionTestUtils.setField(reservation, "id", currentIndex);
+
+        reservations.add(reservation);
+        return reservation;
     }
 
     @Override

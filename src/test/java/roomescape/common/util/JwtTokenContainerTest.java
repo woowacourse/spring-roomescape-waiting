@@ -5,11 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 import java.time.LocalDateTime;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.common.exception.LoginException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
+
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 class JwtTokenContainerTest {
 
@@ -20,7 +22,8 @@ class JwtTokenContainerTest {
     @DisplayName("정상적인 토큰을 반환한다.")
     void createJwtToken_test() {
         // given
-        Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("a", "a", "a", Role.USER);
+        ReflectionTestUtils.setField(member, "id", 1L);
         LocalDateTime dateTime = LocalDateTime.now();
         // when
         String jwtToken = jwtTokenContainer.createJwtToken(member, dateTime);
@@ -43,7 +46,8 @@ class JwtTokenContainerTest {
     void validateToken_expiration_exception() {
         // given
         LocalDateTime dateTime = LocalDateTime.of(2025, 5, 10, 9, 10);
-        Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("a", "a", "a", Role.USER);
+        ReflectionTestUtils.setField(member, "id", 1L);
         String jwtToken = jwtTokenContainer.createJwtToken(member, dateTime);
         // when
         assertThatThrownBy(() -> jwtTokenContainer.validateToken(jwtToken))
@@ -55,7 +59,8 @@ class JwtTokenContainerTest {
     void validateToken_test() {
         // given
         LocalDateTime dateTime = LocalDateTime.now();
-        Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("a", "a", "a", Role.USER);
+        ReflectionTestUtils.setField(member, "id", 1L);
         String jwtToken = jwtTokenContainer.createJwtToken(member, dateTime);
         // when & then
         assertDoesNotThrow(() -> jwtTokenContainer.validateToken(jwtToken));
@@ -66,7 +71,8 @@ class JwtTokenContainerTest {
     void getMemberId_test() {
         // given
         LocalDateTime dateTime = LocalDateTime.now();
-        Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("a", "a", "a", Role.USER);
+        ReflectionTestUtils.setField(member, "id", 1L);
         String jwtToken = jwtTokenContainer.createJwtToken(member, dateTime);
         // when
         Long memberId = jwtTokenContainer.getMemberId(jwtToken);
@@ -89,7 +95,8 @@ class JwtTokenContainerTest {
     void getMemberRole_test() {
         // given
         LocalDateTime dateTime = LocalDateTime.now();
-        Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
+        Member member = Member.createWithoutId("a", "a", "a", Role.USER);
+        ReflectionTestUtils.setField(member, "id", 1L);
         String jwtToken = jwtTokenContainer.createJwtToken(member, dateTime);
         // when
         Role memberRole = jwtTokenContainer.getMemberRole(jwtToken);
