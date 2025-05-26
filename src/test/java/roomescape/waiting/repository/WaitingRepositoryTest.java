@@ -129,4 +129,35 @@ class WaitingRepositoryTest {
             );
         }
     }
+
+    @Nested
+    @DisplayName("id로 waiting 객체 존재 여부 판단")
+    class existsById {
+
+        @DisplayName("존재하는 id로 요청했을 때 true를 반환한다")
+        @Test
+        void existsById_true_byExistingId() {
+            // given
+            Reservation reservation = createReservationDefault();
+            Reservation savedReservation = reservationRepository.save(reservation);
+
+            Waiting waiting = waitingRepository.save(WaitingFixture.createByReservation(savedReservation));
+
+            // when
+            boolean actual = waitingRepository.existsById(waiting.getId());
+            // then
+            Assertions.assertThat(actual).isTrue();
+        }
+
+        @DisplayName("존재하지 않는 id로 요청했을 때 false를 반환한다")
+        @Test
+        void existsById_false_byNonExistingId() {
+            // given
+
+            // when
+            boolean actual = waitingRepository.existsById(Long.MAX_VALUE);
+            // then
+            Assertions.assertThat(actual).isFalse();
+        }
+    }
 }

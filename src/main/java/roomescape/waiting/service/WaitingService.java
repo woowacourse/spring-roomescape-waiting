@@ -52,7 +52,7 @@ public class WaitingService {
     }
 
     public void delete(Long waitingId) {
-        findByIdOrThrow(waitingId);
+        validateExistsById(waitingId);
         waitingRepository.deleteById(waitingId);
     }
 
@@ -60,8 +60,9 @@ public class WaitingService {
         return WaitingResponseDto.of(savedWaiting);
     }
 
-    private void findByIdOrThrow(Long waitingId) {
-        waitingRepository.findById(waitingId)
-                .orElseThrow(NotFoundWaitingException::new);
+    private void validateExistsById(Long waitingId) {
+        if (!waitingRepository.existsById(waitingId)) {
+            throw new NotFoundWaitingException();
+        }
     }
 }

@@ -48,7 +48,7 @@ public class UserService {
     }
 
     public List<ReservationWithStateDto> findAllReservationByMember(User member) {
-        validateExistsUser(member.getId());
+        validateExistsById(member.getId());
 
         List<Reservation> reservations = reservationRepository.findByUser(member);
         List<ReservationWithStateDto> dtos1 = convertReservationWithStateDto(reservations);
@@ -83,7 +83,7 @@ public class UserService {
 
     @Transactional
     public void deleteWaitingByMember(Long waitingId, User member) {
-        validateExistsUser(member.getId());
+        validateExistsById(member.getId());
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(NotFoundWaitingException::new);
 
@@ -94,12 +94,14 @@ public class UserService {
         waitingRepository.deleteById(waitingId);
     }
 
-    private void validateExistsUser(Long id) {
-        findByIdOrThrow(id);
-    }
-
     public User findByIdOrThrow(Long id) {
         return userRepository.findById(id)
                 .orElseThrow(NotFoundUserException::new);
+    }
+
+    private void validateExistsById(Long id) {
+        if (!userRepository.existsById(id)) {
+            throw new NotFoundUserException();
+        }
     }
 }
