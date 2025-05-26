@@ -12,13 +12,17 @@ public record ReservationResponse(
         ThemeResponse theme
 ) {
 
-    public static List<ReservationResponse> fromReservations(List<Reservation> reservations) {
+    public static List<ReservationResponse> fromReservations(
+            final List<Reservation> reservations
+    ) {
         return reservations.stream()
                 .map(ReservationResponse::fromReservation)
                 .toList();
     }
 
-    public static ReservationResponse fromReservation(final Reservation reservation) {
+    public static ReservationResponse fromReservation(
+            final Reservation reservation
+    ) {
         return new ReservationResponse(
                 reservation.id(),
                 UserResponse.fromUser(reservation.user()),

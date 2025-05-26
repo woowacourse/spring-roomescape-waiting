@@ -10,13 +10,16 @@ public record AvailableTimeSlotResponse(
         Boolean alreadyBooked
 ) {
     public static List<AvailableTimeSlotResponse> fromAvailableTimeSlots(
-            final List<AvailableTimeSlot> availableTimeSlots) {
+            final List<AvailableTimeSlot> availableTimeSlots
+    ) {
         return availableTimeSlots.stream()
                 .map(AvailableTimeSlotResponse::fromAvailableTimeSlot)
                 .toList();
     }
 
-    private static AvailableTimeSlotResponse fromAvailableTimeSlot(final AvailableTimeSlot availableTimeSlot) {
+    private static AvailableTimeSlotResponse fromAvailableTimeSlot(
+            final AvailableTimeSlot availableTimeSlot
+    ) {
         return new AvailableTimeSlotResponse(
                 availableTimeSlot.timeSlot().id(),
                 availableTimeSlot.timeSlot().startAt(),

@@ -12,13 +12,17 @@ public record WaitingResponse(
         ThemeResponse theme
 ) {
 
-    public static List<WaitingResponse> fromWaitings(List<Waiting> waitings) {
+    public static List<WaitingResponse> fromWaitings(
+            final List<Waiting> waitings
+    ) {
         return waitings.stream()
                 .map(WaitingResponse::fromWaiting)
                 .toList();
     }
 
-    public static WaitingResponse fromWaiting(Waiting waiting) {
+    public static WaitingResponse fromWaiting(
+            final Waiting waiting
+    ) {
         return new WaitingResponse(
                 waiting.id(),
                 UserResponse.fromUser(waiting.user()),
