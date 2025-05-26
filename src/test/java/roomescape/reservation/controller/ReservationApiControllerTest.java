@@ -149,7 +149,7 @@ class ReservationApiControllerTest {
         );
         ReservationResponse reservationResponse = mock(ReservationResponse.class);
 
-        when(reservationService.addWaiting(1L, reservationRequest))
+        when(reservationService.addFromWaiting(1L))
                 .thenReturn(reservationResponse);
 
         mockMvc.perform(post(URI + "/1")

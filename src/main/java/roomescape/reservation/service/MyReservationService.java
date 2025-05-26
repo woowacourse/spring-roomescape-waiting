@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.Reservation;
@@ -19,6 +20,7 @@ public class MyReservationService {
         this.waitingOrder = waitingOrder;
     }
 
+    @Transactional
     public List<MyReservationResponse> findAllMyReservationByMember(final Long memberId) {
         waitingOrder.resetWaitingOrder();
 
