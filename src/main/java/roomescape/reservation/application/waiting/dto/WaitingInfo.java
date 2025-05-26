@@ -7,6 +7,7 @@ import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
 import roomescape.reservation.domain.reservation.ReservationStatus;
 import roomescape.reservation.domain.waiting.Waiting;
 import roomescape.reservation.domain.waiting.WaitingWithRank;
+import roomescape.reservation.ui.reservation.display.ReservationStatusDisplay;
 
 public record WaitingInfo(
         long id,
@@ -24,7 +25,7 @@ public record WaitingInfo(
                 new TimeSlotInfo(waiting.time()),
                 new ThemeInfo(waiting.theme()),
                 new MemberInfo(waiting.member()),
-                String.format(ReservationStatus.WAITING.getDisplayName(), 0)
+                ReservationStatusDisplay.display(ReservationStatus.WAITING, 0)
         );
     }
 
@@ -35,7 +36,7 @@ public record WaitingInfo(
                 new TimeSlotInfo(waitingWithRank.waiting().time()),
                 new ThemeInfo(waitingWithRank.waiting().theme()),
                 new MemberInfo(waitingWithRank.waiting().member()),
-                String.format(ReservationStatus.WAITING.getDisplayName(), waitingWithRank.rank())
+                ReservationStatusDisplay.display(ReservationStatus.WAITING, waitingWithRank.rank())
         );
     }
 }

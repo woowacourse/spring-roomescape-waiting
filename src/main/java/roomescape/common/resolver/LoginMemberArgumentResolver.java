@@ -30,7 +30,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
                                   final NativeWebRequest webRequest, final WebDataBinderFactory binderFactory) {
         HttpServletRequest request = (HttpServletRequest) webRequest.getNativeRequest();
         Cookie[] cookies = Optional.ofNullable(request.getCookies()).orElse(new Cookie[0]);
-        final String token = CookieExtractor.extractToken(cookies);;
+        final String token = CookieExtractor.extractToken(cookies);
         return authService.getLoginMemberInfoByToken(token);
     }
 }

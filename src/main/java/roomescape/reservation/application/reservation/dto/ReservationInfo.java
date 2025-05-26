@@ -6,6 +6,7 @@ import roomescape.reservation.application.theme.dto.ThemeInfo;
 import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
 import roomescape.reservation.domain.reservation.Reservation;
 import roomescape.reservation.domain.reservation.ReservationStatus;
+import roomescape.reservation.ui.reservation.display.ReservationStatusDisplay;
 
 public record ReservationInfo(
         long id,
@@ -23,7 +24,7 @@ public record ReservationInfo(
                 reservation.date(),
                 new TimeSlotInfo(reservation.time()),
                 new ThemeInfo(reservation.theme()),
-                ReservationStatus.BOOKED.getDisplayName()
+                ReservationStatusDisplay.display(ReservationStatus.BOOKED)
         );
     }
 }
