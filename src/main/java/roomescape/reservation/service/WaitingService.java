@@ -60,6 +60,9 @@ public class WaitingService {
         if (canCreateReservation(request)) {
             throw new EntityNotFoundException("예약이 존재하지 않습니다.");
         }
+        if (isAlreadyReservedBySelf(request)) {
+            throw new AlreadyInUseException("이미 예약이 존재합니다.");
+        }
 
         Waiting waiting = getWaiting(request);
         LocalDateTime now = LocalDateTime.now();
@@ -78,6 +81,12 @@ public class WaitingService {
     private boolean canCreateReservation(final WaitingCreateRequest request) {
         return !reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(), request.timeId(), request.themeId()
+        );
+    }
+
+    private boolean isAlreadyReservedBySelf(final WaitingCreateRequest request) {
+        return reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
+                request.date(), request.themeId(), request.timeId(), request.loginMember().id()
         );
     }
 

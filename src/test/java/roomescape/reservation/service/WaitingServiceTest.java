@@ -112,6 +112,24 @@ class WaitingServiceTest {
                 .isInstanceOf(EntityNotFoundException.class);
     }
 
+    @DisplayName("자신이 예약한 경우 예약 대기를 생성할 수 없다.")
+    @Test
+    void createWaitingIn() {
+        // given
+        LocalDate date = getTomorrow();
+        Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
+        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        reservationRepository.save(new Reservation(member, date, time, theme));
+
+        WaitingCreateRequest request =
+                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.createWaiting(request))
+                .isInstanceOf(AlreadyInUseException.class);
+    }
+
     @DisplayName("예약대기를 삭제한다.")
     @Test
     void deleteReservationWaiting() {
