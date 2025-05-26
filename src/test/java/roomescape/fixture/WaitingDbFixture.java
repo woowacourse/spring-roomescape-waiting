@@ -15,7 +15,11 @@ public class WaitingDbFixture {
         this.waitingRepository = waitingRepository;
     }
 
-    public Waiting 대기_25_4_23_10시_공포(ReservationInfo reservationInfo, Member waitingMember) {
+    public Waiting 첫번째_대기_25_4_23_10시_공포(ReservationInfo reservationInfo, Member waitingMember) {
         return waitingRepository.save(Waiting.create(reservationInfo, waitingMember, 1L));
+    }
+
+    public Waiting 두번째_대기_25_4_23_10시_공포(ReservationInfo reservationInfo, Member waitingMember) {
+        return waitingRepository.save(Waiting.create(reservationInfo, waitingMember, 2L));
     }
 }

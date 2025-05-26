@@ -6,6 +6,7 @@ import roomescape.domain.ReservationInfo;
 import roomescape.domain.Waiting;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
@@ -14,6 +15,8 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     List<Waiting> findAllByMember(Member member);
 
     boolean existsByReservationInfoAndMember(ReservationInfo reservationInfo, Member member);
+
+    Optional<Waiting> findTop1ByReservationInfoOrderByRankAsc(ReservationInfo reservationInfo);
 
     List<Waiting> findAllByReservationInfo(ReservationInfo reservationInfo);
 

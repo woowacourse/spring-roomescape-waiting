@@ -110,8 +110,8 @@ public class WaitingService {
     }
 
     public Waiting findFirstRankWaitingByReservationInfo(ReservationInfo reservationInfo) {
-        return waitingRepository.findAllByReservationInfo(reservationInfo)
-                .getFirst();
+        return waitingRepository.findTop1ByReservationInfoOrderByRankAsc(reservationInfo)
+                .orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 대기 건이 존재하지 않습니다."));
     }
 
     @Transactional

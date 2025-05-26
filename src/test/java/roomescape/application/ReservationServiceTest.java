@@ -213,7 +213,7 @@ class ReservationServiceTest extends BaseTest {
         Member alreadyReservedMember = memberDbFixture.듀이_사용자();
         Reservation alreadyReservedReservation = reservationDbFixture.예약_생성(alreadyReservedMember, ReservationDateFixture.예약날짜_25_4_23, reservationTime, theme);
         ReservationInfo reservationInfo = ReservationInfo.create(alreadyReservedReservation);
-        Waiting waiting = waitingDbFixture.대기_25_4_23_10시_공포(reservationInfo, member);
+        Waiting waiting = waitingDbFixture.첫번째_대기_25_4_23_10시_공포(reservationInfo, member);
 
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
