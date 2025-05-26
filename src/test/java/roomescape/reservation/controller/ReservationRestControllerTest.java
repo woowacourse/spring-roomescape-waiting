@@ -175,13 +175,13 @@ class ReservationRestControllerTest {
         //given
         final String payload = "wooga@gmail.com";
         final String token = jwtTokenProvider.createToken(payload);
-        final Map<String, String> resesrvationParams = createReservationRequestJsonMap("2026-04-15", "1", "1");
+        final Map<String, String> reservationParams = createReservationRequestJsonMap("2026-04-15", "1", "1");
         final Map<String, String> waitingParams = createWaitingRequestJsonMap("2026-04-15", "1", "1");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
-                .body(resesrvationParams)
+                .body(reservationParams)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
@@ -191,7 +191,7 @@ class ReservationRestControllerTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .body(waitingParams)
-                .when().post("/reservations/waiting")
+                .when().post("/reservations/waitings")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
     }
@@ -216,13 +216,13 @@ class ReservationRestControllerTest {
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .body(waitingParams)
-                .when().post("/reservations/waiting")
+                .when().post("/reservations/waitings")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
 
         //when & then
         RestAssured.given().log().all()
-                .when().delete("/reservations/waiting/1")
+                .when().delete("/reservations/waitings/1")
                 .then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }

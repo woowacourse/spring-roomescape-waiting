@@ -99,7 +99,7 @@ public class ReservationRestController {
         return ResponseEntity.ok(combined);
     }
 
-    @PostMapping("/waiting")
+    @PostMapping("/waitings")
     public ResponseEntity<CreateWaitingResponse> createWaitingReservation(
             @RequestBody final CreateWaitingRequest createWaitingRequest,
             final Member member
@@ -114,7 +114,7 @@ public class ReservationRestController {
         return ResponseEntity.status(HttpStatus.CREATED).body(CreateWaitingResponse.from(savedWaiting));
     }
 
-    @DeleteMapping("/waiting/{id}")
+    @DeleteMapping("/waitings/{id}")
     public ResponseEntity<Void> deleteWaitingReservation(@PathVariable final Long id) {
         reservationService.deleteWaitingById(id);
 

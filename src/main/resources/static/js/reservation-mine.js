@@ -59,7 +59,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '/reservations/waiting/' + id; // 예약 대기 취소 API 엔드포인트
+    const endpoint = '/reservations/waitings/' + id; // 예약 대기 취소 API 엔드포인트
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
