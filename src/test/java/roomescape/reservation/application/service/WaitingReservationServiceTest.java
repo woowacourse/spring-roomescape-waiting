@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -12,7 +13,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -48,6 +48,9 @@ public class WaitingReservationServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
+    @Mock
+    private ReservationService reservationService;
+
     @InjectMocks
     private WaitingReservationService waitingReservationService;
 
@@ -64,9 +67,10 @@ public class WaitingReservationServiceTest {
         Theme theme = new Theme(themeId, "theme", "description", "thumbnail");
         Member member = new Member(memberId, "name", "email@email.com", "password", Role.USER);
 
-        when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
-        when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
-        when(reservationRepository.alreadyExists(date, time, theme, member)).thenReturn(true);
+        when(reservationService.getReservationTime(anyLong())).thenReturn(time);
+        when(reservationService.getTheme(anyLong())).thenReturn(theme);
+        doThrow(new ReservationAlreadyExistsException())
+                .when(reservationService).validateDuplicatedReservation(any(), any(), any(), any());
 
         WaitingReservationRequest request = new WaitingReservationRequest(date, time.getId(), theme.getId());
 
@@ -94,16 +98,11 @@ public class WaitingReservationServiceTest {
         Reservation reservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
                 createdAt);
 
-        List<Reservation> waitings = new ArrayList<>();
-        for (int i = 0; i < 3; i++) {
-            waitings.add(new Reservation((long) i, date, time, theme, member, ReservationStatus.WAITING,
-                    createdAt.minusDays(i + 1)));
-        }
-
-        when(timeRepository.findById(anyLong())).thenReturn(Optional.of(time));
-        when(themeRepository.findById(anyLong())).thenReturn(Optional.of(theme));
-        when(reservationRepository.countReservationsBefore(date, time, theme, createdAt)).thenReturn(3);
+        when(reservationService.getReservationTime(anyLong())).thenReturn(time);
+        when(reservationService.getTheme(anyLong())).thenReturn(theme);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(reservation);
+        when(reservationService.mapToReservationResponse(any(Reservation.class)))
+                .thenReturn(ReservationResponse.fromWaitingReservation(reservation, 1));
 
         // when
         ReservationResponse response = waitingReservationService.createWaitingReservation(request, member);
@@ -128,7 +127,7 @@ public class WaitingReservationServiceTest {
         // 취소할 예약
         Reservation targetReservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
                 SystemLocalDateTime.now().minusDays(3));
-        when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
+        when(reservationService.getReservation(99L)).thenReturn(targetReservation);
 
         // when
         waitingReservationService.deleteWaitingReservation(99L, member);
@@ -154,7 +153,7 @@ public class WaitingReservationServiceTest {
         // 취소할 예약
         Reservation targetReservation = new Reservation(99L, date, time, theme, member, ReservationStatus.WAITING,
                 SystemLocalDateTime.now().minusDays(3));
-        when(reservationRepository.findById(99L)).thenReturn(Optional.of(targetReservation));
+        when(reservationService.getReservation(99L)).thenReturn(targetReservation);
 
         // when & then
         assertThatThrownBy(
@@ -190,7 +189,6 @@ public class WaitingReservationServiceTest {
         assertThat(waitingReservations.size()).isEqualTo(3);
     }
 
-
     @DisplayName("대기를 거절하려는 예약의 id가 대기 상태가 아닐 경우, 예외가 발생한다.")
     @Test
     void denyWaitingReservationTest_notWaitingReservation() {
@@ -207,9 +205,9 @@ public class WaitingReservationServiceTest {
         Reservation reservation = new Reservation(reservationId, date, time, theme, member, ReservationStatus.CONFIRMED,
                 SystemLocalDateTime.now());
 
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationService.getReservation(reservationId)).thenReturn(reservation);
 
-        // when
+        // when & then
         assertThatThrownBy(() -> waitingReservationService.denyWaitingReservation(reservationId))
                 .isInstanceOf(UnexpectedReservationStatusException.class);
     }
@@ -230,7 +228,7 @@ public class WaitingReservationServiceTest {
         Reservation reservation = new Reservation(reservationId, date, time, theme, member, ReservationStatus.WAITING,
                 SystemLocalDateTime.now());
 
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(reservation));
+        when(reservationService.getReservation(reservationId)).thenReturn(reservation);
 
         // when
         waitingReservationService.denyWaitingReservation(reservationId);
@@ -238,5 +236,4 @@ public class WaitingReservationServiceTest {
         // then
         verify(reservationRepository).delete(reservation);
     }
-
 }

@@ -117,7 +117,7 @@ public class ReservationService {
                 .toList();
     }
 
-    private ReservationResponse mapToReservationResponse(Reservation reservation) {
+    public ReservationResponse mapToReservationResponse(Reservation reservation) {
         if (reservation.getStatus().isWaiting()) {
             int order = calculateWaitingOrder(reservation);
             return ReservationResponse.fromWaitingReservation(reservation, order);
@@ -125,19 +125,35 @@ public class ReservationService {
         return ReservationResponse.fromConfirmedReservation(reservation);
     }
 
-    private Reservation getReservation(Long id) {
+    public Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
     }
 
-    private ReservationTime getReservationTime(Long timeId) {
+    public ReservationTime getReservationTime(Long timeId) {
         return timeRepository.findById(timeId)
                 .orElseThrow(() -> new ReservationTimeNotFoundException(timeId));
     }
 
-    private Theme getTheme(Long themeId) {
+    public Theme getTheme(Long themeId) {
         return themeRepository.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException(themeId));
+    }
+
+    public void validateDuplicatedReservation(LocalDate adminReservationRequest, ReservationTime reservationTime,
+                                              Theme theme, Member member) {
+        if (reservationRepository.alreadyExists(adminReservationRequest, reservationTime, theme, member)) {
+            throw new ReservationAlreadyExistsException();
+        }
+    }
+
+    public int calculateWaitingOrder(Reservation reservation) {
+        return reservationRepository.countReservationsBefore(
+                reservation.getDate(),
+                reservation.getTime(),
+                reservation.getTheme(),
+                reservation.getCreatedAt()
+        );
     }
 
     private Member getMember(Long memberId) {
@@ -150,13 +166,6 @@ public class ReservationService {
             return ReservationStatus.WAITING;
         }
         return ReservationStatus.CONFIRMED;
-    }
-
-    private void validateDuplicatedReservation(LocalDate adminReservationRequest, ReservationTime reservationTime,
-                                               Theme theme, Member member) {
-        if (reservationRepository.alreadyExists(adminReservationRequest, reservationTime, theme, member)) {
-            throw new ReservationAlreadyExistsException();
-        }
     }
 
     private void updateNextWaitingReservationStatus(Reservation targetReservation) {
@@ -178,14 +187,5 @@ public class ReservationService {
             return MemberReservationResponse.fromWaitingReservation(reservation, order);
         }
         return MemberReservationResponse.fromConfirmedReservation(reservation);
-    }
-
-    private int calculateWaitingOrder(Reservation reservation) {
-        return reservationRepository.countReservationsBefore(
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
-                reservation.getCreatedAt()
-        );
     }
 }
