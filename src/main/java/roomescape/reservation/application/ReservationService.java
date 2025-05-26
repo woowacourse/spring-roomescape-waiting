@@ -44,8 +44,6 @@ public class ReservationService {
         final Reservation reservation = registerReservation(request.date(), request.timeId(), request.themeId(),
                 memberId);
 
-        reservationRepository.flush();
-
         return MemberReservationResponse.from(reservation,
                 reservationRepository.getReservationRankById(reservation.getId()));
     }
@@ -54,8 +52,6 @@ public class ReservationService {
     public AdminReservationResponse createForAdmin(final AdminCreateReservationRequest request) {
         final Reservation reservation = registerReservation(request.date(), request.timeId(), request.themeId(),
                 request.memberId());
-
-        reservationRepository.flush();
 
         return AdminReservationResponse.from(reservation,
                 reservationRepository.getReservationRankById(reservation.getId()));
