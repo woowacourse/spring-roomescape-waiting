@@ -75,10 +75,10 @@ class WaitingServiceTest {
 
         // then
         assertAll(
-                () -> assertThat(response.theme().getId()).isEqualTo(100L),
-                () -> assertThat(response.time().getId()).isEqualTo(100L),
+                () -> assertThat(response.theme().id()).isEqualTo(100L),
+                () -> assertThat(response.time().id()).isEqualTo(100L),
                 () -> assertThat(response.date()).isEqualTo(LocalDate.of(2025, 5, 15)),
-                () -> assertThat(response.member().getId()).isEqualTo(loginMember.id())
+                () -> assertThat(response.member().id()).isEqualTo(loginMember.id())
         );
     }
 

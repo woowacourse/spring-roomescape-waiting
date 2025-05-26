@@ -189,6 +189,7 @@ class ReservationControllerIntegrationTest {
 
         // when & then
         given()
+                .cookie("token", token)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when()
                 .delete("/reservations/{id}", reservationId)
@@ -321,7 +322,15 @@ class ReservationControllerIntegrationTest {
         Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
         memberRepository.save(member);
 
+        final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
         given()
+                .cookie("token", token)
                 .when()
                 .delete("/reservations/{id}", 999L)
                 .then()

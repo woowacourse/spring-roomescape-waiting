@@ -16,6 +16,7 @@ import roomescape.exception.BadRequestException;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
@@ -89,26 +90,25 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(final Long id) {
+    public void deleteById(final Long id, final LoginMember loginMember) {
         final Reservation reservation = queryService.getReservationById(id);
         validateNotPast(reservation);
         reservationRepository.deleteById(id);
         reservationRepository.flush();
 
-        promoteFirstWaitingToReservation(reservation);
+        promoteFirstWaitingToReservation(reservation, loginMember);
     }
 
-    private void promoteFirstWaitingToReservation(final Reservation reservation) {
+    private void promoteFirstWaitingToReservation(final Reservation reservation, final LoginMember loginMember) {
         final Optional<WaitingResponse> waiting = waitingService.deleteFirstBySameConditionReservation(
                 WaitingRequest.from(reservation));
 
         if (waiting.isEmpty()) {
             return;
         }
-        final WaitingResponse newReservation = waiting.get();
-        reservationRepository.save(
-                new Reservation(newReservation.date(), newReservation.member(), newReservation.time(),
-                        newReservation.theme()));
+        Reservation newReservation = new Reservation(reservation.getDate(),
+                queryService.getMemberById(loginMember.id()), reservation.getTime(), reservation.getTheme());
+        reservationRepository.save(newReservation);
     }
 
     private void validateNotPast(final Reservation reservation) {

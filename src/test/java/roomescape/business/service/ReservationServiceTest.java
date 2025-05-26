@@ -25,6 +25,7 @@ import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.infrastructure.repository.WaitingRepository;
+import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationMineResponse;
 import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
@@ -206,9 +207,10 @@ public class ReservationServiceTest {
         final ReservationResponse reservationResponse = reservationService.insert(
                 new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, themeId));
         final Long id = reservationResponse.id();
+        final LoginMember loginMember = new LoginMember(1L, "mimi", "email", "USER");
 
         // when
-        reservationService.deleteById(id);
+        reservationService.deleteById(id, loginMember);
 
         // then
         final Optional<Reservation> findReservation = reservationRepository.findById(id);
@@ -220,9 +222,10 @@ public class ReservationServiceTest {
     void deleteByIdWhenNotExistReservation() {
         // given
         final Long notExistId = 999L;
+        final LoginMember loginMember = new LoginMember(1L, "mimi", "email", "USER");
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteById(notExistId))
+        assertThatThrownBy(() -> reservationService.deleteById(notExistId, loginMember))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -251,9 +254,10 @@ public class ReservationServiceTest {
         final long firstWaitingMemberId = 101L;
         final int originalMemberReservationCount = 3;
         final int firstWaitingMemberReservationCount = 1;
+        final LoginMember firstWaitingMember = new LoginMember(firstWaitingMemberId, "lee", "lee@test.com", "USER");
 
         // when
-        reservationService.deleteById(originalReservationId);
+        reservationService.deleteById(originalReservationId, firstWaitingMember);
 
         // then
         assertAll(
