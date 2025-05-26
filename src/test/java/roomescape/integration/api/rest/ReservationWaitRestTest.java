@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.common.RestAssuredTestBase;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationWait;
-import roomescape.domain.reservation.schdule.ReservationSchedule;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 import roomescape.integration.api.RestLoginMember;
@@ -42,7 +42,7 @@ class ReservationWaitRestTest extends RestAssuredTestBase {
             @Autowired ThemeDbFixture themeDbFixture,
             @Autowired ReservationDbFixture reservationDbFixture
     ) {
-        restLoginMember = generateLoginMember();
+        restLoginMember = generateLoginMember(memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개());
         Theme theme = themeDbFixture.공포();
         ReservationTime time = reservationTimeDbFixture.예약시간_10시();
         schedule = reservationScheduleDbFixture.createSchedule(ReservationDateFixture.예약날짜_오늘, time, theme);
@@ -78,9 +78,10 @@ class ReservationWaitRestTest extends RestAssuredTestBase {
         );
         ReservationSchedule schedule = reservationWait.getSchedule();
         reservationRepository.deleteById(reservation.getId());
+        RestLoginMember admin = generateLoginMember(memberDbFixture.leehyeonsu48888_지메일_gustn111느낌표두개_어드민());
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .cookie("JSESSIONID", restLoginMember.sessionId())
+                .cookie("JSESSIONID", admin.sessionId())
                 .when().post("/reservations/waits/{id}", reservationWait.getId())
                 .then().log().all()
                 .statusCode(201)

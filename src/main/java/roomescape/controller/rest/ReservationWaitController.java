@@ -1,5 +1,7 @@
 package roomescape.controller.rest;
 
+import static roomescape.domain.member.MemberRole.ADMIN;
+
 import jakarta.validation.Valid;
 import java.util.List;
 import org.springframework.http.HttpStatus;
@@ -11,6 +13,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.global.annotation.CheckRole;
 import roomescape.global.dto.SessionMember;
 import roomescape.service.ReservationWaitService;
 import roomescape.service.request.CreateReservationWaitRequest;
@@ -38,14 +41,18 @@ public class ReservationWaitController {
     }
 
     @PostMapping("/{id}")
+    @CheckRole(ADMIN)
     public ResponseEntity<ReservationResponse> approveReservationWait(@PathVariable("id") Long waitId) {
         ReservationResponse response = reservationWaitService.approveReservationWait(waitId);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservationWait(@PathVariable("id") Long waitId) {
-        reservationWaitService.deleteReservationWait(waitId);
+    public ResponseEntity<Void> deleteReservationWait(
+            @PathVariable("id") final Long waitId,
+            final SessionMember sessionMember
+    ) {
+        reservationWaitService.deleteReservationWait(waitId, sessionMember.id());
         return ResponseEntity.noContent().build();
     }
 
