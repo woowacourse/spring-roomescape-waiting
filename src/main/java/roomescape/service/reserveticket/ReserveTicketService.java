@@ -3,10 +3,16 @@ package roomescape.service.reserveticket;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlotTimes;
+import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reserveticket.ReserveTicket;
+import roomescape.domain.waiting.Waiting;
 import roomescape.dto.reservation.AddReservationDto;
+import roomescape.dto.reservationtime.AvailableTimeRequestDto;
+import roomescape.dto.waiting.ApplyWaitingRequestDto;
 import roomescape.repository.reserveticket.ReserveTicketRepository;
 import roomescape.service.member.MemberService;
 import roomescape.service.reservation.ReservationService;
@@ -74,5 +80,14 @@ public class ReserveTicketService {
 
     public List<ReserveTicket> memberReservations(long memberId) {
         return reserveTicketRepository.findAllByMemberId(memberId);
+    }
+
+    @Transactional
+    public Long applyWaiting(ApplyWaitingRequestDto applyWaitingRequestDto) {
+        Long waitingId = applyWaitingRequestDto.id();
+        Waiting waiting = waitingService.getWaitingById(waitingId);
+        Long reservationId = addReservation(new AddReservationDto(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId()), waiting.getMember().getId());
+        waitingService.deleteWaiting(waitingId);
+        return reservationId;
     }
 }

@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -21,19 +20,17 @@ import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationSlotTimes;
 import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
 import roomescape.dto.reservationmember.ReservationMemberResponseDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
+import roomescape.dto.waiting.ApplyWaitingRequestDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reserveticket.ReserveTicketService;
-import roomescape.service.waiting.WaitingService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -98,7 +95,7 @@ public class ReservationController {
     @GetMapping("/available-times")
     public ResponseEntity<List<ReservationTimeSlotResponseDto>> availableReservationTimes(
             @Valid @ModelAttribute AvailableTimeRequestDto availableTimeRequestDto) {
-        ReservationSlotTimes reservationSlotTimes = reservationService.availableReservationTimes(
+        ReservationSlotTimes reservationSlotTimes = reserveTicketService.availableReservationTimes(
                 availableTimeRequestDto);
         List<ReservationSlot> availableBookTimes = reservationSlotTimes.getAvailableBookTimes();
 
@@ -119,5 +116,11 @@ public class ReservationController {
                         theme.getName(), theme.getThumbnail()))
                 .toList();
         return ResponseEntity.ok(themeResponseDtos);
+    }
+
+    @PostMapping("/apply-waiting")
+    public ResponseEntity<Void> applyWaiting(@RequestBody ApplyWaitingRequestDto applyWaitingRequestDto) {
+        Long reservationId = reserveTicketService.applyWaiting(applyWaitingRequestDto);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationId)).build();
     }
 }
