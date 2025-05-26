@@ -63,7 +63,7 @@ class JpaReservationRepositoryTest {
 
     @Test
     void 특정_시간의_예약이_존재하는경우_True() {
-        Reservation saved = jpaReservationRepository.save(new Reservation(null, schedule, member));
+        jpaReservationRepository.save(new Reservation(null, schedule, member));
 
         assertThat(jpaReservationRepository.existsByScheduleTimeId(time.getId())).isTrue();
     }
@@ -105,5 +105,35 @@ class JpaReservationRepositoryTest {
                 new Reservation(null, schedule2, member),
                 new Reservation(null, schedule3, member)
         );
+    }
+
+    @Test
+    void 스케줄이_일치하는_예약_중에서_멤버_예약_존재_여부_확인_True() {
+        jpaReservationRepository.save(new Reservation(null, schedule, member));
+        boolean isExists = jpaReservationRepository.existsByMemberAndSchedule(member, schedule);
+        assertThat(isExists).isTrue();
+    }
+
+    @Test
+    void 스케줄이_일치하는_예약_중에서_멤버_예약_존재_여부_확인_False() {
+        Reservation saved = jpaReservationRepository.save(new Reservation(null, schedule, member));
+        jpaReservationRepository.delete(saved);
+        boolean isExists = jpaReservationRepository.existsByMemberAndSchedule(member, schedule);
+        assertThat(isExists).isFalse();
+    }
+
+    @Test
+    void 스케줄이_일치하는_예약이_존재하는지_확인_True() {
+        jpaReservationRepository.save(new Reservation(null, schedule, member));
+        boolean isExists = jpaReservationRepository.existsBySchedule(schedule);
+        assertThat(isExists).isTrue();
+    }
+
+    @Test
+    void 스케줄이_일치하는_예약이_존재하는지_확인_False() {
+        Reservation saved = jpaReservationRepository.save(new Reservation(null, schedule, member));
+        jpaReservationRepository.delete(saved);
+        boolean isExists = jpaReservationRepository.existsBySchedule(schedule);
+        assertThat(isExists).isFalse();
     }
 }
