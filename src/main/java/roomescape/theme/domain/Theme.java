@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import roomescape.exception.BadRequestException;
@@ -21,13 +22,16 @@ public class Theme {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name", nullable = false)
+    @Column(name = "name")
+    @NotNull
     private String name;
 
-    @Column(name = "description", nullable = false)
+    @Column(name = "description")
+    @NotNull
     private String description;
 
-    @Column(name = "thumbnail", nullable = false)
+    @Column(name = "thumbnail")
+    @NotNull
     private String thumbnail;
 
     protected Theme() {

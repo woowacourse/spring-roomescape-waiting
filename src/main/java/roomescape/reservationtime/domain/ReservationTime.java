@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
@@ -19,7 +20,8 @@ public class ReservationTime {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "start_at", nullable = false)
+    @Column(name = "start_at")
+    @NotNull
     private LocalTime startAt;
 
     protected ReservationTime() {

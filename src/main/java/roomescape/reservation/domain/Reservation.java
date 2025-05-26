@@ -33,16 +33,19 @@ public class Reservation {
     @NotNull
     private Member member;
 
-    @Column(name = "date", nullable = false)
+    @Column(name = "date")
     @Temporal(TemporalType.DATE)
+    @NotNull
     private LocalDate date;
 
+    @JoinColumn(name = "time_id")
     @ManyToOne
-    @JoinColumn(name = "time_id", nullable = false)
+    @NotNull
     private ReservationTime time;
 
+    @JoinColumn(name = "theme_id")
     @ManyToOne
-    @JoinColumn(name = "theme_id", nullable = false)
+    @NotNull
     private Theme theme;
 
     protected Reservation() {
