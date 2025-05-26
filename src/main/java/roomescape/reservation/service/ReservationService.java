@@ -61,11 +61,6 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        reservationRepository.deleteById(id);
-    }
-
-    @Transactional
     public void cancel(Long id) {
         Reservation reservation = getReservation(id);
         ReservationSlot reservationSlot = new ReservationSlot(
