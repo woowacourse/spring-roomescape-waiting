@@ -2,13 +2,11 @@ package roomescape.member;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.auth.dto.LoginMember;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.custom.reason.member.MemberEmailConflictException;
 import roomescape.exception.custom.reason.member.MemberNotFoundException;
 import roomescape.member.dto.MemberRequest;
-import roomescape.member.dto.MemberReservationResponse;
 import roomescape.member.dto.MemberResponse;
-import roomescape.reservation.ReservationRepository;
 
 import java.util.List;
 
@@ -17,31 +15,35 @@ import java.util.List;
 public class MemberService {
 
     private final MemberRepository memberRepository;
-    private final ReservationRepository reservationRepository;
 
-    public void createMember(final MemberRequest request) {
-        validateDuplicationEmail(request);
+    @Transactional
+    public void create(final MemberRequest request) {
+        validateDuplication(request);
 
         final Member notSavedMember = new Member(request.email(), request.password(), request.name(), MemberRole.MEMBER);
         memberRepository.save(notSavedMember);
     }
 
-    public List<MemberReservationResponse> readAllReservationsByMember(final LoginMember loginMember) {
-        final Member member = memberRepository.findByEmail(loginMember.email())
-                .orElseThrow(MemberNotFoundException::new);
-
-        return reservationRepository.findAllByMember(member).stream()
-                .map(MemberReservationResponse::of)
-                .toList();
-    }
-
-    public List<MemberResponse> readAllMember() {
+    @Transactional(readOnly = true)
+    public List<MemberResponse> getAll() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
     }
 
-    private void validateDuplicationEmail(final MemberRequest request) {
+    @Transactional(readOnly = true)
+    public Member getByEmail(final String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(MemberNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public Member getById(final Long id) {
+        return memberRepository.findById(id)
+                .orElseThrow(MemberNotFoundException::new);
+    }
+
+    private void validateDuplication(final MemberRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
             throw new MemberEmailConflictException();
         }

@@ -1,13 +1,7 @@
 package roomescape.api;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalTime;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -21,6 +15,13 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
+
+import java.time.LocalTime;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.stream.Stream;
+
+import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 public class ReservationTimeApiTest {
@@ -38,6 +39,7 @@ public class ReservationTimeApiTest {
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("DELETE FROM schedule");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");

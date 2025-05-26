@@ -1,14 +1,15 @@
 package roomescape.theme;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -18,22 +19,17 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.*;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.themeWithId;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
 
+    @Mock
+    private ReservationService reservationService;
+    @Mock
     private ThemeRepository themeRepository;
+    @InjectMocks
     private ThemeService themeService;
-    private ReservationRepository reservationRepository;
-
-    @BeforeEach
-    void setUp() {
-        themeRepository = mock(ThemeRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        themeService = new ThemeService(themeRepository, reservationRepository);
-    }
 
     @Nested
     @DisplayName("테마 생성")
@@ -74,7 +70,7 @@ class ThemeServiceTest {
                     .willReturn(themes);
 
             // when
-            final List<ThemeResponse> actual = themeService.findAll();
+            final List<ThemeResponse> actual = themeService.getAll();
 
             // then
             assertThat(actual).hasSize(3);
@@ -84,7 +80,7 @@ class ThemeServiceTest {
         @Test
         void findAll2() {
             // given & when
-            final List<ThemeResponse> actual = themeService.findAll();
+            final List<ThemeResponse> actual = themeService.getAll();
 
             // then
             assertThat(actual).isEmpty();
@@ -110,7 +106,7 @@ class ThemeServiceTest {
                     .willReturn(themes);
 
             // when
-            final List<ThemeResponse> actual = themeService.findTopRankThemes(5);
+            final List<ThemeResponse> actual = themeService.getTopRankThemes(5);
 
             // then
             assertThat(actual).hasSize(5);
@@ -130,7 +126,7 @@ class ThemeServiceTest {
             final Theme theme = themeWithId(1L, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.existsByTheme(theme))
+            given(reservationService.existsByTheme(theme))
                     .willReturn(false);
 
             // when
@@ -147,7 +143,7 @@ class ThemeServiceTest {
             final Long id = 1L;
             given(themeRepository.findById(id))
                     .willReturn(Optional.empty());
-            
+
             // when & then
             assertThatThrownBy(() -> {
                 themeService.deleteById(id);
@@ -162,7 +158,7 @@ class ThemeServiceTest {
             final Theme theme = themeWithId(id, new Theme("로키", "로키로키", "http://www.google.com"));
             given(themeRepository.findById(id))
                     .willReturn(Optional.of(theme));
-            given(reservationRepository.existsByTheme(theme))
+            given(reservationService.existsByTheme(theme))
                     .willReturn(true);
 
             // when & then

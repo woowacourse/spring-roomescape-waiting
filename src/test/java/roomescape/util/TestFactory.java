@@ -1,9 +1,11 @@
 package roomescape.util;
 
 import org.springframework.test.util.ReflectionTestUtils;
+import roomescape.booking.reservation.Reservation;
+import roomescape.booking.waiting.Waiting;
 import roomescape.member.Member;
-import roomescape.reservation.Reservation;
 import roomescape.reservationtime.ReservationTime;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
 
 public class TestFactory {
@@ -26,5 +28,15 @@ public class TestFactory {
     public static Member memberWithId(Long id, Member member) {
         ReflectionTestUtils.setField(member, "id", id);
         return member;
+    }
+
+    public static Waiting waitingWithId(Long id, Waiting waiting) {
+        ReflectionTestUtils.setField(waiting, "id", id);
+        return waiting;
+    }
+
+    public static Schedule scheduleWithId(Long id, Schedule schedule) {
+        ReflectionTestUtils.setField(schedule, "id", id);
+        return schedule;
     }
 }

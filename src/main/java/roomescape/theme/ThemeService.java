@@ -2,9 +2,10 @@ package roomescape.theme;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.theme.ThemeNotFoundException;
 import roomescape.exception.custom.reason.theme.ThemeUsedException;
-import roomescape.reservation.ReservationRepository;
 import roomescape.theme.dto.ThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 
@@ -19,8 +20,9 @@ public class ThemeService {
     private static final int BETWEEN_DAY_END = 1;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationService reservationService;
 
+    @Transactional
     public ThemeResponse create(
             final ThemeRequest request
     ) {
@@ -34,13 +36,21 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
-    public List<ThemeResponse> findAll() {
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> getAll() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    public List<ThemeResponse> findTopRankThemes(final int size) {
+    @Transactional(readOnly = true)
+    public Theme getById(final Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(ThemeNotFoundException::new);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ThemeResponse> getTopRankThemes(final int size) {
         final LocalDate now = LocalDate.now();
         final LocalDate from = now.minusDays(BETWEEN_DAY_START);
         final LocalDate to = now.minusDays(BETWEEN_DAY_END);
@@ -49,13 +59,10 @@ public class ThemeService {
                 .toList();
     }
 
-    public void deleteById(
-            final Long id
-    ) {
-        final Theme theme = themeRepository.findById(id)
-                .orElseThrow(ThemeNotFoundException::new);
-
-        if (reservationRepository.existsByTheme(theme)) {
+    @Transactional
+    public void deleteById(final Long id) {
+        final Theme theme = getById(id);
+        if (reservationService.existsByTheme(theme)) {
             throw new ThemeUsedException();
         }
 

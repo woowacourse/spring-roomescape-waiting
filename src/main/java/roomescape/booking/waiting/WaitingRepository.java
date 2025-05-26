@@ -1,0 +1,18 @@
+package roomescape.booking.waiting;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import roomescape.schedule.Schedule;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+
+    List<Waiting> findAllByMember_Email(String email);
+
+    Waiting findFirstByScheduleOrderByCreatedAtAsc(Schedule schedule);
+
+    boolean existsBySchedule(Schedule schedule);
+
+    Long countByScheduleAndCreatedAtLessThan(Schedule schedule, LocalDateTime createdAt);
+}

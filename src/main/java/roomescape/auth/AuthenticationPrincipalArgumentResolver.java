@@ -2,10 +2,9 @@ package roomescape.auth;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Arrays;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import org.springframework.core.MethodParameter;
+import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
@@ -14,6 +13,10 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.exception.custom.reason.auth.AuthNotExistsCookieException;
 import roomescape.exception.custom.reason.auth.AuthNotValidTokenException;
 
+import java.util.Arrays;
+import java.util.Objects;
+
+@Component
 @AllArgsConstructor
 public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -57,13 +60,13 @@ public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArg
     }
 
     private void validateToken(final String token) {
-        if(!jwtProvider.isValidToken(token)){
+        if (!jwtProvider.isValidToken(token)) {
             throw new AuthNotValidTokenException();
         }
     }
 
     private void validateExistsCookies(final Cookie[] cookies) {
-        if(cookies == null){
+        if (cookies == null) {
             throw new AuthNotExistsCookieException();
         }
     }

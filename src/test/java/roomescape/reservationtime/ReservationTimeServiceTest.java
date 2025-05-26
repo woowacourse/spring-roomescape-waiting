@@ -1,22 +1,23 @@
 package roomescape.reservationtime;
 
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.booking.reservation.Reservation;
+import roomescape.booking.reservation.ReservationService;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeConflictException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.custom.reason.reservationtime.ReservationTimeUsedException;
-import roomescape.reservation.Reservation;
-import roomescape.reservation.ReservationRepository;
-import roomescape.reservation.ReservationStatus;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
+import roomescape.schedule.Schedule;
 import roomescape.theme.Theme;
-import roomescape.theme.ThemeRepository;
+import roomescape.theme.ThemeService;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -27,26 +28,20 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.mock;
 import static roomescape.util.TestFactory.reservationTimeWithId;
 import static roomescape.util.TestFactory.themeWithId;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
 
-    private ReservationTimeService reservationTimeService;
+    @Mock
     private ReservationTimeRepository reservationTimeRepository;
-    private ThemeRepository themeRepository;
-    private ReservationRepository reservationRepository;
-
-    @BeforeEach
-    void setUp() {
-        reservationTimeRepository = mock(ReservationTimeRepository.class);
-        reservationRepository = mock(ReservationRepository.class);
-        themeRepository = mock(ThemeRepository.class);
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository,
-                themeRepository);
-    }
+    @Mock
+    private ThemeService themeService;
+    @Mock
+    private ReservationService reservationService;
+    @InjectMocks
+    private ReservationTimeService reservationTimeService;
 
     @Nested
     @DisplayName("예약 시간 생성")
@@ -101,7 +96,7 @@ public class ReservationTimeServiceTest {
                     ));
 
             // when
-            final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
+            final List<ReservationTimeResponse> actual = reservationTimeService.getAll();
 
             // then
             assertThat(actual)
@@ -117,7 +112,7 @@ public class ReservationTimeServiceTest {
                     .willReturn(List.of());
 
             // when
-            final List<ReservationTimeResponse> actual = reservationTimeService.findAll();
+            final List<ReservationTimeResponse> actual = reservationTimeService.getAll();
 
             // then
             assertThat(actual).hasSize(0);
@@ -141,13 +136,13 @@ public class ReservationTimeServiceTest {
                             reservationTimeWithId(2L, new ReservationTime(LocalTime.of(13, 0))),
                             reservationTimeWithId(3L, new ReservationTime(LocalTime.of(14, 0)))
                     ));
-            given(themeRepository.findById(dummyThemeId))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+            given(themeService.getById(dummyThemeId))
+                    .willReturn(theme);
+            given(reservationService.getAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of());
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.getAllAvailableTimes(
                     dummyThemeId, targetDate);
 
             // then
@@ -162,19 +157,20 @@ public class ReservationTimeServiceTest {
             final Theme theme = themeWithId(dummyThemeId, new Theme("메이", "테마", "asd"));
             final LocalDate targetDate = LocalDate.of(2026, 12, 1);
             final ReservationTime savedTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 0)));
+            final Schedule savedSchedule = new Schedule(targetDate, savedTime, theme);
             given(reservationTimeRepository.findAll())
                     .willReturn(List.of(
                             savedTime
                     ));
-            given(themeRepository.findById(dummyThemeId))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+            given(themeService.getById(dummyThemeId))
+                    .willReturn(theme);
+            given(reservationService.getAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of(
-                            new Reservation(null, null, savedTime, theme, ReservationStatus.PENDING))
+                            new Reservation(null, savedSchedule))
                     );
 
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.getAllAvailableTimes(
                     dummyThemeId, targetDate);
 
             // then
@@ -192,20 +188,18 @@ public class ReservationTimeServiceTest {
                     .willReturn(List.of(reservationTimeWithId(1L,
                             new ReservationTime(LocalTime.of(12, 0)))
                     ));
-            given(themeRepository.findById(dummyThemeId))
-                    .willReturn(Optional.of(theme));
-            given(reservationRepository.findAllByThemeAndDate(theme, targetDate))
+            given(themeService.getById(dummyThemeId))
+                    .willReturn(theme);
+            given(reservationService.getAllByThemeAndDate(theme, targetDate))
                     .willReturn(List.of());
             // when
-            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.findAllAvailableTimes(
+            final List<AvailableReservationTimeResponse> allAvailableTimes = reservationTimeService.getAllAvailableTimes(
                     dummyThemeId, targetDate);
 
             // then
             assertThat(allAvailableTimes.getFirst().alreadyBooked()).isFalse();
         }
-
     }
-
 
     @Nested
     @DisplayName("예약 시간 삭제")
@@ -218,7 +212,7 @@ public class ReservationTimeServiceTest {
             final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByReservationTime(reservationTime))
+            given(reservationService.existsByReservationTime(reservationTime))
                     .willReturn(false);
 
             // when
@@ -249,7 +243,7 @@ public class ReservationTimeServiceTest {
             final ReservationTime reservationTime = reservationTimeWithId(1L, new ReservationTime(LocalTime.of(12, 40)));
             given(reservationTimeRepository.findById(reservationTime.getId()))
                     .willReturn(Optional.of(reservationTime));
-            given(reservationRepository.existsByReservationTime(reservationTime))
+            given(reservationService.existsByReservationTime(reservationTime))
                     .willReturn(true);
 
             // when & then
