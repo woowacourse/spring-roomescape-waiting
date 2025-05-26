@@ -99,23 +99,11 @@ public class ReservationApplicationService {
             loginMemberInfo.id());
 
         List<MyReservationResponse> responses = new ArrayList<>(reservations.stream()
-            .map(reservation -> new MyReservationResponse(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getTime().getStartAt(),
-                "예약"
-            ))
+            .map(MyReservationResponse::from)
             .toList());
 
         responses.addAll(waitings.stream()
-            .map(waiting -> new MyReservationResponse(
-                waiting.waitingReservation().getId(),
-                waiting.waitingReservation().getTheme().getName(),
-                waiting.waitingReservation().getDate(),
-                waiting.waitingReservation().getTime().getStartAt(),
-                (waiting.rank()+1) + "번째 예약대기"
-            ))
+            .map(MyReservationResponse::from)
             .toList());
 
         return responses;
