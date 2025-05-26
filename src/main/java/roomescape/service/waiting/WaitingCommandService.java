@@ -50,8 +50,7 @@ public class WaitingCommandService {
 
         Waiting waiting = Waiting.createWithoutId(member, dto.localDate(), reservationTime, theme);
         Waiting saved = waitingRepository.save(waiting);
-        WaitingResponseDto waitingResponseDto = WaitingResponseDto.from(saved);
-        return waitingResponseDto;
+        return WaitingResponseDto.from(saved);
     }
 
     private void validateDuplicate(LocalDate date, long timeId, long themeId, long memberId) {
