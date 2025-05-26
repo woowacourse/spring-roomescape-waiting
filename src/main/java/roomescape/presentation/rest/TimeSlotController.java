@@ -24,23 +24,25 @@ import roomescape.presentation.response.TimeSlotResponse;
 @RestController
 public class TimeSlotController {
 
-    private final TimeSlotService service;
+    private final TimeSlotService timeSlotService;
 
-    public TimeSlotController(final TimeSlotService service) {
-        this.service = service;
+    public TimeSlotController(final TimeSlotService timeSlotService) {
+        this.timeSlotService = timeSlotService;
     }
 
     @PostMapping("/admin/times")
     @ResponseStatus(CREATED)
-    public TimeSlotResponse createTimeSlot(@RequestBody @Valid final CreateTimeSlotRequest request) {
-        TimeSlot timeSlot = service.saveTimeSlot(request.startAt());
+    public TimeSlotResponse createTimeSlot(
+            @RequestBody @Valid final CreateTimeSlotRequest request
+    ) {
+        TimeSlot timeSlot = timeSlotService.saveTimeSlot(request.startAt());
 
         return TimeSlotResponse.fromTimeSlot(timeSlot);
     }
 
     @GetMapping("/times")
     public List<TimeSlotResponse> readAllTimeSlots() {
-        List<TimeSlot> timeSlots = service.findAllTimeSlots();
+        List<TimeSlot> timeSlots = timeSlotService.findAllTimeSlots();
 
         return TimeSlotResponse.fromTimeSlots(timeSlots);
     }
@@ -48,16 +50,18 @@ public class TimeSlotController {
     @GetMapping(value = "/availableTimes", params = {"date", "themeId"})
     public List<AvailableTimeSlotResponse> readAvailableTimes(
             @RequestParam("date") final LocalDate date,
-            @RequestParam("themeId") final Long themeId) {
-
-        List<AvailableTimeSlot> availableTimeSlots = service.findAvailableTimeSlots(date, themeId);
+            @RequestParam("themeId") final Long themeId
+    ) {
+        List<AvailableTimeSlot> availableTimeSlots = timeSlotService.findAvailableTimeSlots(date, themeId);
 
         return AvailableTimeSlotResponse.fromAvailableTimeSlots(availableTimeSlots);
     }
 
     @DeleteMapping("/admin/times/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void deleteTimeSlotById(@PathVariable("id") final long id) {
-        service.removeById(id);
+    public void deleteTimeSlotById(
+            @PathVariable("id") final long id
+    ) {
+        timeSlotService.removeById(id);
     }
 }

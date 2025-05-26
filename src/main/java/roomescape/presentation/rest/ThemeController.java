@@ -30,7 +30,9 @@ public class ThemeController {
 
     @PostMapping("/admin/themes")
     @ResponseStatus(CREATED)
-    public ThemeResponse addTheme(@Valid @RequestBody final CreateThemeRequest request) {
+    public ThemeResponse addTheme(
+            @Valid @RequestBody final CreateThemeRequest request
+    ) {
         Theme theme = themeService.saveTheme(request.name(), request.description(), request.thumbnail());
 
         return ThemeResponse.fromTheme(theme);
@@ -56,7 +58,9 @@ public class ThemeController {
 
     @DeleteMapping("/admin/themes/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void removeTheme(@PathVariable final long id) {
+    public void removeTheme(
+            @PathVariable final long id
+    ) {
         themeService.removeById(id);
     }
 }

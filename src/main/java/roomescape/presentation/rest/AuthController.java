@@ -33,12 +33,16 @@ public class AuthController {
     }
 
     @GetMapping("/login/check")
-    public UserResponse checkLogin(@Authenticated final User user) {
+    public UserResponse checkLogin(
+            @Authenticated final User user
+    ) {
         return UserResponse.fromUser(user);
     }
 
     @PostMapping("/logout")
-    public void logout(final HttpServletResponse response) throws IOException {
+    public void logout(
+            final HttpServletResponse response
+    ) throws IOException {
         AuthenticationTokenCookie tokenCookieForExpire = AuthenticationTokenCookie.forExpire();
         response.addCookie(tokenCookieForExpire);
         response.sendRedirect("/");
