@@ -1,11 +1,11 @@
 package roomescape.application;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,8 +15,10 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.application.dto.ReservationCreateDto;
 import roomescape.application.dto.ReservationDto;
+import roomescape.application.dto.UserWaitingCreateDto;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Status;
 import roomescape.domain.Theme;
@@ -64,29 +66,28 @@ public class ReservationCommandServiceTest {
         ));
 
         //then
-        Assertions.assertThat(reservationDto).isEqualTo(ReservationDto.from(reservation));
+        assertThat(reservationDto).isEqualTo(ReservationDto.from(reservation));
     }
 
     @DisplayName("예약이 가능한 일시에 예약 대기를 등록할 수 없다")
     @Test
     void rejectedWaitingByUser() {
         // given
+        UserWaitingCreateDto request = new UserWaitingCreateDto(LocalDate.of(2025, 1, 1), 1L, 1L);
+        Long memberId = 1L;
+
+        Mockito.doReturn(false).when(reservationRepository).existsByDateAndTimeIdAndThemeIdAndStatusStatus(
+                request.date(),
+                request.time(),
+                request.theme(),
+                ReservationStatus.RESERVED
+        );
 
         // when
-
         // then
-
-    }
-
-    @DisplayName("이미 해당 일시에 예약이 존재한다면 예약 대기를 등록한다")
-    @Test
-    void registerWaitingByUser() {
-        // given
-
-        // when
-
-        // then
-
+        assertThatThrownBy(() -> reservationService.registerWaitingByUser(request, memberId))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약 가능한 일시입니다.");
     }
 
     @DisplayName("관리자가 다른 사람의 예약을 삭제할 수 있다")
