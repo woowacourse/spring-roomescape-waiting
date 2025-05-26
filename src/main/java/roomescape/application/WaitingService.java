@@ -67,19 +67,28 @@ public class WaitingService {
     public List<ReservationStatusServiceResponse> getWaitingsByMember(Long memberId) {
         List<Waiting> memberWaitings = waitingRepository.findByMemberId(memberId);
         return memberWaitings.stream()
-                .map(WaitingService::createReservationStatusDto)
+                .map(this::createReservationStatusDto)
                 .toList();
     }
 
-    private static ReservationStatusServiceResponse createReservationStatusDto(Waiting waiting) {
+    private ReservationStatusServiceResponse createReservationStatusDto(Waiting waiting) {
         GameSchedule gameSchedule = waiting.getGameSchedule();
+        Long order = calculateOrder(waiting);
         return new ReservationStatusServiceResponse(
                 waiting.getId(),
                 gameSchedule.getTheme().getName(),
                 gameSchedule.getDate(),
                 gameSchedule.getTime().getStartAt(),
-                ReservationStatus.name(waiting.getStatus())
+                order + waiting.getStatus().status()
         );
+    }
+
+    private Long calculateOrder(Waiting waiting) {
+        GameSchedule gameSchedule = waiting.getGameSchedule();
+        List<Waiting> waitings = waitingRepository.findByGameSchedule(gameSchedule);
+        return waitings.stream()
+                .filter(otherWaiting -> otherWaiting.getId() <= waiting.getId())
+                .count();
     }
 
     @Transactional

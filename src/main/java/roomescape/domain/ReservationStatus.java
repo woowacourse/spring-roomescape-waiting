@@ -12,4 +12,11 @@ public enum ReservationStatus {
         }
         throw new IllegalStateException("상태가 존재하지 않습니다.");
     }
+
+    public String status() {
+        if (this == WAITING) {
+            return "번째 " + name(this);
+        }
+        return name(this);
+    }
 }
