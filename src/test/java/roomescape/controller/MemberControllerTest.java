@@ -1,45 +1,30 @@
 package roomescape.controller;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.OK;
 import static roomescape.TestFixture.createMemberByName;
 
-import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.controller.dto.request.RegisterMemberRequest;
 import roomescape.controller.dto.response.MemberResponse;
 import roomescape.controller.dto.response.RegisterUserResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class MemberControllerTest {
-
-    @LocalServerPort
-    private int port;
+class MemberControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
 
     @Autowired
     private DBHelper dbHelper;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @BeforeEach
     void clean() {
@@ -57,7 +42,7 @@ class MemberControllerTest {
         );
 
         // when & then
-        RegisterUserResponse response = given().log().all()
+        RegisterUserResponse response = givenWithDocs("member-signup-post")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -82,7 +67,7 @@ class MemberControllerTest {
         dbHelper.insertMember(createMemberByName("멍구2"));
 
         // when & then
-        List<MemberResponse> responses = given().log().all()
+        List<MemberResponse> responses = givenWithDocs("member-get")
                 .when()
                 .get("/members")
                 .then().log().all()

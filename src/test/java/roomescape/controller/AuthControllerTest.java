@@ -1,20 +1,15 @@
 package roomescape.controller;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.springframework.http.HttpStatus.OK;
 import static roomescape.TestFixture.createMemberByName;
 
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.auth.JwtTokenProvider;
@@ -25,12 +20,7 @@ import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.service.dto.result.MemberResult;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class AuthControllerTest {
-
-    @LocalServerPort
-    private int port;
+class AuthControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     private DBHelper dbHelper;
@@ -40,11 +30,6 @@ class AuthControllerTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @BeforeEach
     void clean() {
@@ -64,7 +49,7 @@ class AuthControllerTest {
         );
 
         // when & then
-        LoginMemberResponse response = given().log().all()
+        LoginMemberResponse response = givenWithDocs("auth-login-post")
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(request)
                 .when()
@@ -90,7 +75,7 @@ class AuthControllerTest {
         String token = jwtTokenProvider.createToken(MemberResult.from(member));
 
         // when & then
-        CheckLoginUserResponse response = given().log().all()
+        CheckLoginUserResponse response = givenWithDocs("auth-login-check-get")
                 .cookie("token", token)
                 .when()
                 .get("/login/check")
@@ -111,7 +96,7 @@ class AuthControllerTest {
         String token = jwtTokenProvider.createToken(MemberResult.from(member));
 
         // when & then
-        given().log().all()
+        givenWithDocs("auth-logout-post")
                 .cookie("token", token)
                 .when()
                 .post("/logout")

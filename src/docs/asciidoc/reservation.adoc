@@ -1,0 +1,25 @@
+== 예약 (Reservation)
+
+=== 관리자 예약 추가 API
+==== request
+include::{snippets}/admin-reservation-create/http-request.adoc[]
+==== response
+include::{snippets}/admin-reservation-create/http-response.adoc[]
+
+=== 관리자 예약 목록 조회 API
+==== request
+include::{snippets}/admin-reservation-get/http-request.adoc[]
+==== response
+include::{snippets}/admin-reservation-get/http-response.adoc[]
+
+=== 관리자 예약 삭제 API
+==== request
+include::{snippets}/admin-reservation-delete/http-request.adoc[]
+==== response
+include::{snippets}/admin-reservation-delete/http-response.adoc[]
+
+=== 사용자 예약 추가 API
+==== request
+include::{snippets}/reservation-create/http-request.adoc[]
+==== response
+include::{snippets}/reservation-create/http-response.adoc[]

@@ -1,0 +1,25 @@
+== 테마 (Theme)
+
+=== 테마 추가 API
+==== request
+include::{snippets}/theme-create/http-request.adoc[]
+==== response
+include::{snippets}/theme-create/http-response.adoc[]
+
+=== 테마 목록 조회 API
+==== request
+include::{snippets}/theme-get/http-request.adoc[]
+==== response
+include::{snippets}/theme-get/http-response.adoc[]
+
+=== 테마 랭킹 조회 API
+==== request
+include::{snippets}/theme-rank-get/http-request.adoc[]
+==== response
+include::{snippets}/theme-rank-get/http-response.adoc[]
+
+=== 테마 삭제 API
+==== request
+include::{snippets}/theme-delete/http-request.adoc[]
+==== response
+include::{snippets}/theme-delete/http-response.adoc[]

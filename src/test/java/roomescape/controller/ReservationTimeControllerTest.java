@@ -1,14 +1,16 @@
 package roomescape.controller;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.springframework.restdocs.request.RequestDocumentation.parameterWithName;
+import static org.springframework.restdocs.request.RequestDocumentation.queryParameters;
+import static org.springframework.restdocs.restassured.RestAssuredRestDocumentation.document;
 import static roomescape.TestFixture.DEFAULT_DATE;
 import static roomescape.TestFixture.createDefaultMember;
 import static roomescape.TestFixture.createDefaultReservationTime;
-import static roomescape.TestFixture.createTimeFrom;
 import static roomescape.TestFixture.createDefaultTheme;
 import static roomescape.TestFixture.createNewReservation;
+import static roomescape.TestFixture.createTimeFrom;
 
 import io.restassured.RestAssured;
 import java.time.LocalTime;
@@ -17,10 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.controller.dto.request.CreateReservationTimeRequest;
@@ -30,12 +29,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationTimeRepository;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class ReservationTimeControllerTest {
-
-    @LocalServerPort
-    private int port;
+class ReservationTimeControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     private DBHelper dbHelper;
@@ -45,11 +39,6 @@ class ReservationTimeControllerTest {
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @BeforeEach
     void clean() {
@@ -63,7 +52,7 @@ class ReservationTimeControllerTest {
         dbHelper.insertTime(createDefaultReservationTime());
 
         // when & then
-        List<ReservationTimeResponse> responses = given().log().all()
+        List<ReservationTimeResponse> responses = givenWithDocs("reservationTime-get")
                 .when()
                 .get("/times")
                 .then().log().all()
@@ -82,7 +71,7 @@ class ReservationTimeControllerTest {
         );
 
         // when & then
-        given().log().all()
+        givenWithDocs("reservationTime-create")
                 .contentType("application/json")
                 .body(request)
                 .when()
@@ -102,7 +91,7 @@ class ReservationTimeControllerTest {
         dbHelper.insertTime(reservationTime);
 
         // when & then
-        given().log().all()
+        givenWithDocs("reservationTime-delete")
                 .when()
                 .delete("/times/1")
                 .then().log().all()
@@ -124,7 +113,13 @@ class ReservationTimeControllerTest {
         dbHelper.insertReservation(createNewReservation(createDefaultMember(), DEFAULT_DATE, time1, theme));
 
         // when & then
-        List<AvailableReservationTimeResponse> responses = given().log().all()
+        List<AvailableReservationTimeResponse> responses = RestAssured.given(documentationSpec)
+                .filter(document("reservationTime-available-get",
+                        queryParameters(
+                                parameterWithName("themeId").description("테마 ID"),
+                                parameterWithName("date").description("예약 날짜")
+                        )
+                ))
                 .when()
                 .get("/times/available?themeId=1&date=" + DEFAULT_DATE)
                 .then().log().all()

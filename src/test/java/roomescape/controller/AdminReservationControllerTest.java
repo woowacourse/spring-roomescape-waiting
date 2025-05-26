@@ -1,6 +1,5 @@
 package roomescape.controller;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.DEFAULT_DATE;
@@ -10,16 +9,12 @@ import static roomescape.TestFixture.createDefaultReservation_1;
 import static roomescape.TestFixture.createDefaultReservation_2;
 import static roomescape.TestFixture.createDefaultTheme;
 
-import io.restassured.RestAssured;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.auth.JwtTokenProvider;
@@ -32,12 +27,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.service.dto.result.MemberResult;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class AdminReservationControllerTest {
-
-    @LocalServerPort
-    private int port;
+class AdminReservationControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     private DBHelper dbHelper;
@@ -50,11 +40,6 @@ class AdminReservationControllerTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @BeforeEach
     void clean() {
@@ -73,7 +58,7 @@ class AdminReservationControllerTest {
         dbHelper.insertReservation(createDefaultReservation_2());
 
         // when & then
-        List<BookingResponse> responses = given().log().all()
+        List<BookingResponse> responses = givenWithDocs("admin-reservation-get")
                 .cookie("token", token)
                 .when()
                 .get("/admin/reservations")
@@ -103,7 +88,7 @@ class AdminReservationControllerTest {
         );
 
         // when & then
-        BookingResponse response = given().log().all()
+        BookingResponse response = givenWithDocs("admin-reservation-create")
                 .cookie("token", token)
                 .contentType("application/json")
                 .body(request)
@@ -131,7 +116,7 @@ class AdminReservationControllerTest {
         dbHelper.insertReservation(reservation);
 
         // when & then
-        given().log().all()
+        givenWithDocs("admin-reservation-delete")
                 .cookie("token", token)
                 .when()
                 .delete("/admin/reservations/1")

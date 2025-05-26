@@ -1,0 +1,19 @@
+== 인증 (Auth)
+
+=== 로그인 요청 API
+==== request
+include::{snippets}/auth-login-post/http-request.adoc[]
+==== response
+include::{snippets}/auth-login-post/http-response.adoc[]
+
+=== 로그인 확인 요청 API
+==== request
+include::{snippets}/auth-login-check-get/http-request.adoc[]
+==== response
+include::{snippets}/auth-login-check-get/http-response.adoc[]
+
+=== 로그아웃 요청 API
+==== request
+include::{snippets}/auth-logout-post/http-request.adoc[]
+==== response
+include::{snippets}/auth-logout-post/http-response.adoc[]

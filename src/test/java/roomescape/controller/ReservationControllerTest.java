@@ -1,20 +1,15 @@
 package roomescape.controller;
 
-import static io.restassured.RestAssured.given;
 import static roomescape.TestFixture.DEFAULT_DATE;
 import static roomescape.TestFixture.createDefaultMember;
 import static roomescape.TestFixture.createDefaultReservationTime;
 import static roomescape.TestFixture.createDefaultTheme;
 
-import io.restassured.RestAssured;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.auth.JwtTokenProvider;
@@ -24,12 +19,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.dto.result.MemberResult;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class ReservationControllerTest {
-
-    @LocalServerPort
-    private int port;
+class ReservationControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -39,11 +29,6 @@ class ReservationControllerTest {
 
     @Autowired
     private DatabaseCleaner databaseCleaner;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @BeforeEach
     void clean() {
@@ -66,7 +51,7 @@ class ReservationControllerTest {
         );
 
         // when & then
-        given().log().all()
+        givenWithDocs("reservation-create")
                 .cookie("token", token)
                 .contentType("application/json")
                 .body(request)
@@ -75,5 +60,4 @@ class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
     }
-
 } 

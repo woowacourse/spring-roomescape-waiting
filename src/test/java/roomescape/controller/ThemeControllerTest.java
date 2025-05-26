@@ -1,36 +1,29 @@
 package roomescape.controller;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.TestFixture.createDefaultMember;
 import static roomescape.TestFixture.createDefaultReservationTime;
 import static roomescape.TestFixture.createDefaultTheme;
 import static roomescape.TestFixture.createNewReservation;
+import static roomescape.TestFixture.createThemeByName;
 
-import io.restassured.RestAssured;
 import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.http.HttpStatus;
-import org.springframework.test.context.ActiveProfiles;
 import roomescape.DBHelper;
 import roomescape.DatabaseCleaner;
 import roomescape.controller.dto.request.CreateThemeRequest;
 import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.domain.Member;
 import roomescape.domain.Theme;
 import roomescape.domain.repository.ThemeRepository;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@ActiveProfiles("test")
-class ThemeControllerTest {
-
-    @LocalServerPort
-    private int port;
+class ThemeControllerTest extends AbstractRestDocsTest {
 
     @Autowired
     private DBHelper dbHelper;
@@ -40,11 +33,6 @@ class ThemeControllerTest {
 
     @Autowired
     private ThemeRepository themeRepository;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-    }
 
     @BeforeEach
     void clean() {
@@ -58,7 +46,7 @@ class ThemeControllerTest {
         dbHelper.insertTheme(createDefaultTheme());
 
         // when & then
-        List<ThemeResponse> responses = given().log().all()
+        List<ThemeResponse> responses = givenWithDocs("theme-get")
                 .when()
                 .get("/themes")
                 .then().log().all()
@@ -79,7 +67,7 @@ class ThemeControllerTest {
         );
 
         // when & then
-        given().log().all()
+        givenWithDocs("theme-create")
                 .contentType("application/json")
                 .body(request)
                 .when()
@@ -101,7 +89,7 @@ class ThemeControllerTest {
         dbHelper.insertTheme(theme);
 
         // when & then
-        given().log().all()
+        givenWithDocs("theme-delete")
                 .when()
                 .delete("/themes/1")
                 .then().log().all()
@@ -114,20 +102,37 @@ class ThemeControllerTest {
     @DisplayName("테마 랭킹을 조회한다")
     void getRankingTheme() {
         // given
-        Theme theme = createDefaultTheme();
-        dbHelper.insertTheme(theme);
+        Theme theme1 = createThemeByName("테마1");
+        Theme theme2 = createThemeByName("테마2");
+        dbHelper.insertTheme(theme1);
+        dbHelper.insertTheme(theme2);
+
+        Member member = createDefaultMember();
         dbHelper.insertReservation(createNewReservation(
-                createDefaultMember(), LocalDate.now().minusDays(1), createDefaultReservationTime(), theme
+                member, LocalDate.now().minusDays(1), createDefaultReservationTime(), theme1
         ));
 
+        dbHelper.insertReservation(createNewReservation(
+                member, LocalDate.now().minusDays(2), createDefaultReservationTime(), theme1
+        ));
+
+        dbHelper.insertReservation(createNewReservation(
+                member, LocalDate.now().minusDays(1), createDefaultReservationTime(), theme2
+        ));
+
+
         // when & then
-        List<ThemeResponse> responses = given().log().all()
+        List<ThemeResponse> responses = givenWithDocs("theme-rank-get")
                 .when()
                 .get("/themes/rank")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
                 .extract().jsonPath().getList(".", ThemeResponse.class);
 
-        assertThat(responses).hasSize(1);
+        assertAll(
+                () -> assertThat(responses).hasSize(2),
+                () -> assertThat(responses.get(0).name()).isEqualTo("테마1"),
+                () -> assertThat(responses.get(1).name()).isEqualTo("테마2")
+        );
     }
 } 

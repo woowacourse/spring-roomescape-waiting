@@ -58,7 +58,7 @@ public class TestFixture {
     }
 
     public static Member createDefaultMember() {
-        return Member.createNew("name", MemberRole.USER, "email", "password");
+        return Member.createNew("멍구", MemberRole.USER, "멍구@eamil.com", "password");
     }
 
     public static Member createAdminMember() {
@@ -70,11 +70,11 @@ public class TestFixture {
     }
 
     public static Theme createDefaultTheme() {
-        return new Theme("themeName", "description", "thumbnail");
+        return new Theme("테마1", "테마1의 설명입니다.", "thumbnail1.jpg");
     }
 
     public static Theme createThemeByName(String name) {
-        return new Theme(name, "description", "thumbnail");
+        return new Theme(name, "테마2의 설명입니다.", "thumbnail2.jpg");
     }
 
     public static Clock fixedClockAt(LocalDateTime fixedDateTime) {
