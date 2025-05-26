@@ -66,11 +66,11 @@ public class ReservationSpecs {
     }
 
     private static Path<LocalDate> dateOf(final Root<Reservation> reservation) {
-        return roomescapeScheduleOf(reservation).get("date");
+        return roomescapeScheduleOf(reservation).get("dateTime").get("date");
     }
 
     private static Path<Long> timeSlotIdOf(final Root<Reservation> reservation) {
-        return roomescapeScheduleOf(reservation).get("timeSlot").get("id");
+        return roomescapeScheduleOf(reservation).get("dateTime").get("timeSlot").get("id");
     }
 
     private static Path<Long> themeIdOf(final Root<Reservation> reservation) {

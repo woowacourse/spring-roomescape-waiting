@@ -1,20 +1,18 @@
 package roomescape.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Embeddable;
-import jakarta.persistence.JoinColumn;
+import jakarta.persistence.Embedded;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import roomescape.domain.reservation.ReservationDateTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.timeslot.TimeSlot;
-import roomescape.exception.BusinessRuleViolationException;
 
 @EqualsAndHashCode
 @Getter
@@ -24,36 +22,29 @@ import roomescape.exception.BusinessRuleViolationException;
 @Embeddable
 public class RoomescapeSchedule {
 
-    @Column(nullable = false)
-    private LocalDate date;
-    @ManyToOne
-    @JoinColumn(name = "time_id", nullable = false)
-    private TimeSlot timeSlot;
+    @Embedded
+    private ReservationDateTime dateTime;
     @ManyToOne
     private Theme theme;
 
-    private RoomescapeSchedule(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        this.date = date;
-        this.timeSlot = timeSlot;
+    private RoomescapeSchedule(final ReservationDateTime dateTime, final Theme theme) {
+        this.dateTime = dateTime;
         this.theme = theme;
     }
 
+    public LocalDate date() {
+        return dateTime.date();
+    }
+
+    public TimeSlot timeSlot() {
+        return dateTime.timeSlot();
+    }
+
     public static RoomescapeSchedule of(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        return new RoomescapeSchedule(date, timeSlot, theme);
+        return new RoomescapeSchedule(ReservationDateTime.of(date, timeSlot), theme);
     }
 
     public static RoomescapeSchedule forReserve(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
-        if (isBeforeNow(date, timeSlot)) {
-            throw new BusinessRuleViolationException("지나간 일시로 예약할 수 없습니다.");
-        }
-        return new RoomescapeSchedule(date, timeSlot, theme);
-    }
-
-    private static boolean isBeforeNow(final LocalDate date, final TimeSlot timeSlot) {
-        var now = LocalDateTime.now();
-        var today = now.toLocalDate();
-        var timeNow = now.toLocalTime();
-        return date.isBefore(today)
-               || (date.isEqual(today) && timeSlot.isTimeBefore(timeNow));
+        return new RoomescapeSchedule(ReservationDateTime.forReserve(date, timeSlot), theme);
     }
 }
