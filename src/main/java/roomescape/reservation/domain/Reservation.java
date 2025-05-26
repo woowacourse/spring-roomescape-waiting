@@ -121,6 +121,14 @@ public class Reservation {
         }
     }
 
+    public void approve() {
+        this.priority = priority.approve();
+    }
+
+    public boolean isWaiting() {
+        return !priority.isHighest();
+    }
+
     public Long getId() {
         return id;
     }

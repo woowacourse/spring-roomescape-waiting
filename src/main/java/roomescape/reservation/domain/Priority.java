@@ -8,6 +8,8 @@ import roomescape.exception.BadRequestException;
 @Embeddable
 public class Priority implements Comparable<Priority> {
 
+    private static final Priority HIGHEST = new Priority(0);
+
     @Column(name = "priority", nullable = false)
     private Integer value;
 
@@ -23,14 +25,18 @@ public class Priority implements Comparable<Priority> {
         return new Priority(1);
     }
 
-    static Priority next(Priority priority) {
-        return new Priority(priority.value + 1);
+    private void validate(Integer value) {
+        if (value == null || value < 0) {
+            throw new BadRequestException("예약 우선순위는 0 이상이어야 합니다.");
+        }
     }
 
-    private void validate(Integer value) {
-        if (value == null || value < 1) {
-            throw new BadRequestException("예약 우선순위는 1 이상이어야 합니다.");
-        }
+    public Priority approve() {
+        return HIGHEST;
+    }
+
+    public boolean isHighest() {
+        return this.equals(HIGHEST);
     }
 
     public Integer getValue() {

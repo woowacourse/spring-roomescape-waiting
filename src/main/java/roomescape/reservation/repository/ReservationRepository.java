@@ -38,5 +38,7 @@ public interface ReservationRepository {
 
     void delete(Reservation reservation);
 
-    List<Reservation> findHighestPriorityReservations();
+    List<Reservation> findHighestPriorityWaitings();
+
+    boolean isHighestPriorityWaiting(Reservation reservation);
 }

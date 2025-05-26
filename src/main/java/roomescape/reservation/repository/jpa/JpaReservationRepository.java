@@ -84,4 +84,17 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
             )
         """)
     List<Reservation> findHighestPriorityReservations();
+
+    @Query("""
+            SELECT COUNT(r) > 0 FROM Reservation r
+            WHERE r = :reservation
+              AND NOT EXISTS (
+                SELECT 1 FROM Reservation r2
+                WHERE r2.date = r.date
+                  AND r2.time = r.time
+                  AND r2.theme = r.theme
+                  AND r2.priority.value < r.priority.value
+              )
+        """)
+    boolean isHighestPriorityWaiting(Reservation reservation);
 }

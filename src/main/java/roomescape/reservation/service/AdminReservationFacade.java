@@ -56,7 +56,11 @@ public class AdminReservationFacade {
         return reservationService.findByCondition(reservationSearchConditionRequest);
     }
 
-    public List<ReservationResponse> findHighestPriorityReservations() {
-        return reservationService.findHighestPriorityReservations();
+    public List<ReservationResponse> findHighestPriorityWaitings() {
+        return reservationService.findHighestPriorityWaitings();
+    }
+
+    public void approveWaiting(Long id) {
+        reservationService.approveWaiting(id);
     }
 }

@@ -163,10 +163,27 @@ public class ReservationService {
         reservationRepository.delete(reservation);
     }
 
-    public List<ReservationResponse> findHighestPriorityReservations() {
-        List<Reservation> reservations = reservationRepository.findHighestPriorityReservations();
+    public List<ReservationResponse> findHighestPriorityWaitings() {
+        List<Reservation> reservations = reservationRepository.findHighestPriorityWaitings();
         return reservations.stream()
+            .filter(Reservation::isWaiting)
             .map(ReservationResponse::from)
             .toList();
+    }
+
+    public void approveWaiting(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+            .orElseThrow(() -> new BadRequestException("존재하지 않는 예약입니다."));
+
+        validateApprovalWaiting(reservation);
+
+        reservation.approve();
+        reservationRepository.save(reservation);
+    }
+
+    private void validateApprovalWaiting(Reservation reservation) {
+        if (!reservationRepository.isHighestPriorityWaiting(reservation)) {
+            throw new BadRequestException("앞에 대기 중인 예약이 있습니다. 대기 순서를 확인해주세요.");
+        }
     }
 }

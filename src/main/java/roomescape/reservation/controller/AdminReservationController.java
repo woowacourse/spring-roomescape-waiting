@@ -6,6 +6,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,7 +45,13 @@ public class AdminReservationController {
 
     @GetMapping("/waitings")
     public ResponseEntity<List<ReservationResponse>> readWaitingLists() {
-        List<ReservationResponse> waitingReservations = adminReservationService.findHighestPriorityReservations();
+        List<ReservationResponse> waitingReservations = adminReservationService.findHighestPriorityWaitings();
         return ResponseEntity.ok(waitingReservations);
+    }
+
+    @PatchMapping("/{id}/waitings/approve")
+    public ResponseEntity<Void> approveWaiting(@PathVariable Long id) {
+        adminReservationService.approveWaiting(id);
+        return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 }

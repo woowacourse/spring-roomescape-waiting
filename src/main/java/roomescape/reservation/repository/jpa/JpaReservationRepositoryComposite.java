@@ -90,7 +90,12 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     }
 
     @Override
-    public List<Reservation> findHighestPriorityReservations() {
+    public List<Reservation> findHighestPriorityWaitings() {
         return jpaReservationRepository.findHighestPriorityReservations();
+    }
+
+    @Override
+    public boolean isHighestPriorityWaiting(Reservation reservation) {
+        return jpaReservationRepository.isHighestPriorityWaiting(reservation);
     }
 }

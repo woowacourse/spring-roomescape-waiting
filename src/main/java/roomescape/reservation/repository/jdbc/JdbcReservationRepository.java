@@ -205,8 +205,16 @@ public class JdbcReservationRepository implements ReservationRepository {
      * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
      */
     @Override
-    public List<Reservation> findHighestPriorityReservations() {
+    public List<Reservation> findHighestPriorityWaitings() {
         return List.of();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public boolean isHighestPriorityWaiting(Reservation reservation) {
+        return false;
     }
 
     @Override
