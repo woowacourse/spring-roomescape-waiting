@@ -1,3 +1,14 @@
+# 사전 생성 계정 정보
+- 관리자 정보
+  - 이메일: admin@admin
+  - 이름: admin 
+  - 비밀번호: 1234
+  
+- 사용자 정보
+  - 이메일: lemon@lemon
+  - 이름: 'lemon'
+  - 비밀번호: 1234
+
 # 🚪방탈출 사용자 예약 애플리케이션
 
 `RoomescapeApplication`에서 실행 가능합니다.
