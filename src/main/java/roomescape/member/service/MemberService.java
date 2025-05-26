@@ -16,12 +16,17 @@ public class MemberService {
 
     @Transactional(readOnly = true)
     public Member findMemberByEmail(final String email) {
-        return memberRepository.findByEmail(email)
-                .orElseThrow(() -> new DataNotFoundException("해당 회원 데이터가 존재하지 않습니다. email = " + email));
+
+        return validateMember(email);
     }
 
     @Transactional(readOnly = true)
     public List<Member> findAll() {
         return memberRepository.findAll();
+    }
+
+    private Member validateMember(final String email) {
+        return memberRepository.findByEmail(email)
+                .orElseThrow(() -> new DataNotFoundException("해당 회원 데이터가 존재하지 않습니다. email = " + email));
     }
 }
