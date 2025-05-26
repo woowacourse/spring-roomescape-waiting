@@ -9,14 +9,11 @@ import roomescape.reservation.domain.WaitingReservation;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface JpaWaitingReservationRepository extends JpaRepository<WaitingReservation, Long> {
 
     boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
-
-    List<WaitingReservation> findAllByUserId(Long userId);
 
     @Query("""
             SELECT COALESCE(MAX(w.waitingOrder), 0) FROM WaitingReservation w WHERE

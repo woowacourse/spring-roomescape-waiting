@@ -13,6 +13,8 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingReservation;
+import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.theme.domain.Theme;
@@ -52,6 +54,9 @@ class ReservationFacadeIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitingReservationRepository waitingReservationRepository;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -138,6 +143,32 @@ class ReservationFacadeIntegrationTest {
                 .isInstanceOf(NotFoundException.class);
 
         assertThat(countReservations()).isEqualTo(initialReservationCount);
+    }
+
+    @Test
+    @DisplayName("예약 삭제 후, 대기된 예약이 있을 시 승격시킨다.")
+    void deleteAndPromtionWhenExsistWaiting() {
+        // given
+        long userId1 = 1L;
+        final Reservation reservation = reservationRepository.save(Reservation.withoutId(userId1,
+                ReservationDate.from(LocalDate.now().plusDays(1)),
+                time,
+                theme
+        ));
+        long userId2 = 2L;
+        final WaitingReservation waitingReservation = waitingReservationRepository.save(WaitingReservation.withoutId(userId2,
+                1,
+                ReservationDate.from(LocalDate.now().plusDays(1)),
+                time,
+                theme
+        ));
+        //when
+        reservationFacade.delete(reservation.getId());
+        //then
+        assertThat(waitingReservationRepository.findAll()).isEmpty();
+        assertThat(reservationRepository.findAllByUserId(userId1)).isEmpty();
+        assertThat(reservationRepository.findAllByUserId(userId2).getFirst().getUserId())
+                .isEqualTo(waitingReservation.getUserId());
     }
 
     private int countReservations() {

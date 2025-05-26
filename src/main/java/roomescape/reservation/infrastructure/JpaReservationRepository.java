@@ -11,15 +11,12 @@ import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 
 import java.util.List;
-import java.util.Optional;
 
 public interface JpaReservationRepository extends JpaRepository<Reservation, Long>, JpaSpecificationExecutor<Reservation> {
 
     boolean existsByTimeId(Long timeId);
 
     boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
-
-    Optional<Reservation> findByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
     List<Reservation> findAllByUserId(Long userId);
 
