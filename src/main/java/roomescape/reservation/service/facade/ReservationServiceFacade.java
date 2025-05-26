@@ -6,7 +6,9 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.auth.dto.LoginMember;
 import roomescape.member.domain.Member;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.AvailableReservationTimeRequest;
@@ -25,9 +27,12 @@ public class ReservationServiceFacade {
 
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
+    private final MemberService memberService;
 
     @Transactional
-    public CreateReservationResponse saveReservation(final CreateReservationRequest request, final Member member) {
+    public CreateReservationResponse saveReservation(final CreateReservationRequest request,
+                                                     final LoginMember loginMember) {
+        final Member member = memberService.findMemberByEmail(loginMember.email());
         final LocalDate date = request.date();
         final Long timeId = request.timeId();
         final Long themeId = request.themeId();
@@ -43,7 +48,8 @@ public class ReservationServiceFacade {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationMineResponse> findMyReservations(final Member member) {
+    public List<ReservationMineResponse> findMyReservations(final LoginMember loginMember) {
+        final Member member = memberService.findMemberByEmail(loginMember.email());
         final List<Reservation> reservations = reservationService.findByMember(member);
         final List<Waiting> waitings = reservationWaitingService.findWaitingByMember(member);
 
@@ -57,7 +63,8 @@ public class ReservationServiceFacade {
     }
 
     @Transactional
-    public CreateWaitingResponse saveWaiting(final CreateWaitingRequest request, final Member member) {
+    public CreateWaitingResponse saveWaiting(final CreateWaitingRequest request, final LoginMember loginMember) {
+        final Member member = memberService.findMemberByEmail(loginMember.email());
         final LocalDate date = request.date();
         final Long time = request.time();
         final Long theme = request.theme();

@@ -4,7 +4,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.jwt.JwtTokenProvider;
+import roomescape.common.exception.AccessDeniedException;
 import roomescape.common.exception.DataNotFoundException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepositoryInterface;
 
 @RequiredArgsConstructor
@@ -30,6 +33,18 @@ public class AuthService {
 
         return jwtTokenProvider.createToken(email);
     }
+
+    @Transactional(readOnly = true)
+    public void validateAdminByToken(final String token) {
+        final String email = jwtTokenProvider.getPayload(token);
+        final Member member = memberRepository.findByEmail(email)
+                .orElseThrow(() -> new DataNotFoundException("회원 정보가 없습니다."));
+
+        if (member.getRole() != Role.ADMIN) {
+            throw new AccessDeniedException("관리자만 접근 가능합니다.");
+        }
+    }
+
 
     private boolean checkInvalidLogin(final String email, final String password) {
         return memberRepository.existsByEmailAndPassword(email, password);

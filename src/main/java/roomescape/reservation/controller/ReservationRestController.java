@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.member.domain.Member;
+import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
@@ -32,11 +32,11 @@ public class ReservationRestController {
     @PostMapping
     public ResponseEntity<CreateReservationResponse> createReservation(
             @RequestBody final CreateReservationRequest createReservationRequest,
-            final Member member
+            final LoginMember loginMember
     ) {
         final CreateReservationResponse createReservationResponse = reservationServiceFacade.saveReservation(
                 createReservationRequest,
-                member
+                loginMember
         );
 
         return ResponseEntity.status(HttpStatus.CREATED).body(createReservationResponse);
@@ -67,7 +67,7 @@ public class ReservationRestController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
+    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final LoginMember member) {
 
         final List<ReservationMineResponse> reservations = reservationServiceFacade.findMyReservations(member);
 
@@ -77,11 +77,11 @@ public class ReservationRestController {
     @PostMapping("/waitings")
     public ResponseEntity<CreateWaitingResponse> createWaitingReservation(
             @RequestBody final CreateWaitingRequest createWaitingRequest,
-            final Member member
+            final LoginMember loginMember
     ) {
 
         final CreateWaitingResponse waitingResponse = reservationServiceFacade.saveWaiting(createWaitingRequest,
-                member);
+                loginMember);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(waitingResponse);
     }
