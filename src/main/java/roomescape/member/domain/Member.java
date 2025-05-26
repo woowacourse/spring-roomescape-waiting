@@ -15,13 +15,17 @@ import jakarta.persistence.Id;
 @Entity
 public class Member {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Embedded @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
     private MemberName name;
-    @Embedded @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "email", nullable = false))
     private Email email;
-    @Embedded @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
+    @Embedded
+    @AttributeOverride(name = "value", column = @Column(name = "password", nullable = false))
     private Password password;
     @Enumerated(value = EnumType.STRING)
     private Role role;
