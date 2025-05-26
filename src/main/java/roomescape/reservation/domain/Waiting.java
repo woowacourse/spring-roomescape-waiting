@@ -31,12 +31,7 @@ public class Waiting {
     @Embedded
     private ReservationInfo info;
 
-
     protected Waiting() {
-    }
-
-    public Member getMember() {
-        return member;
     }
 
     public Waiting(final Member member, final ReservationInfo info, final int turn) {
@@ -48,7 +43,6 @@ public class Waiting {
     public static Waiting createUpcomingReservationWithUnassignedId(final Member member, final int turn,
                                                                     final ReservationInfo reservationInfo,
                                                                     LocalDateTime now) {
-
         validateDateTime(reservationInfo, now);
         return new Waiting(member, reservationInfo, turn);
     }
@@ -58,7 +52,6 @@ public class Waiting {
             throw new InvalidReservationException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
         }
     }
-
 
     @Override
     public boolean equals(final Object object) {
@@ -83,5 +76,9 @@ public class Waiting {
 
     public int getTurn() {
         return turn;
+    }
+
+    public Member getMember() {
+        return member;
     }
 }
