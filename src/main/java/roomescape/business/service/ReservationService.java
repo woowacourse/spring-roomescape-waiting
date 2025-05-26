@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
@@ -48,6 +49,7 @@ public class ReservationService {
         this.waitInfoRepository = waitInfoRepository;
     }
 
+    @Transactional
     public ReservationResponse insert(
             final Long memberId,
             final Long themeId,
@@ -72,6 +74,7 @@ public class ReservationService {
         );
     }
 
+    @Transactional
     public WaitInfoResponse insertWait(
             final Long memberId,
             final Long themeId,
@@ -203,6 +206,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(final Long waitInfoId) {
         final WaitInfo waitInfo = getWaitInfoOrThrow(waitInfoId);
         waitInfoRepository.deleteById(waitInfoId);
@@ -246,6 +250,7 @@ public class ReservationService {
         return (long) index + RANK_START_VALUE;
     }
 
+    @Transactional
     public void deleteWaitInfoByIdAndMemberId(final Long waitInfoId, final Long memberId) {
         validateWaitInfoExistsByIdAndMemberId(waitInfoId, memberId);
         deleteById(waitInfoId);
