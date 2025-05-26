@@ -16,7 +16,7 @@ import roomescape.reservation.dto.request.ReservationCondition;
 public class ReservationRepositoryImpl implements ReservationRepositoryCustom {
 
     @PersistenceContext
-    public EntityManager entityManager;
+    private EntityManager entityManager;
 
     @Override
     public List<Reservation> findByCondition(ReservationCondition condition) {
