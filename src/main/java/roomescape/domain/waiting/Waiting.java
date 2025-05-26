@@ -6,6 +6,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 public class Waiting {
@@ -41,6 +42,18 @@ public class Waiting {
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) return false;
+        Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 
     public Long getId() {
