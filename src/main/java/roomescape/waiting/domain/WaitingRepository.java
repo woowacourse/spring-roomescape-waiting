@@ -37,4 +37,6 @@ public interface WaitingRepository {
             Long timeId,
             WaitingStatus status
     );
+
+    void delete(Waiting waiting);
 }

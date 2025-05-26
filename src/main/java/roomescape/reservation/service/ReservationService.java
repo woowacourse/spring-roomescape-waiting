@@ -79,10 +79,10 @@ public class ReservationService {
     }
 
     public void deleteReservationById(final Long id) {
-        reservationRepository.deleteById(id);
-
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
+
+        reservationRepository.deleteById(id);
 
         List<Waiting> waitings = waitingRepository.findByDateAndThemeIdAndTimeIdAndStatusOrderByCreatedAtAsc(
                 reservation.getDate(),
@@ -109,8 +109,7 @@ public class ReservationService {
         );
         reservationRepository.save(newReservation);
 
-        firstWaiting.approve();
-        waitingRepository.save(firstWaiting);
+        waitingRepository.delete(firstWaiting);
     }
 
     public List<MyReservationResponse> getMyReservations(final Long id) {

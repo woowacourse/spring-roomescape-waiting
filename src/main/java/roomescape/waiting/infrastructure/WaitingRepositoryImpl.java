@@ -72,4 +72,9 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     ) {
         return jpaWaitingRepository.findByDateAndTheme_IdAndTime_IdAndStatusOrderByCreatedAtAsc(date, themeId, timeId, status);
     }
+
+    @Override
+    public void delete(Waiting waiting) {
+        jpaWaitingRepository.delete(waiting);
+    }
 }
