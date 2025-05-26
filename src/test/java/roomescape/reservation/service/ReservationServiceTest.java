@@ -89,14 +89,14 @@ class ReservationServiceTest {
                 Arguments.of(null, 2L, null, null, 2),
                 Arguments.of(null, 3L, null, null, 0),
                 Arguments.of(null, null, LocalDate.of(2024, 10, 6), null, 3),
-                Arguments.of(null, null, LocalDate.of(2024, 10, 7), null, 2),
-                Arguments.of(null, null, LocalDate.of(2024, 10, 8), null, 1),
-                Arguments.of(null, null, LocalDate.of(2024, 10, 9), null, 0),
-                Arguments.of(null, null, null, LocalDate.of(2024, 10, 8), 3),
-                Arguments.of(null, null, null, LocalDate.of(2024, 10, 7), 2),
-                Arguments.of(null, null, null, LocalDate.of(2024, 10, 6), 1),
+                Arguments.of(null, null, LocalDate.of(2024, 10, 7), null, 3),
+                Arguments.of(null, null, LocalDate.of(2024, 10, 8), null, 2),
+                Arguments.of(null, null, LocalDate.of(2024, 10, 9), null, 1),
+                Arguments.of(null, null, null, LocalDate.of(2024, 10, 8), 2),
+                Arguments.of(null, null, null, LocalDate.of(2024, 10, 7), 1),
+                Arguments.of(null, null, null, LocalDate.of(2024, 10, 6), 0),
                 Arguments.of(null, null, null, LocalDate.of(2024, 10, 5), 0),
-                Arguments.of(null, null, LocalDate.of(2024, 10, 6), LocalDate.of(2024, 10, 7), 2)
+                Arguments.of(null, null, LocalDate.of(2024, 10, 6), LocalDate.of(2024, 10, 7), 1)
         );
     }
 
@@ -201,7 +201,7 @@ class ReservationServiceTest {
         // then
         List<ReservationResponse> reservations = reservationService.getReservations(
                 new ReservationConditionRequest(null, null, null, null));
-        assertThat(reservations).hasSize(2);
+        assertThat(reservations).hasSize(3);
     }
 
     @Test
@@ -242,6 +242,5 @@ class ReservationServiceTest {
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().member().name()).isEqualTo("포라");
         assertThat(remainings.getFirst().getMember().getName()).isEqualTo("승연");
-        assertThat(remainings.getFirst().getStatus().name()).isEqualTo("PENDING");
     }
 }

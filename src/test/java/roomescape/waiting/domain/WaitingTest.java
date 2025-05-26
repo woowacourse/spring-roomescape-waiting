@@ -23,14 +23,13 @@ public class WaitingTest {
         LocalDateTime createdAt = LocalDateTime.now();
 
         // when
-        Waiting waiting = Waiting.createWithoutId(member, date, time, theme, WaitingStatus.PENDING, createdAt);
+        Waiting waiting = Waiting.createWithoutId(member, date, time, theme, createdAt);
 
         // then
         assertThat(waiting.getMember()).isEqualTo(member);
         assertThat(waiting.getDate()).isEqualTo(date);
         assertThat(waiting.getTime()).isEqualTo(time);
         assertThat(waiting.getTheme()).isEqualTo(theme);
-        assertThat(waiting.getStatus()).isEqualTo(WaitingStatus.PENDING);
         assertThat(waiting.getCreatedAt()).isEqualTo(createdAt);
     }
 }

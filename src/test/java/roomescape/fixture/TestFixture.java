@@ -9,7 +9,6 @@ import roomescape.member.domain.Role;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingStatus;
 
 public class TestFixture {
 
@@ -42,7 +41,7 @@ public class TestFixture {
     }
 
     public static Waiting createWaiting(Member member, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
-        Waiting waiting = Waiting.createWithoutId(member, date, time, theme, WaitingStatus.PENDING, createdAt);
+        Waiting waiting = Waiting.createWithoutId(member, date, time, theme, createdAt);
         ReflectionTestUtils.setField(waiting, "id", 1L);
         return waiting;
     }

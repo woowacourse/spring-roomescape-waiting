@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -109,6 +110,10 @@ class ReservationServiceMockTest {
     @Test
     @DisplayName("삭제 명령을 1번 요청한다.")
     void deleteReservationById_test() {
+        // given
+        Reservation reservation = mock(Reservation.class);
+        when(reservationRepository.findById(1L))
+                .thenReturn(Optional.of(reservation));
         // when
         reservationService.deleteReservationById(1L);
         // then
