@@ -37,7 +37,7 @@ public class Waiting {
     @Column(name = "STATUS")
     private Status status;
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public Waiting(

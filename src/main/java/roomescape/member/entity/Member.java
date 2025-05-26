@@ -1,7 +1,6 @@
 package roomescape.member.entity;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
 import roomescape.exception.custom.AuthenticatedException;
 import roomescape.reservation.entity.Role;
 
@@ -27,7 +26,7 @@ public class Member {
     @Column(name = "ROLE")
     private Role role;
 
-    public Member() {
+    protected Member() {
     }
 
     public Member(

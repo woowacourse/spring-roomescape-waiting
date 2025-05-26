@@ -20,7 +20,7 @@ public class Theme {
     @Column(name = "THUMBNAIL")
     private String thumbnail;
 
-    public Theme() {
+    protected Theme() {
     }
 
     public Theme(String name, String description, String thumbnail) {

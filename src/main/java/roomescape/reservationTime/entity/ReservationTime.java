@@ -19,7 +19,7 @@ public class ReservationTime {
     @Column(name = "ALREADY_BOOKED")
     private Boolean alreadyBooked;
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public ReservationTime(LocalTime startAt, Boolean alreadyBooked) {

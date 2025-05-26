@@ -36,7 +36,7 @@ public class Reservation {
     @Column(name = "STATUS")
     private Status status;
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public Reservation(
