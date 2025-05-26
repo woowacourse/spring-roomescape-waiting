@@ -189,7 +189,7 @@ public class ReservationService {
                 themeId,
                 startDate,
                 endDate,
-                1L
+                RANK_START_VALUE
         );
 
         return waitInfos.stream()
