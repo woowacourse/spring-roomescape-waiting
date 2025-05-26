@@ -48,5 +48,5 @@ public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
             LEFT JOIN reservation_time rt ON rw.time_id = rt.id
             WHERE rw.member_id = :memberId
             """, nativeQuery = true)
-    List<WaitingWithRankDto> findWithRankByMemberId(Long memberId);
+    List<WaitingWithRankDto> findWithRankByMemberId(@Param("memberId") Long memberId);
 }
