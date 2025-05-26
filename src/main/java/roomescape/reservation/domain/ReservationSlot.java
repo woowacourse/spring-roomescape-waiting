@@ -34,8 +34,10 @@ public class ReservationSlot {
 
     private static final int MAX_WAITING_COUNT = 20;
 
-    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private final List<Reservation> allReservations = new ArrayList<>();
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
+    private Long id;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -51,11 +53,9 @@ public class ReservationSlot {
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "confirmed_reservation_id")
     private Reservation confirmedReservation;
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @EqualsAndHashCode.Include
-    private Long id;
 
+    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<Reservation> allReservations = new ArrayList<>();
 
     public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme) {
         validateDate(date);
