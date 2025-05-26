@@ -3,6 +3,7 @@ package roomescape.business.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.ConstraintMode;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.ForeignKey;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -10,12 +11,12 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @Entity
+@EntityListeners(AuditingEntityListener.class)
 public class WaitInfo {
-
-    private static final DateTimeFormatter DATE_TIME_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,15 +33,15 @@ public class WaitInfo {
     @Column(name = "rank")
     private Long rank;
 
+    @CreatedDate
     @Column(name = "created_at")
-    private String createdAt;
+    private LocalDateTime createdAt;
 
     public WaitInfo(final Long id, final Member member, final Reservation reservation, final Long rank) {
         this.id = id;
         this.member = member;
         this.reservation = reservation;
         this.rank = rank;
-        this.createdAt = LocalDateTime.now().format(DATE_TIME_FORMATTER);
     }
 
     public WaitInfo(final Member member, final Reservation reservation, final Long rank) {
@@ -66,7 +67,7 @@ public class WaitInfo {
         return rank;
     }
 
-    public String getCreatedAt() {
+    public LocalDateTime getCreatedAt() {
         return createdAt;
     }
 }
