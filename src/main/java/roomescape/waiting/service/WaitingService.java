@@ -83,6 +83,6 @@ public class WaitingService {
 
     private ReservationTime getReservationTime(final Long timeId) {
         return timeRepository.findById(timeId)
-                .orElseThrow(() -> new EntityNotFoundException(String.format("%d 식별자를 갖는 테마가 존재하지 않습니다.", timeId)));
+                .orElseThrow(() -> new EntityNotFoundException(String.format("%d 식별자를 갖는 예약 시간이 존재하지 않습니다.", timeId)));
     }
 }
