@@ -1,9 +1,8 @@
 package roomescape.exception;
 
+import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-
-import java.time.LocalDateTime;
 
 public record ErrorResponse(
         LocalDateTime timestamp,

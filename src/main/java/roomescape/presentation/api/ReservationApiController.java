@@ -1,6 +1,9 @@
 package roomescape.presentation.api;
 
 import jakarta.validation.Valid;
+import java.net.URI;
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,16 +17,14 @@ import roomescape.auth.AuthRequired;
 import roomescape.auth.LoginInfo;
 import roomescape.auth.Role;
 import roomescape.business.dto.ReservationDto;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.business.model.vo.UserRole;
 import roomescape.business.service.ReservationService;
 import roomescape.presentation.dto.request.AdminReservationRequest;
 import roomescape.presentation.dto.request.ReservationRequest;
 import roomescape.presentation.dto.response.ReservationMineResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
-
-import java.net.URI;
-import java.time.LocalDate;
-import java.util.List;
+import roomescape.business.dto.ReservationWithAheadDto;
 
 @RestController
 @RequiredArgsConstructor
@@ -33,8 +34,10 @@ public class ReservationApiController {
 
     @PostMapping("/reservations")
     @AuthRequired
-    public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request, LoginInfo loginInfo) {
-        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(), request.themeId(), loginInfo.id());
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody @Valid ReservationRequest request,
+                                                                 LoginInfo loginInfo) {
+        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(),
+                request.themeId(), loginInfo.id(), request.reservationStatus());
         ReservationResponse response = ReservationResponse.from(reservationDto);
         return ResponseEntity.created(URI.create("/reservations")).body(response);
     }
@@ -42,10 +45,21 @@ public class ReservationApiController {
     @PostMapping("/admin/reservations")
     @AuthRequired
     @Role(UserRole.ADMIN)
-    public ResponseEntity<ReservationResponse> adminCreateReservation(@RequestBody @Valid AdminReservationRequest request) {
-        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(), request.themeId(), request.userId());
+    public ResponseEntity<ReservationResponse> adminCreateReservation(
+            @RequestBody @Valid AdminReservationRequest request) {
+        ReservationDto reservationDto = reservationService.addAndGet(request.date(), request.timeId(),
+                request.themeId(), request.userId(),
+                ReservationStatus.RESERVED);
         ReservationResponse response = ReservationResponse.from(reservationDto);
         return ResponseEntity.created(URI.create("/reservations")).body(response);
+    }
+
+    @GetMapping("/admin/reservations/waiting")
+    @AuthRequired
+    @Role(UserRole.ADMIN)
+    public ResponseEntity<List<ReservationResponse>> getWaitingReservations() {
+        List<ReservationResponse> responses = reservationService.getAllWaitingReservations();
+        return ResponseEntity.ok(responses);
     }
 
     @GetMapping("/reservations")
@@ -64,15 +78,16 @@ public class ReservationApiController {
     @GetMapping("/reservations/mine")
     @AuthRequired
     public ResponseEntity<List<ReservationMineResponse>> getMyReservations(LoginInfo loginInfo) {
-        List<ReservationDto> myReservations = reservationService.getMyReservations(loginInfo.id());
-        List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservations);
+        List<ReservationWithAheadDto> myReservationsWithAhead = reservationService.getMyReservations(loginInfo.id());
+        List<ReservationMineResponse> responses = ReservationMineResponse.from(myReservationsWithAhead);
         return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping("/reservations/{id}")
     @AuthRequired
-    public ResponseEntity<Void> deleteReservation(@PathVariable String id, LoginInfo loginInfo) {
-        reservationService.delete(id, loginInfo.id());
+    @Role(UserRole.ADMIN)
+    public ResponseEntity<Void> deleteReservation(@PathVariable String id) {
+        reservationService.deleteAndUpdateWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }

@@ -152,11 +152,19 @@ function saveRow(event) {
 }
 
 function deleteRow(event) {
+    console.log('💥 deleteRow called');
     const row = event.target.closest('tr');
     const reservationId = row.cells[0].textContent;
 
     requestDelete(reservationId)
-        .then(() => row.remove())
+        .then(() => {
+            return window.confirm('삭제가 완료되었습니다.\n목록을 새로고침하시겠습니까?')
+                ? requestRead(RESERVATION_API_ENDPOINT)
+                : null;
+        })
+        .then(data => {
+            if (data) render(data);
+        })
         .catch(error => console.error('Error:', error));
 }
 

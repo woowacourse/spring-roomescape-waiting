@@ -1,9 +1,15 @@
 package roomescape.auth.jwt;
 
+import static roomescape.exception.SecurityErrorCode.TOKEN_EXPIRED;
+import static roomescape.exception.SecurityErrorCode.TOKEN_INVALID;
+
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import java.nio.charset.StandardCharsets;
+import java.util.Date;
+import javax.crypto.SecretKey;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.AuthToken;
@@ -11,13 +17,6 @@ import roomescape.auth.LoginInfo;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.UserRole;
 import roomescape.exception.auth.AuthenticationException;
-
-import javax.crypto.SecretKey;
-import java.nio.charset.StandardCharsets;
-import java.util.Date;
-
-import static roomescape.exception.SecurityErrorCode.TOKEN_EXPIRED;
-import static roomescape.exception.SecurityErrorCode.TOKEN_INVALID;
 
 @Component
 public class JJWTJwtUtil implements JwtUtil {
@@ -27,7 +26,8 @@ public class JJWTJwtUtil implements JwtUtil {
     private final SecretKey key;
     private final long expirationMills;
 
-    public JJWTJwtUtil(@Value("${jwt.secret}") final String secret, @Value("${jwt.expirationMinute}") final long expirationMinute) {
+    public JJWTJwtUtil(@Value("${jwt.secret}") final String secret,
+                       @Value("${jwt.expirationMinute}") final long expirationMinute) {
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMills = expirationMinute * 60 * 1000;
     }

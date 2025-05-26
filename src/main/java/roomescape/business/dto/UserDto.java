@@ -1,12 +1,11 @@
 package roomescape.business.dto;
 
+import java.util.List;
 import roomescape.business.model.entity.User;
 import roomescape.business.model.vo.Email;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.UserName;
 import roomescape.business.model.vo.UserRole;
-
-import java.util.List;
 
 public record UserDto(
         Id id,

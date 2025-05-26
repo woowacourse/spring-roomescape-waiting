@@ -1,31 +1,34 @@
 package roomescape.presentation.dto.response;
 
-import roomescape.business.dto.ReservationDto;
-import roomescape.business.model.vo.ReservationStatus;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import roomescape.business.dto.ReservationWithAheadDto;
+import roomescape.business.model.entity.Reservation;
+import roomescape.business.model.vo.ReservationStatus;
 
 public record ReservationMineResponse(
         String id,
         String themeName,
         LocalDate date,
         LocalTime time,
-        String status
+        ReservationStatus reservationStatus,
+        Long aheadCount
 ) {
-    public static ReservationMineResponse from(ReservationDto myReservations) {
+    public static ReservationMineResponse from(ReservationWithAheadDto myReservationWithAheadDto) {
+        Reservation reservation = myReservationWithAheadDto.reservation();
         return new ReservationMineResponse(
-                myReservations.id().value(),
-                myReservations.theme().name().value(),
-                myReservations.date().value(),
-                myReservations.time().startTime().value(),
-                ReservationStatus.RESERVED.getDisplayName()
+                reservation.getId().value(),
+                reservation.getTheme().getName().value(),
+                reservation.getDate().value(),
+                reservation.getTime().getStartTime().value(),
+                reservation.getReservationStatus(),
+                myReservationWithAheadDto.aheadCount()
         );
     }
 
-    public static List<ReservationMineResponse> from(List<ReservationDto> myReservations) {
-        return myReservations.stream()
+    public static List<ReservationMineResponse> from(List<ReservationWithAheadDto> myReservationsWithAheads) {
+        return myReservationsWithAheads.stream()
                 .map(ReservationMineResponse::from)
                 .toList();
     }

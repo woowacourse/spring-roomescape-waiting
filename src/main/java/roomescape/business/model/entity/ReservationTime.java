@@ -4,11 +4,14 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.*;
+import java.time.LocalTime;
+import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.StartTime;
-
-import java.time.LocalTime;
 
 @ToString
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

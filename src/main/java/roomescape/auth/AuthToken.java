@@ -1,13 +1,13 @@
 package roomescape.auth;
 
+import static org.springframework.boot.web.server.Cookie.SameSite;
+import static roomescape.exception.SecurityErrorCode.TOKEN_NOT_EXIST;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import roomescape.exception.auth.AuthenticationException;
-
-import static org.springframework.boot.web.server.Cookie.SameSite;
-import static roomescape.exception.SecurityErrorCode.TOKEN_NOT_EXIST;
 
 public record AuthToken(
         String value

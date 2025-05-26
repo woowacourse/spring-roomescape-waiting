@@ -1,10 +1,9 @@
 package roomescape.presentation.dto.response;
 
-import roomescape.business.dto.ReservationTimeDto;
-
 import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
+import roomescape.business.dto.ReservationTimeDto;
 
 public record ReservationTimeResponse(
         String id,

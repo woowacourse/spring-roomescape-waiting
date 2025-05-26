@@ -1,5 +1,13 @@
 package roomescape.infrastructure;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -10,16 +18,8 @@ import org.springframework.context.annotation.Import;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.repository.ReservationTimeRepository;
 import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ReservationStatus;
 import roomescape.test_util.JpaTestUtil;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 
 @DataJpaTest
 @Import({JpaReservationTimeRepository.class, JpaTestUtil.class})
@@ -81,10 +81,12 @@ class ReservationTimeRepositoryTest {
         testUtil.insertReservationTime(timeId3, LocalTime.of(14, 0));
         testUtil.insertTheme(themeId, "주홍색 연구");
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, LocalDate.now().plusDays(10), timeId1, themeId, userId);
+        testUtil.insertReservation(reservationId, LocalDate.now().plusDays(10), timeId1, themeId, userId,
+                ReservationStatus.RESERVED);
 
         // when
-        final List<ReservationTime> result = sut.findAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        final List<ReservationTime> result = sut.findAvailableByDateAndThemeId(LocalDate.now().plusDays(10),
+                Id.create(themeId));
 
         // then
         assertThat(result.size()).isEqualTo(2);
@@ -107,10 +109,12 @@ class ReservationTimeRepositoryTest {
         testUtil.insertReservationTime(timeId3, LocalTime.of(14, 0));
         testUtil.insertTheme(themeId, "주홍색 연구");
         testUtil.insertUser(userId, "돔푸");
-        testUtil.insertReservation(reservationId, LocalDate.now().plusDays(10), timeId1, themeId, userId);
+        testUtil.insertReservation(reservationId, LocalDate.now().plusDays(10), timeId1, themeId, userId,
+                ReservationStatus.RESERVED);
 
         // when
-        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10), Id.create(themeId));
+        final List<ReservationTime> result = sut.findNotAvailableByDateAndThemeId(LocalDate.now().plusDays(10),
+                Id.create(themeId));
 
         // then
         assertThat(result.size()).isEqualTo(1);

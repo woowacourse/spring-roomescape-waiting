@@ -37,6 +37,7 @@ function render(data) {
         row.insertCell(3).textContent = item.date;            // date
         row.insertCell(4).textContent = item.time.startAt;    // 예약 시간 startAt
 
+
         const actionCell = row.insertCell(row.cells.length);
         actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
     });
@@ -184,7 +185,14 @@ function deleteRow(event) {
     const reservationId = row.cells[0].textContent;
 
     requestDelete(reservationId)
-        .then(() => row.remove())
+        .then(() => {
+            return window.confirm(`예약번호 ${reservationId} 삭제가 완료되었습니다.`)
+                ? requestRead(RESERVATION_API_ENDPOINT)
+                : null;
+        })
+        .then(data => {
+            if (data) render(data);
+        })
         .catch(error => console.error('Error:', error));
 }
 

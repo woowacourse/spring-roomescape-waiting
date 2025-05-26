@@ -1,5 +1,11 @@
 package roomescape.auth.config;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.mock;
+import static org.mockito.BDDMockito.verify;
+
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -14,9 +20,6 @@ import roomescape.auth.AuthToken;
 import roomescape.auth.LoginInfo;
 import roomescape.auth.jwt.JwtUtil;
 import roomescape.exception.auth.AuthenticationException;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.BDDMockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class AuthenticationInterceptorTest {

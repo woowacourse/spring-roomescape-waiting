@@ -1,7 +1,16 @@
 package roomescape.business.service;
 
+import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
+import static roomescape.exception.ErrorCode.RESERVATION_TIME_ALREADY_EXIST;
+import static roomescape.exception.ErrorCode.RESERVATION_TIME_INTERVAL_INVALID;
+import static roomescape.exception.ErrorCode.RESERVED_RESERVATION_TIME;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ReservableReservationTimeDto;
 import roomescape.business.dto.ReservationTimeDto;
 import roomescape.business.model.entity.ReservationTime;
@@ -13,16 +22,8 @@ import roomescape.exception.business.InvalidCreateArgumentException;
 import roomescape.exception.business.NotFoundException;
 import roomescape.exception.business.RelatedEntityExistException;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static roomescape.exception.ErrorCode.RESERVATION_NOT_EXIST;
-import static roomescape.exception.ErrorCode.RESERVATION_TIME_ALREADY_EXIST;
-import static roomescape.exception.ErrorCode.RESERVATION_TIME_INTERVAL_INVALID;
-import static roomescape.exception.ErrorCode.RESERVED_RESERVATION_TIME;
-
 @Service
+@Transactional
 @RequiredArgsConstructor
 public class ReservationTimeService {
 
@@ -38,8 +39,8 @@ public class ReservationTimeService {
         return ReservationTimeDto.fromEntity(reservationTime);
     }
 
+
     private void validateNoDuplication(final ReservationTime reservationTime) {
-        // TODO : 디미터 법칙
         boolean isExist = reservationTimeRepository.existByTime(reservationTime.startTimeValue());
         if (isExist) {
             throw new DuplicatedException(RESERVATION_TIME_ALREADY_EXIST);
@@ -47,21 +48,25 @@ public class ReservationTimeService {
     }
 
     private void validateTimeInterval(final ReservationTime reservationTime) {
-        boolean existInInterval = reservationTimeRepository.existBetween(reservationTime.startInterval(), reservationTime.endInterval());
+        boolean existInInterval = reservationTimeRepository.existBetween(reservationTime.startInterval(),
+                reservationTime.endInterval());
         if (existInInterval) {
             throw new InvalidCreateArgumentException(RESERVATION_TIME_INTERVAL_INVALID);
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeDto> getAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return ReservationTimeDto.fromEntities(reservationTimes);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservableReservationTimeDto> getAllByDateAndThemeId(final LocalDate date, final String themeIdValue) {
         Id themeId = Id.create(themeIdValue);
         final List<ReservationTime> available = reservationTimeRepository.findAvailableByDateAndThemeId(date, themeId);
-        final List<ReservationTime> notAvailable = reservationTimeRepository.findNotAvailableByDateAndThemeId(date, themeId);
+        final List<ReservationTime> notAvailable = reservationTimeRepository.findNotAvailableByDateAndThemeId(date,
+                themeId);
 
         return ReservableReservationTimeDto.fromEntities(available, notAvailable);
     }
