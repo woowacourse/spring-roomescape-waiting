@@ -27,12 +27,14 @@ import roomescape.waiting.domain.WaitingRepository;
 import roomescape.waiting.domain.Waitings;
 import roomescape.waiting.exception.DuplicatedWaitingException;
 import roomescape.waiting.exception.SlotNotReservedException;
+import roomescape.waiting.exception.TooManyWaitingException;
 import roomescape.waiting.exception.WaitingNotFoundException;
 
 @Service
 @AllArgsConstructor
 @Transactional
 public class WaitingService {
+    private static final int MAX_WAITING_COUNT = 100;
 
     private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
@@ -52,8 +54,16 @@ public class WaitingService {
         ReservationSpec spec = new ReservationSpec(date, time, theme);
         validateReservedByOthers(member, spec);
 
+        validateMaxWaitingCount(spec);
+
         Waiting waiting = new Waiting(member, spec);
         return WaitingResponse.from(waitingRepository.save(waiting));
+    }
+
+    private void validateMaxWaitingCount(ReservationSpec spec) {
+        if (waitingRepository.findBySpec(spec).size() >= MAX_WAITING_COUNT) {
+            throw new TooManyWaitingException();
+        }
     }
 
     private void validateReservedByOthers(Member member, ReservationSpec spec) {
@@ -63,16 +73,16 @@ public class WaitingService {
         validateDuplicated(member, reservation.get());
     }
 
+    private void validateReservationExists(Optional<Reservation> reservation) {
+        if (reservation.isEmpty()) {
+            throw new SlotNotReservedException();
+        }
+    }
+
     private void validateDuplicated(Member member, Reservation reservation) {
         Waitings waitings = new Waitings(waitingRepository.findBySpec(reservation.getSpec()));
         if (reservation.getMember().equals(member) || waitings.containsMember(member)) {
             throw new DuplicatedWaitingException();
-        }
-    }
-
-    private void validateReservationExists(Optional<Reservation> reservation) {
-        if (reservation.isEmpty()) {
-            throw new SlotNotReservedException();
         }
     }
 
