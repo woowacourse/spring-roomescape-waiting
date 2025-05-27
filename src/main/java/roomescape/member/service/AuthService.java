@@ -3,19 +3,19 @@ package roomescape.member.service;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.NoSuchElementException;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.controller.request.TokenLoginCreateRequest;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.member.controller.response.TokenLoginResponse;
 import roomescape.member.domain.Email;
-import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JwtTokenProvider;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.resolver.UnauthenticatedException;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private static final String TOKEN = "token";
@@ -40,11 +40,9 @@ public class AuthService {
 
     public MemberResponse findUserByToken(String token) {
         String payload = jwtTokenProvider.getPayload(token);
-        Optional<Member> member = memberRepository.findByEmail(new Email(payload));
-        if (member.isPresent()) {
-            return MemberResponse.from(member.get());
-        }
-        throw new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.");
+        return MemberResponse.from(
+                memberRepository.findByEmail(new Email(payload))
+                        .orElseThrow(() -> new NoSuchElementException("[ERROR] 멤버가 존재하지 않습니다.")));
     }
 
     public String extractToken(HttpServletRequest request) {

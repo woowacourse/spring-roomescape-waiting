@@ -14,7 +14,7 @@ public class Name {
         this.name = name;
     }
 
-    public Name() {
+    protected Name() {
 
     }
 

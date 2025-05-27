@@ -6,6 +6,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import roomescape.member.role.Role;
 
 @Entity
@@ -54,5 +55,9 @@ public class Member {
 
     public Role getRole() {
         return role;
+    }
+
+    public boolean isSameId(Long id) {
+        return Objects.equals(this.id, id);
     }
 }

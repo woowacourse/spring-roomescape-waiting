@@ -1,18 +1,17 @@
 package roomescape.time.repository;
 
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.time.controller.response.AvailableReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
 
+@Transactional(readOnly = true)
 public interface ReservationTimeJpaTimeRepository extends JpaRepository<ReservationTime, Long>,
         ReservationTimeRepository {
-
-    boolean existsByStartAt(LocalTime startAt);
 
     @Query("""
             SELECT new roomescape.time.controller.response.AvailableReservationTimeResponse(

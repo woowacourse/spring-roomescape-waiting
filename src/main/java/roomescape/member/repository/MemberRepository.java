@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 
 public interface MemberRepository {
@@ -16,8 +15,6 @@ public interface MemberRepository {
     Optional<Member> findByEmail(Email payload);
 
     Optional<Member> findById(Long id);
-
-    Optional<Member> findByName(Name name);
 
     List<Member> findAll();
 }
