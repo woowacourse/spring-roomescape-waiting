@@ -46,7 +46,7 @@ function render(data) {
             cancelButton.textContent = '취소';
             cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
-                requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
+                requestDeleteWaiting(item.reservationSlotId).then(() => window.location.reload());
             };
             cancelCell.appendChild(cancelButton);
         } else { // 예약 완료 상태일 때
@@ -55,8 +55,8 @@ function render(data) {
     });
 }
 
-function requestDeleteWaiting(reservationId) {
-    const endpoint = `/waiting-reservations/${reservationId}`;
+function requestDeleteWaiting(reservationSlotId) {
+    const endpoint = `/waiting-reservations/${reservationSlotId}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

@@ -59,9 +59,4 @@ public class ThemeDataService {
         LocalDate startDate = endDate.minusDays(days);
         return themeRepository.findPopularThemes(startDate, endDate, PageRequest.of(0, limit));
     }
-
-    public Theme findById(final Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
-    }
 }

@@ -70,6 +70,10 @@ public class Reservation {
         return reservationSlot;
     }
 
+    public void setReservationSlot(final ReservationSlot reservationSlot) {
+        this.reservationSlot = reservationSlot;
+    }
+
     public Member getMember() {
         return member;
     }

@@ -58,6 +58,22 @@ public class ReservationSlot {
         reservations.add(new Reservation(member, this));
     }
 
+    public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
+    public static ReservationSlot createWithReservation(
+            final Member member, final LocalDate date,
+            final ReservationTime time, final Theme theme) {
+
+        ReservationSlot slot = new ReservationSlot(date, time, theme);
+        Reservation reservation = new Reservation(member, slot);
+        slot.addReservation(reservation);
+        return slot;
+    }
+
     protected ReservationSlot() {
     }
 
@@ -66,13 +82,18 @@ public class ReservationSlot {
                                                             final ReservationTime time,
                                                             final Theme theme, final LocalDateTime now) {
         validateDateTime(date, time.getStartAt(), now);
-        return new ReservationSlot(member, date, time, theme);
+        return ReservationSlot.createWithReservation(member, date, time, theme);
     }
 
     private static void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
         if (LocalDateTime.of(date, time).isBefore(now)) {
             throw new InvalidReservationSlotException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
         }
+    }
+
+    public void addReservation(final Reservation reservation) {
+        this.reservations.add(reservation);
+        reservation.setReservationSlot(this);
     }
 
     public Reservation addWaiting(final Member member) {
