@@ -89,13 +89,6 @@ public class Reservation {
         return status == ReservationStatus.CONFIRMED;
     }
 
-    public void setSlot(ReservationSlot slot) {
-        if (!isWaiting()) {
-            throw new ReservationException("대기 상태가 아닌 예약은 슬롯을 변경할 수 없습니다.");
-        }
-        this.slot = slot;
-    }
-
     public String getStatusValue() {
         return status.getDescription();
     }
