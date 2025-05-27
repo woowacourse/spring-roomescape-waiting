@@ -69,8 +69,9 @@ public class ReservationFacadeService {
         Reservation newReservation = reservationService.save(
                 Reservation.createUpcomingReservationWithUnassignedId(
                         member,
-                        new ReservationInfo(date, time, theme), now));
-        return ReservationResponse.of(newReservation, time, theme, member);
+                        new ReservationInfo(date, time, theme), now)
+        );
+        return ReservationResponse.of(newReservation);
     }
 
     private ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
@@ -85,7 +86,7 @@ public class ReservationFacadeService {
                         member,
                         turn + 1,
                         new ReservationInfo(date, time, theme), now));
-        return ReservationResponse.of(newWaiting, time, theme, member);
+        return ReservationResponse.of(newWaiting);
     }
 
     public void deleteReservation(final Long reservationId) {
