@@ -17,6 +17,7 @@ import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
+import roomescape.reservationslot.exception.InvalidReservationSlotException;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
@@ -102,5 +103,14 @@ class ReservationSlotApplicationServiceTest {
                 () -> reservationSlotApplicationService.create(futureDate, 999L, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationSlotNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
+    }
+
+    @Test
+    void createReservation_shouldThrowException_WhenPastDate() {
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        assertThatThrownBy(
+                () -> reservationSlotApplicationService.create(pastDate, timeId, themeId, memberId, afterOneHour))
+                .isInstanceOf(InvalidReservationSlotException.class)
+                .hasMessageContaining("예약 시간이 현재 시간보다 이전일 수 없습니다.");
     }
 }

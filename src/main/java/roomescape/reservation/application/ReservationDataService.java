@@ -33,13 +33,13 @@ public class ReservationDataService {
     }
 
     @Transactional
-    public void deleteByReservationSlotIdAndMemberId(final Long reservationId, final Long memberId) {
-        validateWaitingOwner(reservationId, memberId);
-        reservationRepository.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
+    public void deleteByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
+        validateWaitingOwner(reservationSlotId, memberId);
+        reservationRepository.deleteByReservationIdAndMemberId(reservationSlotId, memberId);
     }
 
-    public void validateWaitingOwner(final Long reservationId, final Long memberId) {
-        boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationId, memberId);
+    public void validateWaitingOwner(final Long reservationSlotId, final Long memberId) {
+        boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
         if (!doesExists) {
             throw new ReservationOwnerException("자신의 예약 대기가 아닙니다.");
         }
@@ -55,8 +55,8 @@ public class ReservationDataService {
                 memberId);
     }
 
-    public void removeWaitingReservation(final Long waitingId) {
-        reservationRepository.deleteById(waitingId);
+    public void removeWaitingReservation(final Long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 
     public void deleteById(final Long reservationId) {

@@ -51,14 +51,14 @@ public class ReservationApplicationService {
         ReservationSlot reservationSlot = reservationSlotDataService.getReservationByDateAndTimeAndTheme(date, timeId,
                 themeId);
         Member member = memberDataService.getMember(memberId);
-        Reservation reservation = reservationSlot.addMemberToWaiting(member);
+        Reservation reservation = reservationSlot.addWaiting(member);
         reservationDataService.save(reservation);
 
         return ReservationResponse.from(reservation);
     }
 
-    public void removeWaiting(final Long reservationId, final Long memberId) {
-        reservationDataService.deleteByReservationSlotIdAndMemberId(reservationId, memberId);
+    public void removeWaiting(final Long reservationSlotId, final Long memberId) {
+        reservationDataService.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
     }
 
     public List<WaitingResponse> findAllWaitingReservations() {
@@ -68,8 +68,8 @@ public class ReservationApplicationService {
                 .toList();
     }
 
-    public void removeWaitingReservation(final Long waitingId) {
-        reservationDataService.removeWaitingReservation(waitingId);
+    public void removeWaitingReservation(final Long reservationId) {
+        reservationDataService.removeWaitingReservation(reservationId);
     }
 
     public void delete(final Long reservationId) {

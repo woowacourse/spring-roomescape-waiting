@@ -51,12 +51,16 @@ public class ReservationSlotApplicationService {
         Theme theme = themeDataService.findTheme(themeId);
         Member member = memberDataService.getMember(memberId);
         ReservationSlot reservationSlot = reservationSlotDataService.save(member, date, time, theme, now);
-        Reservation reservation = reservationDataService.findByReservationSlot(reservationSlot)
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+        Reservation reservation = getReservation(reservationSlot);
         return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }
 
     public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {
         return reservationDataService.findMyReservations(memberInfo);
+    }
+
+    private Reservation getReservation(final ReservationSlot reservationSlot) {
+        return reservationDataService.findByReservationSlot(reservationSlot)
+                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
     }
 }

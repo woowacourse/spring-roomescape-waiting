@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.presentation.dto.request.AdminReservationSlotCreateRequest;
 import roomescape.reservationslot.presentation.dto.request.ReservationSlotCreateRequest;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 
 @RestController
 public class ReservationSlotController {
@@ -33,8 +33,7 @@ public class ReservationSlotController {
             MemberInfo memberInfo
     ) {
         TotalReservationResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
-                request.themeId(),
-                memberInfo.id(), LocalDateTime.now());
+                request.themeId(), memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 

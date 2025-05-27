@@ -48,9 +48,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             WHERE w.reservationSlot.id = :reservationId
             AND w.member.id = :memberId
             """)
-    void deleteByReservationSlotIdAndMemberId(Long reservationId, Long memberId);
+    void deleteByReservationIdAndMemberId(Long reservationId, Long memberId);
 
-    boolean existsByReservationSlotIdAndMemberId(Long reservationId, Long memberId);
+    boolean existsByReservationSlotIdAndMemberId(Long reservationSlotId, Long memberId);
 
     @Query("""
             SELECT r 

@@ -62,12 +62,12 @@ public class ReservationController {
     }
 
     @RequireRole(MemberRole.REGULAR)
-    @DeleteMapping("/waiting-reservations/{reservationId}")
+    @DeleteMapping("/waiting-reservations/{reservationSlotId}")
     public ResponseEntity<Void> deleteWaitingReservations(
-            @PathVariable Long reservationId,
+            @PathVariable Long reservationSlotId,
             MemberInfo memberInfo
     ) {
-        reservationApplicationService.removeWaiting(reservationId, memberInfo.id());
+        reservationApplicationService.removeWaiting(reservationSlotId, memberInfo.id());
         return ResponseEntity.noContent().build();
     }
 

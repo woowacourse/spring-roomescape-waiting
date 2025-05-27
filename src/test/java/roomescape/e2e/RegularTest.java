@@ -151,13 +151,13 @@ public class RegularTest {
                 .extract()
                 .as(ReservationResponse.class);
 
-        Long reservationId = reservationResponse.reservationId();
+        Long reservationSlotId = reservationResponse.reservationSlotId();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, user2Token)
-                .pathParam("reservationId", reservationId)
-                .when().delete("/waiting-reservations/{reservationId}")
+                .pathParam("reservationSlotId", reservationSlotId)
+                .when().delete("/waiting-reservations/{reservationSlotId}")
                 .then().log().all()
                 .statusCode(204);
 

@@ -3,7 +3,7 @@ package roomescape.reservationslot.presentation.dto.response;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationslot.domain.ReservationSlot;
 
-public record MyReservationSlotResponse(Long reservationId,
+public record MyReservationSlotResponse(Long reservationSlotId,
                                         String theme,
                                         String date,
                                         String time,

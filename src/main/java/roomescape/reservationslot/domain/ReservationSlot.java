@@ -75,7 +75,7 @@ public class ReservationSlot {
         }
     }
 
-    public Reservation addMemberToWaiting(final Member member) {
+    public Reservation addWaiting(final Member member) {
         boolean alreadyWaiting = reservations.stream()
                 .anyMatch(waiting -> waiting.getMember().getId().equals(member.getId()));
         if (alreadyWaiting) {
@@ -94,15 +94,19 @@ public class ReservationSlot {
                 .orElseThrow(() -> new ReservationSlotNotFoundException("현재 예약한 멤버가 없습니다."));
     }
 
-    public long findRank(final Reservation givenReservation) {
-        if (!reservations.contains(givenReservation)) {
-            throw new ReservationNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
-        }
+    public long findRank(final Reservation reservation) {
+        validateReservationExist(reservation);
         List<Reservation> sortedReservations = new ArrayList<>(reservations)
                 .stream()
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .toList();
-        return sortedReservations.indexOf(givenReservation);
+        return sortedReservations.indexOf(reservation);
+    }
+
+    private void validateReservationExist(final Reservation givenReservation) {
+        if (!reservations.contains(givenReservation)) {
+            throw new ReservationNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
+        }
     }
 
     @Override
