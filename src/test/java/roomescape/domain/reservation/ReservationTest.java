@@ -24,13 +24,13 @@ public class ReservationTest {
     private final Theme theme = TestFixtures.anyThemeWithNewId();
 
     @Test
-    @DisplayName("주어진 예약과 같은 예약 슬롯인 지 비교할 수 있다.")
-    void sameSlotWith() {
+    @DisplayName("주어진 예약과 같은 방탈출 일정인 지 비교할 수 있다.")
+    void sameScheduleWith() {
         var schedule = RoomescapeSchedule.of(date, timeSlot, theme);
         var reservation1 = new Reservation(1L, user1, schedule, ReservationStatus.RESERVED);
         var reservation2 = new Reservation(2L, user2, schedule, ReservationStatus.RESERVED);
 
-        assertThat(reservation1.sameSlotWith(reservation2)).isTrue();
+        assertThat(reservation1.sameScheduleWith(reservation2)).isTrue();
     }
 
     @Test

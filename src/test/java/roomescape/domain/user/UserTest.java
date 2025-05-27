@@ -51,17 +51,17 @@ class UserTest {
     }
 
     @Test
-    @DisplayName("이미 예약한 슬롯에는 예약을 할 수 없다.")
-    void reserveDuplicateSlot() {
+    @DisplayName("이미 예약한 방탈출 일정에는 예약을 할 수 없다.")
+    void reserveDuplicateSchedule() {
         // given
         var user = anyUserWithNewId();
         var reservation = new Reservation(1L, user, schedule, ReservationStatus.RESERVED);
         user.reserve(reservation);
 
-        var reservationWithDuplicatedSlot = new Reservation(2L, user, schedule, ReservationStatus.WAITING);
+        var reservationWithDuplicatedSchedule = new Reservation(2L, user, schedule, ReservationStatus.WAITING);
 
         // when & then
-        assertThatThrownBy(() -> user.reserve(reservationWithDuplicatedSlot))
+        assertThatThrownBy(() -> user.reserve(reservationWithDuplicatedSchedule))
             .isInstanceOf(AlreadyExistedException.class);
     }
 

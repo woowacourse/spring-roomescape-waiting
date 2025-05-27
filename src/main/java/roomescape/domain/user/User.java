@@ -63,7 +63,7 @@ public class User {
         return role == UserRole.ADMIN;
     }
 
-    public List<RoomescapeSchedule> reservedSlots() {
+    public List<RoomescapeSchedule> reservedSchedules() {
         return reservations.stream()
             .map(Reservation::reservedSchedule)
             .toList();
@@ -71,13 +71,13 @@ public class User {
 
     public void reserve(final Reservation reservation) {
         if (alreadyReservedAt(reservation.reservedSchedule())) {
-            throw new AlreadyExistedException("이미 해당 예약 슬롯에 예약 또는 대기하셨습니다.");
+            throw new AlreadyExistedException("이미 해당 방탈출 일정에 예약 또는 대기하셨습니다.");
         }
         reservations.add(reservation);
     }
 
     private boolean alreadyReservedAt(final RoomescapeSchedule schedule) {
-        return reservedSlots().contains(schedule);
+        return reservedSchedules().contains(schedule);
     }
 
     public void cancelReservation(final Reservation reservation) {

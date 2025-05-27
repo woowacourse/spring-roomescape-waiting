@@ -27,7 +27,7 @@ public class ReservationQueues {
         if (!reservation.isWaiting()) {
             return ReservationQueue.ORDERING_START_INDEX;
         }
-        var queue = queueOfSlot(reservation.reservedSchedule());
+        var queue = queueOfSchedule(reservation.reservedSchedule());
         return queue.orderOf(reservation);
     }
 
@@ -39,11 +39,11 @@ public class ReservationQueues {
     }
 
     public Optional<Reservation> findNext(final Reservation reservation) {
-        var queue = queueOfSlot(reservation.reservedSchedule());
+        var queue = queueOfSchedule(reservation.reservedSchedule());
         return queue.findNext(reservation);
     }
 
-    private ReservationQueue queueOfSlot(final RoomescapeSchedule schedule) {
+    private ReservationQueue queueOfSchedule(final RoomescapeSchedule schedule) {
         return queues.getOrDefault(schedule, new ReservationQueue(Collections.emptyList()));
     }
 }

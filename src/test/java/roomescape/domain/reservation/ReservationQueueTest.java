@@ -63,8 +63,8 @@ class ReservationQueueTest {
     }
 
     @Test
-    @DisplayName("다른 슬롯의 예약 순번을 조회하려하면 예외가 발생한다.")
-    void orderOfMismatchSlot() {
+    @DisplayName("다른 일정의 예약 순번을 조회하려하면 예외가 발생한다.")
+    void orderOfMismatchSchedule() {
         var queue = new ReservationQueue(emptyList());
         var reservation = reservationOf(otherSchedule, user1);
 

@@ -36,7 +36,7 @@ public class UserService {
     @Transactional(readOnly = true)
     public List<ReservationWithOrder> getMyReservations(final long id) {
         var user = repository.getById(id);
-        var queues = reservationRepository.findQueuesBySchedules(user.reservedSlots());
+        var queues = reservationRepository.findQueuesBySchedules(user.reservedSchedules());
         return queues.orderOfAll(user.reservations());
     }
 

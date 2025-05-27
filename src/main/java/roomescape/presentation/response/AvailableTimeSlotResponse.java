@@ -7,7 +7,7 @@ import roomescape.domain.timeslot.TimeSlotBookStatus;
 public record AvailableTimeSlotResponse(
         long id,
         LocalTime startAt,
-        Boolean alreadyBooked
+        boolean alreadyBooked
 ) {
 
     public static AvailableTimeSlotResponse from(final TimeSlotBookStatus timeSlotBookStatus) {

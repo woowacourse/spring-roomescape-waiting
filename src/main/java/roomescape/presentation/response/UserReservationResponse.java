@@ -16,9 +16,9 @@ public record UserReservationResponse(
         var reservation = waiting.reservation();
         return new UserReservationResponse(
             reservation.id(),
-            reservation.reservedSchedule().date(),
-            TimeSlotResponse.from(reservation.reservedSchedule().timeSlot()),
-            ThemeResponse.from(reservation.reservedSchedule().theme()),
+            reservation.date(),
+            TimeSlotResponse.from(reservation.timeSlot()),
+            ThemeResponse.from(reservation.theme()),
             writeDescription(waiting)
         );
     }

@@ -9,12 +9,15 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.sql.Timestamp;
+import java.time.LocalDate;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.domain.RoomescapeSchedule;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.user.User;
 import roomescape.exception.BusinessRuleViolationException;
 
@@ -51,7 +54,7 @@ public class Reservation {
         this(0L, user, schedule, status);
     }
 
-    public final boolean sameSlotWith(final Reservation reservation) {
+    public final boolean sameScheduleWith(final Reservation reservation) {
         return this.reservedSchedule.equals(reservation.reservedSchedule);
     }
 
@@ -75,6 +78,18 @@ public class Reservation {
             throw new BusinessRuleViolationException("대기중인 예약만 취소할 수 있습니다.");
         }
         this.status = ReservationStatus.CANCELED;
+    }
+
+    public LocalDate date() {
+        return reservedSchedule.date();
+    }
+
+    public TimeSlot timeSlot() {
+        return reservedSchedule.timeSlot();
+    }
+
+    public Theme theme() {
+        return reservedSchedule.theme();
     }
 
     @Override

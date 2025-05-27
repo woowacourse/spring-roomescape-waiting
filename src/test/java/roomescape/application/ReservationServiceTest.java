@@ -225,7 +225,7 @@ class ReservationServiceTest extends ServiceTest {
         // when
         var fromYesterday_toToday = new ReservationSearchFilter(theme.id(), user.id(), yesterday(), today());
         var fromToday_toTomorrow = new ReservationSearchFilter(theme.id(), user.id(), today(), tomorrow());
-        var fromTomorrow_toThreeDays = new ReservationSearchFilter(theme.id(), user.id(), tomorrow(), afterThreeDay.reservedSchedule().date());
+        var fromTomorrow_toThreeDays = new ReservationSearchFilter(theme.id(), user.id(), tomorrow(), afterThreeDay.date());
 
         // then
         assertAll(
