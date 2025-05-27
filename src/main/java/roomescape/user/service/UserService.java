@@ -56,10 +56,9 @@ public class UserService {
         List<Reservation> reservations = reservationRepository.findByUser(member);
         List<ReservationWithStateDto> dtos1 = convertReservationWithStateDto(reservations);
 
-        List<Waiting> waitings = waitingRepository.findByMember(member);
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(
                 member.getId());
-        List<ReservationWithStateDto> dtos2 = convertReservationWithStateDto(waitings, waitingWithRanks);
+        List<ReservationWithStateDto> dtos2 = convertWaitingWithRanksWithStateDto(waitingWithRanks);
 
         dtos1.addAll(dtos2);
         return dtos1;
@@ -71,12 +70,11 @@ public class UserService {
                 .collect(Collectors.toCollection(ArrayList::new));
     }
 
-    private static List<ReservationWithStateDto> convertReservationWithStateDto(List<Waiting> waitings,
-                                                                                List<WaitingWithRank> waitingWithRanks) {
+    private static List<ReservationWithStateDto> convertWaitingWithRanksWithStateDto(List<WaitingWithRank> waitingWithRanks) {
         Map<Waiting, WaitingWithRank> waitingRankMap = waitingWithRanks.stream()
                 .collect(Collectors.toMap(WaitingWithRank::waiting, Function.identity()));
 
-        return waitings.stream()
+        return waitingRankMap.keySet().stream()
                 .map(waiting -> {
                     WaitingWithRank waitingWithRank = waitingRankMap.get(waiting);
                     if (waitingWithRank == null) {
