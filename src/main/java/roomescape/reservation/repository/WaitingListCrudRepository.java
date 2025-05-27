@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
+import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 
@@ -20,7 +21,7 @@ public interface WaitingListCrudRepository extends ListCrudRepository<Waiting, L
             ORDER BY w.id ASC
             LIMIT 1
             """)
-    Optional<Waiting> findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(LocalDate date, Long timeId, Long themeId);
+    Optional<Waiting> findFirstWaitingByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(@Param("date") LocalDate date, @Param("timeId") Long timeId, @Param("themeId") Long themeId);
 
     @Query("""
             SELECT new roomescape.reservation.domain.WaitingWithRank(
@@ -34,7 +35,7 @@ public interface WaitingListCrudRepository extends ListCrudRepository<Waiting, L
             FROM Waiting w
             WHERE w.member.id = :memberId
             """)
-    List<WaitingWithRank> findWaitingWithRankByMemberId(Long memberId);
+    List<WaitingWithRank> findWaitingWithRankByMemberId(@Param("memberId") Long memberId);
 
     boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 }
