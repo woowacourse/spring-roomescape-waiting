@@ -1,6 +1,6 @@
 package roomescape.waiting.application.dto;
 
-import roomescape.waiting.Waiting;
+import roomescape.waiting.domain.Waiting;
 
 public record WaitingIdResponse(Long waitingId) {
 

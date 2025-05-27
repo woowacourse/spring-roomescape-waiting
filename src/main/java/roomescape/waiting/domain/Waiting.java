@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

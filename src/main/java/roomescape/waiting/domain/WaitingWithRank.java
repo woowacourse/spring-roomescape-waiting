@@ -1,4 +1,4 @@
-package roomescape.waiting;
+package roomescape.waiting.domain;
 
 public class WaitingWithRank {
 

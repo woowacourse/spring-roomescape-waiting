@@ -24,8 +24,8 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.waiting.Waiting;
-import roomescape.waiting.repository.WaitingRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.repository.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
