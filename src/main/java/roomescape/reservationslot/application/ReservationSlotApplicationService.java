@@ -51,7 +51,7 @@ public class ReservationSlotApplicationService {
         ReservationTime time = reservationTimeDataService.findReservationTime(timeId);
         Theme theme = themeDataService.findTheme(themeId);
         Member member = memberDataService.getMember(memberId);
-        ReservationSlot reservationSlot = reservationSlotDataService.save(member, date, time, theme, now);
+        ReservationSlot reservationSlot = reservationSlotDataService.saveWithReservation(member, date, time, theme, now);
         Reservation reservation = getReservation(reservationSlot);
         return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }

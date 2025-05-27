@@ -21,9 +21,9 @@ import java.util.List;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationslot.exception.InvalidReservationSlotException;
-import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -53,58 +53,18 @@ public class ReservationSlot {
     @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     private List<Reservation> reservations = new ArrayList<>();
 
-    public ReservationSlot(final Member member, final LocalDate date, final ReservationTime time,
-                           final Theme theme) {
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        reservations.add(new Reservation(member, this));
-    }
-
     public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
         this.date = date;
         this.time = time;
         this.theme = theme;
     }
 
-    public static ReservationSlot createWithReservation(
-            final Member member, final LocalDate date,
-            final ReservationTime time, final Theme theme) {
-
-        ReservationSlot slot = new ReservationSlot(date, time, theme);
-        Reservation reservation = new Reservation(member, slot);
-        slot.addReservation(reservation);
-        return slot;
-    }
-
     protected ReservationSlot() {
     }
 
-    public static ReservationSlot createUpcomingReservation(final Member member,
-                                                            final LocalDate date,
-                                                            final ReservationTime time,
-                                                            final Theme theme, final LocalDateTime now) {
+    public Reservation addReservation(final Member member, final LocalDateTime now) {
         validateDateTime(date, time.getStartAt(), now);
-        return ReservationSlot.createWithReservation(member, date, time, theme);
-    }
-
-    private static void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
-        if (LocalDateTime.of(date, time).isBefore(now)) {
-            throw new InvalidReservationSlotException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
-        }
-    }
-
-    public void addReservation(final Reservation reservation) {
-        this.reservations.add(reservation);
-        reservation.setReservationSlot(this);
-    }
-
-    public Reservation addWaiting(final Member member) {
-        boolean alreadyWaiting = reservations.stream()
-                .anyMatch(waiting -> waiting.getMember().getId().equals(member.getId()));
-        if (alreadyWaiting) {
-            throw new ReservationSlotAlreadyExistsException("이미 예약 대기중입니다.");
-        }
+        validateMemberReserved(member);
         Reservation reservation = new Reservation(member, this);
         reservations.add(reservation);
         return reservation;
@@ -127,9 +87,23 @@ public class ReservationSlot {
         return sortedReservations.indexOf(reservation);
     }
 
+    private void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
+        if (LocalDateTime.of(date, time).isBefore(now)) {
+            throw new InvalidReservationSlotException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
+        }
+    }
+
+    private void validateMemberReserved(final Member member) {
+        boolean memberExists = reservations.stream()
+                .anyMatch(reservation -> reservation.getMember().getId().equals(member.getId()));
+        if (memberExists) {
+            throw new ReservationAlreadyExistsException("이미 예약 대기중입니다.");
+        }
+    }
+
     private void validateReservationExist(final Reservation givenReservation) {
         if (!reservations.contains(givenReservation)) {
-            throw new ReservationNotFoundException("해당 예약 대기를 찾을 수 없습니다.");
+            throw new ReservationNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
     }
 
@@ -160,5 +134,9 @@ public class ReservationSlot {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public List<Reservation> getReservations() {
+        return reservations;
     }
 }

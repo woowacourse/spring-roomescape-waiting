@@ -1,12 +1,14 @@
 package roomescape.reservation.application;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
+
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservation.presentation.dto.response.WaitingResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
@@ -52,7 +54,7 @@ public class ReservationApplicationService {
         ReservationSlot reservationSlot = reservationSlotDataService.getReservationByDateAndTimeAndTheme(date, timeId,
                 themeId);
         Member member = memberDataService.getMember(memberId);
-        Reservation reservation = reservationSlot.addWaiting(member);
+        Reservation reservation = reservationSlot.addReservation(member, LocalDateTime.now());
         reservationDataService.save(reservation);
 
         return ReservationResponse.from(reservation);

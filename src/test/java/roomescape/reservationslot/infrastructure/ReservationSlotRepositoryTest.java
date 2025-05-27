@@ -2,7 +2,6 @@ package roomescape.reservationslot.infrastructure;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.fixture.TestFixture.FUTURE_DATE;
-import static roomescape.fixture.TestFixture.NOW_DATETIME;
 
 import java.time.LocalTime;
 import java.util.List;
@@ -49,8 +48,7 @@ class ReservationSlotRepositoryTest {
         member = memberRepository.save(TestFixture.makeMember());
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
-        reservationSlotRepository.save(
-                ReservationSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime, theme, NOW_DATETIME));
+        reservationSlotRepository.save(TestFixture.makeReservation(FUTURE_DATE, reservationTime, member, theme));
     }
 
     @Test
@@ -83,10 +81,8 @@ class ReservationSlotRepositoryTest {
         ReservationTime reservationTime3 = reservationTimeRepository.save(
                 ReservationTime.withUnassignedId(LocalTime.of(12, 0)));
 
-        reservationSlotRepository.save(
-                ReservationSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime2, theme, NOW_DATETIME));
-        reservationSlotRepository.save(
-                ReservationSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime3, theme, NOW_DATETIME));
+        reservationSlotRepository.save(TestFixture.makeReservation(FUTURE_DATE, reservationTime2, member, theme));
+        reservationSlotRepository.save(TestFixture.makeReservation(FUTURE_DATE, reservationTime3, member, theme));
 
         List<AvailableReservationTimeResponse> bookedTimesByDateAndThemeId = reservationSlotRepository.findBookedTimesByDateAndThemeId(
                 FUTURE_DATE, theme.getId());

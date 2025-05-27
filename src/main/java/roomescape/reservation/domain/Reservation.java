@@ -40,9 +40,10 @@ public class Reservation {
     public Reservation(final Member member, final ReservationSlot reservationSlot) {
         this.member = member;
         this.reservationSlot = reservationSlot;
+        reservationSlot.getReservations().add(this);
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public boolean isReserved() {
@@ -68,10 +69,6 @@ public class Reservation {
 
     public ReservationSlot getReservationSlot() {
         return reservationSlot;
-    }
-
-    public void setReservationSlot(final ReservationSlot reservationSlot) {
-        this.reservationSlot = reservationSlot;
     }
 
     public Member getMember() {

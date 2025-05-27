@@ -11,16 +11,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.domain.Reservation;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
@@ -53,8 +53,10 @@ class ReservationRepositoryTest {
         member = memberRepository.save(TestFixture.makeMember());
         reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
-        ReservationSlot reservationSlot = reservationSlotRepository.save(
-                ReservationSlot.createUpcomingReservation(member, FUTURE_DATE, reservationTime, theme, NOW_DATETIME));
+
+        ReservationSlot reservationSlot = new ReservationSlot(FUTURE_DATE, reservationTime, theme);
+        reservationSlot.addReservation(member, NOW_DATETIME);
+        reservationSlotRepository.save(reservationSlot);
     }
 
     @Test
@@ -76,9 +78,7 @@ class ReservationRepositoryTest {
         ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
         reservationTime2 = reservationTimeRepository.save(reservationTime2);
 
-        ReservationSlot reservationSlot2 = ReservationSlot.createUpcomingReservation(member, FUTURE_DATE,
-                reservationTime2, theme2,
-                NOW_DATETIME);
+        ReservationSlot reservationSlot2 = TestFixture.makeReservation(FUTURE_DATE, reservationTime2, member, theme2);
         reservationSlotRepository.save(reservationSlot2);
 
         List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndDateBetweenAndReservationMemberId(
