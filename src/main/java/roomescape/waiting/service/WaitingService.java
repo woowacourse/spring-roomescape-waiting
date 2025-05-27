@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.dto.request.LoginMember;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -23,12 +24,14 @@ public class WaitingService {
     private final MemberRepository memberRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
-    public WaitingService(WaitingRepository waitingRepository, MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+    public WaitingService(WaitingRepository waitingRepository, MemberRepository memberRepository, ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
         this.memberRepository = memberRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public WaitingResponse createWaiting(WaitingRequest request, LoginMember loginMember) {
@@ -38,6 +41,11 @@ public class WaitingService {
                 .orElseThrow(() -> new IllegalArgumentException("예약 시간을 찾을 수 없습니다"));
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new IllegalArgumentException("테마를 찾을 수 없습니다"));
+
+        boolean isBooking = reservationRepository.existsByDateAndTimeStartAtAndThemeId(request.date(), time.getStartAt(), request.themeId());
+        if (!isBooking) {
+            throw new IllegalStateException("해당 날짜와 시간에 예약이 존재하지 않아 대기를 할 수 없습니다.");
+        }
 
         if (waitingRepository.existsByMemberIdAndDateAndTimeId(
                 loginMember.id(),
