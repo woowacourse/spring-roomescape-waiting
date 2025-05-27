@@ -24,8 +24,6 @@ import roomescape.service.timeprovider.TimeProvider;
 @Service
 public class WaitingService {
 
-    private static final LocalDate NOW = LocalDate.now();
-
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
@@ -50,7 +48,7 @@ public class WaitingService {
         final Waiting waiting = createWaiting(reservation, member, currentDateTime);
 
         validateExists(waiting, member);
-        waiting.isAfterBy(NOW);
+        waiting.isAfterBy(timeProvider.getCurrentDateTime().toLocalDate());
 
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return savedWaiting.getId();
