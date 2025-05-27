@@ -157,62 +157,95 @@ VALUES
 (CURRENT_DATE - 3, 9, 1, 4, NOW()),
 (CURRENT_DATE - 3, 10, 1, 4, NOW());
 
--- theme_id 2: 예약 9건, waiting 2명씩
+
 INSERT INTO waiting (date, member_id, theme_id, time_id, created_at)
 VALUES
-    (CURRENT_DATE - 2, 5, 2, 11, NOW()),
-    (CURRENT_DATE - 2, 6, 2, 11, NOW()),
+    (CURRENT_DATE - 3, 1, 1, 13, NOW()),
+    (CURRENT_DATE - 3, 2, 1, 13, NOW()),
 
-    (CURRENT_DATE - 2, 7, 2, 10, NOW()),
-    (CURRENT_DATE - 2, 8, 2, 10, NOW()),
+    (CURRENT_DATE - 3, 3, 1, 12, NOW()),
+    (CURRENT_DATE - 3, 4, 1, 12, NOW()),
 
-    (CURRENT_DATE - 2, 9, 2, 9, NOW()),
-    (CURRENT_DATE - 2, 10, 2, 9, NOW()),
+    (CURRENT_DATE - 3, 5, 1, 11, NOW()),
+    (CURRENT_DATE - 3, 6, 1, 11, NOW()),
 
-    (CURRENT_DATE - 2, 11, 2, 8, NOW()),
+    (CURRENT_DATE - 3, 7, 1, 10, NOW()),
+    (CURRENT_DATE - 3, 8, 1, 10, NOW()),
+
+    (CURRENT_DATE - 3, 9, 1, 9, NOW()),
+    (CURRENT_DATE - 3, 10, 1, 9, NOW()),
+
+    (CURRENT_DATE - 3, 11, 1, 8, NOW()),
+    (CURRENT_DATE - 3, 1, 1, 8, NOW()),
+
+    (CURRENT_DATE - 3, 2, 1, 7, NOW()),
+    (CURRENT_DATE - 3, 3, 1, 7, NOW()),
+
+    (CURRENT_DATE - 3, 4, 1, 6, NOW()),
+    (CURRENT_DATE - 3, 5, 1, 6, NOW()),
+
+    (CURRENT_DATE - 3, 6, 1, 5, NOW()),
+    (CURRENT_DATE - 3, 7, 1, 5, NOW()),
+
+    (CURRENT_DATE - 3, 8, 1, 4, NOW()),
+    (CURRENT_DATE - 3, 9, 1, 4, NOW());
+
+
+INSERT INTO waiting (date, member_id, theme_id, time_id, created_at)
+VALUES
+    (CURRENT_DATE - 2, 10, 2, 11, NOW()),
+    (CURRENT_DATE - 2, 11, 2, 11, NOW()),
+
+    (CURRENT_DATE - 2, 1, 2, 10, NOW()),
+    (CURRENT_DATE - 2, 2, 2, 10, NOW()),
+
+    (CURRENT_DATE - 2, 3, 2, 9, NOW()),
+    (CURRENT_DATE - 2, 4, 2, 9, NOW()),
+
     (CURRENT_DATE - 2, 5, 2, 8, NOW()),
+    (CURRENT_DATE - 2, 6, 2, 8, NOW()),
 
-    (CURRENT_DATE - 2, 6, 2, 7, NOW()),
     (CURRENT_DATE - 2, 7, 2, 7, NOW()),
+    (CURRENT_DATE - 2, 8, 2, 7, NOW()),
 
-    (CURRENT_DATE - 2, 8, 2, 6, NOW()),
     (CURRENT_DATE - 2, 9, 2, 6, NOW()),
+    (CURRENT_DATE - 2, 10, 2, 6, NOW()),
 
-    (CURRENT_DATE - 2, 10, 2, 5, NOW()),
     (CURRENT_DATE - 2, 11, 2, 5, NOW()),
+    (CURRENT_DATE - 2, 1, 2, 5, NOW()),
 
-    (CURRENT_DATE - 2, 5, 2, 4, NOW()),
-    (CURRENT_DATE - 2, 6, 2, 4, NOW()),
+    (CURRENT_DATE - 2, 2, 2, 4, NOW()),
+    (CURRENT_DATE - 2, 3, 2, 4, NOW()),
 
-    (CURRENT_DATE - 2, 7, 2, 3, NOW()),
-    (CURRENT_DATE - 2, 8, 2, 3, NOW());
+    (CURRENT_DATE - 2, 4, 2, 3, NOW()),
+    (CURRENT_DATE - 2, 5, 2, 3, NOW());
 
--- theme_id 3: 예약 8건, waiting 2명씩
+
 INSERT INTO waiting (date, member_id, theme_id, time_id, created_at)
 VALUES
-    (CURRENT_DATE - 1, 5, 3, 9, NOW()),
     (CURRENT_DATE - 1, 6, 3, 9, NOW()),
+    (CURRENT_DATE - 1, 7, 3, 9, NOW()),
 
-    (CURRENT_DATE - 1, 7, 3, 8, NOW()),
     (CURRENT_DATE - 1, 8, 3, 8, NOW()),
+    (CURRENT_DATE - 1, 9, 3, 8, NOW()),
 
-    (CURRENT_DATE - 1, 9, 3, 7, NOW()),
     (CURRENT_DATE - 1, 10, 3, 7, NOW()),
+    (CURRENT_DATE - 1, 11, 3, 7, NOW()),
 
-    (CURRENT_DATE - 1, 11, 3, 6, NOW()),
-    (CURRENT_DATE - 1, 5, 3, 6, NOW()),
+    (CURRENT_DATE - 1, 1, 3, 6, NOW()),
+    (CURRENT_DATE - 1, 2, 3, 6, NOW()),
 
-    (CURRENT_DATE - 1, 6, 3, 5, NOW()),
-    (CURRENT_DATE - 1, 7, 3, 5, NOW()),
+    (CURRENT_DATE - 1, 3, 3, 5, NOW()),
+    (CURRENT_DATE - 1, 4, 3, 5, NOW()),
 
-    (CURRENT_DATE - 1, 8, 3, 4, NOW()),
-    (CURRENT_DATE - 1, 9, 3, 4, NOW()),
+    (CURRENT_DATE - 1, 5, 3, 4, NOW()),
+    (CURRENT_DATE - 1, 6, 3, 4, NOW()),
 
-    (CURRENT_DATE - 1, 10, 3, 3, NOW()),
-    (CURRENT_DATE - 1, 11, 3, 3, NOW()),
+    (CURRENT_DATE - 1, 7, 3, 3, NOW()),
+    (CURRENT_DATE - 1, 8, 3, 3, NOW()),
 
-    (CURRENT_DATE - 1, 5, 3, 2, NOW()),
-    (CURRENT_DATE - 1, 6, 3, 2, NOW());
+    (CURRENT_DATE - 1, 9, 3, 2, NOW()),
+    (CURRENT_DATE - 1, 10, 3, 2, NOW());
 
 
 
