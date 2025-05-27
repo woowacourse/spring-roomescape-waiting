@@ -45,7 +45,10 @@ public class WaitingService {
     }
 
     @Transactional
-    public WaitingIdResponse addWaiting(@Valid MemberReservationRequest request, Long memberId) {
+    public WaitingIdResponse addWaiting(
+        @Valid final MemberReservationRequest request,
+        final Long memberId
+    ) {
         ReservationTime reservationTime = getReservationTime(request.timeId());
         Member member = getMember(memberId);
         Theme theme = getTheme(request.themeId());
@@ -57,7 +60,11 @@ public class WaitingService {
     }
 
     private void validateAlreadyReserved(
-        MemberReservationRequest request, Member member, Theme theme, ReservationTime reservationTime) {
+        final MemberReservationRequest request,
+        final Member member,
+        final Theme theme,
+        final ReservationTime reservationTime
+    ) {
         boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
             member.getId(), theme.getId(), reservationTime.getId(), request.date());
         if (isAlreadyReserved) {
@@ -66,10 +73,10 @@ public class WaitingService {
     }
 
     private void validateAlreadyWaiting(
-        MemberReservationRequest request,
-        Member member,
-        Theme theme,
-        ReservationTime reservationTime
+        final MemberReservationRequest request,
+        final Member member,
+        final Theme theme,
+        final ReservationTime reservationTime
     ) {
         boolean isAlreadyWaiting = waitingRepository.existsByMemberIdAndThemeIdAndReservationTimeIdAndDate(
             member.getId(), theme.getId(), reservationTime.getId(), request.date());
@@ -78,7 +85,7 @@ public class WaitingService {
         }
     }
 
-    public List<MyReservation> getWaitingsFromMember(Long memberId) {
+    public List<MyReservation> getWaitingsFromMember(final Long memberId) {
         List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(
             memberId);
         return waitingWithRanks.stream()
@@ -87,7 +94,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void cancel(Long memberId, Long waitingId) {
+    public void cancel(final Long memberId, final Long waitingId) {
         Waiting waiting = getWaiting(waitingId);
         if (!waiting.getMember().getId().equals(memberId)) {
             throw new IllegalArgumentException("본인의 대기만 삭제할 수 있습니다.");
@@ -96,7 +103,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public void cancelFromAdmin(Long waitingId) {
+    public void cancelFromAdmin(final Long waitingId) {
         getWaiting(waitingId);
         waitingRepository.deleteById(waitingId);
     }

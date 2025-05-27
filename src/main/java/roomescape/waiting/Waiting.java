@@ -34,8 +34,13 @@ public class Waiting {
 
     protected Waiting() {}
 
-    public Waiting(Long id, Member member, ReservationTime reservationTime, Theme theme,
-        LocalDate date) {
+    public Waiting(
+        final Long id,
+        final Member member,
+        final ReservationTime reservationTime,
+        final Theme theme,
+        final LocalDate date
+    ) {
         this.id = id;
         this.member = member;
         this.reservationTime = reservationTime;
@@ -43,7 +48,12 @@ public class Waiting {
         this.date = date;
     }
 
-    public Waiting(Member member, ReservationTime reservationTime, Theme theme, LocalDate date) {
+    public Waiting(
+        final Member member,
+        final ReservationTime reservationTime,
+        final Theme theme,
+        final LocalDate date
+    ) {
         this(null, member, reservationTime, theme, date);
     }
 
