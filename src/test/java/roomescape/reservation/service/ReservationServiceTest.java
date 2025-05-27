@@ -55,15 +55,16 @@ class ReservationServiceTest {
     @DisplayName("예약 추가 시 현재보다 과거 시간인 경우 예외를 발생시킨다")
     @Test
     void exception_time_before() {
-        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusMinutes(1));
         Member member = new Member(1L, "test", "test@test.com", "password", Role.USER);
-        when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
 
         UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
         assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidTimeException.class);
 
+        verify(memberRepository, times(1)).findById(1L);
         verify(timeRepository, times(1)).findById(1L);
     }
 
@@ -134,15 +135,16 @@ class ReservationServiceTest {
     @DisplayName("관리자가 예약 추가 시 현재보다 과거 시간인 경우 예외를 발생시킨다")
     @Test
     void exception_admin_time_before() {
-        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusMinutes(1));
         Member member = new Member(1L, "test", "test@test.com", "password", Role.USER);
-        when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
+        when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
 
         AdminReservationRequest adminReservationRequest = new AdminReservationRequest(LocalDate.now(), 1L, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addByAdmin(adminReservationRequest))
                 .isInstanceOf(InvalidTimeException.class);
 
+        verify(memberRepository, times(1)).findById(1L);
         verify(timeRepository, times(1)).findById(1L);
     }
 
