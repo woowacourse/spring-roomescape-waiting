@@ -181,7 +181,7 @@ public class ReservationService {
     }
 
     private void approveFirstWaiting(final Reservation reservation) {
-        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByIdAsc(
+        Optional<Waiting> waiting = waitingRepository.findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(
                 reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme()

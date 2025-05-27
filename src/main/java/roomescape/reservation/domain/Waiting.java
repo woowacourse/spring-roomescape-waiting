@@ -1,8 +1,11 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
@@ -34,6 +37,9 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
+
+    @CreatedDate
+    private LocalDateTime createdAt;
 
     protected Waiting() {}
 
@@ -86,6 +92,10 @@ public class Waiting {
 
     public String themeName() {
         return theme.getName();
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     @Override

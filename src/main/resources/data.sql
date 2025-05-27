@@ -77,13 +77,13 @@ insert into reservation (id, date, time_id, theme_id, member_id, status)
 values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 1, 1, 10, 2, 'CONFIRMED');
 
 -- 포스티 예약 대기 목록
-insert into waiting (id, date, time_id, theme_id, member_id)
-values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 1, 1, 1);
-insert into waiting (id, date, time_id, theme_id, member_id)
-values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 2, 2, 1);
-insert into waiting (id, date, time_id, theme_id, member_id)
-values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 3, 3, 1);
+insert into waiting (id, date, time_id, theme_id, member_id, created_at)
+values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 1, 1, 1, DATEADD('DAY', -4, CURRENT_TIMESTAMP));
+insert into waiting (id, date, time_id, theme_id, member_id, created_at)
+values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 2, 2, 1, DATEADD('DAY', -3, CURRENT_TIMESTAMP));
+insert into waiting (id, date, time_id, theme_id, member_id, created_at)
+values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 3, 3, 1, DATEADD('DAY', -3, CURRENT_TIMESTAMP));
 
 -- 로키 예약 대기 목록
-insert into waiting (id, date, time_id, theme_id, member_id)
-values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 1, 1, 3);
+insert into waiting (id, date, time_id, theme_id, member_id, created_at)
+values (NEXT VALUE FOR WAITING_ID_SEQUENCE, CURRENT_DATE - 2, 1, 1, 3, DATEADD('DAY', -3, CURRENT_TIMESTAMP));

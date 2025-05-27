@@ -54,7 +54,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, WaitingId> {
             """)
     List<WaitingWithRank> findAllWaitingWithRankByMemberId(MemberId memberId);
 
-    Optional<Waiting> findFirstByDateAndTimeAndThemeOrderByIdAsc(
+    Optional<Waiting> findFirstByDateAndTimeAndThemeOrderByCreatedAtAsc(
             LocalDate date,
             ReservationTime time,
             Theme theme
