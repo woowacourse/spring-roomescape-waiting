@@ -14,21 +14,21 @@ import java.util.List;
 @RestController
 public class MyReservationController {
 
-    private final MyReservationService reservationQueryService;
+    private final MyReservationService myReservationService;
 
-    public MyReservationController(MyReservationService reservationQueryService) {
-        this.reservationQueryService = reservationQueryService;
+    public MyReservationController(MyReservationService myReservationService) {
+        this.myReservationService = myReservationService;
     }
 
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> getMyReservations(@AuthenticationPrincipal LoginMember loginMember) {
-        List<MyReservationResponse> myReservations = reservationQueryService.getMyReservations(loginMember);
+        List<MyReservationResponse> myReservations = myReservationService.getMyReservations(loginMember);
         return ResponseEntity.ok(myReservations);
     }
 
     @GetMapping("/reservations-mine/with-waitings")
     public ResponseEntity<List<MyReservationWithWaitingResponse>> getMyReservationsWithWaiting(@AuthenticationPrincipal LoginMember loginMember) {
-        List<MyReservationWithWaitingResponse> myReservations = reservationQueryService.getMyReservationsWithWaitings(loginMember);
+        List<MyReservationWithWaitingResponse> myReservations = myReservationService.getMyReservationsWithWaitings(loginMember);
         return ResponseEntity.ok(myReservations);
     }
 }
