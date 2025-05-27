@@ -45,6 +45,14 @@ public class ReservationInfo {
         return theme;
     }
 
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
+    }
+
     @Override
     public boolean equals(final Object object) {
         if (!(object instanceof final ReservationInfo that)) {

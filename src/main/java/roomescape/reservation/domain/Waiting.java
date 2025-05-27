@@ -9,10 +9,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.exception.InvalidReservationException;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Entity
 public class Waiting {
@@ -67,6 +70,18 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    public ReservationTime getTime() {
+        return info.getTime();
+    }
+
+    public Theme getTheme() {
+        return info.getTheme();
+    }
+
+    public LocalDate getDate() {
+        return info.getDate();
     }
 
     @Override
