@@ -14,8 +14,6 @@ import java.util.Optional;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    Waiting save(Waiting waiting);
-
     @Query("""
             SELECT new roomescape.presentation.dto.response.WaitingWithRank(
                 w.id,
