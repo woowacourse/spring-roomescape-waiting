@@ -8,10 +8,11 @@ import org.springframework.data.jpa.repository.Query;
 
 import roomescape.member.domain.MemberId;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.ThemeId;
 
-public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+public interface ReservationRepository extends JpaRepository<Reservation, ReservationId> {
 
     @Query("""
             SELECT r

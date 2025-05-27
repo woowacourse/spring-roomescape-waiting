@@ -22,6 +22,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberId;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.Theme;
@@ -170,9 +171,10 @@ public class ReservationService {
 
     @Transactional
     public void delete(final Long id) {
-        Reservation reservation = reservationRepository.findById(id)
+        ReservationId reservationId = new ReservationId(id);
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
-        reservationRepository.deleteById(id);
+        reservationRepository.deleteById(reservationId);
 
         approveFirstWaiting(reservation);
     }

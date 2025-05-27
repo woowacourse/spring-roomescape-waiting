@@ -41,40 +41,40 @@ insert into member (id, name, email, password, role)
 values (NEXT VALUE FOR MEMBER_ID_SEQUENCE, '로키', 'roky@woowa.com', '12341234', 'ADMIN');
 
 -- 포스티 예약 목록
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 3, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 2, 3, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 3, 3, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 1, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 2, 1, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 2, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 4, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 5, 1, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 6, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 1, 3, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 2, 3, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 3, 3, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 1, 1, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 2, 1, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 1, 2, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 1, 4, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 1, 5, 1, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE, CURRENT_DATE - 1, 1, 6, 1, 'CONFIRMED');
 
 -- 밍곰 예약 목록
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 2, 1, 1, 2, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 2, 2, 2, 2, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 2, 3, 3, 2, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 7, 2, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 8, 2, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 9, 2, 'CONFIRMED');
-insert into reservation (date, time_id, theme_id, member_id, status)
-values (CURRENT_DATE - 1, 1, 10, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 2, 1, 1, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 2, 2, 2, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 2, 3, 3, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 1, 1, 7, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 1, 1, 8, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 1, 1, 9, 2, 'CONFIRMED');
+insert into reservation (id, date, time_id, theme_id, member_id, status)
+values (NEXT VALUE FOR RESERVATION_ID_SEQUENCE,CURRENT_DATE - 1, 1, 10, 2, 'CONFIRMED');
 
 -- 포스티 예약 대기 목록
 insert into waiting (date, time_id, theme_id, member_id)
