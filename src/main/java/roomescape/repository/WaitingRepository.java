@@ -21,12 +21,12 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
                     WHERE w2.theme.id = w.theme.id
                     AND w2.date = w.date
                     AND w2.time.id = w.time.id
-                    AND w2.createdDate < w.createdDate
+                    AND w2.createdAt < w.createdAt
                 )
             )
             FROM Waiting w
             WHERE w.member.id = :memberId
-            ORDER BY w.createdDate ASC
+            ORDER BY w.createdAt ASC
             """)
     List<WaitingWithRank> findWithRankingByMember(@Param("memberId") long memberId);
 
@@ -53,7 +53,7 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
             WHERE w.theme.id = :themeId
             AND w.date = :date
             AND w.time.id = :timeId
-            ORDER BY w.createdDate
+            ORDER BY w.createdAt
             LIMIT 1
             """)
     Optional<Waiting> findFirstWaiting(

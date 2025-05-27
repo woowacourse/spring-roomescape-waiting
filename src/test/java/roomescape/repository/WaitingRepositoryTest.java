@@ -48,11 +48,11 @@ class WaitingRepositoryTest {
         entityManager.flush();
 
         jdbcTemplate.update(String.format("""
-                INSERT INTO waiting(date, theme_id, time_id, member_id, created_date, last_modified_date)
+                INSERT INTO waiting(date, theme_id, time_id, member_id, created_at, updated_at)
                 VALUES ('2025-05-10', %d, %d, %d, '2025-05-23 20:37:43.488281', '2025-05-23 20:37:43.488281')
                 """, theme.getId(), time.getId(), otherMember.getId()));
         jdbcTemplate.update(String.format("""
-                INSERT INTO waiting(date, theme_id, time_id, member_id, created_date, last_modified_date)
+                INSERT INTO waiting(date, theme_id, time_id, member_id, created_at, updated_at)
                 VALUES ('2025-05-10', %d, %d, %d, '2025-05-23 23:37:43.488281', '2025-05-23 20:37:43.488281')
                 """, theme.getId(), time.getId(), targetMember.getId()));
 
