@@ -4,15 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.dto.UserInfo;
-import roomescape.member.domain.Member;
 import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.reservation.exception.WaitingNotFoundException;
 import roomescape.reservation.repository.WaitingRepository;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 @Service
 public class WaitingService {
@@ -30,12 +27,7 @@ public class WaitingService {
     public List<ReservationResponse> findWaitings() {
         return waitingRepository.findAll()
                 .stream()
-                .map(reservation -> {
-                    ReservationTime time = reservation.getInfo().getTime();
-                    Theme theme = reservation.getInfo().getTheme();
-                    Member member = reservation.getMember();
-                    return ReservationResponse.of(reservation, time, theme, member);
-                })
+                .map(ReservationResponse::of)
                 .toList();
     }
 
@@ -58,11 +50,8 @@ public class WaitingService {
     }
 
     public boolean isWaitingExists(final ReservationInfo info) {
-        if (waitingRepository.existsByDateAndTimeIdAndThemeId(info.getDate(), info.getTime().getId(),
-                info.getTheme().getId())) {
-            return true;
-        }
-        return false;
+        return waitingRepository.existsByDateAndTimeIdAndThemeId(info.getDate(), info.getTimeId(),
+                info.getThemeId());
     }
 
 }
