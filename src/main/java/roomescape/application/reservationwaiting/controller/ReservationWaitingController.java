@@ -1,5 +1,7 @@
 package roomescape.application.reservationwaiting.controller;
 
+import static java.util.stream.Stream.concat;
+
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.http.ResponseEntity;
@@ -27,14 +29,13 @@ public class ReservationWaitingController {
     ) {
         ReservationInfoAndWaitingInfo myReservationAndWaiting = reservationWaitingService.findMyReservationAndWaiting(
                 loginMemberInfo.id());
-        List<MyReservationAndWaitingResponse> responses = Stream.concat(
-                myReservationAndWaiting.reservationInfos()
-                        .stream()
-                        .map(MyReservationAndWaitingResponse::new),
-                myReservationAndWaiting.waitingInfos()
-                        .stream()
-                        .map(MyReservationAndWaitingResponse::new)
-        ).toList();
+        Stream<MyReservationAndWaitingResponse> reservationResponses = myReservationAndWaiting.reservationInfos()
+                .stream()
+                .map(MyReservationAndWaitingResponse::new);
+        Stream<MyReservationAndWaitingResponse> waitingResponses = myReservationAndWaiting.waitingInfos()
+                .stream()
+                .map(MyReservationAndWaitingResponse::new);
+        List<MyReservationAndWaitingResponse> responses = concat(reservationResponses, waitingResponses).toList();
         return ResponseEntity.ok().body(responses);
     }
 
