@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class ReservationTime {
@@ -43,16 +44,15 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Reservation that)) {
             return false;
         }
-        ReservationTime that = (ReservationTime) o;
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getStartAt(), that.getStartAt());
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(getId(), getStartAt());
+        return Objects.hash(getId());
     }
 }

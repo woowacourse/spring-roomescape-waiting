@@ -53,19 +53,6 @@ public class Waiting {
         }
     }
 
-    @Override
-    public boolean equals(final Object object) {
-        if (!(object instanceof final Waiting that)) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId());
-    }
-
     public Long getId() {
         return id;
     }
@@ -80,5 +67,18 @@ public class Waiting {
 
     public Member getMember() {
         return member;
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Reservation that)) {
+            return false;
+        }
+        return Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }
