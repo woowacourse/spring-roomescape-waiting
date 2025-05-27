@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 
 @Component
 public class WaitingOrder {
-    private final AtomicInteger waitingOrderValue = new AtomicInteger(0);
+    private static final AtomicInteger WAITING_ORDER_VALUE = new AtomicInteger(0);
 
     public void resetWaitingOrder() {
-        waitingOrderValue.set(0);
+        WAITING_ORDER_VALUE.set(0);
     }
 
     public long issueNextWaitingOrder() {
-        return waitingOrderValue.incrementAndGet();
+        return WAITING_ORDER_VALUE.incrementAndGet();
     }
 }
