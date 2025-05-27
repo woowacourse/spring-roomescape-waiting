@@ -18,6 +18,7 @@ import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingId;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
 import roomescape.reservation.dto.response.WaitingResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -136,9 +137,10 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaiting(final Long id) {
-        if (!waitingRepository.existsById(id)) {
+        WaitingId waitingId = new WaitingId(id);
+        if (!waitingRepository.existsById(waitingId)) {
             throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
         }
-        waitingRepository.deleteById(id);
+        waitingRepository.deleteById(waitingId);
     }
 }

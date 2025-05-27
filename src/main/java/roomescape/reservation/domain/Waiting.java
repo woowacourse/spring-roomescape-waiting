@@ -4,12 +4,11 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import roomescape.member.domain.Member;
@@ -17,9 +16,9 @@ import roomescape.member.domain.Member;
 @Entity
 public class Waiting {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "id", nullable = false))
+    private WaitingId id;
 
     @Column(nullable = false)
     private LocalDate date;
@@ -45,7 +44,7 @@ public class Waiting {
             final ReservationTime time,
             final Theme theme
     ) {
-        this.id = id;
+        this.id = new WaitingId(id);
         this.date = date;
         this.member = member;
         this.time = time;
@@ -62,7 +61,7 @@ public class Waiting {
     }
 
     public Long getId() {
-        return id;
+        return id.getValue();
     }
 
     public LocalDate getDate() {

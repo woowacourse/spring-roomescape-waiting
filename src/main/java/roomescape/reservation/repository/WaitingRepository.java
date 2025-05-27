@@ -13,9 +13,10 @@ import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingId;
 import roomescape.reservation.domain.WaitingWithRank;
 
-public interface WaitingRepository extends JpaRepository<Waiting, Long> {
+public interface WaitingRepository extends JpaRepository<Waiting, WaitingId> {
 
     @Query("""
             SELECT w2
