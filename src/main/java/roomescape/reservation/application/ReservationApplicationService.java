@@ -59,6 +59,9 @@ public class ReservationApplicationService {
 
     public void removeWaiting(final Long reservationSlotId, final Long memberId) {
         reservationDataService.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
+        if (reservationDataService.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId)) {
+            reservationSlotDataService.delete(reservationSlotId);
+        }
     }
 
     public List<WaitingResponse> findAllWaitingReservations() {

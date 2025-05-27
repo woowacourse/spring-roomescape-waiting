@@ -66,4 +66,8 @@ public class ReservationDataService {
     public Optional<Reservation> findByReservationSlot(final ReservationSlot reservationSlot) {
         return reservationRepository.findByReservationSlot(reservationSlot);
     }
+
+    public boolean existsByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
+        return reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
+    }
 }

@@ -12,21 +12,21 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.application.ReservationDataService;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationslot.exception.InvalidReservationSlotException;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.application.ReservationTimeDataService;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.theme.application.ThemeDataService;
-import roomescape.reservation.application.ReservationDataService;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
@@ -59,7 +59,8 @@ class ReservationSlotApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(reservationSlotRepository);
+        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(
+                reservationSlotRepository);
         reservationSlotApplicationService = new ReservationSlotApplicationService(
                 reservationSlotDataService,
                 new ReservationTimeDataService(reservationTimeRepository, reservationSlotDataService),
@@ -76,7 +77,8 @@ class ReservationSlotApplicationServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId,
+        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId,
+                memberId,
                 afterOneHour);
 
         Assertions.assertAll(
