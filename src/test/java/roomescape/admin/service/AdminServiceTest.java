@@ -33,212 +33,212 @@ import roomescape.theme.repository.ThemeRepository;
 @DataJpaTest
 class AdminServiceTest {
 
-    @Autowired
-    private AdminService adminService;
+        @Autowired
+        private AdminService adminService;
 
-    @Autowired
-    private MemberRepository memberRepository;
+        @Autowired
+        private MemberRepository memberRepository;
 
-    @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+        @Autowired
+        private ReservationTimeRepository reservationTimeRepository;
 
-    @Autowired
-    private ThemeRepository themeRepository;
+        @Autowired
+        private ThemeRepository themeRepository;
 
-    @Autowired
-    private ReservationRepository reservationRepository;
+        @Autowired
+        private ReservationRepository reservationRepository;
 
-    private LocalDate now = LocalDate.now();
+        private LocalDate now = LocalDate.now();
 
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public AdminService adminService(
-                final ReservationRepository reservationRepository,
-                final ReservationTimeRepository reservationTimeRepository,
-                final ThemeRepository themeRepository,
-                final MemberRepository memberRepository) {
-            return new AdminService(reservationRepository, reservationTimeRepository, themeRepository,
-                    memberRepository);
+        @TestConfiguration
+        static class TestConfig {
+                @Bean
+                public AdminService adminService(
+                                final ReservationRepository reservationRepository,
+                                final ReservationTimeRepository reservationTimeRepository,
+                                final ThemeRepository themeRepository,
+                                final MemberRepository memberRepository) {
+                        return new AdminService(reservationRepository, reservationTimeRepository, themeRepository,
+                                        memberRepository);
+                }
         }
-    }
 
-    @Test
-    void 어드민이_예약을_생성한다() {
-        // given
-        Member member = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_예약을_생성한다() {
+                // given
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        // when
-        Long reservationId = adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
+                // when
+                Long reservationId = adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
 
-        // then
-        Reservation savedReservation = reservationRepository.findById(reservationId).get();
-        assertThat(savedReservation.getMember().getId()).isEqualTo(member.getId());
-        assertThat(savedReservation.getSlot().getDate()).isEqualTo(date);
-        assertThat(savedReservation.getSlot().getTime().getId()).isEqualTo(time.getId());
-        assertThat(savedReservation.getSlot().getTheme().getId()).isEqualTo(theme.getId());
-        assertThat(savedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-    }
+                // then
+                Reservation savedReservation = reservationRepository.findById(reservationId).get();
+                assertThat(savedReservation.getMember().getId()).isEqualTo(member.getId());
+                assertThat(savedReservation.getSlot().getDate()).isEqualTo(date);
+                assertThat(savedReservation.getSlot().getTime().getId()).isEqualTo(time.getId());
+                assertThat(savedReservation.getSlot().getTheme().getId()).isEqualTo(theme.getId());
+                assertThat(savedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+        }
 
-    @Test
-    void 어드민이_예약을_생성할_때_이미_예약된_시간이면_예외가_발생한다() {
-        // given
-        Member member1 = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        Member member2 = memberRepository.save(new Member(
-                new MemberName("우가"),
-                new Email("t2@test.com"),
-                new Password("password"),
-                Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_예약을_생성할_때_이미_예약된_시간이면_예외가_발생한다() {
+                // given
+                Member member1 = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                Member member2 = memberRepository.save(new Member(
+                                new MemberName("우가"),
+                                new Email("t2@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        // 첫 번째 예약 생성
-        adminService.saveByAdmin(date, theme.getId(), time.getId(), member1.getId());
+                // 첫 번째 예약 생성
+                adminService.saveByAdmin(date, theme.getId(), time.getId(), member1.getId());
 
-        // when & then
-        assertThatThrownBy(() -> adminService.saveByAdmin(date, theme.getId(), time.getId(), member2.getId()))
-                .isInstanceOf(DataExistException.class);
-    }
+                // when & then
+                assertThatThrownBy(() -> adminService.saveByAdmin(date, theme.getId(), time.getId(), member2.getId()))
+                                .isInstanceOf(DataExistException.class);
+        }
 
-    @Test
-    void 어드민이_예약을_생성할_때_존재하지_않는_회원이면_예외가_발생한다() {
-        // given
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_예약을_생성할_때_존재하지_않는_회원이면_예외가_발생한다() {
+                // given
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        // when & then
-        assertThatThrownBy(() -> adminService.saveByAdmin(date, theme.getId(), time.getId(), 999L))
-                .isInstanceOf(DataNotFoundException.class);
-    }
+                // when & then
+                assertThatThrownBy(() -> adminService.saveByAdmin(date, theme.getId(), time.getId(), 999L))
+                                .isInstanceOf(DataNotFoundException.class);
+        }
 
-    @Test
-    void 어드민이_예약을_생성할_때_존재하지_않는_테마면_예외가_발생한다() {
-        // given
-        Member member = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_예약을_생성할_때_존재하지_않는_테마면_예외가_발생한다() {
+                // given
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                LocalDate date = now.plusDays(1);
 
-        // when & then
-        assertThatThrownBy(() -> adminService.saveByAdmin(date, 999L, time.getId(), member.getId()))
-                .isInstanceOf(DataNotFoundException.class);
-    }
+                // when & then
+                assertThatThrownBy(() -> adminService.saveByAdmin(date, 999L, time.getId(), member.getId()))
+                                .isInstanceOf(DataNotFoundException.class);
+        }
 
-    @Test
-    void 어드민이_예약을_생성할_때_존재하지_않는_시간이면_예외가_발생한다() {
-        // given
-        Member member = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_예약을_생성할_때_존재하지_않는_시간이면_예외가_발생한다() {
+                // given
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        // when & then
-        assertThatThrownBy(() -> adminService.saveByAdmin(date, theme.getId(), 999L, member.getId()))
-                .isInstanceOf(DataNotFoundException.class);
-    }
+                // when & then
+                assertThatThrownBy(() -> adminService.saveByAdmin(date, theme.getId(), 999L, member.getId()))
+                                .isInstanceOf(DataNotFoundException.class);
+        }
 
-    @Test
-    void 어드민이_예약을_조회한다() {
-        // given
-        Member member = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_예약을_조회한다() {
+                // given
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        Long reservationId = adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
+                Long reservationId = adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
 
-        // when
-        Reservation foundReservation = adminService.getById(reservationId);
+                // when
+                Reservation foundReservation = adminService.getById(reservationId);
 
-        // then
-        assertThat(foundReservation.getId()).isEqualTo(reservationId);
-        assertThat(foundReservation.getMember().getId()).isEqualTo(member.getId());
-        assertThat(foundReservation.getSlot().getDate()).isEqualTo(date);
-        assertThat(foundReservation.getSlot().getTime().getId()).isEqualTo(time.getId());
-        assertThat(foundReservation.getSlot().getTheme().getId()).isEqualTo(theme.getId());
-    }
+                // then
+                assertThat(foundReservation.getId()).isEqualTo(reservationId);
+                assertThat(foundReservation.getMember().getId()).isEqualTo(member.getId());
+                assertThat(foundReservation.getSlot().getDate()).isEqualTo(date);
+                assertThat(foundReservation.getSlot().getTime().getId()).isEqualTo(time.getId());
+                assertThat(foundReservation.getSlot().getTheme().getId()).isEqualTo(theme.getId());
+        }
 
-    @Test
-    void 어드민이_존재하지_않는_예약을_조회하면_예외가_발생한다() {
-        // when & then
-        assertThatThrownBy(() -> adminService.getById(999L)).isInstanceOf(DataNotFoundException.class);
-    }
+        @Test
+        void 어드민이_존재하지_않는_예약을_조회하면_예외가_발생한다() {
+                // when & then
+                assertThatThrownBy(() -> adminService.getById(999L)).isInstanceOf(DataNotFoundException.class);
+        }
 
-    @Test
-    void 어드민이_조건에_맞는_예약을_조회한다() {
-        // given
-        Member member = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_조건에_맞는_예약을_조회한다() {
+                // given
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
+                adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
 
-        // when
-        List<Reservation> reservations = adminService.findByInFromTo(
-                theme.getId(),
-                member.getId(),
-                date.minusDays(1),
-                date.plusDays(1));
+                // when
+                List<Reservation> reservations = adminService.findReservationsByThemeMemberAndDateRange(
+                                theme.getId(),
+                                member.getId(),
+                                date.minusDays(1),
+                                date.plusDays(1));
 
-        // then
-        assertThat(reservations).hasSize(1);
-        Reservation foundReservation = reservations.get(0);
-        assertThat(foundReservation.getMember().getId()).isEqualTo(member.getId());
-        assertThat(foundReservation.getSlot().getDate()).isEqualTo(date);
-        assertThat(foundReservation.getSlot().getTime().getId()).isEqualTo(time.getId());
-        assertThat(foundReservation.getSlot().getTheme().getId()).isEqualTo(theme.getId());
-    }
+                // then
+                assertThat(reservations).hasSize(1);
+                Reservation foundReservation = reservations.get(0);
+                assertThat(foundReservation.getMember().getId()).isEqualTo(member.getId());
+                assertThat(foundReservation.getSlot().getDate()).isEqualTo(date);
+                assertThat(foundReservation.getSlot().getTime().getId()).isEqualTo(time.getId());
+                assertThat(foundReservation.getSlot().getTheme().getId()).isEqualTo(theme.getId());
+        }
 
-    @Test
-    void 어드민이_조건에_맞지_않는_예약을_조회하면_빈_리스트를_반환한다() {
-        // given
-        Member member = memberRepository.save(new Member(
-                new MemberName("재즈"),
-                new Email("t1@test.com"),
-                new Password("password"),
-                Role.USER));
-        ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
-        LocalDate date = now.plusDays(1);
+        @Test
+        void 어드민이_조건에_맞지_않는_예약을_조회하면_빈_리스트를_반환한다() {
+                // given
+                Member member = memberRepository.save(new Member(
+                                new MemberName("재즈"),
+                                new Email("t1@test.com"),
+                                new Password("password"),
+                                Role.USER));
+                ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+                Theme theme = themeRepository.save(new Theme("테마1", "테마1 설명", "https://example.com/theme1.jpg"));
+                LocalDate date = now.plusDays(1);
 
-        adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
+                adminService.saveByAdmin(date, theme.getId(), time.getId(), member.getId());
 
-        // when
-        List<Reservation> reservations = adminService.findByInFromTo(
-                theme.getId(),
-                member.getId(),
-                date.plusDays(2),
-                date.plusDays(3));
+                // when
+                List<Reservation> reservations = adminService.findReservationsByThemeMemberAndDateRange(
+                                theme.getId(),
+                                member.getId(),
+                                date.plusDays(2),
+                                date.plusDays(3));
 
-        // then
-        assertThat(reservations).isEmpty();
-    }
+                // then
+                assertThat(reservations).isEmpty();
+        }
 }

@@ -54,7 +54,8 @@ public class AdminService {
                                 .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
         }
 
-        public List<Reservation> findByInFromTo(final Long themeId, final Long memberId, final LocalDate dateFrom,
+        public List<Reservation> findReservationsByThemeMemberAndDateRange(final Long themeId, final Long memberId,
+                        final LocalDate dateFrom,
                         final LocalDate dateTo) {
                 Theme theme = themeRepository.findById(themeId)
                                 .orElseThrow(() -> new DataNotFoundException("해당 테마 데이터가 존재하지 않습니다. id = " + themeId));
