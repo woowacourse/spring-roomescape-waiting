@@ -2,6 +2,8 @@ package roomescape.user.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +18,7 @@ import roomescape.user.exception.UserForbiddenException;
 import roomescape.user.repository.UserRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
+import roomescape.waiting.exception.InvalidWaitingException;
 import roomescape.waiting.exception.NotFoundWaitingException;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -70,15 +73,18 @@ public class UserService {
 
     private static List<ReservationWithStateDto> convertReservationWithStateDto(List<Waiting> waitings,
                                                                                 List<WaitingWithRank> waitingWithRanks) {
-        List<ReservationWithStateDto> dtos = new ArrayList<>();
-        for (Waiting waiting : waitings) {
-            WaitingWithRank waitingWithRank = waitingWithRanks.stream()
-                    .filter(o -> o.waiting().equals(waiting))
-                    .findAny()
-                    .get();
-            dtos.add(ReservationWithStateDto.of(waitingWithRank));
-        }
-        return dtos;
+        Map<Waiting, WaitingWithRank> waitingRankMap = waitingWithRanks.stream()
+                .collect(Collectors.toMap(WaitingWithRank::waiting, Function.identity()));
+
+        return waitings.stream()
+                .map(waiting -> {
+                    WaitingWithRank waitingWithRank = waitingRankMap.get(waiting);
+                    if (waitingWithRank == null) {
+                        throw new InvalidWaitingException();
+                    }
+                    return ReservationWithStateDto.of(waitingWithRank);
+                })
+                .collect(Collectors.toList());
     }
 
     @Transactional
