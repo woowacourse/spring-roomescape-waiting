@@ -27,7 +27,7 @@ public interface ReservationJpaRepository extends ReservationRepository, Reposit
     }
 
     @Override
-    default ReservationQueues findQueuesBySlots(final List<RoomescapeSchedule> schedules) {
+    default ReservationQueues findQueuesBySchedules(final List<RoomescapeSchedule> schedules) {
         var reservations = findAll(toSpecs(schedules));
         return new ReservationQueues(reservations);
     }
@@ -46,6 +46,6 @@ public interface ReservationJpaRepository extends ReservationRepository, Reposit
     }
 
     private Specification<Reservation> toSpecs(final List<RoomescapeSchedule> schedules) {
-        return Specification.anyOf(schedules.stream().map(ReservationSpecs::bySlot).toList());
+        return Specification.anyOf(schedules.stream().map(ReservationSpecs::bySchedule).toList());
     }
 }

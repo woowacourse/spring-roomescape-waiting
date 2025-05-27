@@ -33,7 +33,7 @@ public class ReservationSpecs {
         return (reservation, query, cb) -> cb.equal(statusOf(reservation), status);
     }
 
-    public static Specification<Reservation> bySlot(final RoomescapeSchedule schedule) {
+    public static Specification<Reservation> bySchedule(final RoomescapeSchedule schedule) {
         return allOf(byDate(schedule.date()), byTimeSlotId(schedule.timeSlot().id()), byThemeId(schedule.theme().id()));
     }
 

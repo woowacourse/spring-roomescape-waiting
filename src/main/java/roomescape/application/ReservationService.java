@@ -1,7 +1,7 @@
 package roomescape.application;
 
 import static roomescape.infrastructure.ReservationSpecs.byFilter;
-import static roomescape.infrastructure.ReservationSpecs.bySlot;
+import static roomescape.infrastructure.ReservationSpecs.bySchedule;
 import static roomescape.infrastructure.ReservationSpecs.byStatus;
 
 import java.time.LocalDate;
@@ -34,7 +34,7 @@ public class ReservationService {
     @Transactional
     public Reservation reserve(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var schedule = toRoomescapeSchedule(date, timeId, themeId);
-        if (reservationRepository.exists(bySlot(schedule))) {
+        if (reservationRepository.exists(bySchedule(schedule))) {
             throw new AlreadyExistedException("이미 예약된 날짜, 시간, 테마에 대한 예약은 불가능합니다.");
         }
 
@@ -44,7 +44,7 @@ public class ReservationService {
     @Transactional
     public Reservation waitFor(final long userId, final LocalDate date, final long timeId, final long themeId) {
         var schedule = toRoomescapeSchedule(date, timeId, themeId);
-        if (!reservationRepository.exists(bySlot(schedule))) {
+        if (!reservationRepository.exists(bySchedule(schedule))) {
             throw new BusinessRuleViolationException("해당 날짜, 시간, 테마에 예약이 없습니다. 바로 예약해 주세요.");
         }
 
@@ -65,7 +65,7 @@ public class ReservationService {
     public void removeById(final long id) {
         var reservation = reservationRepository.getById(id);
         if (reservation.isReserved()) {
-            var queues = reservationRepository.findQueuesBySlots(List.of(reservation.reservedSchedule()));
+            var queues = reservationRepository.findQueuesBySchedules(List.of(reservation.reservedSchedule()));
             var nextReservation = queues.findNext(reservation);
             nextReservation.ifPresent(Reservation::confirm);
         }

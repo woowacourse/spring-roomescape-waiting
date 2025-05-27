@@ -18,7 +18,7 @@ public interface ReservationRepository extends BaseRepository<Reservation, Long>
     @Override
     Reservation getById(Long id) throws NotFoundException;
 
-    ReservationQueues findQueuesBySlots(List<RoomescapeSchedule> schedules);
+    ReservationQueues findQueuesBySchedules(List<RoomescapeSchedule> schedules);
 
     Reservations findAllWithWrapping(Specification<Reservation> specification);
 
