@@ -1,6 +1,5 @@
 package roomescape.business.dto;
 
-import org.springframework.jdbc.core.RowMapper;
 import roomescape.business.model.entity.ReservationTime;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.StartTime;
@@ -17,10 +16,4 @@ public record ReservableReservationTimeDto(
                 available
         );
     }
-
-    public static RowMapper<ReservableReservationTimeDto> ROW_MAPPER = (rs, rowNum) -> new ReservableReservationTimeDto(
-            Id.create(rs.getString("id")),
-            new StartTime(rs.getTime("start_time").toLocalTime()),
-            rs.getBoolean("available")
-    );
 }

@@ -1,10 +1,13 @@
 package roomescape.infrastructure.reader;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.dto.ThemeDto;
+import roomescape.business.model.vo.Id;
+import roomescape.business.model.vo.ThemeName;
 import roomescape.business.service.reader.ThemeReader;
 
 import java.time.LocalDate;
@@ -15,6 +18,13 @@ import java.util.List;
 @Transactional(readOnly = true)
 public class JdbcThemeReader implements ThemeReader {
 
+    private static final RowMapper<ThemeDto> THEME_ROW_MAPPER = (rs, rowNum) -> new ThemeDto(
+            Id.create(rs.getString("id")),
+            new ThemeName(rs.getString("theme_name")),
+            rs.getString("description"),
+            rs.getString("thumbnail")
+    );
+
     private final JdbcClient jdbcClient;
 
     @Override
@@ -22,7 +32,7 @@ public class JdbcThemeReader implements ThemeReader {
         String sql = "SELECT * FROM theme";
 
         return jdbcClient.sql(sql)
-                .query(ThemeDto.ROW_MAPPER)
+                .query(THEME_ROW_MAPPER)
                 .list();
     }
 
@@ -47,7 +57,7 @@ public class JdbcThemeReader implements ThemeReader {
                 .param("start", now.minusDays(AGGREGATE_START_DATE_INTERVAL))
                 .param("end", now.minusDays(AGGREGATE_END_DATE_INTERVAL))
                 .param("size", size)
-                .query(ThemeDto.ROW_MAPPER)
+                .query(THEME_ROW_MAPPER)
                 .list();
     }
 }
