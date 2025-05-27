@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import jakarta.transaction.Transactional;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -52,7 +51,6 @@ public class ReservationFacadeService {
         ).collect(Collectors.toList());
     }
 
-    @Transactional
     public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
                                       final LocalDateTime now) {
         if (!reservationService.isReservationExists(date, timeId, themeId)) {
@@ -90,7 +88,6 @@ public class ReservationFacadeService {
         return ReservationResponse.of(newWaiting, time, theme, member);
     }
 
-    @Transactional
     public void deleteReservation(final Long reservationId) {
         Reservation reservation = reservationService.findById(reservationId);
         reservationService.delete(reservationId);
