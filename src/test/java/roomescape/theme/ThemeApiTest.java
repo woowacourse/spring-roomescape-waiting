@@ -1,8 +1,5 @@
 package roomescape.theme;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.hamcrest.Matchers;
@@ -15,6 +12,9 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.dto.ThemeResponse;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ThemeApiTest {
@@ -25,7 +25,7 @@ public class ThemeApiTest {
     void testFindPopularThemes() {
         ThemeResponse[] responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().get("/popular-themes")
+                .when().get("/themes/popular")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", Matchers.is(3))
