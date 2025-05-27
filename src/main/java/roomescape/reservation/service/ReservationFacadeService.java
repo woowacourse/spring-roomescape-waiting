@@ -66,10 +66,9 @@ public class ReservationFacadeService {
         ReservationTime time = reservationTimeService.findReservationTime(timeId);
         Theme theme = themeService.findTheme(themeId);
         Member member = memberService.findUserByMemberId(memberId);
+        ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
         Reservation newReservation = reservationService.save(
-                Reservation.createUpcomingReservationWithUnassignedId(
-                        member,
-                        new ReservationInfo(date, time, theme), now)
+                Reservation.createUpcomingReservationWithUnassignedId(member, reservationInfo, now)
         );
         return ReservationResponse.of(newReservation);
     }
@@ -79,13 +78,10 @@ public class ReservationFacadeService {
         ReservationTime time = reservationTimeService.findReservationTime(timeId);
         Theme theme = themeService.findTheme(themeId);
         Member member = memberService.findUserByMemberId(memberId);
-        int turn = waitingService.findMaxOrderByDateAndTimeAndTheme(date, timeId,
-                themeId);
+        int turn = waitingService.findMaxOrderByDateAndTimeAndTheme(date, timeId, themeId);
+        ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
         Waiting newWaiting = waitingService.save(
-                Waiting.createUpcomingReservationWithUnassignedId(
-                        member,
-                        turn + 1,
-                        new ReservationInfo(date, time, theme), now));
+                Waiting.createUpcomingReservationWithUnassignedId(member, turn + 1, reservationInfo, now));
         return ReservationResponse.of(newWaiting);
     }
 
@@ -101,10 +97,10 @@ public class ReservationFacadeService {
         }
         Waiting waiting = waitingService.findFirstWaitingOfInfo(info);
         createReservation(
-                waiting.getInfo().getDate(),
-                waiting.getInfo().getTime().getId(),
-                waiting.getInfo().getTheme().getId(),
-                waiting.getMember().getId(),
+                waiting.getDate(),
+                waiting.getTimeId(),
+                waiting.getThemeId(),
+                waiting.getMemberId(),
                 LocalDateTime.now()
         );
         waitingService.delete(waiting.getId());

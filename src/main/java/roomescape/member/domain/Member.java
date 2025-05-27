@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
 import roomescape.member.exception.InvalidMemberException;
-import roomescape.reservation.domain.Reservation;
 
 @Entity
 public class Member {
@@ -73,7 +72,7 @@ public class Member {
 
     @Override
     public boolean equals(final Object object) {
-        if (!(object instanceof final Reservation that)) {
+        if (!(object instanceof final Member that)) {
             return false;
         }
         return Objects.equals(getId(), that.getId());

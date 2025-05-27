@@ -26,12 +26,12 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingWithRank;
-import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.WaitingNotFoundException;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
@@ -132,7 +132,7 @@ class ReservationServiceTest {
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
                 () -> reservationFacadeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
-                .isInstanceOf(ReservationNotFoundException.class)
+                .isInstanceOf(ReservationTimeNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
 

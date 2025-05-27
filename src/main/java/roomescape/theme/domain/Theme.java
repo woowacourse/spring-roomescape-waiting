@@ -6,7 +6,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import java.util.Objects;
-import roomescape.reservation.domain.Reservation;
 import roomescape.theme.exception.InvalidThemeException;
 
 @Entity
@@ -84,7 +83,7 @@ public class Theme {
 
     @Override
     public boolean equals(final Object object) {
-        if (!(object instanceof final Reservation that)) {
+        if (!(object instanceof final Theme that)) {
             return false;
         }
         return Objects.equals(getId(), that.getId());

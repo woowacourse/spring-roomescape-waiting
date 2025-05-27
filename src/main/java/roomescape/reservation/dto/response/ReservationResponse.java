@@ -22,7 +22,7 @@ public record ReservationResponse(
                 MemberResponse.from(reservation.getMember()),
                 reservation.getDate(),
                 ReservationTimeResponse.from(reservation.getTime()), ThemeResponse.from(reservation.getTheme()),
-                ReservationStatus.WAITING.getName()
+                ReservationStatus.RESERVED.getName()
         );
     }
 

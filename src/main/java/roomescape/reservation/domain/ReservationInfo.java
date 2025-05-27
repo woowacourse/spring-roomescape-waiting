@@ -45,11 +45,11 @@ public class ReservationInfo {
         return theme;
     }
 
-    public Long getThemeId() {
+    public Long getIdOfTheme() {
         return theme.getId();
     }
 
-    public Long getTimeId() {
+    public Long getIdOfTime() {
         return time.getId();
     }
 

@@ -50,8 +50,8 @@ public class WaitingService {
     }
 
     public boolean isWaitingExists(final ReservationInfo info) {
-        return waitingRepository.existsByDateAndTimeIdAndThemeId(info.getDate(), info.getTimeId(),
-                info.getThemeId());
+        return waitingRepository.existsByDateAndTimeIdAndThemeId(info.getDate(), info.getIdOfTime(),
+                info.getIdOfTheme());
     }
 
 }

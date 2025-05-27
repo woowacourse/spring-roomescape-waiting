@@ -84,9 +84,21 @@ public class Waiting {
         return info.getDate();
     }
 
+    public Long getTimeId() {
+        return info.getIdOfTime();
+    }
+
+    public Long getThemeId() {
+        return info.getIdOfTheme();
+    }
+
+    public Long getMemberId() {
+        return member.getId();
+    }
+
     @Override
     public boolean equals(final Object object) {
-        if (!(object instanceof final Reservation that)) {
+        if (!(object instanceof final Waiting that)) {
             return false;
         }
         return Objects.equals(getId(), that.getId());
