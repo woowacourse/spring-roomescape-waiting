@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.exception.ExceptionCause;
-import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.reservation.dto.AdminReservationCreateRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
@@ -33,7 +30,7 @@ public class AdminReservationController {
     public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody AdminReservationCreateRequest request,
                                                               Member member) {
         member.validateAdminOrThrow();
-        ReservationResponse response = reservationService.createAdminReservation(request, member);
+        ReservationResponse response = reservationService.createAdminReservation(request);
         return ResponseEntity.created(URI.create("reservations/" + response.id())).body(response);
     }
 

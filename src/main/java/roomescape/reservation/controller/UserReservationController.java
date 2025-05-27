@@ -2,11 +2,11 @@ package roomescape.reservation.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.jwt.TokenProvider;
+import roomescape.member.domain.Member;
 import roomescape.reservation.dto.UserReservationResponse;
 import roomescape.reservation.service.UserReservationService;
 
@@ -23,11 +23,8 @@ public class UserReservationController {
     }
 
     @GetMapping("/member/reservations")
-    public ResponseEntity<List<UserReservationResponse>> getMemberReservations(
-            @CookieValue(name = "token", required = false) String token) {
-        Long memberId = tokenProvider.getMemberIdFromToken(token);
-        List<UserReservationResponse> allMemberReservations = userReservationService.findAllMemberReservations(
-                memberId);
-        return ResponseEntity.ok(allMemberReservations);
+    public ResponseEntity<List<UserReservationResponse>> getMemberReservations(Member member) {
+        List<UserReservationResponse> response = userReservationService.findAllMemberReservations(member);
+        return ResponseEntity.ok(response);
     }
 }

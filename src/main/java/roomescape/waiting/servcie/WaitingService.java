@@ -1,6 +1,5 @@
 package roomescape.waiting.servcie;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -82,7 +81,8 @@ public class WaitingService {
     }
 
     private void updateWaitingToReservation(Waiting waiting) {
-        if(reservationRepository.existsByDateAndTimeIdAndThemeId(waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(waiting.getDate(), waiting.getTime().getId(),
+                waiting.getTheme().getId())) {
             throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);
         }
         Reservation reservation = new Reservation(waiting.getMember(),
@@ -101,7 +101,8 @@ public class WaitingService {
         Map<WaitingSlot, Waiting> earliestWaitingOnly = new HashMap<>();
         for (Waiting waiting : waitings) {
             WaitingSlot key = WaitingSlot.from(waiting);
-            if (!earliestWaitingOnly.containsKey(key) || waiting.getCreatedAt().isBefore(earliestWaitingOnly.get(key).getCreatedAt())) {
+            if (!earliestWaitingOnly.containsKey(key) || waiting.getCreatedAt()
+                    .isBefore(earliestWaitingOnly.get(key).getCreatedAt())) {
                 earliestWaitingOnly.put(key, waiting);
             }
         }
@@ -112,7 +113,8 @@ public class WaitingService {
         ReservationTime time = findReservationTimeById(waitingCreateRequest.time());
         Theme theme = findThemeById(waitingCreateRequest.theme());
         validateDateTime(LocalDateTime.of(waitingCreateRequest.date(), time.getStartAt()));
-        return new Waiting(waitingCreateRequest.date(), member, theme, time, LocalDateTime.now(), WaitingStatus.PENDING);
+        return new Waiting(waitingCreateRequest.date(), member, theme, time, LocalDateTime.now(),
+                WaitingStatus.PENDING);
     }
 
     private Theme findThemeById(Long themeId) {

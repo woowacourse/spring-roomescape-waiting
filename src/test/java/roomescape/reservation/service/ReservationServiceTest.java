@@ -17,27 +17,31 @@ import roomescape.fixture.FakeMemberRepositoryFixture;
 import roomescape.fixture.FakeReservationRepositoryFixture;
 import roomescape.fixture.FakeReservationTimeRepositoryFixture;
 import roomescape.fixture.FakeThemeRepositoryFixture;
+import roomescape.fixture.FakeWaitingRepositoryFixture;
+import roomescape.fixture.LoginMemberFixture;
+import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.repository.FakeTokenProvider;
-import roomescape.reservation.dto.NameResponse;
-import roomescape.reservation.dto.ReservationRequest;
+import roomescape.reservation.dto.AdminReservationCreateRequest;
+import roomescape.reservation.dto.MemberNameResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.waiting.repository.WaitingRepository;
 
 class ReservationServiceTest {
 
     private final ReservationRepository reservationRepository = FakeReservationRepositoryFixture.create();
     private final ReservationTimeRepository reservationTimeRepository = FakeReservationTimeRepositoryFixture.create();
     private final ThemeRepository themeRepository = FakeThemeRepositoryFixture.create();
+    private final WaitingRepository waitingRepository = FakeWaitingRepositoryFixture.create();
     private final MemberRepository memberRepository = FakeMemberRepositoryFixture.create();
-    private final ReservationChecker reservationChecker = new ReservationChecker(reservationTimeRepository,
-            themeRepository, memberRepository);
     private final ReservationService reservationService = new ReservationService(reservationRepository,
-            reservationChecker, new FakeTokenProvider());
+            reservationTimeRepository, themeRepository, memberRepository, waitingRepository);
+
+    private final Member admin = LoginMemberFixture.getAdmin();
 
     @Nested
     @DisplayName("예약 조회")
@@ -47,13 +51,13 @@ class ReservationServiceTest {
         @Test
         void findAllReservationsTest() {
             // when
-            List<ReservationResponse> responses = reservationService.findAllReservationResponses();
+            List<ReservationResponse> responses = reservationService.findAllReservations();
 
             // then
             assertAll(
                     () -> assertThat(responses).hasSize(1),
                     () -> assertThat(responses).extracting("member")
-                            .containsExactly(new NameResponse(1L, "어드민")),
+                            .containsExactly(new MemberNameResponse(1L, "어드민")),
                     () -> assertThat(responses).extracting("date")
                             .containsExactly(LocalDate.now().plusDays(7)),
                     () -> assertThat(responses).extracting("theme")
@@ -80,7 +84,7 @@ class ReservationServiceTest {
             assertAll(
                     () -> assertThat(responses).hasSize(1),
                     () -> assertThat(responses).extracting("member")
-                            .containsExactly(new NameResponse(1L, "어드민")),
+                            .containsExactly(new MemberNameResponse(1L, "어드민")),
                     () -> assertThat(responses).extracting("date")
                             .containsExactly(LocalDate.now().plusDays(7)),
                     () -> assertThat(responses).extracting("theme")
@@ -100,7 +104,7 @@ class ReservationServiceTest {
         void createReservationTest() {
             // given
             LocalDate date = LocalDate.now().plusDays(10);
-            ReservationRequest requestDto = new ReservationRequest(date, 1L, 1L, 1L);
+            AdminReservationCreateRequest requestDto = new AdminReservationCreateRequest(date, 1L, 1L, 1L);
 
             // when
             ReservationResponse responseDto = reservationService.createAdminReservation(requestDto);
@@ -119,7 +123,8 @@ class ReservationServiceTest {
         @Test
         void invalidReservationTimeIdTest() {
             // given
-            ReservationRequest requestDto = new ReservationRequest(LocalDate.now().plusDays(10), 10L,
+            AdminReservationCreateRequest requestDto = new AdminReservationCreateRequest(LocalDate.now().plusDays(10),
+                    10L,
                     1L, 1L);
 
             // when & then
@@ -131,7 +136,8 @@ class ReservationServiceTest {
         @Test
         void invalidThemeIdTest() {
             // given
-            ReservationRequest requestDto = new ReservationRequest(LocalDate.now().plusDays(10), 1L,
+            AdminReservationCreateRequest requestDto = new AdminReservationCreateRequest(LocalDate.now().plusDays(10),
+                    1L,
                     10L, 1L);
 
             // when & then
@@ -143,7 +149,8 @@ class ReservationServiceTest {
         @Test
         void createInvalidNameTest() {
             // given
-            ReservationRequest requestDto = new ReservationRequest(LocalDate.now().plusDays(10), 1L,
+            AdminReservationCreateRequest requestDto = new AdminReservationCreateRequest(LocalDate.now().plusDays(10),
+                    1L,
                     1L, 10L);
 
             // when & then
@@ -155,7 +162,8 @@ class ReservationServiceTest {
         @Test
         void createDuplicateReservationTest() {
             // given
-            ReservationRequest requestDto = new ReservationRequest(LocalDate.now().plusDays(7), 1L,
+            AdminReservationCreateRequest requestDto = new AdminReservationCreateRequest(LocalDate.now().plusDays(7),
+                    1L,
                     1L, 1L);
 
             // when & then
@@ -167,7 +175,8 @@ class ReservationServiceTest {
         @Test
         void createInvalidDateTest() {
             // given
-            ReservationRequest requestDto = new ReservationRequest(LocalDate.now().minusDays(7), 1L,
+            AdminReservationCreateRequest requestDto = new AdminReservationCreateRequest(LocalDate.now().minusDays(7),
+                    1L,
                     1L, 1L);
 
             // when & then
@@ -190,7 +199,7 @@ class ReservationServiceTest {
             reservationService.deleteReservation(targetId);
 
             // then
-            assertThat(reservationService.findAllReservationResponses()).isEmpty();
+            assertThat(reservationService.findAllReservations()).isEmpty();
         }
 
         @DisplayName("존재하지 않는 Id의 Reservation을 삭제할 수 없다")

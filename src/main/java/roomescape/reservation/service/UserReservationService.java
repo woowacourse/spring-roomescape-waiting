@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.UserReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -20,22 +21,22 @@ public class UserReservationService {
         this.waitingRepository = waitingRepository;
     }
 
-    public List<UserReservationResponse> findAllMemberReservations(Long memberId) {
-        List<UserReservationResponse> reservations = findAllReservationByMemberId(memberId);
-        List<UserReservationResponse> waitings = findAllWaitingByMemberId(memberId);
+    public List<UserReservationResponse> findAllMemberReservations(Member member) {
+        List<UserReservationResponse> reservations = findAllReservationByMember(member);
+        List<UserReservationResponse> waitings = findAllWaitingByMember(member);
         return mergeList(reservations, waitings);
     }
 
-    private List<UserReservationResponse> findAllWaitingByMemberId(Long memberId) {
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(memberId);
+    private List<UserReservationResponse> findAllWaitingByMember(Member member) {
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingWithRankByMemberId(member.getId());
         List<UserReservationResponse> waitingResponses = waitingWithRanks.stream()
                 .map(UserReservationResponse::from)
                 .toList();
         return waitingResponses;
     }
 
-    private List<UserReservationResponse> findAllReservationByMemberId(Long memberId) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
+    private List<UserReservationResponse> findAllReservationByMember(Member member) {
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(member.getId());
         return reservations.stream()
                 .map(UserReservationResponse::from)
                 .toList();

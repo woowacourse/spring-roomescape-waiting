@@ -2,7 +2,6 @@ package roomescape.config;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.UnauthorizedException;
@@ -28,18 +27,10 @@ public class AdminAuthorizationInterceptor implements HandlerInterceptor {
         Long memberId = TokenProvider.getMemberIdFromToken(token);
         Member member = memberService.findById(memberId);
         if (!Role.isAdmin(member.getRole())) {
-            redirectToLoginPage(response);
+            response.setStatus(403);
             return false;
         }
         return true;
-    }
-
-    private void redirectToLoginPage(HttpServletResponse response) {
-        try {
-            response.sendRedirect("/login");
-        } catch (IOException e) {
-            throw new RuntimeException("Redirect failed", e);
-        }
     }
 
     private String extractToken(HttpServletRequest request) {

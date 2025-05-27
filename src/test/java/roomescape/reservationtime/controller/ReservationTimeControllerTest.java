@@ -15,9 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.member.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
+import roomescape.member.dto.LoginRequest;
 import roomescape.reservationtime.dto.ReservationTimeCreateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -143,6 +143,12 @@ class ReservationTimeControllerTest {
             RestAssured.given().log().all()
                     .header("Cookie", adminCookie)
                     .when().delete("/reservations/1")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", adminCookie)
+                    .when().delete("/waitings/1")
                     .then().log().all()
                     .statusCode(204);
 

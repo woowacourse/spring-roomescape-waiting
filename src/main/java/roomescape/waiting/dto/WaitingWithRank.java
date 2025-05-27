@@ -19,7 +19,7 @@ public class WaitingWithRank {
 
     public String getLabel() {
         WaitingStatus status = waiting.getStatus();
-        if(status == WaitingStatus.PENDING) {
+        if (status == WaitingStatus.PENDING) {
             return rank + "번째 " + status.getLabel();
         }
         return status.getLabel();

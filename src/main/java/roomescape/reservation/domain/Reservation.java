@@ -80,7 +80,7 @@ public class Reservation {
     public ReservationStatus getStatus() {
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime reservationDateTime = LocalDateTime.of(this.date, this.time.getStartAt());
-        if(reservationDateTime.isBefore(now)) {
+        if (reservationDateTime.isBefore(now)) {
             return ReservationStatus.EXPIRED;
         }
         return ReservationStatus.RESERVED;
