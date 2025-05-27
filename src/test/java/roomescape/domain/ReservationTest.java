@@ -3,10 +3,13 @@ package roomescape.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.testFixture.Fixture.MEMBER1_ADMIN;
 import static roomescape.testFixture.Fixture.MEMBER2_USER;
+import static roomescape.testFixture.Fixture.RESERVATION_TIME_1;
 import static roomescape.testFixture.Fixture.THEME_1;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -26,7 +29,7 @@ class ReservationTest {
                 THEME_1,
                 date,
                 reservationTime,
-                new Waiting(ReservationStatus.RESERVED)
+                Status.statusWithoutId(ReservationStatus.RESERVED)
         );
 
         // when
@@ -36,7 +39,7 @@ class ReservationTest {
                 THEME_1,
                 date,
                 reservationTime,
-                new Waiting(ReservationStatus.RESERVED)
+                Status.statusWithoutId(ReservationStatus.RESERVED)
         );
         boolean duplicated = reservation2.isDuplicated(reservation1);
 
@@ -60,7 +63,7 @@ class ReservationTest {
                 THEME_1,
                 date1,
                 time1,
-                new Waiting(ReservationStatus.RESERVED)
+                Status.statusWithoutId(ReservationStatus.RESERVED)
         );
 
         // when
@@ -72,11 +75,137 @@ class ReservationTest {
                 THEME_1,
                 date2,
                 time2,
-                new Waiting(ReservationStatus.RESERVED)
+                Status.statusWithoutId(ReservationStatus.RESERVED)
         );
         boolean duplicated = reservation2.isDuplicated(reservation1);
 
         // then
         assertThat(duplicated).isFalse();
+    }
+
+    @DisplayName("예약을 삭제 상태로 변경시킬 수 있다")
+    @Test
+    void changeReservedReservation() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.RESERVED)
+        );
+
+        // when
+        reservation.cancel();
+
+        // then
+        assertThat(reservation.getStatus().getStatus()).isEqualTo(ReservationStatus.CANCELED);
+    }
+
+    @DisplayName("대기중인 예약을 예약된 상태로 변경시킬 수 있다")
+    @Test
+    void changeCanceledReservation() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.WAITING)
+        );
+
+        // when
+        reservation.reserve();
+
+        // then
+        assertThat(reservation.getStatus().getStatus()).isEqualTo(ReservationStatus.RESERVED);
+    }
+
+    @DisplayName("예약 대기중일 때 대기중임을 확인한다")
+    @Test
+    void isWaiting() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.WAITING)
+        );
+
+        // when
+        boolean waiting = reservation.isWaiting();
+
+        // then
+        Assertions.assertThat(waiting).isTrue();
+    }
+
+    @DisplayName("예약 대기중이 아닐 때 대기중이 아을 확인한다")
+    @Test
+    void isNotWaiting() {
+        // given
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                LocalDate.of(2025, 1, 1),
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                Status.statusWithoutId(ReservationStatus.RESERVED)
+        );
+
+        // when
+        boolean waiting = reservation.isWaiting();
+
+        // then
+        Assertions.assertThat(waiting).isFalse();
+    }
+
+    @DisplayName("예약이 과거 시간일 경우 true를 반환한다")
+    @Test
+    void isPast_true() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime past = now.minusDays(1);
+        Status status = Status.statusWithoutId(past, ReservationStatus.RESERVED);
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                past.toLocalDate(),
+                RESERVATION_TIME_1,
+                status
+        );
+
+        // when
+        boolean result = reservation.isPast(now);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("예약이 미래 시간일 경우 false를 반환한다")
+    @Test
+    void isPast_false() {
+        // given
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime future = now.plusDays(1);
+        Status status = Status.statusWithoutId(future, ReservationStatus.RESERVED);
+        Reservation reservation = Reservation.of(
+                1L,
+                MEMBER1_ADMIN,
+                THEME_1,
+                future.toLocalDate(),
+                RESERVATION_TIME_1,
+                status
+        );
+
+        // when
+        boolean result = reservation.isPast(now);
+
+        // then
+        assertThat(result).isFalse();
     }
 }

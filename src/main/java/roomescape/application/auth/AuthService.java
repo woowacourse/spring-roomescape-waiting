@@ -8,7 +8,6 @@ import roomescape.application.auth.dto.LoginRequest;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.MemberDto;
 import roomescape.domain.Member;
-import roomescape.domain.Role;
 import roomescape.exception.AuthorizationException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.jwt.JwtTokenProvider;

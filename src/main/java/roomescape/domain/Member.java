@@ -42,6 +42,18 @@ public class Member {
         return of(null, name, email, password, role);
     }
 
+    public boolean matchPassword(String password) {
+        return this.password.equals(password);
+    }
+
+    public boolean isAdmin() {
+        return this.role == Role.ADMIN;
+    }
+
+    public boolean isNotEqual(Member member) {
+        return !member.getId().equals(this.getId());
+    }
+
     public Long getId() {
         return id;
     }
@@ -60,13 +72,5 @@ public class Member {
 
     public Role getRole() {
         return role;
-    }
-
-    public boolean matchPassword(String password) {
-        return this.password.equals(password);
-    }
-
-    public boolean isAdmin() {
-        return this.role == Role.ADMIN;
     }
 }

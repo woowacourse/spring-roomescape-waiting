@@ -12,8 +12,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
+import roomescape.domain.Status;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 
 public class Fixture {
 
@@ -29,7 +29,7 @@ public class Fixture {
             THEME_1,
             LocalDate.now().plusDays(1),
             RESERVATION_TIME_1,
-            new Waiting(ReservationStatus.RESERVED)
+            Status.statusWithoutId(ReservationStatus.RESERVED)
     );
 
     public static final UserReservationCreateDto RESERVATION_BODY = createUserReservationBody();

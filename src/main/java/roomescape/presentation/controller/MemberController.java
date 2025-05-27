@@ -23,14 +23,14 @@ public class MemberController {
         this.memberService = memberService;
     }
 
-    @GetMapping
-    public List<MemberDto> getAllMembers() {
-        return memberService.getAllMemberDtos();
-    }
-
     @PostMapping
     public ResponseEntity<MemberDto> createMember(@Valid @RequestBody MemberCreateDto memberCreateDto) {
         MemberDto memberDto = memberService.registerMember(memberCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(memberDto);
+    }
+
+    @GetMapping
+    public List<MemberDto> getAllMembers() {
+        return memberService.getAllMemberDtos();
     }
 }

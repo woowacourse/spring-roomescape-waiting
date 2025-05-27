@@ -15,7 +15,7 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 @EntityListeners(AuditingEntityListener.class)
 @Entity
-public class Waiting {
+public class Status {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -26,18 +26,48 @@ public class Waiting {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    @OneToOne(mappedBy = "waiting")
+    @OneToOne(mappedBy = "status")
     private Reservation reservation;
 
-    protected Waiting() {
+    private Status(Long id, LocalDateTime savedDateTime, ReservationStatus status) {
+        this.id = id;
+        this.savedDateTime = savedDateTime;
+        this.status = status;
     }
 
-    public Waiting(ReservationStatus status) {
-        this.status = status;
+    protected Status() {
+    }
+
+    private Status(ReservationStatus status) {
+        this(null, null, status);
+    }
+
+    private Status(LocalDateTime savedDateTime, ReservationStatus status) {
+        this(null, savedDateTime, status);
+    }
+
+    public static Status statusWithoutId(ReservationStatus status) {
+        return new Status(status);
+    }
+
+    public static Status statusWithoutId(LocalDateTime dateTime, ReservationStatus status) {
+        return new Status(dateTime, status);
+    }
+
+    public void cancelStatus() {
+        this.status = ReservationStatus.CANCELED;
+    }
+
+    public void reserveStatus() {
+        this.status = ReservationStatus.RESERVED;
     }
 
     public Long getId() {
         return id;
+    }
+
+    public LocalDateTime getSavedDateTime() {
+        return savedDateTime;
     }
 
     public ReservationStatus getStatus() {

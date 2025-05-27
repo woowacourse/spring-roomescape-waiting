@@ -1,7 +1,6 @@
 package roomescape.presentation.controller;
 
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,11 +11,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.ReservationService;
+import roomescape.application.ReservationCommandService;
+import roomescape.application.ReservationQueryService;
+import roomescape.application.WaitingService;
 import roomescape.application.auth.dto.MemberIdDto;
 import roomescape.application.dto.ReservationDto;
 import roomescape.application.dto.ReservationWaitingDto;
 import roomescape.application.dto.UserReservationCreateDto;
+import roomescape.application.dto.UserWaitingCreateDto;
 import roomescape.infrastructure.AuthenticatedMemberId;
 import roomescape.presentation.controller.dto.ReservationWaitingResponse;
 
@@ -24,23 +26,15 @@ import roomescape.presentation.controller.dto.ReservationWaitingResponse;
 @RequestMapping("/reservations")
 public class ReservationController {
 
-    private final ReservationService service;
+    private final ReservationCommandService commandService;
+    private final ReservationQueryService queryService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService service) {
-        this.service = service;
-    }
-
-    @GetMapping
-    public List<ReservationDto> getAllReservations() {
-        return service.getAllReservations();
-    }
-
-    @GetMapping("/member")
-    public List<ReservationWaitingResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
-        List<ReservationWaitingDto> reservationWaitingDtos = service.getReservationsByMember(memberIdDto.id());
-        return reservationWaitingDtos.stream()
-                .map(ReservationWaitingResponse::from)
-                .toList();
+    public ReservationController(ReservationQueryService queryService, ReservationCommandService commandService,
+                                 WaitingService waitingService) {
+        this.queryService = queryService;
+        this.commandService = commandService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -48,14 +42,47 @@ public class ReservationController {
             @Valid @RequestBody UserReservationCreateDto request,
             @AuthenticatedMemberId MemberIdDto memberIdDto
     ) {
-        LocalDateTime now = LocalDateTime.now();
-        ReservationDto reservationDto = service.registerReservationByUser(request, memberIdDto.id());
+        ReservationDto reservationDto = commandService.registerReservationByUser(request, memberIdDto.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationDto> createWaiting(
+            @Valid @RequestBody UserWaitingCreateDto request,
+            @AuthenticatedMemberId MemberIdDto memberIdDto
+    ) {
+        ReservationDto reservationDto = commandService.registerWaitingByUser(request, memberIdDto.id());
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationDto);
+    }
+
+    @GetMapping
+    public List<ReservationDto> getAllReservations() {
+        return queryService.getAllReservations();
+    }
+
+    @GetMapping("/member")
+    public List<ReservationWaitingResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
+        List<ReservationWaitingDto> reservationWaitingDtos = queryService.getReservationsByMember(memberIdDto.id());
+        return reservationWaitingDtos.stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+    }
+
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") Long id) {
-        service.deleteReservation(id);
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable("id") Long id,
+            @AuthenticatedMemberId MemberIdDto memberIdDto
+    ) {
+        commandService.cancelReservation(id, memberIdDto.id());
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaiting(
+            @PathVariable("id") Long reservationId,
+            @AuthenticatedMemberId MemberIdDto memberIdDto
+    ) {
+        waitingService.deleteWaiting(reservationId, memberIdDto.id());
         return ResponseEntity.noContent().build();
     }
 }

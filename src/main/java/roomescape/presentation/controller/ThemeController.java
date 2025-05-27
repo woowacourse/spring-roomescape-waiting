@@ -25,25 +25,25 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @GetMapping
-    public List<ThemeDto> getAllThemes() {
-        return themeService.getAllThemes();
-    }
-
     @PostMapping
     public ResponseEntity<ThemeDto> createTheme(@Valid @RequestBody ThemeCreateDto themeCreateDto) {
         ThemeDto themeDto = themeService.registerTheme(themeCreateDto);
         return ResponseEntity.status(HttpStatus.CREATED).body(themeDto);
     }
 
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
-        themeService.deleteTheme(id);
-        return ResponseEntity.noContent().build();
+    @GetMapping
+    public List<ThemeDto> getAllThemes() {
+        return themeService.getAllThemes();
     }
 
     @GetMapping("/ranking")
     public List<ThemeDto> getThemeRanking() {
         return themeService.getThemeRanking();
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
+        themeService.deleteTheme(id);
+        return ResponseEntity.noContent().build();
     }
 }

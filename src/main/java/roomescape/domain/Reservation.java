@@ -2,9 +2,11 @@ package roomescape.domain;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
@@ -18,13 +20,17 @@ public class Reservation {
     private Long id;
     private LocalDate date;
 
-    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
-    private Waiting waiting;
-    @ManyToOne
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "status_id")
+    private Status status;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     private Reservation(
@@ -33,14 +39,14 @@ public class Reservation {
             Theme theme,
             LocalDate date,
             ReservationTime time,
-            Waiting waiting
+            Status status
     ) {
         this.id = id;
         this.member = member;
         this.theme = theme;
         this.date = date;
         this.time = time;
-        this.waiting = waiting;
+        this.status = status;
         addReservationInTime();
     }
 
@@ -57,9 +63,9 @@ public class Reservation {
             Theme theme,
             LocalDate date,
             ReservationTime time,
-            Waiting waiting
+            Status status
     ) {
-        return new Reservation(id, member, theme, date, time, waiting);
+        return new Reservation(id, member, theme, date, time, status);
     }
 
     public static Reservation withoutId(
@@ -67,9 +73,9 @@ public class Reservation {
             Theme theme,
             LocalDate reservationDate,
             ReservationTime reservationTime,
-            Waiting waiting
+            Status status
     ) {
-        return new Reservation(null, member, theme, reservationDate, reservationTime, waiting);
+        return new Reservation(null, member, theme, reservationDate, reservationTime, status);
     }
 
     public boolean isPast(LocalDateTime comparedDateTime) {
@@ -77,8 +83,10 @@ public class Reservation {
         return reservationDateTime.isBefore(comparedDateTime);
     }
 
-    public void deleteReservationInTime() {
-        this.time.removeReservation(this);
+    public void deleteSelf() {
+        if (this.time != null) {
+            this.time.removeReservation(this);
+        }
     }
 
     public boolean isDuplicated(Reservation other) {
@@ -93,7 +101,19 @@ public class Reservation {
                 && this.time.getId().equals(timeId);
     }
 
-    public void setTime(ReservationTime time) {
+    public boolean isWaiting() {
+        return this.status.getStatus() == ReservationStatus.WAITING;
+    }
+
+    public void reserve() {
+        this.status.reserveStatus();
+    }
+
+    public void cancel() {
+        this.status.cancelStatus();
+    }
+
+    void setTime(ReservationTime time) {
         this.time = time;
     }
 
@@ -117,7 +137,7 @@ public class Reservation {
         return time;
     }
 
-    public Waiting getWaiting() {
-        return waiting;
+    public Status getStatus() {
+        return status;
     }
 }

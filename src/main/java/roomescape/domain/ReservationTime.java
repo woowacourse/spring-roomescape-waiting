@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -18,7 +19,7 @@ public class ReservationTime {
     private Long id;
     private LocalTime startAt;
 
-    @OneToMany(mappedBy = "time")
+    @OneToMany(fetch = FetchType.LAZY, mappedBy = "time")
     private List<Reservation> reservations = new ArrayList<>();
 
     private ReservationTime(Long id, LocalTime startAt) {
@@ -42,6 +43,20 @@ public class ReservationTime {
                 .anyMatch(reservation -> reservation.isAlreadyBookedTime(date, themeId, this.id));
     }
 
+    void addReservation(Reservation reservation) {
+        this.reservations.add(reservation);
+        reservation.setTime(this);
+    }
+
+    void removeReservation(Reservation reservation) {
+        this.reservations.remove(reservation);
+        reservation.setTime(null);
+    }
+
+    public boolean compareEqualId(ReservationTime time) {
+        return this.id.equals(time.id);
+    }
+
     public Long getId() {
         return id;
     }
@@ -52,19 +67,5 @@ public class ReservationTime {
 
     public List<Reservation> getReservations() {
         return reservations;
-    }
-
-    protected void addReservation(Reservation reservation) {
-        this.reservations.add(reservation);
-        reservation.setTime(this);
-    }
-
-    protected void removeReservation(Reservation reservation) {
-        this.reservations.remove(reservation);
-        reservation.setTime(null);
-    }
-
-    public boolean compareEqualId(ReservationTime time) {
-        return this.id.equals(time.id);
     }
 }
