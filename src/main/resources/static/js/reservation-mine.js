@@ -35,14 +35,12 @@ function render(data) {
         row.insertCell(2).textContent = time;
         row.insertCell(3).textContent = status;
 
-        /*
-        TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-         */
+        const cancelCell = row.insertCell(4);
+        const cancelButton = document.createElement('button');
+        cancelButton.textContent = '취소';
+        cancelButton.className = 'btn btn-danger';
+
         if (item.status === '예약대기') {
-            const cancelCell = row.insertCell(4);
-            const cancelButton = document.createElement('button');
-            cancelButton.textContent = '취소';
-            cancelButton.className = 'btn btn-danger';
             cancelButton.onclick = function () {
                 if (!item.reservationId) {
                     console.error('Invalid reservation ID');
@@ -50,15 +48,30 @@ function render(data) {
                 }
                 requestDeleteWaiting(item.reservationId).then(() => window.location.reload());
             };
-            cancelCell.appendChild(cancelButton);
         } else {
-            row.insertCell(4).textContent = '';
+            cancelButton.onclick = function () {
+                if (!item.reservationId) {
+                    console.error('Invalid reservation ID');
+                    return;
+                }
+                requestDelete(item.reservationId).then(() => window.location.reload());
+            };
         }
+        cancelCell.appendChild(cancelButton);
     });
 }
 
 function requestDeleteWaiting(id) {
     return fetch(`/reservations/waiting/${id}`, {
+        method: 'DELETE'
+    }).then(response => {
+        if (response.status === 204) return;
+        throw new Error('Delete failed');
+    });
+}
+
+function requestDelete(id) {
+    return fetch(`/reservations/${id}`, {
         method: 'DELETE'
     }).then(response => {
         if (response.status === 204) return;
