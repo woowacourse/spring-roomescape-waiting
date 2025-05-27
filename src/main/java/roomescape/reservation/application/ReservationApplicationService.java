@@ -6,11 +6,12 @@ import org.springframework.stereotype.Service;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationOwnerException;
+import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservation.presentation.dto.response.WaitingResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -76,6 +77,16 @@ public class ReservationApplicationService {
     }
 
     public void delete(final Long reservationId) {
+        Reservation reservation = reservationDataService.getById(reservationId);
         reservationDataService.deleteById(reservationId);
+
+        deleteReservationSlotIfExists(reservation);
+    }
+
+    private void deleteReservationSlotIfExists(final Reservation reservation) {
+        Long slotId = reservation.getReservationSlot().getId();
+        if (reservationSlotDataService.hasOnlyOneReservation(slotId)) {
+            reservationSlotDataService.delete(slotId);
+        }
     }
 }

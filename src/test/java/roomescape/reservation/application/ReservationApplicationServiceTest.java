@@ -89,24 +89,14 @@ class ReservationApplicationServiceTest {
         assertThat(result).hasSize(2);
     }
 
-    // TODO : 삭제 예외
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
         TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId,
-                memberId,
-                afterOneHour);
-
-        List<TotalReservationResponse> result = reservationApplicationService.findReservations(themeId, memberId,
-                futureDate,
-                futureDate.plusDays(1));
-        assertThat(result.size()).isOne();
+                memberId, afterOneHour);
         reservationApplicationService.delete(response.id());
 
-        List<TotalReservationResponse> result2 = reservationApplicationService.findReservations(themeId, memberId,
-                futureDate,
-                futureDate.plusDays(1));
-        assertThat(result2.size()).isOne();
-
-//        assertThat(result2).isEmpty();
+        List<TotalReservationResponse> result = reservationApplicationService.findReservations(themeId, memberId,
+                futureDate, futureDate.plusDays(1));
+        assertThat(result).isEmpty();
     }
 }

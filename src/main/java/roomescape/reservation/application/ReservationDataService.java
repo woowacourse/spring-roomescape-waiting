@@ -70,4 +70,9 @@ public class ReservationDataService {
     public boolean existsByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
         return reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
     }
+
+    public Reservation getById(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationOwnerException("존재하지 않는 예약입니다."));
+    }
 }

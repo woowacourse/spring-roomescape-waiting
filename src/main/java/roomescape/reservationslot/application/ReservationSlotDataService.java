@@ -56,4 +56,8 @@ public class ReservationSlotDataService {
     public boolean existsByThemeId(final Long themeId) {
         return reservationSlotRepository.existsByThemeId(themeId);
     }
+
+    public boolean hasOnlyOneReservation(final Long reservationSlotId) {
+        return reservationSlotRepository.hasOnlyOneReservation(reservationSlotId);
+    }
 }
