@@ -39,7 +39,7 @@ public class ReservationRestController {
         return ResponseEntity.ok(createReservationResponse);
     }
 
-    @GetMapping("/waitings")
+    @GetMapping("/waiting")
     public ResponseEntity<List<ReservationsWithRankResponse>> getWaiting() {
         final List<ReservationWithRank> waitings = reservationService.findAllWaitingReservations();
         final List<ReservationsWithRankResponse> waitingsResponse = waitings.stream()
