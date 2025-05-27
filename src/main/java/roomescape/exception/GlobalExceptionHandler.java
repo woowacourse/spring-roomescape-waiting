@@ -2,8 +2,8 @@ package roomescape.exception;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 
@@ -12,38 +12,24 @@ public class GlobalExceptionHandler {
 
     private final Logger logger = LoggerFactory.getLogger(GlobalExceptionHandler.class);
 
-    @ExceptionHandler(NotFoundException.class)
-    public ResponseEntity<String> handleNotFoundException(final NotFoundException e) {
-        logger.warn("NotFoundException occurred", e);
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<String> handleBusinessException(final BusinessException e) {
+        logger.warn("BusinessException occurred", e);
 
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        return ResponseEntity.status(e.getHttpStatus()).body(e.getMessage());
     }
 
-    @ExceptionHandler(DuplicateException.class)
-    public ResponseEntity<String> handleDuplicateException(final DuplicateException e) {
-        logger.warn("DuplicateException occurred", e);
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<String> handleHttpMessageNotReadableException(final BusinessException e) {
+        logger.warn("HttpMessageNotReadableException occurred", e);
 
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        return ResponseEntity.badRequest().body("요청이 올바르지 않습니다.");
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<String> handleIllegalArgumentException(final IllegalArgumentException e) {
-        logger.warn("IllegalArgumentException occurred", e);
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<String> handleRuntimeException(final RuntimeException e) {
+        logger.error("RuntimeException occurred", e);
 
-        return ResponseEntity.badRequest().body(e.getMessage());
-    }
-
-    @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<String> handleUnauthorizedException(final UnauthorizedException e) {
-        logger.warn("UnauthorizedException occurred", e);
-
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(e.getMessage());
-    }
-
-    @ExceptionHandler(InvalidDateAndTimeException.class)
-    public ResponseEntity<String> handleInvalidDateAndTimeException(final InvalidDateAndTimeException e) {
-        logger.warn("InvalidDateAndTimeException occurred", e);
-
-        return ResponseEntity.badRequest().body(e.getMessage());
+        return ResponseEntity.internalServerError().body("서버에 오류가 발생하였습니다.");
     }
 }

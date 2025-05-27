@@ -15,7 +15,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.ReservationTime;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.presentation.dto.AvailableReservationTimeResponse;
@@ -58,7 +58,7 @@ class ReservationTimeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.insert(reservationTimeRequest))
-                .isInstanceOf(DuplicateException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test

@@ -12,6 +12,7 @@ import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.exception.BadRequestException;
 
 @Entity
 @Table(
@@ -53,7 +54,7 @@ public class Reservation {
 
     private void validateDate(final LocalDate date) {
         if (date == null) {
-            throw new IllegalArgumentException("date 필드가 null 입니다.");
+            throw new BadRequestException("date 필드가 null 입니다.");
         }
     }
 

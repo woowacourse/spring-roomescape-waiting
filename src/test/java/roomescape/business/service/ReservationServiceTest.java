@@ -17,8 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
-import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidDateAndTimeException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.MemberRepository;
 import roomescape.infrastructure.repository.ReservationRepository;
@@ -154,7 +153,7 @@ public class ReservationServiceTest {
         // when & then
         assertThatThrownBy(
                 () -> reservationService.insert(new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, themeId)))
-                .isInstanceOf(DuplicateException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -165,7 +164,7 @@ public class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.insert(new ReservationRequest(pastDate, memberId, timeId, themeId)))
-                .isInstanceOf(InvalidDateAndTimeException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test

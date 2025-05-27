@@ -17,7 +17,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Theme;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
@@ -82,7 +82,7 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.insert(themeRequest))
-                .isInstanceOf(DuplicateException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test

@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.Theme;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
@@ -42,7 +42,7 @@ public class ThemeService {
 
     private void validateNameIsNotDuplicate(final String name) {
         if (themeRepository.existsByName(name)) {
-            throw new DuplicateException("추가 하려는 테마 이름이 이미 존재합니다.");
+            throw new BadRequestException("추가 하려는 테마 이름이 이미 존재합니다.");
         }
     }
 

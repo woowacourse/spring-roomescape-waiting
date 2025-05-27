@@ -376,7 +376,7 @@ class ReservationControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 반환한다")
+    @DisplayName("이미 예약된 시간에 예약을 시도하면 400 상태코드를 반환한다")
     void createByLoginMember_WithDuplicateDateTime_ReturnsConflict() {
         // given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
@@ -418,7 +418,7 @@ class ReservationControllerIntegrationTest {
                 .when()
                 .post("/reservations")
                 .then()
-                .statusCode(HttpStatus.CONFLICT.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test

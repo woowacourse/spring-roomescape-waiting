@@ -7,6 +7,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
+import roomescape.exception.BadRequestException;
 
 @Entity
 @Table(name = "reservation_time")
@@ -27,7 +28,7 @@ public class ReservationTime {
 
     private void validateStartAt(final LocalTime startAt) {
         if (startAt == null) {
-            throw new IllegalArgumentException("startAt이 null 입니다.");
+            throw new BadRequestException("startAt이 null 입니다.");
         }
     }
 

@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.exception.BadRequestException;
 
 @Entity
 @Table(name = "waiting")
@@ -53,7 +54,7 @@ public class Waiting {
 
     private void validateDate(final LocalDate date) {
         if(date == null) {
-            throw new IllegalArgumentException("date 필드가 null 입니다.");
+            throw new BadRequestException("date 필드가 null 입니다.");
         }
     }
 

@@ -19,7 +19,7 @@ class GlobalExceptionHandlerTest {
         NotFoundException notFoundException = new NotFoundException("조회 결과가 없습니다.");
 
         // when
-        ResponseEntity<String> responseEntity = globalExceptionHandler.handleNotFoundException(notFoundException);
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleBusinessException(notFoundException);
 
         // then
         HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
@@ -27,28 +27,13 @@ class GlobalExceptionHandlerTest {
     }
 
     @Test
-    @DisplayName("중복될 수 없는 값을 저장할 때 발생하는 예외를 핸들러에서 409 응답 코드를 반환한다")
-    void handleDuplicateException() {
-        // given
-        DuplicateException duplicateException = new DuplicateException("중복되는 값입니다.");
-
-        // when
-        ResponseEntity<String> responseEntity = globalExceptionHandler.handleDuplicateException(duplicateException);
-
-        // then
-        HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
-        assertThat(responseHttpStatusCode).isEqualTo(HttpStatus.CONFLICT);
-    }
-
-    @Test
     @DisplayName("유효하지 않은 값을 사용할 때 발생하는 예외를 핸들러에서 400 응답 코드를 반환한다")
     void handleIllegalArgumentException() {
         // given
-        IllegalArgumentException illegalArgumentException = new IllegalArgumentException("유효하지 않은 값입니다.");
+        BadRequestException badRequestException = new BadRequestException("유효하지 않은 값입니다.");
 
         // when
-        ResponseEntity<String> responseEntity = globalExceptionHandler.handleIllegalArgumentException(
-                illegalArgumentException);
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleBusinessException(badRequestException);
 
         // then
         HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
@@ -62,26 +47,11 @@ class GlobalExceptionHandlerTest {
         UnauthorizedException unauthorizedException = new UnauthorizedException("인증, 인가 중 에러가 발생했습니다.");
 
         // when
-        ResponseEntity<String> responseEntity = globalExceptionHandler.handleUnauthorizedException(
+        ResponseEntity<String> responseEntity = globalExceptionHandler.handleBusinessException(
                 unauthorizedException);
 
         // then
         HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
         assertThat(responseHttpStatusCode).isEqualTo(HttpStatus.UNAUTHORIZED);
-    }
-
-    @Test
-    @DisplayName("과거 시간으로 예약할 때 발생하는 예외를 핸들러에서 400 응답 코드를 반환한다")
-    void handleInvalidDateAndTimeException() {
-        // given
-        InvalidDateAndTimeException invalidDateAndTimeException = new InvalidDateAndTimeException("과거 시간입니다.");
-
-        // when
-        ResponseEntity<String> responseEntity = globalExceptionHandler.handleInvalidDateAndTimeException(
-                invalidDateAndTimeException);
-
-        // then
-        HttpStatusCode responseHttpStatusCode = responseEntity.getStatusCode();
-        assertThat(responseHttpStatusCode).isEqualTo(HttpStatus.BAD_REQUEST);
     }
 }

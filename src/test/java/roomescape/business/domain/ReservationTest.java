@@ -8,6 +8,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadRequestException;
 
 class ReservationTest {
 
@@ -22,7 +23,7 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(() -> new Reservation(invalidDate, member, reservationTime, theme))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test

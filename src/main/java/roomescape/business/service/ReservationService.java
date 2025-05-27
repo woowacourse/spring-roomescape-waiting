@@ -13,8 +13,6 @@ import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
 import roomescape.exception.BadRequestException;
-import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidDateAndTimeException;
 import roomescape.infrastructure.repository.ReservationRepository;
 import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationMineResponse;
@@ -63,14 +61,14 @@ public class ReservationService {
 
     private void validateIsDuplicate(final LocalDate date, final Long timeId, final Long themeId) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new DuplicateException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
+            throw new BadRequestException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
         }
     }
 
     private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
         final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
         if (reservationDateTime.isBefore(currentUtil.getCurrentDateTime())) {
-            throw new InvalidDateAndTimeException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
+            throw new BadRequestException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
         }
     }
 

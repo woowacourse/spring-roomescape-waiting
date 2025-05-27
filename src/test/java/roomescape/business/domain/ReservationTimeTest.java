@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.BadRequestException;
 
 class ReservationTimeTest {
 
@@ -19,9 +20,9 @@ class ReservationTimeTest {
         // when & then
         assertAll(
                 () -> assertThatThrownBy(() -> new ReservationTime(invalidStartAt))
-                        .isInstanceOf(IllegalArgumentException.class),
+                        .isInstanceOf(BadRequestException.class),
                 () -> assertThatThrownBy(() -> new ReservationTime(1L, invalidStartAt))
-                        .isInstanceOf(IllegalArgumentException.class)
+                        .isInstanceOf(BadRequestException.class)
         );
     }
 

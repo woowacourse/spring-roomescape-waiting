@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.infrastructure.repository.ReservationTimeRepository;
 import roomescape.presentation.dto.AvailableReservationTimeResponse;
@@ -39,7 +39,7 @@ public class ReservationTimeService {
 
     private void validateStartAtIsNotDuplicate(final LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new DuplicateException("추가 하려는 시간이 이미 존재합니다.");
+            throw new BadRequestException("추가 하려는 시간이 이미 존재합니다.");
         }
     }
 

@@ -47,7 +47,7 @@ class ReservationTimeControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("이미 존재하는 예약 시간을 생성하려고 하면 409 상태코드를 반환한다")
+    @DisplayName("이미 존재하는 예약 시간을 생성하려고 하면 400 상태코드를 반환한다")
     void create_DuplicateTime_ReturnsConflict() {
         // given
         final ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(14, 0));
@@ -65,7 +65,7 @@ class ReservationTimeControllerIntegrationTest {
                 .when()
                 .post("/times")
                 .then()
-                .statusCode(HttpStatus.CONFLICT.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test

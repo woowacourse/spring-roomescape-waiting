@@ -206,8 +206,8 @@ class AdminControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 응답한다")
-    void createReservation_WithDuplicateDateTime_Returns409() {
+    @DisplayName("이미 예약된 시간에 예약을 시도하면 400 상태코드를 응답한다")
+    void createReservation_WithDuplicateDateTime_Returns400() {
         // given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
@@ -248,7 +248,7 @@ class AdminControllerIntegrationTest {
                 .when()
                 .post("/admin/reservations")
                 .then()
-                .statusCode(HttpStatus.CONFLICT.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test

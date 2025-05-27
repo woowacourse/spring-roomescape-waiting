@@ -6,6 +6,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import roomescape.exception.BadRequestException;
 
 @Entity
 @Table(name = "theme")
@@ -37,19 +38,19 @@ public class Theme {
 
     private void validateName(final String name) {
         if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("name 필드가 비어있습니다.");
+            throw new BadRequestException("name 필드가 비어있습니다.");
         }
     }
 
     private void validateDescription(final String description) {
         if (description == null) {
-            throw new IllegalArgumentException("description 필드가 null 입니다.");
+            throw new BadRequestException("description 필드가 null 입니다.");
         }
     }
 
     private void validateThumbnail(final String thumbnail) {
         if (thumbnail == null) {
-            throw new IllegalArgumentException("thumbnail 필드가 null 입니다.");
+            throw new BadRequestException("thumbnail 필드가 null 입니다.");
         }
     }
 
