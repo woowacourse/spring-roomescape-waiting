@@ -11,6 +11,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -28,7 +29,9 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Entity
-@Table(name = "reservation_slots")
+@Table(name = "reservation_slots",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"time_id", "theme_id", "date"})
+)
 public class ReservationSlot {
 
     @Id
