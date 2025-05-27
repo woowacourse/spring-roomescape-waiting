@@ -1,6 +1,5 @@
 package roomescape.domain;
 
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -14,10 +13,8 @@ import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.annotation.CreatedDate;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Entity
 @Getter
@@ -26,7 +23,7 @@ import java.time.LocalDateTime;
 @Table(name = "waiting",
         indexes = {@Index(name = "idx_waiting_created_at", columnList = "createdAt")}
 )
-public class Waiting {
+public class Waiting extends BaseEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,11 +43,7 @@ public class Waiting {
     @JoinColumn(name = "time_id", nullable = false)
     private ReservationTime time;
 
-    @Column(name = "created_at", nullable = false)
-    @CreatedDate
-    private LocalDateTime createdAt;
-
     public static Waiting from(LocalDate date, Member member, Theme theme, ReservationTime time) {
-        return new Waiting(null, date, member, theme, time, LocalDateTime.now());
+        return new Waiting(null, date, member, theme, time);
     }
 }
