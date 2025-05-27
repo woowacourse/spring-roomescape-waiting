@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Member;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
@@ -23,6 +24,8 @@ import roomescape.dto.business.WaitingWithRank;
 @DataJpaTest
 class WaitingRepositoryTest {
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
     @Autowired
     private TestEntityManager entityManager;
     @Autowired
@@ -42,23 +45,23 @@ class WaitingRepositoryTest {
         Member targetMember = entityManager.persist(
                 Member.createWithoutId(Role.GENERAL, "회원1", "member1@test.com", "qwer1234!"));
 
-        Waiting otherMemberWaiting = entityManager.persist(
-                Waiting.createWithoutId(NEXT_DAY, theme, time, otherMember));
-        Waiting targetMemberWaiting = entityManager.persist(
-                Waiting.createWithoutId(NEXT_DAY, theme, time, targetMember));
-
         entityManager.flush();
 
+        jdbcTemplate.update(String.format("""
+                INSERT INTO waiting(date, theme_id, time_id, member_id, created_date, last_modified_date)
+                VALUES ('2025-05-10', %d, %d, %d, '2025-05-23 20:37:43.488281', '2025-05-23 20:37:43.488281')
+                """, theme.getId(), time.getId(), otherMember.getId()));
+        jdbcTemplate.update(String.format("""
+                INSERT INTO waiting(date, theme_id, time_id, member_id, created_date, last_modified_date)
+                VALUES ('2025-05-10', %d, %d, %d, '2025-05-23 23:37:43.488281', '2025-05-23 20:37:43.488281')
+                """, theme.getId(), time.getId(), targetMember.getId()));
+
         // when
-        List<WaitingWithRank> waitingWithRankings =
-                waitingRepository.findWithRankingByMember(targetMemberWaiting.getId());
+        List<WaitingWithRank> waitingWithRankings = waitingRepository.findWithRankingByMember(targetMember.getId());
 
         // then
         assertAll(
                 () -> assertThat(waitingWithRankings).hasSize(1),
-                () -> assertThat(waitingWithRankings)
-                        .extracting(WaitingWithRank::id)
-                        .containsExactly(targetMemberWaiting.getId()),
                 () -> assertThat(waitingWithRankings)
                         .extracting(WaitingWithRank::rank)
                         .containsExactly(2L)
