@@ -22,7 +22,6 @@ import roomescape.presentation.dto.response.ReservationResponse;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -90,12 +89,10 @@ public class ReservationService {
     @Transactional
     public void deleteReservationById(Long id, Long memberId) {
         Reservation reservation = findReservationById(id);
-
         Member member = memberService.findMemberById(memberId);
 
-        boolean isOwner = Objects.equals(reservation.getMember().getId(), memberId);
         boolean isAdmin = member.getRole() == Role.ADMIN;
-        if (!isOwner && !isAdmin) {
+        if (!reservation.isOwner(memberId) && !isAdmin) {
             throw new AuthorizationException("[ERROR] 본인 또는 관리자만 예약을 삭제할 수 있습니다.");
         }
 

@@ -16,6 +16,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -52,5 +53,9 @@ public class Reservation {
             Theme theme
     ) {
         return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
+    }
+
+    public boolean isOwner(Long memberId) {
+        return Objects.equals(this.member.getId(), memberId);
     }
 }
