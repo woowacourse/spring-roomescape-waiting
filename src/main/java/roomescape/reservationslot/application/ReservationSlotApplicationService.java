@@ -11,6 +11,7 @@ import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationDataService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
@@ -61,6 +62,6 @@ public class ReservationSlotApplicationService {
 
     private Reservation getReservation(final ReservationSlot reservationSlot) {
         return reservationDataService.findByReservationSlot(reservationSlot)
-                .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new ReservationNotFoundException("예약이 존재하지 않습니다."));
     }
 }
