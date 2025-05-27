@@ -8,6 +8,7 @@ import roomescape.auth.dto.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.LoginFailException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberId;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
@@ -32,7 +33,8 @@ public class AuthService {
     }
 
     public Member findById(final Long id) {
-        return memberRepository.findById(id)
+        MemberId memberId = new MemberId(id);
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 사용자 입니다."));
     }
 

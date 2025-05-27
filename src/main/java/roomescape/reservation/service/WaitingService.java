@@ -123,7 +123,8 @@ public class WaitingService {
     }
 
     private Member getMember(final WaitingCreateRequest request) {
-        return memberRepository.findById(request.loginMember().id())
+        MemberId memberId = new MemberId(request.loginMember().id());
+        return memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
     }
 

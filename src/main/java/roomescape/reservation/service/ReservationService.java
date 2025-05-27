@@ -144,7 +144,8 @@ public class ReservationService {
     private Reservation getReservation(final ReservationCreateRequest request, final LoginMember loginMember) {
         ReservationTime reservationTime = getReservationTime(request);
         Theme theme = getTheme(request);
-        Member member = memberRepository.findById(loginMember.id())
+        MemberId memberId = new MemberId(loginMember.id());
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
         return new Reservation(member, request.date(), reservationTime, theme);
     }
