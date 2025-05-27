@@ -5,6 +5,9 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.RegistrationRequest;
 import roomescape.exception.DuplicateContentException;
 import roomescape.member.domain.Email;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
+import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepository;
 
 @Service
@@ -17,10 +20,10 @@ public class SignupService {
     }
 
     @Transactional
-    public void signup(RegistrationRequest registrationRequest) {
-        if (memberRepository.existsByEmail(new Email(registrationRequest.email()))) {
+    public void signup(RegistrationRequest request) {
+        if (memberRepository.existsByEmail(new Email(request.email()))) {
             throw new DuplicateContentException("[ERROR] 이미 가입한 이메일입니다.");
         }
-        memberRepository.save(registrationRequest.createMember());
+        memberRepository.save(new Member(null, request.name(), new Email(request.email()), new Password(request.password()), Role.USER));
     }
 }
