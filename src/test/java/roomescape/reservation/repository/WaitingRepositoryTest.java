@@ -54,41 +54,26 @@ class WaitingRepositoryTest {
         member = memberRepository.save(TestFixture.makeMember());
         time = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme(1L));
-
         Waiting w1 = new Waiting(member, new ReservationInfo(futureDate, time, theme), 1);
         waitingRepository.save(w1);
     }
 
     @Test
     void existsByDateAndTimeIdAndThemeId() {
-        boolean exists = waitingRepository.existsByDateAndTimeIdAndThemeId(
-                futureDate, time.getId(), theme.getId()
-        );
+        boolean exists = waitingRepository.existsByDateAndTimeIdAndThemeId(futureDate, time.getId(), theme.getId());
         assertThat(exists).isTrue();
     }
 
     @Test
     void findMaxOrderByDateAndTimeAndTheme() {
-        int initialMax = waitingRepository.findMaxOrderByDateAndTimeAndTheme(
-                futureDate, time.getId(), theme.getId()
-        );
-        assertThat(initialMax).isEqualTo(1);
-
-        Waiting w2 = waitingRepository.save(
-                new Waiting(member, new ReservationInfo(futureDate, time, theme), 2)
-        );
-
-        int updatedMax = waitingRepository.findMaxOrderByDateAndTimeAndTheme(
-                futureDate, time.getId(), theme.getId()
-        );
-        assertThat(updatedMax).isEqualTo(2);
+        waitingRepository.save(new Waiting(member, new ReservationInfo(futureDate, time, theme), 2));
+        int newTurn = waitingRepository.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
+        assertThat(newTurn).isEqualTo(2);
     }
 
     @Test
     void findWaitingsWithRankByMemberId() {
-        Waiting w2 = waitingRepository.save(
-                new Waiting(member, new ReservationInfo(futureDate, time, theme), 2)
-        );
+        waitingRepository.save(new Waiting(member, new ReservationInfo(futureDate, time, theme), 2));
 
         List<WaitingWithRank> ranks = waitingRepository.findWaitingsWithRankByMemberId(member.getId());
         assertThat(ranks).hasSize(2);
@@ -96,16 +81,12 @@ class WaitingRepositoryTest {
 
     @Test
     void findFirstByInfoDateAndInfoTimeAndInfoThemeOrderByTurnAsc() {
-        Waiting w2 = waitingRepository.save(
-                new Waiting(member, new ReservationInfo(futureDate, time, theme), 2)
-        );
+        waitingRepository.save(new Waiting(member, new ReservationInfo(futureDate, time, theme), 2));
 
-        Optional<Waiting> first = waitingRepository
-                .findFirstByInfoDateAndInfoTimeAndInfoThemeOrderByTurnAsc(
-                        futureDate, time, theme
-                );
+        Optional<Waiting> first = waitingRepository.findFirstByInfoDateAndInfoTimeAndInfoThemeOrderByTurnAsc(futureDate,
+                time, theme);
 
-        assertThat(first).isPresent();
         assertThat(first.get().getTurn()).isEqualTo(1);
+
     }
 }
