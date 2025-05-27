@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,11 +22,12 @@ import roomescape.domain.reserveticket.ReserveTicket;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservation.AddReservationDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.dto.reservationmember.MyReservationMemberResponseDto;
+import roomescape.dto.reservationmember.MyReservationResponseDto;
 import roomescape.dto.reservationmember.ReservationMemberResponseDto;
 import roomescape.dto.reservationtime.AvailableTimeRequestDto;
 import roomescape.dto.reservationtime.ReservationTimeSlotResponseDto;
 import roomescape.dto.theme.ThemeResponseDto;
+import roomescape.dto.waiting.ApplyWaitingRequestDto;
 import roomescape.infrastructure.auth.intercept.AuthenticationPrincipal;
 import roomescape.infrastructure.auth.member.UserInfo;
 import roomescape.service.reservation.ReservationService;
@@ -77,7 +79,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponseDto> addReservations(
             @RequestBody @Valid AddReservationDto newReservationDto,
             @AuthenticationPrincipal UserInfo userInfo) {
-        long addedReservationId = reserveTicketService.addReservation(newReservationDto, userInfo.id());
+        long addedReservationId = reserveTicketService.addReservationIfWaitingNotExists(newReservationDto, userInfo.id());
         Reservation reservation = reservationService.getReservationById(addedReservationId);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(addedReservationId,
@@ -94,7 +96,7 @@ public class ReservationController {
     @GetMapping("/available-times")
     public ResponseEntity<List<ReservationTimeSlotResponseDto>> availableReservationTimes(
             @Valid @ModelAttribute AvailableTimeRequestDto availableTimeRequestDto) {
-        ReservationSlotTimes reservationSlotTimes = reservationService.availableReservationTimes(
+        ReservationSlotTimes reservationSlotTimes = reserveTicketService.availableReservationTimes(
                 availableTimeRequestDto);
         List<ReservationSlot> availableBookTimes = reservationSlotTimes.getAvailableBookTimes();
 
@@ -118,17 +120,14 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<MyReservationMemberResponseDto>> myReservations(
-            @AuthenticationPrincipal UserInfo userInfo) {
-        List<ReserveTicket> reserveTickets = reserveTicketService.memberReservations(userInfo.id());
-        List<MyReservationMemberResponseDto> reservationDtos = reserveTickets.stream()
-                .map((reservationMember) -> new MyReservationMemberResponseDto(reservationMember.getReservationId(),
-                        reservationMember.getName(),
-                        reservationMember.getThemeName(),
-                        reservationMember.getDate(),
-                        reservationMember.getStartAt(),
-                        reservationMember.getStatus()))
-                .toList();
-        return ResponseEntity.ok(reservationDtos);
+    public ResponseEntity<List<MyReservationResponseDto>> myReservations(@AuthenticationPrincipal UserInfo userInfo) {
+        List<MyReservationResponseDto> myReservationResponseDtos = reserveTicketService.memberReservationsAndWaitings(userInfo.id());
+        return ResponseEntity.ok(myReservationResponseDtos);
+    }
+
+    @PostMapping("/apply-waiting")
+    public ResponseEntity<Void> applyWaiting(@RequestBody ApplyWaitingRequestDto applyWaitingRequestDto) {
+        Long reservationId = reserveTicketService.applyWaiting(applyWaitingRequestDto);
+        return ResponseEntity.created(URI.create("/reservations/" + reservationId)).build();
     }
 }

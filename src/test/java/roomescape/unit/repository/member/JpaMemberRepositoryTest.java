@@ -8,7 +8,6 @@ import roomescape.domain.member.Role;
 import roomescape.repository.member.JpaMemberRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 
 @DataJpaTest
 class JpaMemberRepositoryTest {

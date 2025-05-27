@@ -1,30 +1,28 @@
-package roomescape.domain.reservation;
+package roomescape.domain.waiting;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
 
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
-
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-    @Column(length = 30, nullable = false)
-    private String name;
     @Column(nullable = false)
     private LocalDate date;
     @ManyToOne
@@ -33,26 +31,32 @@ public class Reservation {
     @ManyToOne
     @JoinColumn(nullable = false)
     private Theme theme;
+    @ManyToOne
+    @JoinColumn(nullable = false)
+    private Member member;
 
-    protected Reservation() {
+    protected Waiting() {
 
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time);
+    public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+        validate(date, time, theme, member);
         this.id = id;
-        this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.member = member;
     }
 
-    private void validate(String name, LocalDate date, ReservationTime time) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("ì´ë¦„ì€ ê³µë°±ì¼ ìˆ˜ ì—†ìŠµë‹ˆë‹¤");
-        }
+    private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
         if (date == null || time == null) {
-            throw new IllegalArgumentException("ì‹œê°„ì€ ê³µë°±ì¼ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
+            throw new IllegalArgumentException("½Ã°£Àº °ø¹éÀÏ ¼ö ¾ø½À´Ï´Ù.");
+        }
+        if (theme == null) {
+            throw new IllegalArgumentException("Å×¸¶´Â °ø¹éÀÏ ¼ö ¾ø½À´Ï´Ù.");
+        }
+        if (member == null) {
+            throw new IllegalArgumentException("¸â¹ö´Â °ø¹éÀÏ ¼ö ¾ø½À´Ï´Ù.");
         }
     }
 
@@ -61,56 +65,44 @@ public class Reservation {
         return reservationDateTime.isBefore(compareDateTime);
     }
 
-    public boolean isSameTheme(long themeId) {
-        return getTheme().isSameTheme(themeId);
-    }
-
-    public boolean isBetweenDate(LocalDate dateFrom, LocalDate dateTo) {
-        return isSameOrBeforeDate(dateFrom) && isSameOrAfterDate(dateTo);
-    }
-
-    private boolean isSameOrAfterDate(LocalDate dateTo) {
-        return dateTo.isAfter(date) || dateTo.isEqual(date);
-    }
-
-    private boolean isSameOrBeforeDate(LocalDate dateFrom) {
-        return dateFrom.isEqual(date) || dateFrom.isBefore(date);
-    }
-
     public Long getId() {
         return id;
-    }
-
-    public String getName() {
-        return name;
     }
 
     public LocalDate getDate() {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
+    public ReservationTime getTime() {
         return time;
-    }
-
-    public LocalTime getStartAt() {
-        return time.getTime();
     }
 
     public Theme getTheme() {
         return theme;
     }
 
+    public Member getMember() {
+        return member;
+    }
+
+    public LocalTime getStartAt() {
+        return time.getTime();
+    }
+
     public String getThemeName() {
         return theme.getName();
+    }
+
+    public String getName() {
+        return member.getName();
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id);
     }
 
     @Override

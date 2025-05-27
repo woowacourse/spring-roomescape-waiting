@@ -20,8 +20,6 @@ import roomescape.service.reserveticket.ReserveTicketService;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private static final String ADMIN_CREATED_MESSAGE = "어드민이 생성한 예약입니다.";
-
     private final ReservationService reservationService;
     private final ReserveTicketService reserveTicketService;
 
@@ -33,12 +31,11 @@ public class AdminController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponseDto> addReservations(
             @RequestBody @Valid AdminReservationAddDto newReservationDto) {
-        AddReservationDto addReservationDto = new AddReservationDto(ADMIN_CREATED_MESSAGE, newReservationDto.date(),
+        AddReservationDto addReservationDto = new AddReservationDto(newReservationDto.date(),
                 newReservationDto.timeId(),
                 newReservationDto.themeId());
 
-        long id = reserveTicketService.addReservation(addReservationDto,
-                newReservationDto.memberId());
+        long id = reserveTicketService.addReservationIfWaitingNotExists(addReservationDto, newReservationDto.memberId());
         Reservation reservation = reservationService.getReservationById(id);
 
         ReservationResponseDto reservationResponseDto = new ReservationResponseDto(reservation.getId(),
