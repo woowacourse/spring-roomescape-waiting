@@ -225,7 +225,7 @@ class ReservationApiTest {
                 .port(port)
                 .cookie("access", accessToken)
                 .body(creationContent)
-                .when().post("/reservations/other")
+                .when().post("/reservations")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value());
     }

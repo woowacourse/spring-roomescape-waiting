@@ -218,7 +218,7 @@ function requestCreate(reservation) {
         body: JSON.stringify(reservation)
     };
 
-    return fetch('/reservations/other', requestOptions)
+    return fetch('/reservations', requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
             throw new Error('Create failed');

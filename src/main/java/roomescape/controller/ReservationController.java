@@ -60,6 +60,19 @@ public class ReservationController {
         return reservationService.findAllReservationStatusByMember(accessTokenContent.id());
     }
 
+    @PostMapping
+    @Authority(Role.ADMIN)
+    public ResponseEntity<ReservationResponse> addReservationByAdmin(
+            @Valid @RequestBody AdminReservationRequest request
+    ) {
+        ReservationCreationContent creationRequest = new ReservationCreationContent(request);
+        ReservationResponse reservationResponse =
+                reservationService.addReservation(request.memberId(), creationRequest);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .location(URI.create("/reservation/" + reservationResponse.id()))
+                .body(reservationResponse);
+    }
+
     @PostMapping("/mine")
     @Authority(Role.GENERAL)
     public ResponseEntity<ReservationResponse> addReservationByMember(
@@ -69,19 +82,6 @@ public class ReservationController {
         ReservationCreationContent creationContent = new ReservationCreationContent(request);
         ReservationResponse reservationResponse = reservationService.addReservation(accessTokenContent.id(),
                 creationContent);
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .location(URI.create("/reservation/" + reservationResponse.id()))
-                .body(reservationResponse);
-    }
-
-    @PostMapping("/other")
-    @Authority(Role.ADMIN)
-    public ResponseEntity<ReservationResponse> addReservationByAdmin(
-            @Valid @RequestBody AdminReservationRequest request
-    ) {
-        ReservationCreationContent creationRequest = new ReservationCreationContent(request);
-        ReservationResponse reservationResponse =
-                reservationService.addReservation(request.memberId(), creationRequest);
         return ResponseEntity.status(HttpStatus.CREATED)
                 .location(URI.create("/reservation/" + reservationResponse.id()))
                 .body(reservationResponse);
