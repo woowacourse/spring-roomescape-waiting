@@ -11,7 +11,7 @@ public interface WaitingReservationRepository {
 
     Optional<WaitingReservation> findById(Long id);
 
-    List<WaitingReservationWithRank> findWaitingsWithRankByMember_Id(Long memberId);
+    List<WaitingReservationWithRank> findWaitingReservationsWithRank(Long memberId);
 
     List<WaitingReservation> findAll();
 
@@ -23,5 +23,5 @@ public interface WaitingReservationRepository {
 
     boolean existsByIdAndMemberId(Long id, Long memberId);
 
-    boolean existsByThemeIdAndTimeIdAndDateAndMemberId(Long themeId, Long timeId, LocalDate date, Long memberId);
+    boolean isAlreadyWaiting(Long themeId, Long timeId, LocalDate date, Long memberId);
 }

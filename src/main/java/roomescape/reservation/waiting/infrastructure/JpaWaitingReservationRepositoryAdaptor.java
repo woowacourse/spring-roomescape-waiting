@@ -28,7 +28,7 @@ public class JpaWaitingReservationRepositoryAdaptor implements WaitingReservatio
     }
 
     @Override
-    public List<WaitingReservationWithRank> findWaitingsWithRankByMember_Id(Long memberId) {
+    public List<WaitingReservationWithRank> findWaitingReservationsWithRank(Long memberId) {
         return jpaWaitingReservationRepository.findWaitingsWithRankByMember_Id(memberId);
     }
 
@@ -58,7 +58,7 @@ public class JpaWaitingReservationRepositoryAdaptor implements WaitingReservatio
     }
 
     @Override
-    public boolean existsByThemeIdAndTimeIdAndDateAndMemberId(Long themeId, Long timeId, LocalDate date, Long memberId) {
+    public boolean isAlreadyWaiting(Long themeId, Long timeId, LocalDate date, Long memberId) {
         return jpaWaitingReservationRepository.existsByThemeIdAndTimeIdAndDateAndMemberId(themeId, timeId, date, memberId);
     }
 }
