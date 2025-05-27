@@ -32,7 +32,7 @@ function updateUIBasedOnLogin() {
         })
         .then(data => {
             // 응답에서 사용자 이름을 추출하여 UI 업데이트
-            document.getElementById('profile-name').textContent = data.name; // 프로필 이름 설정
+            document.getElementById('profile-name').textContent = data.data.name; // 프로필 이름 설정
             document.querySelector('.nav-item.dropdown').style.display = 'block'; // 드롭다운 메뉴 표시
             document.querySelector('.nav-item a[href="/login"]').parentElement.style.display = 'none'; // 로그인 버튼 숨김
         })
@@ -74,7 +74,8 @@ function login() {
         })
     })
         .then(response => {
-            if (200 === !response.status) {
+            console.log(response.status);
+            if (200 !== response.status) {
                 alert('Login failed'); // 로그인 실패 시 경고창 표시
                 throw new Error('Login failed');
             }

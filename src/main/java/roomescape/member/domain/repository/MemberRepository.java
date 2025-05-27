@@ -1,6 +1,6 @@
 package roomescape.member.domain.repository;
 
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import roomescape.member.domain.Member;
 
@@ -9,7 +9,7 @@ public interface MemberRepository {
 
     boolean existsByEmail(String email);
 
-    Collection<Member> findAll();
+    List<Member> findAll();
 
     Member save(Member member);
 

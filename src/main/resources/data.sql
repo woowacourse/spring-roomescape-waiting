@@ -57,28 +57,28 @@ VALUES ('theme14', 'description14', 'thumbnail14');
 INSERT INTO member(name, email, password, role)
 VALUES ('admin', 'wooteco@gmail.com', '$2a$10$HPuLMfygOsN.3UIEqvcBwOS/uaOS4cJ0EQb/eeqexol7BaiGMSXXi', 'admin');
 INSERT INTO member(name, email, password, role)
-VALUES ('riwon', 'riwon@gmail.com', '$2a$10$xulkTSZyjjPnfcvkoaQECusw/HPCnLx3p/AndyHEtimKZVljx0aVC', 'user');
+VALUES ('ed', 'ed@gmail.com', '$2a$10$HPuLMfygOsN.3UIEqvcBwOS/uaOS4cJ0EQb/eeqexol7BaiGMSXXi', 'user');
 INSERT INTO member(name, email, password, role)
-VALUES ('mimi', 'mimi@gmail.com', '$2a$10$ZuuoYwqZXLsCBCdeUN0j1eifbsHzleUB0qjtw1UNd.xM1SwWb.MP2', 'user');
+VALUES ('joanne', 'joanne@gmail.com', '$2a$10$HPuLMfygOsN.3UIEqvcBwOS/uaOS4cJ0EQb/eeqexol7BaiGMSXXi', 'user');
 
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-11', 1, 1, 3);
+VALUES ('2025-05-25', 1, 1, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 2, 1, 3);
+VALUES ('2025-05-26', 2, 1, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 3, 12, 3);
+VALUES ('2025-05-26', 3, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 4, 12, 3);
+VALUES ('2025-05-26', 4, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 5, 12, 3);
+VALUES ('2025-05-17', 5, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 6, 12, 3);
+VALUES ('2025-05-18', 6, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 7, 12, 3);
+VALUES ('2025-05-20', 7, 11, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 8, 12, 3);
+VALUES ('2025-05-20', 8, 11, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-20', 9, 12, 3);
+VALUES ('2025-05-20', 9, 13, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-20', 10, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
@@ -89,19 +89,19 @@ VALUES ('2025-05-20', 12, 12, 3);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-25', 1, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 2, 10, 2);
+VALUES ('2025-05-25', 2, 9, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 3, 10, 2);
+VALUES ('2025-05-26', 3, 9, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 4, 10, 2);
+VALUES ('2025-05-27', 4, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 5, 10, 2);
+VALUES ('2025-05-27', 5, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 6, 10, 2);
+VALUES ('2025-05-28', 6, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 7, 10, 2);
+VALUES ('2025-05-28', 7, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
-VALUES ('2025-05-25', 8, 10, 2);
+VALUES ('2025-05-28', 8, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)
 VALUES ('2025-05-25', 9, 10, 2);
 INSERT INTO reservation(date, time_id, theme_id, member_id)

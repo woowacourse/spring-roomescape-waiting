@@ -9,7 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
         .catch(error => console.error('Error fetching times:', error));
 });
 
-function render(data) {
+function render(apiResponse) {
+    const data = apiResponse.data;
     const container = document.getElementById('theme-ranking');
 
     /*

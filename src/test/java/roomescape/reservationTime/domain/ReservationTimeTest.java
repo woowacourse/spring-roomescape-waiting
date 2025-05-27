@@ -8,12 +8,15 @@ import org.junit.jupiter.api.Test;
 
 class ReservationTimeTest {
 
-    @DisplayName("시간 아이디와 시작 시간이 같은 경우 동일하다")
+    @DisplayName("과거 시간인지 검사한다")
     @Test
-    void isEqual() {
-        ReservationTime reservationTime1 = new ReservationTime(1L, LocalTime.parse("10:00"));
-        ReservationTime reservationTime2 = new ReservationTime(1L, LocalTime.parse("10:00"));
+    void isBeforeNow() {
+        // given
+        ReservationTime past = new ReservationTime(LocalTime.now().minusMinutes(5));
+        ReservationTime future = new ReservationTime(LocalTime.now().plusMinutes(5));
 
-        assertThat(reservationTime1.equals(reservationTime2)).isTrue();
+        // when & then
+        assertThat(past.isBeforeNow()).isTrue();
+        assertThat(future.isBeforeNow()).isFalse();
     }
 }

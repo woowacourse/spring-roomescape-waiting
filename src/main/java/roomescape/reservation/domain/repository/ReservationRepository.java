@@ -1,24 +1,33 @@
 package roomescape.reservation.domain.repository;
 
 import java.time.LocalDate;
-import java.util.Collection;
+import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSpec;
 
 public interface ReservationRepository {
 
-    Collection<Reservation> findAllByMemberIdAndThemeIdAndDateBetween(Long memberId, Long themeId, LocalDate from,
-                                                                      LocalDate to);
+    List<Reservation> findFiltered(Long memberId, Long themeId, LocalDate from,
+                                   LocalDate to);
 
-    boolean existsByDateAndTimeId(LocalDate reservationDate, Long id);
+    List<Reservation> findAllByMemberId(Long memberId);
 
-    Collection<Reservation> findAllByMemberId(Long memberId);
-
-    Collection<Reservation> findAll();
+    List<Reservation> findAll();
 
     Reservation save(Reservation reservation);
 
     void deleteById(Long id);
 
     Optional<Reservation> findById(Long id);
+
+    boolean existsBySpec(ReservationSpec spec);
+
+    List<Long> findTimeIdsByDateAndTheme(LocalDate date, Long themeId);
+
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByThemeId(Long themeId);
+
+    Optional<Reservation> findBySpec(ReservationSpec spec);
 }
