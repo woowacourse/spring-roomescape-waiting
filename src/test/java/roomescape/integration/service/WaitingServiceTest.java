@@ -13,6 +13,7 @@ import roomescape.common.ServiceTestBase;
 import roomescape.global.dto.SessionMember;
 import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.integration.fixture.ReservationDateFixture;
+import roomescape.integration.fixture.ReservationDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.integration.fixture.WaitingDbFixture;
@@ -38,6 +39,8 @@ class WaitingServiceTest extends ServiceTestBase {
 
     @Autowired
     private Clock clock;
+    @Autowired
+    private ReservationDbFixture reservationDbFixture;
 
     @Test
     void 대기를_생성할_수_있다() {
@@ -61,7 +64,22 @@ class WaitingServiceTest extends ServiceTestBase {
     }
 
     @Test
-    void 중복된_예약이나_대기는_생성할_수_없다() {
+    void 이미_예약이_있다면_대기를_생성할_수_없다() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member);
+        var request = new WaitingCreateRequest(예약날짜_오늘.date(), reservationTime.getId(), theme.getId());
+
+        // when // then
+        assertThatThrownBy(() -> sut.createWaiting(request, member.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("이미 예약이 존재합니다.");
+    }
+
+    @Test
+    void 이미_대기가_있다면_대기를_생성할_수_없다() {
         // given
         var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
