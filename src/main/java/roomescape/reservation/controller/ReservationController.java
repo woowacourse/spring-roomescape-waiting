@@ -64,7 +64,7 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/waiting")
+    @GetMapping("/waitings")
     public ResponseEntity<List<WaitingResponse>> getAllWaitings(Member member) {
         if (Role.isUser(member.getRole())) {
             throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
@@ -73,14 +73,14 @@ public class ReservationController {
         return ResponseEntity.ok(waitingService.findAll());
     }
 
-    @PostMapping("/waiting")
+    @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody final WaitingRequest request, Member member) {
         WaitingResponse responseDto = waitingService.createWaiting(request, member);
-        return ResponseEntity.created(URI.create("reservations/waiting/" + responseDto.id())).body(responseDto);
+        return ResponseEntity.created(URI.create("reservations/waitings/" + responseDto.id())).body(responseDto);
     }
 
-    @DeleteMapping("/waiting/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable final Long id, Member member) {
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable("id") final Long id, Member member) {
         waitingService.deleteWaiting(id, member.getId());
         return ResponseEntity.noContent().build();
     }

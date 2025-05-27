@@ -193,7 +193,7 @@ class ReservationControllerTest {
                     .header("Cookie", userCookie)
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/reservations/waiting")
+                    .when().post("/reservations/waitings")
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(2));
@@ -211,7 +211,7 @@ class ReservationControllerTest {
                     .header("Cookie", userCookie)
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/reservations/waiting")
+                    .when().post("/reservations/waitings")
                     .then().log().all()
                     .statusCode(201);
 
@@ -219,7 +219,7 @@ class ReservationControllerTest {
                     .header("Cookie", userCookie)
                     .contentType(ContentType.JSON)
                     .body(params)
-                    .when().post("/reservations/waiting")
+                    .when().post("/reservations/waitings")
                     .then().log().all()
                     .statusCode(400);
         }
@@ -234,7 +234,7 @@ class ReservationControllerTest {
         void deleteWaitingTest() {
             RestAssured.given().log().all()
                     .header("Cookie", userCookie)
-                    .when().delete("/reservations/waiting/1")
+                    .when().delete("/reservations/waitings/1")
                     .then().log().all()
                     .statusCode(204);
         }
@@ -244,7 +244,7 @@ class ReservationControllerTest {
         void invalidWaitingIdDeleteTest() {
             RestAssured.given().log().all()
                     .header("Cookie", adminCookie)
-                    .when().delete("/reservations/waiting/50")
+                    .when().delete("/reservations/waitings/50")
                     .then().log().all()
                     .statusCode(404);
         }

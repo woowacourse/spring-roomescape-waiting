@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('/reservations/waiting') // 내 예약 목록 조회 API 호출
+  fetch('/reservations/waitings') // 내 예약 목록 조회 API 호출
       .then(response => {
         if (response.status === 200) return response.json();
         throw new Error('Read failed');
@@ -37,7 +37,7 @@ function deny(event) {
   const row = event.target.closest('tr');
   const id = row.cells[0].textContent;
 
-  const endpoint = '/admin/reservations/waiting/' + id;
+  const endpoint = '/admin/reservations/waitings/' + id;
   return fetch(endpoint, {
     method: 'DELETE'
   }).then(response => {

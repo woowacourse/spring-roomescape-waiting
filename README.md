@@ -59,7 +59,7 @@ Content-Type: application/json
 ### 예약대기 생성
 request
 ```
-POST /reservations/waiting HTTP/1.1
+POST /reservations/waitings HTTP/1.1
 Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 Content-Type: application/json
 
@@ -73,7 +73,7 @@ response
 ```
 HTTP/1.1 201
 Content-Type: application/json
-Location: /reservations/waiting/1
+Location: /reservations/waitings/1
 
 {
     "id": 1,
@@ -98,7 +98,7 @@ Location: /reservations/waiting/1
 ### 예약대기 삭제
 request
 ```
-DELETE /reservations/waiting/1 HTTP/1.1
+DELETE /reservations/waitings/1 HTTP/1.1
 Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 ```
 response
@@ -109,14 +109,13 @@ HTTP/1.1 204
 ### 예약대기 목록 조회
 request
 ```
-GET /reservations/waiting HTTP/1.1
+GET /reservations/waitings HTTP/1.1
 Cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
 ```
 response
 ```
 HTTP/1.1 200
 Content-Type: application/json
-Location: /reservations/waiting/1
 
 [
     {
