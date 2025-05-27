@@ -3,8 +3,9 @@ package roomescape.reservationslot.application;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
@@ -52,7 +53,6 @@ public class ReservationSlotApplicationService {
         ReservationSlot reservationSlot = reservationSlotDataService.save(member, date, time, theme, now);
         Reservation reservation = reservationDataService.findByReservationSlot(reservationSlot)
                 .orElseThrow(() -> new IllegalArgumentException("예약이 존재하지 않습니다."));
-//        Reservation reservation = reservationDataService.save(new Reservation(member, reservationSlot));
         return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }
 
