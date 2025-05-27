@@ -14,26 +14,26 @@ import roomescape.global.auth.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
-import roomescape.theme.service.ThemeModuleService;
+import roomescape.theme.service.ThemeService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeModuleService themeModuleService;
+    private final ThemeService themeService;
 
-    public ThemeController(final ThemeModuleService themeModuleService) {
-        this.themeModuleService = themeModuleService;
+    public ThemeController(final ThemeService themeService) {
+        this.themeService = themeService;
     }
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getThemes() {
-        return ResponseEntity.ok(themeModuleService.getThemes());
+        return ResponseEntity.ok(themeService.getThemes());
     }
 
     @GetMapping("/popular")
     public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeModuleService.getPopularThemes());
+        return ResponseEntity.ok(themeService.getPopularThemes());
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -41,7 +41,7 @@ public class ThemeController {
     public ResponseEntity<ThemeResponse> createTheme(
             @RequestBody ThemeCreateRequest request
     ) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(themeModuleService.create(request));
+        return ResponseEntity.status(HttpStatus.CREATED).body(themeService.create(request));
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -49,7 +49,7 @@ public class ThemeController {
     public ResponseEntity<Void> deleteTheme(
             @PathVariable("id") Long id
     ) {
-        themeModuleService.delete(id);
+        themeService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }

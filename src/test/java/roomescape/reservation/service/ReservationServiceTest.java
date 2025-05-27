@@ -20,7 +20,7 @@ import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberModuleService;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.Waiting;
@@ -33,10 +33,10 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.reservationtime.service.ReservationTimeModuleService;
+import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.ThemeModuleService;
+import roomescape.theme.service.ThemeService;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -52,12 +52,12 @@ class ReservationServiceTest {
     private Theme theme;
     private Member member;
 
-    private ReservationModuleService reservationModuleService;
-    private ReservationCompositeService reservationCompositeService;
-    private MemberModuleService memberModuleService;
-    private ThemeModuleService themeModuleService;
-    private ReservationTimeModuleService reservationTimeModuleService;
-    private WaitingModuleService waitingModuleService;
+    private ReservationService reservationService;
+    private ReservationFacadeService reservationFacadeService;
+    private MemberService memberService;
+    private ThemeService themeService;
+    private ReservationTimeService reservationTimeService;
+    private WaitingService waitingService;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -76,15 +76,15 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationModuleService = new ReservationModuleService(reservationRepository);
+        reservationService = new ReservationService(reservationRepository);
 
-        reservationCompositeService = new ReservationCompositeService(reservationModuleService,
-                new WaitingModuleService(waitingRepository),
-                new MemberModuleService(memberRepository, new MyPasswordEncoder()),
-                new ThemeModuleService(themeRepository, reservationRepository),
-                new ReservationTimeModuleService(reservationTimeRepository, reservationRepository));
+        reservationFacadeService = new ReservationFacadeService(reservationService,
+                new WaitingService(waitingRepository),
+                new MemberService(memberRepository, new MyPasswordEncoder()),
+                new ThemeService(themeRepository, reservationRepository),
+                new ReservationTimeService(reservationTimeRepository, reservationRepository));
 
-        waitingModuleService = new WaitingModuleService(waitingRepository);
+        waitingService = new WaitingService(waitingRepository);
 
         ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
         time = reservationTimeRepository.save(time2);
@@ -94,7 +94,7 @@ class ReservationServiceTest {
 
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
-        ReservationResponse response = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+        ReservationResponse response = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
                 member.getId(),
                 afterOneHour);
 
@@ -108,21 +108,21 @@ class ReservationServiceTest {
     @Test
     void getReservations_shouldReturnAllCreatedReservations() {
         Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, timeId2, theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, timeId2, theme.getId(), member.getId(), afterOneHour);
 
-        List<ReservationResponse> result = reservationModuleService.findReservations(null, null, null, null);
+        List<ReservationResponse> result = reservationService.findReservations(null, null, null, null);
         assertThat(result).hasSize(2);
     }
 
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        ReservationResponse response = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+        ReservationResponse response = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
                 member.getId(),
                 afterOneHour);
-        reservationModuleService.delete(response.id());
+        reservationService.delete(response.id());
 
-        List<ReservationResponse> result = reservationModuleService.findReservations(theme.getId(), member.getId(),
+        List<ReservationResponse> result = reservationService.findReservations(theme.getId(), member.getId(),
                 futureDate,
                 futureDate.plusDays(1));
         assertThat(result).isEmpty();
@@ -131,16 +131,16 @@ class ReservationServiceTest {
     @Test
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
-                () -> reservationCompositeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
+                () -> reservationFacadeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
                 .isInstanceOf(ReservationNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
 
     @Test
     void createWaiting_shouldReturnWaitingResponseWhenReservationExists() {
-        ReservationResponse reservation = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+        ReservationResponse reservation = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
                 member.getId(), afterOneHour);
-        ReservationResponse waiting = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+        ReservationResponse waiting = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
                 member.getId(), afterOneHour);
 
         assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
@@ -152,15 +152,15 @@ class ReservationServiceTest {
 
     @Test
     void deleteReservation_shouldPromoteFirstWaiting() {
-        ReservationResponse reserved = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+        ReservationResponse reserved = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
                 member.getId(), afterOneHour);
-        ReservationResponse waiting = reservationCompositeService.create(futureDate, time.getId(), theme.getId(),
+        ReservationResponse waiting = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
                 member.getId(), afterOneHour);
         assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
 
-        reservationCompositeService.deleteReservation(reserved.id());
+        reservationFacadeService.deleteReservation(reserved.id());
 
-        List<ReservationResponse> all = reservationModuleService.findReservations(theme.getId(), member.getId(),
+        List<ReservationResponse> all = reservationService.findReservations(theme.getId(), member.getId(),
                 futureDate, futureDate.plusDays(1));
         assertThat(all).hasSize(1)
                 .extracting(ReservationResponse::reservedStatus)
@@ -170,11 +170,11 @@ class ReservationServiceTest {
     @Test
     void findWaitings_shouldReturnAllWaitingAsReservationResponse() {
 
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
 
-        List<ReservationResponse> waitings = waitingModuleService.findWaitings();
+        List<ReservationResponse> waitings = waitingService.findWaitings();
         assertThat(waitings).hasSize(2)
                 .allSatisfy(response -> assertThat(response.reservedStatus())
                         .isEqualTo(ReservationStatus.WAITING.getName()));
@@ -183,11 +183,11 @@ class ReservationServiceTest {
     @Test
     void findMyWaitingsWithRank_shouldReturnCorrectRanks() {
 
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
 
-        List<WaitingWithRank> waiting = waitingModuleService.findMyWaitingsWithRank(
+        List<WaitingWithRank> waiting = waitingService.findMyWaitingsWithRank(
                 new UserInfo(member.getId(), MemberRole.USER)
         );
         assertThat(waiting).hasSize(2)
@@ -197,23 +197,23 @@ class ReservationServiceTest {
 
     @Test
     void findMaxOrderByDateAndTimeAndTheme_shouldReflectHighestTurn() {
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
 
-        int max1 = waitingModuleService.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
+        int max1 = waitingService.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
         assertThat(max1).isEqualTo(1);
 
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        int max2 = waitingModuleService.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        int max2 = waitingService.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
         assertThat(max2).isEqualTo(2);
     }
 
     @Test
     void isWaitingExists_shouldReturnTrueWhenExists() {
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
 
-        boolean exists = waitingModuleService.isWaitingExists(
+        boolean exists = waitingService.isWaitingExists(
                 new ReservationInfo(futureDate,
                         time,
                         theme)
@@ -223,8 +223,8 @@ class ReservationServiceTest {
 
     @Test
     void findFirstWaitingOfInfo_shouldReturnEarliestOrThrow() {
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationCompositeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
 
         ReservationInfo info = new ReservationInfo(
                 futureDate,
@@ -232,14 +232,14 @@ class ReservationServiceTest {
                 theme
         );
 
-        Waiting first = waitingModuleService.findFirstWaitingOfInfo(info);
+        Waiting first = waitingService.findFirstWaitingOfInfo(info);
         assertThat(first.getTurn()).isEqualTo(1);
 
         ReservationInfo notExist =
                 new ReservationInfo(futureDate.plusDays(1),
                         time,
                         theme);
-        assertThatThrownBy(() -> waitingModuleService.findFirstWaitingOfInfo(notExist))
+        assertThatThrownBy(() -> waitingService.findFirstWaitingOfInfo(notExist))
                 .isInstanceOf(WaitingNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 대기 정보가 없습니다.");
     }

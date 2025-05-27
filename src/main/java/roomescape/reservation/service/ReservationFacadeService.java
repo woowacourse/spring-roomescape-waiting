@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import roomescape.global.auth.dto.UserInfo;
 import roomescape.member.domain.Member;
-import roomescape.member.service.MemberModuleService;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationInfo;
 import roomescape.reservation.domain.Waiting;
@@ -18,34 +18,34 @@ import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.WaitingWithRank;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.service.ReservationTimeModuleService;
+import roomescape.reservationtime.service.ReservationTimeService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.service.ThemeModuleService;
+import roomescape.theme.service.ThemeService;
 
 @Service
-public class ReservationCompositeService {
+public class ReservationFacadeService {
 
-    private final ReservationModuleService reservationModuleService;
-    private final WaitingModuleService waitingModuleService;
-    private final MemberModuleService memberModuleService;
-    private final ThemeModuleService themeModuleService;
-    private final ReservationTimeModuleService reservationTimeModuleService;
+    private final ReservationService reservationService;
+    private final WaitingService waitingService;
+    private final MemberService memberService;
+    private final ThemeService themeService;
+    private final ReservationTimeService reservationTimeService;
 
-    public ReservationCompositeService(final ReservationModuleService reservationModuleService,
-                                       final WaitingModuleService waitingModuleService,
-                                       MemberModuleService memberModuleService,
-                                       ThemeModuleService themeModuleService,
-                                       ReservationTimeModuleService reservationTimeModuleService) {
-        this.reservationModuleService = reservationModuleService;
-        this.waitingModuleService = waitingModuleService;
-        this.memberModuleService = memberModuleService;
-        this.themeModuleService = themeModuleService;
-        this.reservationTimeModuleService = reservationTimeModuleService;
+    public ReservationFacadeService(final ReservationService reservationService,
+                                    final WaitingService waitingService,
+                                    MemberService memberService,
+                                    ThemeService themeService,
+                                    ReservationTimeService reservationTimeService) {
+        this.reservationService = reservationService;
+        this.waitingService = waitingService;
+        this.memberService = memberService;
+        this.themeService = themeService;
+        this.reservationTimeService = reservationTimeService;
     }
 
     public List<MyReservationResponse> findMyReservations(final UserInfo userInfo) {
-        List<Reservation> myReservations = reservationModuleService.findMyReservations(userInfo);
-        List<WaitingWithRank> waitingWithRanks = waitingModuleService.findMyWaitingsWithRank(userInfo);
+        List<Reservation> myReservations = reservationService.findMyReservations(userInfo);
+        List<WaitingWithRank> waitingWithRanks = waitingService.findMyWaitingsWithRank(userInfo);
         List<MyReservationResponse> myReservationResponses = new ArrayList<>();
         return Stream.concat(myReservations.stream().map(MyReservationResponse::from),
                 waitingWithRanks.stream().map(MyReservationResponse::from)
@@ -55,7 +55,7 @@ public class ReservationCompositeService {
     @Transactional
     public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
                                       final LocalDateTime now) {
-        if (!reservationModuleService.isReservationExists(date, timeId, themeId)) {
+        if (!reservationService.isReservationExists(date, timeId, themeId)) {
             return createReservation(date, timeId, themeId, memberId, now);
         }
         return createWaiting(date, timeId, themeId, memberId, now);
@@ -64,11 +64,11 @@ public class ReservationCompositeService {
     private ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
                                                   final Long memberId,
                                                   final LocalDateTime now) {
-        reservationModuleService.checkIfReservationExists(date, timeId, themeId);
-        ReservationTime time = reservationTimeModuleService.findReservationTime(timeId);
-        Theme theme = themeModuleService.findTheme(themeId);
-        Member member = memberModuleService.findUserByMemberId(memberId);
-        Reservation newReservation = reservationModuleService.save(
+        reservationService.checkIfReservationExists(date, timeId, themeId);
+        ReservationTime time = reservationTimeService.findReservationTime(timeId);
+        Theme theme = themeService.findTheme(themeId);
+        Member member = memberService.findUserByMemberId(memberId);
+        Reservation newReservation = reservationService.save(
                 Reservation.createUpcomingReservationWithUnassignedId(
                         member,
                         new ReservationInfo(date, time, theme), now));
@@ -77,12 +77,12 @@ public class ReservationCompositeService {
 
     private ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
                                               final Long memberId, final LocalDateTime now) {
-        ReservationTime time = reservationTimeModuleService.findReservationTime(timeId);
-        Theme theme = themeModuleService.findTheme(themeId);
-        Member member = memberModuleService.findUserByMemberId(memberId);
-        int turn = waitingModuleService.findMaxOrderByDateAndTimeAndTheme(date, timeId,
+        ReservationTime time = reservationTimeService.findReservationTime(timeId);
+        Theme theme = themeService.findTheme(themeId);
+        Member member = memberService.findUserByMemberId(memberId);
+        int turn = waitingService.findMaxOrderByDateAndTimeAndTheme(date, timeId,
                 themeId);
-        Waiting newWaiting = waitingModuleService.save(
+        Waiting newWaiting = waitingService.save(
                 Waiting.createUpcomingReservationWithUnassignedId(
                         member,
                         turn + 1,
@@ -92,16 +92,16 @@ public class ReservationCompositeService {
 
     @Transactional
     public void deleteReservation(final Long reservationId) {
-        Reservation reservation = reservationModuleService.findById(reservationId);
-        reservationModuleService.delete(reservationId);
+        Reservation reservation = reservationService.findById(reservationId);
+        reservationService.delete(reservationId);
         promoteWaiting(reservation.getInfo());
     }
 
     private void promoteWaiting(final ReservationInfo info) {
-        if (!waitingModuleService.isWaitingExists(info)) {
+        if (!waitingService.isWaitingExists(info)) {
             return;
         }
-        Waiting waiting = waitingModuleService.findFirstWaitingOfInfo(info);
+        Waiting waiting = waitingService.findFirstWaitingOfInfo(info);
         createReservation(
                 waiting.getInfo().getDate(),
                 waiting.getInfo().getTime().getId(),
@@ -109,7 +109,7 @@ public class ReservationCompositeService {
                 waiting.getMember().getId(),
                 LocalDateTime.now()
         );
-        waitingModuleService.delete(waiting.getId());
+        waitingService.delete(waiting.getId());
     }
 
 }

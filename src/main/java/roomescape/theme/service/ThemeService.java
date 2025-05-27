@@ -14,7 +14,7 @@ import roomescape.theme.dto.response.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
-public class ThemeModuleService {
+public class ThemeService {
 
     private static final int DEFAULT_POPULAR_SIZE = 10;
     private static final int POPULAR_START_DAYS = 7;
@@ -23,8 +23,8 @@ public class ThemeModuleService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeModuleService(final ThemeRepository themeRepository,
-                              final ReservationRepository reservationRepository) {
+    public ThemeService(final ThemeRepository themeRepository,
+                        final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }

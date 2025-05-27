@@ -14,11 +14,11 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Service
-public class ReservationModuleService {
+public class ReservationService {
 
     private final ReservationRepository reservationRepository;
 
-    public ReservationModuleService(final ReservationRepository reservationRepository) {
+    public ReservationService(final ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
     }
 
@@ -35,12 +35,14 @@ public class ReservationModuleService {
                 })
                 .toList();
     }
+
     public List<Reservation> getReservations(final Long themeId, final Long memberId,
                                              final LocalDate startDate, final LocalDate endDate) {
         if ((themeId == null) || (memberId == null) || (startDate == null) || (endDate == null)) {
             return reservationRepository.findAll();
         }
-        return reservationRepository.findByInfoThemeIdAndMemberIdAndInfoDateBetween(themeId, memberId, startDate, endDate);
+        return reservationRepository.findByInfoThemeIdAndMemberIdAndInfoDateBetween(themeId, memberId, startDate,
+                endDate);
     }
 
     public void delete(Long id) {

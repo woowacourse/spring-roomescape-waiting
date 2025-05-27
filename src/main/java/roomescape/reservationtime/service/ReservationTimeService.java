@@ -14,13 +14,13 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @Service
-public class ReservationTimeModuleService {
+public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ReservationTimeModuleService(final ReservationTimeRepository reservationTimeRepository,
-                                        final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
+                                  final ReservationRepository reservationRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -50,7 +50,8 @@ public class ReservationTimeModuleService {
         }
     }
 
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date, final Long themeId) {
+    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date,
+                                                                               final Long themeId) {
         return reservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
     }
 

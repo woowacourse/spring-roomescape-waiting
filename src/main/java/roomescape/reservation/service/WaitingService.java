@@ -15,11 +15,11 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Service
-public class WaitingModuleService {
+public class WaitingService {
 
     private final WaitingRepository waitingRepository;
 
-    public WaitingModuleService(final WaitingRepository waitingRepository) {
+    public WaitingService(final WaitingRepository waitingRepository) {
         this.waitingRepository = waitingRepository;
     }
 
@@ -58,7 +58,8 @@ public class WaitingModuleService {
     }
 
     public boolean isWaitingExists(final ReservationInfo info) {
-        if (waitingRepository.existsByDateAndTimeIdAndThemeId(info.getDate(),info.getTime().getId(),info.getTheme().getId())) {
+        if (waitingRepository.existsByDateAndTimeIdAndThemeId(info.getDate(), info.getTime().getId(),
+                info.getTheme().getId())) {
             return true;
         }
         return false;

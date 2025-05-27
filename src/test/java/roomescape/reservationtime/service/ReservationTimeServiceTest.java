@@ -17,13 +17,13 @@ import roomescape.config.TestConfig;
 import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.service.MemberModuleService;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.WaitingRepository;
-import roomescape.reservation.service.ReservationCompositeService;
-import roomescape.reservation.service.ReservationModuleService;
-import roomescape.reservation.service.WaitingModuleService;
+import roomescape.reservation.service.ReservationFacadeService;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
@@ -32,14 +32,14 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.ThemeModuleService;
+import roomescape.theme.service.ThemeService;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never"
 })
-class ReservationTimeModuleServiceTest {
+class ReservationTimeServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeFutureDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
@@ -47,8 +47,8 @@ class ReservationTimeModuleServiceTest {
     private Theme theme = TestFixture.makeTheme(1L);
     private Member member = TestFixture.makeMember();
 
-    private ReservationTimeModuleService reservationTimeModuleService;
-    private ReservationCompositeService reservationCompositeService;
+    private ReservationTimeService reservationTimeService;
+    private ReservationFacadeService reservationFacadeService;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -67,16 +67,16 @@ class ReservationTimeModuleServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationTimeModuleService = new ReservationTimeModuleService(reservationTimeRepository,
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository,
                 reservationRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
-        reservationCompositeService = new ReservationCompositeService(
-                new ReservationModuleService(reservationRepository),
-                new WaitingModuleService(waitingRepository),
-                new MemberModuleService(memberRepository, new MyPasswordEncoder()),
-                new ThemeModuleService(themeRepository, reservationRepository),
-                new ReservationTimeModuleService(reservationTimeRepository, reservationRepository)
+        reservationFacadeService = new ReservationFacadeService(
+                new ReservationService(reservationRepository),
+                new WaitingService(waitingRepository),
+                new MemberService(memberRepository, new MyPasswordEncoder()),
+                new ThemeService(themeRepository, reservationRepository),
+                new ReservationTimeService(reservationTimeRepository, reservationRepository)
         );
     }
 
@@ -85,9 +85,9 @@ class ReservationTimeModuleServiceTest {
         LocalTime time = LocalTime.of(1, 1);
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(time);
 
-        reservationTimeModuleService.create(request);
+        reservationTimeService.create(request);
 
-        assertThatThrownBy(() -> reservationTimeModuleService.create(request))
+        assertThatThrownBy(() -> reservationTimeService.create(request))
                 .isInstanceOf(ReservationTimeAlreadyExistsException.class)
                 .hasMessageContaining("중복된 예약 시간을 생성할 수 없습니다.");
     }
@@ -97,17 +97,17 @@ class ReservationTimeModuleServiceTest {
         LocalTime time = LocalTime.of(9, 0);
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(time);
 
-        ReservationTimeResponse response = reservationTimeModuleService.create(request);
+        ReservationTimeResponse response = reservationTimeService.create(request);
 
         assertThat(response.startAt()).isEqualTo(time);
     }
 
     @Test
     void getReservationTimes_shouldReturnAllCreatedTimes() {
-        reservationTimeModuleService.create(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        reservationTimeModuleService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
+        reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
+        reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
 
-        List<ReservationTimeResponse> result = reservationTimeModuleService.getReservationTimes();
+        List<ReservationTimeResponse> result = reservationTimeService.getReservationTimes();
 
         assertThat(result).hasSize(2);
     }
@@ -115,35 +115,35 @@ class ReservationTimeModuleServiceTest {
     @Test
     void deleteReservationTime_shouldRemoveSuccessfully() {
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(13, 30));
-        ReservationTimeResponse response = reservationTimeModuleService.create(request);
+        ReservationTimeResponse response = reservationTimeService.create(request);
 
-        reservationTimeModuleService.delete(response.id());
+        reservationTimeService.delete(response.id());
 
-        List<ReservationTimeResponse> result = reservationTimeModuleService.getReservationTimes();
+        List<ReservationTimeResponse> result = reservationTimeService.getReservationTimes();
         assertThat(result).isEmpty();
     }
 
     @Test
     void deleteReservationTime_shouldThrowException_WhenReservationExists() {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeModuleService.create(
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationCompositeService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationFacadeService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
-        assertThatThrownBy(() -> reservationTimeModuleService.delete(reservationTimeResponse.id()))
+        assertThatThrownBy(() -> reservationTimeService.delete(reservationTimeResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
                 .hasMessageContaining("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     @Test
     void getAvailableReservationTimes_shouldReturnAllAvailableReservationTimes() {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeModuleService.create(
+        ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        reservationTimeModuleService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
-        reservationTimeModuleService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
+        reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
+        reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationCompositeService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationFacadeService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
-        List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeModuleService.getAvailableReservationTimes(
+        List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.getAvailableReservationTimes(
                 futureDate, theme.getId());
 
         assertThat(

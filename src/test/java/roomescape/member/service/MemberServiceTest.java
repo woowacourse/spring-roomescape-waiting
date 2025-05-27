@@ -21,11 +21,11 @@ import roomescape.member.repository.MemberRepository;
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-    "spring.sql.init.mode=never"
+        "spring.sql.init.mode=never"
 })
-public class MemberModuleServiceTest {
+public class MemberServiceTest {
 
-    private MemberModuleService memberModuleService;
+    private MemberService memberService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -35,12 +35,12 @@ public class MemberModuleServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberModuleService = new MemberModuleService(memberRepository, myPasswordEncoder);
+        memberService = new MemberService(memberRepository, myPasswordEncoder);
     }
 
     @Test
     void signUpTest() {
-        SignUpResponse response = memberModuleService.signup(new SignupRequest("userr@gmail.com", "password", "userr"));
+        SignUpResponse response = memberService.signup(new SignupRequest("userr@gmail.com", "password", "userr"));
 
         Optional<Member> optionalMember = memberRepository.findById(response.id());
         assertThat(optionalMember.get().getName()).isEqualTo("userr");
@@ -48,10 +48,10 @@ public class MemberModuleServiceTest {
 
     @Test
     void findAllUsersTest() {
-        memberModuleService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
-        memberModuleService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
-        memberModuleService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
-        List<MemberResponse> memberResponses = memberModuleService.findAllUsers();
+        memberService.signup(new SignupRequest("user1@gmail.com", "password", "user1"));
+        memberService.signup(new SignupRequest("user2@gmail.com", "password", "user2"));
+        memberService.signup(new SignupRequest("user3@gmail.com", "password", "user3"));
+        List<MemberResponse> memberResponses = memberService.findAllUsers();
         assertThat(memberResponses.size()).isEqualTo(3);
     }
 }

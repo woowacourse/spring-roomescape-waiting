@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.auth.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.service.WaitingModuleService;
+import roomescape.reservation.service.WaitingService;
 
 @RestController
 public class WaitingController {
 
-    private final WaitingModuleService waitingModuleService;
+    private final WaitingService waitingService;
 
-    public WaitingController(final WaitingModuleService waitingModuleService) {
-        this.waitingModuleService = waitingModuleService;
+    public WaitingController(final WaitingService waitingService) {
+        this.waitingService = waitingService;
     }
 
     @GetMapping("/waiting")
     public ResponseEntity<List<ReservationResponse>> findWaitings(
     ) {
-        return ResponseEntity.ok(waitingModuleService.findWaitings());
+        return ResponseEntity.ok(waitingService.findWaitings());
     }
 
     @RequireRole(MemberRole.USER)
@@ -31,7 +31,7 @@ public class WaitingController {
     public ResponseEntity<Void> deleteReservations(
             @PathVariable("id") Long id
     ) {
-        waitingModuleService.delete(id);
+        waitingService.delete(id);
         return ResponseEntity.noContent().build();
     }
 }
