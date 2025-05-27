@@ -19,11 +19,13 @@ import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRegisterDto;
 import roomescape.dto.response.MemberWaitingResponseDto;
 import roomescape.infrastructure.db.MemberJpaRepository;
+import roomescape.infrastructure.db.ReservationTicketJpaRepository;
 import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
+import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -46,9 +48,12 @@ public class WaitingServiceTest {
 
     @Autowired
     private ReservationTimeJpaRepository reservationTimeJpaRepository;
+    @Autowired
+    private ReservationTicketJpaRepository reservationTicketJpaRepository;
 
     @BeforeEach
     void cleanDatabase() {
+        reservationTicketJpaRepository.deleteAll();
         waitingJpaRepository.deleteAll();
         memberJpaRepository.deleteAll();
         themeJpaRepository.deleteAll();
@@ -62,14 +67,25 @@ public class WaitingServiceTest {
         @DisplayName("정상적으로 등록된다")
         void test1() {
             // given
-            Member member = memberJpaRepository.save(new Member("이름", "email@gmail.com", "password", Role.ADMIN));
-            LoginMember loginMember = new LoginMember(member);
+            Member user = memberJpaRepository.save(
+                    new Member("사용자", "user@gmail.com", "password", Role.USER));
+            LoginMember loginMember = new LoginMember(user);
 
+            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
             ReservationTime reservationTime = reservationTimeJpaRepository.save(
                     new ReservationTime(LocalTime.of(12, 30)));
-            Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
 
             LocalDate date = LocalDate.now().plusDays(1);
+
+            ReservationTicket reservationTicket = reservationTicketJpaRepository.save(
+                    new ReservationTicket(new Reservation(
+                            date,
+                            reservationTime,
+                            theme,
+                            user,
+                            LocalDate.now()
+                    )));
+
             WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(
                     theme.getId(),
                     reservationTime.getId(),
@@ -88,7 +104,7 @@ public class WaitingServiceTest {
                                     .getReservation()
                                     .getMember()
                                     .getId()
-                    ).isEqualTo(member.getId()),
+                    ).isEqualTo(user.getId()),
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
@@ -117,8 +133,21 @@ public class WaitingServiceTest {
             Theme theme = themeJpaRepository.save(new Theme("새로운 테마", "새로운 설명", "썸네일"));
 
             LocalDate date = LocalDate.now().minusDays(1);
-            WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(theme.getId(), reservationTime.getId(),
-                    date);
+
+            ReservationTicket reservationTicket = reservationTicketJpaRepository.save(
+                    new ReservationTicket(new Reservation(
+                            date,
+                            reservationTime,
+                            theme,
+                            member,
+                            LocalDate.now().minusDays(2)
+                    )));
+
+            WaitingRegisterDto waitingRegisterDto = new WaitingRegisterDto(
+                    theme.getId(),
+                    reservationTime.getId(),
+                    date
+            );
 
             // when
             assertThatThrownBy(() -> waitingService.registerWaiting(loginMember, waitingRegisterDto))
