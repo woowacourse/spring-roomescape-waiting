@@ -4,13 +4,11 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.waiting.domain.WaitingReservation;
 import roomescape.reservation.waiting.domain.dto.WaitingReservationWithRank;
 
 public interface JpaWaitingReservationRepository extends CrudRepository<WaitingReservation, Long> {
 
-    @Transactional
     void deleteByIdAndMemberId(Long id, Long memberId);
 
     boolean existsByIdAndMemberId(Long id, Long memberId);
