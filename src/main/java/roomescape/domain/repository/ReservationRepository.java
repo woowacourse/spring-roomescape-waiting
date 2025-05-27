@@ -21,7 +21,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ReservationStatus status
     );
 
-    List<Reservation> findByMember(Member member);
+    @Query("""
+            SELECT r
+            FROM Reservation r
+            JOIN FETCH r.member
+            JOIN FETCH r.status
+            JOIN FETCH r.theme
+            JOIN FETCH r.time
+            WHERE r.member = :member
+            """)
+    List<Reservation> findByMember(@Param("member") Member member);
 
     List<Reservation> findByStatusStatus(ReservationStatus reservationStatus);
 
