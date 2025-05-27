@@ -5,7 +5,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.infrastructure.AuthorizationPrincipal;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
@@ -22,10 +21,9 @@ class AuthServiceTest {
 
         // given
         Member member = MemberFixture.create(MemberRole.USER);
-        LoginRequest request = new LoginRequest(member.getEmail(), member.getPassword());
 
         // when
-        AuthorizationPrincipal authorizationPrincipal = authService.createMemberPrincipal(member, request);
+        AuthorizationPrincipal authorizationPrincipal = authService.createMemberPrincipal(member);
 
         // then
         assertThat(authorizationPrincipal).isNotNull();

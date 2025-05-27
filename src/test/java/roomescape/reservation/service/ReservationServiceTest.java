@@ -86,10 +86,10 @@ class ReservationServiceTest {
         // when
         ReservationResponse actual = reservationService.create(
             reservationTimeToReserve,
+            reservationDate,
             theme,
             member,
-            availableTimes,
-            reservationCreateRequest
+            availableTimes
         );
 
         ReservationResponse expected = ReservationResponse.fromReservation(savedReservation);

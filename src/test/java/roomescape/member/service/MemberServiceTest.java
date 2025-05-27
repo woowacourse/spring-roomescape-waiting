@@ -102,8 +102,8 @@ class MemberServiceTest {
 
         // given
         Member member = MemberFixture.create(MemberRole.USER);
-        when(memberRepository.findById(member.getId()))
-            .thenReturn(Optional.of(member));
+        when(memberRepository.existsById(member.getId()))
+            .thenReturn(true);
 
         // when
         boolean actual = memberService.existsById(member.getId());
@@ -139,8 +139,8 @@ class MemberServiceTest {
 
         // given
         Member member = MemberFixture.create(MemberRole.USER);
-        when(memberRepository.findByName(member.getName()))
-            .thenReturn(Optional.of(member));
+        when(memberRepository.existsByName(member.getName()))
+            .thenReturn(true);
 
         // when
         boolean actual = memberService.existsByName(member.getName());

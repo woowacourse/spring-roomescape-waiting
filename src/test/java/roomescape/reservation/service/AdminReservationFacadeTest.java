@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.IntStream;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -80,11 +79,11 @@ class AdminReservationFacadeTest {
             1
         );
 
-        when(reservationTimeService.findById(reservationTimeToReserve.getId()))
-            .thenReturn(Optional.of(reservationTimeToReserve));
+        when(reservationTimeService.findByIdOrThrow(reservationTimeToReserve.getId()))
+            .thenReturn(reservationTimeToReserve);
 
-        when(themeService.findById(theme.getId()))
-            .thenReturn(Optional.of(theme));
+        when(themeService.findByIdOrThrow(theme.getId()))
+            .thenReturn(theme);
 
         when(memberService.findByIdOrThrow(member.getId()))
             .thenReturn(member);
@@ -97,10 +96,10 @@ class AdminReservationFacadeTest {
 
         when(reservationService.create(
                 reservationTimeToReserve,
+                reservationDate,
                 theme,
                 member,
-                availableTimes,
-                request.toReservationCreateRequest()
+                availableTimes
             )
         ).thenReturn(ReservationResponse.fromReservation(savedReservation));
 

@@ -33,7 +33,8 @@ class AuthServiceFacadeTest {
         Member member = MemberFixture.create(MemberRole.USER);
         LoginRequest loginRequest = new LoginRequest(member.getEmail(), member.getPassword());
 
-        when(memberService.findByEmail(member.getEmail())).thenReturn(Optional.of(member));
+        when(memberService.findByEmailAndPassword(member.getEmail(), member.getPassword()))
+            .thenReturn(Optional.of(member));
 
         // when
         AuthorizationPrincipal principal = authServiceFacade.login(loginRequest);
