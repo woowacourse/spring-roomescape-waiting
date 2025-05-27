@@ -48,4 +48,9 @@ public class ReservationTicket {
     public Theme getTheme() {
         return reservation.getTheme();
     }
+
+    public boolean ownBy(Member comparedMember) {
+        return reservation.getMember().getId().equals(comparedMember.getId());
+    }
+
 }

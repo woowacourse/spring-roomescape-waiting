@@ -6,6 +6,7 @@ import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.DuplicatedException;
+import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.request.ReservationTicketRegisterDto;
@@ -64,10 +65,15 @@ public class ReservationTicketService {
                 .toList();
     }
 
-    public void cancelReservation(Long id) {
-        ReservationTicket reservationTicket = reservationTicketRepository.findById(id);
-        reservationTicketRepository.deleteById(id);
+    public void cancelReservation(LoginMember loginMember, Long id) {
+        Member member = memberRepository.findById(loginMember.id());
 
+        ReservationTicket reservationTicket = reservationTicketRepository.findById(id);
+        if (!reservationTicket.ownBy(member)) {
+            throw new UnauthorizedException("해당 예약을 삭제할 권한이 없습니다.");
+        }
+
+        reservationTicketRepository.deleteById(id);
         promoteNextWaitingToReservation(reservationTicket);
     }
 

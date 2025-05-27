@@ -99,7 +99,7 @@ class ReservationTicketServiceTest {
         ReservationTicketResponseDto saved = this.reservationTicketService.saveReservation(request, this.loginMember);
 
         // when
-        this.reservationTicketService.cancelReservation(saved.id());
+        this.reservationTicketService.cancelReservation(this.loginMember, saved.id());
 
         // then
         List<ReservationTicketResponseDto> reservations = this.reservationTicketService.getAllReservations();
@@ -212,7 +212,7 @@ class ReservationTicketServiceTest {
         )));
 
         // when
-        reservationTicketService.cancelReservation(reservationTicket.getId());
+        reservationTicketService.cancelReservation(loginMember, reservationTicket.getId());
 
         // then
         List<ReservationTicket> allReservationTickets = reservationTicketRepository.findAll();
