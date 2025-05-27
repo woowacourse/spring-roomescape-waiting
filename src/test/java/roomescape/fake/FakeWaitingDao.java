@@ -16,8 +16,8 @@ public class FakeWaitingDao implements WaitingRepository {
 
     @Override
     public Waiting save(final Waiting waiting) {
-        Waiting newWaiting = new Waiting(index++, LocalDateTime.now(), waiting.getDate(), waiting.getTime(),
-                waiting.getMember(), waiting.getTheme());
+        Waiting newWaiting = new Waiting(index++, LocalDateTime.now(), waiting.getMember(), waiting.getDate(),
+                waiting.getTheme(), waiting.getTime());
         waitings.add(newWaiting);
         return newWaiting;
     }

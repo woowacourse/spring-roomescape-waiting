@@ -48,7 +48,7 @@ public class WaitingService {
                 .orElseThrow(() -> new BadRequestException("예약자를 찾을 수 없습니다."));
         final Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new BadRequestException("테마가 존재하지 않습니다."));
-        final Waiting waiting = Waiting.register(request.date(), time, member, theme);
+        final Waiting waiting = Waiting.register(member, request.date(), theme, time);
         final Waiting savedWaiting = waitingRepository.save(waiting);
         return new WaitingResponse(savedWaiting);
     }

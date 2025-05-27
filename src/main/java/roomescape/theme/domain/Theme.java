@@ -23,6 +23,7 @@ public class Theme {
     public Theme(final Long id, final ThemeName name,
                  final ThemeDescription description, final ThemeThumbnail thumbnail
     ) {
+        validateNotNull(name, description, thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
@@ -38,6 +39,18 @@ public class Theme {
     }
 
     public Theme() {
+    }
+
+    private void validateNotNull(final ThemeName name, final ThemeDescription description, final ThemeThumbnail thumbnail) {
+        if (name == null) {
+            throw new IllegalArgumentException("테마 이름을 입력해야 합니다.");
+        }
+        if (description == null) {
+            throw new IllegalArgumentException("테마 설명을 입력해야 합니다.");
+        }
+        if (thumbnail == null) {
+            throw new IllegalArgumentException("테마 썸네일을 입력해야 합니다.");
+        }
     }
 
     public Long getId() {

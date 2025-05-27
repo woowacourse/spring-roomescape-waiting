@@ -28,20 +28,37 @@ public class Waiting {
     @ManyToOne
     private ReservationTime time;
 
-    public Waiting(final Long id, final LocalDateTime createdAt, final LocalDate date, final ReservationTime time, final Member member, final Theme theme) {
+    public Waiting(Long id, LocalDateTime createdAt, Member member, LocalDate date, Theme theme, ReservationTime time) {
+        validateNotNull(member, date, theme, time);
         this.id = id;
         this.createdAt = createdAt;
-        this.date = date;
-        this.time = time;
         this.member = member;
+        this.date = date;
         this.theme = theme;
+        this.time = time;
     }
 
     public Waiting() {
     }
 
-    public static Waiting register(final LocalDate date, final ReservationTime time, final Member member, final Theme theme) {
-        return new Waiting(null, LocalDateTime.now(), date, time, member, theme);
+    public static Waiting register(final Member member, final LocalDate date, final Theme theme, final ReservationTime time) {
+        return new Waiting(null, LocalDateTime.now(), member, date, theme, time);
+    }
+
+    private void validateNotNull(final Member member, final LocalDate date,
+                                 final Theme theme, final ReservationTime time) {
+        if (member == null) {
+            throw new IllegalArgumentException("사용자를 입력해야 합니다.");
+        }
+        if (date == null) {
+            throw new IllegalArgumentException("날짜를 입력해야 합니다.");
+        }
+        if (theme == null) {
+            throw new IllegalArgumentException("테마를 입력해야 합니다.");
+        }
+        if (time == null) {
+            throw new IllegalArgumentException("시간을 입력해야 합니다.");
+        }
     }
 
     public Long getId() {
@@ -52,19 +69,19 @@ public class Waiting {
         return createdAt;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
     public Member getMember() {
         return member;
     }
 
+    public LocalDate getDate() {
+        return date;
+    }
+
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationTime getTime() {
+        return time;
     }
 }

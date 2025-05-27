@@ -8,6 +8,7 @@ import java.util.Objects;
 public class ThemeName {
 
     public static final int THEME_NAME_LENGTH_LIMIT = 20;
+
     private String name;
 
     public ThemeName(final String name) {
