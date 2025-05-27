@@ -31,14 +31,6 @@ public class FakeAccountRepository implements AccountRepository {
     }
 
     @Override
-    public Account findByMemberId(Long memberId) {
-        return accounts.stream()
-                .filter(account -> account.getMember().getId().equals(memberId))
-                .findFirst()
-                .orElse(null);
-    }
-
-    @Override
     public Optional<Account> findAccountByMemberEmail(MemberEmail email) {
         return accounts.stream()
                 .filter(account -> account.getMember().getEmail().equals(email))

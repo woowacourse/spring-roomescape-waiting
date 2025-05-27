@@ -1,7 +1,7 @@
 package roomescape.reservation.controller.dto;
 
 public enum ReservationStatus {
-    WATING("대기"),
+    WAITING("대기"),
     CONFIRM("예약");
 
     private final String status;

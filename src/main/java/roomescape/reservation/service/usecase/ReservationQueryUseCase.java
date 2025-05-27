@@ -6,17 +6,19 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.service.dto.AvailableReservationTimeServiceResponse;
-import roomescape.reservation.service.dto.ThemeToBookCountServiceResponse;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.usecase.ReservationTimeQueryUseCase;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationQueryUseCase {
 
     private final ReservationRepository reservationRepository;
@@ -24,6 +26,11 @@ public class ReservationQueryUseCase {
 
     public List<Reservation> getAll() {
         return reservationRepository.findAll();
+    }
+
+    public Reservation get(Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("예약을 찾을 수 없습니다."));
     }
 
     public List<Reservation> getByMemberId(final Long memberId) {
@@ -34,7 +41,7 @@ public class ReservationQueryUseCase {
             final AvailableReservationTimeServiceRequest availableReservationTimeServiceRequest) {
         final List<ReservationTime> allTimes = reservationTimeQueryUseCase.getAll();
 
-        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByDateAndThemeId(
+        final Set<Long> bookedTimeIds = new HashSet<>(reservationRepository.findByParams(
                         ReservationDate.from(availableReservationTimeServiceRequest.date()),
                         availableReservationTimeServiceRequest.themeId()).stream()
                 .map(reservation -> reservation.getTime().getId())
@@ -54,15 +61,6 @@ public class ReservationQueryUseCase {
         return responses;
     }
 
-    public List<ThemeToBookCountServiceResponse> getRanking(final ReservationDate startDate,
-                                                            final ReservationDate endDate,
-                                                            final int bookCount) {
-
-        return reservationRepository.findThemesWithReservationCount(startDate, endDate, bookCount).stream()
-                .map(ThemeToBookCountServiceResponse::new)
-                .toList();
-    }
-
     public boolean existsByTimeId(final Long timeId) {
         return reservationRepository.existsByTimeId(timeId);
     }
@@ -70,13 +68,20 @@ public class ReservationQueryUseCase {
     public boolean existsByParams(final ReservationDate date,
                                   final Long timeId,
                                   final Long themeId) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return reservationRepository.existsByParams(date, timeId, themeId);
+    }
+
+    public boolean existsByParams(final ReservationDate date,
+                                  final Long timeId,
+                                  final Long themeId,
+                                  final Long memberId) {
+        return reservationRepository.existsByParams(date, timeId, themeId, memberId);
     }
 
     public List<Reservation> search(final Long memberId,
                                     final Long themeId,
                                     final ReservationDate from,
                                     final ReservationDate to) {
-        return reservationRepository.findByMemberIdAndThemeIdAndDateBetween(memberId, themeId, from, to);
+        return reservationRepository.findByParams(memberId, themeId, from, to);
     }
 }

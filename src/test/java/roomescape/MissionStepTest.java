@@ -55,7 +55,7 @@ public class MissionStepTest {
         authService.signup(new SignupRequest(memberEmail, memberPassword, "시소"));
         jdbcTemplate.update("""
                 INSERT INTO member (name, email, role) VALUES (?, ?, ?)
-                """, "솔라", adminEmail, Role.ADMIN.name());
+                """, "솔라", adminEmail, Role.ADMIN.getCode());
         jdbcTemplate.update("""
                 INSERT INTO account (password, id) VALUES (?, ?)
                 """, passwordEncoder.encode(memberPassword), 2);

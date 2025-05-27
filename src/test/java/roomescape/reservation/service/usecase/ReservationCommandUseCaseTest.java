@@ -13,8 +13,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
 import roomescape.member.domain.MemberName;
 import roomescape.member.domain.Role;
-import roomescape.member.repository.AccountRepository;
-import roomescape.member.repository.FakeAccountRepository;
 import roomescape.member.repository.FakeMemberRepository;
 import roomescape.member.repository.MemberRepository;
 import roomescape.member.service.usecase.MemberQueryUseCase;
@@ -45,7 +43,6 @@ class ReservationCommandUseCaseTest {
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
     private MemberRepository memberRepository;
-    private AccountRepository accountRepository;
 
     @BeforeEach
     void setUp() {
@@ -53,15 +50,13 @@ class ReservationCommandUseCaseTest {
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         memberRepository = new FakeMemberRepository();
-        accountRepository = new FakeAccountRepository();
 
         reservationCommandUseCase = new ReservationCommandUseCase(
                 reservationRepository,
                 new ReservationQueryUseCase(reservationRepository,
                         new ReservationTimeQueryUseCase(reservationTimeRepository)),
                 new ReservationTimeQueryUseCase(reservationTimeRepository),
-                new ThemeQueryUseCase(themeRepository, new ReservationQueryUseCase(reservationRepository,
-                        new ReservationTimeQueryUseCase(reservationTimeRepository))),
+                new ThemeQueryUseCase(themeRepository),
                 new MemberQueryUseCase(memberRepository)
         );
     }

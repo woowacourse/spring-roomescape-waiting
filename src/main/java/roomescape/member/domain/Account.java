@@ -12,7 +12,6 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.common.utils.Validator;
 
 @Entity
@@ -53,7 +52,7 @@ public class Account {
                 .notNullField(Fields.password, password);
     }
 
-    public boolean isSamePassword(final PasswordEncoder passwordEncoder, final String password) {
-        return this.password.matches(passwordEncoder, password);
+    public String getPasswordValue() {
+        return password.getValue();
     }
 }
