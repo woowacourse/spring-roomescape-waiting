@@ -23,6 +23,7 @@ import roomescape.member.domain.MemberId;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
@@ -113,12 +114,14 @@ public class ReservationService {
 
     private boolean hasAlreadyWaiting(final ReservationCreateRequest request) {
         return waitingRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), new ThemeId(request.themeId())
+                request.date(),
+                new ReservationTimeId(request.timeId()),
+                new ThemeId(request.themeId())
         );
     }
 
     public List<ReservationResponse> findReservationByFiltering(final FilteringReservationRequest request) {
-        Long themeId = request.themeId();
+        ThemeId themeId = new ThemeId(request.themeId());
         MemberId memberId = new MemberId(request.memberId());
         LocalDate dateFrom = request.dateFrom();
         LocalDate dateTo = request.dateTo();
@@ -132,7 +135,7 @@ public class ReservationService {
     private boolean isAlreadyBooked(final ReservationCreateRequest request) {
         return reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(),
-                request.timeId(),
+                new ReservationTimeId(request.timeId()),
                 new ThemeId(request.themeId())
         );
     }
@@ -153,7 +156,7 @@ public class ReservationService {
 
     private ReservationTime getReservationTime(final ReservationCreateRequest request) {
         Long timeId = request.timeId();
-        return reservationTimeRepository.findById(timeId)
+        return reservationTimeRepository.findById(new ReservationTimeId(timeId))
                 .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
     }
 

@@ -14,6 +14,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberId;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
@@ -77,7 +78,7 @@ public class WaitingService {
     private boolean hasAlreadyWaiting(final WaitingCreateRequest request) {
         return waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
                 request.date(),
-                request.timeId(),
+                new ReservationTimeId(request.timeId()),
                 new ThemeId(request.themeId()),
                 new MemberId(request.loginMember().id())
         );
@@ -86,7 +87,7 @@ public class WaitingService {
     private boolean canCreateReservation(final WaitingCreateRequest request) {
         return !reservationRepository.existsByDateAndTimeIdAndThemeId(
                 request.date(),
-                request.timeId(),
+                new ReservationTimeId(request.timeId()),
                 new ThemeId(request.themeId())
         );
     }
@@ -95,7 +96,7 @@ public class WaitingService {
         return reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
                 request.date(),
                 new ThemeId(request.themeId()),
-                request.timeId(),
+                new ReservationTimeId(request.timeId()),
                 new MemberId(request.loginMember().id())
         );
     }
@@ -110,7 +111,7 @@ public class WaitingService {
 
     private ReservationTime gerReservationTime(final WaitingCreateRequest request) {
         Long timeId = request.timeId();
-        return reservationTimeRepository.findById(timeId)
+        return reservationTimeRepository.findById(new ReservationTimeId(timeId))
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약시간 입니다."));
     }
 

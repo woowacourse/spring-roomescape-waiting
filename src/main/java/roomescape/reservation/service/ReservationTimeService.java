@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.dto.request.ReservationTimeRequest;
 import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -49,12 +50,13 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(final Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        ReservationTimeId timeId = new ReservationTimeId(id);
+        if (reservationRepository.existsByTimeId(timeId)) {
             throw new AlreadyInUseException("Reservation is already in use");
         }
-        if (!reservationTimeRepository.existsById(id)) {
+        if (!reservationTimeRepository.existsById(timeId)) {
             throw new EntityNotFoundException("존재하지 않는 예약 시간입니다.");
         }
-        reservationTimeRepository.deleteById(id);
+        reservationTimeRepository.deleteById(timeId);
     }
 }

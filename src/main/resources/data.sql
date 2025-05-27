@@ -1,13 +1,13 @@
-insert into reservation_time (start_at)
-values ('12:00');
-insert into reservation_time (start_at)
-values ('13:00');
-insert into reservation_time (start_at)
-values ('14:00');
-insert into reservation_time (start_at)
-values ('15:00');
-insert into reservation_time (start_at)
-values ('16:00');
+insert into reservation_time (id, start_at)
+values (NEXT VALUE FOR TIME_ID_SEQUENCE, '12:00');
+insert into reservation_time (id, start_at)
+values (NEXT VALUE FOR TIME_ID_SEQUENCE, '13:00');
+insert into reservation_time (id, start_at)
+values (NEXT VALUE FOR TIME_ID_SEQUENCE, '14:00');
+insert into reservation_time (id, start_at)
+values (NEXT VALUE FOR TIME_ID_SEQUENCE, '15:00');
+insert into reservation_time (id, start_at)
+values (NEXT VALUE FOR TIME_ID_SEQUENCE, '16:00');
 
 insert into theme (id, name, description, thumbnail)
 values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마1', '테마1 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');

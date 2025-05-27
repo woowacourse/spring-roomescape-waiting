@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import roomescape.member.domain.MemberId;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.ThemeId;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -44,7 +45,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                 AND (:dateTo IS NULL OR r.date <= :dateTo)
             """)
     List<Reservation> findByThemeIdAndMemberIdAndDateBetween(
-            Long themeId,
+            ThemeId themeId,
             MemberId memberId,
             LocalDate dateFrom,
             LocalDate dateTo
@@ -52,18 +53,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndTimeIdAndThemeId(
             LocalDate date,
-            Long timeId,
+            ReservationTimeId timeId,
             ThemeId themeId
     );
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByTimeId(ReservationTimeId timeId);
 
     boolean existsByThemeId(ThemeId themeId);
 
     boolean existsByDateAndThemeIdAndTimeIdAndMemberId(
             LocalDate date,
             ThemeId themeId,
-            Long timeId,
+            ReservationTimeId timeId,
             MemberId memberId
     );
 }

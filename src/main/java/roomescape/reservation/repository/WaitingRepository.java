@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import roomescape.member.domain.MemberId;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationTimeId;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
@@ -27,13 +28,13 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
     boolean existsByDateAndTimeIdAndThemeId(
             LocalDate date,
-            Long timeId,
+            ReservationTimeId timeId,
             ThemeId themeId
     );
 
     boolean existsByDateAndTimeIdAndThemeIdAndMemberId(
             LocalDate date,
-            Long timeId,
+            ReservationTimeId timeId,
             ThemeId themeId,
             MemberId memberId
     );
