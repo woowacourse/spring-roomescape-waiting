@@ -19,7 +19,7 @@ import roomescape.time.domain.ReservationTime;
 @NoArgsConstructor
 @AllArgsConstructor(access = AccessLevel.PROTECTED)
 @EqualsAndHashCode(of = "id")
-public class Reservation {
+public class ReservationWait {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,11 +28,15 @@ public class Reservation {
     @Embedded
     private ReservationInfo info;
 
-    private static Reservation of(Long id, ReservationInfo info) {
-        return new Reservation(id, info);
+    public Reservation toReservation() {
+        return Reservation.withoutId(getMember(), getDate(), getTime(), getTheme());
     }
 
-    public static Reservation withId(
+    private static ReservationWait of(Long id, ReservationInfo info) {
+        return new ReservationWait(id, info);
+    }
+
+    public static ReservationWait withId(
             Long id,
             Member member,
             ReservationDate date,
@@ -42,7 +46,7 @@ public class Reservation {
         return of(id, ReservationInfo.of(member, date, time, theme));
     }
 
-    public static Reservation withoutId(
+    public static ReservationWait withoutId(
             Member member,
             ReservationDate date,
             ReservationTime time,

@@ -1,6 +1,8 @@
 package roomescape.theme.service.converter;
 
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import roomescape.theme.controller.dto.CreateThemeWebRequest;
 import roomescape.theme.controller.dto.ThemeWebResponse;
 import roomescape.theme.domain.Theme;
@@ -9,6 +11,7 @@ import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.theme.service.dto.CreateThemeServiceRequest;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ThemeConverter {
 
     public static Theme toDomain(final CreateThemeServiceRequest createThemeServiceRequest) {

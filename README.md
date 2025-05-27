@@ -30,6 +30,10 @@
   모든 예약 목록 조회
 
  
+- [x] `GET /reservations/wait`  
+  모든 예약 대기 목록 조회
+ 
+
 - [x] `GET /reservations/times`  
   날짜와 테마에 따른 예약 가능 여부를 포함한 시간 목록 조회
 
@@ -38,9 +42,18 @@
   예약 생성
 
 
+- [x] `POST /reservations/wait`  
+  예약 대기 생성
+
+
 - [x] `DELETE /reservations/{id}`  
   예약 삭제
   - 예약에서 참조 중인 시간은 삭제 불가능
+  - 해당 예약에 예약대기가 있다면, 우선 순위가 가장 높은 예약대기를 예약으로 승격
+
+
+- [x] `DELETE /reservations/wait/{id}`  
+  예약 대기 취소
 
 
 - [x] `GET /reservations/mine`  
@@ -87,6 +100,10 @@
 
 ### 사용자 페이지
 
+- [x] `GET /`
+  메인 페이지
+
+
 - [x] `GET /login`  
   로그인 페이지
 
@@ -107,6 +124,10 @@
 
 - [x] `GET /admin/reservation`  
   예약 관리용 페이지
+
+
+- [x] `GET /admin/waiting`  
+  예약 대기 관리용 페이지
 
 
 - [x] `GET /admin/time`  

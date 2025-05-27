@@ -30,5 +30,4 @@ public class ThemeQueryUseCase {
                 .map(ThemeToBookCountServiceResponse::theme)
                 .toList();
     }
-
 }

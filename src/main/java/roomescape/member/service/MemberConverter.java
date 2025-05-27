@@ -1,10 +1,13 @@
 package roomescape.member.service;
 
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import roomescape.member.auth.vo.MemberInfo;
 import roomescape.member.controller.dto.MemberInfoResponse;
 import roomescape.member.domain.Member;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class MemberConverter {
 
     public static MemberInfo toDto(Member member) {

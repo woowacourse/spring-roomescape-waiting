@@ -18,6 +18,11 @@ public class AdminController {
         return "admin/reservation-new";
     }
 
+    @GetMapping("/waiting")
+    public String getReservationWaitPage() {
+        return "admin/waiting";
+    }
+
     @GetMapping("/time")
     public String getTimePage() {
         return "admin/time";

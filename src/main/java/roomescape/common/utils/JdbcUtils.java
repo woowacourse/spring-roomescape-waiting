@@ -1,10 +1,13 @@
 package roomescape.common.utils;
 
 import java.util.Optional;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class JdbcUtils {
 
     public static <T> Optional<T> queryForOptional(

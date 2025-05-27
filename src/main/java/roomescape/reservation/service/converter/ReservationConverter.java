@@ -1,6 +1,8 @@
 package roomescape.reservation.service.converter;
 
 import java.util.List;
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberConverter;
 import roomescape.reservation.controller.dto.AvailableReservationTimeWebResponse;
@@ -14,12 +16,15 @@ import roomescape.theme.service.converter.ThemeConverter;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.converter.ReservationTimeConverter;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ReservationConverter {
 
-    public static Reservation toDomain(final CreateReservationServiceRequest request,
-                                       final Member member,
-                                       final ReservationTime time,
-                                       final Theme theme) {
+    public static Reservation toDomain(
+            final CreateReservationServiceRequest request,
+            final Member member,
+            final ReservationTime time,
+            final Theme theme
+    ) {
         return Reservation.withoutId(
                 member,
                 ReservationDate.from(request.date()),
