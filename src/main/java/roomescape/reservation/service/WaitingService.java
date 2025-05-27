@@ -1,0 +1,128 @@
+package roomescape.reservation.service;
+
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.CannotWaitWithoutReservationException;
+import roomescape.exception.ExistedReservationException;
+import roomescape.exception.ExistedWaitingException;
+import roomescape.exception.MemberNotFoundException;
+import roomescape.exception.NotMyWaitingException;
+import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.TimeSlotNotFoundException;
+import roomescape.exception.WaitingNotFoundException;
+import roomescape.member.domain.Member;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.TimeSlot;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.dto.request.WaitingRequest;
+import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.dto.response.WaitingWithRankResponse;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.ThemeRepository;
+import roomescape.reservation.infrastructure.TimeSlotRepository;
+import roomescape.reservation.infrastructure.WaitingRepository;
+
+@Service
+@Transactional(readOnly = true)
+public class WaitingService {
+
+    private final WaitingRepository waitingRepository;
+    private final ThemeRepository themeRepository;
+    private final TimeSlotRepository timeSlotRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
+
+    public WaitingService(WaitingRepository waitingRepository, ThemeRepository themeRepository,
+                          TimeSlotRepository timeSlotRepository, MemberRepository memberRepository,
+                          ReservationRepository reservationRepository) {
+        this.waitingRepository = waitingRepository;
+        this.themeRepository = themeRepository;
+        this.timeSlotRepository = timeSlotRepository;
+        this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
+    }
+
+    @Transactional
+    public WaitingResponse createWaiting(Long memberId, WaitingRequest request) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Theme theme = themeRepository.findById(request.themeId()).orElseThrow(ThemeNotFoundException::new);
+        TimeSlot timeSlot = timeSlotRepository.findById(request.timeId()).orElseThrow(TimeSlotNotFoundException::new);
+        ReservationTime reservationTime = new ReservationTime(request.date(), timeSlot);
+        validateNewWaiting(reservationTime, member, theme);
+        Waiting waiting = Waiting.builder()
+                .reservationTime(reservationTime)
+                .member(member)
+                .theme(theme)
+                .build();
+        Waiting savedWaiting = waitingRepository.save(waiting);
+        return WaitingResponse.from(savedWaiting);
+    }
+
+    private void validateNewWaiting(ReservationTime reservationTime, Member member, Theme theme) {
+        reservationTime.validateDateTime();
+        validateAlreadyReserved(reservationTime, member, theme);
+        validateDuplicatedWaiting(reservationTime, member, theme);
+        validateReservationExist(reservationTime, theme);
+    }
+
+    private void validateReservationExist(ReservationTime time, Theme theme) {
+        if (!reservationRepository.existsByReservationTimeAndTheme(time, theme)) {
+            throw new CannotWaitWithoutReservationException();
+        }
+    }
+
+    private void validateAlreadyReserved(ReservationTime time, Member member, Theme theme) {
+        if (reservationRepository.existsByReservationTimeAndMemberAndTheme(time, member, theme)) {
+            throw new ExistedReservationException();
+        }
+    }
+
+    private void validateDuplicatedWaiting(ReservationTime time, Member member, Theme theme) {
+        if (waitingRepository.existsByReservationTimeAndMemberAndTheme(time, member, theme)) {
+            throw new ExistedWaitingException();
+        }
+    }
+
+    public List<WaitingWithRankResponse> findWaitingByMemberId(Long memberId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        return waitingRepository.findByMemberIdWithRank(member.getId());
+    }
+
+    @Transactional
+    public void deleteWaitingById(Long memberId, Long waitingId) {
+        Member member = memberRepository.findById(memberId).orElseThrow(MemberNotFoundException::new);
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
+        if (!waiting.isSameMember(member)) {
+            throw new NotMyWaitingException();
+        }
+        waitingRepository.delete(waiting);
+    }
+
+    @Transactional
+    public void deleteWaitingById(Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
+        waitingRepository.delete(waiting);
+    }
+
+    public List<WaitingResponse> findAllWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public void convertWaitingToReservation(Long waitingId) {
+        Waiting waiting = waitingRepository.findById(waitingId).orElseThrow(WaitingNotFoundException::new);
+        ReservationTime reservationTime = waiting.getReservationTime();
+        reservationRepository.findByReservationTimeAndTheme(
+                reservationTime, waiting.getTheme()
+        ).ifPresent(reservationRepository::delete);
+        Reservation reservation = waiting.convertToReservation();
+        reservationRepository.save(reservation);
+        waitingRepository.delete(waiting);
+    }
+}

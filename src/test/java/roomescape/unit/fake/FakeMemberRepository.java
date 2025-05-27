@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
-import roomescape.domain.Member;
-import roomescape.domain.repository.MemberRepository;
+import roomescape.member.domain.Member;
+import roomescape.member.infrastructure.MemberRepository;
 
 public class FakeMemberRepository implements MemberRepository {
 
@@ -19,7 +19,13 @@ public class FakeMemberRepository implements MemberRepository {
 
     @Override
     public Member save(Member member) {
-        Member newMember = member.withId(index.getAndIncrement());
+        Member newMember = Member.builder()
+                .id(index.getAndIncrement())
+                .name(member.getName())
+                .email(member.getEmail())
+                .password(member.getPassword())
+                .role(member.getRole())
+                .build();
         members.add(newMember);
         return newMember;
     }

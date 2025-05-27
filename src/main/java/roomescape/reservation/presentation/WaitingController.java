@@ -1,0 +1,62 @@
+package roomescape.reservation.presentation;
+
+import jakarta.validation.Valid;
+import java.net.URI;
+import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RestController;
+import roomescape.auth.domain.Authenticated;
+import roomescape.reservation.dto.request.WaitingRequest;
+import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.dto.response.WaitingWithRankResponse;
+import roomescape.reservation.service.WaitingService;
+
+@RestController
+public class WaitingController {
+
+    private final WaitingService waitingService;
+
+    public WaitingController(WaitingService waitingService) {
+        this.waitingService = waitingService;
+    }
+
+    @PostMapping("/api/waiting")
+    public ResponseEntity<WaitingResponse> addWaitList(@Authenticated Long memberId,
+                                                       @RequestBody @Valid WaitingRequest request) {
+        WaitingResponse response = waitingService.createWaiting(memberId, request);
+        return ResponseEntity.created(URI.create("/api/waiting/" + response.id())).body(response);
+    }
+
+    @PostMapping("/api/admin/waitings/{waitingId}")
+    public ResponseEntity<Void> convertToReservation(@PathVariable("waitingId") Long waitingId) {
+        waitingService.convertWaitingToReservation(waitingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/api/admin/waitings")
+    public List<WaitingResponse> getAllWaiting() {
+        return waitingService.findAllWaitings();
+    }
+
+    @GetMapping("/api/waiting/my")
+    public List<WaitingWithRankResponse> getMyWaitings(@Authenticated Long memberId) {
+        return waitingService.findWaitingByMemberId(memberId);
+    }
+
+    @DeleteMapping("/api/admin/waitings/{waitingId}")
+    public ResponseEntity<Void> denyWaiting(@PathVariable("waitingId") Long waitingId) {
+        waitingService.deleteWaitingById(waitingId);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/api/waiting/{waitingId}")
+    public ResponseEntity<Void> cancelWaiting(@Authenticated Long memberId, @PathVariable("waitingId") Long waitingId) {
+        waitingService.deleteWaitingById(memberId, waitingId);
+        return ResponseEntity.noContent().build();
+    }
+}
