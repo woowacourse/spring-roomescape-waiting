@@ -1,0 +1,128 @@
+package roomescape.controller;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.TestFixture.DEFAULT_DATE;
+import static roomescape.TestFixture.createAdminMember;
+import static roomescape.TestFixture.createDefaultReservationTime;
+import static roomescape.TestFixture.createDefaultReservation_1;
+import static roomescape.TestFixture.createDefaultReservation_2;
+import static roomescape.TestFixture.createDefaultTheme;
+
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import roomescape.DBHelper;
+import roomescape.DatabaseCleaner;
+import roomescape.auth.JwtTokenProvider;
+import roomescape.controller.dto.request.CreateReservationAdminRequest;
+import roomescape.controller.dto.response.BookingResponse;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+import roomescape.domain.repository.ReservationRepository;
+import roomescape.service.dto.result.MemberResult;
+
+class AdminReservationControllerTest extends AbstractRestDocsTest {
+
+    @Autowired
+    private DBHelper dbHelper;
+
+    @Autowired
+    private DatabaseCleaner databaseCleaner;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
+
+    @BeforeEach
+    void clean() {
+        databaseCleaner.clean();
+    }
+
+    @Test
+    @DisplayName("관리자가 예약 목록을 조회한다")
+    void getReservations() {
+        // given
+        Member admin = createAdminMember();
+        dbHelper.insertMember(admin);
+        String token = jwtTokenProvider.createToken(MemberResult.from(admin));
+
+        dbHelper.insertReservation(createDefaultReservation_1());
+        dbHelper.insertReservation(createDefaultReservation_2());
+
+        // when & then
+        List<BookingResponse> responses = givenWithDocs("admin-reservation-get")
+                .cookie("token", token)
+                .when()
+                .get("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .extract().jsonPath().getList(".", BookingResponse.class);
+
+        assertThat(responses).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("관리자가 예약을 생성한다")
+    void createReservation() {
+        // given
+        Member admin = createAdminMember();
+        ReservationTime reservationTime = createDefaultReservationTime();
+        Theme theme = createDefaultTheme();
+        dbHelper.prepareForBooking(admin, reservationTime, theme);
+
+        String token = jwtTokenProvider.createToken(MemberResult.from(admin));
+
+        CreateReservationAdminRequest request = new CreateReservationAdminRequest(
+                DEFAULT_DATE,
+                theme.getId(),
+                reservationTime.getId(),
+                admin.getId()
+        );
+
+        // when & then
+        BookingResponse response = givenWithDocs("admin-reservation-create")
+                .cookie("token", token)
+                .contentType("application/json")
+                .body(request)
+                .when()
+                .post("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value())
+                .extract()
+                .as(BookingResponse.class);
+
+        assertAll(
+                () -> assertThat(response.id()).isNotNull(),
+                () -> assertThat(response.memberName()).isEqualTo(admin.getName())
+        );
+    }
+
+    @Test
+    @DisplayName("관리자가 예약을 삭제한다")
+    void deleteReservation() {
+        // given
+        Member admin = createAdminMember();
+        dbHelper.insertMember(admin);
+        String token = jwtTokenProvider.createToken(MemberResult.from(admin));
+        Reservation reservation = createDefaultReservation_1();
+        dbHelper.insertReservation(reservation);
+
+        // when & then
+        givenWithDocs("admin-reservation-delete")
+                .cookie("token", token)
+                .when()
+                .delete("/admin/reservations/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        assertThat(reservationRepository.findById(1L)).isEmpty();
+    }
+} 

@@ -2,6 +2,7 @@ package roomescape.controller;
 
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -11,11 +12,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import roomescape.auth.CookieProvider;
 import roomescape.auth.JwtTokenProvider;
-import roomescape.controller.request.LoginMemberRequest;
-import roomescape.controller.response.CheckLoginUserResponse;
-import roomescape.controller.response.LoginMemberResponse;
+import roomescape.controller.dto.request.LoginMemberRequest;
+import roomescape.controller.dto.response.CheckLoginUserResponse;
+import roomescape.controller.dto.response.LoginMemberResponse;
 import roomescape.service.MemberService;
-import roomescape.service.result.MemberResult;
+import roomescape.service.dto.result.MemberResult;
 
 @Controller
 public class AuthController {
@@ -31,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<LoginMemberResponse> login(@RequestBody LoginMemberRequest loginMemberRequest, HttpServletResponse response) {
+    public ResponseEntity<LoginMemberResponse> login(@Valid @RequestBody LoginMemberRequest loginMemberRequest, HttpServletResponse response) {
         MemberResult memberResult = memberService.login(loginMemberRequest.toServiceParam());
         String token = jwtTokenProvider.createToken(memberResult);
 
@@ -43,7 +44,7 @@ public class AuthController {
     public ResponseEntity<CheckLoginUserResponse> loginCheck(@CookieValue("token") Cookie cookie) {
         String token = cookieProvider.extractTokenFromCookie(cookie);
         Long id = jwtTokenProvider.extractIdFromToken(token);
-        return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.findById(id)));
+        return ResponseEntity.ok().body(CheckLoginUserResponse.from(memberService.getById(id)));
     }
 
     @PostMapping("/logout")

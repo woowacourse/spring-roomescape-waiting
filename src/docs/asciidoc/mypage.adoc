@@ -1,0 +1,13 @@
+== 마이페이지(MyPage)
+
+=== 내 예약 + 대기 모두 조회 API
+==== request
+include::{snippets}/mypage-bookings-get/http-request.adoc[]
+==== response
+include::{snippets}/mypage-bookings-get/http-response.adoc[]
+
+=== 내 예야 대기 취소 API
+==== request
+include::{snippets}/mypage-waitings-delete/http-request.adoc[]
+==== response
+include::{snippets}/mypage-waitings-delete/http-response.adoc[]

@@ -1,0 +1,19 @@
+== 예약 대기(Waiting)
+
+=== 관리자 대기 목록 조회 API
+==== request
+include::{snippets}/admin-waiting-get/http-request.adoc[]
+==== response
+include::{snippets}/admin-waiting-get/http-response.adoc[]
+
+=== 관리자 대기 삭제 API
+==== request
+include::{snippets}/admin-waiting-delete/http-request.adoc[]
+==== response
+include::{snippets}/admin-waiting-delete/http-response.adoc[]
+
+=== 사용자 대기 추가 API
+==== request
+include::{snippets}/waiting-create/http-request.adoc[]
+==== response
+include::{snippets}/waiting-create/http-response.adoc[]

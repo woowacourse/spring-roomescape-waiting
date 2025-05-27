@@ -5,10 +5,10 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-
-import java.util.Objects;
+import lombok.Getter;
 
 @Entity
+@Getter
 public class Theme {
 
     @Id
@@ -36,43 +36,5 @@ public class Theme {
 
     public Theme(final String name, final String description, final String thumbnail) {
         this(null, name, description, thumbnail);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Theme other)) {
-            return false;
-        }
-        if (this.id == null || other.id == null) {
-            return false;
-        }
-        return Objects.equals(id, other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id == null) {
-            return System.identityHashCode(this);
-        }
-        return Objects.hash(id);
     }
 }

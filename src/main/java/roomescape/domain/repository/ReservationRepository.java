@@ -8,8 +8,6 @@ import roomescape.domain.Reservation;
 
 public interface ReservationRepository {
 
-    List<Reservation> findAll();
-
     Reservation save(Reservation reservation);
 
     void deleteById(Long reservationId);
@@ -18,13 +16,15 @@ public interface ReservationRepository {
 
     List<Reservation> findByMemberId(Long memberId);
 
+    List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
+
     boolean existsByTimeId(Long reservationTimeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate reservationDate, Long timeId, Long themeId);
+    boolean existsDuplicateReservation(LocalDate reservationDate, Long timeId, Long themeId);
 
     boolean existsByThemeId(Long themeId);
 
-    List<Reservation> findByThemeIdAndDate(Long themeId, LocalDate reservationDate);
+    boolean isBookingSlotEmpty(LocalDate reservationDate, Long timeId, Long themeId);
 
-    List<Reservation> findReservationsInConditions(Long memberId, Long themeId, LocalDate dateFrom, LocalDate dateTo);
+    boolean hasAlreadyReserved(Long memberId, Long themeId, Long timeId, LocalDate date);
 }

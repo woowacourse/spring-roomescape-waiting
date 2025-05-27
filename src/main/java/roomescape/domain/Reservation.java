@@ -1,10 +1,16 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
-
+import jakarta.persistence.Embedded;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDate;
-import java.util.Objects;
-
+import java.time.LocalDateTime;
 
 @Entity
 public class Reservation {
@@ -17,36 +23,26 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
-    @ManyToOne
-    @JoinColumn(name = "time_id", nullable = false)
-    private ReservationTime time;
-
-    @ManyToOne
-    @JoinColumn(name = "theme_id", nullable = false)
-    private Theme theme;
-
-    @Column(nullable = false)
-    private LocalDate date;
-
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private ReservationStatus status;
+    @Embedded
+    private BookingSlot bookingSlot;
 
     protected Reservation() {
     }
 
-    private Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                        ReservationStatus status) {
+    private Reservation(Long id, Member member, BookingSlot bookingSlot) {
         this.id = id;
         this.member = member;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.status = status;
+        this.bookingSlot = bookingSlot;
     }
 
-    public static Reservation createNew(Member member, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
+    public static Reservation create(Member member, BookingSlot bookingSlot) {
+        return new Reservation(null, member, bookingSlot);
+    }
+
+    public long calculateMinutesUntilStart(Clock clock) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime reservationDateTime = LocalDateTime.of(getDate(), getTime().getStartAt());
+        return Duration.between(now, reservationDateTime).toMinutes();
     }
 
     public Long getId() {
@@ -58,40 +54,18 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return bookingSlot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return bookingSlot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return bookingSlot.getTheme();
     }
 
-    public ReservationStatus getStatus() {
-        return status;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Reservation other)) {
-            return false;
-        }
-        if (this.id == null || other.id == null) {
-            return false;
-        }
-        return Objects.equals(id, other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id == null) {
-            return System.identityHashCode(this);
-        }
-        return Objects.hash(id);
+    public boolean isPast(Clock clock) {
+        return bookingSlot.isPast(clock);
     }
 }

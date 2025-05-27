@@ -4,9 +4,11 @@ package roomescape.exception;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ProblemDetail;
+import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 @Slf4j
 @ControllerAdvice
@@ -36,33 +38,27 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
 
-    @ExceptionHandler(NotFoundReservationException.class)
-    public ProblemDetail handleNotFoundReservationInfo(NotFoundReservationException e) {
+    @ExceptionHandler(NotFoundException.class)
+    public ProblemDetail handleNotFoundReservationInfo(NotFoundException e) {
         log.error("예외 발생: ", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "입력하신 예약 정보를 찾지 못했습니다.");
-    }
-
-    @ExceptionHandler(NotFoundMemberException.class)
-    public ProblemDetail handleNotFoundMemberException(NotFoundMemberException e) {
-        log.error("예외 발생: ", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "입력하신 사용자 정보를 찾지 못했습니다.");
-    }
-
-    @ExceptionHandler(NotFoundThemeException.class)
-    public ProblemDetail handleNotFoundThemeException(NotFoundThemeException e) {
-        log.error("예외 발생: ", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "입력하신 테마 정보를 찾지 못했습니다.");
-    }
-
-    @ExceptionHandler(NotFoundReservationTimeException.class)
-    public ProblemDetail handleNotFoundReservationTimeException(NotFoundReservationTimeException e) {
-        log.error("예외 발생: ", e);
-        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "입력하신 예약 시간 정보를 찾지 못했습니다.");
+        return ProblemDetail.forStatusAndDetail(HttpStatus.NOT_FOUND, e.getMessage());
     }
 
     @ExceptionHandler(DeletionNotAllowedException.class)
     public ProblemDetail handleDeletionNotAllowedException(DeletionNotAllowedException e) {
         log.error("예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
+    @ExceptionHandler(NoResourceFoundException.class)
+    public ResponseEntity<Void> handleNoResourceFound(NoResourceFoundException e) {
+        log.error("NoResourceFoundException: ", e);
+        return ResponseEntity.noContent().build();
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleUnexpectedException(Exception e) {
+        log.error("예상치 못한 예외 발생: ", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, e.getMessage());
     }
 }

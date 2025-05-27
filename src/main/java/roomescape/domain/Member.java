@@ -1,11 +1,17 @@
 package roomescape.domain;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import lombok.Getter;
 import roomescape.exception.ReservationException;
 
-import java.util.Objects;
-
 @Entity
+@Getter
 public class Member {
 
     @Id
@@ -41,47 +47,5 @@ public class Member {
 
     public static Member createNew(String name, MemberRole role, String email, String password) {
         return new Member(null, name, role, email, password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public MemberRole getRole() {
-        return role;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Member other)) {
-            return false;
-        }
-        if (this.id == null || other.id == null) {
-            return false;
-        }
-        return Objects.equals(id, other.id);
-    }
-
-    @Override
-    public int hashCode() {
-        if (id == null) {
-            return System.identityHashCode(this);
-        }
-        return Objects.hash(id);
     }
 }

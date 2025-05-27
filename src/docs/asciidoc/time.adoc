@@ -1,0 +1,27 @@
+== 예약 시간 (ReservationTime)
+
+=== 시간 추가 API
+==== request
+include::{snippets}/reservationTime-create/http-request.adoc[]
+==== response
+include::{snippets}/reservationTime-create/http-response.adoc[]
+
+=== 시간 삭제 API
+==== request
+include::{snippets}/reservationTime-delete/http-request.adoc[]
+==== response
+include::{snippets}/reservationTime-delete/http-response.adoc[]
+
+=== 시간 목록 조회 API
+==== request
+include::{snippets}/reservationTime-get/http-request.adoc[]
+==== response
+include::{snippets}/reservationTime-get/http-response.adoc[]
+
+=== 예약 여부 포함 시간 목록 조회 API
+==== query parameters
+include::{snippets}/reservationTime-available-get/query-parameters.adoc[]
+==== request
+include::{snippets}/reservationTime-available-get/http-request.adoc[]
+==== response
+include::{snippets}/reservationTime-available-get/http-response.adoc[]

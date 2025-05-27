@@ -1,7 +1,12 @@
 package roomescape.persistence;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,12 +18,6 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-import java.time.LocalDate;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
-
 @ActiveProfiles("test")
 @DataJpaTest
 class JpaThemeRepositoryTest {
@@ -28,7 +27,6 @@ class JpaThemeRepositoryTest {
 
     @PersistenceContext
     private EntityManager em;
-
 
     @Test
     @DisplayName("인기 테마를 개수에 맞게 조회할 수 있다.")
@@ -46,9 +44,9 @@ class JpaThemeRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         em.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
-        Reservation reservation3 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
+        Reservation reservation3 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
         em.persist(reservation1);
         em.persist(reservation2);
         em.persist(reservation3);
@@ -80,10 +78,10 @@ class JpaThemeRepositoryTest {
         ReservationTime time = TestFixture.createDefaultReservationTime();
         em.persist(time);
 
-        Reservation reservation1 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
-        Reservation reservation2 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
-        Reservation reservation3 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 3), time, theme1);
-        Reservation reservation4 = TestFixture.createDefaultReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
+        Reservation reservation1 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme1);
+        Reservation reservation2 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 2), time, theme1);
+        Reservation reservation3 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 3), time, theme1);
+        Reservation reservation4 = TestFixture.createNewReservation(member, LocalDate.of(2025, 1, 1), time, theme2);
         em.persist(reservation1);
         em.persist(reservation2);
         em.persist(reservation3);
