@@ -24,6 +24,7 @@ import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.WaitingWithRank;
 import roomescape.reservation.dto.request.FilteringReservationRequest;
@@ -72,7 +73,8 @@ public class ReservationService {
         List<Reservation> reservations = reservationRepository.findAllByMemberId(new MemberId(loginMember.id()))
                 .stream()
                 .toList();
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(new MemberId(loginMember.id()))
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(
+                        new MemberId(loginMember.id()))
                 .stream()
                 .toList();
         return toMyReservationResponses(reservations, waitingWithRanks);
@@ -111,7 +113,7 @@ public class ReservationService {
 
     private boolean hasAlreadyWaiting(final ReservationCreateRequest request) {
         return waitingRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId()
+                request.date(), request.timeId(), new ThemeId(request.themeId())
         );
     }
 
@@ -129,7 +131,9 @@ public class ReservationService {
 
     private boolean isAlreadyBooked(final ReservationCreateRequest request) {
         return reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId()
+                request.date(),
+                request.timeId(),
+                new ThemeId(request.themeId())
         );
     }
 
@@ -211,7 +215,7 @@ public class ReservationService {
     }
 
     private Set<ReservationTime> getAlreadyBookedTimes(final LocalDate date, final Long themeId) {
-        return reservationRepository.findByDateAndThemeId(date, themeId)
+        return reservationRepository.findByDateAndThemeId(date, new ThemeId(themeId))
                 .stream()
                 .map(Reservation::getTime)
                 .collect(Collectors.toSet());

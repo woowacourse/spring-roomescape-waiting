@@ -1,17 +1,16 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 @Entity
 public class Theme {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "id", nullable = false))
+    private ThemeId id;
 
     @Column(nullable = false)
     private String name;
@@ -30,7 +29,7 @@ public class Theme {
             final String description,
             final String thumbnail
     ) {
-        this.id = id;
+        this.id = new ThemeId(id);
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
@@ -60,7 +59,7 @@ public class Theme {
     }
 
     public Long getId() {
-        return id;
+        return id.getValue();
     }
 
     public String getName() {

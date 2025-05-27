@@ -15,6 +15,7 @@ import roomescape.member.domain.MemberId;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.request.WaitingCreateRequest;
 import roomescape.reservation.dto.response.WaitingResponse;
@@ -75,19 +76,27 @@ public class WaitingService {
 
     private boolean hasAlreadyWaiting(final WaitingCreateRequest request) {
         return waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                request.date(), request.timeId(), request.themeId(), new MemberId(request.loginMember().id())
+                request.date(),
+                request.timeId(),
+                new ThemeId(request.themeId()),
+                new MemberId(request.loginMember().id())
         );
     }
 
     private boolean canCreateReservation(final WaitingCreateRequest request) {
         return !reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId()
+                request.date(),
+                request.timeId(),
+                new ThemeId(request.themeId())
         );
     }
 
     private boolean isAlreadyReservedBySelf(final WaitingCreateRequest request) {
         return reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
-                request.date(), request.themeId(), request.timeId(), new MemberId(request.loginMember().id())
+                request.date(),
+                new ThemeId(request.themeId()),
+                request.timeId(),
+                new MemberId(request.loginMember().id())
         );
     }
 

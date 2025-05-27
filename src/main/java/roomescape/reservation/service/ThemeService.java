@@ -9,6 +9,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeId;
 import roomescape.reservation.dto.request.ThemeRequest;
 import roomescape.reservation.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
@@ -43,13 +44,13 @@ public class ThemeService {
 
     @Transactional
     public void delete(final Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(new ThemeId(id))) {
             throw new AlreadyInUseException("Theme with id " + id + " is already in use");
         }
-        if (!themeRepository.existsById(id)) {
+        if (!themeRepository.existsById(new ThemeId(id))) {
             throw new EntityNotFoundException("존재하지 않는 테마입니다.");
         }
-        themeRepository.deleteById(id);
+        themeRepository.deleteById(new ThemeId(id));
     }
 
     public List<ThemeResponse> getPopularThemes() {

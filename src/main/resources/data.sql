@@ -9,28 +9,28 @@ values ('15:00');
 insert into reservation_time (start_at)
 values ('16:00');
 
-insert into theme (name, description, thumbnail)
-values ('테마1', '테마1 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마2', '테마2 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마3', '테마3 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마4', '테마4 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마5', '테마5 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마6', '테마6 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마7', '테마7 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마8', '테마8 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마9', '테마9 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마10', '테마10 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
-insert into theme (name, description, thumbnail)
-values ('테마11', '테마11 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마1', '테마1 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마2', '테마2 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마3', '테마3 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마4', '테마4 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마5', '테마5 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마6', '테마6 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마7', '테마7 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마8', '테마8 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마9', '테마9 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마10', '테마10 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
+insert into theme (id, name, description, thumbnail)
+values (NEXT VALUE FOR THEME_ID_SEQUENCE, '테마11', '테마11 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
 -- MemberId 시퀀스 생성
 insert into member (id, name, email, password, role)

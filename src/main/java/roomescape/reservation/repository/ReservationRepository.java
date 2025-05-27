@@ -8,6 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 
 import roomescape.member.domain.MemberId;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ThemeId;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -30,7 +31,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findAllByMemberId(MemberId memberId);
 
-    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findByDateAndThemeId(LocalDate date, ThemeId themeId);
 
     @Query("""
             SELECT r FROM Reservation r
@@ -52,16 +53,16 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     boolean existsByDateAndTimeIdAndThemeId(
             LocalDate date,
             Long timeId,
-            Long themeId
+            ThemeId themeId
     );
 
-    boolean existsByTimeId(final Long timeId);
+    boolean existsByTimeId(Long timeId);
 
-    boolean existsByThemeId(final Long themeId);
+    boolean existsByThemeId(ThemeId themeId);
 
     boolean existsByDateAndThemeIdAndTimeIdAndMemberId(
             LocalDate date,
-            Long themeId,
+            ThemeId themeId,
             Long timeId,
             MemberId memberId
     );

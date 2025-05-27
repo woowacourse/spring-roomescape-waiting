@@ -8,10 +8,13 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
 import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeId;
 
-public interface ThemeRepository extends JpaRepository<Theme, Long> {
+public interface ThemeRepository extends JpaRepository<Theme, ThemeId> {
 
-    Optional<Theme> findById(Long id);
+    default Optional<Theme> findById(Long themeId) {
+        return findById(new ThemeId(themeId));
+    }
 
     @Query(nativeQuery = true, value = """
                 SELECT t.id, t.name, t.description, t.thumbnail

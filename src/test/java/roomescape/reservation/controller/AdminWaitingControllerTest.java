@@ -25,17 +25,18 @@ class AdminWaitingControllerTest {
     @Test
     void readAllWaiting() {
         String tokenValue = getAdminLoginTokenValue();
-        addReservationTime("10:00");
-        addTheme();
+        int timeId = addReservationTime("10:00");
+        int themeId = addTheme();
         addReservation(tokenValue);
 
+        String memberLoginTokenValue = getMemberLoginTokenValue();
         RestAssured.given()
-                .cookie("token", tokenValue)
+                .cookie("token", memberLoginTokenValue)
                 .contentType(ContentType.JSON)
                 .body(Map.of(
                         "date", LocalDate.now().plusDays(1L),
-                        "timeId", 1,
-                        "themeId", 1
+                        "timeId", timeId,
+                        "themeId", themeId
                 )).when().post("/waitings")
                 .then();
 
@@ -81,7 +82,7 @@ class AdminWaitingControllerTest {
     void denyWaiting() {
         int timeId = addReservationTime("10:00");
         int themeId = addTheme();
-        String tokenValue = getAdminLoginTokenValue();
+        String adminLoginTokenValue = getAdminLoginTokenValue();
         Map<String, Object> params = Map.of(
                 "date", getTomorrow(),
                 "timeId", timeId,
@@ -89,21 +90,22 @@ class AdminWaitingControllerTest {
         );
 
         RestAssured.given()
-                .cookie("token", tokenValue)
+                .cookie("token", adminLoginTokenValue)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
                 .then();
 
+        String memberLoginTokenValue = getMemberLoginTokenValue();
         int waitingId = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .cookie("token", tokenValue)
+                .cookie("token", memberLoginTokenValue)
                 .body(params)
                 .when().post("/waitings")
                 .then().extract().path("id");
 
         RestAssured.given().log().all()
-                .cookie("token", tokenValue)
+                .cookie("token", adminLoginTokenValue)
                 .when().delete("/admin/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);
@@ -111,6 +113,16 @@ class AdminWaitingControllerTest {
 
     private String getAdminLoginTokenValue() {
         Map<String, String> adminLoginParams = Map.of("email", "admin@woowa.com", "password", "12341234");
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(adminLoginParams)
+                .when().post("/login")
+                .then()
+                .extract().cookie("token");
+    }
+
+    private String getMemberLoginTokenValue() {
+        Map<String, String> adminLoginParams = Map.of("email", "user@woowa.com", "password", "12341234");
         return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(adminLoginParams)

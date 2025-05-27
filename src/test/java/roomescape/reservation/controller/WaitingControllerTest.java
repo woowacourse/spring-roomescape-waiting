@@ -37,8 +37,9 @@ class WaitingControllerTest {
                 .when().post("/reservations")
                 .then();
 
+        String userLoginTokenValue = getUserLoginTokenValue();
         RestAssured.given().log().all()
-                .cookie("token", tokenValue)
+                .cookie("token", userLoginTokenValue)
                 .contentType(ContentType.JSON)
                 .body(waitingParams)
                 .when().post("/waitings")
@@ -67,14 +68,16 @@ class WaitingControllerTest {
                 .when().post("/reservations")
                 .then();
 
+        String userLoginTokenValue = getUserLoginTokenValue();
         int waitingId = RestAssured.given()
-                .cookie("token", tokenValue)
+                .cookie("token", userLoginTokenValue)
                 .contentType(ContentType.JSON)
                 .body(reservationParams)
                 .when().post("/waitings")
                 .then().extract().path("id");
 
         RestAssured.given().log().all()
+                .cookie("token", userLoginTokenValue)
                 .when().delete("/waitings/" + waitingId)
                 .then().log().all()
                 .statusCode(204);
@@ -91,6 +94,16 @@ class WaitingControllerTest {
 
     private String getAdminLoginTokenValue() {
         Map<String, String> adminLoginParams = Map.of("email", "admin@woowa.com", "password", "12341234");
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(adminLoginParams)
+                .when().post("/login")
+                .then()
+                .extract().cookie("token");
+    }
+
+    private String getUserLoginTokenValue() {
+        Map<String, String> adminLoginParams = Map.of("email", "user@woowa.com", "password", "12341234");
         return RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(adminLoginParams)

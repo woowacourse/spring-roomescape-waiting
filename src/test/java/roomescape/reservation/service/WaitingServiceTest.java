@@ -57,11 +57,12 @@ class WaitingServiceTest {
         LocalDate date = getTomorrow();
         Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
-        reservationRepository.save(new Reservation(member, date, time, theme));
+        Member reservationMember = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        Member waitingMember = memberRepository.save(new Member("포스티", "posty@posty.com", "12341234", Role.ADMIN));
+        reservationRepository.save(new Reservation(reservationMember, date, time, theme));
 
         WaitingCreateRequest request =
-                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(waitingMember));
 
         // when
         WaitingResponse response = waitingService.createWaiting(request);
@@ -69,7 +70,7 @@ class WaitingServiceTest {
         // then
         assertAll(
                 () -> assertThat(response.id()).isNotNull(),
-                () -> assertThat(response.member().name()).isEqualTo("로키"),
+                () -> assertThat(response.member().name()).isEqualTo("포스티"),
                 () -> assertThat(response.date()).isEqualTo(date),
                 () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(10, 0)),
                 () -> assertThat(response.theme().name()).isEqualTo("테마1")
@@ -83,11 +84,12 @@ class WaitingServiceTest {
         LocalDate date = getTomorrow();
         Theme theme = themeRepository.save(new Theme("테마1", "테마1", "www.x.com"));
         ReservationTime time = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        Member member = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
-        reservationRepository.save(new Reservation(member, date, time, theme));
+        Member reservationMember = memberRepository.save(new Member("로키", "roky@posty.com", "12341234", Role.ADMIN));
+        Member waitingMember = memberRepository.save(new Member("포스티", "posty@posty.com", "12341234", Role.ADMIN));
+        reservationRepository.save(new Reservation(reservationMember, date, time, theme));
 
         WaitingCreateRequest request =
-                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(member));
+                new WaitingCreateRequest(date, time.getId(), theme.getId(), LoginMember.of(waitingMember));
         waitingService.createWaiting(request);
 
         // when & then
