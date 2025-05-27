@@ -65,11 +65,15 @@ public class ReservationService {
     public void removeById(final long id) {
         var reservation = reservationRepository.getById(id);
         if (reservation.isReserved()) {
-            var queues = reservationRepository.findQueuesBySchedules(List.of(reservation.reservedSchedule()));
-            var nextReservation = queues.findNext(reservation);
-            nextReservation.ifPresent(Reservation::confirm);
+            confirmNextReservationInQueue(reservation);
         }
         reservationRepository.delete(reservation);
+    }
+
+    private void confirmNextReservationInQueue(final Reservation reservation) {
+        var queues = reservationRepository.findQueuesBySchedules(List.of(reservation.reservedSchedule()));
+        var nextReservation = queues.findNext(reservation);
+        nextReservation.ifPresent(Reservation::confirm);
     }
 
     @Transactional
