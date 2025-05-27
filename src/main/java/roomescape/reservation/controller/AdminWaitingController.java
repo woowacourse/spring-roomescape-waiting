@@ -32,9 +32,9 @@ public class AdminWaitingController {
     }
 
     @RequiredAdmin
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deny(@PathVariable final Long id) {
-        waitingService.deleteWaiting(id);
+    @DeleteMapping("/{waitingId}")
+    public ResponseEntity<Void> deny(@PathVariable("waitingId") final Long waitingId) {
+        waitingService.deleteWaiting(waitingId);
 
         return ResponseEntity.noContent()
                 .build();
