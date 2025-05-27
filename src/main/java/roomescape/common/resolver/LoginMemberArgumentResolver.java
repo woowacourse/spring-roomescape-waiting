@@ -8,22 +8,20 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.auth.dto.LoginMember;
 import roomescape.auth.jwt.JwtTokenProvider;
 import roomescape.common.exception.MissingTokenExcpetion;
-import roomescape.member.domain.Member;
-import roomescape.member.service.MemberService;
 
 @RequiredArgsConstructor
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private static final String TOKEN_COOKIE_NAME = "token";
 
-    private final MemberService memberService;
     private final JwtTokenProvider jwtTokenProvider;
 
     @Override
     public boolean supportsParameter(final MethodParameter parameter) {
-        return Member.class.equals(parameter.getParameterType());
+        return parameter.getParameterType().equals(LoginMember.class);
     }
 
     @Override
@@ -41,7 +39,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
         }
 
         final String email = jwtTokenProvider.getPayload(token);
-        return memberService.findMemberByEmail(email);
+        return new LoginMember(email);
     }
 
     private String extractTokenFromCookies(final Cookie[] cookies) {

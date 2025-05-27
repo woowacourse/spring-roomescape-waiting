@@ -4,8 +4,10 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -13,46 +15,48 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.admin.dto.AdminReservationResponse;
 import roomescape.admin.dto.ReservationSearchRequest;
-import roomescape.admin.service.AdminService;
-import roomescape.reservation.domain.Reservation;
+import roomescape.admin.dto.ReservationWaitingResponse;
+import roomescape.admin.service.facade.AdminServiceFacade;
 
 @RequestMapping("/admin")
 @RequiredArgsConstructor
 @RestController
 public class AdminRestController {
 
-    private final AdminService adminService;
+    private final AdminServiceFacade adminService;
 
     @PostMapping("/reservations")
     public ResponseEntity<AdminReservationResponse> createReservation(
             @RequestBody final AdminReservationRequest adminReservationRequest
     ) {
-        final Long id = adminService.saveByAdmin(
-                adminReservationRequest.date(),
-                adminReservationRequest.themeId(),
-                adminReservationRequest.timeId(),
-                adminReservationRequest.memberId()
-        );
-        final Reservation found = adminService.getById(id);
+        final AdminReservationResponse adminReservationResponse = adminService.saveByAdmin(adminReservationRequest);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(AdminReservationResponse.from(found));
+        return ResponseEntity.status(HttpStatus.CREATED).body(adminReservationResponse);
     }
 
     @GetMapping("/searchable-reservations")
     public ResponseEntity<List<AdminReservationResponse>> getReservationsBySearch(
             @ModelAttribute ReservationSearchRequest searchRequest
     ) {
-        final List<Reservation> searchedReservations = adminService.findByInFromTo(
-                searchRequest.themeId(),
-                searchRequest.memberId(),
-                searchRequest.dateFrom(),
-                searchRequest.dateTo()
-        );
-
-        final List<AdminReservationResponse> searchedResponses = searchedReservations.stream()
-                .map(AdminReservationResponse::from)
-                .toList();
+        final List<AdminReservationResponse> searchedResponses = adminService.findByInFromTo(searchRequest);
 
         return ResponseEntity.ok(searchedResponses);
+    }
+
+    @GetMapping("/waitings")
+    public ResponseEntity<List<ReservationWaitingResponse>> waitingManagement(
+    ) {
+        final List<ReservationWaitingResponse> waitingResponses = adminService.findAllWaitingReservations();
+
+        return ResponseEntity.ok(waitingResponses);
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaiting(
+            @PathVariable final Long id
+    ) {
+        adminService.deleteWaitingById(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

@@ -5,19 +5,13 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.auth.jwt.JwtTokenProvider;
-import roomescape.common.exception.AccessDeniedException;
-import roomescape.common.exception.InvalidTokenException;
+import roomescape.auth.service.AuthService;
 import roomescape.common.exception.MissingTokenExcpetion;
-import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
-import roomescape.member.service.MemberService;
 
 @RequiredArgsConstructor
 public class AdminRoleInterceptor implements HandlerInterceptor {
 
-    private final MemberService memberService;
-    private final JwtTokenProvider jwtTokenProvider;
+    private final AuthService authService;
 
     @Override
     public boolean preHandle(
@@ -26,20 +20,7 @@ public class AdminRoleInterceptor implements HandlerInterceptor {
             final Object handler) throws Exception {
 
         final String token = extractTokenFromCookies(request.getCookies());
-        if (token == null) {
-            throw new MissingTokenExcpetion("Token is missing");
-        }
-
-        final String email = jwtTokenProvider.getPayload(token);
-        if (email == null) {
-            throw new InvalidTokenException("Invalid token");
-        }
-
-        final Member member = memberService.findMemberByEmail(email);
-        if (member == null || member.getRole() != Role.ADMIN) {
-            throw new AccessDeniedException("Access denied");
-        }
-
+        authService.validateAdminByToken(token);
         return true;
     }
 

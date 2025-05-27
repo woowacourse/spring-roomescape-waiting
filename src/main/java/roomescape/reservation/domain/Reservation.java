@@ -23,11 +23,11 @@ public class Reservation {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
-
-    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private ReservationTime time;
@@ -37,6 +37,7 @@ public class Reservation {
 
     public Reservation(final Long id, final Member member, final Theme theme, final LocalDate date,
                        final ReservationTime time) {
+        validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -48,6 +49,7 @@ public class Reservation {
     }
 
     public Reservation(final Member member, final LocalDate date, final ReservationTime time, final Theme theme) {
+        validateMember(member);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
@@ -55,6 +57,12 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
+    }
+
+    private void validateMember(final Member member) {
+        if (member == null) {
+            throw new ReservationException("Member cannot be null");
+        }
     }
 
     private void validateDate(final LocalDate date) {

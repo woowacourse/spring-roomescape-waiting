@@ -12,49 +12,46 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.member.domain.Member;
-import roomescape.reservation.domain.Reservation;
+import roomescape.auth.dto.LoginMember;
 import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationResponse;
+import roomescape.reservation.dto.CreateWaitingRequest;
+import roomescape.reservation.dto.CreateWaitingResponse;
 import roomescape.reservation.dto.ReservationMineResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.facade.ReservationServiceFacade;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/reservations")
 public class ReservationRestController {
 
-    private final ReservationService reservationService;
+    private final ReservationServiceFacade reservationServiceFacade;
 
     @PostMapping
     public ResponseEntity<CreateReservationResponse> createReservation(
             @RequestBody final CreateReservationRequest createReservationRequest,
-            final Member member
+            final LoginMember loginMember
     ) {
-        final Reservation savedReservation = reservationService.save(
-                member,
-                createReservationRequest.date(),
-                createReservationRequest.timeId(),
-                createReservationRequest.themeId()
+        final CreateReservationResponse createReservationResponse = reservationServiceFacade.saveReservation(
+                createReservationRequest,
+                loginMember
         );
-        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(savedReservation));
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(createReservationResponse);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
-        reservationService.deleteById(id);
+        reservationServiceFacade.deleteById(id);
 
         return ResponseEntity.noContent().build();
     }
 
     @GetMapping
     public ResponseEntity<List<CreateReservationResponse>> getReservations() {
-        final List<Reservation> reservations = reservationService.findAll();
-        final List<CreateReservationResponse> createReservationResponse = reservations.stream()
-                .map(CreateReservationResponse::from)
-                .toList();
+        final List<CreateReservationResponse> createReservationResponse = reservationServiceFacade.findAll();
 
         return ResponseEntity.ok(createReservationResponse);
     }
@@ -63,24 +60,37 @@ public class ReservationRestController {
     public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableReservationTimes(
             @ModelAttribute final AvailableReservationTimeRequest request) {
 
-        return ResponseEntity.ok(
-                reservationService.findAvailableReservationTimes(request.date(), request.themeId()).stream()
-                        .map(availableReservationTime -> new AvailableReservationTimeResponse(
-                                availableReservationTime.id(),
-                                availableReservationTime.startAt(),
-                                availableReservationTime.alreadyBooked()
-                        ))
-                        .toList()
-        );
+        final List<AvailableReservationTimeResponse> availableTimes = reservationServiceFacade.findAvailableTimes(
+                request);
+
+        return ResponseEntity.ok(availableTimes);
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
-        final List<Reservation> reservations = reservationService.findByMember(member);
-        final List<ReservationMineResponse> reservationMineResponses = reservations.stream()
-                .map(ReservationMineResponse::from)
-                .toList();
+    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final LoginMember member) {
 
-        return ResponseEntity.ok(reservationMineResponses);
+        final List<ReservationMineResponse> reservations = reservationServiceFacade.findMyReservations(member);
+
+        return ResponseEntity.ok(reservations);
+    }
+
+    @PostMapping("/waitings")
+    public ResponseEntity<CreateWaitingResponse> createWaitingReservation(
+            @RequestBody final CreateWaitingRequest createWaitingRequest,
+            final LoginMember loginMember
+    ) {
+
+        final CreateWaitingResponse waitingResponse = reservationServiceFacade.saveWaiting(createWaitingRequest,
+                loginMember);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(waitingResponse);
+    }
+
+    @DeleteMapping("/waitings/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable final Long id) {
+
+        reservationServiceFacade.deleteWaiting(id);
+
+        return ResponseEntity.noContent().build();
     }
 }

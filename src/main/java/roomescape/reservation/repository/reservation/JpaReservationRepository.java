@@ -1,4 +1,4 @@
-package roomescape.reservation.repository;
+package roomescape.reservation.repository.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -10,7 +10,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-public interface ReservationRepository extends CrudRepository<Reservation, Long> {
+public interface JpaReservationRepository extends CrudRepository<Reservation, Long> {
 
     @Query("""
                 SELECT r

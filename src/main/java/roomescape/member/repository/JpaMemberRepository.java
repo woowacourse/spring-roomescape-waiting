@@ -2,48 +2,21 @@ package roomescape.member.repository;
 
 import java.util.List;
 import java.util.Optional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
 import roomescape.member.domain.Member;
 
-@RequiredArgsConstructor
-@Repository
-public class JpaMemberRepository implements MemberRepositoryInterface {
+public interface JpaMemberRepository extends CrudRepository<Member, Long> {
 
-    private final MemberRepository memberRepository;
+    @Query("SELECT m.name FROM Member m WHERE m.email = :email")
+    Optional<String> findNameByEmail(@Param("email") final String email);
 
-    @Override
-    public Optional<Member> findByEmail(final String email) {
-        return memberRepository.findByEmail(email);
-    }
+    boolean existsByEmailAndPassword(final String email, final String password);
 
-    @Override
-    public Optional<Member> findById(final Long id) {
-        return memberRepository.findById(id);
-    }
+    Optional<Member> findByEmail(final String email);
 
-    @Override
-    public List<Member> findAll() {
-        return memberRepository.findAll();
-    }
+    Optional<Member> findById(final Long memberId);
 
-    @Override
-    public Member save(final Member member) {
-        return memberRepository.save(member);
-    }
-
-    @Override
-    public void deleteById(final Long id) {
-        memberRepository.deleteById(id);
-    }
-
-    @Override
-    public boolean existsByEmailAndPassword(final String email, final String password) {
-        return memberRepository.existsByEmailAndPassword(email, password);
-    }
-
-    @Override
-    public Optional<String> findNameByEmail(final String email) {
-        return memberRepository.findNameByEmail(email);
-    }
+    List<Member> findAll();
 }

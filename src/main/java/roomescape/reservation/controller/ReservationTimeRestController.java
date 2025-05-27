@@ -11,41 +11,40 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.ReservationTimeRequest;
 import roomescape.reservation.dto.ReservationTimeResponse;
-import roomescape.reservation.service.ReservationTimeService;
+import roomescape.reservation.service.facade.ReservationTimeServiceFacade;
 
 @RequiredArgsConstructor
 @RestController
 @RequestMapping("/times")
 public class ReservationTimeRestController {
 
-    private final ReservationTimeService reservationTimeService;
+    private final ReservationTimeServiceFacade timeService;
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> createReservationTime(
             @RequestBody final ReservationTimeRequest request
     ) {
-        final ReservationTime savedReservationTime = reservationTimeService.save(request.startAt());
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(ReservationTimeResponse.from(savedReservationTime));
+        final ReservationTimeResponse reservationTimeResponse = timeService.save(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationTimeResponse);
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
-        return ResponseEntity.ok(
-                reservationTimeService.findAll().stream()
-                        .map(ReservationTimeResponse::from)
-                        .toList()
-        );
+
+        final List<ReservationTimeResponse> reservationTimeResponses = timeService.findAll();
+
+        return ResponseEntity.ok(reservationTimeResponses);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservationTime(
             @PathVariable final Long id
     ) {
-        reservationTimeService.deleteById(id);
+        timeService.deleteById(id);
 
         return ResponseEntity.noContent().build();
     }

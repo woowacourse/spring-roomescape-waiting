@@ -52,4 +52,18 @@ class ReservationTest {
             new Reservation(member, date, reservationTime, theme);
         }).isInstanceOf(ReservationException.class);
     }
+
+    @Test
+    void 멤버가_null이면_예외가_발생한다() {
+        // given
+        final Member member = null;
+        final LocalDate date = LocalDate.of(2025, 4, 24);
+        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
+        final Theme theme = new Theme("헤일러", "헤일러 설명", "헤일러 썸네일");
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> {
+            new Reservation(member, date, reservationTime, theme);
+        }).isInstanceOf(ReservationException.class);
+    }
 }

@@ -72,4 +72,81 @@ class AdminRestControllerTest {
                 .statusCode(HttpStatus.OK.value())
                 .body("size()", greaterThanOrEqualTo(0));
     }
+
+    @Test
+    void 어드민이_대기_정보를_조회한다() {
+        // given
+        final String adminToken = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "yebink@email.com", "password", "1234"))
+                .when().post("/login").getCookie("token");
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", adminToken)
+                .when().get("/admin/waitings")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", greaterThanOrEqualTo(0));
+    }
+
+    @Test
+    void 어드민이_대기_거절한다() {
+        // given
+        final String adminToken = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "yebink@email.com", "password", "1234"))
+                .when().post("/login").getCookie("token");
+
+        final Map<String, String> reservationParams = createReservationRequestJsonMap("2026-04-15", "1", "1");
+        final Map<String, String> waitingParams = createWaitingRequestJsonMap("2026-04-15", "1", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", adminToken)
+                .body(reservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", adminToken)
+                .body(waitingParams)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie("token", adminToken)
+                .when().delete("/admin/waitings/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    private Map<String, String> createWaitingRequestJsonMap(
+            final String date,
+            final String theme,
+            final String time) {
+        return Map.of(
+                "date", date,
+                "theme", theme,
+                "time", time
+        );
+    }
+
+
+    private Map<String, String> createReservationRequestJsonMap(
+            final String date,
+            final String themeId,
+            final String timeId) {
+        return Map.of(
+                "date", date,
+                "themeId", themeId,
+                "timeId", timeId
+        );
+    }
 }

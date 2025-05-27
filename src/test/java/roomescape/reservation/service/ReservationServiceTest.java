@@ -6,20 +6,23 @@ import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.DataExistException;
-import roomescape.common.exception.DataNotFoundException;
 import roomescape.common.exception.PastDateException;
 import roomescape.fake.FakeMemberRepository;
 import roomescape.fake.FakeReservationRepository;
 import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.fake.FakeThemeRepository;
+import roomescape.fake.FakeWaitingRepository;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.member.repository.MemberRepositoryInterface;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.dto.AvailableReservationTime;
-import roomescape.reservation.repository.ReservationRepositoryInterface;
-import roomescape.reservation.repository.ReservationTimeRepositoryInterface;
+import roomescape.reservation.repository.reservation.ReservationRepositoryInterface;
+import roomescape.reservation.repository.time.ReservationTimeRepositoryInterface;
+import roomescape.reservation.repository.waiting.WaitingRepositoryInterface;
+import roomescape.reservation.service.reservation.ReservationService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
@@ -31,10 +34,12 @@ class ReservationServiceTest {
     private final ReservationTimeRepositoryInterface reservationTimeRepository = new FakeReservationTimeRepository();
     private final ThemeRepositoryInterface themeRepository = new FakeThemeRepository();
     private final MemberRepositoryInterface memberRepository = new FakeMemberRepository();
+    private final WaitingRepositoryInterface waitingRepository = new FakeWaitingRepository();
     private final ReservationService reservationService = new ReservationService(
             reservationRepository,
             reservationTimeRepository,
-            themeRepository
+            themeRepository,
+            waitingRepository
     );
 
     @Test
@@ -116,7 +121,7 @@ class ReservationServiceTest {
         final String thumbnail = "귀신사진";
         final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
 
-        Reservation savedReservation = reservationRepository.save(new Reservation(
+        final Reservation savedReservation = reservationRepository.save(new Reservation(
                 savedMember,
                 date,
                 savedTime,
@@ -126,6 +131,44 @@ class ReservationServiceTest {
         // when & then
         Assertions.assertThatCode(() -> reservationService.deleteById(savedReservation.getId()))
                 .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 예약_정보를_삭제하면_첫번째_대기가_예약이_된다() {
+        // given
+        final Member member = new Member("이스트", "east@email.com", "1234", Role.ADMIN);
+        final Member member2 = new Member("우가", "wooga@gmail.com", "1234", Role.USER);
+        final Member savedMember = memberRepository.save(member);
+        final Member savedMember2 = memberRepository.save(member2);
+        final LocalTime time = LocalTime.parse("20:00");
+        final LocalDate date = LocalDate.parse("2025-11-28");
+        final ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(time));
+
+        final String themeName = "공포";
+        final String description = "무섭다";
+        final String thumbnail = "귀신사진";
+        final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
+
+        final Reservation savedReservation = reservationRepository.save(new Reservation(
+                savedMember,
+                date,
+                savedTime,
+                savedTheme
+        ));
+
+        waitingRepository.save(new Waiting(
+                savedMember2,
+                savedTime,
+                savedTheme,
+                date
+        ));
+
+        // when
+        reservationService.deleteById(savedReservation.getId());
+
+        // then
+        Assertions.assertThat(reservationRepository.findByMember(savedMember2).getFirst().getMember())
+                .isEqualTo(savedMember2);
     }
 
     @Test
@@ -177,15 +220,6 @@ class ReservationServiceTest {
         final String thumbnail = "귀신사진";
         final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
 
-        reservationRepository.save(
-                new Reservation(
-                        member,
-                        date,
-                        savedTime,
-                        savedTheme
-                )
-        );
-
         // when & then
         Assertions.assertThatThrownBy(
                         () -> reservationService.save(member, date, savedTime.getId(), savedTheme.getId()))
@@ -193,7 +227,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약_정보를_저장할_때_이미_예약된_시간이면_예외가_발생한다() {
+    void 예약_정보를_저장할_때_이미_예약이_있으면_예외가_발생한다() {
         // given
         final Member member = new Member("이스트", "east@email.com", "1234", Role.ADMIN);
         memberRepository.save(member);
@@ -221,25 +255,6 @@ class ReservationServiceTest {
                 .isInstanceOf(DataExistException.class);
     }
 
-
-    @Test
-    void 예약_정보를_저장할_때_예약시간이_존재하지않으면_예외가_발생한다() {
-        // given
-        final Member member = new Member("이스트", "east@email.com", "1234", Role.ADMIN);
-        final Member savedMember = memberRepository.save(member);
-        final LocalDate date = LocalDate.parse("2025-11-28");
-        final Long timeId = Long.MAX_VALUE;
-
-        final String themeName = "공포";
-        final String description = "무섭다";
-        final String thumbnail = "귀신사진";
-        final Theme savedTheme = themeRepository.save(new Theme(themeName, description, thumbnail));
-
-        // when & then
-        Assertions.assertThatThrownBy(() -> reservationService.save(savedMember, date, timeId, savedTheme.getId()))
-                .isInstanceOf(DataNotFoundException.class);
-    }
-
     @Test
     void 한_테마의_날짜와_시간이_중복_될_수_없다() {
         // given
@@ -256,7 +271,7 @@ class ReservationServiceTest {
 
         reservationRepository.save(
                 new Reservation(
-                        member,
+                        savedMember,
                         date,
                         savedTime,
                         savedTheme

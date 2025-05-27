@@ -3,7 +3,6 @@ package roomescape.fake;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepositoryInterface;
 
@@ -20,8 +19,8 @@ public class FakeThemeRepository implements ThemeRepositoryInterface {
     }
 
     @Override
-    public Optional<Theme> findById(final Long id) {
-        return Optional.ofNullable(themes.get(id));
+    public Theme findById(final Long id) {
+        return themes.get(id);
     }
 
     @Override

@@ -11,10 +11,10 @@ import roomescape.member.domain.Role;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class MemberRepositoryTest {
+class JpaMemberRepositoryTest {
 
     @Autowired
-    private MemberRepository memberRepository;
+    private JpaMemberRepository jpaMemberRepository;
 
     @Test
     void 멤버_등록() {
@@ -22,26 +22,26 @@ class MemberRepositoryTest {
         final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
 
         // when
-        memberRepository.save(member);
+        jpaMemberRepository.save(member);
 
         // then
-        assertThat(memberRepository.findAll()).hasSize(1);
+        assertThat(jpaMemberRepository.findAll()).hasSize(1);
     }
 
     @Test
     void 멤버_전부_찾기() {
         // when & then
-        assertThat(memberRepository.findAll()).hasSize(0);
+        assertThat(jpaMemberRepository.findAll()).hasSize(0);
     }
 
     @Test
     void 아이디_기준으로_멤버_찾기() {
         // given
         final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
-        final Member savedMember = memberRepository.save(member);
+        final Member savedMember = jpaMemberRepository.save(member);
 
         // when
-        final Member foundMember = memberRepository.findById(savedMember.getId()).orElse(null);
+        final Member foundMember = jpaMemberRepository.findById(savedMember.getId()).orElse(null);
 
         // then
         assertThat(savedMember.getId()).isEqualTo(foundMember.getId());
@@ -51,10 +51,10 @@ class MemberRepositoryTest {
     void 이메일_기준으로_멤버_찾기() {
         // given
         final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
-        final Member savedMember = memberRepository.save(member);
+        final Member savedMember = jpaMemberRepository.save(member);
 
         //when
-        final Member foundMember = memberRepository.findByEmail(savedMember.getEmail()).orElse(null);
+        final Member foundMember = jpaMemberRepository.findByEmail(savedMember.getEmail()).orElse(null);
 
         // then
         assertThat(savedMember.getId()).isEqualTo(foundMember.getId());
@@ -64,10 +64,10 @@ class MemberRepositoryTest {
     void 이메일_기준으로_멤버_이름_찾기() {
         // given
         final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
-        final Member savedMember = memberRepository.save(member);
+        final Member savedMember = jpaMemberRepository.save(member);
 
         // when
-        final String foundName = memberRepository.findNameByEmail(savedMember.getEmail()).orElse(null);
+        final String foundName = jpaMemberRepository.findNameByEmail(savedMember.getEmail()).orElse(null);
 
         // then
         assertThat(savedMember.getName()).isEqualTo(foundName);
@@ -77,10 +77,10 @@ class MemberRepositoryTest {
     void 이메일_비밀번호_존재하는지_확인() {
         // given
         final Member member = new Member("testUser", "east@email.com", "password", Role.USER);
-        final Member savedMember = memberRepository.save(member);
+        final Member savedMember = jpaMemberRepository.save(member);
 
         // when
-        final boolean exists = memberRepository.existsByEmailAndPassword(savedMember.getEmail(),
+        final boolean exists = jpaMemberRepository.existsByEmailAndPassword(savedMember.getEmail(),
                 savedMember.getPassword());
 
         // then
@@ -95,7 +95,7 @@ class MemberRepositoryTest {
     })
     void 이메일_비밀번호_존재_확인_실패(final String email, final String password) {
         // when
-        final boolean exists = memberRepository.existsByEmailAndPassword(email, password);
+        final boolean exists = jpaMemberRepository.existsByEmailAndPassword(email, password);
 
         // then
         assertThat(exists).isFalse();

@@ -7,19 +7,20 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.repository.time.JpaReservationTimeRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
-class ReservationTimeRepositoryTest {
+class JpaReservationTimeRepositoryTest {
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private JpaReservationTimeRepository jpaReservationTimeRepository;
 
     @Test
     void 등록된_시간_전부_찾기() {
         // when & then
-        assertThat(reservationTimeRepository.findAll()).hasSize(0);
+        assertThat(jpaReservationTimeRepository.findAll()).hasSize(0);
     }
 
     @Test
@@ -28,10 +29,10 @@ class ReservationTimeRepositoryTest {
         final ReservationTime reservationTime = new ReservationTime(LocalTime.of(20, 0));
 
         // when
-        reservationTimeRepository.save(reservationTime);
+        jpaReservationTimeRepository.save(reservationTime);
 
         // then
-        assertThat(reservationTimeRepository.findAll()).hasSize(1);
+        assertThat(jpaReservationTimeRepository.findAll()).hasSize(1);
     }
 
     @Test
@@ -39,10 +40,10 @@ class ReservationTimeRepositoryTest {
         // given
         final LocalTime startAt = LocalTime.of(20, 0);
         final ReservationTime reservationTime = new ReservationTime(startAt);
-        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        final ReservationTime savedReservationTime = jpaReservationTimeRepository.save(reservationTime);
 
         // when
-        final ReservationTime foundReservationTime = reservationTimeRepository.findById(savedReservationTime.getId())
+        final ReservationTime foundReservationTime = jpaReservationTimeRepository.findById(savedReservationTime.getId())
                 .orElseThrow(IllegalArgumentException::new);
 
         // then
@@ -54,14 +55,14 @@ class ReservationTimeRepositoryTest {
         // given
         final LocalTime startAt = LocalTime.of(20, 0);
         final ReservationTime reservationTime = new ReservationTime(startAt);
-        final ReservationTime savedReservationTime = reservationTimeRepository.save(reservationTime);
+        final ReservationTime savedReservationTime = jpaReservationTimeRepository.save(reservationTime);
         final Long id = savedReservationTime.getId();
 
         // when
-        reservationTimeRepository.deleteById(id);
+        jpaReservationTimeRepository.deleteById(id);
 
         // then
-        assertThat(reservationTimeRepository.findById(id)).isEmpty();
+        assertThat(jpaReservationTimeRepository.findById(id)).isEmpty();
     }
 
     @ParameterizedTest
@@ -73,10 +74,10 @@ class ReservationTimeRepositoryTest {
     void 시간_존재하는지_확인(final int hour, final int minute, final boolean expected) {
         // given
         final LocalTime startAt = LocalTime.of(20, 0);
-        reservationTimeRepository.save(new ReservationTime(startAt));
+        jpaReservationTimeRepository.save(new ReservationTime(startAt));
 
         // when
-        final boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(hour, minute));
+        final boolean exists = jpaReservationTimeRepository.existsByStartAt(LocalTime.of(hour, minute));
 
         // then
         assertThat(exists).isEqualTo(expected);

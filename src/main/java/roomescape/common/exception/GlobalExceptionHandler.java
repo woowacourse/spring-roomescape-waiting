@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler({ReservationException.class, ThemeException.class, MemberException.class,
-            PastDateException.class})
+            PastDateException.class, WaitingException.class})
     public ResponseEntity<String> handleDomainExceptions(final Exception e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
     }
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
     }
 
-    @ExceptionHandler(SaveException.class)
+    @ExceptionHandler({SaveException.class, WaitingNotAllowedException.class, ReservationNotAllowedException.class})
     public ResponseEntity<String> handleSaveException(final SaveException e) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(e.getMessage());
     }

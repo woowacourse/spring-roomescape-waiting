@@ -14,6 +14,8 @@
 
 `/admin/reservation` 요청 시 예약 관리 화면을 응답한다.
 
+- 예약을 취소하면 대기 중인 예약이 자동으로 예약된다.
+
 ### ▶️ 예약 목록 검색
 
 `/admin/searchable-reservations` 요청 시 필터에 해당하는 예약 목록을 응답한다.
@@ -25,6 +27,12 @@
 ## 📌 테마 관리 화면
 
 `/admin/theme` 요청 시 테마 관리 화면을 응답한다.
+
+## 📌 예약 대기 관리 화면
+
+`/admin/waitings` 요청 시 대기 관리 화면을 응답한다.
+
+- 예약 대기를 거절 할 수 있다.
 
 ### ▶️ 예약 조회
 
@@ -79,7 +87,7 @@
 
 ## ADMIN 계정
 
-- email : east@email.com
+- email : yebink@email.com
 - password : 1234
 
 ## USER 계정
@@ -111,6 +119,21 @@
 ## 📌 사용자 예약 화면
 
 `/reservation` 요청 시 사용자 예약 화면을 응답한다.
+
+## 📌 이용 가능한 시간 화면
+
+`/reservations/available-times` 요청 시 이용 가능한 시간 화면을 응답한다.
+
+## 📌 대기 등록
+
+`/reservations/waitings` 요청 시 예약 대기 등록을 요청한다.
+
+## 📌 나의 예약 화면
+
+`/reservations/mine` 요청 시 사용자 예약 정보 화면을 응답한다.
+
+- 예약된 정보와 대기 정보를 응답한다.
+- 대기 취소를 할 수 있다.
 
 - 예외 검증
     - 이전 날짜에 해당하는 예약은 할 수 없다.

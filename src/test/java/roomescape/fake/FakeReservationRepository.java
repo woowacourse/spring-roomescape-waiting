@@ -4,12 +4,11 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.data.domain.PageRequest;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
-import roomescape.reservation.repository.ReservationRepositoryInterface;
+import roomescape.reservation.repository.reservation.ReservationRepositoryInterface;
 import roomescape.theme.domain.Theme;
 
 public class FakeReservationRepository implements ReservationRepositoryInterface {
@@ -54,8 +53,8 @@ public class FakeReservationRepository implements ReservationRepositoryInterface
     }
 
     @Override
-    public Optional<Reservation> findById(final Long id) {
-        return Optional.ofNullable(reservations.get(id));
+    public Reservation findById(final Long id) {
+        return reservations.get(id);
     }
 
     @Override
@@ -80,6 +79,22 @@ public class FakeReservationRepository implements ReservationRepositoryInterface
     public List<Reservation> findByMember(final Member member) {
         return reservations.values().stream()
                 .filter(reservation -> reservation.getMember().equals(member))
+                .toList();
+    }
+
+    @Override
+    public List<Reservation> findByThemeAndMemberAndDateBetween(
+            final Theme theme,
+            final Member member,
+            final LocalDate dateFrom,
+            final LocalDate dateTo) {
+        return reservations.values().stream()
+                .filter(reservation ->
+                        reservation.getTheme().equals(theme) &&
+                                reservation.getMember().equals(member) &&
+                                !reservation.getDate().isBefore(dateFrom) &&
+                                !reservation.getDate().isAfter(dateTo)
+                )
                 .toList();
     }
 }
