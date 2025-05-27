@@ -8,6 +8,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
 import roomescape.member.domain.Member;
@@ -67,6 +68,22 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public String getThemeName() {
+        return theme.getName();
+    }
+
+    public String getMemberName() {
+        return member.getName();
+    }
+
+    public TimeSlot getTimeSlot() {
+        return reservationTime.getTimeSlot();
+    }
+
+    public LocalDate getDate() {
+        return reservationTime.getDate();
     }
 
     @Override

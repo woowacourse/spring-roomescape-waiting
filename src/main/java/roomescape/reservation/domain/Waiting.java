@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.ArgumentNullException;
@@ -73,6 +74,22 @@ public class Waiting {
 
     public ReservationTime getReservationTime() {
         return reservationTime;
+    }
+
+    public TimeSlot getTimeSlot() {
+        return reservationTime.getTimeSlot();
+    }
+
+    public LocalDate getDate() {
+        return reservationTime.getDate();
+    }
+
+    public String getMemberName() {
+        return member.getName();
+    }
+
+    public String getThemeName() {
+        return theme.getName();
     }
 
     public Theme getTheme() {

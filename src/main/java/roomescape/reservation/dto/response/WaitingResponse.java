@@ -13,10 +13,10 @@ public record WaitingResponse(
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
                 waiting.getId(),
-                waiting.getMember().getName(),
-                waiting.getReservationTime().getDate(),
-                TimeSlotResponse.from(waiting.getReservationTime().getTimeSlot()),
-                waiting.getTheme().getName()
+                waiting.getMemberName(),
+                waiting.getDate(),
+                TimeSlotResponse.from(waiting.getTimeSlot()),
+                waiting.getThemeName()
         );
     }
 }

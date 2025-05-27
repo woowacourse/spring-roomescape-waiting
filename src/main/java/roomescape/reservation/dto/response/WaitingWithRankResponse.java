@@ -14,10 +14,10 @@ public class WaitingWithRankResponse {
 
     public WaitingWithRankResponse(Waiting waiting, Long rank) {
         this.id = waiting.getId();
-        this.memberName = waiting.getMember().getName();
-        this.date = waiting.getReservationTime().getDate();
-        this.time = TimeSlotResponse.from(waiting.getReservationTime().getTimeSlot());
-        this.themeName = waiting.getTheme().getName();
+        this.memberName = waiting.getMemberName();
+        this.date = waiting.getDate();
+        this.time = TimeSlotResponse.from(waiting.getTimeSlot());
+        this.themeName = waiting.getThemeName();
         this.rank = rank;
     }
 
