@@ -28,5 +28,5 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
 
-    Optional<Waiting> findFirstByThemeIdAndDateAndReservationTimeId(Long themeId, LocalDate date, Long reservationTimeId);
+    Optional<Waiting> findFirstByThemeIdAndDateAndReservationTimeIdOrderById(Long themeId, LocalDate date, Long reservationTimeId);
 }

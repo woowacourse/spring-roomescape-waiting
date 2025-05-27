@@ -5,7 +5,6 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.BadRequestException;
@@ -24,7 +23,6 @@ import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.repository.ThemeRepository;
-import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.repository.WaitingRepository;
 
 @Service
@@ -79,17 +77,14 @@ public class ReservationService {
     public void deleteReservationAndGetFirstWaiting(final Long reservationId) {
         Reservation reservation = getReservation(reservationId);
         deleteById(reservation.getId());
-        Optional<Waiting> findWaiting = waitingRepository.findFirstByThemeIdAndDateAndReservationTimeId(
+        waitingRepository.findFirstByThemeIdAndDateAndReservationTimeIdOrderById(
             reservation.getTheme().getId(),
             reservation.getDate(),
             reservation.getTime().getId()
-        );
-        if (findWaiting.isEmpty()) {
-            return;
-        }
-        Waiting waiting = findWaiting.get();
-        waitingRepository.delete(waiting);
-        reservationRepository.save(waiting.convertToReservation());
+        ).ifPresent(waiting -> {
+            waitingRepository.delete(waiting);
+            reservationRepository.save(waiting.convertToReservation());
+        });
     }
 
     public List<AvailableReservationTimeResponse> findAvailableReservationTime(final Long themeId, final String date) {
