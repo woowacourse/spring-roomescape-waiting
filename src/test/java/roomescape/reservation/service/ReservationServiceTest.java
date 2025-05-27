@@ -70,28 +70,30 @@ class ReservationServiceTest {
     @DisplayName("예약 추가 시 동일 일자와 시간에 예약이 존재하는 경우 예외를 발생시킨다")
     @Test
     void exception_not_available() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         Member member = new Member(1L, "test", "test@test.com", "password", Role.USER);
         when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-        when(reservationRepository.existsByDateAndTimeId(LocalDate.now(), 1L)).thenReturn(true);
+        when(reservationRepository.existsByDateAndTimeId(futureDate, 1L)).thenReturn(true);
 
-        UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
+        UserReservationRequest userReservationRequest = new UserReservationRequest(futureDate, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(DuplicateException.class);
 
         verify(timeRepository, times(1)).findById(1L);
-        verify(reservationRepository, times(1)).existsByDateAndTimeId(LocalDate.now(), 1L);
+        verify(reservationRepository, times(1)).existsByDateAndTimeId(futureDate, 1L);
     }
 
     @DisplayName("예약 추가 시 존재하지 않는 시간 아이디를 조회하려고 할 때 예외를 발생시킨다")
     @Test
     void exception_invalid_time_id() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         Member member = new Member(1L, "test", "test@test.com", "password", Role.USER);
         when(timeRepository.findById(2L)).thenReturn(Optional.empty());
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
 
-        UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 2L, 1L);
+        UserReservationRequest userReservationRequest = new UserReservationRequest(futureDate, 2L, 1L);
         assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
@@ -101,13 +103,14 @@ class ReservationServiceTest {
     @DisplayName("예약 추가 시 존재하지 않는 테마 아이디를 조회하려고 할 때 예외를 발생시킨다")
     @Test
     void exception_invalid_theme_id() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         Member member = new Member(1L, "test", "test@test.com", "password", Role.USER);
         when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
         when(themeRepository.findById(2L)).thenReturn(Optional.empty());
 
-        UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 2L);
+        UserReservationRequest userReservationRequest = new UserReservationRequest(futureDate, 1L, 2L);
         assertThatThrownBy(() -> reservationService.addByUser(1L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
@@ -118,9 +121,10 @@ class ReservationServiceTest {
     @DisplayName("예약 추가 시 존재하지 않는 회원 아이디를 조회하려고 할 때 예외를 발생시킨다")
     @Test
     void exception_invalid_member_id() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         when(memberRepository.findById(2L)).thenReturn(Optional.empty());
 
-        UserReservationRequest userReservationRequest = new UserReservationRequest(LocalDate.now(), 1L, 1L);
+        UserReservationRequest userReservationRequest = new UserReservationRequest(futureDate, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addByUser(2L, userReservationRequest))
                 .isInstanceOf(InvalidIdException.class);
 
@@ -145,18 +149,19 @@ class ReservationServiceTest {
     @DisplayName("관리자가 예약 추가 시 동일 일자와 시간에 예약이 존재하는 경우 예외를 발생시킨다")
     @Test
     void exception_admin_not_available() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         Member member = new Member(1L, "test", "test@test.com", "password", Role.USER);
         when(timeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
         when(memberRepository.findById(1L)).thenReturn(Optional.of(member));
-        when(reservationRepository.existsByDateAndTimeId(LocalDate.now(), 1L)).thenReturn(true);
+        when(reservationRepository.existsByDateAndTimeId(futureDate, 1L)).thenReturn(true);
 
-        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(LocalDate.now(), 1L, 1L, 1L);
+        AdminReservationRequest adminReservationRequest = new AdminReservationRequest(futureDate, 1L, 1L, 1L);
         assertThatThrownBy(() -> reservationService.addByAdmin(adminReservationRequest))
                 .isInstanceOf(DuplicateException.class);
 
         verify(timeRepository, times(1)).findById(1L);
-        verify(reservationRepository, times(1)).existsByDateAndTimeId(LocalDate.now(), 1L);
+        verify(reservationRepository, times(1)).existsByDateAndTimeId(futureDate, 1L);
     }
 
     @DisplayName("관리자가 예약 대기 추가 시 대기 상태인 예약 아이디가 존재하지 않는 경우 예외를 발생시킨다")

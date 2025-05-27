@@ -17,19 +17,4 @@ class WaitingOrderTest {
 
         assertThat(value2).isEqualTo(value1 + 1);
     }
-
-    @DisplayName("대기 순서 값을 초기화 한다")
-    @Test
-    void reset_waiting_order() {
-        WaitingOrder waitingOrder = new WaitingOrder();
-
-        long value1 = waitingOrder.issueNextWaitingOrder();
-        waitingOrder.issueNextWaitingOrder();
-        waitingOrder.issueNextWaitingOrder();
-
-        waitingOrder.resetWaitingOrder();
-        long value2 = waitingOrder.issueNextWaitingOrder();
-
-        assertThat(value1).isEqualTo(value2);
-    }
 }

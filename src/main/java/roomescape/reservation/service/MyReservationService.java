@@ -13,24 +13,25 @@ public class MyReservationService {
     private static final long WAITING_ORDER_START_VALUE = 0;
 
     private final ReservationRepository reservationRepository;
-    private final WaitingOrder waitingOrder;
 
-    public MyReservationService(ReservationRepository reservationRepository, WaitingOrder waitingOrder) {
+    public MyReservationService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.waitingOrder = waitingOrder;
     }
 
     @Transactional
     public List<MyReservationResponse> findAllMyReservationByMember(final Long memberId) {
-        waitingOrder.resetWaitingOrder();
+        WaitingOrder waitingOrder = new WaitingOrder();
 
         return reservationRepository.findAllByMemberId(memberId)
                 .stream()
-                .map(this::generateMyReservation)
+                .map(reservation -> generateMyReservation(reservation, waitingOrder))
                 .toList();
     }
 
-    private MyReservationResponse generateMyReservation(final Reservation reservation) {
+    private MyReservationResponse generateMyReservation(
+            final Reservation reservation,
+            final WaitingOrder waitingOrder
+    ) {
         if (reservation.isWaiting()) {
             return MyReservationResponse.from(reservation, waitingOrder.issueNextWaitingOrder());
         }
