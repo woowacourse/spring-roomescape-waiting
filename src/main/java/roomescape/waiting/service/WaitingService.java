@@ -73,10 +73,13 @@ public class WaitingService {
             final long fromPriority,
             final int amount
     ) {
-        waitingRepository.pullPriority(theme, date, reservationTime, fromPriority, amount);
+        waitingRepository.findAllByThemeAndDateAndTime(theme, date, reservationTime)
+                .stream()
+                .filter(waiting -> waiting.hasAfterPriority(fromPriority))
+                .forEach(waiting -> waiting.pullPriority(amount));
     }
 
-    public Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time) {
+    public Optional<Waiting> popFirstWaiting(final Theme theme, final LocalDate date, final ReservationTime time) {
         return waitingRepository.popFirstWaiting(theme, date, time);
     }
 

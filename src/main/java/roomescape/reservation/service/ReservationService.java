@@ -27,7 +27,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+        private final MemberRepository memberRepository;
     private final CurrentDateTime currentDateTime;
 
     public ReservationService(final ReservationRepository reservationRepository,

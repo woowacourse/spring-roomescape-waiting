@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.waiting.domain.Waiting;
@@ -63,16 +62,12 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void pullPriority(Theme theme, LocalDate date, ReservationTime reservationTime, long fromPriority,
-                             int amount) {
-        waitings.stream()
-                .filter(waiting -> waiting.getDate().equals(date))
-                .filter(waiting -> waiting.getTime().getId() == reservationTime.getId())
+    public List<Waiting> findAllByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime time) {
+        return waitings.stream()
                 .filter(waiting -> waiting.getTheme().getId() == theme.getId())
-                .filter(waiting -> waiting.getPriority() >= fromPriority)
-                .forEach(waiting ->
-                        ReflectionTestUtils.setField(waiting, "priority", waiting.getPriority() - amount)
-                );
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId() == time.getId())
+                .toList();
     }
 
     @Override

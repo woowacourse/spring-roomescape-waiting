@@ -78,34 +78,6 @@ public class WaitingJpaRepositoryTest {
         assertThat(result).isTrue();
     }
 
-    @DisplayName("조건에 해당하는 대기들의 순번을 앞당길 수 있다")
-    @Test
-    void pullPriority() {
-        // given
-        LocalDate now = LocalDate.now();
-        ReservationTime reservationTime = new ReservationTime(LocalTime.now());
-        Theme theme = new Theme(null, "공포테마", "진짜 무서운거임", "덜덜");
-        Member firstMember = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
-        Member secondMember = new Member(null, "유저1", "유저1이메일", "비밀번호1", MemberRole.USER);
-        entityManager.persist(reservationTime);
-        entityManager.persist(theme);
-        entityManager.persist(firstMember);
-        entityManager.persist(secondMember);
-        Waiting firstWaiting = new Waiting(null, now, reservationTime, theme, firstMember, 1);
-        Waiting secondWaiting = new Waiting(null, now, reservationTime, theme, secondMember, 2);
-        entityManager.persist(firstWaiting);
-        entityManager.persist(secondWaiting);
-
-        // when
-        waitingRepository.pullPriority(theme, now, reservationTime, 1L, 1);
-
-        // then
-        assertAll(
-                () -> assertThat(waitingRepository.findById(firstWaiting.getId()).get().getPriority()).isEqualTo(0),
-                () -> assertThat(waitingRepository.findById(secondWaiting.getId()).get().getPriority()).isEqualTo(1)
-        );
-    }
-
     @DisplayName("조건에 해당하는 첫번째 대기를 조회할 수 있다")
     @Test
     void popFirstWaiting() {

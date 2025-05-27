@@ -41,6 +41,14 @@ public class Waiting {
     public Waiting() {
     }
 
+    public void pullPriority(final int amount) {
+        priority -= amount;
+    }
+
+    public boolean hasAfterPriority(final long other) {
+        return priority > other;
+    }
+
     public Long getId() {
         return id;
     }

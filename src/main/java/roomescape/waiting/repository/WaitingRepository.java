@@ -14,7 +14,7 @@ public interface WaitingRepository {
     List<Waiting> findAllByMemberId(long memberId);
     void delete(Waiting waiting);
     boolean existsByIdAndMemberId(long id, long memberId);
-    void pullPriority(Theme theme, LocalDate date, ReservationTime reservationTime, long fromPriority, int amount);
+    List<Waiting> findAllByThemeAndDateAndTime(Theme theme, LocalDate date, ReservationTime reservationTime);
     Optional<Waiting> findById(long id);
     List<Waiting> findAll();
     Optional<Waiting> popFirstWaiting(Theme theme, LocalDate date, ReservationTime time);
