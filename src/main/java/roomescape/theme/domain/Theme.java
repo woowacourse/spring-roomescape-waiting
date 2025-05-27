@@ -38,7 +38,7 @@ public class Theme {
         this(null, new ThemeName(name), new ThemeDescription(description), new ThemeThumbnail(thumbnail));
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
     private void validateNotNull(final ThemeName name, final ThemeDescription description, final ThemeThumbnail thumbnail) {

@@ -27,7 +27,7 @@ public class ReservationTime {
         this(null, startAt);
     }
 
-    public ReservationTime() {
+    protected ReservationTime() {
 
     }
 

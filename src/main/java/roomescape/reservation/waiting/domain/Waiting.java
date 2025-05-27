@@ -38,7 +38,7 @@ public class Waiting {
         this.time = time;
     }
 
-    public Waiting() {
+    protected Waiting() {
     }
 
     public static Waiting register(final Member member, final LocalDate date, final Theme theme, final ReservationTime time) {
