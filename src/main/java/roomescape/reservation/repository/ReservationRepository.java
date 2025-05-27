@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
+import roomescape.member.domain.MemberId;
 import roomescape.reservation.domain.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
@@ -27,7 +28,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             JOIN FETCH r.time
             WHERE r.member.id = :memberId
             """)
-    List<Reservation> findAllByMemberId(Long memberId);
+    List<Reservation> findAllByMemberId(MemberId memberId);
 
     List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
 
@@ -43,7 +44,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             """)
     List<Reservation> findByThemeIdAndMemberIdAndDateBetween(
             Long themeId,
-            Long memberId,
+            MemberId memberId,
             LocalDate dateFrom,
             LocalDate dateTo
     );
@@ -62,6 +63,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             LocalDate date,
             Long themeId,
             Long timeId,
-            Long memberId
+            MemberId memberId
     );
 }

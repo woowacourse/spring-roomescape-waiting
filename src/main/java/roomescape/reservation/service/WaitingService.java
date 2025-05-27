@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberId;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
@@ -74,7 +75,7 @@ public class WaitingService {
 
     private boolean hasAlreadyWaiting(final WaitingCreateRequest request) {
         return waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
-                request.date(), request.timeId(), request.themeId(), request.loginMember().id()
+                request.date(), request.timeId(), request.themeId(), new MemberId(request.loginMember().id())
         );
     }
 
@@ -86,7 +87,7 @@ public class WaitingService {
 
     private boolean isAlreadyReservedBySelf(final WaitingCreateRequest request) {
         return reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
-                request.date(), request.themeId(), request.timeId(), request.loginMember().id()
+                request.date(), request.themeId(), request.timeId(), new MemberId(request.loginMember().id())
         );
     }
 

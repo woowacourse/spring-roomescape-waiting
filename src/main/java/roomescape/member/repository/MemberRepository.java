@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberId;
 import roomescape.member.domain.Password;
 
 public interface MemberRepository extends JpaRepository<Member, Long> {
@@ -16,5 +17,9 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
         return findByEmailAndPassword(new Email(email), new Password(password));
     }
 
-    Optional<Member> findById(Long id);
+    Optional<Member> findById(MemberId id);
+
+    default Optional<Member> findById(Long id) {
+        return findById(new MemberId(id));
+    }
 }

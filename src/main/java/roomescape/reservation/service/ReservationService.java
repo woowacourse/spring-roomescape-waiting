@@ -19,6 +19,7 @@ import roomescape.auth.dto.LoginMember;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberId;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
@@ -68,10 +69,10 @@ public class ReservationService {
     }
 
     public List<MyReservationsResponse> getAllMyReservations(final LoginMember loginMember) {
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.id())
+        List<Reservation> reservations = reservationRepository.findAllByMemberId(new MemberId(loginMember.id()))
                 .stream()
                 .toList();
-        List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(loginMember.id())
+        List<WaitingWithRank> waitingWithRanks = waitingRepository.findAllWaitingWithRankByMemberId(new MemberId(loginMember.id()))
                 .stream()
                 .toList();
         return toMyReservationResponses(reservations, waitingWithRanks);
@@ -116,7 +117,7 @@ public class ReservationService {
 
     public List<ReservationResponse> findReservationByFiltering(final FilteringReservationRequest request) {
         Long themeId = request.themeId();
-        Long memberId = request.memberId();
+        MemberId memberId = new MemberId(request.memberId());
         LocalDate dateFrom = request.dateFrom();
         LocalDate dateTo = request.dateTo();
 

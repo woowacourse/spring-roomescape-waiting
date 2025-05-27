@@ -32,12 +32,13 @@ values ('테마10', '테마10 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6
 insert into theme (name, description, thumbnail)
 values ('테마11', '테마11 입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-insert into member (name, email, password, role)
-values ('포스티', 'posty@woowa.com', '12341234', 'MEMBER');
-insert into member (name, email, password, role)
-values ('밍곰', 'minggom@woowa.com', '12341234', 'MEMBER');
-insert into member (name, email, password, role)
-values ('로키', 'roky@woowa.com', '12341234', 'ADMIN');
+-- MemberId 시퀀스 생성
+insert into member (id, name, email, password, role)
+values (NEXT VALUE FOR MEMBER_ID_SEQUENCE, '포스티', 'posty@woowa.com', '12341234', 'MEMBER');
+insert into member (id, name, email, password, role)
+values (NEXT VALUE FOR MEMBER_ID_SEQUENCE, '밍곰', 'minggom@woowa.com', '12341234', 'MEMBER');
+insert into member (id, name, email, password, role)
+values (NEXT VALUE FOR MEMBER_ID_SEQUENCE, '로키', 'roky@woowa.com', '12341234', 'ADMIN');
 
 -- 포스티 예약 목록
 insert into reservation (date, time_id, theme_id, member_id, status)
