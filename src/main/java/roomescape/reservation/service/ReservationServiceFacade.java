@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
@@ -23,6 +24,7 @@ public class ReservationServiceFacade {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
+    @Transactional
     public ReservationResponse createReservation(
         ReservationCreateRequest reservationCreateRequest,
         MemberPrincipal memberPrincipal
@@ -44,6 +46,7 @@ public class ReservationServiceFacade {
         );
     }
 
+    @Transactional
     public ReservationResponse createWaiting(
         ReservationCreateRequest reservationCreateRequest,
         MemberPrincipal memberPrincipal
@@ -60,19 +63,23 @@ public class ReservationServiceFacade {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         return reservationService.findAll();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         reservationService.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> findMine(MemberPrincipal memberPrincipal) {
         Member member = memberService.findByPrincipalOrThrow(memberPrincipal);
         return reservationService.findAllByMember(member);
     }
 
+    @Transactional
     public void deleteWaiting(Long id, MemberPrincipal memberPrincipal) {
         Member member = memberService.findByPrincipalOrThrow(memberPrincipal);
         reservationService.deleteWaiting(id, member);

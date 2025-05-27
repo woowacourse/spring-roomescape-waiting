@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import java.util.List;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.AdminReservationCreateRequest;
@@ -22,6 +23,7 @@ public class AdminReservationFacade {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
+    @Transactional
     public ReservationResponse create(AdminReservationCreateRequest adminReservationCreateRequest) {
         ReservationTime reservationTime = reservationTimeService.findByIdOrThrow(
             adminReservationCreateRequest.timeId()
@@ -42,20 +44,24 @@ public class AdminReservationFacade {
         );
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAllByCondition(
         ReservationSearchConditionRequest reservationSearchConditionRequest
     ) {
         return reservationService.findByCondition(reservationSearchConditionRequest);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findHighestPriorityWaitings() {
         return reservationService.findHighestPriorityWaitings();
     }
 
+    @Transactional
     public void approveWaiting(Long id) {
         reservationService.approveWaiting(id);
     }
 
+    @Transactional
     public void denyWaiting(Long id) {
         reservationService.denyWaiting(id);
     }

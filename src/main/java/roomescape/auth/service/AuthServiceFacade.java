@@ -2,6 +2,7 @@ package roomescape.auth.service;
 
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.infrastructure.AuthorizationPrincipal;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
@@ -17,6 +18,7 @@ public class AuthServiceFacade {
     private final AuthService authService;
     private final MemberService memberService;
 
+    @Transactional(readOnly = true)
     public AuthorizationPrincipal login(LoginRequest request) {
         Member member = memberService.findByEmailAndPassword(request.email(), request.password())
             .orElseThrow(() -> new UnauthorizedException("이메일 혹은 비밀번호가 일치하지 않습니다."));
@@ -24,6 +26,7 @@ public class AuthServiceFacade {
         return authService.createMemberPrincipal(member);
     }
 
+    @Transactional(readOnly = true)
     public void validateMemberExistence(MemberPrincipal memberPrincipal) {
         if (!memberService.existsByName(memberPrincipal.name())) {
             throw new NotFoundException("존재하지 않는 유저 정보입니다.");
