@@ -39,7 +39,7 @@ public class AdminRestController {
         @GetMapping("/searchable-reservations")
         public ResponseEntity<List<AdminReservationResponse>> getReservationsBySearch(
                         @ModelAttribute ReservationSearchRequest searchRequest) {
-                final List<Reservation> searchedReservations = adminService.findByInFromTo(
+                final List<Reservation> searchedReservations = adminService.findReservationsByThemeMemberAndDateRange(
                                 searchRequest.themeId(),
                                 searchRequest.memberId(),
                                 searchRequest.dateFrom(),
