@@ -1,0 +1,18 @@
+package roomescape.reservation.presentation.dto;
+
+import java.util.List;
+import roomescape.reservation.domain.Theme;
+
+public record ThemeResponse(Long id, String name, String description, String thumbnail) {
+
+    public static ThemeResponse from(Theme theme) {
+        return new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(),
+                theme.getThumbnail());
+    }
+
+    public static List<ThemeResponse> from(List<Theme> themes) {
+        return themes.stream()
+                .map(ThemeResponse::from)
+                .toList();
+    }
+}
