@@ -80,18 +80,36 @@ class ReservationApplicationServiceTest {
     }
 
     @Test
-    void findFilteredReservations_shouldReturnAllCreatedReservations() {
+    void findFilteredReservations_shouldReturnAllReservations() {
+        // given
         Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
-        reservationSlotApplicationService.create(futureDate, timeId2, themeId, memberId, afterOneHour);
-
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId, memberId, afterOneHour);
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId, afterOneHour);
+        // when
         List<TotalReservationResponse> result = reservationApplicationService.findReservations(null, null, null, null);
+
+        // then
         assertThat(result).hasSize(2);
     }
 
     @Test
+    void findFilteredReservations_shouldReturnFilteredReservations() {
+        // given
+        Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
+        reservationSlotApplicationService.createConfirmedReservation(futureDate.minusDays(1), timeId, themeId, memberId, afterOneHour);
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId, afterOneHour);
+
+        // when
+        List<TotalReservationResponse> result = reservationApplicationService.findReservations(null, null, futureDate,
+                null);
+
+        // then
+        assertThat(result).hasSize(1);
+    }
+
+    @Test
     void deleteReservation_shouldRemoveSuccessfully() {
-        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId,
+        TotalReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId,
                 memberId, afterOneHour);
         reservationApplicationService.delete(response.id());
 

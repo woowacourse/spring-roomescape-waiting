@@ -3,15 +3,12 @@ package roomescape.reservationslot.application;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
-
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationDataService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
@@ -45,23 +42,21 @@ public class ReservationSlotApplicationService {
         reservationSlotDataService.delete(id);
     }
 
-    public TotalReservationResponse create(final LocalDate date, final Long timeId, final Long themeId,
-                                           final Long memberId, final LocalDateTime now) {
-        reservationSlotDataService.checkIfReservationDoesNotExists(date, timeId, themeId);
+    public TotalReservationResponse createConfirmedReservation(final LocalDate date, final Long timeId,
+                                                               final Long themeId,
+                                                               final Long memberId, final LocalDateTime now) {
+        reservationSlotDataService.validateReservationSlotDoesNotExists(date, timeId, themeId);
         ReservationTime time = reservationTimeDataService.findReservationTime(timeId);
         Theme theme = themeDataService.findTheme(themeId);
         Member member = memberDataService.getMember(memberId);
-        ReservationSlot reservationSlot = reservationSlotDataService.saveWithReservation(member, date, time, theme, now);
-        Reservation reservation = getReservation(reservationSlot);
+        ReservationSlot reservationSlot = reservationSlotDataService.saveReservationSlotWithReservation(member, date,
+                time, theme,
+                now);
+        Reservation reservation = reservationSlot.findConfirmedReservation();
         return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }
 
     public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {
         return reservationDataService.findMyReservations(memberInfo);
-    }
-
-    private Reservation getReservation(final ReservationSlot reservationSlot) {
-        return reservationDataService.findByReservationSlot(reservationSlot)
-                .orElseThrow(() -> new ReservationNotFoundException("예약이 존재하지 않습니다."));
     }
 }

@@ -123,7 +123,7 @@ class ReservationTimeApplicationServiceTest {
     void deleteReservationTime_shouldThrowException_WhenReservationExists() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationSlotApplicationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
         assertThatThrownBy(() -> reservationTimeApplicationService.delete(reservationTimeResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
@@ -137,7 +137,7 @@ class ReservationTimeApplicationServiceTest {
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationSlotApplicationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
                 afterOneHour);
         List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeApplicationService.getAvailableReservationTimes(
                 futureDate, theme.getId());

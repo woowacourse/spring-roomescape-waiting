@@ -39,18 +39,12 @@ public class ReservationApplicationService {
                 memberId, startDate, endDate);
         return filteredReservations
                 .stream()
-                .map(reservation -> {
-                    ReservationSlot reservationSlot = reservation.getReservationSlot();
-                    ReservationTime time = reservationSlot.getTime();
-                    Theme theme = reservationSlot.getTheme();
-                    Member member = reservationSlot.findReservedMember();
-                    return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
-                })
+                .map(this::mapToTotalReservationResponse)
                 .toList();
     }
 
-    public ReservationResponse addWaiting(final LocalDate date, final Long timeId, final Long themeId,
-                                          final Long memberId) {
+    public ReservationResponse addWaitingReservation(final LocalDate date, final Long timeId, final Long themeId,
+                                                     final Long memberId) {
         ReservationSlot reservationSlot = reservationSlotDataService.getReservationByDateAndTimeAndTheme(date, timeId,
                 themeId);
         Member member = memberDataService.getMember(memberId);
@@ -76,6 +70,14 @@ public class ReservationApplicationService {
 
     public void removeWaitingReservation(final Long reservationId) {
         reservationDataService.removeWaitingReservation(reservationId);
+    }
+
+    private TotalReservationResponse mapToTotalReservationResponse(final Reservation reservation) {
+        ReservationSlot reservationSlot = reservation.getReservationSlot();
+        ReservationTime time = reservationSlot.getTime();
+        Theme theme = reservationSlot.getTheme();
+        Member member = reservationSlot.findReservedMember();
+        return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
     }
 
     public void delete(final Long reservationId) {

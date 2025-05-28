@@ -87,6 +87,12 @@ public class ReservationSlot {
         return sortedReservations.indexOf(reservation);
     }
 
+    public Reservation findConfirmedReservation() {
+        return reservations.stream()
+                .min(Comparator.comparing(Reservation::getCreatedAt))
+                .orElseThrow(() -> new ReservationSlotNotFoundException("현재 예약한 멤버가 없습니다."));
+    }
+
     private void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
         if (LocalDateTime.of(date, time).isBefore(now)) {
             throw new InvalidReservationSlotException("예약 시간이 현재 시간보다 이전일 수 없습니다.");

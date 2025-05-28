@@ -56,7 +56,7 @@ public class ReservationController {
             @RequestBody ReservationSlotCreateRequest request,
             MemberInfo memberInfo
     ) {
-        ReservationResponse reservationResponse = reservationApplicationService.addWaiting(
+        ReservationResponse reservationResponse = reservationApplicationService.addWaitingReservation(
                 request.date(), request.timeId(), request.themeId(), memberInfo.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
     }

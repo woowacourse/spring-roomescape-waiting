@@ -28,22 +28,22 @@ public class ReservationSlotController {
 
     @RequireRole(MemberRole.REGULAR)
     @PostMapping("/reservations")
-    public ResponseEntity<TotalReservationResponse> createReservation(
+    public ResponseEntity<TotalReservationResponse> createConfirmedReservation(
             @RequestBody ReservationSlotCreateRequest request,
             MemberInfo memberInfo
     ) {
-        TotalReservationResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
-                request.themeId(), memberInfo.id(), LocalDateTime.now());
-        return ResponseEntity.status(HttpStatus.CREATED).body(dto);
+        TotalReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(request.date(),
+                request.timeId(), request.themeId(), memberInfo.id(), LocalDateTime.now());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @RequireRole(MemberRole.ADMIN)
     @PostMapping("/admin/reservations")
-    public ResponseEntity<TotalReservationResponse> createReservation(
+    public ResponseEntity<TotalReservationResponse> createConfirmedReservation(
             @RequestBody AdminReservationSlotCreateRequest request
     ) {
-        TotalReservationResponse dto = reservationSlotApplicationService.create(request.date(), request.timeId(),
-                request.themeId(), request.memberId(), LocalDateTime.now());
+        TotalReservationResponse dto = reservationSlotApplicationService.createConfirmedReservation(request.date(),
+                request.timeId(), request.themeId(), request.memberId(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 

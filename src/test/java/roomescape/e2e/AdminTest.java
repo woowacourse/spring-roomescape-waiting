@@ -153,7 +153,6 @@ public class AdminTest {
                 .statusCode(201);
     }
 
-
     @Test
     void findWaitingReservation() {
         makeWaitingReservations();

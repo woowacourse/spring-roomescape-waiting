@@ -76,8 +76,8 @@ class ReservationSlotApplicationServiceTest {
     }
 
     @Test
-    void createReservation_shouldReturnResponseWhenSuccessful() {
-        TotalReservationResponse response = reservationSlotApplicationService.create(futureDate, timeId, themeId,
+    void createConfirmedReservationReservation_shouldReturnResponseWhenSuccessful() {
+        TotalReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId,
                 memberId,
                 afterOneHour);
 
@@ -89,29 +89,29 @@ class ReservationSlotApplicationServiceTest {
     }
 
     @Test
-    void createReservation_shouldThrowException_WhenDuplicated() {
+    void createConfirmedReservationReservation_shouldThrowException_WhenDuplicated() {
         reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
-        reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour);
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId, memberId, afterOneHour);
 
         assertThatThrownBy(
-                () -> reservationSlotApplicationService.create(futureDate, timeId, themeId, memberId, afterOneHour))
+                () -> reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationSlotAlreadyExistsException.class)
                 .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
     @Test
-    void createReservation_shouldThrowException_WhenTimeIdNotFound() {
+    void createConfirmedReservationReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
-                () -> reservationSlotApplicationService.create(futureDate, 999L, themeId, memberId, afterOneHour))
+                () -> reservationSlotApplicationService.createConfirmedReservation(futureDate, 999L, themeId, memberId, afterOneHour))
                 .isInstanceOf(ReservationSlotNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
 
     @Test
-    void createReservation_shouldThrowException_WhenPastDate() {
+    void createConfirmedReservationReservation_shouldThrowException_WhenPastDate() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         assertThatThrownBy(
-                () -> reservationSlotApplicationService.create(pastDate, timeId, themeId, memberId, afterOneHour))
+                () -> reservationSlotApplicationService.createConfirmedReservation(pastDate, timeId, themeId, memberId, afterOneHour))
                 .isInstanceOf(InvalidReservationSlotException.class)
                 .hasMessageContaining("예약 시간이 현재 시간보다 이전일 수 없습니다.");
     }
