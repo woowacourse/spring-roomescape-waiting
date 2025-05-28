@@ -63,8 +63,9 @@ public class ConfirmedReservationApplicationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
-        return reservationDataService.findMyReservations(memberInfo);
+    public List<MyReservationResponse> findMyReservations(final Long memberId) {
+        memberDataService.validateExists(memberId);
+        return reservationDataService.findMyReservations(memberId);
     }
 
     public void cancel(final Long reservationId) {

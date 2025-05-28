@@ -32,4 +32,11 @@ public class MemberDataService {
     public boolean existsByEmail(final String email) {
         return memberRepository.existsByEmail(email);
     }
+
+    public void validateExists(final Long memberId) {
+        boolean doesExists = memberRepository.existsById(memberId);
+        if (!doesExists) {
+            throw new MemberNotFoundException("존재하지 않은 멤버입니다.");
+        }
+    }
 }

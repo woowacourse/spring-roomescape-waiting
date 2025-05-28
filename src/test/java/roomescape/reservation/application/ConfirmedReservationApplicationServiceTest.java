@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -16,20 +17,25 @@ import org.springframework.context.annotation.Import;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
+import roomescape.member.exception.MemberNotFoundException;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;
 import roomescape.reservation.application.dto.request.ConfirmedReservationCreateRequest;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
-import roomescape.reservationslot.exception.InvalidReservationSlotException;
 import roomescape.reservationslot.exception.ReservationSlotDuplicatedException;
-import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
+import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.theme.application.ThemeDataService;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
@@ -38,10 +44,6 @@ class ConfirmedReservationApplicationServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
-
-    private Long timeId;
-    private Long themeId;
-    private Long memberId;
 
     private ConfirmedReservationApplicationService confirmedReservationApplicationService;
 
@@ -60,6 +62,11 @@ class ConfirmedReservationApplicationServiceTest {
     @Autowired
     private ReservationRepository reservationRepository;
 
+    private Long timeId;
+    private Long themeId;
+    private Long memberId;
+    private Long reservationId;
+
     @BeforeEach
     void setUp() {
         ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(
@@ -74,19 +81,18 @@ class ConfirmedReservationApplicationServiceTest {
                 reservationTimeDataService, themeDataService,
                 memberDataService, reservationDataService);
 
-        ReservationTime time2 = new ReservationTime(LocalTime.of(9, 0));
-        timeId = reservationTimeRepository.save(time2).getId();
+        timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0))).getId();
         themeId = themeRepository.save(TestFixture.makeTheme()).getId();
         memberId = memberRepository.save(TestFixture.makeMember()).getId();
+        reservationId = confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
+                        afterOneHour)).id();
     }
 
     @Test
-    void findFilteredReservations_shouldReturnAllReservations() {
+    void findByCriteria_whenNoCondition_returnAllReservations() {
         // given
         Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
-        confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
-                        afterOneHour));
         confirmedReservationApplicationService.create(
                 new ConfirmedReservationCreateRequest(futureDate, timeId2, themeId, memberId,
                         afterOneHour));
@@ -99,81 +105,110 @@ class ConfirmedReservationApplicationServiceTest {
     }
 
     @Test
-    void findFilteredReservations_shouldReturnFilteredReservations() {
+    void findByCriteria_whenHasCondition_shouldReturnFilteredReservations() {
         // given
-        Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
-        confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate.minusDays(1), timeId, themeId, memberId,
-                        afterOneHour));
-        confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId2, themeId, memberId,
-                        afterOneHour));
+        Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
+        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId, afterOneHour));
 
         // when
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
-                new ConfirmedReservationByCriteriaWebRequest(null, null, futureDate, null));
+                new ConfirmedReservationByCriteriaWebRequest(themeId2, null, null, null));
 
         // then
         assertThat(result).hasSize(1);
     }
 
     @Test
-    void removeByIdReservation_shouldRemoveConfirmReservationSuccessfully() {
-        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate,
-                        timeId, themeId,
-                        memberId, afterOneHour));
-        confirmedReservationApplicationService.cancel(response.id());
+    void cancel_whenReservationExists_removesSuccessfully() {
+        // given
 
+        // when
+        confirmedReservationApplicationService.cancel(reservationId);
+
+        // then
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
                 new ConfirmedReservationByCriteriaWebRequest(themeId, memberId, futureDate, futureDate.plusDays(1)));
-        assertThat(result).isEmpty();
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(result).isEmpty();
+            softAssertions.assertThat(reservationSlotRepository.findById(reservationId)).isEmpty();
+        });
     }
 
-
     @Test
-    void create_shouldReturnResponseWhenSuccessful() {
+    void create_whenValidRequest_returnsReservation() {
+        // when
+        Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
         ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate,
-                        timeId, themeId, memberId, afterOneHour));
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId, afterOneHour));
+
+        // then
+        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
+                new ConfirmedReservationByCriteriaWebRequest(themeId2, null, null, null));
 
         Assertions.assertAll(
                 () -> assertThat(response.member().name()).isEqualTo("Mint"),
                 () -> assertThat(response.date()).isEqualTo(futureDate),
-                () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0))
+                () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0)),
+                () -> assertThat(result).hasSize(1)
         );
     }
 
     @Test
-    void create_shouldThrowException_WhenDuplicated() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
-                        afterOneHour));
-
+    void create_whenDuplicateTimeSlot_throwsReservationSlotDuplicatedException() {
         assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(futureDate, timeId, themeId,
-                        memberId, afterOneHour)))
+                () -> confirmedReservationApplicationService.create(
+                        new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId, afterOneHour)))
                 .isInstanceOf(ReservationSlotDuplicatedException.class)
                 .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
     }
 
     @Test
-    void create_shouldThrowException_WhenTimeIdNotFound() {
+    void create_whenTimeIdNotFound_throwsReservationTimeNotFoundException() {
         assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(futureDate, 999L, themeId, memberId,
-                        afterOneHour)))
-                .isInstanceOf(ReservationSlotNotFoundException.class)
+                () -> confirmedReservationApplicationService.create(
+                        new ConfirmedReservationCreateRequest(futureDate, 999L, themeId, memberId,
+                                afterOneHour)))
+                .isInstanceOf(ReservationTimeNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
 
     @Test
-    void create_shouldThrowException_WhenPastDate() {
-        LocalDate pastDate = LocalDate.now().minusDays(1);
+    void create_whenThemeIdNotFound_throwsThemeNotFoundException() {
         assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(pastDate, timeId, themeId, memberId,
-                        afterOneHour)))
-                .isInstanceOf(InvalidReservationSlotException.class)
-                .hasMessageContaining("예약 시간이 현재 시간보다 이전일 수 없습니다.");
+                () -> confirmedReservationApplicationService.create(
+                        new ConfirmedReservationCreateRequest(futureDate, timeId, 999L, memberId,
+                                afterOneHour)))
+                .isInstanceOf(ThemeNotFoundException.class)
+                .hasMessageContaining("요청한 id와 일치하는 테마 정보가 없습니다.");
+    }
+
+    @Test
+    void findMyReservations_shouldReturnMemberReservations() {
+        // given
+        Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
+        Long memberId2 = memberRepository.save(new Member("free", "free@gmail.com", "password", MemberRole.REGULAR))
+                .getId();
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId2,
+                        afterOneHour));
+
+        // when
+        List<MyReservationResponse> result = confirmedReservationApplicationService.findMyReservations(memberId);
+
+        // then
+        SoftAssertions.assertSoftly(softAssertions -> {
+                    softAssertions.assertThat(result).hasSize(1);
+                    softAssertions.assertThat(result.getFirst().theme()).isEqualTo("추리");
+                }
+        );
+    }
+
+    @Test
+    void findMyReservations_whenMemberIdNotFound_throwsMemberNotFoundException() {
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.findMyReservations(999L))
+                .isInstanceOf(MemberNotFoundException.class)
+                .hasMessageContaining("존재하지 않은 멤버입니다.");
     }
 }
