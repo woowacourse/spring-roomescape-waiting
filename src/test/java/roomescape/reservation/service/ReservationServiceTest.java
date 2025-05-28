@@ -2,11 +2,11 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +22,6 @@ import roomescape.global.exception.InvalidArgumentException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.controller.response.WaitingReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
@@ -32,6 +31,8 @@ import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.controller.response.ReservationTimeResponse;
 import roomescape.time.domain.ReservationTime;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.NONE)
 class ReservationServiceTest {
@@ -51,6 +52,8 @@ class ReservationServiceTest {
 
     @Autowired
     private CleanUp cleanUp;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
     @BeforeEach
     void setUp() {
@@ -76,32 +79,6 @@ class ReservationServiceTest {
         assertThat(response.member().name()).isEqualTo(reserver.getName());
         assertThat(response.date()).isEqualTo(date);
         assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationTime));
-        assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
-    }
-
-    @Test
-    void 예약을_대기한다() {
-        Theme theme = themeDbFixture.공포();
-        Member reserver = memberDbFixture.유저1_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Reservation reservation = Reservation.reserve(
-                reserver, reservationDateTime, theme, LocalDateTime.now()
-        );
-        reservationRepository.save(reservation);
-
-        Member reserver2 = memberDbFixture.유저2_생성();
-        ReserveCommand command = new ReserveCommand(
-                reservation.getDate(),
-                reservation.getTheme().getId(),
-                reservation.getReservationTime().getId(),
-                reserver2.getId()
-        );
-        ReservationResponse response = reservationService.reserve(command);
-
-        assertThat(response.id()).isNotNull();
-        assertThat(response.member().name()).isEqualTo(reserver2.getName());
-        assertThat(response.date()).isEqualTo(reservationDateTime.reservationDate().date());
-        assertThat(response.time()).isEqualTo(ReservationTimeResponse.from(reservationDateTime.reservationTime()));
         assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
     }
 
@@ -171,7 +148,7 @@ class ReservationServiceTest {
 
         // when & then
         // 공포 필터링
-        SoftAssertions.assertSoftly(softly -> {
+        assertSoftly(softly -> {
             softly.assertThat(reservationService.getFilteredReservations(
                     theme.getId(), null, null, null)
             ).hasSize(3);
@@ -207,78 +184,35 @@ class ReservationServiceTest {
     void 내_예약_목록을_조회한다() {
         Member member1 = memberDbFixture.유저1_생성();
         Member member2 = memberDbFixture.유저2_생성();
-
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Theme theme = themeDbFixture.공포();
 
-        Reservation reservation1 = reservationRepository.save(
-                Reservation.reserve(member1, reservationDateTime, theme, LocalDateTime.now()));
-        reservationRepository.save(
-                Reservation.reserve(member2, reservationDateTime, theme, LocalDateTime.now()));
+        Reservation reservation = reservationRepository.save(
+                Reservation.reserve(member1, reservationDateTime, theme, LocalDateTime.now())
+        );
+        Waiting waiting = waitingRepository.save(
+                Waiting.wait(member2, reservationDateTime, theme, LocalDateTime.now())
+        );
 
         List<MyReservationResponse> myReservations = reservationService.getMyReservations(member1.getId());
+        MyReservationResponse myReservation = myReservations.get(0);
+        List<MyReservationResponse> myWaitings = reservationService.getMyReservations(member2.getId());
+        MyReservationResponse myWaiting = myWaitings.get(0);
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(myReservations).hasSize(1);
-            softly.assertThat(myReservations.get(0).id()).isEqualTo(reservation1.getId());
-            softly.assertThat(myReservations.get(0).theme()).isEqualTo(reservation1.getTheme().getName());
-            softly.assertThat(myReservations.get(0).date()).isEqualTo(reservation1.getDate());
-            softly.assertThat(myReservations.get(0).time()).isEqualTo(reservation1.getStartAt());
-            softly.assertThat(myReservations.get(0).status()).isEqualTo("예약");
+        assertSoftly(softly -> {
+            softly.assertThat(myReservation.id()).isEqualTo(reservation.getId());
+            softly.assertThat(myReservation.date()).isEqualTo(reservation.getDate());
+            softly.assertThat(myReservation.time())
+                    .isEqualTo(reservation.getReservationTime().getStartAt());
+            softly.assertThat(myReservation.theme()).isEqualTo(theme.getName());
         });
-    }
 
-    @Test
-    void 대기중인_예약을_조회한다() {
-        Member reserver = memberDbFixture.유저1_생성();
-        Member reserver2 = memberDbFixture.유저2_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-        reservationRepository.save(
-                Reservation.reserve(
-                        reserver,
-                        reservationDateTime,
-                        theme,
-                        LocalDateTime.now()
-                )
-        );
-        reservationRepository.save(
-                Reservation.wait(
-                        reserver2,
-                        reservationDateTime,
-                        theme,
-                        LocalDateTime.now()
-                )
-        );
-
-        List<WaitingReservationResponse> responses = reservationService.getWaitingReservations();
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(responses).hasSize(1);
-            softly.assertThat(responses.get(0).waitingId()).isNotNull();
-            softly.assertThat(responses.get(0).reserverName()).isEqualTo(reserver2.getName());
-            softly.assertThat(responses.get(0).themeName()).isEqualTo(theme.getName());
-            softly.assertThat(responses.get(0).date()).isEqualTo(reservationDateTime.reservationDate().date());
-            softly.assertThat(responses.get(0).time()).isEqualTo(reservationDateTime.reservationTime().getStartAt());
+        assertSoftly(softly -> {
+            softly.assertThat(myWaiting.id()).isEqualTo(waiting.getId());
+            softly.assertThat(myWaiting.date()).isEqualTo(waiting.getReservationDatetime().reservationDate().date());
+            softly.assertThat(myWaiting.time())
+                    .isEqualTo(waiting.getReservationDatetime().reservationTime().getStartAt());
+            softly.assertThat(myWaiting.theme()).isEqualTo(waiting.getTheme().getName());
         });
-    }
-
-    @Test
-    void 사용자가_예약을_취소하면_다음으로_대기중인_예약이_예약된다() {
-        Member reserver = memberDbFixture.유저1_생성();
-        Member reserver2 = memberDbFixture.유저2_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-        Reservation reservation = reservationRepository.save(
-                Reservation.reserve(reserver, reservationDateTime, theme, LocalDateTime.now())
-        );
-        Reservation waiting = reservationRepository.save(
-                Reservation.wait(reserver2, reservationDateTime, theme, LocalDateTime.now().plusMinutes(10))
-        );
-
-        reservationService.cancel(reservation.getId());
-
-        Reservation updated = reservationRepository.findById(waiting.getId()).orElseThrow();
-        assertThat(updated.isReserved()).isTrue();
     }
 }

@@ -4,6 +4,7 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.reservation.domain.exception.PastReservationException;
 import roomescape.time.domain.ReservationTime;
@@ -30,5 +31,13 @@ public record ReservationDateTime(
         if (reservationDateTime.isBefore(now)) {
             throw new PastReservationException();
         }
+    }
+
+    public LocalDate date() {
+        return reservationDate.date();
+    }
+
+    public Long timeId() {
+        return reservationTime.getId();
     }
 }

@@ -9,16 +9,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
-import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.controller.response.MyReservationResponse;
 import roomescape.reservation.controller.response.ReservationResponse;
-import roomescape.reservation.controller.response.WaitingReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationDateTime;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
@@ -60,26 +57,13 @@ public class ReservationService {
 
     private void isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
         if (reservationRepository.existsBy(date, timeId, themeId)) {
-            throw new InvalidArgumentException("이미 예약된 시간입니다.");
+            throw new InvalidArgumentException("이미 예약했습니다.");
         }
     }
 
     @Transactional
-    public void cancel(Long id) {
-        Reservation reservation = getReservation(id);
-        ReservationSlot reservationSlot = new ReservationSlot(
-                reservationRepository.findByDateAndTimeIdAndThemeId(
-                        reservation.getDate(),
-                        reservation.getTimeId(),
-                        reservation.getTheme()
-                )
-        );
+    public void delete(Long id) {
         reservationRepository.deleteById(id);
-    }
-
-    private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoElementsException("예약을 찾을 수 없습니다."));
     }
 
     public List<ReservationResponse> getFilteredReservations(
@@ -114,13 +98,6 @@ public class ReservationService {
                                 .stream()
                                 .map(MyReservationResponse::from)
                 )
-                .toList();
-    }
-
-    public List<WaitingReservationResponse> getWaitingReservations() {
-        return waitingRepository.findAll()
-                .stream()
-                .map(WaitingReservationResponse::from)
                 .toList();
     }
 }

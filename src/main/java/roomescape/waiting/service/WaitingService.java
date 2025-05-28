@@ -2,6 +2,7 @@ package roomescape.waiting.service;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.global.exception.InvalidArgumentException;
@@ -26,28 +27,35 @@ public class WaitingService {
     private final ThemeService themeService;
     private final MemberQueryService memberQueryService;
 
-    public WaitingResponse wait(WaitingRequest request, Long memberId) {
-        LocalDate date = request.date();
-        Long timeId = request.timeId();
-        Long themeId = request.themeId();
-
+    public roomescape.waiting.controller.response.WaitingResponse wait(WaitingRequest request, Long memberId) {
         ReservationDateTime reservationDateTime = ReservationDateTime.create(
-                new ReservationDate(date), reservationTimeService.getReservationTime(timeId));
-        Theme theme = themeService.getTheme(themeId);
+                new ReservationDate(request.date()), reservationTimeService.getReservationTime(request.timeId()));
+        Theme theme = themeService.getTheme(request.themeId());
         Member waiter = memberQueryService.getMember(memberId);
 
-        validateDuplicateReservation(date, timeId, themeId, waiter.getId());
+        validateDuplicateReservation(
+                reservationDateTime.date(), reservationDateTime.timeId(), theme.getId(), waiter.getId());
 
         LocalDateTime waitedAt = LocalDateTime.now();
         Waiting waiting = Waiting.wait(waiter, reservationDateTime, theme, waitedAt);
         Waiting saved = waitingRepository.save(waiting);
 
-        return WaitingResponse.from(saved);
+        return roomescape.waiting.controller.response.WaitingResponse.from(saved);
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId, Long memberId) {
         if (waitingRepository.existsBy(date, timeId, themeId, memberId)) {
             throw new InvalidArgumentException("이미 대기 중인 예약입니다.");
         }
+    }
+
+    public void cancel(Long id) {
+        waitingRepository.deleteById(id);
+    }
+
+    public List<WaitingResponse> getWaitings() {
+        List<Waiting> waitings = waitingRepository.findAll();
+
+        return WaitingResponse.from(waitings);
     }
 }

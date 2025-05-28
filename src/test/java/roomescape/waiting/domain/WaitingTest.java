@@ -1,4 +1,4 @@
-package roomescape.reservation.domain;
+package roomescape.waiting.domain;
 
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
@@ -9,10 +9,12 @@ import org.junit.jupiter.api.Test;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Password;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationDateTime;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-class ReservationTest {
+class WaitingTest {
 
     private static Member createMember() {
         return Member.signUpUser(
@@ -42,21 +44,21 @@ class ReservationTest {
     }
 
     @Test
-    void 예약을_생성한다() {
-        Member reserver = createMember();
+    void 예약을_대기한다() {
+        Member waiter = createMember();
         ReservationDateTime reservationDateTime = createReservationDateTime();
         Theme theme = createTheme();
-        LocalDateTime reservedAt = LocalDateTime.now();
+        LocalDateTime waitedAt = LocalDateTime.now();
 
-        Reservation reservation = Reservation.reserve(
-                reserver, reservationDateTime, theme, reservedAt
+        Waiting waiting = Waiting.wait(
+                waiter, reservationDateTime, theme, waitedAt
         );
 
         assertSoftly(softly -> {
-            softly.assertThat(reservation.getReserver()).isEqualTo(reserver);
-            softly.assertThat(reservation.getReservationDatetime()).isEqualTo(reservationDateTime);
-            softly.assertThat(reservation.getTheme()).isEqualTo(theme);
-            softly.assertThat(reservation.getReservedAt()).isEqualTo(reservedAt);
+            softly.assertThat(waiting.getWaiter()).isEqualTo(waiter);
+            softly.assertThat(waiting.getReservationDatetime()).isEqualTo(reservationDateTime);
+            softly.assertThat(waiting.getTheme()).isEqualTo(theme);
+            softly.assertThat(waiting.getWaitedAt()).isEqualTo(waitedAt);
         });
     }
 }

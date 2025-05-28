@@ -93,8 +93,4 @@ public class Reservation {
     public Long getThemeId() {
         return theme.getId();
     }
-
-    public String getThemeName() {
-        return theme.getName();
-    }
 }

@@ -2,6 +2,7 @@ package roomescape.waiting.controller.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
+import java.util.List;
 import roomescape.member.controller.response.MemberResponse;
 import roomescape.theme.controller.response.ThemeResponse;
 import roomescape.time.controller.response.ReservationTimeResponse;
@@ -22,5 +23,11 @@ public record WaitingResponse(
                 ReservationTimeResponse.from(waiting.getReservationDatetime().reservationTime()),
                 ThemeResponse.from(waiting.getTheme())
         );
+    }
+
+    public static List<WaitingResponse> from(List<Waiting> waitings) {
+        return waitings.stream()
+                .map(WaitingResponse::from)
+                .toList();
     }
 }
