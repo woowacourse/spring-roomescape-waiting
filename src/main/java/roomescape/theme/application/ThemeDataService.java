@@ -6,8 +6,8 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.presentation.dto.request.ThemeCreateWebRequest;
 
@@ -32,7 +32,7 @@ public class ThemeDataService {
 
     public Theme getById(final Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
+                .orElseThrow(() -> new ThemeNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
     }
 
     public Page<Theme> findPopularThemes(final Clock clock, final int days, final int limit) {

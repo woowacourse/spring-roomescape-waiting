@@ -5,10 +5,10 @@ import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservationslot.application.ReservationSlotDataService;
-import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.exception.ReservationTimeDuplicatedException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
+import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
 
@@ -35,7 +35,7 @@ public class ReservationTimeDataService {
 
     public ReservationTime getById(final Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
+                .orElseThrow(() -> new ReservationTimeNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
     }
 
     public List<AvailableReservationTimeWebResponse> findAvailable(
