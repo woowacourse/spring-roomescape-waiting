@@ -96,7 +96,7 @@ public class GlobalExceptionHandler {
     ) {
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("올바르지 않은 입력입니다.");
-        problemDetail.setDetail(String.join("요청 메세지의 형식을 다시 확인해주세요."));
+        problemDetail.setDetail("요청 메세지의 형식을 다시 확인해주세요.");
         return ResponseEntity.badRequest().body(problemDetail);
     }
 
@@ -113,7 +113,7 @@ public class GlobalExceptionHandler {
         System.out.println("exception = " + exception);
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problemDetail.setTitle("서버 내부 에러입니다.");
-        problemDetail.setDetail(String.join("서버 내부에서 로직 예외 발생헸습니다."));
+        problemDetail.setDetail("서버 내부에서 로직 예외 발생헸습니다.");
         return ResponseEntity.internalServerError().body(problemDetail);
     }
 
@@ -122,7 +122,7 @@ public class GlobalExceptionHandler {
         System.out.println("exception = " + exception);
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problemDetail.setTitle("예상치 못한 에러입니다.");
-        problemDetail.setDetail(String.join("예상치 못한 예외 발생헸습니다."));
+        problemDetail.setDetail("예상치 못한 예외 발생헸습니다.");
         return ResponseEntity.internalServerError().body(problemDetail);
     }
 }
