@@ -31,14 +31,13 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public Waiting(final Long id, final LocalDateTime createdAt, final Reservation reservation, final Member member) {
-        this.id = id;
+    public Waiting(final LocalDateTime createdAt, final Reservation reservation, final Member member) {
         this.createdAt = createdAt;
         this.reservation = reservation;
         this.member = member;
     }
 
-    public Waiting() {
+    protected Waiting() {
 
     }
 
@@ -46,7 +45,7 @@ public class Waiting {
         if (reservation.isBefore(LocalDateTime.now())) {
             throw new BadRequestException("지나간 날짜와 시간에 예약 대기할 수 없습니다.");
         }
-        return new Waiting(null, LocalDateTime.now(), reservation, member);
+        return new Waiting(LocalDateTime.now(), reservation, member);
     }
 
     public boolean hasOwner(final Member other) {
