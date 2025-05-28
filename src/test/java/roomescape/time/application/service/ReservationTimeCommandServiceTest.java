@@ -72,7 +72,7 @@ class ReservationTimeCommandServiceTest {
         // given
         final ReservationTime saved =
                 reservationTimeRepository.save(
-                        ReservationTime.withoutId(LocalTime.of(14, 0)));
+                        ReservationTime.of(LocalTime.of(14, 0)));
         final Long id = saved.getId();
 
         // when
@@ -100,22 +100,22 @@ class ReservationTimeCommandServiceTest {
     void deleteRefReservationTime() {
         // given
         final ReservationTime savedTime =
-                reservationTimeRepository.save(ReservationTime.withoutId(
+                reservationTimeRepository.save(ReservationTime.of(
                         LocalTime.of(14, 0)));
 
-        final Theme theme = themeRepository.save(Theme.withoutId(
+        final Theme theme = themeRepository.save(Theme.of(
                 ThemeName.from("공포"),
                 ThemeDescription.from("지구별 방탈출 최고"),
                 ThemeThumbnail.from("www.making.com")));
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
                         UserRole.NORMAL));
 
-        final Reservation reservation = reservationRepository.save(Reservation.withoutId(
+        final Reservation reservation = reservationRepository.save(Reservation.of(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1L)),
                 savedTime,
@@ -136,7 +136,7 @@ class ReservationTimeCommandServiceTest {
         // given
 
         final LocalTime time = LocalTime.of(14, 0);
-        reservationTimeRepository.save(ReservationTime.withoutId(time));
+        reservationTimeRepository.save(ReservationTime.of(time));
 
         final CreateReservationTimeServiceRequest sameTimeRequest = new CreateReservationTimeServiceRequest(time);
 

@@ -60,13 +60,13 @@ class ReservationQueryServiceTest {
         final Theme theme = createAndSaveTheme("공포", "지구별 방탈출 최고");
         final User user = createAndSaveUser();
 
-        final Reservation given1 = Reservation.withoutId(
+        final Reservation given1 = Reservation.of(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 reservationTime,
                 theme);
 
-        final Reservation given2 = Reservation.withoutId(
+        final Reservation given2 = Reservation.of(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 reservationTime,
@@ -101,7 +101,7 @@ class ReservationQueryServiceTest {
         final ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
 
         final Reservation reservation = reservationRepository.save(
-                Reservation.withoutId(user.getId(), date, booked, theme));
+                Reservation.of(user.getId(), date, booked, theme));
         // when
         final List<AvailableReservationTimeServiceResponse> timesWithAvailability = reservationQueryService.getTimesWithAvailability(
                 new AvailableReservationTimeServiceRequest(date, theme.getId()));
@@ -128,12 +128,12 @@ class ReservationQueryServiceTest {
     // Helper 메서드들
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
         return reservationTimeRepository.save(
-                ReservationTime.withoutId(time));
+                ReservationTime.of(time));
     }
 
     private Theme createAndSaveTheme(String name, String description) {
         return themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from(name),
                         ThemeDescription.from(description),
                         ThemeThumbnail.from("www.making.com")));
@@ -141,7 +141,7 @@ class ReservationQueryServiceTest {
 
     private User createAndSaveUser() {
         return userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),

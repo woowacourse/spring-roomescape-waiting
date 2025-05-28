@@ -35,7 +35,7 @@ class UserQueryServiceTest {
         Email email = Email.from("email@email.com");
         Password password = Password.fromEncoded("1234");
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName,
                         email,
                         password,
@@ -61,14 +61,14 @@ class UserQueryServiceTest {
         Email email = Email.from("email@email.com");
         Password password = Password.fromEncoded("1234");
         final User user1 = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName1,
                         email,
                         password,
                         UserRole.NORMAL));
         UserName userName2 = UserName.from("강산2");
         final User user2 = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName2,
                         email,
                         password,
@@ -90,7 +90,7 @@ class UserQueryServiceTest {
         Email email = Email.from("email@email.com");
         Password password = Password.fromEncoded("1234");
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName,
                         email,
                         password,
@@ -116,21 +116,21 @@ class UserQueryServiceTest {
         Email email = Email.from("email@email.com");
         Password password = Password.fromEncoded("1234");
         final User user1 = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName1,
                         email,
                         password,
                         UserRole.NORMAL));
         UserName userName2 = UserName.from("강산2");
         final User user2 = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName2,
                         email,
                         password,
                         UserRole.NORMAL));
         UserName userName3 = UserName.from("강산3");
         final User user3 = userRepository.save(
-                User.withoutId(
+                User.of(
                         userName3,
                         email,
                         password,

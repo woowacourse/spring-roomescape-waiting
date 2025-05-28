@@ -16,7 +16,7 @@ class ThemeTest {
         ThemeThumbnail themeThumbnail = ThemeThumbnail.from("thumbnail.jpg");
 
         // when & then
-        assertThatThrownBy(() -> Theme.withoutId(null, themeDescription, themeThumbnail))
+        assertThatThrownBy(() -> Theme.of(null, themeDescription, themeThumbnail))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: Theme.name");
     }
@@ -29,7 +29,7 @@ class ThemeTest {
         ThemeThumbnail themeThumbnail = ThemeThumbnail.from("thumbnail.jpg");
 
         // when & then
-        assertThatThrownBy(() -> Theme.withoutId(themeName, null, themeThumbnail))
+        assertThatThrownBy(() -> Theme.of(themeName, null, themeThumbnail))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: Theme.description");
 
@@ -43,7 +43,7 @@ class ThemeTest {
         ThemeDescription themeDescription = ThemeDescription.from("설명");
 
         // when & then
-        assertThatThrownBy(() -> Theme.withoutId(themeName, themeDescription, null))
+        assertThatThrownBy(() -> Theme.of(themeName, themeDescription, null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: Theme.thumbnail");
     }

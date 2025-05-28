@@ -88,7 +88,7 @@ class ThemeCommandServiceTest {
         final String description = "공포 방탈출 대표 테마";
         final String url = "https://www.naver.com";
 
-        final Theme saved = themeRepository.save(Theme.withoutId(
+        final Theme saved = themeRepository.save(Theme.of(
                 ThemeName.from(name),
                 ThemeDescription.from(description),
                 ThemeThumbnail.from(url)));

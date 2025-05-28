@@ -128,7 +128,7 @@ class ReservationCommandServiceTest {
         final User user = createAndSaveUser();
 
         final Reservation reservation = reservationRepository.save(
-                Reservation.withoutId(
+                Reservation.of(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
                         reservationTime,
@@ -194,12 +194,12 @@ class ReservationCommandServiceTest {
     // Helper 메서드들
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
         return reservationTimeRepository.save(
-                ReservationTime.withoutId(time));
+                ReservationTime.of(time));
     }
 
     private Theme createAndSaveTheme() {
         return themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포"),
                         ThemeDescription.from("지구별 방탈출 최고"),
                         ThemeThumbnail.from("www.making.com")));
@@ -207,7 +207,7 @@ class ReservationCommandServiceTest {
 
     private User createAndSaveUser() {
         return userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),

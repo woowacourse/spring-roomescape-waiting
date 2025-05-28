@@ -72,7 +72,7 @@ class WaitingReservationCommandServiceTest {
                 theme.getId());
 
         final Reservation reservation = reservationRepository.save(
-                Reservation.withoutId(
+                Reservation.of(
                         user.getId(),
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
                         reservationTime,
@@ -126,7 +126,7 @@ class WaitingReservationCommandServiceTest {
         final User user = createAndSaveUser();
 
         final WaitingReservation waitingReservation = waitingReservationRepository.save(
-                WaitingReservation.withoutId(
+                WaitingReservation.of(
                         user.getId(),
                         1,
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
@@ -151,7 +151,7 @@ class WaitingReservationCommandServiceTest {
         final User user = createAndSaveUser();
 
         final WaitingReservation waiting1 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(
+                WaitingReservation.of(
                         user.getId(),
                         1,
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
@@ -159,7 +159,7 @@ class WaitingReservationCommandServiceTest {
                         theme));
 
         final WaitingReservation waiting2 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(
+                WaitingReservation.of(
                         user.getId(),
                         2,
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
@@ -167,7 +167,7 @@ class WaitingReservationCommandServiceTest {
                         theme));
 
         final WaitingReservation waiting3 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(
+                WaitingReservation.of(
                         user.getId(),
                         3,
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
@@ -175,7 +175,7 @@ class WaitingReservationCommandServiceTest {
                         theme));
 
         final WaitingReservation waiting4 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(
+                WaitingReservation.of(
                         user.getId(),
                         4,
                         ReservationDate.from(LocalDate.of(2025, 8, 5)),
@@ -204,12 +204,12 @@ class WaitingReservationCommandServiceTest {
     // Helper 메서드들
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
         return reservationTimeRepository.save(
-                ReservationTime.withoutId(time));
+                ReservationTime.of(time));
     }
 
     private Theme createAndSaveTheme(String name, String description) {
         return themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from(name),
                         ThemeDescription.from(description),
                         ThemeThumbnail.from("www.making.com")));
@@ -217,7 +217,7 @@ class WaitingReservationCommandServiceTest {
 
     private User createAndSaveUser() {
         return userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),

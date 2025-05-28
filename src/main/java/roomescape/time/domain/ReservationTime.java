@@ -41,7 +41,7 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public static ReservationTime withoutId(final LocalTime startAt) {
+    public static ReservationTime of(final LocalTime startAt) {
         return new ReservationTime(startAt);
     }
 

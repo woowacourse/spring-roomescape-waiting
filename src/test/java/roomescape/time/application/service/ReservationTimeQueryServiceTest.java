@@ -28,7 +28,7 @@ class ReservationTimeQueryServiceTest {
     void getReservationTime() {
         // given
         final LocalTime time = LocalTime.of(10, 0);
-        final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.withoutId(time));
+        final ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.of(time));
         final Long id = savedTime.getId();
 
         // when
@@ -42,8 +42,8 @@ class ReservationTimeQueryServiceTest {
     @DisplayName("예약 시간을 전체 조회할 수 있다")
     void getAllReservationTimes() {
         // given
-        reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(10, 0)));
-        reservationTimeRepository.save(ReservationTime.withoutId(LocalTime.of(11, 0)));
+        reservationTimeRepository.save(ReservationTime.of(LocalTime.of(10, 0)));
+        reservationTimeRepository.save(ReservationTime.of(LocalTime.of(11, 0)));
 
         // when
         final List<ReservationTime> times = reservationTimeQueryService.getAll();

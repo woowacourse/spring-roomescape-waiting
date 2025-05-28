@@ -20,7 +20,7 @@ public record CreateReservationServiceRequest(Long userId,
     }
 
     public Reservation toDomain(final ReservationTime time, final Theme theme) {
-        return Reservation.withoutId(
+        return Reservation.of(
                 userId,
                 date,
                 time,

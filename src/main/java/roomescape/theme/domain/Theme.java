@@ -65,9 +65,9 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public static Theme withoutId(final ThemeName name,
-                                  final ThemeDescription description,
-                                  final ThemeThumbnail thumbnail) {
+    public static Theme of(final ThemeName name,
+                           final ThemeDescription description,
+                           final ThemeThumbnail thumbnail) {
         return new Theme(name, description, thumbnail);
     }
 

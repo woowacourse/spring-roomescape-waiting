@@ -75,10 +75,10 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public static Reservation withoutId(final Long userId,
-                                        final ReservationDate date,
-                                        final ReservationTime time,
-                                        final Theme theme) {
+    public static Reservation of(final Long userId,
+                                 final ReservationDate date,
+                                 final ReservationTime time,
+                                 final Theme theme) {
         return new Reservation(userId, date, time, theme);
     }
 

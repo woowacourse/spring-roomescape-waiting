@@ -23,8 +23,8 @@ class ReservationViewTest {
                 null,
                 1L,
                 ReservationDate.from(LocalDate.now()),
-                ReservationTime.withoutId(LocalTime.of(11, 0)),
-                Theme.withoutId(
+                ReservationTime.of(LocalTime.of(11, 0)),
+                Theme.of(
                         ThemeName.from("테마 이름"),
                         ThemeDescription.from("테마 설명"),
                         ThemeThumbnail.from("https://example.com/image.jpg")

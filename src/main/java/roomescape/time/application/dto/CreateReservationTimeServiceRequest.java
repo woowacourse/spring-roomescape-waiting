@@ -16,7 +16,7 @@ public record CreateReservationTimeServiceRequest(LocalTime startAt) {
     }
 
     public ReservationTime toDomain() {
-        return ReservationTime.withoutId(
+        return ReservationTime.of(
                 startAt);
     }
 

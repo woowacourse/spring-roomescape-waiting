@@ -30,7 +30,7 @@ class ReservationTest {
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(null, date, time, theme))
+        assertThatThrownBy(() -> Reservation.of(null, date, time, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.userId");
     }
@@ -44,7 +44,7 @@ class ReservationTest {
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(userId, null, time, theme))
+        assertThatThrownBy(() -> Reservation.of(userId, null, time, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.date");
     }
@@ -58,7 +58,7 @@ class ReservationTest {
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(userId, date, null, theme))
+        assertThatThrownBy(() -> Reservation.of(userId, date, null, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.time");
     }
@@ -72,7 +72,7 @@ class ReservationTest {
         ReservationTime time = createReservationTime();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(userId, date, time, null))
+        assertThatThrownBy(() -> Reservation.of(userId, date, time, null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.theme");
     }
@@ -100,7 +100,7 @@ class ReservationTest {
         ReservationDate pastDate = ReservationDate.from(LocalDate.now().minusDays(1));
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
-        Reservation reservation = Reservation.withoutId(userId, pastDate, time, theme);
+        Reservation reservation = Reservation.of(userId, pastDate, time, theme);
         LocalDateTime now = LocalDateTime.now();
 
         // when & then
@@ -115,9 +115,9 @@ class ReservationTest {
         Long userId = 1L;
         ReservationDate todayDate = ReservationDate.from(LocalDate.now());
         LocalDateTime now = LocalDateTime.now();
-        ReservationTime pastTime = ReservationTime.withoutId(now.toLocalTime().minusHours(1));
+        ReservationTime pastTime = ReservationTime.of(now.toLocalTime().minusHours(1));
         Theme theme = createTheme();
-        Reservation reservation = Reservation.withoutId(userId, todayDate, pastTime, theme);
+        Reservation reservation = Reservation.of(userId, todayDate, pastTime, theme);
 
         // when
         // then
@@ -126,7 +126,7 @@ class ReservationTest {
     }
 
     private Theme createTheme() {
-        return Theme.withoutId(
+        return Theme.of(
                 ThemeName.from("테스트 테마"),
                 ThemeDescription.from("테스트 설명"),
                 ThemeThumbnail.from("test.jpg")
@@ -134,7 +134,7 @@ class ReservationTest {
     }
 
     private ReservationTime createReservationTime() {
-        return ReservationTime.withoutId((LocalTime.of(14, 0)));
+        return ReservationTime.of((LocalTime.of(14, 0)));
     }
 
 }

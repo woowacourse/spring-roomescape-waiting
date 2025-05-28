@@ -68,7 +68,7 @@ class ReservationFacadeIntegrationTest {
     @BeforeEach
     void setUp() {
         user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("테스트사용자"),
                         Email.from("test@example.com"),
                         Password.fromEncoded("encoded-password"),
@@ -77,7 +77,7 @@ class ReservationFacadeIntegrationTest {
         );
 
         theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("테스트테마"),
                         ThemeDescription.from("테마 설명"),
                         ThemeThumbnail.from("http://example.com/image.jpg")
@@ -85,7 +85,7 @@ class ReservationFacadeIntegrationTest {
         );
 
         time = timeRepository.save(
-                ReservationTime.withoutId(LocalTime.of(15, 0))
+                ReservationTime.of(LocalTime.of(15, 0))
         );
     }
 
@@ -96,11 +96,11 @@ class ReservationFacadeIntegrationTest {
         LocalDate targetDate = LocalDate.now().plusDays(1);
 
         ReservationTime anotherTime = timeRepository.save(
-                ReservationTime.withoutId(LocalTime.of(16, 0))
+                ReservationTime.of(LocalTime.of(16, 0))
         );
 
         reservationRepository.save(
-                Reservation.withoutId(
+                Reservation.of(
                         user.getId(),
                         ReservationDate.from(targetDate),
                         time,
@@ -150,13 +150,13 @@ class ReservationFacadeIntegrationTest {
     void deleteAndPromtionWhenExsistWaiting() {
         // given
         long userId1 = 1L;
-        final Reservation reservation = reservationRepository.save(Reservation.withoutId(userId1,
+        final Reservation reservation = reservationRepository.save(Reservation.of(userId1,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 time,
                 theme
         ));
         long userId2 = 2L;
-        final WaitingReservation waitingReservation = waitingReservationRepository.save(WaitingReservation.withoutId(userId2,
+        final WaitingReservation waitingReservation = waitingReservationRepository.save(WaitingReservation.of(userId2,
                 1,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
                 time,

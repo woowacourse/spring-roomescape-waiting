@@ -33,7 +33,7 @@ public class WaitingReservationCommandService {
         final int nextOrder = waitingReservationRepository
                 .findMaxWaitingByParams(request.date(), reservationTime, theme) + 1;
 
-        final WaitingReservation waitingReservation = WaitingReservation.withoutId(
+        final WaitingReservation waitingReservation = WaitingReservation.of(
                 request.userId(),
                 nextOrder,
                 request.date(),

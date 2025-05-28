@@ -61,7 +61,7 @@ class ReservationViewQueryServiceTest {
         // given
         final User user1 = createAndSaveUser();
         final User user2 = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강"),
                         Email.from("emailemail@email.com"),
                         Password.fromEncoded("1234"),
@@ -75,9 +75,9 @@ class ReservationViewQueryServiceTest {
         final Reservation reservation1 = createAndSaveReservation(user2.getId(), date, time, theme1);
         final Reservation reservation2 = createAndSaveReservation(user2.getId(), date, time, theme2);
         final WaitingReservation waitingReservation1 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(userId, 1, date, time, theme1));
+                WaitingReservation.of(userId, 1, date, time, theme1));
         final WaitingReservation waitingReservation2 = waitingReservationRepository.save(
-                WaitingReservation.withoutId(userId, 1, date, time, theme2));
+                WaitingReservation.of(userId, 1, date, time, theme2));
         // when
         List<ReservationView> reservations = service.getAllByUserId(userId);
 
@@ -92,12 +92,12 @@ class ReservationViewQueryServiceTest {
     // Helper 메서드들
     private ReservationTime createAndSaveReservationTime(LocalTime time) {
         return reservationTimeRepository.save(
-                ReservationTime.withoutId(time));
+                ReservationTime.of(time));
     }
 
     private Theme createAndSaveTheme(String name, String description) {
         return themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from(name),
                         ThemeDescription.from(description),
                         ThemeThumbnail.from("www.making.com")));
@@ -105,7 +105,7 @@ class ReservationViewQueryServiceTest {
 
     private User createAndSaveUser() {
         return userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -114,6 +114,6 @@ class ReservationViewQueryServiceTest {
 
     private Reservation createAndSaveReservation(Long userId, ReservationDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(
-                Reservation.withoutId(userId, date, time, theme));
+                Reservation.of(userId, date, time, theme));
     }
 }

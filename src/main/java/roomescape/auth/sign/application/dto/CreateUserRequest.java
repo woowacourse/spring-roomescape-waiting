@@ -20,6 +20,6 @@ public record CreateUserRequest(UserName name,
     }
 
     public User toDomain() {
-        return User.withoutId(name, email, password, UserRole.NORMAL);
+        return User.of(name, email, password, UserRole.NORMAL);
     }
 }

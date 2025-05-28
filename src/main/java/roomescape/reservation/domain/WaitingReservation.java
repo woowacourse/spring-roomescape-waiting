@@ -78,11 +78,11 @@ public class WaitingReservation {
         this.theme = theme;
     }
 
-    public static WaitingReservation withoutId(final Long userId,
-                                               final int waitingOrder,
-                                               final ReservationDate date,
-                                               final ReservationTime time,
-                                               final Theme theme
+    public static WaitingReservation of(final Long userId,
+                                        final int waitingOrder,
+                                        final ReservationDate date,
+                                        final ReservationTime time,
+                                        final Theme theme
     ) {
         return new WaitingReservation(userId, waitingOrder, date, time, theme);
     }

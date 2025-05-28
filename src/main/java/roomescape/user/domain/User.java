@@ -73,10 +73,10 @@ public class User {
         this.role = role;
     }
 
-    public static User withoutId(final UserName name,
-                                 final Email email,
-                                 final Password password,
-                                 final UserRole role) {
+    public static User of(final UserName name,
+                          final Email email,
+                          final Password password,
+                          final UserRole role) {
         return new User(name, email, password, role);
     }
 

@@ -72,7 +72,7 @@ public class MissionStepTest {
     @DisplayName("1단계: localhost:8080/admin 요청 시 어드민 메인 페이지가 성공적으로 응답된다")
     void first() {
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -96,7 +96,7 @@ public class MissionStepTest {
             "예약들을 조회할 수 있다")
     void second() {
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -127,12 +127,12 @@ public class MissionStepTest {
     void third() {
         // given
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now())
         );
 
         final Theme theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포 제목"),
                         ThemeDescription.from("공포 설명"),
                         ThemeThumbnail.from("gongpo.com/image/1")
@@ -140,7 +140,7 @@ public class MissionStepTest {
         );
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -209,25 +209,25 @@ public class MissionStepTest {
     void fifth() {
         // given
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now()));
 
         final Theme theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포 제목"),
                         ThemeDescription.from("공포 설명"),
                         ThemeThumbnail.from("gongpo.com/image/1")
                 ));
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
                         UserRole.ADMIN));
 
         final Reservation reservation = reservationRepository.save(
-                Reservation.withoutId(
+                Reservation.of(
                         user.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
                         time,
@@ -260,18 +260,18 @@ public class MissionStepTest {
     void sixth() {
         // given
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now()));
 
         final Theme theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포 제목"),
                         ThemeDescription.from("공포 설명"),
                         ThemeThumbnail.from("gongpo.com/image/1")
                 ));
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -318,7 +318,7 @@ public class MissionStepTest {
     @DisplayName("시간으로 API를 관리할 수 있다")
     void seventh() {
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now()));
 
         RestAssured.given().log().all()
