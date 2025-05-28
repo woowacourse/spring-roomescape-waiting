@@ -90,4 +90,8 @@ public class Reservation {
     public Theme getTheme() {
         return reservationInformation.getTheme();
     }
+
+    public ReservationInformation getReservationInformation() {
+        return reservationInformation;
+    }
 }

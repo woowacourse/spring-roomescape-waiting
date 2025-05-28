@@ -8,9 +8,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.request.FilteringReservationRequest;
-import roomescape.reservation.service.dto.response.ReservationTimeWithBookedResponse;
 import roomescape.reservation.service.dto.response.MyReservationsResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.service.dto.response.ReservationTimeWithBookedResponse;
+import roomescape.waiting.domain.ReservationInformation;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.WaitingRepository;
 
@@ -75,7 +76,7 @@ public class ReservationService {
     public void delete(final Long id, LoginMember loginMember) {
         Reservation reservation = getAuthorizedReservation(id, loginMember);
         reservationRepository.deleteById(id);
-        promoteFirstWaitingFor(reservation);
+        promoteFirstWaitingFor(reservation.getReservationInformation());
     }
 
     private Reservation getAuthorizedReservation(final Long id, LoginMember loginMember) {
@@ -87,10 +88,8 @@ public class ReservationService {
         };
     }
 
-    private void promoteFirstWaitingFor(Reservation reservation) {
-        Waiting firstWaiting = waitingRepository.findFirstByReservationInfo(
-                reservation.getDate(), reservation.getTime(), reservation.getTheme()
-        );
+    private void promoteFirstWaitingFor(ReservationInformation reservationInformation) {
+        Waiting firstWaiting = waitingRepository.findFirstByReservationInformation(reservationInformation);
         if (firstWaiting != null) {
             waitingRepository.delete(firstWaiting);
             reservationRepository.save(Reservation.of(firstWaiting));

@@ -12,6 +12,7 @@ import roomescape.member.domain.Role;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Rank;
+import roomescape.waiting.domain.ReservationInformation;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.repository.dto.WaitingInfoDataResponse;
 
@@ -67,9 +68,9 @@ class WaitingRepositoryTest {
         });
     }
 
-    @DisplayName("예약 정보에 해당하는 첫 번째 대기 예약을 조회할 수 있다.")
+    @DisplayName("예약 정보에 해당하는 첫 번째 대기 예약을 조회할 수 있다. 2")
     @Test
-    void findFirstByReservationInformation() {
+    void findFirstByReservationInformation2() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
         LocalDateTime firstCreated = LocalDateTime.now();
@@ -82,7 +83,7 @@ class WaitingRepositoryTest {
         entityManager.persist(secondWaiting);
 
         // when
-        Waiting result = waitingRepository.findFirstByReservationInfo(date, time, theme);
+        Waiting result = waitingRepository.findFirstByReservationInformation(new ReservationInformation(date, time, theme));
 
         // then
         assertThat(result.getId()).isEqualTo(firstWaiting.getId());
