@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
@@ -80,6 +81,7 @@ public class ReservationService {
             throw new ReservationException("이미 해당 날짜에 예약이 존재합니다.");
         }
         try {
+            validateFutureOrPresent(date, reservationTime);
             final RoomEscapeInformation roomEscapeInformation = roomEscapeInformationRepository.save(
                     RoomEscapeInformation.builder().date(date).time(reservationTime).theme(theme).build());
             final Reservation reservation = reservationRepository.save(
@@ -136,6 +138,7 @@ public class ReservationService {
                 .roomEscapeInformation(waitingReservation.getRoomEscapeInformation())
                 .member(waitingReservation.getMember())
                 .build();
+        // FIXME:: 위치 수정
         if (hasReservation(
                 reservation.getRoomEscapeInformation().getDate(),
                 reservation.getRoomEscapeInformation().getTime(),
@@ -161,5 +164,13 @@ public class ReservationService {
 
     private boolean hasReservation(final LocalDate date, final ReservationTime time, final Theme theme) {
         return roomEscapeInformationRepository.existsByDateAndTimeAndTheme(date, time, theme);
+    }
+
+    private void validateFutureOrPresent(final LocalDate date, final ReservationTime time) {
+        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+        final LocalDateTime currentDateTime = LocalDateTime.now();
+        if (reservationDateTime.isBefore(currentDateTime)) {
+            throw new ReservationException("예약은 현재 시간 이후로 가능합니다.");
+        }
     }
 }

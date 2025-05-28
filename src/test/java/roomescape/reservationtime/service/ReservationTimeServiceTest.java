@@ -4,19 +4,28 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.constant.TestData.RESERVATION_TIME_COUNT;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ReservationException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
+import roomescape.member.domain.Password;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.RoomEscapeInformation;
 import roomescape.reservation.repository.RoomEscapeInformationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.dto.ReservationTimeRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-
+import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeRepository;
 
 @DataJpaTest
 @Sql("/data.sql")
@@ -28,57 +37,94 @@ class ReservationTimeServiceTest {
     @Autowired
     private RoomEscapeInformationRepository roomEscapeInformationRepository;
 
-    private ReservationTimeService service;
+    @Autowired
+    private ThemeRepository themeRepository;
 
-    private final LocalTime time1 = LocalTime.of(13, 0);
-    private final LocalTime time2 = LocalTime.of(14, 0);
+    @Autowired
+    private MemberRepository memberRepository;
+
+    private ReservationTimeService service;
+    private Theme theme;
+    private Member member;
 
     @BeforeEach
     void setUp() {
         service = new ReservationTimeService(reservationTimeRepository, roomEscapeInformationRepository);
-        reservationTimeRepository.saveAll(List.of(
-                ReservationTime.from(time1),
-                ReservationTime.from(time2)
-        ));
+
+        theme = Theme.of("테마1", "설명1", "썸네일1");
+        themeRepository.save(theme);
+
+        member = Member.builder()
+                .name("사용자1")
+                .email("user1@example.com")
+                .password(Password.createForMember("pass123"))
+                .role(MemberRole.MEMBER)
+                .build();
+        memberRepository.save(member);
+    }
+
+    @Test
+    void 예약_시간이_정상적으로_저장된다() {
+        // given
+        LocalTime newTime = LocalTime.of(16, 30);
+        ReservationTimeRequest request = new ReservationTimeRequest(newTime);
+
+        // when
+        ReservationTimeResponse response = service.saveTime(request);
+
+        // then
+        assertThat(response.id()).isNotNull();
+        assertThat(response.startAt()).isEqualTo(newTime);
     }
 
     @Test
     void 모든_예약_시간을_조회한다() {
+        // given
+        LocalTime time1 = LocalTime.of(10, 0);
+        LocalTime time2 = LocalTime.of(11, 30);
+        reservationTimeRepository.saveAll(List.of(
+                ReservationTime.from(time1),
+                ReservationTime.from(time2)
+        ));
+
         // when
-        List<ReservationTimeResponse> all = service.findAll();
+        List<ReservationTimeResponse> responses = service.findAll();
 
         // then
-        assertThat(all).hasSize(RESERVATION_TIME_COUNT + 2)
+        assertThat(responses).hasSize(RESERVATION_TIME_COUNT + 2)
                 .extracting(ReservationTimeResponse::startAt)
                 .contains(time1, time2);
     }
 
     @Test
-    void 예약_시간이_삭제된다() {
+    void 예약이_없는_시간은_삭제된다() {
         // given
-        List<ReservationTimeResponse> before = service.findAll();
-        final Long idToDelete = before.stream()
-                .filter(response -> response.startAt() == time1).findFirst().get().id();
+        ReservationTime time = ReservationTime.from(LocalTime.of(14, 30));
+        ReservationTime savedTime = reservationTimeRepository.save(time);
 
         // when
-        service.delete(idToDelete);
+        service.delete(savedTime.getId());
 
         // then
-        List<ReservationTimeResponse> after = service.findAll();
-        assertThat(after).hasSize(RESERVATION_TIME_COUNT + 1)
-                .extracting(ReservationTimeResponse::id)
-                .doesNotContain(idToDelete);
+        assertThat(reservationTimeRepository.findById(savedTime.getId())).isEmpty();
     }
 
-
     @Test
-    void 예약이_존재하는_시간을_삭제하지_못_한다() {
+    void 예약이_있는_시간은_삭제할_수_없다() {
         // given
-        // when
-        // then
-        assertThatThrownBy(() -> service.delete(1L))
+        ReservationTime time = ReservationTime.from(LocalTime.of(15, 0));
+        ReservationTime savedTime = reservationTimeRepository.save(time);
+
+        RoomEscapeInformation info = RoomEscapeInformation.builder()
+                .date(LocalDate.of(2999, 12, 31))
+                .time(savedTime)
+                .theme(theme)
+                .build();
+        roomEscapeInformationRepository.save(info);
+
+        // when & then
+        assertThatThrownBy(() -> service.delete(savedTime.getId()))
                 .isInstanceOf(ReservationException.class)
                 .hasMessage("해당 시간으로 예약된 건이 존재합니다.");
-
     }
 }
