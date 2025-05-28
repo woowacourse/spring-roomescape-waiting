@@ -3,7 +3,6 @@ package roomescape.waiting.repository.jpa;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
-import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.schedule.domain.Schedule;
 import roomescape.waiting.domain.Waiting;
@@ -14,7 +13,6 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface JpaWaitingRepository extends JpaRepository<Waiting, Long> {
     @Query("""
             SELECT new roomescape.waiting.domain.WaitingWithRank(
