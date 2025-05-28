@@ -25,10 +25,12 @@ public class ScheduleService {
         return scheduleRepository.save(schedule);
     }
 
+    @Transactional(readOnly = true)
     public Schedule getSchedule(LocalDate date, Long timeId, Long themeId) {
         return scheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() -> new BadRequestException("예약 가능한 일정이 존재하지 않습니다."));
     }
 
+    @Transactional(readOnly = true)
     public boolean existsSchedule(LocalDate date, Long timeId, Long themeId) {
         return scheduleRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
