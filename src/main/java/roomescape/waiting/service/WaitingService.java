@@ -74,7 +74,6 @@ public class WaitingService {
     public AdminWaitingUpdateResponse updateWaitingStatus(String status, Long waitingId) {
         WaitingStatus waitingStatus = WaitingStatus.getStatus(status);
         Waiting waiting = findWaitingById(waitingId);
-        waiting.updateStatus(waitingStatus);
         if (waitingStatus == WaitingStatus.APPROVED) {
             updateWaitingToReservation(waiting);
         }
@@ -102,8 +101,7 @@ public class WaitingService {
         ReservationTime time = findReservationTimeById(waitingCreateRequest.time());
         Theme theme = findThemeById(waitingCreateRequest.theme());
         validateDateTime(LocalDateTime.of(waitingCreateRequest.date(), time.getStartAt()));
-        return new Waiting(waitingCreateRequest.date(), member, theme, time, LocalDateTime.now(),
-                WaitingStatus.PENDING);
+        return new Waiting(waitingCreateRequest.date(), member, theme, time, WaitingStatus.PENDING);
     }
 
     private Theme findThemeById(Long themeId) {

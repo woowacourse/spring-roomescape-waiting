@@ -2,6 +2,7 @@ package roomescape.waiting.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityListeners;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
@@ -10,18 +11,19 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import org.springframework.data.annotation.CreatedDate;
+import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Entity
 @Table(name = "waiting")
+@EntityListeners(AuditingEntityListener.class)
 public class Waiting {
 
     @Id
@@ -48,7 +50,7 @@ public class Waiting {
     private ReservationTime time;
 
     @Column(name = "created_at")
-    @Temporal(value = TemporalType.TIMESTAMP)
+    @CreatedDate
     @NotNull
     private LocalDateTime createdAt;
 
@@ -60,28 +62,20 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public Waiting(Long id, LocalDate date, Member member, Theme theme, ReservationTime time, LocalDateTime createdAt,
-                   WaitingStatus status) {
+    public Waiting(Long id, LocalDate date, Member member, Theme theme, ReservationTime time, WaitingStatus status) {
         this.id = id;
         this.date = date;
         this.member = member;
         this.theme = theme;
         this.time = time;
-        this.createdAt = createdAt;
         this.status = status;
     }
 
-    public Waiting(LocalDate date, Member member, Theme theme, ReservationTime time, LocalDateTime createdAt,
-                   WaitingStatus status) {
+    public Waiting(LocalDate date, Member member, Theme theme, ReservationTime time, WaitingStatus status) {
         this.date = date;
         this.member = member;
         this.theme = theme;
         this.time = time;
-        this.createdAt = createdAt;
-        this.status = status;
-    }
-
-    public void updateStatus(WaitingStatus status) {
         this.status = status;
     }
 
