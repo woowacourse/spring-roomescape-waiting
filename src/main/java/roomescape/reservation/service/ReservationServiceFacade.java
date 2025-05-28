@@ -59,7 +59,7 @@ public class ReservationServiceFacade {
                 return createWaiting(reservationCreateRequest, member, savedSchedule);
             }
         } else {
-            savedSchedule = scheduleService.createAndSaveSchedule(reservationCreateRequest.date(), reservationTime, theme);
+            savedSchedule = scheduleService.createSchedule(reservationCreateRequest.date(), reservationTime, theme);
         }
 
         List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(

@@ -40,7 +40,7 @@ public class AdminReservationFacade {
         Theme theme = themeService.getByThemeId(adminReservationCreateRequest.themeId());
         Member member = memberService.getExistingMemberByMemberId(adminReservationCreateRequest.memberId());
 
-        Schedule savedSchedule = scheduleService.createAndSaveSchedule(adminReservationCreateRequest.date(), reservationTime, theme);
+        Schedule savedSchedule = scheduleService.createSchedule(adminReservationCreateRequest.date(), reservationTime, theme);
 
         List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
                 adminReservationCreateRequest.date(),
