@@ -6,18 +6,18 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
+import roomescape.common.security.application.AuthService;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.common.security.infrastructure.AuthorizationExtractor;
-import roomescape.common.security.application.AuthService;
 
 @Component
-public class AuthenticationPrincipalArgumentResolver implements HandlerMethodArgumentResolver {
+public class MemberInfoArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final AuthService authService;
     private final AuthorizationExtractor authorizationExtractor;
 
-    public AuthenticationPrincipalArgumentResolver(final AuthService authService,
-                                                   final AuthorizationExtractor authorizationExtractor) {
+    public MemberInfoArgumentResolver(final AuthService authService,
+                                      final AuthorizationExtractor authorizationExtractor) {
         this.authService = authService;
         this.authorizationExtractor = authorizationExtractor;
     }
