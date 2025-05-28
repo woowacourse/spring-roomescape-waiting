@@ -17,6 +17,8 @@ import roomescape.integration.fixture.ReservationDbFixture;
 import roomescape.integration.fixture.ReservationTimeDbFixture;
 import roomescape.integration.fixture.ThemeDbFixture;
 import roomescape.integration.fixture.WaitingDbFixture;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.WaitingRepository;
 import roomescape.service.WaitingService;
 import roomescape.service.request.WaitingCreateRequest;
 
@@ -39,8 +41,15 @@ class WaitingServiceTest extends ServiceTestBase {
 
     @Autowired
     private Clock clock;
+
     @Autowired
     private ReservationDbFixture reservationDbFixture;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Autowired
+    private ReservationRepository reservationRepository;
 
     @Test
     void 대기를_생성할_수_있다() {
@@ -112,6 +121,41 @@ class WaitingServiceTest extends ServiceTestBase {
 
         // then
         assertThat(all).hasSize(1);
+    }
+
+    @Test
+    void 대기를_승인하면_예약으로_전환되고_대기는_삭제된다() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        var waiting = waitingDbFixture.대기_25_4_22(reservationTime, theme, member);
+
+        // whenR
+        sut.approveWaitingById(waiting.getId());
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(waitingRepository.findById(waiting.getId())).isEmpty();
+            softly.assertThat(reservationRepository.findAll()).hasSize(1);
+        });
+    }
+
+    @Test
+    void 대기를_승인할_때_이미_예약이_존재하면_예외가_발생한다() {
+        // given
+        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var reservationTime = reservationTimeDbFixture.예약시간_10시();
+        var theme = themeDbFixture.공포();
+        var schedule = ReservationDateFixture.예약날짜_오늘;
+
+        reservationDbFixture.예약_생성(schedule, reservationTime, theme, member);
+        var waiting = waitingDbFixture.대기_생성(schedule, reservationTime, theme, member, LocalDateTime.now(clock));
+
+        // when // then
+        assertThatThrownBy(() -> sut.approveWaitingById(waiting.getId()))
+                .isInstanceOf(IllegalStateException.class)
+                .hasMessage("이미 예약이 존재합니다.");
     }
 
     @Test
