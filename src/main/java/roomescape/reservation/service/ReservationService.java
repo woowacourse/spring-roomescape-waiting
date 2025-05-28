@@ -49,10 +49,7 @@ public class ReservationService {
     }
 
     public boolean isReservationExists(final LocalDate date, final Long timeId, final Long themeId) {
-        if (reservationRepository.existsByInfoDateAndInfoTimeIdAndInfoThemeId(date, timeId, themeId)) {
-            return true;
-        }
-        return false;
+        return reservationRepository.existsByInfoDateAndInfoTimeIdAndInfoThemeId(date, timeId, themeId);
     }
 
     public List<Reservation> findMyReservations(final UserInfo userInfo) {

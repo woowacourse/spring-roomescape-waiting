@@ -1,7 +1,6 @@
 package roomescape.reservation.controller;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -52,7 +51,7 @@ public class ReservationController {
     ) {
         ReservationResponse dto = reservationFacadeService.create(request.date(), request.timeId(),
                 request.themeId(),
-                userInfo.id(), LocalDateTime.now());
+                userInfo.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
@@ -63,7 +62,7 @@ public class ReservationController {
     ) {
         ReservationResponse dto = reservationFacadeService.create(request.date(), request.timeId(),
                 request.themeId(),
-                request.memberId(), LocalDateTime.now());
+                request.memberId());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 

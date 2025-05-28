@@ -40,14 +40,14 @@ public class Reservation {
     }
 
     public static Reservation createUpcomingReservationWithUnassignedId(final Member member,
-                                                                        final ReservationInfo reservationInfo,
-                                                                        LocalDateTime now) {
-        validateDateTime(reservationInfo, now);
+                                                                        final ReservationInfo reservationInfo) {
+        validateDateTime(reservationInfo);
         return new Reservation(member, reservationInfo);
     }
 
-    private static void validateDateTime(ReservationInfo reservationInfo, LocalDateTime now) {
-        if (LocalDateTime.of(reservationInfo.getDate(), reservationInfo.getTime().getStartAt()).isBefore(now)) {
+    private static void validateDateTime(ReservationInfo reservationInfo) {
+        if (LocalDateTime.of(reservationInfo.getDate(), reservationInfo.getTime().getStartAt())
+                .isBefore(LocalDateTime.now())) {
             throw new InvalidReservationException("예약 시간이 현재 시간보다 이전일 수 없습니다.");
         }
     }
