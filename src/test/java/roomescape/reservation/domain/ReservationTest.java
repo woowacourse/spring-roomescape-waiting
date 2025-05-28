@@ -3,6 +3,7 @@ package roomescape.reservation.domain;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -39,7 +40,7 @@ class ReservationTest {
         Theme theme = Theme.createWithId(1L, "a", "a", "a");
         Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
         Reservation reservation = Reservation.createWithId(1L, member, LocalDate.of(2000, 11, 2), reservationTime1,
-                theme);
+                theme, RESERVED, LocalDateTime.now());
         // when
         ReservationTime reservationTime2 = ReservationTime.createWithId(2L, localTime);
         // then
@@ -54,7 +55,7 @@ class ReservationTest {
         Theme theme = Theme.createWithId(1L, "a", "a", "a");
         Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
         Reservation withoutId = Reservation.createWithoutId(LocalDateTime.of(1999, 11, 2, 20, 10), member,
-                LocalDate.of(2000, 11, 2), reservationTime1, theme);
+                LocalDate.of(2000, 11, 2), reservationTime1, theme, RESERVED);
         // when
         Reservation reservation = withoutId.assignId(1L);
         // then
@@ -74,7 +75,7 @@ class ReservationTest {
         Theme theme = Theme.createWithId(1L, "a", "a", "a");
         Member member = Member.createWithId(1L, "a", "a", "a", Role.USER);
         // when & then
-        assertThatThrownBy(() -> Reservation.createWithoutId(now, member, date, reservationTime, theme))
+        assertThatThrownBy(() -> Reservation.createWithoutId(now, member, date, reservationTime, theme, RESERVED))
                 .isInstanceOf(IllegalArgumentException.class);
     }
 }

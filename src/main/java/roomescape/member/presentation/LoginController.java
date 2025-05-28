@@ -6,11 +6,11 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.common.argumentResolver.Login;
+import roomescape.member.argumentResolver.Authentication;
 import roomescape.common.util.TokenCookieManager;
-import roomescape.member.dto.request.LoginMember;
-import roomescape.member.dto.request.LoginRequest;
-import roomescape.member.dto.response.LoginCheckResponse;
+import roomescape.member.presentation.dto.request.LoginMember;
+import roomescape.member.presentation.dto.request.LoginRequest;
+import roomescape.member.presentation.dto.response.LoginCheckResponse;
 import roomescape.member.service.LoginService;
 
 @RestController
@@ -19,20 +19,20 @@ public class LoginController {
     private final TokenCookieManager tokenCookieManager;
     private final LoginService loginService;
 
-    public LoginController(TokenCookieManager tokenCookieManager, LoginService loginService) {
+    public LoginController(final TokenCookieManager tokenCookieManager, final LoginService loginService) {
         this.tokenCookieManager = tokenCookieManager;
         this.loginService = loginService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<Void> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+    public ResponseEntity<Void> login(@RequestBody final LoginRequest request, final HttpServletResponse response) {
         String token = loginService.loginAndReturnToken(request);
         tokenCookieManager.addTokenCookie(response, token);
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/login/check")
-    public ResponseEntity<LoginCheckResponse> loginCheck(@Login LoginMember member) {
+    public ResponseEntity<LoginCheckResponse> loginCheck(@Authentication final LoginMember member) {
         return ResponseEntity.ok().body(new LoginCheckResponse(member.name()));
     }
 

@@ -7,8 +7,8 @@ import roomescape.common.util.DateTime;
 import roomescape.common.util.JwtTokenContainer;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
-import roomescape.member.dto.request.LoginMember;
-import roomescape.member.dto.request.LoginRequest;
+import roomescape.member.presentation.dto.request.LoginMember;
+import roomescape.member.presentation.dto.request.LoginRequest;
 
 @Service
 public class LoginService {

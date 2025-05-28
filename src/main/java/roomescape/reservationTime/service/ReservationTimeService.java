@@ -6,10 +6,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
-import roomescape.reservationTime.dto.request.ReservationTimeRequest;
-import roomescape.reservationTime.dto.request.TimeConditionRequest;
-import roomescape.reservationTime.dto.response.ReservationTimeResponse;
-import roomescape.reservationTime.dto.response.TimeConditionResponse;
+import roomescape.reservationTime.presentation.dto.request.ReservationTimeRequest;
+import roomescape.reservationTime.presentation.dto.request.TimeConditionRequest;
+import roomescape.reservationTime.presentation.dto.response.ReservationTimeResponse;
+import roomescape.reservationTime.presentation.dto.response.TimeConditionResponse;
 
 @Service
 public class ReservationTimeService {

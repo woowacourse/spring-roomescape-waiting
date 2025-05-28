@@ -10,9 +10,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.member.dto.request.SignupRequest;
-import roomescape.member.dto.response.MemberResponse;
-import roomescape.member.dto.response.SignupResponse;
+import roomescape.member.presentation.dto.request.SignupRequest;
+import roomescape.member.presentation.dto.response.MemberResponse;
+import roomescape.member.presentation.dto.response.SignupResponse;
 import roomescape.member.service.MemberService;
 
 @RestController
@@ -24,12 +24,12 @@ public class MemberController {
 
     private final MemberService memberService;
 
-    public MemberController(MemberService memberService) {
+    public MemberController(final MemberService memberService) {
         this.memberService = memberService;
     }
 
     @PostMapping
-    public ResponseEntity<SignupResponse> signup(@RequestBody SignupRequest request) {
+    public ResponseEntity<SignupResponse> signup(@RequestBody final SignupRequest request) {
         SignupResponse response = memberService.createUser(request);
         URI uri = URI.create(RESERVATION_BASE_URL + SLASH + response.id());
         return ResponseEntity.created(uri).body(response);
