@@ -1,9 +1,10 @@
 package roomescape.theme.repository;
 
+import roomescape.theme.domain.Theme;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.theme.domain.Theme;
 
 public interface ThemeRepository {
     Theme save(Theme theme);
@@ -14,5 +15,5 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(Long id);
 
-    List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum);
+    List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, Long listNum);
 }

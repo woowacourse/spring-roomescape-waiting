@@ -55,7 +55,7 @@ class JpaThemeRepositoryTest {
         List<Theme> findThemes = jpaThemeRepository.findTopByReservationCountDesc(
                 LocalDate.now().plusDays(1),
                 LocalDate.now().plusDays(4),
-                10
+                10L
         );
 
         assertAll(

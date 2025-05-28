@@ -1,6 +1,5 @@
 package roomescape.waiting.repository;
 
-import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.schedule.domain.Schedule;
 import roomescape.waiting.domain.Waiting;
@@ -9,7 +8,6 @@ import roomescape.waiting.domain.WaitingWithRank;
 import java.util.List;
 import java.util.Optional;
 
-@Repository
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
 

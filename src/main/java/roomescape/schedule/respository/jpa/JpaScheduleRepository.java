@@ -7,7 +7,7 @@ import java.time.LocalDate;
 import java.util.Optional;
 
 public interface JpaScheduleRepository extends JpaRepository<Schedule, Long> {
-    Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
+    Optional<Schedule> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

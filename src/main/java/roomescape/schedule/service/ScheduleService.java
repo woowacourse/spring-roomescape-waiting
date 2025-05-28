@@ -29,7 +29,7 @@ public class ScheduleService {
         return scheduleRepository.save(schedule);
     }
 
-    public Schedule getScheduleByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+    public Schedule getScheduleByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return scheduleRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId).orElseThrow(() -> new BadRequestException("예약 가능한 일정이 존재하지 않습니다."));
     }
 

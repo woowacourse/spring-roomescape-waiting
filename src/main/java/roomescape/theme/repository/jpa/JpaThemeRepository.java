@@ -21,5 +21,5 @@ public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
                     LIMIT :listNum
                 )
             """)
-    List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, long listNum);
+    List<Theme> findTopByReservationCountDesc(LocalDate fromDate, LocalDate toDate, Long listNum);
 }
