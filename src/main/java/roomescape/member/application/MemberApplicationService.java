@@ -5,9 +5,9 @@ import org.springframework.stereotype.Service;
 import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.member.presentation.dto.request.SignupRequest;
-import roomescape.member.presentation.dto.response.MemberResponse;
-import roomescape.member.presentation.dto.response.SignUpResponse;
+import roomescape.member.presentation.dto.request.SignupWebRequest;
+import roomescape.member.presentation.dto.response.MemberWebResponse;
+import roomescape.member.presentation.dto.response.SignUpWebResponse;
 import roomescape.member.exception.MemberDuplicatedException;
 
 @Service
@@ -22,21 +22,21 @@ public class MemberApplicationService {
         this.myPasswordEncoder = myPasswordEncoder;
     }
 
-    public SignUpResponse signup(final SignupRequest signupRequest) {
-        String encodedPassword = myPasswordEncoder.encode(signupRequest.password());
-        Member member = new Member(signupRequest.name(), signupRequest.email(), encodedPassword, MemberRole.REGULAR);
-        validateMemberExists(signupRequest);
-        return SignUpResponse.from(memberDataService.create(member));
+    public SignUpWebResponse signup(final SignupWebRequest signupWebRequest) {
+        String encodedPassword = myPasswordEncoder.encode(signupWebRequest.password());
+        Member member = new Member(signupWebRequest.name(), signupWebRequest.email(), encodedPassword, MemberRole.REGULAR);
+        validateMemberExists(signupWebRequest);
+        return SignUpWebResponse.from(memberDataService.create(member));
     }
 
-    public List<MemberResponse> findAllRegular() {
+    public List<MemberWebResponse> findAllRegular() {
         return memberDataService.findByMemberRole(MemberRole.REGULAR).stream()
-                .map(member -> new MemberResponse(member.getId(), member.getName()))
+                .map(member -> new MemberWebResponse(member.getId(), member.getName()))
                 .toList();
     }
 
-    private void validateMemberExists(final SignupRequest signupRequest) {
-        if (memberDataService.existsByEmail(signupRequest.email())) {
+    private void validateMemberExists(final SignupWebRequest signupWebRequest) {
+        if (memberDataService.existsByEmail(signupWebRequest.email())) {
             throw new MemberDuplicatedException("이미 존재하는 회원입니다.");
         }
     }

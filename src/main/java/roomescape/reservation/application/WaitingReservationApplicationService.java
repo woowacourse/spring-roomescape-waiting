@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.presentation.dto.response.WaitingResponse;
+import roomescape.reservation.presentation.dto.response.WaitingWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
@@ -38,10 +38,10 @@ public class WaitingReservationApplicationService {
         return ReservationResponse.from(reservation);
     }
 
-    public List<WaitingResponse> findAll() {
+    public List<WaitingWebResponse> findAll() {
         List<Reservation> reservations = reservationDataService.findAllWaitingReservations();
         return reservations.stream()
-                .map(WaitingResponse::from)
+                .map(WaitingWebResponse::from)
                 .toList();
     }
 

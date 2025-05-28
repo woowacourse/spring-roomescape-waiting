@@ -17,8 +17,9 @@ import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
+import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.exception.InvalidReservationSlotException;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
@@ -87,8 +88,8 @@ class ConfirmedReservationApplicationServiceTest {
         confirmedReservationApplicationService.create(futureDate, timeId2, themeId, memberId,
                 afterOneHour);
         // when
-        List<ConfirmedReservationResponse> result = confirmedReservationApplicationService.findByCriteria(null, null, null,
-                null);
+        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
+                new ConfirmedReservationByCriteriaWebRequest(null, null, null, null));
 
         // then
         assertThat(result).hasSize(2);
@@ -104,9 +105,8 @@ class ConfirmedReservationApplicationServiceTest {
                 afterOneHour);
 
         // when
-        List<ConfirmedReservationResponse> result = confirmedReservationApplicationService.findByCriteria(null, null,
-                futureDate,
-                null);
+        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
+                new ConfirmedReservationByCriteriaWebRequest(null, null, futureDate, null));
 
         // then
         assertThat(result).hasSize(1);
@@ -114,20 +114,20 @@ class ConfirmedReservationApplicationServiceTest {
 
     @Test
     void removeByIdReservation_shouldRemoveConfirmReservationSuccessfully() {
-        ConfirmedReservationResponse response = confirmedReservationApplicationService.create(futureDate,
+        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(futureDate,
                 timeId, themeId,
                 memberId, afterOneHour);
         confirmedReservationApplicationService.cancel(response.id());
 
-        List<ConfirmedReservationResponse> result = confirmedReservationApplicationService.findByCriteria(themeId, memberId,
-                futureDate, futureDate.plusDays(1));
+        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
+                new ConfirmedReservationByCriteriaWebRequest(themeId, memberId, futureDate, futureDate.plusDays(1)));
         assertThat(result).isEmpty();
     }
 
 
     @Test
     void create_shouldReturnResponseWhenSuccessful() {
-        ConfirmedReservationResponse response = confirmedReservationApplicationService.create(futureDate,
+        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(futureDate,
                 timeId, themeId, memberId, afterOneHour);
 
         Assertions.assertAll(

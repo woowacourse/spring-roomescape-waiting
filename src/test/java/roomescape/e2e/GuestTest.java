@@ -21,9 +21,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.fixture.TestFixture;
-import roomescape.member.presentation.dto.request.SignupRequest;
-import roomescape.member.presentation.dto.response.MemberResponse;
-import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
+import roomescape.member.presentation.dto.request.SignupWebRequest;
+import roomescape.member.presentation.dto.response.MemberWebResponse;
+import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -85,7 +85,7 @@ public class GuestTest {
     @Test
     void signup() {
         RestAssured.given().log().all()
-                .body(new SignupRequest("testMember@gmail.com", PASSWORD, "testMember"))
+                .body(new SignupWebRequest("testMember@gmail.com", PASSWORD, "testMember"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/members")
                 .then().log().all()
@@ -96,7 +96,7 @@ public class GuestTest {
 
     @Test
     void findAllRegulars() {
-        List<MemberResponse> memberResponses = RestAssured.given().log().all()
+        List<MemberWebResponse> memberWebRespons = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .when().get("/members")
                 .then().log().all()
@@ -104,7 +104,7 @@ public class GuestTest {
                 .extract()
                 .as(new TypeRef<>() {
                 });
-        assertThat(memberResponses.size()).isEqualTo(2);
+        assertThat(memberWebRespons.size()).isEqualTo(2);
     }
 
     @Test
@@ -115,7 +115,7 @@ public class GuestTest {
         createRegularReservation(1L);
         createRegularReservation(2L);
 
-        List<ConfirmedReservationResponse> reservationsFilteredByThemeId = RestAssured.given().log().all()
+        List<ConfirmedReservationWebResponse> reservationsFilteredByThemeId = RestAssured.given().log().all()
                 .when().queryParams("themeId", 1L, "memberId", 2L, "dateFrom", FUTURE_DATE,
                         "dateTo", TestFixture.makeAfterOneWeekDate().plusDays(1).toString())
                 .get("/reservations")

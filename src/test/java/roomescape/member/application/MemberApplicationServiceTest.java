@@ -13,9 +13,9 @@ import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.common.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.member.presentation.dto.request.SignupRequest;
-import roomescape.member.presentation.dto.response.MemberResponse;
-import roomescape.member.presentation.dto.response.SignUpResponse;
+import roomescape.member.presentation.dto.request.SignupWebRequest;
+import roomescape.member.presentation.dto.response.MemberWebResponse;
+import roomescape.member.presentation.dto.response.SignUpWebResponse;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -37,8 +37,8 @@ public class MemberApplicationServiceTest {
 
     @Test
     void signUpTest() {
-        SignUpResponse response = memberApplicationService.signup(
-                new SignupRequest("member@gmail.com", "password", "member"));
+        SignUpWebResponse response = memberApplicationService.signup(
+                new SignupWebRequest("member@gmail.com", "password", "member"));
 
         Optional<Member> optionalMember = memberRepository.findById(response.id());
         assertThat(optionalMember.get().getName()).isEqualTo("member");
@@ -46,10 +46,10 @@ public class MemberApplicationServiceTest {
 
     @Test
     void findAllRegularTest() {
-        memberApplicationService.signup(new SignupRequest("member1@gmail.com", "password", "member1"));
-        memberApplicationService.signup(new SignupRequest("member2@gmail.com", "password", "member2"));
-        memberApplicationService.signup(new SignupRequest("member3@gmail.com", "password", "member3"));
-        List<MemberResponse> memberResponses = memberApplicationService.findAllRegular();
-        assertThat(memberResponses.size()).isEqualTo(3);
+        memberApplicationService.signup(new SignupWebRequest("member1@gmail.com", "password", "member1"));
+        memberApplicationService.signup(new SignupWebRequest("member2@gmail.com", "password", "member2"));
+        memberApplicationService.signup(new SignupWebRequest("member3@gmail.com", "password", "member3"));
+        List<MemberWebResponse> memberWebRespons = memberApplicationService.findAllRegular();
+        assertThat(memberWebRespons.size()).isEqualTo(3);
     }
 }

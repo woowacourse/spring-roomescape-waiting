@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
-import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
-import roomescape.theme.presentation.dto.response.ThemeResponse;
+import roomescape.theme.presentation.dto.request.ThemeCreateWebRequest;
+import roomescape.theme.presentation.dto.response.ThemeWebResponse;
 import roomescape.theme.application.ThemeApplicationService;
 
 @RestController
@@ -31,19 +31,19 @@ public class ThemeController {
 
     @RequireRole(MemberRole.ADMIN)
     @PostMapping
-    public ResponseEntity<ThemeResponse> create(
-            @RequestBody ThemeCreateRequest request
+    public ResponseEntity<ThemeWebResponse> create(
+            @RequestBody ThemeCreateWebRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(themeApplicationService.create(request));
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> findAll() {
+    public ResponseEntity<List<ThemeWebResponse>> findAll() {
         return ResponseEntity.ok(themeApplicationService.findAll());
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<ThemeResponse>> findPopular() {
+    public ResponseEntity<List<ThemeWebResponse>> findPopular() {
         return ResponseEntity.ok(themeApplicationService.findPopular(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
     }
 

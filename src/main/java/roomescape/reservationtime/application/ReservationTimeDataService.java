@@ -10,7 +10,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
+import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
 
 @Service
 public class ReservationTimeDataService {
@@ -38,7 +38,7 @@ public class ReservationTimeDataService {
                 .orElseThrow(() -> new ReservationSlotNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
     }
 
-    public List<AvailableReservationTimeResponse> findAvailable(
+    public List<AvailableReservationTimeWebResponse> findAvailable(
             final LocalDate date,
             final Long themeId
     ) {

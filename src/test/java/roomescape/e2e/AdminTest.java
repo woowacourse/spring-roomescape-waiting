@@ -24,7 +24,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.reservation.presentation.dto.response.WaitingResponse;
+import roomescape.reservation.presentation.dto.response.WaitingWebResponse;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -156,7 +156,7 @@ public class AdminTest {
     @Test
     void findWaitingReservation() {
         makeWaitingReservations();
-        List<WaitingResponse> responses = RestAssured.given().log().all()
+        List<WaitingWebResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
                 .when().get("/admin/waiting-reservations")
@@ -179,7 +179,7 @@ public class AdminTest {
                 .then().log().all()
                 .statusCode(204);
 
-        List<WaitingResponse> responses = RestAssured.given().log().all()
+        List<WaitingWebResponse> responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie(TOKEN, ADMIN_TOKEN)
                 .when().get("/admin/waiting-reservations")

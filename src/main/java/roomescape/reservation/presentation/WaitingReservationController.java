@@ -13,8 +13,8 @@ import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.WaitingReservationApplicationService;
-import roomescape.reservation.presentation.dto.response.WaitingResponse;
-import roomescape.reservationslot.presentation.dto.request.ConfirmedReservationCreateRequest;
+import roomescape.reservation.presentation.dto.response.WaitingWebResponse;
+import roomescape.reservation.presentation.dto.request.ConfirmedReservationCreateWebRequest;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 @RestController
@@ -30,7 +30,7 @@ public class WaitingReservationController {
     @RequireRole(MemberRole.REGULAR)
     @PostMapping("/waiting-reservations")
     public ResponseEntity<ReservationResponse> create(
-            @RequestBody ConfirmedReservationCreateRequest request,
+            @RequestBody ConfirmedReservationCreateWebRequest request,
             MemberInfo memberInfo
     ) {
         ReservationResponse reservationResponse = waitingReservationApplicationService.create(
@@ -40,9 +40,9 @@ public class WaitingReservationController {
 
     @RequireRole(MemberRole.ADMIN)
     @GetMapping("/admin/waiting-reservations")
-    public ResponseEntity<List<WaitingResponse>> findAll(
+    public ResponseEntity<List<WaitingWebResponse>> findAll(
     ) {
-        List<WaitingResponse> responses = waitingReservationApplicationService.findAll();
+        List<WaitingWebResponse> responses = waitingReservationApplicationService.findAll();
         return ResponseEntity.ok(responses);
     }
 

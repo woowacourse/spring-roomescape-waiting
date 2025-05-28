@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
+import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
+import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
+import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 
 @Service
 public class ReservationTimeApplicationService {
@@ -17,19 +17,19 @@ public class ReservationTimeApplicationService {
         this.reservationTimeDataService = reservationTimeDataService;
     }
 
-    public ReservationTimeResponse create(final ReservationTimeCreateRequest request) {
+    public ReservationTimeWebResponse create(final ReservationTimeCreateWebRequest request) {
         ReservationTime newReservationTime = reservationTimeDataService.create(request.toReservationTime());
-        return ReservationTimeResponse.from(newReservationTime);
+        return ReservationTimeWebResponse.from(newReservationTime);
     }
 
-    public List<ReservationTimeResponse> findAll() {
+    public List<ReservationTimeWebResponse> findAll() {
         return reservationTimeDataService.findAll()
                 .stream()
-                .map(ReservationTimeResponse::from)
+                .map(ReservationTimeWebResponse::from)
                 .toList();
     }
 
-    public List<AvailableReservationTimeResponse> findAvailable(
+    public List<AvailableReservationTimeWebResponse> findAvailable(
             final LocalDate date,
             final Long themeId
     ) {

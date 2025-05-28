@@ -25,9 +25,9 @@ import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
+import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
+import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
+import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 import roomescape.theme.application.ThemeDataService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
@@ -80,7 +80,7 @@ class ReservationTimeApplicationServiceTest {
     @Test
     void createReservationTime_shouldThrowException_IfDuplicated() {
         LocalTime time = LocalTime.of(1, 1);
-        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(time);
+        ReservationTimeCreateWebRequest request = new ReservationTimeCreateWebRequest(time);
 
         reservationTimeApplicationService.create(request);
 
@@ -92,62 +92,62 @@ class ReservationTimeApplicationServiceTest {
     @Test
     void createReservationTime_shouldReturnResponse_WhenSuccessful() {
         LocalTime time = LocalTime.of(9, 0);
-        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(time);
+        ReservationTimeCreateWebRequest request = new ReservationTimeCreateWebRequest(time);
 
-        ReservationTimeResponse response = reservationTimeApplicationService.create(request);
+        ReservationTimeWebResponse response = reservationTimeApplicationService.create(request);
 
         assertThat(response.startAt()).isEqualTo(time);
     }
 
     @Test
     void findAll() {
-        reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
+        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(10, 0)));
+        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
 
-        List<ReservationTimeResponse> result = reservationTimeApplicationService.findAll();
+        List<ReservationTimeWebResponse> result = reservationTimeApplicationService.findAll();
 
         assertThat(result).hasSize(2);
     }
 
     @Test
     void removeByIdReservationTime_shouldRemoveSuccessfully() {
-        ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(13, 30));
-        ReservationTimeResponse response = reservationTimeApplicationService.create(request);
+        ReservationTimeCreateWebRequest request = new ReservationTimeCreateWebRequest(LocalTime.of(13, 30));
+        ReservationTimeWebResponse response = reservationTimeApplicationService.create(request);
 
         reservationTimeApplicationService.removeById(response.id());
 
-        List<ReservationTimeResponse> result = reservationTimeApplicationService.findAll();
+        List<ReservationTimeWebResponse> result = reservationTimeApplicationService.findAll();
         assertThat(result).isEmpty();
     }
 
     @Test
     void removeByIdReservationTime_shouldThrowException_WhenReservationExists() {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
-                new ReservationTimeCreateRequest(LocalTime.now()));
-        confirmedReservationApplicationService.create(futureDate, reservationTimeResponse.id(),
+        ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
+                new ReservationTimeCreateWebRequest(LocalTime.now()));
+        confirmedReservationApplicationService.create(futureDate, reservationTimeWebResponse.id(),
                 theme.getId(), member.getId(),
                 afterOneHour);
-        assertThatThrownBy(() -> reservationTimeApplicationService.removeById(reservationTimeResponse.id()))
+        assertThatThrownBy(() -> reservationTimeApplicationService.removeById(reservationTimeWebResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
                 .hasMessageContaining("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     @Test
     void findAvailableReservationTimes_shouldReturnAllAvailable() {
-        ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
-        reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
+        ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
+                new ReservationTimeCreateWebRequest(LocalTime.of(10, 0)));
+        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
+        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(12, 0)));
 
-        confirmedReservationApplicationService.create(futureDate, reservationTimeResponse.id(),
+        confirmedReservationApplicationService.create(futureDate, reservationTimeWebResponse.id(),
                 theme.getId(), member.getId(),
                 afterOneHour);
-        List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(
+        List<AvailableReservationTimeWebResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(
                 futureDate, theme.getId());
 
         assertThat(
                 availableReservationTimes.stream()
-                        .filter(AvailableReservationTimeResponse::alreadyBooked)
+                        .filter(AvailableReservationTimeWebResponse::alreadyBooked)
                         .count())
                 .isEqualTo(1L);
     }

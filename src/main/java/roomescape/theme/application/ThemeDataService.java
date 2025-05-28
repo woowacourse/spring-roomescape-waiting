@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
-import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
+import roomescape.theme.presentation.dto.request.ThemeCreateWebRequest;
 
 @Service
 public class ThemeDataService {
@@ -22,7 +22,7 @@ public class ThemeDataService {
         this.themeRepository = themeRepository;
     }
 
-    public Theme create(final ThemeCreateRequest request) {
+    public Theme create(final ThemeCreateWebRequest request) {
         return themeRepository.save(request.toTheme());
     }
 

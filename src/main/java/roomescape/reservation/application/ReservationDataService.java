@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
@@ -55,7 +56,7 @@ public class ReservationDataService {
 
     public Reservation getById(final Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationOwnerException("존재하지 않는 예약입니다."));
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
     }
 
     public void removeWaitingReservation(final Reservation reservation) {

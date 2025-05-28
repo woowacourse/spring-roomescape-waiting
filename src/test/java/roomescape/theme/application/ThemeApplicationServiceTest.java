@@ -21,20 +21,20 @@ import roomescape.member.application.MemberApplicationService;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
-import roomescape.member.presentation.dto.request.SignupRequest;
-import roomescape.member.presentation.dto.response.SignUpResponse;
+import roomescape.member.presentation.dto.request.SignupWebRequest;
+import roomescape.member.presentation.dto.response.SignUpWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.application.ReservationTimeApplicationService;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
+import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
+import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
-import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
-import roomescape.theme.presentation.dto.response.ThemeResponse;
+import roomescape.theme.presentation.dto.request.ThemeCreateWebRequest;
+import roomescape.theme.presentation.dto.response.ThemeWebResponse;
 
 @DataJpaTest
 @Import(TestConfig.class)
@@ -79,18 +79,18 @@ class ThemeApplicationServiceTest {
 
     @Test
     void delete() {
-        ThemeResponse themeResponse = themeApplicationService.create(
-                new ThemeCreateRequest("논리", "논리 게임 with Vector", "image.png"));
-        themeApplicationService.delete(themeResponse.id());
+        ThemeWebResponse themeWebResponse = themeApplicationService.create(
+                new ThemeCreateWebRequest("논리", "논리 게임 with Vector", "image.png"));
+        themeApplicationService.delete(themeWebResponse.id());
         assertThat(themeApplicationService.findAll().size()).isEqualTo(0);
     }
 
     @Test
     void create() {
-        ThemeResponse themeResponse = themeApplicationService.create(
-                new ThemeCreateRequest("논리", "논리 게임 with Vector", "image.png"));
+        ThemeWebResponse themeWebResponse = themeApplicationService.create(
+                new ThemeCreateWebRequest("논리", "논리 게임 with Vector", "image.png"));
 
-        Optional<Theme> optionalTheme = themeRepository.findById(themeResponse.id());
+        Optional<Theme> optionalTheme = themeRepository.findById(themeWebResponse.id());
         assertThat(optionalTheme.get().getName()).isEqualTo("논리");
     }
 
@@ -99,107 +99,107 @@ class ThemeApplicationServiceTest {
         String email = "regular2@gmail.com";
         String password = "password";
         String name = "regular2";
-        SignUpResponse signUpResponse = memberApplicationService.signup(new SignupRequest(email, password, name));
-        Member member = memberRepository.findById(signUpResponse.id()).get();
+        SignUpWebResponse signUpWebResponse = memberApplicationService.signup(new SignupWebRequest(email, password, name));
+        Member member = memberRepository.findById(signUpWebResponse.id()).get();
 
-        ThemeResponse themeResponse1 = themeApplicationService.create(
-                new ThemeCreateRequest("추리", "셜록 홈즈: 실종된 보석의 비밀", "sherlock_jewel.png"));
-        ThemeResponse themeResponse2 = themeApplicationService.create(
-                new ThemeCreateRequest("논리", "양자 코드: 암호 해독 게임", "quantum_code.png"));
+        ThemeWebResponse themeWebResponse1 = themeApplicationService.create(
+                new ThemeCreateWebRequest("추리", "셜록 홈즈: 실종된 보석의 비밀", "sherlock_jewel.png"));
+        ThemeWebResponse themeWebResponse2 = themeApplicationService.create(
+                new ThemeCreateWebRequest("논리", "양자 코드: 암호 해독 게임", "quantum_code.png"));
 
-        ThemeResponse themeResponse3 = themeApplicationService.create(
-                new ThemeCreateRequest("공포", "저주받은 병원: 13호실의 비밀", "cursed_hospital.png"));
-        ThemeResponse themeResponse4 = themeApplicationService.create(
-                new ThemeCreateRequest("모험", "잃어버린 문명: 마야의 유산", "maya_civilization.png"));
+        ThemeWebResponse themeWebResponse3 = themeApplicationService.create(
+                new ThemeCreateWebRequest("공포", "저주받은 병원: 13호실의 비밀", "cursed_hospital.png"));
+        ThemeWebResponse themeWebResponse4 = themeApplicationService.create(
+                new ThemeCreateWebRequest("모험", "잃어버린 문명: 마야의 유산", "maya_civilization.png"));
 
-        ThemeResponse themeResponse5 = themeApplicationService.create(
-                new ThemeCreateRequest("판타지", "드래곤의 동굴: 마법의 보물", "dragon_cave.png"));
-        ThemeResponse themeResponse6 = themeApplicationService.create(
-                new ThemeCreateRequest("역사", "타임머신: 조선 왕조의 비밀", "joseon_dynasty.png"));
+        ThemeWebResponse themeWebResponse5 = themeApplicationService.create(
+                new ThemeCreateWebRequest("판타지", "드래곤의 동굴: 마법의 보물", "dragon_cave.png"));
+        ThemeWebResponse themeWebResponse6 = themeApplicationService.create(
+                new ThemeCreateWebRequest("역사", "타임머신: 조선 왕조의 비밀", "joseon_dynasty.png"));
 
-        ThemeResponse themeResponse7 = themeApplicationService.create(
-                new ThemeCreateRequest("SF", "화성 기지: 레드 플래닛의 음모", "mars_base.png"));
-        ThemeResponse themeResponse8 = themeApplicationService.create(
-                new ThemeCreateRequest("스릴러", "연쇄 살인마의 게임", "serial_killer_game.png"));
+        ThemeWebResponse themeWebResponse7 = themeApplicationService.create(
+                new ThemeCreateWebRequest("SF", "화성 기지: 레드 플래닛의 음모", "mars_base.png"));
+        ThemeWebResponse themeWebResponse8 = themeApplicationService.create(
+                new ThemeCreateWebRequest("스릴러", "연쇄 살인마의 게임", "serial_killer_game.png"));
 
-        ThemeResponse themeResponse9 = themeApplicationService.create(
-                new ThemeCreateRequest("코미디", "유머 수사대: 웃음을 찾아서", "humor_detective.png"));
+        ThemeWebResponse themeWebResponse9 = themeApplicationService.create(
+                new ThemeCreateWebRequest("코미디", "유머 수사대: 웃음을 찾아서", "humor_detective.png"));
 
-        ThemeResponse themeResponse10 = themeApplicationService.create(
-                new ThemeCreateRequest("액션", "비밀 요원: 마지막 미션", "secret_agent.png"));
-        ThemeResponse themeResponse11 = themeApplicationService.create(
-                new ThemeCreateRequest("신비", "신화의 미궁: 그리스 신들의 시험", "greek_gods.png"));
-        ThemeResponse themeResponse12 = themeApplicationService.create(
-                new ThemeCreateRequest("음악", "멜로디 탐정: 잃어버린 노래", "lost_melody.png"));
+        ThemeWebResponse themeWebResponse10 = themeApplicationService.create(
+                new ThemeCreateWebRequest("액션", "비밀 요원: 마지막 미션", "secret_agent.png"));
+        ThemeWebResponse themeWebResponse11 = themeApplicationService.create(
+                new ThemeCreateWebRequest("신비", "신화의 미궁: 그리스 신들의 시험", "greek_gods.png"));
+        ThemeWebResponse themeWebResponse12 = themeApplicationService.create(
+                new ThemeCreateWebRequest("음악", "멜로디 탐정: 잃어버린 노래", "lost_melody.png"));
 
-        ReservationTimeResponse reservationTimeResponse1 = reservationTimeApplicationService.create(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        ReservationTimeResponse reservationTimeResponse2 = reservationTimeApplicationService.create(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
+        ReservationTimeWebResponse reservationTimeWebResponse1 = reservationTimeApplicationService.create(
+                new ReservationTimeCreateWebRequest(LocalTime.of(10, 0)));
+        ReservationTimeWebResponse reservationTimeWebResponse2 = reservationTimeApplicationService.create(
+                new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
 
-        ReservationTime savedReservationTime = findReservationTime(reservationTimeResponse1);
-        ReservationTime savedReservationTime2 = findReservationTime(reservationTimeResponse2);
+        ReservationTime savedReservationTime = findReservationTime(reservationTimeWebResponse1);
+        ReservationTime savedReservationTime2 = findReservationTime(reservationTimeWebResponse2);
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(1), savedReservationTime,
                         member,
-                        findTheme(themeResponse1)));
+                        findTheme(themeWebResponse1)));
 
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(2), savedReservationTime,
                         member,
-                        findTheme(themeResponse2)));
+                        findTheme(themeWebResponse2)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(2), savedReservationTime2,
                         member,
-                        findTheme(themeResponse2)));
+                        findTheme(themeWebResponse2)));
 
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(3), savedReservationTime,
                         member,
-                        findTheme(themeResponse4)));
+                        findTheme(themeWebResponse4)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(3), savedReservationTime2,
                         member,
-                        findTheme(themeResponse5)));
+                        findTheme(themeWebResponse5)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(4), savedReservationTime,
                         member,
-                        findTheme(themeResponse6)));
+                        findTheme(themeWebResponse6)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(4), savedReservationTime2,
                         member,
-                        findTheme(themeResponse7)));
+                        findTheme(themeWebResponse7)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(5), savedReservationTime,
                         member,
-                        findTheme(themeResponse8)));
+                        findTheme(themeWebResponse8)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(5), savedReservationTime2,
                         member,
-                        findTheme(themeResponse9)));
+                        findTheme(themeWebResponse9)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(6), savedReservationTime,
                         member,
-                        findTheme(themeResponse10)));
+                        findTheme(themeWebResponse10)));
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(6), savedReservationTime2,
                         member,
-                        findTheme(themeResponse11)));
+                        findTheme(themeWebResponse11)));
 
-        List<ThemeResponse> themes = themeApplicationService.findPopular(7, 10);
+        List<ThemeWebResponse> themes = themeApplicationService.findPopular(7, 10);
 
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(themes.size()).isEqualTo(10);
-            softAssertions.assertThat(themes).doesNotContain(themeResponse3, themeResponse12);
-            softAssertions.assertThat(themes.getFirst()).isEqualTo(themeResponse2);
+            softAssertions.assertThat(themes).doesNotContain(themeWebResponse3, themeWebResponse12);
+            softAssertions.assertThat(themes.getFirst()).isEqualTo(themeWebResponse2);
         });
     }
 
-    private ReservationTime findReservationTime(final ReservationTimeResponse reservationTimeResponse) {
-        return reservationTimeRepository.findById(reservationTimeResponse.id()).orElseThrow();
+    private ReservationTime findReservationTime(final ReservationTimeWebResponse reservationTimeWebResponse) {
+        return reservationTimeRepository.findById(reservationTimeWebResponse.id()).orElseThrow();
     }
 
-    private Theme findTheme(final ThemeResponse themeResponse) {
-        return themeRepository.findById(themeResponse.id()).orElseThrow();
+    private Theme findTheme(final ThemeWebResponse themeWebResponse) {
+        return themeRepository.findById(themeWebResponse.id()).orElseThrow();
     }
 }

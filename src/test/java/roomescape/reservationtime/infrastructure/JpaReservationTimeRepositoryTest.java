@@ -15,7 +15,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
+import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -55,11 +55,11 @@ class JpaReservationTimeRepositoryTest {
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(FUTURE_DATE, reservationTime2, member, theme));
 
-        List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeRepository.findAvailable(
+        List<AvailableReservationTimeWebResponse> availableReservationTimes = reservationTimeRepository.findAvailable(
                 FUTURE_DATE, theme.getId());
 
         long count = availableReservationTimes.stream()
-                .filter(AvailableReservationTimeResponse::alreadyBooked)
+                .filter(AvailableReservationTimeWebResponse::alreadyBooked)
                 .count();
         assertThat(count).isEqualTo(1);
     }

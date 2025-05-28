@@ -3,14 +3,13 @@ package roomescape.theme.presentation.dto.request;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
-import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
 
-class ThemeCreateRequestTest {
+class ThemeCreateWebRequestTest {
 
     @Test
     void create_shouldThrowException_whenNameNull() {
         assertThatThrownBy(
-                () -> new ThemeCreateRequest(
+                () -> new ThemeCreateWebRequest(
                         null,
                         "description",
                         "thumbnail"
@@ -21,7 +20,7 @@ class ThemeCreateRequestTest {
     @Test
     void create_shouldThrowException_whenDescriptionNull() {
         assertThatThrownBy(
-                () -> new ThemeCreateRequest(
+                () -> new ThemeCreateWebRequest(
                         "name",
                         null,
                         "thumbnail"
@@ -32,7 +31,7 @@ class ThemeCreateRequestTest {
     @Test
     void create_shouldThrowException_whenThumbnailNull() {
         assertThatThrownBy(
-                () -> new ThemeCreateRequest(
+                () -> new ThemeCreateWebRequest(
                         "name",
                         "description",
                         null

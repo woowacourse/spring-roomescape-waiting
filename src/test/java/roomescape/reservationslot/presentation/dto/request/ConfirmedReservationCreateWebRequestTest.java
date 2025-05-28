@@ -4,13 +4,14 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
+import roomescape.reservation.presentation.dto.request.ConfirmedReservationCreateWebRequest;
 
-class ConfirmedReservationCreateRequestTest {
+class ConfirmedReservationCreateWebRequestTest {
 
     @Test
     void create_shouldThrowException_whenDateNull() {
         assertThatThrownBy(
-                () -> new ConfirmedReservationCreateRequest(
+                () -> new ConfirmedReservationCreateWebRequest(
                         null,
                         1L,
                         1L
@@ -21,7 +22,7 @@ class ConfirmedReservationCreateRequestTest {
     @Test
     void create_shouldThrowException_whenTimeIdNull() {
         assertThatThrownBy(
-                () -> new ConfirmedReservationCreateRequest(
+                () -> new ConfirmedReservationCreateWebRequest(
                         LocalDate.parse("2025-12-25"),
                         null,
                         1L
@@ -32,7 +33,7 @@ class ConfirmedReservationCreateRequestTest {
     @Test
     void create_shouldThrowException_whenThemeIdNull() {
         assertThatThrownBy(
-                () -> new ConfirmedReservationCreateRequest(
+                () -> new ConfirmedReservationCreateWebRequest(
                         LocalDate.parse("2025-12-25"),
                         1L,
                         null
@@ -43,7 +44,7 @@ class ConfirmedReservationCreateRequestTest {
     @Test
     void create_shouldThrowException_whenDateformatIllegal() {
         assertThatThrownBy(
-                () -> new ConfirmedReservationCreateRequest(
+                () -> new ConfirmedReservationCreateWebRequest(
                         LocalDate.parse("2025-12"),
                         1L,
                         1L

@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
-import roomescape.theme.presentation.dto.response.ThemeResponse;
+import roomescape.theme.presentation.dto.request.ThemeCreateWebRequest;
+import roomescape.theme.presentation.dto.response.ThemeWebResponse;
 
 @Service
 public class ThemeApplicationService {
@@ -25,21 +25,21 @@ public class ThemeApplicationService {
         this.clock = clock;
     }
 
-    public ThemeResponse create(final ThemeCreateRequest request) {
+    public ThemeWebResponse create(final ThemeCreateWebRequest request) {
         Theme theme = themeDataService.save(request.toTheme());
-        return ThemeResponse.from(theme);
+        return ThemeWebResponse.from(theme);
     }
 
-    public List<ThemeResponse> findAll() {
+    public List<ThemeWebResponse> findAll() {
         return themeDataService.findAll().stream()
-                .map(ThemeResponse::from)
+                .map(ThemeWebResponse::from)
                 .toList();
     }
 
-    public List<ThemeResponse> findPopular(int days, int limit) {
+    public List<ThemeWebResponse> findPopular(int days, int limit) {
         Page<Theme> popularThemes = themeDataService.findPopularThemes(clock, days, limit);
         return popularThemes.getContent().stream()
-                .map(ThemeResponse::from)
+                .map(ThemeWebResponse::from)
                 .toList();
     }
 

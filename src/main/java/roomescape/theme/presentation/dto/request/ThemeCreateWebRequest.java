@@ -2,12 +2,12 @@ package roomescape.theme.presentation.dto.request;
 
 import roomescape.theme.domain.Theme;
 
-public record ThemeCreateRequest(
+public record ThemeCreateWebRequest(
         String name,
         String description,
         String thumbnail
 ) {
-    public ThemeCreateRequest {
+    public ThemeCreateWebRequest {
         if (name == null) {
             throw new IllegalArgumentException("이름은 null일 수 없습니다.");
         }

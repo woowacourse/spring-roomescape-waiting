@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservationtime.application.ReservationTimeApplicationService;
-import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
-import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
+import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
+import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
+import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 
 @RestController
 @RequestMapping("/times")
@@ -31,20 +31,20 @@ public class ReservationTimeController {
 
     @RequireRole(MemberRole.ADMIN)
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> create(
-            @RequestBody ReservationTimeCreateRequest request
+    public ResponseEntity<ReservationTimeWebResponse> create(
+            @RequestBody ReservationTimeCreateWebRequest request
     ) {
-        ReservationTimeResponse dto = reservationTimeApplicationService.create(request);
+        ReservationTimeWebResponse dto = reservationTimeApplicationService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationTimeResponse>> findAll() {
+    public ResponseEntity<List<ReservationTimeWebResponse>> findAll() {
         return ResponseEntity.ok(reservationTimeApplicationService.findAll());
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<AvailableReservationTimeResponse>> findAvailable(
+    public ResponseEntity<List<AvailableReservationTimeWebResponse>> findAvailable(
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") Long themeId
     ) {
