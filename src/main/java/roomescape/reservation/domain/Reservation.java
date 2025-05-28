@@ -40,7 +40,6 @@ public class Reservation {
     public Reservation(final Member member, final ReservationSlot reservationSlot) {
         this.member = member;
         this.reservationSlot = reservationSlot;
-        reservationSlot.getReservations().add(this);
     }
 
     protected Reservation() {
