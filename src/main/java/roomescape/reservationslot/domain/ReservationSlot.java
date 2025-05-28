@@ -17,8 +17,10 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationAlreadyExistsException;
@@ -51,7 +53,7 @@ public class ReservationSlot {
     private Theme theme;
 
     @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private List<Reservation> reservations = new ArrayList<>();
+    private Set<Reservation> reservations = new HashSet<>();
 
     public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
         this.date = date;
@@ -142,7 +144,7 @@ public class ReservationSlot {
         return theme;
     }
 
-    public List<Reservation> getReservations() {
+    public Set<Reservation> getReservations() {
         return reservations;
     }
 }
