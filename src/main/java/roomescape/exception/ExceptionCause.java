@@ -34,6 +34,8 @@ public enum ExceptionCause {
     UNAUTHORIZED_ACCESS("접근 권한이 없습니다."),
     UNAUTHORIZED_LOGIN_ACCESS("로그인 정보를 다시 확인해 주세요."),
 
+    WAITING_STATUS_INVALID("예약 대기 상태가 잘못되었습니다"),
+
     INPUT_INVALID("값이 잘못되었습니다"),
 
     JWT_TOKEN_EMPTY("로그인이 필요합니다."),

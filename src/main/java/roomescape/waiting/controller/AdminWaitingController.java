@@ -32,7 +32,7 @@ public class AdminWaitingController {
     }
 
     @PostMapping("/{id}")
-    public ResponseEntity<AdminWaitingUpdateResponse> updateWaitingStatus(@RequestParam("status") WaitingStatus status,
+    public ResponseEntity<AdminWaitingUpdateResponse> updateWaitingStatus(@RequestParam("status") String status,
                                                                           @PathVariable("id") Long waitingId,
                                                                           Member member) {
         member.validateAdminOrThrow();

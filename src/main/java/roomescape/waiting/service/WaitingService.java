@@ -1,5 +1,6 @@
 package roomescape.waiting.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -19,7 +20,6 @@ import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingSlot;
 import roomescape.waiting.domain.WaitingStatus;
 import roomescape.waiting.dto.AdminWaitingResponse;
 import roomescape.waiting.dto.AdminWaitingUpdateResponse;
@@ -71,13 +71,14 @@ public class WaitingService {
     }
 
     @Transactional
-    public AdminWaitingUpdateResponse updateWaitingStatus(WaitingStatus status, Long waitingId) {
+    public AdminWaitingUpdateResponse updateWaitingStatus(String status, Long waitingId) {
+        WaitingStatus waitingStatus = WaitingStatus.getStatus(status);
         Waiting waiting = findWaitingById(waitingId);
-        waiting.updateStatus(status);
-        if (status == WaitingStatus.APPROVED) {
+        waiting.updateStatus(waitingStatus);
+        if (waitingStatus == WaitingStatus.APPROVED) {
             updateWaitingToReservation(waiting);
         }
-        return AdminWaitingUpdateResponse.from(status);
+        return AdminWaitingUpdateResponse.from(waitingStatus);
     }
 
     private void updateWaitingToReservation(Waiting waiting) {
@@ -95,18 +96,6 @@ public class WaitingService {
     private Waiting findWaitingById(Long waitingId) {
         return waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new NotFoundException(ExceptionCause.WAITING_NOTFOUND));
-    }
-
-    private List<Waiting> getEarliestWaitingOnly(List<Waiting> waitings) {
-        Map<WaitingSlot, Waiting> earliestWaitingOnly = new HashMap<>();
-        for (Waiting waiting : waitings) {
-            WaitingSlot key = WaitingSlot.from(waiting);
-            if (!earliestWaitingOnly.containsKey(key) || waiting.getCreatedAt()
-                    .isBefore(earliestWaitingOnly.get(key).getCreatedAt())) {
-                earliestWaitingOnly.put(key, waiting);
-            }
-        }
-        return earliestWaitingOnly.values().stream().toList();
     }
 
     private Waiting buildWaiting(WaitingCreateRequest waitingCreateRequest, Member member) {
@@ -149,6 +138,28 @@ public class WaitingService {
         LocalDateTime currentDateTime = LocalDateTime.now();
         if (requestDateTime.isBefore(currentDateTime) || requestDateTime.equals(currentDateTime)) {
             throw new BadRequestException(ExceptionCause.RESERVATION_INVALID_FOR_PAST);
+        }
+    }
+
+    private List<Waiting> getEarliestWaitingOnly(List<Waiting> waitings) {
+        Map<WaitingSlot, Waiting> earliestWaitingOnly = new HashMap<>();
+        for (Waiting waiting : waitings) {
+            WaitingSlot key = WaitingSlot.from(waiting);
+            if (!earliestWaitingOnly.containsKey(key) ||
+                    waiting.getCreatedAt().isBefore(earliestWaitingOnly.get(key).getCreatedAt())) {
+                earliestWaitingOnly.put(key, waiting);
+            }
+        }
+        return earliestWaitingOnly.values().stream().toList();
+    }
+
+    record WaitingSlot(
+            Theme theme,
+            ReservationTime time,
+            LocalDate date
+    ) {
+        static WaitingSlot from(Waiting waiting) {
+            return new WaitingSlot(waiting.getTheme(), waiting.getTime(), waiting.getDate());
         }
     }
 }
