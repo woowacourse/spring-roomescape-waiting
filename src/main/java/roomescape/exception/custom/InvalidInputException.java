@@ -9,7 +9,7 @@ public class InvalidInputException extends CustomException {
         super(ErrorCode.INVALID_INPUT);
     }
 
-    public InvalidInputException(String detail) {
+    public InvalidInputException(final String detail) {
         super(ErrorCode.INVALID_INPUT, detail);
     }
 }

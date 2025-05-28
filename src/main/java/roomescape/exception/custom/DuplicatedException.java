@@ -9,7 +9,7 @@ public class DuplicatedException extends CustomException {
         super(ErrorCode.DUPLICATED);
     }
 
-    public DuplicatedException(String detail) {
+    public DuplicatedException(final String detail) {
         super(ErrorCode.DUPLICATED, detail);
     }
 }

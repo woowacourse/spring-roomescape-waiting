@@ -9,7 +9,7 @@ public class AuthenticatedException extends CustomException {
         super(ErrorCode.NOT_AUTHENTICATED);
     }
 
-    public AuthenticatedException(String detail) {
+    public AuthenticatedException(final String detail) {
         super(ErrorCode.NOT_AUTHENTICATED, detail);
     }
 }

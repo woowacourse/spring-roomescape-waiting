@@ -82,7 +82,7 @@ public class AdminReservationControllerTest {
     private Map<String, Object> getTestParamsWithReservation() {
         return Map.of(
             "memberId", 1,
-            "date", "2024-04-26",
+            "date", "2025-12-12",
             "timeId", 1,
             "themeId", 1
         );
