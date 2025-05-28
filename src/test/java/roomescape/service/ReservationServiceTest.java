@@ -146,7 +146,7 @@ class ReservationServiceTest {
         LoginMember loginMember = LoginMember.from(savedReservation.getMember());
 
         Waiting savedWaiting = createSaveWaiting(savedReservation);
-        WaitingWithRank waitingWithRank = new WaitingWithRank(savedWaiting, 0L);
+        WaitingWithRank waitingWithRank = new WaitingWithRank(savedWaiting, 1L);
 
         //when
         List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);

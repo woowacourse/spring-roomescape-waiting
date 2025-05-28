@@ -32,7 +32,12 @@ function render(data) {
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+
+        if (status === "예약") {
+            row.insertCell(3).textContent = status
+        } else {
+            row.insertCell(3).textContent = status + "번째 예약대기";
+        }
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
