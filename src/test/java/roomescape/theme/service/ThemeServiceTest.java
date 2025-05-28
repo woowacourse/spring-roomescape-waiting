@@ -36,7 +36,7 @@ import roomescape.theme.repository.ThemeRepository;
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-        "spring.sql.init.data-locations="
+        "spring.sql.init.mode=never"
 })
 class ThemeServiceTest {
 
@@ -67,9 +67,9 @@ class ThemeServiceTest {
     void setUp() {
         themeService = new ThemeService(themeRepository, reservationRepository);
         memberService = new MemberService(memberRepository, myPasswordEncoder);
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
-                memberRepository);
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository,
+                reservationRepository);
+        reservationService = new ReservationService(reservationRepository);
     }
 
     @Test

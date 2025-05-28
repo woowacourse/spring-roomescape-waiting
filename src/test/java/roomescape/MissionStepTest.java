@@ -118,8 +118,8 @@ public class MissionStepTest {
             createTheme("추리");
 
             jdbcTemplate.update(
-                    "INSERT INTO reservation (date, time_id, theme_id, member_id,reservation_status) VALUES (?, ?, ?, ?,?)",
-                    futureDate, "1", "1", "1", "RESERVED");
+                    "INSERT INTO reservation (date, time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                    futureDate, "1", "1", "1");
 
             RestAssured.given().log().all()
                     .when().get("/reservations")
@@ -409,6 +409,116 @@ public class MissionStepTest {
 
             assertThat(responses.size()).isEqualTo(1);
         }
+        @Test
+        void step3_createWaiting() {
+            createReservationTime();
+            createTheme("추리");
+            createUserReservation(1L);   //  RESERVED
+            createUserReservation(1L);   // WAITING
+
+            RestAssured.given().log().all()
+                    .cookie(TOKEN, USER_TOKEN)
+                    .when().get("/waiting")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+        }
+
+        @Test
+        void step3_findMyReservations() {
+            createReservationTime();
+            createTheme("추리");
+            createUserReservation(1L);   // RESERVED
+            createUserReservation(1L);   // WAITING
+
+            RestAssured.given().log().all()
+                    .cookie(TOKEN, USER_TOKEN)
+                    .when().get("/reservations-mine")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(2));
+        }
+
+        @Test
+        void step3_deleteWaiting() {
+            createReservationTime();
+            createTheme("추리");
+            createUserReservation(1L);   // RESERVED
+            createUserReservation(1L);   // WAITING
+
+            Long waitingId = RestAssured.given().log().all()
+                    .cookie(TOKEN, USER_TOKEN)
+                    .when().get("/waiting")
+                    .then().extract().jsonPath().getLong("[0].id");
+
+            RestAssured.given().log().all()
+                    .cookie(TOKEN, USER_TOKEN)
+                    .when().delete("/waiting/" + waitingId)
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .when().get("/waiting")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(0));
+        }
+
+        @Test
+        void step4_findWaiting() {
+            createReservationTime();
+            createTheme("추리");
+            createUserReservation(1L);
+            createUserReservation(1L);
+
+
+            RestAssured.given().log().all()
+                    .cookie(TOKEN, loginAndGetAuthToken(ADMIN_EMAIL, PASSWORD))
+                    .when().get("/waiting")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(1));
+        }
+        @Test
+        void step4_cancelReservation_promotesWaiting() {
+            createReservationTime();
+            createTheme("추리");
+            createUserReservation(1L);
+            createUserReservation(1L);
+
+            String adminToken = loginAndGetAuthToken(ADMIN_EMAIL, PASSWORD);
+
+            List<ReservationResponse> before = RestAssured.given().log().all()
+                    .cookie(TOKEN, adminToken)
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract().as(new TypeRef<List<ReservationResponse>>() {});
+            assertThat(before).hasSize(1);
+            Long reservedId = before.get(0).id();
+
+            RestAssured.given().log().all()
+                    .cookie(TOKEN, adminToken)
+                    .when().delete("/reservations/" + reservedId)
+                    .then().log().all()
+                    .statusCode(204);
+
+            List<ReservationResponse> after = RestAssured.given().log().all()
+                    .cookie(TOKEN, adminToken)
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract().as(new TypeRef<List<ReservationResponse>>() {});
+            assertThat(after).hasSize(1);
+
+            RestAssured.given().log().all()
+                    .cookie(TOKEN, adminToken)
+                    .when().get("/waiting")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(0));
+        }
+
     }
 
     private static String loginAndGetAuthToken(final String email, final String password) {
@@ -479,4 +589,6 @@ public class MissionStepTest {
                 .statusCode(200)
                 .body("size()", is(size));
     }
+
+
 }

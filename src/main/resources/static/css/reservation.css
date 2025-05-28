@@ -13,3 +13,18 @@
     color: #666666;
     cursor: not-allowed;
 }
+
+.time-slot.already-booked {
+    background-color: #e0e0e0;
+    color: #888;
+    cursor: pointer;
+}
+
+.time-slot.booked {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-color: #f5c6cb;
+}
+.time-slot.booked.active {
+    box-shadow: 0 0 0 3px rgba(114,28,36,0.5);
+}

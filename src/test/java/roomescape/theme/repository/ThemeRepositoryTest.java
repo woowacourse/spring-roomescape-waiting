@@ -24,7 +24,7 @@ import roomescape.theme.domain.Theme;
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-        "spring.sql.init.data-locations="
+    "spring.sql.init.mode=never"
 })
 class ThemeRepositoryTest {
 
@@ -108,7 +108,7 @@ class ThemeRepositoryTest {
         reservationRepository.save(
                 TestFixture.makeReservation(futureDate.minusDays(6), reservationTime2, member, theme11));
 
-        List<Theme> themes = themeRepository.findTop10PopularThemesWithinLastWeek(futureDate.minusDays(7),
+        List<Theme> themes = themeRepository.findPopularThemesWithinDateRange(futureDate.minusDays(7),
                 futureDate.minusDays(1),
                 PageRequest.of(0, 10));
 

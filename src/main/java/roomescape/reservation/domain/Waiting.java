@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -16,9 +17,8 @@ import roomescape.reservation.exception.InvalidReservationException;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,21 +28,25 @@ public class Reservation {
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
+    @Column(name = "turn", nullable = false)
+    private int turn;
+
     @Embedded
     private ReservationInfo info;
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public Reservation(final Member member, final ReservationInfo info) {
+    public Waiting(final Member member, final ReservationInfo info, final int turn) {
         this.member = member;
         this.info = info;
+        this.turn = turn;
     }
 
-    public static Reservation createUpcomingReservationWithUnassignedId(final Member member,
-                                                                        final ReservationInfo reservationInfo) {
+    public static Waiting createUpcomingReservationWithUnassignedId(final Member member, final int turn,
+                                                                    final ReservationInfo reservationInfo) {
         validateDateTime(reservationInfo);
-        return new Reservation(member, reservationInfo);
+        return new Waiting(member, reservationInfo, turn);
     }
 
     private static void validateDateTime(ReservationInfo reservationInfo) {
@@ -56,12 +60,16 @@ public class Reservation {
         return id;
     }
 
-    public Member getMember() {
-        return member;
-    }
-
     public ReservationInfo getInfo() {
         return info;
+    }
+
+    public int getTurn() {
+        return turn;
+    }
+
+    public Member getMember() {
+        return member;
     }
 
     public ReservationTime getTime() {
@@ -84,9 +92,13 @@ public class Reservation {
         return info.getIdOfTheme();
     }
 
+    public Long getMemberId() {
+        return member.getId();
+    }
+
     @Override
     public boolean equals(final Object object) {
-        if (!(object instanceof final Reservation that)) {
+        if (!(object instanceof final Waiting that)) {
             return false;
         }
         return Objects.equals(getId(), that.getId());

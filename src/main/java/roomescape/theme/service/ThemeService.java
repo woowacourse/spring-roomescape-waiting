@@ -10,6 +10,7 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
+import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 
 @Service
@@ -22,7 +23,8 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
+    public ThemeService(final ThemeRepository themeRepository,
+                        final ReservationRepository reservationRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
     }
@@ -48,10 +50,15 @@ public class ThemeService {
     public List<ThemeResponse> getPopularThemes() {
         final LocalDate date = LocalDate.now();
         Pageable pageable = PageRequest.of(0, DEFAULT_POPULAR_SIZE);
-        return themeRepository.findTop10PopularThemesWithinLastWeek(date.minusDays(POPULAR_START_DAYS),
+        return themeRepository.findPopularThemesWithinDateRange(date.minusDays(POPULAR_START_DAYS),
                         date.minusDays(POPULAR_END_DAYS), pageable)
                 .stream()
                 .map(ThemeResponse::from)
                 .toList();
+    }
+
+    public Theme findTheme(final Long request) {
+        return themeRepository.findById(request)
+                .orElseThrow(() -> new ThemeNotFoundException("요청한 id와 일치하는 테마 정보가 없습니다."));
     }
 }

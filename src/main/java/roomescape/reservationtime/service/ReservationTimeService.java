@@ -3,7 +3,6 @@ package roomescape.reservationtime.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.repository.JpaReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
@@ -11,6 +10,7 @@ import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
+import roomescape.reservationtime.exception.ReservationTimeNotFoundException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 
 @Service
@@ -44,13 +44,23 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(newReservationTime);
     }
 
-    private void validateIsTimeUnique(final ReservationTimeCreateRequest request) {
+    void validateIsTimeUnique(final ReservationTimeCreateRequest request) {
         if (reservationTimeRepository.existsByStartAt(request.startAt())) {
             throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");
         }
     }
 
-    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date, final Long themeId) {
+    public List<AvailableReservationTimeResponse> getAvailableReservationTimes(final LocalDate date,
+                                                                               final Long themeId) {
         return reservationRepository.findBookedTimesByDateAndThemeId(date, themeId);
+    }
+
+    public ReservationTime findReservationTime(final Long reservationTimeId) {
+        return reservationTimeRepository.findById(reservationTimeId)
+                .orElseThrow(() -> new ReservationTimeNotFoundException("요청한 id와 일치하는 예약 시간 정보가 없습니다."));
+    }
+
+    public ReservationTime save(final ReservationTime reservationTime) {
+        return reservationTimeRepository.save(reservationTime);
     }
 }

@@ -14,11 +14,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.TestConfig;
+import roomescape.global.auth.service.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
+import roomescape.member.service.MemberService;
 import roomescape.reservation.fixture.TestFixture;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.WaitingRepository;
+import roomescape.reservation.service.ReservationFacadeService;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.WaitingService;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
@@ -27,11 +32,12 @@ import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.service.ThemeService;
 
 @DataJpaTest
 @Import(TestConfig.class)
 @TestPropertySource(properties = {
-        "spring.sql.init.data-locations="
+        "spring.sql.init.mode=never"
 })
 class ReservationTimeServiceTest {
 
@@ -41,8 +47,8 @@ class ReservationTimeServiceTest {
     private Theme theme = TestFixture.makeTheme(1L);
     private Member member = TestFixture.makeMember();
 
-    private ReservationService reservationService;
     private ReservationTimeService reservationTimeService;
+    private ReservationFacadeService reservationFacadeService;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;
@@ -56,13 +62,22 @@ class ReservationTimeServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @BeforeEach
     void setUp() {
-        reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+        reservationTimeService = new ReservationTimeService(reservationTimeRepository,
+                reservationRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
-                memberRepository);
+        reservationFacadeService = new ReservationFacadeService(
+                new ReservationService(reservationRepository),
+                new WaitingService(waitingRepository),
+                new MemberService(memberRepository, new MyPasswordEncoder()),
+                new ThemeService(themeRepository, reservationRepository),
+                new ReservationTimeService(reservationTimeRepository, reservationRepository)
+        );
     }
 
     @Test
@@ -112,8 +127,8 @@ class ReservationTimeServiceTest {
     void deleteReservationTime_shouldThrowException_WhenReservationExists() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
-                afterOneHour);
+        reservationFacadeService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId()
+        );
         assertThatThrownBy(() -> reservationTimeService.delete(reservationTimeResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
                 .hasMessageContaining("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
@@ -126,8 +141,8 @@ class ReservationTimeServiceTest {
         reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
         reservationTimeService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
-                afterOneHour);
+        reservationFacadeService.create(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId()
+        );
         List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.getAvailableReservationTimes(
                 futureDate, theme.getId());
 

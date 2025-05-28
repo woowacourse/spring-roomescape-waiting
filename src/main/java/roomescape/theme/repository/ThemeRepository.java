@@ -8,7 +8,7 @@ import roomescape.theme.domain.Theme;
 
 public interface ThemeRepository {
 
-    List<Theme> findTop10PopularThemesWithinLastWeek(LocalDate fromDate, LocalDate toDate, Pageable pageable);
+    List<Theme> findPopularThemesWithinDateRange(LocalDate fromDate, LocalDate toDate, Pageable pageable);
 
     List<Theme> findAll();
 

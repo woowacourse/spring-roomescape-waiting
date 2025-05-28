@@ -43,4 +43,9 @@ public class MemberService {
         return memberRepository.findById(userInfo.id())
                 .orElseThrow(() -> new MemberNotFoundException("존재하지 않은 멤버입니다."));
     }
+
+    public Member findUserByMemberId(final Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new MemberNotFoundException("멤버를 찾을 수 없습니다."));
+    }
 }

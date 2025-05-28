@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 import roomescape.member.exception.InvalidMemberException;
 
 @Entity
@@ -67,5 +68,18 @@ public class Member {
 
     public MemberRole getMemberRole() {
         return memberRole;
+    }
+
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final Member that)) {
+            return false;
+        }
+        return Objects.equals(getId(), that.getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(getId());
     }
 }
