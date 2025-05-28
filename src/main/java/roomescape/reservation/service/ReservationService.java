@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.InvalidIdException;
 import roomescape.common.exception.InvalidTimeException;
@@ -12,9 +13,10 @@ import roomescape.common.exception.message.ReservationExceptionMessage;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.WaitingResponse;
 import roomescape.reservation.dto.admin.AdminReservationRequest;
 import roomescape.reservation.dto.admin.AdminReservationSearchRequest;
 import roomescape.reservation.dto.user.UserReservationRequest;
@@ -25,7 +27,6 @@ import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
 public class ReservationService {
-
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository timeRepository;
     private final ThemeRepository themeRepository;
@@ -49,12 +50,6 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationResponse> findAllByMemberId(final Long memberId) {
-        return reservationRepository.findAllByMemberId(memberId).stream()
-                .map(MyReservationResponse::from)
-                .toList();
-    }
-
     public List<ReservationResponse> findAllByMemberAndThemeAndDate(
             final AdminReservationSearchRequest request
     ) {
@@ -69,6 +64,47 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<WaitingResponse> findAllWaiting() {
+        return reservationRepository.findAllWaiting()
+                .stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public ReservationResponse addFromWaiting(final Long id) {
+        Reservation waitingReservation = reservationRepository.findByWaitingId(id)
+                .orElseThrow(() -> new InvalidIdException(
+                        IdExceptionMessage.INVALID_RESERVATION_WAITING_ID.getMessage())
+                );
+
+        Reservation bookedReservation = new Reservation(
+                waitingReservation.getMember(),
+                waitingReservation.getDate(),
+                waitingReservation.getTime(),
+                waitingReservation.getTheme(),
+                Status.BOOKED
+        );
+
+        validateDuplicateReservationExceptWaiting(bookedReservation.getDate(), bookedReservation.getTime());
+        reservationRepository.deleteById(id);
+
+        Reservation savedReservation = reservationRepository.save(bookedReservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
+    @Transactional
+    public ReservationResponse addWaiting(final Long memberId, final UserReservationRequest request) {
+        Member member = searchMember(memberId);
+        ReservationTime reservationTime = searchReservationTime(request.timeId());
+        validateFutureTime(request.date(), reservationTime);
+        Theme theme = searchTheme(request.themeId());
+
+        Reservation newReservation = new Reservation(member, request.date(), reservationTime, theme, Status.WAITING);
+        Reservation savedReservation = reservationRepository.save(newReservation);
+        return ReservationResponse.from(savedReservation);
+    }
+
     public ReservationResponse addByUser(final Long memberId, final UserReservationRequest request) {
         return addReservation(memberId, request.date(), request.timeId(), request.themeId());
     }
@@ -77,13 +113,14 @@ public class ReservationService {
         return addReservation(request.memberId(), request.date(), request.timeId(), request.themeId());
     }
 
-    private ReservationResponse addReservation(Long memberId, LocalDate date, Long timeId, Long themeId) {
+    @Transactional
+    public ReservationResponse addReservation(Long memberId, LocalDate date, Long timeId, Long themeId) {
         Member member = searchMember(memberId);
         ReservationTime reservationTime = searchReservationTime(timeId);
         validateRequest(date, reservationTime);
         Theme theme = searchTheme(themeId);
 
-        Reservation newReservation = new Reservation(member, date, reservationTime, theme);
+        Reservation newReservation = new Reservation(member, date, reservationTime, theme, Status.BOOKED);
         Reservation savedReservation = reservationRepository.save(newReservation);
         return ReservationResponse.from(savedReservation);
     }
@@ -107,6 +144,20 @@ public class ReservationService {
         return reservationTime.getStartAt().isBefore(LocalTime.now());
     }
 
+    private void validateDuplicateReservationExceptWaiting(
+            final LocalDate reservationDate,
+            final ReservationTime reservationTime
+    ) {
+        boolean isOccupiedByReservation = reservationRepository.existsByDateAndTimeIdAndStatus(
+                reservationDate,
+                reservationTime.getId(),
+                Status.BOOKED
+        );
+        if (isOccupiedByReservation) {
+            throw new DuplicateException(ReservationExceptionMessage.OCCUPIED_RESERVATION.getMessage());
+        }
+    }
+
     private void validateDuplicateReservation(
             final LocalDate reservationDate,
             final ReservationTime reservationTime
@@ -121,13 +172,7 @@ public class ReservationService {
     }
 
     public void deleteById(final Long id) {
-        searchReservation(id);
         reservationRepository.deleteById(id);
-    }
-
-    private void searchReservation(final Long id) {
-        reservationRepository.findById(id)
-                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_RESERVATION_ID.getMessage()));
     }
 
     private Member searchMember(final Long memberId) {

@@ -8,7 +8,8 @@ public enum RequestExceptionMessage {
     DATE_BEFORE_NOW("이미 지난 날짜로는 예약할 수 없습니다."),
     INVALID_TIME_ID("시간 아이디를 입력해주세요"),
     INVALID_THEME_ID("테마 아이디를 입력해주세요"),
-    INVALID_MEMBER_ID("멤버 아이디를 입력해주세요");
+    INVALID_MEMBER_ID("멤버 아이디를 입력해주세요"),
+    ;
 
     private final String message;
 

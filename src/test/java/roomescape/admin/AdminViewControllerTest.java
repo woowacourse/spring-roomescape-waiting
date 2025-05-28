@@ -87,4 +87,13 @@ class AdminViewControllerTest {
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
     }
+
+    @DisplayName("어드민 예약 대기 관리 페이지를 출력한다")
+    @Test
+    void checkAdminDisplay_Waiting() {
+        requestSpecification.log().all()
+                .when().get("/admin/waiting")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value());
+    }
 }

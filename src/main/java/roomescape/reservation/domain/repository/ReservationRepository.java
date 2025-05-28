@@ -2,10 +2,12 @@ package roomescape.reservation.domain.repository;
 
 import java.time.LocalDate;
 import java.util.Collection;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
@@ -27,5 +29,23 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByDateAndTimeId(LocalDate reservationDate, Long id);
 
+    @Query("""
+            SELECT COUNT(r) > 0 FROM Reservation r 
+            WHERE (r.date = :reservationDate) 
+              AND (r.time.id = :timeId) 
+              AND (r.status = :status)
+            """)
+    boolean existsByDateAndTimeIdAndStatus(
+            @Param("reservationDate") LocalDate reservationDate,
+            @Param("timeId") Long timeId,
+            @Param("status") Status status
+    );
+
     Collection<Reservation> findAllByMemberId(Long memberId);
+
+    @Query("SELECT r FROM Reservation r WHERE r.status = 'WAITING'")
+    Collection<Reservation> findAllWaiting();
+
+    @Query("SELECT r FROM Reservation r WHERE (r.status = 'WAITING') AND (r.id = :id)")
+    Optional<Reservation> findByWaitingId(@Param("id") Long id);
 }

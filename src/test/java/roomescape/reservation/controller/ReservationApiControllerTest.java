@@ -31,6 +31,7 @@ import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
 import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.user.UserReservationRequest;
 import roomescape.reservation.service.ReservationService;
@@ -68,7 +69,8 @@ class ReservationApiControllerTest {
                 new Member(1L, "test", "test@test.com", "password", Role.USER),
                 LocalDate.now().plusDays(1),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
-                new Theme(1L, "테마1", "테마1 설명", "thumbnail.jpg")
+                new Theme(1L, "테마1", "테마1 설명", "thumbnail.jpg"),
+                Status.BOOKED
         );
 
         List<ReservationResponse> expectedResponses = List.of(
@@ -110,6 +112,49 @@ class ReservationApiControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(reservationRequest)))
                 .andExpect(status().isCreated());
+    }
+
+    @DisplayName("예약 대기를 성공적으로 추가한다")
+    @Test
+    void add_waiting_success() throws Exception {
+        UserReservationRequest reservationRequest = new UserReservationRequest(
+                LocalDate.now().plusDays(1),
+                1L,
+                1L
+        );
+        ReservationResponse reservationResponse = mock(ReservationResponse.class);
+        MemberResponse memberResponse = mock(MemberResponse.class);
+
+        when(tokenAuthorizationHandler.extractToken(any()))
+                .thenReturn("test-token");
+        when(memberService.findByToken("test-token"))
+                .thenReturn(memberResponse);
+
+        when(reservationService.addWaiting(1L, reservationRequest))
+                .thenReturn(reservationResponse);
+
+        mockMvc.perform(post(URI)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(reservationRequest)))
+                .andExpect(status().isCreated());
+    }
+
+    @DisplayName("예약 대기를 예약 내역으로 전환하여 성공적으로 추가한다")
+    @Test
+    void add_from_waiting_success() throws Exception {
+        UserReservationRequest reservationRequest = new UserReservationRequest(
+                LocalDate.now().plusDays(1),
+                1L,
+                1L
+        );
+        ReservationResponse reservationResponse = mock(ReservationResponse.class);
+
+        when(reservationService.addFromWaiting(1L))
+                .thenReturn(reservationResponse);
+
+        mockMvc.perform(post(URI + "/1")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk());
     }
 
     @DisplayName("추가하려는 예약 내역 속성에 빈 값이 있는 경우 잘못된 요청으로 처리한다")

@@ -1,5 +1,6 @@
 package roomescape.member.service;
 
+import jakarta.transaction.Transactional;
 import java.util.List;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -49,6 +50,7 @@ public class MemberService {
         return findByEmail(email);
     }
 
+    @Transactional
     public MemberTokenResponse createToken(final MemberLoginRequest memberLoginRequest) {
         Member member = validateLoginEmail(memberLoginRequest);
         validatePassword(memberLoginRequest.password(), member.getPassword());
@@ -63,6 +65,7 @@ public class MemberService {
                 .orElseThrow(() -> new AuthenticationException(LoginExceptionMessage.AUTHENTICATION_FAIL.getMessage()));
     }
 
+    @Transactional
     public MemberResponse add(final MemberSignupRequest memberSignupRequest) {
         validateSignupEmail(memberSignupRequest);
         validateDuplicateMember(memberSignupRequest);

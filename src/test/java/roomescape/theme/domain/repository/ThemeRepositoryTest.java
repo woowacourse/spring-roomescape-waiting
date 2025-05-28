@@ -16,6 +16,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -69,18 +70,18 @@ class ThemeRepositoryTest {
 
     private List<Reservation> createAndPersistReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member1, day1, time1, theme1),
-                new Reservation(member1, day2, time1, theme1),
-                new Reservation(member1, day3, time1, theme1),
-                new Reservation(member1, day3, time1, theme2),
-                new Reservation(member1, day3, time1, theme2),
-                new Reservation(member1, day3, time1, theme2),
-                new Reservation(member2, day2, time2, theme2),
-                new Reservation(member2, day2, time2, theme2),
-                new Reservation(member2, day2, time2, theme2),
-                new Reservation(member2, day1, time2, theme3),
-                new Reservation(member2, day1, time2, theme3),
-                new Reservation(member2, day1, time2, theme3)
+                new Reservation(member1, day1, time1, theme1, Status.BOOKED),
+                new Reservation(member1, day2, time1, theme1, Status.BOOKED),
+                new Reservation(member1, day3, time1, theme1, Status.BOOKED),
+                new Reservation(member1, day3, time1, theme2, Status.BOOKED),
+                new Reservation(member1, day3, time1, theme2, Status.BOOKED),
+                new Reservation(member1, day3, time1, theme2, Status.BOOKED),
+                new Reservation(member2, day2, time2, theme2, Status.BOOKED),
+                new Reservation(member2, day2, time2, theme2, Status.BOOKED),
+                new Reservation(member2, day2, time2, theme2, Status.BOOKED),
+                new Reservation(member2, day1, time2, theme3, Status.BOOKED),
+                new Reservation(member2, day1, time2, theme3, Status.BOOKED),
+                new Reservation(member2, day1, time2, theme3, Status.BOOKED)
         );
 
         reservations.forEach(entityManager::persist);

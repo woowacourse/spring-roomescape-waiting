@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateException;
 import roomescape.common.exception.ForeignKeyException;
 import roomescape.common.exception.InvalidIdException;
@@ -80,6 +81,7 @@ public class ReservationTimeService {
                 .collect(Collectors.toSet());
     }
 
+    @Transactional
     public ReservationTimeResponse add(final ReservationTimeRequest timeRequest) {
         validateDuplicate(timeRequest);
 
@@ -96,15 +98,10 @@ public class ReservationTimeService {
         }
     }
 
+    @Transactional
     public void deleteById(final Long id) {
-        searchReservationTimeId(id);
         validateUnoccupiedTime(id);
         timeRepository.deleteById(id);
-    }
-
-    private void searchReservationTimeId(final Long id) {
-        timeRepository.findById(id)
-                .orElseThrow(() -> new InvalidIdException(IdExceptionMessage.INVALID_TIME_ID.getMessage()));
     }
 
     private void validateUnoccupiedTime(final Long id) {

@@ -20,8 +20,10 @@ class ReservationTest {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.parse("10:00"));
         Theme theme = new Theme(1L, "roomescape", "timeAttack", "timeAttack.jpg");
 
-        Reservation reservation1 = new Reservation(1L, member, LocalDate.parse("2025-05-05"), reservationTime, theme);
-        Reservation reservation2 = new Reservation(1L, member, LocalDate.parse("2025-05-05"), reservationTime, theme);
+        Reservation reservation1 = new Reservation(1L, member, LocalDate.parse("2025-05-05"), reservationTime, theme,
+                Status.BOOKED);
+        Reservation reservation2 = new Reservation(1L, member, LocalDate.parse("2025-05-05"), reservationTime, theme,
+                Status.BOOKED);
 
         assertThat(reservation1.equals(reservation2)).isTrue();
     }

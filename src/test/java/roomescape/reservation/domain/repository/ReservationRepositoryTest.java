@@ -17,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -70,18 +71,18 @@ class ReservationRepositoryTest {
 
     private List<Reservation> createAndPersistReservations() {
         List<Reservation> reservations = List.of(
-                new Reservation(member1, day1, time1, theme1),
-                new Reservation(member1, day2, time1, theme1),
-                new Reservation(member1, day3, time1, theme1),
-                new Reservation(member1, day1, time1, theme2),
-                new Reservation(member1, day2, time1, theme2),
-                new Reservation(member1, day3, time1, theme2),
-                new Reservation(member2, day1, time2, theme2),
-                new Reservation(member2, day2, time2, theme2),
-                new Reservation(member2, day3, time2, theme2),
-                new Reservation(member2, day1, time2, theme3),
-                new Reservation(member2, day2, time2, theme3),
-                new Reservation(member2, day3, time2, theme3)
+                new Reservation(member1, day1, time1, theme1, Status.BOOKED),
+                new Reservation(member1, day2, time1, theme1, Status.BOOKED),
+                new Reservation(member1, day3, time1, theme1, Status.BOOKED),
+                new Reservation(member1, day1, time1, theme2, Status.BOOKED),
+                new Reservation(member1, day2, time1, theme2, Status.BOOKED),
+                new Reservation(member1, day3, time1, theme2, Status.BOOKED),
+                new Reservation(member2, day1, time2, theme2, Status.BOOKED),
+                new Reservation(member2, day2, time2, theme2, Status.BOOKED),
+                new Reservation(member2, day3, time2, theme2, Status.BOOKED),
+                new Reservation(member2, day1, time2, theme3, Status.BOOKED),
+                new Reservation(member2, day2, time2, theme3, Status.BOOKED),
+                new Reservation(member2, day3, time2, theme3, Status.WAITING)
         );
 
         reservations.forEach(entityManager::persist);
@@ -93,7 +94,7 @@ class ReservationRepositoryTest {
     void save() {
         // given
         LocalDate date = LocalDate.parse("2025-05-05");
-        Reservation newReservation = new Reservation(member1, date, time1, theme1);
+        Reservation newReservation = new Reservation(member1, date, time1, theme1, Status.BOOKED);
 
         // when
         reservationRepository.save(newReservation);
@@ -158,5 +159,51 @@ class ReservationRepositoryTest {
                 .count();
 
         assertThat(reservations).hasSize((int) expectedCount);
+    }
+
+    @Test
+    @DisplayName("예약 목록을 조회한다")
+    void findAllWaiting() {
+        // when
+        Collection<Reservation> reservations = reservationRepository.findAllWaiting();
+
+        // then
+        long expectedCount = reservations.stream()
+                .filter(Reservation -> Reservation.getStatus().equals(Status.WAITING))
+                .count();
+
+        assertThat(reservations).hasSize((int) expectedCount);
+    }
+
+    @Test
+    @DisplayName("대기 상태인 예약 내역 아이디로 해당 내역을 조회한다")
+    void findByWaitingId() {
+        // when
+        long waitingId = allReservations.stream()
+                .filter(Reservation -> Reservation.getStatus().equals(Status.WAITING))
+                .mapToLong(Reservation::getId)
+                .findFirst()
+                .orElseThrow(() -> new IllegalStateException("대기 상태인 예약 내역이 없습니다"));
+
+        Reservation reservation = reservationRepository.findByWaitingId(waitingId).get();
+
+        // then
+        assertThat(reservation.getId()).isEqualTo(waitingId);
+    }
+
+    @Test
+    @DisplayName("대기 상태가 아닌 동일 예약 내역이 존재하는지 확인한다")
+    void existsByDateAndTimeIdAndStatus() {
+        // when
+        Reservation reservation = allReservations.getFirst();
+
+        boolean isOccupied = reservationRepository.existsByDateAndTimeIdAndStatus(
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getStatus()
+        );
+
+        // then
+        assertThat(isOccupied).isTrue();
     }
 }

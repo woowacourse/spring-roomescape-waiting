@@ -25,7 +25,7 @@ import roomescape.member.login.authorization.LoginAuthorizationInterceptor;
 import roomescape.member.login.authorization.TokenAuthorizationHandler;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.MyReservationService;
 
 @WebMvcTest(MemberReservationApiController.class)
 @Import({WebMvcConfiguration.class, GlobalExceptionHandler.class})
@@ -35,7 +35,7 @@ class MemberReservationApiControllerTest {
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ReservationService reservationService;
+    private MyReservationService myReservationService;
     @MockitoBean
     private MemberService memberService;
     @MockitoBean
@@ -63,7 +63,7 @@ class MemberReservationApiControllerTest {
                 .thenReturn("test-token");
         when(memberService.findByToken("test-token"))
                 .thenReturn(memberResponse);
-        when(reservationService.findAllByMemberId(1L))
+        when(myReservationService.findAllMyReservationByMember(1L))
                 .thenReturn(List.of(myReservationResponse));
 
         mockMvc.perform(get(URI)
