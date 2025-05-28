@@ -100,11 +100,12 @@ public class Member {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Member that)) return false;
-        return Objects.equals(email, that.email);
+        return Objects.equals(name, that.name) && Objects.equals(email, that.email) && Objects.equals(password, that.password)
+                && role == that.role;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(email);
+        return Objects.hash(name, email, password, role);
     }
 }
