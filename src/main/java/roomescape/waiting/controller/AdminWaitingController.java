@@ -12,7 +12,7 @@ import roomescape.member.domain.Member;
 import roomescape.waiting.domain.WaitingStatus;
 import roomescape.waiting.dto.AdminWaitingResponse;
 import roomescape.waiting.dto.AdminWaitingUpdateResponse;
-import roomescape.waiting.servcie.WaitingService;
+import roomescape.waiting.service.WaitingService;
 
 @RestController
 @RequestMapping("/admin/waitings")

@@ -60,6 +60,17 @@ public class Waiting {
     protected Waiting() {
     }
 
+    public Waiting(Long id, LocalDate date, Member member, Theme theme, ReservationTime time, LocalDateTime createdAt,
+                   WaitingStatus status) {
+        this.id = id;
+        this.date = date;
+        this.member = member;
+        this.theme = theme;
+        this.time = time;
+        this.createdAt = createdAt;
+        this.status = status;
+    }
+
     public Waiting(LocalDate date, Member member, Theme theme, ReservationTime time, LocalDateTime createdAt,
                    WaitingStatus status) {
         this.date = date;
