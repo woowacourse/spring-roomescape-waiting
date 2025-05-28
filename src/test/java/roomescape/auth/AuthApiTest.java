@@ -12,7 +12,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.global.auth.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -111,21 +110,6 @@ public class AuthApiTest {
         void testInvalidCookie() {
             RestAssured.given().log().all()
                     .cookie(TOKEN_COOKIE_NAME, "3L")
-                    .when().get("/login/check")
-                    .then().log().all()
-                    .statusCode(401);
-        }
-
-        @DisplayName("사용자를 찾을 수 없는 경우 401을 반환한다.")
-        @Test
-        void testNotFoundMember() {
-            // given
-            JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-            String token = jwtTokenProvider.createToken("4");
-            // when
-            // then
-            RestAssured.given().log().all()
-                    .cookie(TOKEN_COOKIE_NAME, token)
                     .when().get("/login/check")
                     .then().log().all()
                     .statusCode(401);

@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.fake.FakeReservationDao;
 import roomescape.fake.FakeReservationTimeDao;
 import roomescape.fake.FakeThemeDao;
+import roomescape.global.exception.custom.BadRequestException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.CreateThemeRequest;
@@ -36,7 +37,7 @@ class ThemeServiceTest {
         // when
         // then
         assertThatThrownBy(() -> themeService.createTheme(request2))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("해당 이름의 테마는 이미 존재합니다.");
     }
 
@@ -82,7 +83,7 @@ class ThemeServiceTest {
         // when
         // then
         assertThatThrownBy(() -> themeService.deleteThemeById(THEME.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
 

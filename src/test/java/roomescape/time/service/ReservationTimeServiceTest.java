@@ -14,6 +14,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.fake.FakeReservationDao;
 import roomescape.fake.FakeReservationTimeDao;
+import roomescape.global.exception.custom.BadRequestException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.dto.CreateReservationTimeRequest;
@@ -34,7 +35,7 @@ class ReservationTimeServiceTest {
         // when
         // then
         assertThatThrownBy(() -> reservationTimeService.createReservationTime(request))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("이미 존재하는 시간입니다.");
     }
 
@@ -90,7 +91,7 @@ class ReservationTimeServiceTest {
         // when
         // then
         assertThatThrownBy(() -> reservationTimeService.deleteReservationTimeById(TIME.getId()))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(BadRequestException.class)
                 .hasMessage("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
 

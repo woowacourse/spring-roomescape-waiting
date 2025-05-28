@@ -56,20 +56,16 @@ public class Theme {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+    public final boolean equals(final Object o) {
+        if (!(o instanceof final Theme theme)) {
             return false;
         }
 
-        final Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id);
+        return Objects.equals(getId(), theme.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 }

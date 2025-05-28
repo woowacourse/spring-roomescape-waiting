@@ -41,16 +41,16 @@ public class ReservationTime {
     }
 
     @Override
-    public boolean equals(Object object) {
-        if (object == null || getClass() != object.getClass()) {
+    public final boolean equals(final Object o) {
+        if (!(o instanceof final ReservationTime that)) {
             return false;
         }
-        ReservationTime that = (ReservationTime) object;
-        return Objects.equals(id, that.id);
+
+        return Objects.equals(getId(), that.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 }

@@ -45,10 +45,6 @@ public class Member {
 
     }
 
-    public boolean hasRole(final Role other) {
-        return this.role == other;
-    }
-
     public Long getId() {
         return id;
     }
@@ -70,23 +66,16 @@ public class Member {
     }
 
     @Override
-    public boolean equals(final Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        if (this.id == null || ((Member) o).id == null) {
+    public final boolean equals(final Object o) {
+        if (!(o instanceof final Member member)) {
             return false;
         }
 
-        final Member member = (Member) o;
-        return Objects.equals(id, member.id);
+        return Objects.equals(getId(), member.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 }

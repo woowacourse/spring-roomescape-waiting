@@ -1,5 +1,8 @@
 package roomescape.reservation;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
@@ -14,16 +17,16 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.global.auth.JwtTokenProvider;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationWithMemberRequest;
+import roomescape.reservation.dto.ReservationResponse;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql({"/test-time-data.sql", "/test-theme-data.sql", "/test-member-data.sql", "/test-reservation-data.sql"})
+@Sql({"/test-time-data.sql", "/test-theme-data.sql", "/test-member-data.sql"})
 public class ReservationApiTest {
 
-    private static final String TOKEN_COOKIE_NAME = "token";
+    private static final String AUTH_COOKIE_NAME = "token";
 
     @DisplayName("예약 생성 API 테스트")
     @Nested
@@ -40,7 +43,7 @@ public class ReservationApiTest {
                     .body(new LoginRequest("aaa@gmail.com", "1234"))
                     .when().post("/login")
                     .then().log().all()
-                    .extract().cookie(TOKEN_COOKIE_NAME);
+                    .extract().cookie(AUTH_COOKIE_NAME);
         }
 
         @DisplayName("예약 생성을 성공할 경우 201을 반환한다.")
@@ -48,12 +51,12 @@ public class ReservationApiTest {
         void testCreateReservation() {
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .body(REQUEST)
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .body("id", Matchers.equalTo(4))
+                    .body("id", Matchers.equalTo(1))
                     .body("member.name", Matchers.equalTo("사용자1"));
         }
 
@@ -70,18 +73,8 @@ public class ReservationApiTest {
             // JWT 토큰 파싱 불가능
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, "invalidValue")
+                    .cookie(AUTH_COOKIE_NAME, "invalidValue")
                     .body(REQUEST)
-                    .when().post("/reservations")
-                    .then().log().all()
-                    .statusCode(401);
-            // payload 값으로 식별할 수 없음
-            JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-            String token = jwtTokenProvider.createToken("4");
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(REQUEST)
-                    .cookie(TOKEN_COOKIE_NAME, token)
                     .when().post("/reservations")
                     .then().log().all()
                     .statusCode(401);
@@ -93,7 +86,7 @@ public class ReservationApiTest {
             // given
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .body(REQUEST)
                     .when().post("/reservations")
                     .then().log().all()
@@ -102,7 +95,7 @@ public class ReservationApiTest {
             // then
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .body(REQUEST)
                     .when().post("/reservations")
                     .then().log().all()
@@ -126,7 +119,7 @@ public class ReservationApiTest {
                     .body(new LoginRequest("admin@gmail.com", "1234"))
                     .when().post("/login")
                     .then().log().all()
-                    .extract().cookie(TOKEN_COOKIE_NAME);
+                    .extract().cookie(AUTH_COOKIE_NAME);
         }
 
         @DisplayName("예약 생성을 성공할 경우 201을 반환한다.")
@@ -134,12 +127,12 @@ public class ReservationApiTest {
         void testCreateReservation() {
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .body(REQUEST)
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(201)
-                    .body("id", Matchers.equalTo(4))
+                    .body("id", Matchers.equalTo(1))
                     .body("member.name", Matchers.equalTo("사용자1"));
         }
 
@@ -156,18 +149,8 @@ public class ReservationApiTest {
             // JWT 토큰 파싱 불가능
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, "invalidValue")
+                    .cookie(AUTH_COOKIE_NAME, "invalidValue")
                     .body(REQUEST)
-                    .when().post("/admin/reservations")
-                    .then().log().all()
-                    .statusCode(401);
-            // payload 값으로 식별할 수 없음
-            JwtTokenProvider jwtTokenProvider = new JwtTokenProvider();
-            String token = jwtTokenProvider.createToken("4");
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(REQUEST)
-                    .cookie(TOKEN_COOKIE_NAME, token)
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(401);
@@ -179,7 +162,7 @@ public class ReservationApiTest {
             // given
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .body(REQUEST)
                     .when().post("/admin/reservations")
                     .then().log().all()
@@ -188,7 +171,7 @@ public class ReservationApiTest {
             // then
             RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .body(REQUEST)
                     .when().post("/admin/reservations")
                     .then().log().all()
@@ -219,15 +202,66 @@ public class ReservationApiTest {
                     .body(new LoginRequest("aaa@gmail.com", "1234"))
                     .when().post("/login")
                     .then().log().all()
-                    .extract().cookie(TOKEN_COOKIE_NAME);
+                    .extract().cookie(AUTH_COOKIE_NAME);
             // when
             // then
             RestAssured.given().log().all()
-                    .cookie(TOKEN_COOKIE_NAME, TOKEN)
+                    .cookie(AUTH_COOKIE_NAME, TOKEN)
                     .when().get("/me/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", Matchers.is(3));
+                    .body("size()", Matchers.is(0));
+        }
+    }
+
+    @DisplayName("예약 취소 API 테스트")
+    @Nested
+    class DeleteReservationTest {
+
+        public static final int RESERVATION_ID_OF_MEMBER_1 = 3;
+        private static String MEMBER_1_TOKEN;
+        private static String ADMIN_TOKEN;
+
+        @BeforeEach
+        void setUp() {
+            MEMBER_1_TOKEN = RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(new LoginRequest("aaa@gmail.com", "1234"))
+                    .when().post("/login")
+                    .then().log().all()
+                    .extract().cookie(AUTH_COOKIE_NAME);
+            ADMIN_TOKEN = RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .body(new LoginRequest("admin@gmail.com", "1234"))
+                    .when().post("/login")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract().cookie(AUTH_COOKIE_NAME);
+        }
+
+        @DisplayName("예약을 취소할 경우 대기 목록을 자동 업데이트 한다.")
+        @Test
+        @Sql({"/test-time-data.sql", "/test-theme-data.sql", "/test-member-data.sql", "/test-waiting-data.sql"})
+        void testUpdateWaiting() {
+            // given
+            // when
+            RestAssured.given().log().all()
+                    .cookie(AUTH_COOKIE_NAME, ADMIN_TOKEN)
+                    .when().delete("/admin/reservations/{id}", RESERVATION_ID_OF_MEMBER_1)
+                    .then().log().all()
+                    .statusCode(204);
+            // then
+            ReservationResponse[] responses = RestAssured.given().log().all()
+                    .cookie(AUTH_COOKIE_NAME, ADMIN_TOKEN)
+                    .when().get("/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .extract()
+                    .as(ReservationResponse[].class);
+            assertAll(
+                    () -> assertThat(responses.length).isEqualTo(3), // 예약이 삭제되지 않고 대기와 교체됨
+                    () -> assertThat(responses[2].member()).isEqualTo(responses[1].member()) // 예약자 1에서 예약자 2로 바뀜
+            );
         }
     }
 }

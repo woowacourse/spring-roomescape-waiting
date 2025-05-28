@@ -15,7 +15,7 @@ public class AdminController {
 
     @GetMapping("/reservation")
     public String reservation() {
-        return "admin/reservation-new";
+        return "admin/reservation";
     }
 
     @GetMapping("/time")
@@ -26,5 +26,10 @@ public class AdminController {
     @GetMapping("/theme")
     public String theme() {
         return "admin/theme";
+    }
+
+    @GetMapping("/waiting")
+    public String waiting() {
+        return "admin/waiting";
     }
 }
