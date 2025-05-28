@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.application.ReservationService;
 import roomescape.domain.auth.AuthenticationInfo;
 import roomescape.domain.reservation.ReservationSearchFilter;
+import roomescape.exception.AuthorizationException;
 import roomescape.presentation.request.CreateReservationRequest;
 import roomescape.presentation.response.ReservationResponse;
 
@@ -39,6 +40,16 @@ public class ReservationController {
         return ReservationResponse.from(reservation);
     }
 
+    @PostMapping("/wait")
+    @ResponseStatus(CREATED)
+    public ReservationResponse waitFor(
+            final AuthenticationInfo authenticationInfo,
+            @RequestBody @Valid final CreateReservationRequest request
+    ) {
+        var reservation = service.waitFor(authenticationInfo.id(), request.date(), request.timeId(), request.themeId());
+        return ReservationResponse.from(reservation);
+    }
+
     @GetMapping
     public List<ReservationResponse> getAllReservations(
             @RequestParam(name = "themeId", required = false) final Long themeId,
@@ -53,7 +64,23 @@ public class ReservationController {
 
     @DeleteMapping("/{id}")
     @ResponseStatus(NO_CONTENT)
-    public void delete(@PathVariable("id") final long id) {
+    public void delete(
+        final AuthenticationInfo authenticationInfo,
+        @PathVariable("id") final long id
+    ) {
+        if (!authenticationInfo.isAdmin()) {
+            throw new AuthorizationException("관리자에게만 허용된 작업입니다.");
+        }
         service.removeById(id);
+    }
+
+    @DeleteMapping("/wait/{id}")
+    @ResponseStatus(NO_CONTENT)
+    public void cancelWaiting(
+        final AuthenticationInfo authenticationInfo,
+        @PathVariable("id") final long reservationId
+    ) {
+        var userId = authenticationInfo.id();
+        service.cancelWaiting(userId, reservationId);
     }
 }

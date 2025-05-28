@@ -15,6 +15,7 @@ import roomescape.application.ReservationService;
 import roomescape.application.UserService;
 import roomescape.presentation.request.CreateReservationAdminRequest;
 import roomescape.presentation.response.ReservationResponse;
+import roomescape.presentation.response.ReservationWithOrderResponse;
 import roomescape.presentation.response.UserResponse;
 
 @RestController
@@ -36,5 +37,11 @@ public class AdminController {
     public List<UserResponse> getAllUsers() {
         var users = userService.findAllUsers();
         return UserResponse.from(users);
+    }
+
+    @GetMapping("/waitings")
+    public List<ReservationWithOrderResponse> getAllWaitings() {
+        var waitings = reservationService.findAllWaitings();
+        return ReservationWithOrderResponse.from(waitings);
     }
 }

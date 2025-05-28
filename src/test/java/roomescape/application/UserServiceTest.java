@@ -6,19 +6,17 @@ import static roomescape.DateUtils.tomorrow;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.TestRepositoryHelper;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationWithOrder;
+import roomescape.domain.user.User;
 
-@DataJpaTest
-@Import({UserService.class, TestRepositoryHelper.class})
-class UserServiceTest {
+@Import(UserService.class)
+class UserServiceTest extends ServiceTest {
 
     @Autowired
     private UserService service;
-    @Autowired
-    private TestRepositoryHelper repositoryHelper;
 
     @Test
     @DisplayName("사용자를 추가한다.")
@@ -38,19 +36,22 @@ class UserServiceTest {
 
     @Test
     @DisplayName("사용자의 예약을 조회한다.")
-    void getReservations() {
+    void getMyReservations() {
         // given
-        var savedTimeSlot = repositoryHelper.saveAnyTimeSlot();
-        var savedTheme = repositoryHelper.saveAnyTheme();
         var user = service.register("popo@email.com", "pw", "popo");
-
-        var savedReservation = repositoryHelper.saveReservation(new Reservation(user, tomorrow(), savedTimeSlot, savedTheme));
-        repositoryHelper.flushAndClear();
+        var reservation = reserveWithUser(user);
 
         // when
-        var reservations = service.getReservations(user.id());
+        var reservations = service.getMyReservations(user.id());
 
         // then
-        assertThat(reservations).contains(savedReservation);
+        assertThat(reservations).contains(new ReservationWithOrder(reservation, 1));
+    }
+
+    private Reservation reserveWithUser(final User user) {
+        var savedTimeSlot = repositoryHelper.saveAnyTimeSlot();
+        var savedTheme = repositoryHelper.saveAnyTheme();
+        var reservation = new Reservation(user, RoomescapeSchedule.forReserve(tomorrow(), savedTimeSlot, savedTheme));
+        return repositoryHelper.saveReservation(reservation);
     }
 }

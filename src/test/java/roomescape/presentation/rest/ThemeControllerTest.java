@@ -9,7 +9,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static roomescape.TestFixtures.anyThemeWithId;
+import static roomescape.TestFixtures.anyThemeWithNewId;
 
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -35,7 +35,7 @@ class ThemeControllerTest {
     @DisplayName("방 테마 추가 요청시, id를 포함한 방 테마와 CREATED를 응답한다.")
     void register() throws Exception {
         Mockito.when(themeService.register(any(), any(), any()))
-            .thenReturn(anyThemeWithId());
+            .thenReturn(anyThemeWithNewId());
 
         mockMvc.perform(post("/themes")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -53,7 +53,7 @@ class ThemeControllerTest {
     @Test
     @DisplayName("방 테마 조회 요청시, 존재하는 모든 방 테마와 OK를 응답한다.")
     void getAllThemes() throws Exception {
-        var expectedThemes = List.of(anyThemeWithId(), anyThemeWithId(), anyThemeWithId());
+        var expectedThemes = List.of(anyThemeWithNewId(), anyThemeWithNewId(), anyThemeWithNewId());
         Mockito.when(themeService.findAllThemes()).thenReturn(expectedThemes);
 
         mockMvc.perform(get("/themes"))

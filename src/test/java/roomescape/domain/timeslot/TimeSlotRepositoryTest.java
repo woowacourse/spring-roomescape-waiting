@@ -32,18 +32,6 @@ class TimeSlotRepositoryTest {
     }
 
     @Test
-    @DisplayName("아이디에 해당하는 타임 슬롯을 삭제하고 삭제된 타임 슬롯 수를 반환한다.")
-    void deleteByIdAndCount() {
-        var id = savedTimeSlot.id();
-        var deletedCount = timeSlotRepository.deleteByIdAndCount(id);
-
-        assertAll(
-            () -> assertThat(timeSlotRepository.findById(id)).isEmpty(),
-            () -> assertThat(deletedCount).isEqualTo(1)
-        );
-    }
-
-    @Test
     @DisplayName("아이디에 해당하는 타임 슬롯을 삭제한다.")
     void deleteByIdWhenFound() {
         var id = savedTimeSlot.id();

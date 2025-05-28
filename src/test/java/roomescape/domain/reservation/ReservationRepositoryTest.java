@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.TestRepositoryHelper;
+import roomescape.domain.RoomescapeSchedule;
 import roomescape.exception.NotFoundException;
 
 @DataJpaTest
@@ -34,21 +36,9 @@ class ReservationRepositoryTest {
         var timeSlot = repositoryHelper.saveAnyTimeSlot();
         var theme = repositoryHelper.saveAnyTheme();
 
-        var reservation = new Reservation(user, date, timeSlot, theme);
+        var reservation = new Reservation(user, RoomescapeSchedule.forReserve(date, timeSlot, theme));
         savedReservation = reservationRepository.save(reservation);
         repositoryHelper.flushAndClear();
-    }
-
-    @Test
-    @DisplayName("아이디에 해당하는 예약을 삭제하고 삭제된 예약 수를 반환한다.")
-    void deleteByIdAndCount() {
-        var id = savedReservation.id();
-        var deletedCount = reservationRepository.deleteByIdAndCount(id);
-
-        assertAll(
-            () -> assertThat(reservationRepository.findById(id)).isEmpty(),
-            () -> assertThat(deletedCount).isEqualTo(1)
-        );
     }
 
     @Test
@@ -88,5 +78,12 @@ class ReservationRepositoryTest {
     void getByIdWhenNotFound() {
         assertThatThrownBy(() -> reservationRepository.getById(1234L))
             .isInstanceOf(NotFoundException.class);
+    }
+
+    @Test
+    @DisplayName("방탈출 일정별 대기열로 이루어진 대기열들을 불러온다.")
+    void findQueuesBySchedules() {
+        var queues = reservationRepository.findQueuesBySchedules(List.of(savedReservation.reservedSchedule()));
+        assertThat(queues).isInstanceOf(ReservationQueues.class);
     }
 }

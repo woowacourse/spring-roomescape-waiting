@@ -15,12 +15,12 @@ import lombok.experimental.Accessors;
 import roomescape.domain.timeslot.TimeSlot;
 import roomescape.exception.BusinessRuleViolationException;
 
-@Embeddable
 @EqualsAndHashCode
 @Getter
 @Accessors(fluent = true)
 @ToString
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Embeddable
 public class ReservationDateTime {
 
     @Column(nullable = false)

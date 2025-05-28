@@ -2,24 +2,24 @@ package roomescape.presentation.response;
 
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.domain.timeslot.AvailableTimeSlot;
+import roomescape.domain.timeslot.TimeSlotBookStatus;
 
 public record AvailableTimeSlotResponse(
         long id,
         LocalTime startAt,
-        Boolean alreadyBooked
+        boolean alreadyBooked
 ) {
 
-    public static AvailableTimeSlotResponse from(final AvailableTimeSlot availableTimeSlot) {
+    public static AvailableTimeSlotResponse from(final TimeSlotBookStatus timeSlotBookStatus) {
         return new AvailableTimeSlotResponse(
-                availableTimeSlot.timeSlot().id(),
-                availableTimeSlot.timeSlot().startAt(),
-                availableTimeSlot.alreadyBooked()
+                timeSlotBookStatus.timeSlot().id(),
+                timeSlotBookStatus.timeSlot().startAt(),
+                timeSlotBookStatus.alreadyBooked()
         );
     }
 
-    public static List<AvailableTimeSlotResponse> from(final List<AvailableTimeSlot> availableTimeSlots) {
-        return availableTimeSlots.stream()
+    public static List<AvailableTimeSlotResponse> from(final List<TimeSlotBookStatus> timeSlotAvailiabilities) {
+        return timeSlotAvailiabilities.stream()
                 .map(AvailableTimeSlotResponse::from)
                 .toList();
     }
