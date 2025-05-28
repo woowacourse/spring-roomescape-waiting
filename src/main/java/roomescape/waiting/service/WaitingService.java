@@ -1,4 +1,4 @@
-package roomescape.waiting.servcie;
+package roomescape.waiting.service;
 
 import java.time.LocalDateTime;
 import java.util.Comparator;
