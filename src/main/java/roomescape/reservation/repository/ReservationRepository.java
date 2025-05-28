@@ -58,6 +58,15 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     @Query("SELECT new roomescape.reservation.dto.ReservationWithRank("
             + "r, "
+            + "1) "
+            + "FROM Reservation r "
+            + "WHERE r.status = :status "
+            + "AND r.member = :member")
+    List<ReservationWithRank> findReservationsByMemberAndStatus(@Param("member") Member member,
+                                                                        @Param("status") ReservationStatus status);
+
+    @Query("SELECT new roomescape.reservation.dto.ReservationWithRank("
+            + "r, "
             + "(SELECT COUNT(r2) + 1 "
             + "FROM Reservation r2 "
             + "WHERE r2.slot = r.slot "
@@ -66,8 +75,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             + "FROM Reservation r "
             + "WHERE r.status = :status")
     List<ReservationWithRank> findAllReservationsWithRankByStatus(@Param("status") ReservationStatus status);
-
-    List<Reservation> findReservationsByMemberAndStatus(Member member, ReservationStatus status);
 
     @Query("SELECT r FROM Reservation r WHERE r.slot = :slot AND r.status = :status")
     Optional<Reservation> findReservationBySlotAndStatus(@Param("slot") ReservationSlot slot,

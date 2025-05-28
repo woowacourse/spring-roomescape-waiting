@@ -119,7 +119,7 @@ public class ReservationService {
 
     public List<ReservationsWithRankResponse> findReservationsByMember(final Member member) {
         List<ReservationWithRank> confirmedReservations = reservationRepository
-                .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.CONFIRMED);
+                .findReservationsByMemberAndStatus(member, ReservationStatus.CONFIRMED);
         List<ReservationWithRank> waitingReservations = reservationRepository
                 .findReservationsWithRankByMemberAndStatus(member, ReservationStatus.WAITING);
 
