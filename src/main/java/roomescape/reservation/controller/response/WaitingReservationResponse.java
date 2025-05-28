@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.reservation.domain.Reservation;
+import roomescape.waiting.domain.Waiting;
 
 public record WaitingReservationResponse(
         Long waitingId,
@@ -13,18 +13,18 @@ public record WaitingReservationResponse(
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         @JsonFormat(pattern = "HH:mm") LocalTime time
 ) {
-    public static WaitingReservationResponse from(Reservation reservation) {
+    public static WaitingReservationResponse from(Waiting waiting) {
         return new WaitingReservationResponse(
-                reservation.getId(),
-                reservation.getReserverName(),
-                reservation.getThemeName(),
-                reservation.getDate(),
-                reservation.getStartAt()
+                waiting.getId(),
+                waiting.getWaiter().getName(),
+                waiting.getTheme().getName(),
+                waiting.getReservationDatetime().reservationDate().date(),
+                waiting.getReservationDatetime().reservationTime().getStartAt()
         );
     }
 
-    public static List<WaitingReservationResponse> from(List<Reservation> reservations) {
-        return reservations.stream()
+    public static List<WaitingReservationResponse> from(List<Waiting> waitings) {
+        return waitings.stream()
                 .map(WaitingReservationResponse::from)
                 .toList();
     }

@@ -52,9 +52,9 @@ public class ReservationApiController {
             @Authenticated Long memberId
     ) {
         List<MyReservationResponse> responses = reservationService.getMyReservations(memberId);
+
         return ResponseEntity.ok(
-                ApiResponse.success(GET_MY_RESERVATIONS, responses)
-        );
+                ApiResponse.success(GET_MY_RESERVATIONS, responses));
     }
 
     @DeleteMapping("/{id}")

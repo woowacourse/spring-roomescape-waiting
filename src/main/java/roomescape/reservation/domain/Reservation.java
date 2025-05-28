@@ -3,8 +3,6 @@ package roomescape.reservation.domain;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -40,10 +38,6 @@ public class Reservation {
     @ManyToOne
     private Theme theme;
 
-    @Column(name = "status")
-    @Enumerated(value = EnumType.STRING)
-    private ReservationStatus status;
-
     @Column(name = "reserved_at")
     private LocalDateTime reservedAt;
 
@@ -52,14 +46,12 @@ public class Reservation {
             Member reserver,
             ReservationDateTime reservationDateTime,
             Theme theme,
-            ReservationStatus status,
             LocalDateTime reservedAt
     ) {
         this.id = id;
         this.reserver = reserver;
         this.reservationDatetime = reservationDateTime;
         this.theme = theme;
-        this.status = status;
         this.reservedAt = reservedAt;
     }
 
@@ -74,39 +66,8 @@ public class Reservation {
                 reserver,
                 reservationDateTime,
                 theme,
-                ReservationStatus.RESERVED,
                 reservedAt
         );
-    }
-
-    public void reserve() {
-        if (isWaiting()) {
-            this.status = ReservationStatus.RESERVED;
-        }
-    }
-
-    public static Reservation wait(
-            Member reserver,
-            ReservationDateTime reservationDateTime,
-            Theme theme,
-            LocalDateTime reservedAt
-    ) {
-        return new Reservation(
-                null,
-                reserver,
-                reservationDateTime,
-                theme,
-                ReservationStatus.WAITING,
-                reservedAt
-        );
-    }
-
-    public boolean isReserved() {
-        return status == ReservationStatus.RESERVED;
-    }
-
-    public boolean isWaiting() {
-        return status == ReservationStatus.WAITING;
     }
 
     public String getReserverName() {

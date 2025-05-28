@@ -7,7 +7,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.theme.domain.Theme;
 
 @Repository
@@ -20,21 +19,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     default boolean existsBy(LocalDate date, Long timeId, Long themeId) {
         return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
-
-    default boolean existsBy(LocalDate date, Long timeId, Long themeId, Long memberId) {
-        return existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
-    }
-
-
-    @Query("""
-            select exists
-                (select r from Reservation r
-                    where r.reservationDatetime.reservationDate.date = :date
-                    and r.reservationDatetime.reservationTime.id = :timeId
-                    and r.theme.id = :themeId
-                    and r.reserver.id = :memberId)
-            """)
-    boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 
     @Query("""
             select exists
@@ -120,6 +104,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
               and th = :theme
             """)
     List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Theme theme);
-
-    List<Reservation> findByStatus(ReservationStatus reservationStatus);
 }

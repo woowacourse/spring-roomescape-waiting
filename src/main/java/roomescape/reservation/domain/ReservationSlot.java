@@ -16,6 +16,16 @@ public class ReservationSlot {
                 .toList();
     }
 
+//    public ReservationSlot(List<Reservation> reservations, List<Waiting> waitings) {
+//        this.reservations = reservations.stream()
+//                .sorted(Comparator.comparing(Reservation::getReservedAt))
+//                .toList();
+//        this.reservations.addAll(waitings.stream()
+//                .map(Waiting::toReservation)
+//                .sorted(Comparator.comparing(Reservation::getReservedAt))
+//                .toList());
+//    }
+
     private void validateSameSlot(List<Reservation> reservations) {
         Reservation first = reservations.getFirst();
         boolean isNotSameSlot = reservations.stream()
