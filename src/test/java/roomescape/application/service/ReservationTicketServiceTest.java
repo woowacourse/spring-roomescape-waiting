@@ -211,6 +211,8 @@ class ReservationTicketServiceTest {
                 LocalDate.now()
         )));
 
+        LoginMember loginMember = new LoginMember(user);
+
         // when
         reservationTicketService.cancelReservation(loginMember, reservationTicket.getId());
 

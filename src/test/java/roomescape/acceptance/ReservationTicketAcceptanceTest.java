@@ -19,8 +19,11 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.response.ReservationTicketResponseDto;
+import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
+import roomescape.model.Member;
 import roomescape.model.Role;
+import roomescape.persistence.repository.ReservationTicketRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -31,6 +34,12 @@ class ReservationTicketAcceptanceTest {
 
     @Autowired
     private JjwtJwtTokenProvider jjwtJwtTokenProvider;
+
+    @Autowired
+    private MemberJpaRepository memberJpaRepository;
+
+    @Autowired
+    private ReservationTicketRepository reservationTicketRepository;
 
     private String email;
 
@@ -172,9 +181,10 @@ class ReservationTicketAcceptanceTest {
     @DisplayName("특정 예약을 삭제하는 경우 성공 시 204를 반환한다")
     void test7() {
         // given
+        Member member = memberJpaRepository.findByEmail(this.email).get();
         Long timeId = 1L;
         Long themeId = 1L;
-        Long savedId = insertNewReservationWithJdbcTemplate(timeId, themeId);
+        Long savedId = insertNewReservationWithJdbcTemplate(timeId, themeId, member.getId());
 
         // when & then
         RestAssured.given().log().all()
@@ -196,6 +206,23 @@ class ReservationTicketAcceptanceTest {
             ps.setLong(2, timeId);
             ps.setLong(3, themeId);
             ps.setLong(4, 1L);
+            return ps;
+        }, keyHolder);
+
+        return keyHolder.getKey().longValue();
+    }
+
+    private Long insertNewReservationWithJdbcTemplate(final Long timeId, final Long themeId, final Long memberId) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(
+                    "INSERT INTO reservation_ticket (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                    new String[]{"id"});
+            ps.setDate(1, Date.valueOf(tomorrow));
+            ps.setLong(2, timeId);
+            ps.setLong(3, themeId);
+            ps.setLong(4, memberId);
             return ps;
         }, keyHolder);
 
