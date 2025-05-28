@@ -1,11 +1,13 @@
 package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +19,10 @@ import roomescape.member.application.MemberDataService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
-import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.application.ReservationSlotDataService;
+import roomescape.reservationslot.exception.InvalidReservationSlotException;
+import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
+import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -28,7 +32,7 @@ import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
-class ReservationApplicationServiceTest {
+class ConfirmedReservationApplicationServiceTest {
 
     private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
@@ -37,9 +41,7 @@ class ReservationApplicationServiceTest {
     private Long themeId;
     private Long memberId;
 
-    private ReservationSlotApplicationService reservationSlotApplicationService;
-
-    private ReservationApplicationService reservationApplicationService;
+    private ConfirmedReservationApplicationService confirmedReservationApplicationService;
 
     @Autowired
     private ReservationSlotRepository reservationSlotRepository;
@@ -65,11 +67,8 @@ class ReservationApplicationServiceTest {
         ThemeDataService themeDataService = new ThemeDataService(themeRepository);
         ReservationTimeDataService reservationTimeDataService = new ReservationTimeDataService(
                 reservationTimeRepository, reservationSlotDataService);
-        reservationApplicationService = new ReservationApplicationService(
-                memberDataService,
+        confirmedReservationApplicationService = new ConfirmedReservationApplicationService(
                 reservationSlotDataService,
-                reservationDataService);
-        reservationSlotApplicationService = new ReservationSlotApplicationService(reservationSlotDataService,
                 reservationTimeDataService, themeDataService,
                 memberDataService, reservationDataService);
 
@@ -83,12 +82,12 @@ class ReservationApplicationServiceTest {
     void findFilteredReservations_shouldReturnAllReservations() {
         // given
         Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId, memberId,
+        confirmedReservationApplicationService.create(futureDate, timeId, themeId, memberId,
                 afterOneHour);
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId,
+        confirmedReservationApplicationService.create(futureDate, timeId2, themeId, memberId,
                 afterOneHour);
         // when
-        List<ConfirmedReservationResponse> result = reservationApplicationService.findByCriteria(null, null, null,
+        List<ConfirmedReservationResponse> result = confirmedReservationApplicationService.findByCriteria(null, null, null,
                 null);
 
         // then
@@ -99,13 +98,13 @@ class ReservationApplicationServiceTest {
     void findFilteredReservations_shouldReturnFilteredReservations() {
         // given
         Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
-        reservationSlotApplicationService.createConfirmedReservation(futureDate.minusDays(1), timeId, themeId, memberId,
+        confirmedReservationApplicationService.create(futureDate.minusDays(1), timeId, themeId, memberId,
                 afterOneHour);
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId,
+        confirmedReservationApplicationService.create(futureDate, timeId2, themeId, memberId,
                 afterOneHour);
 
         // when
-        List<ConfirmedReservationResponse> result = reservationApplicationService.findByCriteria(null, null,
+        List<ConfirmedReservationResponse> result = confirmedReservationApplicationService.findByCriteria(null, null,
                 futureDate,
                 null);
 
@@ -114,14 +113,59 @@ class ReservationApplicationServiceTest {
     }
 
     @Test
-    void removeByIdReservation_shouldRemoveSuccessfully() {
-        ConfirmedReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(futureDate,
+    void removeByIdReservation_shouldRemoveConfirmReservationSuccessfully() {
+        ConfirmedReservationResponse response = confirmedReservationApplicationService.create(futureDate,
                 timeId, themeId,
                 memberId, afterOneHour);
-        reservationApplicationService.removeById(response.id());
+        confirmedReservationApplicationService.cancel(response.id());
 
-        List<ConfirmedReservationResponse> result = reservationApplicationService.findByCriteria(themeId, memberId,
+        List<ConfirmedReservationResponse> result = confirmedReservationApplicationService.findByCriteria(themeId, memberId,
                 futureDate, futureDate.plusDays(1));
         assertThat(result).isEmpty();
+    }
+
+
+    @Test
+    void create_shouldReturnResponseWhenSuccessful() {
+        ConfirmedReservationResponse response = confirmedReservationApplicationService.create(futureDate,
+                timeId, themeId, memberId, afterOneHour);
+
+        Assertions.assertAll(
+                () -> assertThat(response.member().name()).isEqualTo("Mint"),
+                () -> assertThat(response.date()).isEqualTo(futureDate),
+                () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0))
+        );
+    }
+
+    @Test
+    void create_shouldThrowException_WhenDuplicated() {
+        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
+        confirmedReservationApplicationService.create(futureDate, timeId, themeId, memberId,
+                afterOneHour);
+
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.create(futureDate, timeId, themeId,
+                        memberId, afterOneHour))
+                .isInstanceOf(ReservationSlotAlreadyExistsException.class)
+                .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
+    }
+
+    @Test
+    void create_shouldThrowException_WhenTimeIdNotFound() {
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.create(futureDate, 999L, themeId, memberId,
+                        afterOneHour))
+                .isInstanceOf(ReservationSlotNotFoundException.class)
+                .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
+    }
+
+    @Test
+    void create_shouldThrowException_WhenPastDate() {
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.create(pastDate, timeId, themeId, memberId,
+                        afterOneHour))
+                .isInstanceOf(InvalidReservationSlotException.class)
+                .hasMessageContaining("예약 시간이 현재 시간보다 이전일 수 없습니다.");
     }
 }

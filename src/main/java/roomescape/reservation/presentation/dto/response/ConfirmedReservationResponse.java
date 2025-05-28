@@ -14,8 +14,9 @@ public record ConfirmedReservationResponse(
         ReservationTimeResponse time,
         ThemeResponse theme
 ) {
-    public static ConfirmedReservationResponse of(Reservation reservation, ReservationSlot reservationSlot) {
-        return new ConfirmedReservationResponse(reservation.getId(),
+    public static ConfirmedReservationResponse of(ReservationSlot reservationSlot) {
+        Reservation confirmedReservation = reservationSlot.findConfirmedReservation();
+        return new ConfirmedReservationResponse(confirmedReservation.getId(),
                 MemberResponse.from(reservationSlot.findReservedMember()), reservationSlot.getDate(),
                 ReservationTimeResponse.from(reservationSlot.getTime()), ThemeResponse.from(reservationSlot.getTheme())
         );

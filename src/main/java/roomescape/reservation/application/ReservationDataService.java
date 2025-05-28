@@ -2,14 +2,12 @@ package roomescape.reservation.application;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 
 @Service
@@ -55,24 +53,20 @@ public class ReservationDataService {
                 memberId);
     }
 
-    public void removeWaitingReservation(final Long reservationId) {
-        reservationRepository.deleteById(reservationId);
+    public Reservation getById(final Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ReservationOwnerException("존재하지 않는 예약입니다."));
+    }
+
+    public void removeWaitingReservation(final Reservation reservation) {
+        reservationRepository.delete(reservation);
     }
 
     public void deleteById(final Long reservationId) {
         reservationRepository.deleteById(reservationId);
     }
 
-    public Optional<Reservation> findByReservationSlot(final ReservationSlot reservationSlot) {
-        return reservationRepository.findByReservationSlot(reservationSlot);
-    }
-
     public boolean existsByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
         return reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
-    }
-
-    public Reservation getById(final Long reservationId) {
-        return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationOwnerException("존재하지 않는 예약입니다."));
     }
 }

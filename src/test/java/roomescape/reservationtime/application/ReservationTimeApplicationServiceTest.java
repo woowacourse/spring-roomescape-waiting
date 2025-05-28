@@ -17,9 +17,9 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.application.ConfirmedReservationApplicationService;
 import roomescape.reservation.application.ReservationDataService;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
@@ -42,7 +42,8 @@ class ReservationTimeApplicationServiceTest {
     private Theme theme = TestFixture.makeTheme();
     private Member member = TestFixture.makeMember();
 
-    private ReservationSlotApplicationService reservationSlotApplicationService;
+    private ConfirmedReservationApplicationService confirmedReservationApplicationService;
+
     private ReservationTimeApplicationService reservationTimeApplicationService;
 
     @Autowired
@@ -72,7 +73,7 @@ class ReservationTimeApplicationServiceTest {
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
         ReservationDataService slotReservationDataService = new ReservationDataService(reservationRepository);
-        reservationSlotApplicationService = new ReservationSlotApplicationService(reservationSlotDataService,
+        confirmedReservationApplicationService = new ConfirmedReservationApplicationService(reservationSlotDataService,
                 reservationTimeDataService, themeDataService, memberDataService, slotReservationDataService);
     }
 
@@ -123,7 +124,7 @@ class ReservationTimeApplicationServiceTest {
     void removeByIdReservationTime_shouldThrowException_WhenReservationExists() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(),
+        confirmedReservationApplicationService.create(futureDate, reservationTimeResponse.id(),
                 theme.getId(), member.getId(),
                 afterOneHour);
         assertThatThrownBy(() -> reservationTimeApplicationService.removeById(reservationTimeResponse.id()))
@@ -138,7 +139,7 @@ class ReservationTimeApplicationServiceTest {
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(),
+        confirmedReservationApplicationService.create(futureDate, reservationTimeResponse.id(),
                 theme.getId(), member.getId(),
                 afterOneHour);
         List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(

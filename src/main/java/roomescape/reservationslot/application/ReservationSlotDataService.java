@@ -1,15 +1,11 @@
 package roomescape.reservationslot.application;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
-import roomescape.member.domain.Member;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 @Service
 public class ReservationSlotDataService {
@@ -36,11 +32,7 @@ public class ReservationSlotDataService {
                 .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간에 예약이 존재하지 않습니다."));
     }
 
-    public ReservationSlot saveReservationSlotWithReservation(final Member member, final LocalDate date,
-                                                              final ReservationTime time,
-                                                              final Theme theme, final LocalDateTime now) {
-        ReservationSlot reservationSlot = new ReservationSlot(date, time, theme);
-        reservationSlot.addReservation(member, now);
+    public ReservationSlot save(final ReservationSlot reservationSlot) {
         return reservationSlotRepository.save(reservationSlot);
     }
 
