@@ -13,21 +13,19 @@ import roomescape.dto.business.WaitingWithRank;
 
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    @Query("""
-            SELECT new roomescape.dto.business.WaitingWithRank(
-                w, (
-                    SELECT COUNT(w2) + 1
-                    FROM Waiting w2
-                    WHERE w2.theme.id = w.theme.id
-                    AND w2.date = w.date
-                    AND w2.time.id = w.time.id
-                    AND w2.createdAt < w.createdAt
-                )
-            )
-            FROM Waiting w
-            WHERE w.member.id = :memberId
-            ORDER BY w.createdAt ASC
-            """)
+    @Query(value = """
+            SELECT
+                w.id AS id,
+                w.date AS date,
+                t.name AS theme_name,
+                rt.start_at AS start_at,
+                ROW_NUMBER() OVER (PARTITION BY :memberId ORDER BY w.created_at DESC) + 1 AS rank
+            FROM waiting AS w
+            LEFT JOIN theme AS t ON w.theme_id = t.id
+            LEFT JOIN reservation_time AS rt ON w.time_id = rt.id
+            LEFT JOIN member AS m ON w.member_id = m.id
+            WHERE w.member_id = :memberId
+            """, nativeQuery = true)
     List<WaitingWithRank> findWithRankingByMember(@Param("memberId") long memberId);
 
     @Query("""

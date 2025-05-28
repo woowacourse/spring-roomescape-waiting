@@ -63,7 +63,7 @@ class WaitingRepositoryTest {
         assertAll(
                 () -> assertThat(waitingWithRankings).hasSize(1),
                 () -> assertThat(waitingWithRankings)
-                        .extracting(WaitingWithRank::rank)
+                        .extracting(WaitingWithRank::getRank)
                         .containsExactly(2L)
         );
     }

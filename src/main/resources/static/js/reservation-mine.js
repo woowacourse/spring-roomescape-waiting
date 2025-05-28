@@ -24,9 +24,9 @@ function render(data) {
                   response 명세에 맞춰 값 설정
              */
 
-            const theme = item.theme.name;
+            const theme = item.themeName;
             const date = item.date;
-            const time = item.time.startAt;
+            const time = item.startAt;
 
             row.insertCell(0).textContent = theme;
             row.insertCell(1).textContent = date;
@@ -44,9 +44,9 @@ function render(data) {
               response 명세에 맞춰 값 설정
          */
 
-        const theme = item.theme.name;
+        const theme = item.id;
         const date = item.date;
-        const time = item.time.startAt;
+        const time = item.themeName;
         const rank = item.rank;
 
         row.insertCell(0).textContent = theme;

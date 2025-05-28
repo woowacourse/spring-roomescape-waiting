@@ -24,6 +24,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.business.ReservationCreationContent;
 import roomescape.dto.response.MemberProfileResponse;
+import roomescape.dto.response.ReservationProfileResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationStatusResponse;
 import roomescape.dto.response.ThemeResponse;
@@ -155,7 +156,7 @@ class ReservationServiceTest {
         List<Long> waitingIds = waitings.stream().map(Waiting::getId).toList();
         assertAll(
                 () -> assertThat(allReservationState.reservationResponses())
-                        .extracting(ReservationResponse::id)
+                        .extracting(ReservationProfileResponse::id)
                         .containsExactlyElementsOf(reservationIds),
                 () -> assertThat(allReservationState.waitingWithRankResponses())
                         .extracting(WaitingWithRankResponse::id)
