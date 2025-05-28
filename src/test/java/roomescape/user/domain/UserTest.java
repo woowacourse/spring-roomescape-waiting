@@ -20,7 +20,7 @@ class UserTest {
         final UserRole role = UserRole.NORMAL;
 
         // when & then
-        assertThatThrownBy(() -> User.withId(null, name, email, password, role))
+        assertThatThrownBy(() -> new User(null, name, email, password, role))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: User.id");
     }

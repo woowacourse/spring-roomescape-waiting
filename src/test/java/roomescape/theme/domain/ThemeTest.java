@@ -57,7 +57,7 @@ class ThemeTest {
         ThemeThumbnail themeThumbnail = ThemeThumbnail.from("thumbnail.jpg");
 
         // when & then
-        assertThatThrownBy(() -> Theme.withId(null, themeName, themeDescription, themeThumbnail))
+        assertThatThrownBy(() -> new Theme(null, themeName, themeDescription, themeThumbnail))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: Theme.id");
     }

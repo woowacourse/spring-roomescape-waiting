@@ -297,15 +297,15 @@ class ReservationFacadeTest {
     }
 
     private Reservation createReservation(Long id) {
-        return Reservation.withId(
+        return new Reservation(
                 id,
                 1L,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                ReservationTime.withId(
+                new ReservationTime(
                         1L,
                         LocalTime.of(15, 0)
                 ),
-                Theme.withId(
+                new Theme(
                         1L,
                         ThemeName.from("테스트테마"),
                         ThemeDescription.from("설명"),
@@ -315,16 +315,16 @@ class ReservationFacadeTest {
     }
 
     private WaitingReservation createWaiting(Long id, int waitingNumber) {
-        return WaitingReservation.withId(
+        return new WaitingReservation(
                 id,
                 1L,
                 waitingNumber,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                ReservationTime.withId(
+                new ReservationTime(
                         1L,
                         LocalTime.of(15, 0)
                 ),
-                Theme.withId(
+                new Theme(
                         1L,
                         ThemeName.from("테스트테마"),
                         ThemeDescription.from("설명"),
@@ -342,7 +342,7 @@ class ReservationFacadeTest {
     }
 
     private User createUser(Long Id) {
-        return User.withId(
+        return new User(
                 Id,
                 UserName.from("테스트"),
                 Email.from("email@email.com"),

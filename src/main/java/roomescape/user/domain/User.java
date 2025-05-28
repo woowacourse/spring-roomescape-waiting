@@ -55,7 +55,7 @@ public class User {
     @Column(name = Fields.role)
     private UserRole role;
 
-    public User(final UserName name, final Email email, final Password password, final UserRole role) {
+    private User(final UserName name, final Email email, final Password password, final UserRole role) {
         validate(name, email, password, role);
         this.name = name;
         this.email = email;
@@ -71,14 +71,6 @@ public class User {
         this.email = email;
         this.password = password;
         this.role = role;
-    }
-
-    public static User withId(final Long id,
-                              final UserName name,
-                              final Email email,
-                              final Password password,
-                              final UserRole role) {
-        return new User(id, name, email, password, role);
     }
 
     public static User withoutId(final UserName name,

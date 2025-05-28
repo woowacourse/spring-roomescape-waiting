@@ -47,11 +47,11 @@ public class WaitingReservation {
     @ManyToOne
     private Theme theme;
 
-    public WaitingReservation(final Long userId,
-                              final int waitingOrder,
-                              final ReservationDate date,
-                              final ReservationTime time,
-                              final Theme theme
+    private WaitingReservation(final Long userId,
+                               final int waitingOrder,
+                               final ReservationDate date,
+                               final ReservationTime time,
+                               final Theme theme
     ) {
         validate(userId, waitingOrder, date, time, theme);
         this.userId = userId;
@@ -76,16 +76,6 @@ public class WaitingReservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-    }
-
-    public static WaitingReservation withId(final Long id,
-                                            final Long userId,
-                                            final int waitingOrder,
-                                            final ReservationDate date,
-                                            final ReservationTime time,
-                                            final Theme theme
-    ) {
-        return new WaitingReservation(id, userId, waitingOrder, date, time, theme);
     }
 
     public static WaitingReservation withoutId(final Long userId,

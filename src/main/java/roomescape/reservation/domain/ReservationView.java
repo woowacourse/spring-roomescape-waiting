@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.FieldNameConstants;
@@ -48,6 +49,7 @@ import roomescape.time.domain.ReservationTime;
 @Table(name = "reservation_view")
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@AllArgsConstructor
 @FieldNameConstants
 public class ReservationView {
 
@@ -74,22 +76,6 @@ public class ReservationView {
 
     @Column
     private int waitingOrder;
-
-    public ReservationView(final String compositeId,
-                           final Long userId,
-                           final ReservationDate date,
-                           final ReservationTime time,
-                           final Theme theme,
-                           final ReservationStatus status,
-                           final int waitingOrder) {
-        this.compositeId = compositeId;
-        this.userId = userId;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.status = status;
-        this.waitingOrder = waitingOrder;
-    }
 
     public Long getId() {
         try {

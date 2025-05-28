@@ -29,7 +29,7 @@ class ThemeFacadeImplTest {
 
     @Mock
     private ThemeQueryService themeQueryService;
-    
+
     @Mock
     private ThemeCommandService themeCommandService;
 
@@ -103,7 +103,7 @@ class ThemeFacadeImplTest {
     }
 
     private Theme createTheme(Long id, String name, String description, String thumbnail) {
-        return Theme.withId(
+        return new Theme(
                 id,
                 ThemeName.from(name),
                 ThemeDescription.from(description),

@@ -76,6 +76,6 @@ class ReservationTimeFacadeImplTest {
     }
 
     private ReservationTime createReservationTime(Long id, LocalTime startAt) {
-        return ReservationTime.withId(id, startAt);
+        return new ReservationTime(id, startAt);
     }
 }

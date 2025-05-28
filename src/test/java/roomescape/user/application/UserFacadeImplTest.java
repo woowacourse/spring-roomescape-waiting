@@ -46,7 +46,7 @@ class UserFacadeImplTest {
     }
 
     private User createUser(Long id, String name, String email, String password) {
-        return User.withId(
+        return new User(
                 id,
                 UserName.from(name),
                 Email.from(email),

@@ -87,7 +87,7 @@ class ReservationTest {
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withId(null, userId, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(null, userId, date, time, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.id");
     }

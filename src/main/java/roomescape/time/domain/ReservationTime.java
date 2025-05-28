@@ -34,15 +34,11 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    private ReservationTime(final Long id, final LocalTime startAt) {
+    public ReservationTime(final Long id, final LocalTime startAt) {
         validate(id);
         validate(startAt);
         this.id = id;
         this.startAt = startAt;
-    }
-
-    public static ReservationTime withId(final Long id, final LocalTime startAt) {
-        return new ReservationTime(id, startAt);
     }
 
     public static ReservationTime withoutId(final LocalTime startAt) {
