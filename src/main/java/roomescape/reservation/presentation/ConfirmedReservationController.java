@@ -32,7 +32,8 @@ public class ConfirmedReservationController {
         this.confirmedReservationApplicationService = confirmedReservationApplicationService;
     }
 
-    @GetMapping("/reservations")
+    @RequireRole(MemberRole.ADMIN)
+    @GetMapping("/admin/reservations")
     public ResponseEntity<List<ConfirmedReservationWebResponse>> findByCriteria(
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
@@ -45,7 +46,7 @@ public class ConfirmedReservationController {
     }
 
     @RequireRole(MemberRole.ADMIN)
-    @DeleteMapping("/reservations/{reservationId}")
+    @DeleteMapping("/admin/reservations/{reservationId}")
     public ResponseEntity<Void> cancel(
             @PathVariable("reservationId") Long reservationId
     ) {

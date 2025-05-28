@@ -23,7 +23,7 @@ import roomescape.reservation.application.dto.request.ConfirmedReservationCreate
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
-import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
+import roomescape.reservationtime.exception.ReservationTimeDuplicatedException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
@@ -86,7 +86,7 @@ class ReservationTimeApplicationServiceTest {
         reservationTimeApplicationService.create(request);
 
         assertThatThrownBy(() -> reservationTimeApplicationService.create(request))
-                .isInstanceOf(ReservationTimeAlreadyExistsException.class)
+                .isInstanceOf(ReservationTimeDuplicatedException.class)
                 .hasMessageContaining("중복된 예약 시간을 생성할 수 없습니다.");
     }
 

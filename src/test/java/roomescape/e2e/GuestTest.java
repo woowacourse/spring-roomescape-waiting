@@ -33,19 +33,6 @@ import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebR
 public class GuestTest {
 
     @Test
-    void findAllReservations() {
-        createReservationTime();
-        createTheme("추리");
-        createRegularReservation(1L);
-
-        RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
-    }
-
-    @Test
     void findAvailableReservations() {
         createReservationTime();
         createTheme("추리");
@@ -92,38 +79,5 @@ public class GuestTest {
                 .statusCode(201);
 
         loginAndGetAuthToken("testMember@gmail.com", PASSWORD);
-    }
-
-    @Test
-    void findAllRegulars() {
-        List<MemberWebResponse> memberWebRespons = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .when().get("/members")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .as(new TypeRef<>() {
-                });
-        assertThat(memberWebRespons.size()).isEqualTo(2);
-    }
-
-    @Test
-    void filterReservations() {
-        createReservationTime();
-        createTheme("추리");
-        createTheme("로맨스");
-        createRegularReservation(1L);
-        createRegularReservation(2L);
-
-        List<ConfirmedReservationWebResponse> reservationsFilteredByThemeId = RestAssured.given().log().all()
-                .when().queryParams("themeId", 1L, "memberId", 2L, "dateFrom", FUTURE_DATE,
-                        "dateTo", TestFixture.makeAfterOneWeekDate().plusDays(1).toString())
-                .get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .as(new TypeRef<>() {
-                });
-        assertThat(reservationsFilteredByThemeId.size()).isEqualTo(1);
     }
 }

@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
+import roomescape.reservationtime.exception.ReservationTimeDuplicatedException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
@@ -58,7 +58,7 @@ public class ReservationTimeDataService {
 
     private void validateDistinct(final LocalTime reservationTime) {
         if (reservationTimeRepository.existsByStartAt(reservationTime)) {
-            throw new ReservationTimeAlreadyExistsException("중복된 예약 시간을 생성할 수 없습니다.");
+            throw new ReservationTimeDuplicatedException("중복된 예약 시간을 생성할 수 없습니다.");
         }
     }
 }

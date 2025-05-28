@@ -59,7 +59,7 @@ public class IntegrationFixture {
                 .contentType(ContentType.JSON)
                 .body(theme)
                 .cookie(TOKEN, authToken)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -74,7 +74,7 @@ public class IntegrationFixture {
                 .contentType(ContentType.JSON)
                 .body(reservationTime)
                 .cookie(TOKEN, authToken)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201);
     }

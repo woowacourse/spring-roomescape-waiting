@@ -23,7 +23,7 @@ import java.util.Objects;
 import java.util.Set;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.ReservationAlreadyExistsException;
+import roomescape.reservation.exception.ReservationDuplicatedException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservationslot.exception.InvalidReservationSlotException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
@@ -105,7 +105,7 @@ public class ReservationSlot {
         boolean memberExists = reservations.stream()
                 .anyMatch(reservation -> reservation.getMember().getId().equals(member.getId()));
         if (memberExists) {
-            throw new ReservationAlreadyExistsException("이미 예약 중입니다.");
+            throw new ReservationDuplicatedException("이미 예약 중입니다.");
         }
     }
 

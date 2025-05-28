@@ -1,5 +1,5 @@
 let isEditing = false;
-const RESERVATION_API_ENDPOINT = '/reservations';
+const RESERVATION_API_ENDPOINT = '/admin/reservations';
 
 document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('add-button').addEventListener('click', addInputRow);

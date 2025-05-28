@@ -1,6 +1,8 @@
 package roomescape.reservationtime.exception;
 
-public class ReservationTimeInUseException extends RuntimeException {
+import roomescape.common.exception.InUseException;
+
+public class ReservationTimeInUseException extends InUseException {
 
     public ReservationTimeInUseException(final String message) {
         super(message);

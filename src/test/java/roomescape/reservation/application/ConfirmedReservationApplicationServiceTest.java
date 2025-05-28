@@ -23,7 +23,7 @@ import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.exception.InvalidReservationSlotException;
-import roomescape.reservationslot.exception.ReservationSlotAlreadyExistsException;
+import roomescape.reservationslot.exception.ReservationSlotDuplicatedException;
 import roomescape.reservationslot.exception.ReservationSlotNotFoundException;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.application.ReservationTimeDataService;
@@ -154,7 +154,7 @@ class ConfirmedReservationApplicationServiceTest {
         assertThatThrownBy(
                 () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(futureDate, timeId, themeId,
                         memberId, afterOneHour)))
-                .isInstanceOf(ReservationSlotAlreadyExistsException.class)
+                .isInstanceOf(ReservationSlotDuplicatedException.class)
                 .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
     }
 

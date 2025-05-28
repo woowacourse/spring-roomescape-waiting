@@ -9,7 +9,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
@@ -20,7 +19,6 @@ import roomescape.reservationtime.presentation.dto.response.AvailableReservation
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 
 @RestController
-@RequestMapping("/times")
 public class ReservationTimeController {
 
     private final ReservationTimeApplicationService reservationTimeApplicationService;
@@ -30,7 +28,7 @@ public class ReservationTimeController {
     }
 
     @RequireRole(MemberRole.ADMIN)
-    @PostMapping
+    @PostMapping("/admin/times")
     public ResponseEntity<ReservationTimeWebResponse> create(
             @RequestBody ReservationTimeCreateWebRequest request
     ) {
@@ -38,12 +36,12 @@ public class ReservationTimeController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    @GetMapping
+    @GetMapping("/times")
     public ResponseEntity<List<ReservationTimeWebResponse>> findAll() {
         return ResponseEntity.ok(reservationTimeApplicationService.findAll());
     }
 
-    @GetMapping("/available")
+    @GetMapping("/times/available")
     public ResponseEntity<List<AvailableReservationTimeWebResponse>> findAvailable(
             @RequestParam("date") LocalDate date,
             @RequestParam("themeId") Long themeId
@@ -52,7 +50,7 @@ public class ReservationTimeController {
     }
 
     @RequireRole(MemberRole.ADMIN)
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/admin/times/{id}")
     public ResponseEntity<Void> remove(
             @PathVariable("id") Long id
     ) {

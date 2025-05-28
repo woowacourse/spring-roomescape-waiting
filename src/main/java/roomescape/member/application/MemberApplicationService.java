@@ -36,6 +36,10 @@ public class MemberApplicationService {
                 .toList();
     }
 
+    public Member getById(final Long id) {
+        return memberDataService.getById(id);
+    }
+
     private void validateMemberExists(final SignupWebRequest signupWebRequest) {
         if (memberDataService.existsByEmail(signupWebRequest.email())) {
             throw new MemberDuplicatedException("이미 존재하는 회원입니다.");
