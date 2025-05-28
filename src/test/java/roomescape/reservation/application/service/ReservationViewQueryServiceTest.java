@@ -35,7 +35,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Slf4j
 @SpringBootTest
 @Transactional
-class ReservationViewQueryServiceImplTest {
+class ReservationViewQueryServiceTest {
 
     @Autowired
     private ReservationViewQueryService service;

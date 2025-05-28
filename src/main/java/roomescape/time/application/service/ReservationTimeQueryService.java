@@ -1,17 +1,36 @@
 package roomescape.time.application.service;
 
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.domain.ReservationTimeRepository;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 
-public interface ReservationTimeQueryService {
+@Service
+@RequiredArgsConstructor
+@Transactional(readOnly = true)
+public class ReservationTimeQueryService {
 
-    ReservationTime get(Long id);
+    private final ReservationTimeRepository reservationTimeRepository;
 
-    List<ReservationTime> getAll();
+    public ReservationTime get(final Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(NoSuchElementException::new);
+    }
 
-    boolean existsByStartAt(LocalTime time);
+    public List<ReservationTime> getAll() {
+        return reservationTimeRepository.findAll();
+    }
 
-    boolean existById(Long id);
+    public boolean existsByStartAt(final LocalTime startAt) {
+        return reservationTimeRepository.existsByStartAt(startAt);
+    }
+
+    public boolean existById(final Long id) {
+        return reservationTimeRepository.existsById(id);
+    }
 }

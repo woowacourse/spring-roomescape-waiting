@@ -31,10 +31,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class ThemeQueryServiceImplTest {
+class ThemeQueryServiceTest {
 
     @Autowired
-    private ThemeQueryServiceImpl themeQueryService;
+    private ThemeQueryService themeQueryService;
 
     @Autowired
     private ThemeRepository themeRepository;

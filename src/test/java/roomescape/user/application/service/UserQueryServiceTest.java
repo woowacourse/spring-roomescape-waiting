@@ -19,10 +19,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @Transactional
-class UserQueryServiceImplTest {
+class UserQueryServiceTest {
 
     @Autowired
-    private UserQueryServiceImpl userQueryService;
+    private UserQueryService userQueryService;
 
     @Autowired
     private UserRepository userRepository;

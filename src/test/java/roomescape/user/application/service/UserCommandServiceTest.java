@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.auth.sign.application.usecase.CreateUserRequest;
+import roomescape.auth.sign.application.dto.CreateUserRequest;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
 import roomescape.user.domain.User;
@@ -17,10 +17,10 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 @SpringBootTest
 @Transactional
-class UserCommandServiceImplTest {
+class UserCommandServiceTest {
 
     @Autowired
-    private UserCommandServiceImpl userCommandService;
+    private UserCommandService userCommandService;
 
     @Autowired
     private UserRepository userRepository;

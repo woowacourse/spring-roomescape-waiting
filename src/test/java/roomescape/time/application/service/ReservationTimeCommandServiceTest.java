@@ -34,10 +34,10 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest
 @Transactional
-class ReservationTimeCommandServiceImplTest {
+class ReservationTimeCommandServiceTest {
 
     @Autowired
-    private ReservationTimeCommandServiceImpl reservationTimeCommandService;
+    private ReservationTimeCommandService reservationTimeCommandService;
 
     @Autowired
     private ReservationTimeRepository reservationTimeRepository;

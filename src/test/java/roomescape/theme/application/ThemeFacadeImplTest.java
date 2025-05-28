@@ -29,7 +29,7 @@ class ThemeFacadeImplTest {
 
     @Mock
     private ThemeQueryService themeQueryService;
-
+    
     @Mock
     private ThemeCommandService themeCommandService;
 

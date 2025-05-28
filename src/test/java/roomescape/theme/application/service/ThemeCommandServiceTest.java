@@ -20,10 +20,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 @SpringBootTest
 @Transactional
-class ThemeCommandServiceImplTest {
+class ThemeCommandServiceTest {
 
     @Autowired
-    private ThemeCommandServiceImpl themeCommandService;
+    private ThemeCommandService themeCommandService;
 
     @Autowired
     private ThemeRepository themeRepository;

@@ -37,7 +37,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @Slf4j
 @SpringBootTest
 @Transactional
-class WaitingReservationCommandServiceImplTest {
+class WaitingReservationCommandServiceTest {
 
     @Autowired
     private WaitingReservationCommandService service;

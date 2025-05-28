@@ -35,10 +35,10 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 @Slf4j
 @SpringBootTest
 @Transactional
-class ReservationQueryServiceImplTest {
+class ReservationQueryServiceTest {
 
     @Autowired
-    private ReservationQueryServiceImpl reservationQueryService;
+    private ReservationQueryService reservationQueryService;
 
     @Autowired
     private ReservationRepository reservationRepository;
