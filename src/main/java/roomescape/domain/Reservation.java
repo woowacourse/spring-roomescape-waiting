@@ -41,17 +41,10 @@ public class Reservation {
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validateBeforeTime(date, time);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
         validateMember(member);
-    }
-
-    private void validateBeforeTime(LocalDate date, ReservationTime time) {
-        if (LocalDateTime.now().isAfter(LocalDateTime.of(date, time.getStartAt()))) {
-            throw new ReservationInPastException();
-        }
     }
 
     private void validateDate(LocalDate date) {

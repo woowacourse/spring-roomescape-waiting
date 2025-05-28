@@ -1,6 +1,7 @@
 package roomescape.service.reservation;
 
 import jakarta.validation.Valid;
+import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -16,6 +17,7 @@ import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.search.SearchConditionsRequest;
 import roomescape.exception.member.MemberNotFoundException;
 import roomescape.exception.reservation.ReservationAlreadyExistsException;
+import roomescape.exception.reservation.ReservationInPastException;
 import roomescape.exception.reservation.ReservationNotFoundException;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.theme.ThemeNotFoundException;
@@ -51,6 +53,10 @@ public class ReservationServiceImpl implements ReservationService {
 
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(request.themeId()));
+
+        if (LocalDateTime.now().isAfter(LocalDateTime.of(request.date(), reservationTime.getStartAt()))) {
+            throw new ReservationInPastException();
+        }
 
         if (reservationRepository.existsByDateAndTimeId(request.date(), reservationTime.getId())) {
             throw new ReservationAlreadyExistsException();
