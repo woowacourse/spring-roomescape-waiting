@@ -22,7 +22,7 @@ public class ScheduleService {
     @Transactional
     public Schedule createAndSaveSchedule(LocalDate date, ReservationTime reservationTime, Theme theme) {
         Schedule schedule = new Schedule(null, date, reservationTime, theme);
-        return scheduleRepository.save(schedule);
+        return save(schedule);
     }
 
     public Schedule save(Schedule schedule) {
