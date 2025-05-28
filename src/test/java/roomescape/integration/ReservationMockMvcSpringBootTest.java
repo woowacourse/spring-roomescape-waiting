@@ -39,22 +39,6 @@ public class ReservationMockMvcSpringBootTest {
     @Autowired
     MockMvc mockMvc;
 
-    @DisplayName("내 예약 목록을 조회할 수 있다")
-    @Test
-    void getMyReservations() throws Exception {
-        // given
-        String token = getAdminToken();
-        Cookie cookie = new Cookie("token", token);
-
-        // when
-        // then
-        mockMvc.perform(get("/reservations-mine")
-                        .contentType("application/json")
-                        .cookie(cookie)
-                ).andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(13));
-    }
-
     @DisplayName("어드민이 예약을 추가할 수 있다")
     @Test
     void adminCreate() throws Exception {

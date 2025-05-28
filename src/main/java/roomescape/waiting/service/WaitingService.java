@@ -141,8 +141,7 @@ public class WaitingService {
     }
 
     private long calculateWaitingOrder(WaitingAddCommand command) {
-        return waitingRepository.countByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId())
-                + 1;
+        return waitingRepository.countByDateAndTimeIdAndThemeId(command.date(), command.timeId(), command.themeId()) + 1;
     }
 
     private ReservationTime getReservationTime(long timeId) {

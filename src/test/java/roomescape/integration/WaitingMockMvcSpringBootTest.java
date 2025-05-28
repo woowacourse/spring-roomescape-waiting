@@ -102,23 +102,9 @@ public class WaitingMockMvcSpringBootTest {
         // then
         mockMvc.perform(get("/waiting").cookie(cookie))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2));
-    }
-
-    private String getAdminToken() throws Exception {
-        return mockMvc.perform(post("/login")
-                        .contentType("application/json")
-                        .content("""
-                                {
-                                    "email": "admin@gmail.com",
-                                    "password": "qwer!"
-                                }
-                                """)
-                ).andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getCookie("token")
-                .getValue();
+                .andExpect(jsonPath("$.length()").value(2))
+                .andExpect(jsonPath("$[0].date").value(today.plusDays(1).toString()))
+                .andExpect(jsonPath("$[1].date").value(today.plusDays(2).toString()));
     }
 
     private String getUserToken() throws Exception {

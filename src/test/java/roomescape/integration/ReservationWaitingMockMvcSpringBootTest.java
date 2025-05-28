@@ -1,6 +1,7 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -25,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
@@ -74,7 +76,13 @@ public class ReservationWaitingMockMvcSpringBootTest {
         // then
         mockMvc.perform(get("/reservations-mine").cookie(cookie))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(3));
+                .andExpect(jsonPath("$.length()").value(3))
+                .andExpect(jsonPath("$[0].date").value("2025-04-29"))
+                .andExpect(jsonPath("$[0].status").value("예약"))
+                .andExpect(jsonPath("$[1].date").value("2025-04-29"))
+                .andExpect(jsonPath("$[1].status").value("1번째 예약대기"))
+                .andExpect(jsonPath("$[2].date").value("2025-04-30"))
+                .andExpect(jsonPath("$[2].status").value("1번째 예약대기"));
     }
 
     @DisplayName("예약 취소 시 순번이 가장 빠른 예약 대기가 예약된다")
@@ -91,7 +99,16 @@ public class ReservationWaitingMockMvcSpringBootTest {
 
         // then
         List<Reservation> reservations = reservationRepository.findAllByMemberId(2L);
-        assertThat(reservations).hasSize(2);
+        assertAll(
+                () -> assertThat(reservations).hasSize(2),
+                () -> assertThat(reservations)
+                        .map(Reservation::getDate)
+                        .containsExactly(today.plusDays(1), today.plusDays(1)),
+                () -> assertThat(reservations)
+                        .map(Reservation::getTime)
+                        .map(ReservationTime::getId)
+                        .containsExactly(2L, 1L)
+        );
     }
 
     @DisplayName("예약에 대한 취소 권한이 없을 시 예외가 발생한다")

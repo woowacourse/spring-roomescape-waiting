@@ -38,8 +38,6 @@ public class ThemeServiceSliceTest {
     @MockitoBean
     TestCurrentDateTime currentDateTime;
     ThemeService themeService;
-    @Autowired
-    ApplicationContext applicationContext;
 
     @BeforeEach
     void init() {
