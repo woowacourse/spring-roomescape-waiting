@@ -174,8 +174,8 @@ class AdminReservationControllerTest {
             Map<String, Object> params = Map.of(
                     "themeId", 1L,
                     "memberId", 1L,
-                    "dateFrom", "2025-05-01",
-                    "dateTo", "2025-05-30");
+                    "dateFrom", LocalDate.now().toString(),
+                    "dateTo", LocalDate.now().plusDays(31).toString());
 
             RestAssured.given().cookie("token", loginToken).log().all()
                     .queryParams(params)

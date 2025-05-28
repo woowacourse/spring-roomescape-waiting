@@ -49,4 +49,3 @@ CREATE TABLE IF NOT EXISTS waiting
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (member_id) REFERENCES member (id)
 );
-

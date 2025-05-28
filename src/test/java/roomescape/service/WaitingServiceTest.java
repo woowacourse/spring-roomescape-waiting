@@ -22,7 +22,6 @@ import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.domain.waiting.Waiting;
-import roomescape.domain.waiting.WaitingWithRank;
 import roomescape.dto.waiting.WaitingCreateRequest;
 import roomescape.dto.waiting.WaitingResponse;
 import roomescape.exception.NotFoundException;
@@ -46,6 +45,7 @@ class WaitingServiceTest {
     private WaitingQueryRepository waitingQueryRepository;
     @Mock
     private ReservationService reservationService;
+
     @InjectMocks
     private WaitingService waitingService;
 
@@ -98,10 +98,13 @@ class WaitingServiceTest {
         // given
         Long memberId = testMember.getId();
         long rank = 2L;
-        WaitingWithRank waitingWithRank = new WaitingWithRank(testWaiting, rank);
+        Waiting testWaiting2 = new Waiting(2L, testDate, testMember, testTheme, testReservationTime);
+        Waiting testWaiting3 = new Waiting(3L, testDate, testMember, testTheme, testReservationTime);
 
-        when(waitingQueryRepository.findWaitingsWithRankByMemberId(memberId))
-                .thenReturn(Collections.singletonList(waitingWithRank));
+        when(waitingRepository.findAll())
+                .thenReturn(List.of(testWaiting, testWaiting2, testWaiting3));
+        when(waitingRepository.findAllByMemberId(memberId))
+                .thenReturn(List.of(testWaiting2));
 
         // when
         var responses = waitingService.findMyWaitings(memberId);
@@ -111,9 +114,9 @@ class WaitingServiceTest {
         assertThat(responses).hasSize(1);
 
         var response = responses.get(0);
-        assertThat(response.id()).isEqualTo(testWaiting.getId());
+        assertThat(response.id()).isEqualTo(testWaiting2.getId());
         assertThat(response.theme()).isEqualTo(testTheme.getName());
-        assertThat(response.date()).isEqualTo(testWaiting.getDate());
+        assertThat(response.date()).isEqualTo(testWaiting2.getDate());
         assertThat(response.time()).isEqualTo(testReservationTime.getStartAt());
         assertThat(response.status()).isEqualTo(rank + "번째 예약대기");
     }

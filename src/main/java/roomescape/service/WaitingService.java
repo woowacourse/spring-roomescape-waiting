@@ -27,20 +27,17 @@ public class WaitingService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final WaitingQueryRepository waitingQueryRepository;
     private final ReservationService reservationService;
 
     public WaitingService(final WaitingRepository WaitingRepository,
                           final ReservationTimeRepository ReservationTimeRepository,
                           final ThemeRepository themeRepository,
                           final MemberRepository memberRepository,
-                          final WaitingQueryRepository waitingQueryRepository,
                           final ReservationService reservationService) {
         this.waitingRepository = WaitingRepository;
         this.reservationTimeRepository = ReservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
-        this.waitingQueryRepository = waitingQueryRepository;
         this.reservationService = reservationService;
     }
 
@@ -77,9 +74,24 @@ public class WaitingService {
         waitingRepository.deleteById(id);
     }
 
-    public List<MyReservationAndWaitingsResponse> findMyWaitings(Long id) {
-        List<WaitingWithRank> waitingsWithRank = waitingQueryRepository.findWaitingsWithRankByMemberId(id);
-        return waitingsWithRank.stream()
+    public List<MyReservationAndWaitingsResponse> findMyWaitings(Long memberId) {
+        List<Waiting> myWaitings = waitingRepository.findAllByMemberId(memberId);
+
+        List<Waiting> allWaitings = waitingRepository.findAll();
+
+        List<WaitingWithRank> myWaitingsWithRank = myWaitings.stream()
+                .map(waiting -> {
+                    long rank = allWaitings.stream()
+                            .filter(w -> w.getTheme().equals(waiting.getTheme()) &&
+                                    w.getDate().equals(waiting.getDate()) &&
+                                    w.getTime().equals(waiting.getTime()) &&
+                                    w.getId() <= waiting.getId())
+                            .count();
+                    return new WaitingWithRank(waiting, rank);
+                })
+                .toList();
+
+        return myWaitingsWithRank.stream()
                 .map(MyReservationAndWaitingsResponse::from)
                 .toList();
     }

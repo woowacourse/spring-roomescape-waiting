@@ -10,8 +10,7 @@ import roomescape.domain.Theme;
 public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query(value = """
             SELECT
-            new
-            Theme (th.id,
+            new Theme (th.id,
             th.name,
             th.description,
             th.thumbnail)
