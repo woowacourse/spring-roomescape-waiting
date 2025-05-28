@@ -1,7 +1,6 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -51,37 +50,36 @@ public class ReservationFacadeService {
         ).collect(Collectors.toList());
     }
 
-    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId, final Long memberId,
-                                      final LocalDateTime now) {
+    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId,
+                                      final Long memberId) {
         if (!reservationService.isReservationExists(date, timeId, themeId)) {
-            return createReservation(date, timeId, themeId, memberId, now);
+            return createReservation(date, timeId, themeId, memberId);
         }
-        return createWaiting(date, timeId, themeId, memberId, now);
+        return createWaiting(date, timeId, themeId, memberId);
     }
 
     private ReservationResponse createReservation(final LocalDate date, final Long timeId, final Long themeId,
-                                                  final Long memberId,
-                                                  final LocalDateTime now) {
+                                                  final Long memberId) {
         reservationService.checkIfReservationExists(date, timeId, themeId);
         ReservationTime time = reservationTimeService.findReservationTime(timeId);
         Theme theme = themeService.findTheme(themeId);
         Member member = memberService.findUserByMemberId(memberId);
         ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
         Reservation newReservation = reservationService.save(
-                Reservation.createUpcomingReservationWithUnassignedId(member, reservationInfo, now)
+                Reservation.createUpcomingReservationWithUnassignedId(member, reservationInfo)
         );
         return ReservationResponse.of(newReservation);
     }
 
     private ReservationResponse createWaiting(final LocalDate date, final Long timeId, final Long themeId,
-                                              final Long memberId, final LocalDateTime now) {
+                                              final Long memberId) {
         ReservationTime time = reservationTimeService.findReservationTime(timeId);
         Theme theme = themeService.findTheme(themeId);
         Member member = memberService.findUserByMemberId(memberId);
         int turn = waitingService.findMaxOrderByDateAndTimeAndTheme(date, timeId, themeId);
         ReservationInfo reservationInfo = new ReservationInfo(date, time, theme);
         Waiting newWaiting = waitingService.save(
-                Waiting.createUpcomingReservationWithUnassignedId(member, turn + 1, reservationInfo, now));
+                Waiting.createUpcomingReservationWithUnassignedId(member, turn + 1, reservationInfo));
         return ReservationResponse.of(newWaiting);
     }
 
@@ -100,8 +98,7 @@ public class ReservationFacadeService {
                 waiting.getDate(),
                 waiting.getTimeId(),
                 waiting.getThemeId(),
-                waiting.getMemberId(),
-                LocalDateTime.now()
+                waiting.getMemberId()
         );
         waitingService.delete(waiting.getId());
     }

@@ -95,8 +95,8 @@ class ReservationServiceTest {
     @Test
     void createReservation_shouldReturnResponseWhenSuccessful() {
         ReservationResponse response = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
-                member.getId(),
-                afterOneHour);
+                member.getId()
+        );
 
         Assertions.assertAll(
                 () -> assertThat(response.member().name()).isEqualTo("Mint"),
@@ -108,8 +108,8 @@ class ReservationServiceTest {
     @Test
     void getReservations_shouldReturnAllCreatedReservations() {
         Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, timeId2, theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, timeId2, theme.getId(), member.getId());
 
         List<ReservationResponse> result = reservationService.findReservations(null, null, null, null);
         assertThat(result).hasSize(2);
@@ -118,8 +118,8 @@ class ReservationServiceTest {
     @Test
     void deleteReservation_shouldRemoveSuccessfully() {
         ReservationResponse response = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
-                member.getId(),
-                afterOneHour);
+                member.getId()
+        );
         reservationService.delete(response.id());
 
         List<ReservationResponse> result = reservationService.findReservations(theme.getId(), member.getId(),
@@ -131,7 +131,7 @@ class ReservationServiceTest {
     @Test
     void createReservation_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
-                () -> reservationFacadeService.create(futureDate, 999L, theme.getId(), member.getId(), afterOneHour))
+                () -> reservationFacadeService.create(futureDate, 999L, theme.getId(), member.getId()))
                 .isInstanceOf(ReservationTimeNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
@@ -139,9 +139,9 @@ class ReservationServiceTest {
     @Test
     void createWaiting_shouldReturnWaitingResponseWhenReservationExists() {
         ReservationResponse reservation = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
-                member.getId(), afterOneHour);
+                member.getId());
         ReservationResponse waiting = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
-                member.getId(), afterOneHour);
+                member.getId());
 
         Assertions.assertAll(
                 () -> assertThat(reservation.reservedStatus()).isEqualTo(ReservationStatus.RESERVED.getName()),
@@ -152,9 +152,9 @@ class ReservationServiceTest {
     @Test
     void deleteReservation_shouldPromoteFirstWaiting() {
         ReservationResponse reserved = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
-                member.getId(), afterOneHour);
+                member.getId());
         ReservationResponse waiting = reservationFacadeService.create(futureDate, time.getId(), theme.getId(),
-                member.getId(), afterOneHour);
+                member.getId());
         assertThat(waiting.reservedStatus()).isEqualTo(ReservationStatus.WAITING.getName());
 
         reservationFacadeService.deleteReservation(reserved.id());
@@ -169,9 +169,9 @@ class ReservationServiceTest {
     @Test
     void findWaitings_shouldReturnAllWaitingAsReservationResponse() {
 
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
 
         List<ReservationResponse> waitings = waitingService.findWaitings();
         assertThat(waitings).hasSize(2)
@@ -182,9 +182,9 @@ class ReservationServiceTest {
     @Test
     void findMyWaitingsWithRank_shouldReturnCorrectRanks() {
 
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
 
         List<WaitingWithRank> waiting = waitingService.findMyWaitingsWithRank(
                 new UserInfo(member.getId(), MemberRole.USER));
@@ -193,21 +193,21 @@ class ReservationServiceTest {
 
     @Test
     void findMaxOrderByDateAndTimeAndTheme_shouldReflectHighestTurn() {
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
 
         int max1 = waitingService.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
         assertThat(max1).isEqualTo(1);
 
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
         int max2 = waitingService.findMaxOrderByDateAndTimeAndTheme(futureDate, time.getId(), theme.getId());
         assertThat(max2).isEqualTo(2);
     }
 
     @Test
     void isWaitingExists_shouldReturnTrueWhenExists() {
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
 
         boolean exists = waitingService.isWaitingExists(new ReservationInfo(futureDate, time, theme));
         assertThat(exists).isTrue();
@@ -215,8 +215,8 @@ class ReservationServiceTest {
 
     @Test
     void findFirstWaitingOfInfo_shouldReturnEarliestOrThrow() {
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
-        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId(), afterOneHour);
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
+        reservationFacadeService.create(futureDate, time.getId(), theme.getId(), member.getId());
 
         ReservationInfo info = new ReservationInfo(futureDate, time, theme);
 
