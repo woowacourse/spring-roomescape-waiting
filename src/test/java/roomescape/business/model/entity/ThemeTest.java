@@ -15,7 +15,7 @@ class ThemeTest {
         void 이름은_최대_20자이다() {
             final String name = "dompoolemondompoolemon";
 
-            assertThatThrownBy(() -> Theme.create(name, "", ""))
+            assertThatThrownBy(() -> new Theme(name, "", ""))
                     .isInstanceOf(InvalidCreateArgumentException.class);
         }
     }

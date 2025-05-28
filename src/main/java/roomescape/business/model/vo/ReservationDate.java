@@ -17,14 +17,9 @@ public record ReservationDate(
 ) {
     private static final int INTERVAL_FROM_NOW = 7;
 
-    public static ReservationDate create(final LocalDate date) {
-        validateInterval(date);
-        validateNotPast(date);
-        return new ReservationDate(date);
-    }
-
-    public static ReservationDate restore(final LocalDate date) {
-        return new ReservationDate(date);
+    public void validateFresh() {
+        validateNotPast(value);
+        validateInterval(value);
     }
 
     private static void validateNotPast(final LocalDate date) {

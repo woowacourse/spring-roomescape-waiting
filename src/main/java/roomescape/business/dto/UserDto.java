@@ -6,8 +6,6 @@ import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.UserName;
 import roomescape.business.model.vo.UserRole;
 
-import java.util.List;
-
 public record UserDto(
         Id id,
         UserRole userRole,
@@ -21,11 +19,5 @@ public record UserDto(
                 user.getName(),
                 user.getEmail()
         );
-    }
-
-    public static List<UserDto> fromEntities(final List<User> users) {
-        return users.stream()
-                .map(UserDto::fromEntity)
-                .toList();
     }
 }

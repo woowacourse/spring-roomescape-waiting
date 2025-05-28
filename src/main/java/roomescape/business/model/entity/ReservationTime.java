@@ -4,9 +4,9 @@ import jakarta.persistence.Embedded;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.ToString;
 import roomescape.business.model.vo.Id;
 import roomescape.business.model.vo.StartTime;
@@ -14,8 +14,8 @@ import roomescape.business.model.vo.StartTime;
 import java.time.LocalTime;
 
 @ToString
-@AllArgsConstructor(access = AccessLevel.PRIVATE)
 @EqualsAndHashCode(of = "id")
+@NoArgsConstructor(access = AccessLevel.PROTECTED, force = true)
 @Getter
 @Entity
 public class ReservationTime {
@@ -23,20 +23,12 @@ public class ReservationTime {
     private static final int MINUTE_INTERVAL = 30;
 
     @EmbeddedId
-    private final Id id;
+    private final Id id = Id.issue();
     @Embedded
-    private StartTime startTime;
+    private final StartTime startTime;
 
-    public ReservationTime() {
-        id = Id.issue();
-    }
-
-    public static ReservationTime create(final LocalTime startTime) {
-        return new ReservationTime(Id.issue(), new StartTime(startTime));
-    }
-
-    public static ReservationTime restore(final String id, final LocalTime startTime) {
-        return new ReservationTime(Id.create(id), new StartTime(startTime));
+    public ReservationTime(final LocalTime startTime) {
+        this.startTime = new StartTime(startTime);
     }
 
     public LocalTime startInterval() {

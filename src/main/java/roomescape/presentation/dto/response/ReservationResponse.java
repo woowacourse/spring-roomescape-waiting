@@ -3,27 +3,28 @@ package roomescape.presentation.dto.response;
 import roomescape.business.dto.ReservationDto;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.Comparator;
 import java.util.List;
 
 public record ReservationResponse(
         String id,
-        UserResponse user,
+        String userName,
         LocalDate date,
-        ReservationTimeResponse time,
-        ThemeResponse theme
+        LocalTime startAt,
+        String themeName
 ) {
-    public static ReservationResponse from(ReservationDto dto) {
+    public static ReservationResponse from(final ReservationDto dto) {
         return new ReservationResponse(
                 dto.id().value(),
-                UserResponse.from(dto.user()),
+                dto.userName().value(),
                 dto.date().value(),
-                ReservationTimeResponse.from(dto.time()),
-                ThemeResponse.from(dto.theme())
+                dto.time().value(),
+                dto.themeName().value()
         );
     }
 
-    public static List<ReservationResponse> from(List<ReservationDto> dtos) {
+    public static List<ReservationResponse> from(final List<ReservationDto> dtos) {
         return dtos.stream()
                 .map(ReservationResponse::from)
                 .sorted(Comparator.comparing(ReservationResponse::date))
