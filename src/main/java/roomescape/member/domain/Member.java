@@ -5,19 +5,17 @@ import java.util.Objects;
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
+import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 @Entity
 public class Member {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @EmbeddedId
+    @AttributeOverride(name = "value", column = @Column(name = "id", nullable = false))
+    private MemberId id;
 
     @Embedded
     @AttributeOverride(name = "value", column = @Column(name = "name", nullable = false))
@@ -43,7 +41,7 @@ public class Member {
             final String password,
             final Role role
     ) {
-        this.id = id;
+        this.id = new MemberId(id);
         this.name = new MemberName(name);
         this.email = new Email(email);
         this.password = new Password(password);
@@ -60,7 +58,7 @@ public class Member {
     }
 
     public Long getId() {
-        return id;
+        return id.getValue();
     }
 
     public String getName() {

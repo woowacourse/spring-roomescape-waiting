@@ -1,0 +1,147 @@
+package roomescape.reservation.service;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import roomescape.common.exception.AlreadyInUseException;
+import roomescape.common.exception.EntityNotFoundException;
+import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberId;
+import roomescape.member.repository.MemberRepository;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.ReservationTimeId;
+import roomescape.reservation.domain.Theme;
+import roomescape.reservation.domain.ThemeId;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.WaitingId;
+import roomescape.reservation.dto.request.WaitingCreateRequest;
+import roomescape.reservation.dto.response.WaitingResponse;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.ReservationTimeRepository;
+import roomescape.reservation.repository.ThemeRepository;
+import roomescape.reservation.repository.WaitingRepository;
+
+@Service
+public class WaitingService {
+
+    private final WaitingRepository waitingRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationRepository reservationRepository;
+
+    public WaitingService(
+            final WaitingRepository waitingRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final ThemeRepository themeRepository,
+            final MemberRepository memberRepository,
+            final ReservationRepository reservationRepository
+    ) {
+        this.waitingRepository = waitingRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
+        this.reservationRepository = reservationRepository;
+    }
+
+    public List<WaitingResponse> getAll() {
+        return waitingRepository.findAll()
+                .stream()
+                .map(WaitingResponse::from)
+                .toList();
+    }
+
+    @Transactional
+    public WaitingResponse createWaiting(final WaitingCreateRequest request) {
+        if (hasAlreadyWaiting(request)) {
+            throw new AlreadyInUseException("이미 예약 대기가 존재합니다.");
+        }
+        if (canCreateReservation(request)) {
+            throw new EntityNotFoundException("예약이 존재하지 않습니다.");
+        }
+        if (isAlreadyReservedBySelf(request)) {
+            throw new AlreadyInUseException("이미 예약이 존재합니다.");
+        }
+
+        Waiting waiting = getWaiting(request);
+        LocalDateTime now = LocalDateTime.now();
+        validateDateTime(now, waiting.getDate(), waiting.getTime().getStartAt());
+
+        Waiting savedWaiting = waitingRepository.save(waiting);
+        return WaitingResponse.from(savedWaiting);
+    }
+
+    private boolean hasAlreadyWaiting(final WaitingCreateRequest request) {
+        return waitingRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(
+                request.date(),
+                new ReservationTimeId(request.timeId()),
+                new ThemeId(request.themeId()),
+                new MemberId(request.loginMember().id())
+        );
+    }
+
+    private boolean canCreateReservation(final WaitingCreateRequest request) {
+        return !reservationRepository.existsByDateAndTimeIdAndThemeId(
+                request.date(),
+                new ReservationTimeId(request.timeId()),
+                new ThemeId(request.themeId())
+        );
+    }
+
+    private boolean isAlreadyReservedBySelf(final WaitingCreateRequest request) {
+        return reservationRepository.existsByDateAndThemeIdAndTimeIdAndMemberId(
+                request.date(),
+                new ThemeId(request.themeId()),
+                new ReservationTimeId(request.timeId()),
+                new MemberId(request.loginMember().id())
+        );
+    }
+
+    private Waiting getWaiting(final WaitingCreateRequest request) {
+        Member member = getMember(request);
+        ReservationTime time = gerReservationTime(request);
+        Theme theme = getTheme(request);
+
+        return new Waiting(request.date(), member, time, theme);
+    }
+
+    private ReservationTime gerReservationTime(final WaitingCreateRequest request) {
+        Long timeId = request.timeId();
+        return reservationTimeRepository.findById(new ReservationTimeId(timeId))
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약시간 입니다."));
+    }
+
+    private Theme getTheme(final WaitingCreateRequest request) {
+        Long themeId = request.themeId();
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    private Member getMember(final WaitingCreateRequest request) {
+        MemberId memberId = new MemberId(request.loginMember().id());
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
+    }
+
+    private void validateDateTime(final LocalDateTime now, final LocalDate date, final LocalTime time) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
+
+        if (now.isAfter(reservationDateTime)) {
+            throw new IllegalArgumentException("이미 지난 예약 시간입니다.");
+        }
+    }
+
+    @Transactional
+    public void deleteWaiting(final Long id) {
+        WaitingId waitingId = new WaitingId(id);
+        if (!waitingRepository.existsById(waitingId)) {
+            throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
+        }
+        waitingRepository.deleteById(waitingId);
+    }
+}

@@ -47,6 +47,6 @@ class MemberControllerTest {
                 .when().get("/members")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("size()", is(2));
+                .body("size()", is(3));
     }
 }

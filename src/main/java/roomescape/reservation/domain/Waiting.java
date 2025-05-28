@@ -1,36 +1,34 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+
+import org.springframework.data.annotation.CreatedDate;
 
 import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import roomescape.member.domain.Member;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @EmbeddedId
     @AttributeOverride(name = "value", column = @Column(name = "id", nullable = false))
-    private ReservationId id;
+    private WaitingId id;
+
+    @Column(nullable = false)
+    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)
     private Member member;
-
-    @Enumerated(value = EnumType.STRING)
-    private ReservationStatus status;
-
-    @Column(nullable = false)
-    private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id", nullable = false)
@@ -40,51 +38,44 @@ public class Reservation {
     @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    protected Reservation() {}
+    @CreatedDate
+    private LocalDateTime createdAt;
 
-    public Reservation(
+    protected Waiting() {}
+
+    public Waiting(
             final Long id,
-            final Member member,
-            final ReservationStatus status,
             final LocalDate date,
+            final Member member,
             final ReservationTime time,
             final Theme theme
     ) {
-        this.id = new ReservationId(id);
-        this.member = member;
-        this.status = status;
+        this.id = new WaitingId(id);
         this.date = date;
+        this.member = member;
         this.time = time;
         this.theme = theme;
     }
 
-    public Reservation(
-            final Member member,
+    public Waiting(
             final LocalDate date,
+            final Member member,
             final ReservationTime time,
             final Theme theme
     ) {
-        this(null, member, ReservationStatus.CONFIRMED, date, time, theme);
+        this(null, date, member, time, theme);
     }
 
     public Long getId() {
         return id.getValue();
     }
 
-    public Member getMember() {
-        return member;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
-    }
-
-    public String statusDescription() {
-        return status.getDescription();
-    }
-
     public LocalDate getDate() {
         return date;
+    }
+
+    public Member getMember() {
+        return member;
     }
 
     public ReservationTime getTime() {
@@ -103,17 +94,23 @@ public class Reservation {
         return theme.getName();
     }
 
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     @Override
     public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Waiting waiting)) {
             return false;
         }
-        Reservation that = (Reservation) o;
-        return Objects.equals(id, that.id);
+        return Objects.equals(getId(), waiting.getId());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(id);
+        return Objects.hashCode(getId());
     }
 }
