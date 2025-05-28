@@ -17,10 +17,8 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationDuplicatedException;
@@ -53,7 +51,7 @@ public class ReservationSlot {
     private Theme theme;
 
     @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
-    private Set<Reservation> reservations = new HashSet<>();
+    private List<Reservation> reservations = new ArrayList<>();
 
     public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
         this.date = date;
@@ -82,7 +80,7 @@ public class ReservationSlot {
 
     public long findRank(final Reservation reservation) {
         validateReservationExists(reservation);
-        List<Reservation> sortedReservations = new ArrayList<>(reservations)
+        List<Reservation> sortedReservations = reservations
                 .stream()
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .toList();
@@ -105,7 +103,7 @@ public class ReservationSlot {
         boolean memberExists = reservations.stream()
                 .anyMatch(reservation -> reservation.getMember().getId().equals(member.getId()));
         if (memberExists) {
-            throw new ReservationDuplicatedException("이미 예약 중입니다.");
+            throw new ReservationDuplicatedException("해당 멤버는 이미 예약 중입니다.");
         }
     }
 
@@ -144,7 +142,7 @@ public class ReservationSlot {
         return theme;
     }
 
-    public Set<Reservation> getReservations() {
+    public List<Reservation> getReservations() {
         return reservations;
     }
 }
