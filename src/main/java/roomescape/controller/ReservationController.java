@@ -8,6 +8,7 @@ import roomescape.controller.request.CreateReservationRequest;
 import roomescape.controller.request.LoginMemberInfo;
 import roomescape.controller.response.MyReservationResponse;
 import roomescape.controller.response.ReservationResponse;
+import roomescape.domain.ReservationStatus;
 import roomescape.service.ReservationService;
 import roomescape.service.result.ReservationResult;
 
@@ -28,8 +29,10 @@ public class ReservationController {
     public ResponseEntity<List<ReservationResponse>> findReservations(@RequestParam(required = false) Long memberId,
                                                                       @RequestParam(required = false) Long themeId,
                                                                       @RequestParam(required = false) LocalDate dateFrom,
-                                                                      @RequestParam(required = false) LocalDate dateTo) {
-        List<ReservationResult> reservationResults = reservationService.findReservationsInConditions(memberId, themeId, dateFrom, dateTo);
+                                                                      @RequestParam(required = false) LocalDate dateTo,
+                                                                      @RequestParam(required = false) ReservationStatus status
+                                                                      ) {
+        List<ReservationResult> reservationResults = reservationService.findReservationsInConditions(memberId, themeId, dateFrom, dateTo, status);
         List<ReservationResponse> reservationResponses = reservationResults.stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -52,6 +55,12 @@ public class ReservationController {
         Long reservationId = reservationService.create(createReservationRequest.toServiceParam(loginMemberInfo.id()), LocalDateTime.now());
         ReservationResult reservationResult = reservationService.findById(reservationId);
         return ResponseEntity.status(HttpStatus.CREATED).body(ReservationResponse.from(reservationResult));
+    }
+
+    @PatchMapping("/reservations/{reservationId}/approve")
+    public ResponseEntity<ReservationResponse> approveWaitingReservation(@PathVariable Long reservationId) {
+        reservationService.approveWaitingReservation(reservationId);
+        return ResponseEntity.ok().build();
     }
 
     @DeleteMapping("/reservations/{reservationId}")

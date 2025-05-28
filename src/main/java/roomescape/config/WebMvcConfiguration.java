@@ -1,5 +1,6 @@
 package roomescape.config;
 
+import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -10,15 +11,12 @@ import roomescape.auth.JwtTokenProvider;
 import roomescape.auth.LoginMemberArgumentResolver;
 import roomescape.service.MemberService;
 
-import java.util.List;
-
 @Configuration
 public class WebMvcConfiguration implements WebMvcConfigurer {
 
     private final CookieProvider cookieProvider;
     private final JwtTokenProvider jwtTokenProvider;
     private final MemberService memberService;
-
 
     public WebMvcConfiguration(final CookieProvider cookieProvider, final JwtTokenProvider jwtTokenProvider, final MemberService memberService) {
         this.cookieProvider = cookieProvider;
@@ -29,7 +27,15 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
     @Override
     public void addInterceptors(final InterceptorRegistry registry) {
         registry.addInterceptor(new CheckAdminInterceptor(cookieProvider, jwtTokenProvider))
-                .addPathPatterns("/admin/**");
+                .addPathPatterns("/admin/**")
+                .addPathPatterns("/reservations/**")
+                .excludePathPatterns("/reservations")
+                .addPathPatterns("/times/**")
+                .excludePathPatterns("/times")
+                .excludePathPatterns("/times/available")
+                .addPathPatterns("/themes/**")
+                .excludePathPatterns("/themes")
+                .excludePathPatterns("/themes/rank");
     }
 
     @Override

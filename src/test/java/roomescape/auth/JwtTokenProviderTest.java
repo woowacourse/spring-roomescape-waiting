@@ -1,5 +1,9 @@
 package roomescape.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import java.time.Duration;
+import java.util.Date;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,15 +13,10 @@ import roomescape.domain.MemberRole;
 import roomescape.exception.UnauthorizedException;
 import roomescape.service.result.MemberResult;
 
-import java.util.Date;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 class JwtTokenProviderTest {
 
     private static final String secretKey = "wpvmflgltmxkaoxmdhflajdrnahfn20250514";
-    private final int validityInMilliseconds = 3600000; //1h
+    private final int validityInMilliseconds = (int) Duration.ofHours(1).toMillis();
     private JwtTokenProvider jwtTokenProvider;
 
     @BeforeEach

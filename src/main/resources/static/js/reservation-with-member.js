@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('add-button').addEventListener('click', addInputRow);
   document.getElementById('filter-form').addEventListener('submit', applyFilter);
 
-  requestRead(RESERVATION_API_ENDPOINT)
+  requestRead(`${RESERVATION_API_ENDPOINT}?status=RESERVED`)
       .then(render)
       .catch(error => console.error('Error fetching reservations:', error));
 
@@ -168,6 +168,7 @@ function saveRow(event) {
     themeId: themeSelect.value,
     timeId: timeSelect.value,
     memberId: memberSelect.value,
+    status: "RESERVED"
   };
 
   requestCreate(reservation)
@@ -206,6 +207,9 @@ function applyFilter(event) {
   if (themeId) params.append('themeId', themeId);
   if (dateFrom) params.append('dateFrom', dateFrom);
   if (dateTo) params.append('dateTo', dateTo);
+
+  // 예약 검색은 (취소, 대기)등의 상태를 배제한 정말 예약만 검색하도록.
+  params.append('status', "RESERVED");
 
   let url = '/reservations';
 

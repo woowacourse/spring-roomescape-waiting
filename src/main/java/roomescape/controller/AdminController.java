@@ -28,7 +28,8 @@ public class AdminController {
                 reservationRequest.memberId(),
                 reservationRequest.date(),
                 reservationRequest.timeId(),
-                reservationRequest.themeId()
+                reservationRequest.themeId(),
+                reservationRequest.status()
         );
         Long reservationId = reservationService.create(createReservationParam, LocalDateTime.now());
         return ResponseEntity.ok().body(reservationService.findById(reservationId));

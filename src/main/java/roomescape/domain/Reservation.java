@@ -52,15 +52,19 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation makeTransientReserve(Member member, LocalDate date, ReservationTime time, Theme theme) {
+    public static Reservation makeTransientReservation(Member member, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         return new Reservation(
                 null,
                 member,
                 date,
                 time,
                 theme,
-                ReservationStatus.RESERVED
+                status
         );
+    }
+
+    public void approveToReserve() {
+        this.status = ReservationStatus.RESERVED;
     }
 
     @Override

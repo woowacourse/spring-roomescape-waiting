@@ -12,7 +12,7 @@ import roomescape.exception.NotFoundReservationException;
 import roomescape.exception.NotFoundReservationTimeException;
 import roomescape.exception.NotFoundThemeException;
 import roomescape.exception.UnableCreateMemberException;
-import roomescape.exception.UnableCreateReservationException;
+import roomescape.exception.UnableReservationException;
 import roomescape.exception.UnauthorizedException;
 
 @Slf4j
@@ -37,8 +37,8 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.UNAUTHORIZED, "인증 정보를 찾을 수 없습니다.");
     }
 
-    @ExceptionHandler(UnableCreateReservationException.class)
-    public ProblemDetail handleUnAvailableReservationException(UnableCreateReservationException e) {
+    @ExceptionHandler(UnableReservationException.class)
+    public ProblemDetail handleUnAvailableReservationException(UnableReservationException e) {
         log.error("예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }

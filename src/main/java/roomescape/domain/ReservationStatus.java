@@ -2,8 +2,8 @@ package roomescape.domain;
 
 public enum ReservationStatus {
     RESERVED("예약"),
-    CANCELED("취소됨"),
-    COMPLETED("완료됨");
+    WAITING("예약대기"),
+    CANCELED("취소됨");
 
     private final String description;
 

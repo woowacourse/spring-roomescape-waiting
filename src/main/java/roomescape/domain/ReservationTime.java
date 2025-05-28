@@ -8,7 +8,7 @@ import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.exception.UnableCreateReservationException;
+import roomescape.exception.UnableReservationException;
 
 import java.time.LocalTime;
 import java.util.Objects;
@@ -29,7 +29,7 @@ public class ReservationTime {
 
     public ReservationTime(Long id, LocalTime startAt) {
         if (startAt.isBefore(RESERVATION_START_TIME) || startAt.isAfter(RESERVATION_END_TIME)) {
-            throw new UnableCreateReservationException("해당 시간은 예약 가능 시간이 아닙니다.");
+            throw new UnableReservationException("해당 시간은 예약 가능 시간이 아닙니다.");
         }
         this.id = id;
         this.startAt = startAt;

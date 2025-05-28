@@ -20,7 +20,7 @@ public record MyReservationResponse(
                 reservationResult.date(),
                 ReservationTimeResponse.from(reservationResult.time()),
                 ThemeResponse.from(reservationResult.theme()),
-                ReservationStatus.RESERVED
+                reservationResult.status()
         );
     }
 }

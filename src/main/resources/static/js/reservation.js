@@ -124,7 +124,8 @@ function saveRow(event) {
     const reservation = {
         name: nameInput.value,
         date: dateInput.value,
-        timeId: timeSelect.value
+        timeId: timeSelect.value,
+        status: "RESERVED"
     };
 
     requestCreate(reservation)
