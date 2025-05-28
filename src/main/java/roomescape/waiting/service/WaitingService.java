@@ -61,7 +61,7 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
-    public void deleteWaitingByAdmin(final long id) {
+    public void rejectWaitingByAdmin(final long id) {
         waitingRepository.deleteById(id);
     }
 
