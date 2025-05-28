@@ -12,13 +12,16 @@ public record MemberReservationResponseDto(
         LocalTime time,
         String status
 ) {
+
+    private static final String RESERVATION_STATUS = "예약";
+
     public static MemberReservationResponseDto from(final Reservation reservation) {
         return new MemberReservationResponseDto(
                 reservation.getId(),
                 reservation.getTheme().getName(),
                 reservation.getDate(),
                 reservation.getReservationTime().getStartAt(),
-                "예약"
+                RESERVATION_STATUS
         );
     }
 
@@ -28,7 +31,7 @@ public record MemberReservationResponseDto(
                 waitingWithRank.waiting().getTheme().getName(),
                 waitingWithRank.waiting().getDate(),
                 waitingWithRank.waiting().getReservationTime().getStartAt(),
-                waitingWithRank.rank() + 1 + "번째 예약대기"
+                waitingWithRank.rank().toString()
         );
     }
 }
