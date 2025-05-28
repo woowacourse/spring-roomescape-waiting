@@ -18,7 +18,8 @@ public record ConfirmedReservationWebResponse(
         Reservation confirmedReservation = reservationSlot.findConfirmedReservation();
         return new ConfirmedReservationWebResponse(confirmedReservation.getId(),
                 MemberWebResponse.from(reservationSlot.findReservedMember()), reservationSlot.getDate(),
-                ReservationTimeWebResponse.from(reservationSlot.getTime()), ThemeWebResponse.from(reservationSlot.getTheme())
+                ReservationTimeWebResponse.from(reservationSlot.getTime()),
+                ThemeWebResponse.from(reservationSlot.getTheme())
         );
     }
 }

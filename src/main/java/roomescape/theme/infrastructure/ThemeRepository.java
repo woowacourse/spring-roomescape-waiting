@@ -11,12 +11,12 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
 
     @Query("""
             SELECT th FROM Theme th 
-            left join ReservationSlot as bs
-            on th.id = bs.theme.id 
-            and bs.date between :fromDate and :toDate 
+            left join ReservationSlot as rs
+            on th.id = rs.theme.id 
+            and rs.date between :fromDate and :toDate 
             group by th.id 
-            order by count(bs.id) desc, 
+            order by count(rs.id) desc, 
             th.name asc 
             """)
-    Page<Theme> findPopularThemes(LocalDate fromDate, LocalDate toDate, Pageable pageable);
+    Page<Theme> findPopular(LocalDate fromDate, LocalDate toDate, Pageable pageable);
 }

@@ -5,10 +5,10 @@ import org.springframework.stereotype.Service;
 import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
+import roomescape.member.exception.MemberDuplicatedException;
 import roomescape.member.presentation.dto.request.SignupWebRequest;
 import roomescape.member.presentation.dto.response.MemberWebResponse;
 import roomescape.member.presentation.dto.response.SignUpWebResponse;
-import roomescape.member.exception.MemberDuplicatedException;
 
 @Service
 public class MemberApplicationService {
@@ -24,7 +24,8 @@ public class MemberApplicationService {
 
     public SignUpWebResponse signup(final SignupWebRequest signupWebRequest) {
         String encodedPassword = myPasswordEncoder.encode(signupWebRequest.password());
-        Member member = new Member(signupWebRequest.name(), signupWebRequest.email(), encodedPassword, MemberRole.REGULAR);
+        Member member = new Member(signupWebRequest.name(), signupWebRequest.email(), encodedPassword,
+                MemberRole.REGULAR);
         validateMemberExists(signupWebRequest);
         return SignUpWebResponse.from(memberDataService.create(member));
     }

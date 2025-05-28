@@ -38,7 +38,7 @@ public class ThemeDataService {
     public Page<Theme> findPopularThemes(final Clock clock, final int days, final int limit) {
         LocalDate endDate = LocalDate.now(clock).minusDays(DAYS_TO_SUBTRACT);
         LocalDate startDate = endDate.minusDays(days);
-        return themeRepository.findPopularThemes(startDate, endDate, PageRequest.of(0, limit));
+        return themeRepository.findPopular(startDate, endDate, PageRequest.of(0, limit));
     }
 
     public Theme save(final Theme theme) {

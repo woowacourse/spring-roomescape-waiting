@@ -45,7 +45,7 @@ class ThemeRepositoryTest {
     }
 
     @Test
-    void findPopularThemes() {
+    void findPopular() {
         Member member = TestFixture.makeMember();
         memberRepository.save(member);
 
@@ -104,7 +104,7 @@ class ThemeRepositoryTest {
         reservationSlotRepository.save(
                 TestFixture.makeConfirmedReservation(futureDate.minusDays(6), reservationTime2, member, theme11));
 
-        List<Theme> themes = themeRepository.findPopularThemes(futureDate.minusDays(6), futureDate,
+        List<Theme> themes = themeRepository.findPopular(futureDate.minusDays(6), futureDate,
                 PageRequest.of(0, 10)).getContent();
 
         Assertions.assertAll(

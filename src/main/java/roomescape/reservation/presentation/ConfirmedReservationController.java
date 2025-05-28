@@ -16,8 +16,9 @@ import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.ConfirmedReservationApplicationService;
 import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;
-import roomescape.reservation.application.dto.request.ConfirmedReservationCreateWebRequest;
+import roomescape.reservation.application.dto.request.ConfirmedReservationCreateRequest;
 import roomescape.reservation.presentation.dto.request.AdminReservationSlotCreateWebRequest;
+import roomescape.reservation.presentation.dto.request.ConfirmedReservationCreateWebRequest;
 import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 
@@ -55,11 +56,11 @@ public class ConfirmedReservationController {
     @RequireRole(MemberRole.REGULAR)
     @PostMapping("/reservations")
     public ResponseEntity<ConfirmedReservationWebResponse> create(
-            @RequestBody roomescape.reservation.presentation.dto.request.ConfirmedReservationCreateWebRequest request,
+            @RequestBody ConfirmedReservationCreateWebRequest request,
             MemberInfo memberInfo
     ) {
         ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
-                ConfirmedReservationCreateWebRequest.of(request, memberInfo));
+                ConfirmedReservationCreateRequest.of(request, memberInfo));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -69,7 +70,7 @@ public class ConfirmedReservationController {
             @RequestBody AdminReservationSlotCreateWebRequest request
     ) {
         ConfirmedReservationWebResponse dto = confirmedReservationApplicationService.create(
-                ConfirmedReservationCreateWebRequest.of(request));
+                ConfirmedReservationCreateRequest.of(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 

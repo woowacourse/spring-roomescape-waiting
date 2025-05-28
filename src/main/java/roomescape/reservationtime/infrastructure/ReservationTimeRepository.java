@@ -13,10 +13,10 @@ public interface ReservationTimeRepository extends ListCrudRepository<Reservatio
     boolean existsByStartAt(LocalTime time);
 
     @Query("""
-            SELECT new roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse(rt.id, rt.startAt, 
-            r.id IS NOT NULL) 
+            SELECT new roomescape.reservationtime.presentation.dto.response.
+            AvailableReservationTimeWebResponse(rt.id, rt.startAt, rs.id IS NOT NULL) 
             FROM ReservationTime AS rt 
-            LEFT JOIN ReservationSlot r ON rt.id = r.time.id AND r.date = :date AND r.theme.id = :themeId 
+            LEFT JOIN ReservationSlot rs ON rt.id = rs.time.id AND rs.date = :date AND rs.theme.id = :themeId 
             ORDER BY rt.startAt
             """)
     List<AvailableReservationTimeWebResponse> findAvailable(LocalDate date, Long themeId);

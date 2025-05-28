@@ -2,17 +2,15 @@ package roomescape.reservation.infrastructure;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationslot.domain.ReservationSlot;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
     @Query("""
-            SELECT DISTINCT r
+            SELECT r
             FROM Reservation r
             JOIN FETCH r.reservationSlot rs
             JOIN FETCH rs.time t
@@ -33,20 +31,20 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
                                                                         LocalDate endDate, Long memberId);
 
     @Query("""
-            SELECT w 
-            FROM Reservation w 
-            JOIN FETCH w.reservationSlot r            
-            JOIN FETCH r.time t 
-            JOIN FETCH r.theme th                   
-            WHERE w.member.id = :memberId
+            SELECT r 
+            FROM Reservation r 
+            JOIN FETCH r.reservationSlot rs            
+            JOIN FETCH rs.time t 
+            JOIN FETCH rs.theme th                   
+            WHERE r.member.id = :memberId
             """)
     List<Reservation> findByReservationMemberId(Long memberId);
 
     @Modifying
     @Query("""
-            DELETE FROM Reservation w 
-            WHERE w.reservationSlot.id = :reservationId
-            AND w.member.id = :memberId
+            DELETE FROM Reservation r 
+            WHERE r.reservationSlot.id = :reservationId
+            AND r.member.id = :memberId
             """)
     void deleteByReservationIdAndMemberId(Long reservationId, Long memberId);
 
@@ -66,6 +64,4 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             ORDER BY rs.id, r.createdAt asc 
             """)
     List<Reservation> findAllWaitingReservations();
-
-    Optional<Reservation> findByReservationSlot(ReservationSlot reservationSlot);
 }

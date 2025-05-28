@@ -18,6 +18,7 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;
+import roomescape.reservation.application.dto.request.ConfirmedReservationCreateRequest;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
@@ -83,10 +84,12 @@ class ConfirmedReservationApplicationServiceTest {
     void findFilteredReservations_shouldReturnAllReservations() {
         // given
         Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
-        confirmedReservationApplicationService.create(futureDate, timeId, themeId, memberId,
-                afterOneHour);
-        confirmedReservationApplicationService.create(futureDate, timeId2, themeId, memberId,
-                afterOneHour);
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
+                        afterOneHour));
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId2, themeId, memberId,
+                        afterOneHour));
         // when
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
                 new ConfirmedReservationByCriteriaWebRequest(null, null, null, null));
@@ -99,10 +102,12 @@ class ConfirmedReservationApplicationServiceTest {
     void findFilteredReservations_shouldReturnFilteredReservations() {
         // given
         Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
-        confirmedReservationApplicationService.create(futureDate.minusDays(1), timeId, themeId, memberId,
-                afterOneHour);
-        confirmedReservationApplicationService.create(futureDate, timeId2, themeId, memberId,
-                afterOneHour);
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate.minusDays(1), timeId, themeId, memberId,
+                        afterOneHour));
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId2, themeId, memberId,
+                        afterOneHour));
 
         // when
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
@@ -114,9 +119,10 @@ class ConfirmedReservationApplicationServiceTest {
 
     @Test
     void removeByIdReservation_shouldRemoveConfirmReservationSuccessfully() {
-        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(futureDate,
-                timeId, themeId,
-                memberId, afterOneHour);
+        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate,
+                        timeId, themeId,
+                        memberId, afterOneHour));
         confirmedReservationApplicationService.cancel(response.id());
 
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
@@ -127,8 +133,9 @@ class ConfirmedReservationApplicationServiceTest {
 
     @Test
     void create_shouldReturnResponseWhenSuccessful() {
-        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(futureDate,
-                timeId, themeId, memberId, afterOneHour);
+        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate,
+                        timeId, themeId, memberId, afterOneHour));
 
         Assertions.assertAll(
                 () -> assertThat(response.member().name()).isEqualTo("Mint"),
@@ -140,12 +147,13 @@ class ConfirmedReservationApplicationServiceTest {
     @Test
     void create_shouldThrowException_WhenDuplicated() {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        confirmedReservationApplicationService.create(futureDate, timeId, themeId, memberId,
-                afterOneHour);
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
+                        afterOneHour));
 
         assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(futureDate, timeId, themeId,
-                        memberId, afterOneHour))
+                () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(futureDate, timeId, themeId,
+                        memberId, afterOneHour)))
                 .isInstanceOf(ReservationSlotAlreadyExistsException.class)
                 .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
     }
@@ -153,8 +161,8 @@ class ConfirmedReservationApplicationServiceTest {
     @Test
     void create_shouldThrowException_WhenTimeIdNotFound() {
         assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(futureDate, 999L, themeId, memberId,
-                        afterOneHour))
+                () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(futureDate, 999L, themeId, memberId,
+                        afterOneHour)))
                 .isInstanceOf(ReservationSlotNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
     }
@@ -163,8 +171,8 @@ class ConfirmedReservationApplicationServiceTest {
     void create_shouldThrowException_WhenPastDate() {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(pastDate, timeId, themeId, memberId,
-                        afterOneHour))
+                () -> confirmedReservationApplicationService.create(new ConfirmedReservationCreateRequest(pastDate, timeId, themeId, memberId,
+                        afterOneHour)))
                 .isInstanceOf(InvalidReservationSlotException.class)
                 .hasMessageContaining("예약 시간이 현재 시간보다 이전일 수 없습니다.");
     }

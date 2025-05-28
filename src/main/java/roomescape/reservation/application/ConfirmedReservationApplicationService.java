@@ -6,7 +6,7 @@ import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;
-import roomescape.reservation.application.dto.request.ConfirmedReservationCreateWebRequest;
+import roomescape.reservation.application.dto.request.ConfirmedReservationCreateRequest;
 import roomescape.reservation.application.dto.request.ReservationCreateWebRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
@@ -39,7 +39,7 @@ public class ConfirmedReservationApplicationService {
         this.reservationDataService = slotReservationDataService;
     }
 
-    public ConfirmedReservationWebResponse create(final ConfirmedReservationCreateWebRequest request) {
+    public ConfirmedReservationWebResponse create(final ConfirmedReservationCreateRequest request) {
         reservationSlotDataService.validateReservationSlotDoesNotExists(request.date(), request.timeId(),
                 request.themeId());
 
