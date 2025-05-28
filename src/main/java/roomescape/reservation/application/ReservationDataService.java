@@ -4,7 +4,6 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.exception.ReservationOwnerException;
@@ -24,8 +23,8 @@ public class ReservationDataService {
         return reservationRepository.save(reservation);
     }
 
-    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
-        return reservationRepository.findByReservationMemberId(memberInfo.id())
+    public List<MyReservationResponse> findMyReservations(final Long memberId) {
+        return reservationRepository.findByReservationMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();

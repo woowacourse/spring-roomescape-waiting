@@ -79,7 +79,7 @@ public class ConfirmedReservationController {
     @GetMapping("/reservations-mine")
     public ResponseEntity<List<MyReservationResponse>> findMine(MemberInfo memberInfo) {
         List<MyReservationResponse> myReservations = confirmedReservationApplicationService.findMyReservations(
-                memberInfo);
+                memberInfo.id());
         return ResponseEntity.ok().body(myReservations);
     }
 }
