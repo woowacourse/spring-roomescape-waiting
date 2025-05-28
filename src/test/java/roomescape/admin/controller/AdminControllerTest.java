@@ -35,11 +35,6 @@ import roomescape.user.domain.User;
 @DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_EACH_TEST_METHOD)
 class AdminControllerTest {
 
-    @Autowired
-    private ThemeTestDataConfig themeTestDataConfig;
-    @Autowired
-    private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
-
     @LocalServerPort
     int port;
 
@@ -48,35 +43,40 @@ class AdminControllerTest {
         RestAssured.port = port;
     }
 
+    private static LocalDate date;
+
+    private static Long themeId;
+    private static Long reservationTimeId;
+
+    private static User memberStatic;
+    private static User adminStatic;
+    private static TokenResponseDto memberTokenResponseDto;
+    private static TokenResponseDto adminTokenResponseDto;
+
+    @BeforeAll
+    public static void setUp(@Autowired AuthService authService,
+                             @Autowired MemberTestDataConfig memberTestDataConfig,
+                             @Autowired AdminTestDataConfig adminTestDataConfig,
+                             @Autowired ThemeTestDataConfig themeTestDataConfig,
+                             @Autowired ReservationTimeTestDataConfig reservationTimeTestDataConfig
+    ) {
+        date = LocalDate.now().plusDays(1);
+
+        memberStatic = memberTestDataConfig.getSavedUser();
+        adminStatic = adminTestDataConfig.getSavedAdmin();
+
+        themeId = themeTestDataConfig.getSavedId();
+        reservationTimeId = reservationTimeTestDataConfig.getSavedId();
+
+        memberTokenResponseDto = authService.login(
+                AuthFixture.createTokenRequestDto(memberStatic.getEmail(), memberStatic.getPassword()));
+        adminTokenResponseDto = authService.login(
+                AuthFixture.createTokenRequestDto(adminStatic.getEmail(), adminStatic.getPassword()));
+    }
+
     @Nested
     @DisplayName("POST /admin/reservations 요청")
     class createReservation {
-
-        private static LocalDate date;
-
-        private final Long themeId = themeTestDataConfig.getSavedId();
-        private final Long reservationTimeId = reservationTimeTestDataConfig.getSavedId();
-
-        private static User memberStatic;
-        private static User adminStatic;
-        private static TokenResponseDto memberTokenResponseDto;
-        private static TokenResponseDto adminTokenResponseDto;
-
-        @BeforeAll
-        public static void setUp(@Autowired AuthService authService,
-                                 @Autowired MemberTestDataConfig memberTestDataConfig,
-                                 @Autowired AdminTestDataConfig adminTestDataConfig
-        ) {
-            date = LocalDate.now().plusDays(1);
-
-            memberStatic = memberTestDataConfig.getSavedUser();
-            adminStatic = adminTestDataConfig.getSavedAdmin();
-
-            memberTokenResponseDto = authService.login(
-                    AuthFixture.createTokenRequestDto(memberStatic.getEmail(), memberStatic.getPassword()));
-            adminTokenResponseDto = authService.login(
-                    AuthFixture.createTokenRequestDto(adminStatic.getEmail(), adminStatic.getPassword()));
-        }
 
         @DisplayName("memberId의 role이 ROLE_MEMBER 일 때 201 CREATED 와 함께 member의 예약이 추가된다.")
         @Test
@@ -100,7 +100,7 @@ class AdminControllerTest {
                     .statusCode(HttpStatus.CREATED.value());
         }
 
-        @DisplayName("memberId에 role이 ROLE_ADMIN 일 때 401 A를 반환한다")
+        @DisplayName("memberId에 role이 ROLE_ADMIN 일 때 401 Unauthorized를 반환한다")
         @Test
         void createReservation_throwException_byAdminId() {
             // given
@@ -120,6 +120,33 @@ class AdminControllerTest {
                     .when().post("/admin/reservations")
                     .then().log().all()
                     .statusCode(HttpStatus.UNAUTHORIZED.value());
+        }
+    }
+
+    @Nested
+    @DisplayName("GET /admin/waitings 요청")
+    class findAllWaitings {
+
+        @DisplayName("어드민 권한자가 요청했을 때 200 OK를 반환한다")
+        @Test
+        void findAllWaitings_success_byAdmin() {
+            // given
+            AdminReservationRequestDto dto = new AdminReservationRequestDto(date,
+                    themeId,
+                    reservationTimeId,
+                    adminStatic.getId());
+
+            String token = adminTokenResponseDto.accessToken();
+
+            // when
+            // then
+            RestAssured.given().log().all()
+                    .cookies("token", token)
+                    .contentType(ContentType.JSON)
+                    .body(dto)
+                    .when().get("/admin/waitings")
+                    .then().log().all()
+                    .statusCode(HttpStatus.OK.value());
         }
     }
 }

@@ -14,25 +14,35 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import roomescape.reservation.exception.InvalidReservationTimeException;
 import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.ReservationTimeTestDataConfig;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.fixture.ReservationTimeFixture;
 import roomescape.theme.ThemeTestDataConfig;
 import roomescape.user.MemberTestDataConfig;
+import roomescape.waiting.repository.WaitingRepository;
 
 @DataJpaTest
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {
+        ReservationTimeTestDataConfig.class,
         ThemeTestDataConfig.class,
         MemberTestDataConfig.class
 })
 class ReservationTest {
 
     @Autowired
+    ReservationTimeTestDataConfig reservationTimeTestDataConfig;
+    @Autowired
     private ThemeTestDataConfig themeTestDataConfig;
     @Autowired
     private MemberTestDataConfig memberTestDataConfig;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
 
-    private Reservation createReservation(LocalDate date, ReservationTime time) {
+    private Reservation createReservationByDateAndTime(LocalDate date, ReservationTime time) {
         return ReservationFixture.createByBookedStatus(date, time, themeTestDataConfig.getSavedTheme(),
                 memberTestDataConfig.getSavedUser());
     }
@@ -52,7 +62,7 @@ class ReservationTest {
 
             // when & then
             Assertions.assertThatThrownBy(
-                    () -> createReservation(dummyPastDate, reservationTime)
+                    () -> createReservationByDateAndTime(dummyPastDate, reservationTime)
             ).isInstanceOf(InvalidReservationTimeException.class);
         }
 
@@ -67,7 +77,7 @@ class ReservationTest {
 
             // when & then
             Assertions.assertThatCode(
-                    () -> createReservation(dummyPastDate, reservationTime)
+                    () -> createReservationByDateAndTime(dummyPastDate, reservationTime)
             ).doesNotThrowAnyException();
         }
 
@@ -78,11 +88,11 @@ class ReservationTest {
             LocalDateTime dummyDateTime1 = LocalDateTime.now().plusDays(1);
             ReservationTime duplicateReservationTime = ReservationTimeFixture.create(dummyDateTime1.toLocalTime());
 
-            Reservation reservation1 = createReservation(dummyDateTime1.toLocalDate(),
+            Reservation reservation1 = createReservationByDateAndTime(dummyDateTime1.toLocalDate(),
                     duplicateReservationTime);
 
             LocalDateTime dummyDateTime2 = LocalDateTime.now().plusDays(2);
-            Reservation reservation2 = createReservation(dummyDateTime2.toLocalDate(),
+            Reservation reservation2 = createReservationByDateAndTime(dummyDateTime2.toLocalDate(),
                     duplicateReservationTime);
 
             // when

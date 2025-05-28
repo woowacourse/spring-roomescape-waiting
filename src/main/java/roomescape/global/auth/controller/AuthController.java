@@ -27,7 +27,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/signin")
     public ResponseEntity<Void> login(@RequestBody TokenRequestDto tokenRequestDto) {
         TokenResponseDto tokenResponseDto = authService.login(tokenRequestDto);
         ResponseCookie cookie = ResponseCookie

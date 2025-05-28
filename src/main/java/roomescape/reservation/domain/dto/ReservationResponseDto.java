@@ -13,10 +13,12 @@ public record ReservationResponseDto(
         ThemeResponseDto theme,
         UserResponseDto user
 ) {
-    public static ReservationResponseDto from(Reservation reservation,
-                                              ReservationTimeResponseDto reservationTimeResponseDto,
-                                              ThemeResponseDto themeResponseDto,
-                                              UserResponseDto userResponseDto) {
+    public static ReservationResponseDto of(Reservation reservation) {
+        ReservationTimeResponseDto reservationTimeResponseDto = ReservationTimeResponseDto.of(
+                reservation.getReservationTime());
+        ThemeResponseDto themeResponseDto = ThemeResponseDto.of(reservation.getTheme());
+        UserResponseDto userResponseDto = UserResponseDto.of(reservation.getUser());
+
         return new ReservationResponseDto(
                 reservation.getId(),
                 reservation.getDate(),

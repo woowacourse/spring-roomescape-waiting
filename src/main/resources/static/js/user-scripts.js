@@ -65,7 +65,7 @@ function login() {
         return; // 필수 입력 필드가 비어있으면 여기서 함수 실행을 중단
     }
 
-    fetch('/login', {
+    fetch('/signin', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'

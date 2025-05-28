@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -11,6 +12,9 @@ import roomescape.theme.domain.Theme;
 import roomescape.user.domain.User;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
+
+    @Query("SELECT r FROM Reservation r JOIN FETCH r.user WHERE r.id = :id")
+    Optional<Reservation> findByIdWithUser(@Param("id") Long id);
 
     List<Reservation> findByUser(User user);
 

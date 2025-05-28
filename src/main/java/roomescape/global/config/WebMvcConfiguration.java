@@ -2,11 +2,9 @@ package roomescape.global.config;
 
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
-import org.springframework.web.servlet.config.annotation.ViewResolverRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.global.auth.JwtTokenProvider;
 import roomescape.global.config.interceptor.CheckAdminInterceptor;
@@ -45,5 +43,7 @@ public class WebMvcConfiguration implements WebMvcConfigurer {
         registry.addViewController("/admin/theme").setViewName("admin/theme");
         registry.addViewController("/").setViewName("index");
         registry.addViewController("/reservation-mine").setViewName("reservation-mine");
+        registry.addViewController("/login").setViewName("login");
+        registry.addViewController("/admin/waiting").setViewName("admin/waiting");
     }
 }

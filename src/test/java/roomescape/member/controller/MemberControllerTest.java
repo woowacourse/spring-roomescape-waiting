@@ -10,36 +10,27 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.admin.domain.dto.AdminReservationRequestDto;
-import roomescape.global.auth.domain.dto.TokenResponseDto;
 import roomescape.auth.fixture.AuthFixture;
+import roomescape.global.auth.domain.dto.TokenResponseDto;
 import roomescape.global.auth.service.AuthService;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.ReservationTimeTestDataConfig;
 import roomescape.theme.ThemeTestDataConfig;
 import roomescape.user.MemberTestDataConfig;
 import roomescape.user.domain.User;
-import roomescape.user.service.UserService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT, classes =
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT, classes =
         {MemberTestDataConfig.class, ThemeTestDataConfig.class, ReservationTimeTestDataConfig.class,})
 @DirtiesContext(classMode = AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
 
     @Autowired
-    private UserService service;
-    @Autowired
     private ReservationTimeTestDataConfig reservationTimeTestDataConfig;
     @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
-    private MemberTestDataConfig memberTestDataConfig;
-    @Autowired
     private ThemeTestDataConfig themeTestDataConfig;
-    @Autowired
-    private ReservationTimeTestDataConfig timeTestDataConfig;
 
     private static LocalDate date;
     private static User memberStatic;

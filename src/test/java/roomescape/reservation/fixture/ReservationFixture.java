@@ -3,6 +3,7 @@ package roomescape.reservation.fixture;
 import java.time.LocalDate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.dto.ReservationInfo;
 import roomescape.reservation.domain.dto.ReservationRequestDto;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -23,5 +24,9 @@ public class ReservationFixture {
 
     public static ReservationRequestDto createRequestDto(LocalDate date, Long timeId, Long themeId) {
         return new ReservationRequestDto(date, timeId, themeId);
+    }
+
+    public static ReservationInfo createReservationInfo(Reservation reservation) {
+        return new ReservationInfo(reservation.getDate(), reservation.getReservationTime(), reservation.getTheme());
     }
 }

@@ -6,12 +6,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import roomescape.global.auth.JwtTokenProvider;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import roomescape.auth.fixture.AuthFixture;
 import roomescape.global.auth.domain.dto.TokenResponseDto;
 import roomescape.global.auth.exception.InvalidTokenException;
-import roomescape.auth.fixture.AuthFixture;
 import roomescape.global.auth.service.AuthService;
 import roomescape.user.domain.Role;
 import roomescape.user.domain.User;
@@ -19,11 +20,8 @@ import roomescape.user.domain.dto.UserResponseDto;
 import roomescape.user.fixture.UserFixture;
 import roomescape.user.repository.UserRepository;
 
-@DataJpaTest
-@Import({
-        AuthService.class,
-        JwtTokenProvider.class,
-})
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class AuthServiceTest {
 
     private static final String NAME = "username";
@@ -77,5 +75,4 @@ class AuthServiceTest {
             ).isInstanceOf(InvalidTokenException.class);
         }
     }
-
 }
