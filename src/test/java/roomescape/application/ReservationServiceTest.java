@@ -4,6 +4,9 @@ import org.junit.jupiter.api.DisplayNameGeneration;
 import org.junit.jupiter.api.DisplayNameGenerator;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.exception.AuthorizationException;
+import roomescape.application.exception.DuplicateReservationException;
 import roomescape.common.BaseTest;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
@@ -15,11 +18,13 @@ import roomescape.fixture.ReservationDateFixture;
 import roomescape.fixture.ReservationDbFixture;
 import roomescape.fixture.ReservationTimeDbFixture;
 import roomescape.fixture.ThemeDbFixture;
+import roomescape.fixture.WaitingDbFixture;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.WaitingRepository;
 import roomescape.presentation.dto.request.AdminReservationCreateRequest;
 import roomescape.presentation.dto.request.LoginMember;
 import roomescape.presentation.dto.request.ReservationCreateRequest;
 import roomescape.presentation.dto.response.MemberResponse;
-import roomescape.presentation.dto.response.MyReservationResponse;
 import roomescape.presentation.dto.response.ReservationResponse;
 import roomescape.presentation.dto.response.ReservationTimeResponse;
 import roomescape.presentation.dto.response.ThemeResponse;
@@ -40,6 +45,12 @@ class ReservationServiceTest extends BaseTest {
     private ReservationService reservationService;
 
     @Autowired
+    private ReservationRepository reservationRepository;
+
+    @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Autowired
     private ReservationTimeDbFixture reservationTimeDbFixture;
 
     @Autowired
@@ -50,6 +61,9 @@ class ReservationServiceTest extends BaseTest {
 
     @Autowired
     private ReservationDbFixture reservationDbFixture;
+
+    @Autowired
+    private WaitingDbFixture waitingDbFixture;
 
     @Test
     void 예약을_모두_조회한다() {
@@ -153,7 +167,8 @@ class ReservationServiceTest extends BaseTest {
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
 
         assertThatThrownBy(() -> reservationService.createReservation(request, loginMember))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(DuplicateReservationException.class)
+                .hasMessage("[ERROR] 이미 예약이 찼습니다.");
     }
 
     @Test
@@ -163,7 +178,7 @@ class ReservationServiceTest extends BaseTest {
         Member member = memberDbFixture.한스_사용자();
         Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
 
-        reservationService.deleteReservationById(reservation.getId());
+        reservationService.deleteReservationById(reservation.getId(), member.getId());
 
         List<ReservationResponse> responses = reservationService.getReservations();
         assertThat(responses).hasSize(0);
@@ -171,7 +186,7 @@ class ReservationServiceTest extends BaseTest {
 
     @Test
     void 존재하지_않는_예약을_삭제하면_예외가_발생한다() {
-        assertThatThrownBy(() -> reservationService.deleteReservationById(3L))
+        assertThatThrownBy(() -> reservationService.deleteReservationById(3L, 1L))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
@@ -198,19 +213,66 @@ class ReservationServiceTest extends BaseTest {
     }
 
     @Test
-    void 나의_예약_기록을_조회한다() {
+    void 관리자는_예약을_삭제할_수_있다() {
         ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
         Theme theme = themeDbFixture.공포();
         Member member = memberDbFixture.한스_사용자();
-
-        Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(member, reservationTime, theme);
+        Member admin = memberDbFixture.관리자();
+        ReservationCreateRequest request = new ReservationCreateRequest(
+                ReservationDateFixture.예약날짜_25_4_22.getDate(),
+                reservationTime.getId(),
+                theme.getId()
+        );
         LoginMember loginMember = new LoginMember(member.getId(), member.getName(), Role.USER, member.getEmail());
+        ReservationResponse reservation = reservationService.createReservation(request, loginMember);
 
-        List<MyReservationResponse> myReservations = reservationService.getMyReservations(loginMember);
+        assertThatCode(() -> reservationService.deleteReservationById(reservation.id(), admin.getId()))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 예약자가_아니면_예약을_삭제할_수_없다() {
+        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        Theme theme = themeDbFixture.공포();
+        Member booker = memberDbFixture.한스_사용자();
+        Member member = memberDbFixture.제임스_사용자();
+        ReservationCreateRequest request = new ReservationCreateRequest(
+                ReservationDateFixture.예약날짜_25_4_22.getDate(),
+                reservationTime.getId(),
+                theme.getId()
+        );
+        LoginMember loginMember = new LoginMember(booker.getId(), booker.getName(), Role.USER, booker.getEmail());
+        ReservationResponse reservation = reservationService.createReservation(request, loginMember);
+
+        assertThatThrownBy(() -> reservationService.deleteReservationById(reservation.id(), member.getId()))
+                .isInstanceOf(AuthorizationException.class)
+                .hasMessage("[ERROR] 본인 또는 관리자만 예약을 삭제할 수 있습니다.");
+    }
+
+    @Transactional
+    @Test
+    void 예약_취소_시_예약_대기_1순위가_예약_승인된다() {
+        ReservationTime reservationTime = reservationTimeDbFixture.예약시간_10시();
+        Theme theme = themeDbFixture.공포();
+        Member booker = memberDbFixture.한스_사용자();
+        Member awaiter = memberDbFixture.제임스_사용자();
+        Reservation reservation = reservationDbFixture.예약_한스_25_4_22_10시_공포(booker, reservationTime, theme);
+        waitingDbFixture.예약_대기_제임스_25_4_22_10시_공포(awaiter, reservationTime, theme);
+
+        reservationService.deleteReservationById(reservation.getId(), booker.getId());
+
+        Reservation promotedReservation = reservationRepository.findByDateAndThemeAndTime(
+                reservation.getDate(), theme, reservationTime
+        ).orElse(null);
+
+        boolean waitingExists = waitingRepository.existsByDateAndThemeAndTimeAndMember(
+                reservation.getDate(), theme, reservationTime, awaiter
+        );
 
         assertAll(
-                () -> assertThat(myReservations).hasSize(1),
-                () -> assertThat(myReservations.getFirst().reservationId()).isEqualTo(reservation.getId())
+                () -> assertThat(promotedReservation).isNotNull(),
+                () -> assertThat(promotedReservation.getMember().getName()).isEqualTo(awaiter.getName()),
+                () -> assertThat(waitingExists).isFalse()
         );
     }
 }

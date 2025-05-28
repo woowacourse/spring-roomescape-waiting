@@ -9,6 +9,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import roomescape.application.exception.AuthException;
+import roomescape.application.exception.AuthorizationException;
+import roomescape.application.exception.DuplicateException;
 import roomescape.domain.exception.PastReservationException;
 import roomescape.presentation.dto.response.ErrorResponse;
 
@@ -75,5 +77,25 @@ public class GlobalExceptionHandler {
         log.error(message, e);
         ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.INTERNAL_SERVER_ERROR, message);
         return ResponseEntity.internalServerError().body(errorResponse);
+    }
+
+    @ExceptionHandler(DuplicateException.class)
+    public ResponseEntity<ErrorResponse> handleDuplicateException(DuplicateException e) {
+        String message = e.getMessage();
+        log.warn(message);
+        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.CONFLICT, message);
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler(AuthorizationException.class)
+    public ResponseEntity<ErrorResponse> handleAuthorizationException(AuthorizationException e) {
+        String message = e.getMessage();
+        log.warn(message);
+        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.FORBIDDEN, message);
+        return ResponseEntity
+                .status(HttpStatus.FORBIDDEN)
+                .body(errorResponse);
     }
 }

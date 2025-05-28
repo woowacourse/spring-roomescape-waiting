@@ -16,12 +16,13 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.Objects;
 
 @Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
-public class Reservation {
+public class Reservation extends BaseEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -52,5 +53,9 @@ public class Reservation {
             Theme theme
     ) {
         return new Reservation(null, member, date, time, theme, ReservationStatus.RESERVED);
+    }
+
+    public boolean isOwner(Long memberId) {
+        return Objects.equals(this.member.getId(), memberId);
     }
 }

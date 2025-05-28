@@ -17,6 +17,7 @@ import roomescape.presentation.dto.response.ReservationResponse;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -198,6 +199,8 @@ class ReservationTest extends BaseTest {
 
             // 삭제
             RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(HttpStatus.NO_CONTENT.value());
@@ -236,7 +239,14 @@ class ReservationTest extends BaseTest {
 
         @Test
         void 예약_삭제시_존재하지_않는_예약이면_예외를_응답한다() {
+            givenCreatedReservationTime();
+            givenCreatedTheme();
+            givenCreatedMember();
+            String token = givenMemberLoginToken();
+
             RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(HttpStatus.NOT_FOUND.value());
@@ -357,8 +367,8 @@ class ReservationTest extends BaseTest {
                     "테마1", "설명1", "썸네일1");
             jdbcTemplate.update("INSERT INTO member (name, role, email, password) VALUES (?, ?, ?, ?)",
                     "브라운", "USER", "test@email.com", "pass1");
-            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id, status) VALUES (?, ?, ?, ?, ?)",
-                    "2025-08-05", 1, 1, 1, ReservationStatus.RESERVED.name());
+            jdbcTemplate.update("INSERT INTO reservation (date, time_id, theme_id, member_id, status, created_at) VALUES (?, ?, ?, ?, ?, ?)",
+                    "2025-08-05", 1, 1, 1, ReservationStatus.RESERVED.name(), LocalDateTime.now());
 
             List<ReservationResponse> response = RestAssured.given().log().all()
                     .when().get("/reservations")
@@ -393,6 +403,8 @@ class ReservationTest extends BaseTest {
             assertThat(count).isEqualTo(1);
 
             RestAssured.given().log().all()
+                    .contentType(ContentType.JSON)
+                    .cookie("token", token)
                     .when().delete("/reservations/1")
                     .then().log().all()
                     .statusCode(HttpStatus.NO_CONTENT.value());

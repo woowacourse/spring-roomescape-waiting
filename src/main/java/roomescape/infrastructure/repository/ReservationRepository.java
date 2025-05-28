@@ -17,8 +17,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     Reservation save(Reservation reservation);
 
-    void deleteById(Long id);
-
     Optional<Reservation> findById(Long id);
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme);
@@ -38,4 +36,6 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findAllByThemeAndMemberAndDate(Long themeId, Long memberId, LocalDate dateFrom, LocalDate dateTo);
 
     List<Reservation> findAllByMember(Member member);
+
+    Optional<Reservation> findByDateAndThemeAndTime(LocalDate date, Theme theme, ReservationTime time);
 }
