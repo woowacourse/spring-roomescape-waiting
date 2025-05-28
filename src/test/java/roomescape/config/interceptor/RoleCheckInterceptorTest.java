@@ -173,7 +173,7 @@ class RoleCheckInterceptorTest {
 
         @DisplayName("일반 회원 요청인데 일반 사용자가 접속한 경우 블록")
         @Test
-        void passWithMemberRequestAndNoneToken() {
+        void blockWithMemberRequestAndNoneToken() {
             // given
             HttpServletRequest request = mock(HttpServletRequest.class);
             when(request.getRequestURI()).thenReturn("/example");

@@ -75,7 +75,7 @@ class ReservationTimeApiTest {
                 .body("size()", is(3));
     }
 
-    @DisplayName("에약 여부와 함께 모든 예약 시간을 조회할 수 있다.")
+    @DisplayName("예약 여부와 함께 모든 예약 시간을 조회할 수 있다.")
     @Test
     void canFindReservationTimesWithBookState() {
         // given

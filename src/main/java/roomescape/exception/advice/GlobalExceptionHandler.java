@@ -102,18 +102,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ProblemDetail> illegalArgumentExceptionHandler(IllegalArgumentException exception) {
-        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
+        ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.BAD_REQUEST);
         problemDetail.setTitle("올바르지 않은 입력입니다.");
         problemDetail.setDetail(exception.getMessage());
         return ResponseEntity.internalServerError().body(problemDetail);
     }
 
     @ExceptionHandler(InternalServerException.class)
-    public ResponseEntity<ProblemDetail> InternalServerExceptionHandler(InternalServerException exception) {
+    public ResponseEntity<ProblemDetail> internalServerExceptionHandler(InternalServerException exception) {
         System.out.println("exception = " + exception);
         ProblemDetail problemDetail = ProblemDetail.forStatus(HttpStatus.INTERNAL_SERVER_ERROR);
         problemDetail.setTitle("서버 내부 에러입니다.");
-        problemDetail.setDetail("서버 내부에서 로직 예외 발생헸습니다.");
+        problemDetail.setDetail("서버 내부에서 로직 예외 발생했습니다.");
         return ResponseEntity.internalServerError().body(problemDetail);
     }
 

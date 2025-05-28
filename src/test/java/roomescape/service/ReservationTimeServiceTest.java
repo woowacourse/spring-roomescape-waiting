@@ -146,7 +146,7 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간을 삭제할 수 있다.")
     public class deleteReservationTimeById {
 
-        @DisplayName("예약 시간을 성공적으로 추가할 수 있다.")
+        @DisplayName("예약 시간을 성공적으로 삭제할 수 있다.")
         @Test
         void canDeleteReservationTime() {
             // given
@@ -161,7 +161,7 @@ class ReservationTimeServiceTest {
             assertThat(entityManager.find(ReservationTime.class, time.getId())).isNull();
         }
 
-        @DisplayName("이미 해당 시간에 예약이 존재할 경우 예약을 추가할 수 없다.")
+        @DisplayName("이미 해당 시간에 예약이 존재할 경우 예약을 삭제할 수 없다.")
         @Test
         void cannotDeleteReservedTimeByReservation() {
             // given
@@ -184,7 +184,7 @@ class ReservationTimeServiceTest {
                     .hasMessage("이미 예약이 존재하는 예약 시간입니다.");
         }
 
-        @DisplayName("이미 해당 시간에 예약 대기가 존재할 경우 예약을 추가할 수 없다.")
+        @DisplayName("이미 해당 시간에 예약 대기가 존재할 경우 예약을 삭제할 수 없다.")
         @Test
         void cannotDeleteReservedTimeByWaiting() {
             // given

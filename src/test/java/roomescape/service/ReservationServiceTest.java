@@ -104,7 +104,7 @@ class ReservationServiceTest {
 
     @DisplayName("회원의 모든 예약을 조회할 수 있다.")
     @Test
-    void testMethodNameHere() {
+    void canFindAllReservationsByMember() {
         // given
         entityManager.persist(Reservation.createWithoutId(
                 TODAY, reservationTime, theme, member));
