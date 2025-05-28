@@ -76,24 +76,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             + "WHERE r.status = :status")
     List<ReservationWithRank> findAllReservationsWithRankByStatus(@Param("status") ReservationStatus status);
 
-    @Query("SELECT r FROM Reservation r WHERE r.slot = :slot AND r.status = :status")
-    Optional<Reservation> findReservationBySlotAndStatus(@Param("slot") ReservationSlot slot,
-            @Param("status") ReservationStatus status);
-
     @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot = :slot AND r.status = :status")
     boolean existsReservationBySlotAndStatus(@Param("slot") ReservationSlot slot,
-            @Param("status") ReservationStatus status);
-
-    @Query("SELECT r FROM Reservation r WHERE r.slot.date = :date AND r.slot.time = :time AND r.slot.theme = :theme AND r.status = :status")
-    Optional<Reservation> findReservationByDateTimeThemeAndStatus(@Param("date") LocalDate date,
-            @Param("time") ReservationTime time,
-            @Param("theme") Theme theme,
-            @Param("status") ReservationStatus status);
-
-    @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot.date = :date AND r.slot.time = :time AND r.slot.theme = :theme AND r.status = :status")
-    boolean existsReservationByDateTimeThemeAndStatus(@Param("date") LocalDate date,
-            @Param("time") ReservationTime time,
-            @Param("theme") Theme theme,
             @Param("status") ReservationStatus status);
 
     @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot = :slot AND r.member = :member AND r.status = :status")
@@ -106,19 +90,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT r FROM Reservation r WHERE r.status = :status")
     List<Reservation> findAllReservations(@Param("status") ReservationStatus status);
 
-    default Optional<Reservation> findConfirmedReservationBySlot(ReservationSlot slot) {
-        return findReservationBySlotAndStatus(slot, ReservationStatus.CONFIRMED);
-    }
-
     default boolean existsConfirmedReservationBySlot(ReservationSlot slot) {
         return existsReservationBySlotAndStatus(slot, ReservationStatus.CONFIRMED);
-    }
-
-    default Optional<Reservation> findConfirmedReservation(LocalDate date, ReservationTime time, Theme theme) {
-        return findReservationByDateTimeThemeAndStatus(date, time, theme, ReservationStatus.CONFIRMED);
-    }
-
-    default boolean existsConfirmedReservation(LocalDate date, ReservationTime time, Theme theme) {
-        return existsReservationByDateTimeThemeAndStatus(date, time, theme, ReservationStatus.CONFIRMED);
     }
 }
