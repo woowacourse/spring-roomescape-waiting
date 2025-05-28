@@ -75,6 +75,10 @@ public class ReservationController {
 
     @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> addWaiting(@Valid @RequestBody final WaitingRequest request, Member member) {
+        if (Role.isAdmin(member.getRole())) {
+            throw new UnauthorizedAccessException("[ERROR] 접근 권한이 없습니다.");
+        }
+
         WaitingResponse responseDto = waitingService.createWaiting(request, member);
         return ResponseEntity.created(URI.create("reservations/waitings/" + responseDto.id())).body(responseDto);
     }
