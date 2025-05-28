@@ -30,6 +30,7 @@ import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
@@ -97,11 +98,14 @@ class ReservationRepositoryTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
-        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme1, LocalDateTime.now(clock));
-        final ReservationSlot notReservedSlot = new ReservationSlot(date, time, theme2, LocalDateTime.now(clock));
+        final ReservationSlot reservationSlot = reservationSlotRepository.save(
+                new ReservationSlot(date, time, theme1, LocalDateTime.now(clock)));
+        final ReservationSlot notReservedSlot = reservationSlotRepository.save(
+                new ReservationSlot(date, time, theme2, LocalDateTime.now(clock)));
 
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        reservationSlot.addReservation(new Reservation(member, reservationSlot));
+
+        reservationRepository.save(new Reservation(member, reservationSlot));
 
         reservationSlotRepository.save(reservationSlot);
         reservationSlotRepository.save(notReservedSlot);
@@ -127,14 +131,17 @@ class ReservationRepositoryTest {
 
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
-        final ReservationSlot reservationSlot1 = new ReservationSlot(date, time1, theme1, LocalDateTime.now(clock));
-        reservationSlot1.addReservation(new Reservation(member, reservationSlot1));
+        final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
+                new ReservationSlot(date, time1, theme1, LocalDateTime.now(clock)));
+        reservationRepository.save(new Reservation(member, reservationSlot1));
 
-        final ReservationSlot reservationSlot2 = new ReservationSlot(date, time2, theme1, LocalDateTime.now(clock));
-        reservationSlot2.addReservation(new Reservation(member, reservationSlot2));
+        final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
+                new ReservationSlot(date, time2, theme1, LocalDateTime.now(clock)));
+        reservationRepository.save(new Reservation(member, reservationSlot2));
 
-        final ReservationSlot reservationSlot3 = new ReservationSlot(date, time2, theme2, LocalDateTime.now(clock));
-        reservationSlot3.addReservation(new Reservation(member, reservationSlot3));
+        final ReservationSlot reservationSlot3 = reservationSlotRepository.save(
+                new ReservationSlot(date, time2, theme2, LocalDateTime.now(clock)));
+        reservationRepository.save(new Reservation(member, reservationSlot3));
 
         reservationSlotRepository.save(reservationSlot1);
         reservationSlotRepository.save(reservationSlot2);
@@ -198,13 +205,12 @@ class ReservationRepositoryTest {
         final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
         final Member member3 = memberRepository.save(NOT_SAVED_MEMBER_3());
 
-        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme, LocalDateTime.now(clock));
-        final Reservation target = new Reservation(member2, reservationSlot);
-        reservationSlot.addReservation(new Reservation(member1, reservationSlot));
-        reservationSlot.addReservation(target);
-        reservationSlot.addReservation(new Reservation(member3, reservationSlot));
-        reservationSlotRepository.save(reservationSlot);
-        reservationSlot.assignConfirmedIfEmpty();
+        final ReservationSlot reservationSlot = reservationSlotRepository.save(
+                new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
+        reservationRepository.save(new Reservation(null, BookingStatus.RESERVED, member1, reservationSlot));
+        final Reservation target = new Reservation(null, BookingStatus.WAITING, member2, reservationSlot);
+        reservationRepository.save(target);
+        reservationRepository.save(new Reservation(null, BookingStatus.WAITING, member3, reservationSlot));
 
         // when
         final Long rank = reservationRepository.getReservationRankById(target.getId());

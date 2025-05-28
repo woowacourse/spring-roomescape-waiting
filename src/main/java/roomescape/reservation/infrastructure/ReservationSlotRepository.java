@@ -9,17 +9,8 @@ import roomescape.reservation.domain.ReservationSlot;
 
 public interface ReservationSlotRepository extends JpaRepository<ReservationSlot, Long> {
 
-    @EntityGraph(attributePaths = {"allReservations"})
     Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     @EntityGraph(attributePaths = {"time"})
     List<ReservationSlot> findAllByDateAndThemeId(LocalDate date, Long themeId);
-
-    @EntityGraph(attributePaths = {
-            "allReservations",
-            "allReservations.member",
-            "time",
-            "theme"
-    })
-    List<ReservationSlot> findAll();
 }

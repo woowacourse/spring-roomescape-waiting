@@ -1,6 +1,5 @@
 package roomescape.reservation.domain;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -9,20 +8,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Objects;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import roomescape.exception.resource.ResourceLimitExceededException;
 import roomescape.theme.domain.Theme;
 
 @Entity
@@ -32,24 +24,21 @@ import roomescape.theme.domain.Theme;
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class ReservationSlot {
 
-    private static final int MAX_WAITING_COUNT = 20;
-    @OneToMany(mappedBy = "reservationSlot", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
-    private final List<Reservation> allReservations = new ArrayList<>();
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @EqualsAndHashCode.Include
     private Long id;
+
     @Column(nullable = false)
     private LocalDate date;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "time_id")
     private ReservationTime time;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "theme_id")
     private Theme theme;
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "confirmed_reservation_id")
-    private Reservation confirmedReservation;
 
     public ReservationSlot(final Long id, final LocalDate date, final ReservationTime time, final Theme theme,
                            final LocalDateTime now) {
@@ -66,28 +55,6 @@ public class ReservationSlot {
     public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme,
                            final LocalDateTime now) {
         this(null, date, time, theme, now);
-    }
-
-    public List<Reservation> getWaitingReservations() {
-        return allReservations.stream().filter(reservation -> !Objects.equals(reservation, confirmedReservation))
-                .toList();
-    }
-
-    public void addReservation(final Reservation reservation) {
-        if (allReservations.size() >= MAX_WAITING_COUNT) {
-            throw new ResourceLimitExceededException("최대 예약 대기 개수를 초과했습니다.");
-        }
-        allReservations.add(reservation);
-    }
-
-    public void assignConfirmedIfEmpty() {
-        if (this.confirmedReservation == null) {
-            confirmedReservation = getFirstRankWaiting();
-        }
-    }
-
-    public boolean shouldBeDeleted() {
-        return this.confirmedReservation == null && this.allReservations.isEmpty();
     }
 
     private void validateDate(final LocalDate date) {
@@ -113,20 +80,5 @@ public class ReservationSlot {
         if (theme == null) {
             throw new IllegalArgumentException("테마는 null이면 안됩니다.");
         }
-    }
-
-    private Reservation getFirstRankWaiting() {
-        return allReservations.stream().min(Comparator.comparing(Reservation::getId))
-                .orElseThrow(() -> new IllegalStateException("예약 데이터가 존재하지 않습니다."));
-    }
-
-    public void removeReservation(final Reservation reservation) {
-        if (!allReservations.contains(reservation)) {
-            return;
-        }
-        if (confirmedReservation == reservation) {
-            confirmedReservation = null;
-        }
-        allReservations.remove(reservation);
     }
 }

@@ -140,19 +140,17 @@ class ReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme, LocalDateTime.now(clock));
-        final Reservation reservation = new Reservation(member, reservationSlot);
-        reservationSlot.addReservation(reservation);
-        reservationSlot.assignConfirmedIfEmpty();
 
-        reservationSlotRepository.save(reservationSlot);
+        final Long reservationId = reservationService.createForMember(
+                new MemberCreateReservationRequest(date, time.getId(), theme.getId()), member.getId()).id();
+
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
 
         // when
-        reservationService.deleteReservation(reservation.getId(), memberAuthInfo);
+        reservationService.deleteReservation(reservationId, memberAuthInfo);
 
         // then
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(reservationId)).isEmpty();
     }
 
     @Test
@@ -181,22 +179,19 @@ class ReservationServiceTest {
         final LocalDate date = LocalDate.now().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme, LocalDateTime.now(clock));
-
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final Reservation reservation = new Reservation(member, reservationSlot);
-        reservationSlot.addReservation(reservation);
-        reservationSlot.assignConfirmedIfEmpty();
-        reservationSlotRepository.save(reservationSlot);
+
+        final MemberReservationResponse response = reservationService.createForMember(
+                new MemberCreateReservationRequest(date, time.getId(), theme.getId()), member.getId());
 
         final Member admin = memberRepository.save(NOT_SAVED_ADMIN_1());
         final MemberAuthInfo adminAuthInfo = new MemberAuthInfo(admin.getId(), admin.getRole());
 
         // when
-        reservationService.deleteReservation(reservation.getId(), adminAuthInfo);
+        reservationService.deleteReservation(response.id(), adminAuthInfo);
 
         // then
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(response.id())).isEmpty();
     }
 
     @Test
@@ -207,27 +202,22 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
         final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
-        final ReservationSlot reservationSlot = new ReservationSlot(date, time, theme, LocalDateTime.now(clock));
 
-        final Reservation confirmedReservation = new Reservation(member1, reservationSlot);
-        reservationSlot.addReservation(confirmedReservation);
-        reservationSlot.assignConfirmedIfEmpty();
+        final Long confirmedReservationId = reservationService.createForMember(
+                new MemberCreateReservationRequest(date, time.getId(), theme.getId()), member1.getId()).id();
 
-        final Reservation waitingReservation = new Reservation(member2, reservationSlot);
-        reservationSlot.addReservation(waitingReservation);
-        reservationSlot.assignConfirmedIfEmpty();
-
-        reservationSlotRepository.save(reservationSlot);
+        final Long waitingReservationId = reservationService.createForMember(
+                new MemberCreateReservationRequest(date, time.getId(), theme.getId()), member2.getId()).id();
 
         final MemberAuthInfo member1AuthInfo = new MemberAuthInfo(member1.getId(), member1.getRole());
 
         // when
-        reservationService.deleteReservation(confirmedReservation.getId(), member1AuthInfo);
-        reservationRepository.flush();
+        reservationService.deleteReservation(confirmedReservationId, member1AuthInfo);
 
         // then
-        assertAll(() -> assertThat(reservationRepository.findById(confirmedReservation.getId())).isEmpty(),
-                () -> assertThat(reservationSlot.getConfirmedReservation()).isEqualTo(waitingReservation));
+        final Reservation confirmedReservation = reservationRepository.getById(waitingReservationId);
+        assertAll(() -> assertThat(reservationRepository.findById(confirmedReservationId)).isEmpty(),
+                () -> assertThat(confirmedReservation.getId()).isEqualTo(waitingReservationId));
     }
 
     @Test
@@ -239,29 +229,28 @@ class ReservationServiceTest {
         final LocalDate date1 = LocalDate.now().plusDays(1);
         final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
-        final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date1, time1, theme1, LocalDateTime.now(clock)));
+        reservationService.createForMember(new MemberCreateReservationRequest(date1, time1.getId(), theme1.getId()),
+                member.getId());
 
         final LocalDate date2 = LocalDate.now().plusDays(2);
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
-        final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time2, theme2, LocalDateTime.now(clock)));
-
-        reservationSlot1.addReservation(reservationRepository.save(new Reservation(member, reservationSlot1)));
-        reservationSlot2.addReservation(reservationRepository.save(new Reservation(member, reservationSlot2)));
+        reservationService.createForMember(new MemberCreateReservationRequest(date2, time2.getId(), theme2.getId()),
+                member.getId());
 
         // when
-        final List<AdminReservationResponse> reservations = reservationService.findAll();
+        final List<Reservation> reservations = reservationRepository.findAll();
         final int afterCount = reservations.size();
+        final List<ReservationSlot> reservationSlots = reservations.stream().map(Reservation::getReservationSlot)
+                .toList();
 
         // then
         assertAll(() -> assertThat(afterCount - beforeCount).isEqualTo(2),
-                () -> assertThat(reservations).extracting(AdminReservationResponse::date)
-                        .containsExactlyInAnyOrder(date1, date2),
-                () -> assertThat(reservations).extracting(reservation -> reservation.time().startAt())
+                () -> assertThat(reservations).extracting(Reservation::getMember)
+                        .containsExactlyInAnyOrder(member, member),
+                () -> assertThat(reservationSlots).extracting(slot -> slot.getTime().getStartAt())
                         .containsExactlyInAnyOrder(time1.getStartAt(), time2.getStartAt()),
-                () -> assertThat(reservations).extracting(reservation -> reservation.theme().name())
+                () -> assertThat(reservationSlots).extracting(slot -> slot.getTheme().getName())
                         .containsExactlyInAnyOrder(theme1.getName(), theme2.getName()));
     }
 
@@ -272,19 +261,15 @@ class ReservationServiceTest {
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
-
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         final AvailableReservationTimeRequest request = new AvailableReservationTimeRequest(date, theme.getId());
-
         final List<AvailableReservationTimeResponse> before = reservationService.findAvailableReservationTimes(request);
 
-        final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date, time1, theme, LocalDateTime.now(clock)));
-        final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date, time2, theme, LocalDateTime.now(clock)));
-        reservationSlot1.addReservation(reservationRepository.save(new Reservation(member, reservationSlot1)));
-        reservationSlot2.addReservation(reservationRepository.save(new Reservation(member, reservationSlot2)));
+        reservationService.createForMember(new MemberCreateReservationRequest(date, time1.getId(), theme.getId()),
+                member.getId());
+        reservationService.createForMember(new MemberCreateReservationRequest(date, time2.getId(), theme.getId()),
+                member.getId());
 
         // when
         final List<AvailableReservationTimeResponse> after = reservationService.findAvailableReservationTimes(request);
@@ -306,10 +291,9 @@ class ReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final ReservationSlot reservationSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
 
-        reservationRepository.save(new Reservation(member, reservationSlot));
+        reservationService.createForMember(new MemberCreateReservationRequest(date, time.getId(), theme.getId()),
+                member.getId());
 
         final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
                 theme.getId());
@@ -327,14 +311,13 @@ class ReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
-        final ReservationSlot reservationSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
+
+        reservationService.createForMember(new MemberCreateReservationRequest(date, time.getId(), theme.getId()),
+                member.getId());
 
         final MemberCreateReservationRequest request = new MemberCreateReservationRequest(date, time.getId(),
                 theme.getId());
         final MemberAuthInfo memberAuthInfo = new MemberAuthInfo(member.getId(), member.getRole());
-
-        reservationRepository.save(new Reservation(member, reservationSlot));
 
         // when & then
         assertThatThrownBy(() -> reservationService.createForMember(request, memberAuthInfo.id())).isInstanceOf(
@@ -347,27 +330,25 @@ class ReservationServiceTest {
         final LocalDate date1 = LocalDate.now().plusDays(1);
         final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
-        final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date1, time1, theme1, LocalDateTime.now(clock)));
 
         final LocalDate date2 = LocalDate.now().plusDays(2);
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
-        final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time2, theme2, LocalDateTime.now(clock)));
 
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
-        final Reservation saved1 = reservationRepository.save(new Reservation(member, reservationSlot1));
-        final Reservation saved2 = reservationRepository.save(new Reservation(member, reservationSlot2));
+        final Long reservationId1 = reservationService.createForMember(
+                new MemberCreateReservationRequest(date1, time1.getId(), theme1.getId()), member.getId()).id();
+        final Long reservationId2 = reservationService.createForMember(
+                new MemberCreateReservationRequest(date2, time2.getId(), theme2.getId()), member.getId()).id();
 
         // when
         final List<MemberReservationResponse> founds = reservationService.findReservationsByMemberId(member.getId());
 
         // then
         assertAll(() -> assertThat(founds).hasSize(2), () -> assertThat(founds).containsExactlyInAnyOrder(
-                new MemberReservationResponse(saved1.getId(), theme1.getName(), date1, time1.getStartAt(), 0L),
-                new MemberReservationResponse(saved2.getId(), theme2.getName(), date2, time2.getStartAt(), 0L)));
+                new MemberReservationResponse(reservationId1, theme1.getName(), date1, time1.getStartAt(), 0L),
+                new MemberReservationResponse(reservationId2, theme2.getName(), date2, time2.getStartAt(), 0L)));
     }
 
     @Test
@@ -380,20 +361,14 @@ class ReservationServiceTest {
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
         final Member member2 = memberRepository.save(NOT_SAVED_MEMBER_2());
 
-        final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme1, LocalDateTime.now(clock)));
-        final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme2, LocalDateTime.now(clock)));
-
-        reservationSlot1.addReservation(reservationRepository.save(new Reservation(member1, reservationSlot1)));
-        final Reservation waitingReservation1 = reservationRepository.save(new Reservation(member2, reservationSlot1));
-        reservationSlot1.addReservation(waitingReservation1);
-        reservationSlot1.assignConfirmedIfEmpty();
-
-        reservationSlot2.addReservation(reservationRepository.save(new Reservation(member2, reservationSlot2)));
-        final Reservation waitingReservation2 = reservationRepository.save(new Reservation(member1, reservationSlot2));
-        reservationSlot2.addReservation(waitingReservation2);
-        reservationSlot2.assignConfirmedIfEmpty();
+        reservationService.createForMember(new MemberCreateReservationRequest(date, time.getId(), theme1.getId()),
+                member1.getId());
+        final Long waitingReservationId1 = reservationService.createForMember(
+                new MemberCreateReservationRequest(date, time.getId(), theme1.getId()), member2.getId()).id();
+        reservationService.createForMember(new MemberCreateReservationRequest(date, time.getId(), theme2.getId()),
+                member2.getId());
+        final Long waitingReservationId2 = reservationService.createForMember(
+                new MemberCreateReservationRequest(date, time.getId(), theme2.getId()), member1.getId()).id();
 
         // when
         final List<AdminReservationWaitingResponse> responses = reservationService.findReservationWaitings();
@@ -401,7 +376,7 @@ class ReservationServiceTest {
         // then
         assertAll(() -> assertThat(responses).hasSize(2),
                 () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationId)
-                        .containsExactlyInAnyOrder(waitingReservation1.getId(), waitingReservation2.getId()),
+                        .containsExactlyInAnyOrder(waitingReservationId1, waitingReservationId2),
                 () -> assertThat(responses).extracting(AdminReservationWaitingResponse::memberName)
                         .containsExactlyInAnyOrder(member1.getName(), member2.getName()),
                 () -> assertThat(responses).extracting(AdminReservationWaitingResponse::reservationDate)

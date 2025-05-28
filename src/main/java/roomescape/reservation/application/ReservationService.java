@@ -12,6 +12,7 @@ import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.domain.BookingStatus;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
@@ -67,14 +68,14 @@ public class ReservationService {
         member.validateDeletableReservation(reservation);
 
         final ReservationSlot reservationSlot = reservation.getReservationSlot();
-        reservation.delete();
+        reservationRepository.delete(reservation);
         resolveSlotAfterChange(reservationSlot);
     }
 
     @Transactional(readOnly = true)
     public List<AdminReservationResponse> findAll() {
-        return reservationSlotRepository.findAll().stream().map(this::mapSlotReservations).flatMap(List::stream)
-                .toList();
+        return reservationRepository.findAll().stream().map(reservation -> AdminReservationResponse.from(reservation,
+                reservationRepository.getReservationRankById(reservation.getId()))).toList();
     }
 
 
@@ -111,8 +112,8 @@ public class ReservationService {
 
     @Transactional(readOnly = true)
     public List<AdminReservationWaitingResponse> findReservationWaitings() {
-        return reservationSlotRepository.findAll().stream().map(ReservationSlot::getWaitingReservations)
-                .flatMap(List::stream).map(AdminReservationWaitingResponse::from).toList();
+        return reservationRepository.findByStatus(BookingStatus.WAITING).stream()
+                .map(AdminReservationWaitingResponse::from).toList();
     }
 
     private Reservation registerReservation(final LocalDate date, final Long timeId, final Long themeId,
@@ -123,9 +124,9 @@ public class ReservationService {
 
         final Member member = memberRepository.getByIdOrThrow(memberId);
         final Reservation reservation = new Reservation(member, reservationSlot);
-        reservationSlot.addReservation(reservation);
+        reservationRepository.save(reservation);
         resolveSlotAfterChange(reservationSlot);
-        return reservationRepository.save(reservation);
+        return reservation;
     }
 
     private ReservationSlot getReservationSlot(final LocalDate date, final Long timeId, final Long themeId) {
@@ -141,17 +142,11 @@ public class ReservationService {
     }
 
     private void resolveSlotAfterChange(final ReservationSlot reservationSlot) {
-        if (reservationSlot.shouldBeDeleted()) {
-            reservationSlotRepository.delete(reservationSlot);
-            return;
+        if (!reservationRepository.existsConfirmedReservation(reservationSlot.getId())) {
+            reservationRepository.findFirstRankWaitingBy(reservationSlot.getId())
+                    .ifPresentOrElse(Reservation::confirmReservation,
+                            () -> reservationSlotRepository.delete(reservationSlot));
         }
-        reservationSlot.assignConfirmedIfEmpty();
-    }
-
-    private List<AdminReservationResponse> mapSlotReservations(final ReservationSlot reservationSlot) {
-        return reservationSlot.getAllReservations().stream()
-                .map(reservation -> AdminReservationResponse.from(reservation,
-                        reservationRepository.getReservationRankById(reservation.getId()))).toList();
     }
 
     private void validateMemberDuplicateReservation(final ReservationSlot reservationSlot, final Long memberId) {
