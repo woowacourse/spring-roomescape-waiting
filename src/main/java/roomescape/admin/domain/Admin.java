@@ -4,8 +4,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@EqualsAndHashCode(of = "id")
 public class Admin {
 
     @Id
@@ -14,9 +21,6 @@ public class Admin {
     private String name;
     private String email;
     private String password;
-
-    public Admin() {
-    }
 
     public Admin(String name, String email, String password) {
         this.id = null;
@@ -27,21 +31,5 @@ public class Admin {
 
     public boolean isSamePassword(String password) {
         return this.password.equals(password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getPassword() {
-        return password;
     }
 }

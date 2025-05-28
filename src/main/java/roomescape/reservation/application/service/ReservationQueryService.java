@@ -17,11 +17,11 @@ public class ReservationQueryService {
     }
 
     public List<Reservation> findByThemeIdAndDate(final Long themeId, final LocalDate date) {
-        return reservationRepository.findBy(themeId, date);
+        return reservationRepository.findBy(date, themeId);
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+    public List<Reservation> findByMemberId(final Long memberId) {
+        return reservationRepository.findByMemberId(memberId);
     }
 
     public List<Reservation> findBySearchCondition(final SearchCondition condition) {
@@ -30,7 +30,11 @@ public class ReservationQueryService {
         );
     }
 
-    public List<Reservation> findByMemberId(final Long memberId) {
-        return reservationRepository.findByMemberId(memberId);
+    public List<Reservation> findAll() {
+        return reservationRepository.findAll();
+    }
+
+    public boolean isExistsReservedReservation(Long themeId, Long timeId, LocalDate date) {
+        return reservationRepository.existsByThemeIdAndTimeIdAndDate(themeId, timeId, date);
     }
 }

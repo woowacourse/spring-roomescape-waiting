@@ -13,25 +13,23 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.login.presentation.dto.LoginMemberInfo;
 import roomescape.auth.login.presentation.dto.annotation.LoginMember;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
-import roomescape.member.presentation.dto.MyReservationResponse;
+import roomescape.reservation.application.ReservationApplicationService;
+import roomescape.reservation.presentation.dto.MyReservationResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
-import roomescape.reservation.application.ReservationFacadeService;
 
 @RestController
 public class MemberReservationController {
 
-    private final ReservationFacadeService reservationService;
+    private final ReservationApplicationService reservationService;
 
-    public MemberReservationController(final ReservationFacadeService reservationService) {
+    public MemberReservationController(ReservationApplicationService reservationService) {
         this.reservationService = reservationService;
     }
 
-    @PostMapping("/reservations")
-    public ResponseEntity<ReservationResponse> createReservation(
-        @RequestBody final ReservationRequest request,
-        @LoginMember final LoginMemberInfo memberInfo)
-    {
+    @PostMapping("/reservation")
+    public ResponseEntity<ReservationResponse> createReservation(@RequestBody final ReservationRequest request,
+                                                                 @LoginMember final LoginMemberInfo memberInfo) {
         ReservationResponse response = reservationService.createReservation(request, memberInfo.id());
         return ResponseEntity.created(URI.create("/reservation")).body(response);
     }

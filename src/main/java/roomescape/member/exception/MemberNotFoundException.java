@@ -2,8 +2,8 @@ package roomescape.member.exception;
 
 import roomescape.common.exception.BusinessException;
 
-public class MemberNotFound extends BusinessException {
-    public MemberNotFound(String message) {
+public class MemberNotFoundException extends BusinessException {
+    public MemberNotFoundException(String message) {
         super(message);
     }
 }

@@ -16,19 +16,17 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.exception.handler.dto.ExceptionResponse;
 import roomescape.reservation.time.presentation.dto.ReservationTimeRequest;
 import roomescape.reservation.time.presentation.dto.ReservationTimeResponse;
-import roomescape.reservation.time.presentation.dto.TimeConditionRequest;
-import roomescape.reservation.time.presentation.dto.TimeConditionResponse;
-import roomescape.reservation.time.application.ReservationTimeFacadeService;
+import roomescape.reservation.time.application.ReservationTimeApplicationService;
 
 @RestController
-@RequestMapping("/times")
-public class ReservationTimeController {
+@RequestMapping("/admin/times")
+public class AdminReservationTimeController {
 
     public static final String GET_ADMIN_TIME = "/admin/time";
 
-    private final ReservationTimeFacadeService reservationTimeService;
+    private final ReservationTimeApplicationService reservationTimeService;
 
-    public ReservationTimeController(final ReservationTimeFacadeService reservationTimeService) {
+    public AdminReservationTimeController(final ReservationTimeApplicationService reservationTimeService) {
         this.reservationTimeService = reservationTimeService;
     }
 
@@ -36,12 +34,6 @@ public class ReservationTimeController {
     public ResponseEntity<List<ReservationTimeResponse>> getReservationTimes() {
         List<ReservationTimeResponse> response = reservationTimeService.getReservationTimes();
         return ResponseEntity.ok(response);
-    }
-
-    @GetMapping(consumes = {"application/json"})
-    public ResponseEntity<List<TimeConditionResponse>> getReservationTimes(final TimeConditionRequest request) {
-        List<TimeConditionResponse> responses = reservationTimeService.getTimesWithCondition(request);
-        return ResponseEntity.ok().body(responses);
     }
 
     @PostMapping

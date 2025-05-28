@@ -1,8 +1,11 @@
 package roomescape.auth.login.presentation;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,21 +30,35 @@ public class AdminLoginController {
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(@RequestBody LoginRequest request) {
-        String token = loginService.createAdminToken(request);
+        String token = loginService.loginAdmin(request);
 
         ResponseCookie cookie = ResponseCookie.from("token", token)
-                .httpOnly(true)
-                .path("/")
-                .build();
+            .httpOnly(true)
+            .path("/")
+            .maxAge(1800)
+            .build();
 
         return ResponseEntity.ok()
-                .header(HttpHeaders.SET_COOKIE, cookie.toString())
-                .build();
+            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .build();
     }
 
     @GetMapping("/login/check")
     public ResponseEntity<LoginCheckResponse> checkLogin(@LoginAdmin final LoginAdminInfo info) {
         Admin admin = loginService.findByAdminId(info.id());
         return ResponseEntity.ok().body(new LoginCheckResponse(admin.getName()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@CookieValue("token") String token) {
+        ResponseCookie cookie = ResponseCookie.from("token", token)
+            .httpOnly(true)
+            .path("/")
+            .maxAge(0)
+            .build();
+
+        return ResponseEntity.ok()
+            .header(HttpHeaders.SET_COOKIE, cookie.toString())
+            .build();
     }
 }

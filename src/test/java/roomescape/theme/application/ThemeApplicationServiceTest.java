@@ -7,9 +7,9 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Import;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import roomescape.common.BaseServiceTest;
 import roomescape.common.exception.BusinessException;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
@@ -17,27 +17,17 @@ import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
-import roomescape.reservation.infrastructure.JpaReservationRepositoryAdapter;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
-import roomescape.theme.application.service.ThemeCommandService;
-import roomescape.theme.application.service.ThemeQueryService;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.infrastructure.JpaThemeRepository;
-import roomescape.theme.infrastructure.JpaThemeRepositoryAdaptor;
 import roomescape.theme.presentation.dto.PopularThemeResponse;
-import roomescape.theme.application.ThemeServiceTest.ThemeConfig;
 
-@DataJpaTest
-@Import(ThemeConfig.class)
-class ThemeServiceTest {
+class ThemeApplicationServiceTest extends BaseServiceTest {
 
     @Autowired
-    private ThemeFacadeService themeService;
+    private ThemeApplicationService themeService;
 
     @Autowired
     private JpaReservationRepository jpaReservationRepository;
@@ -75,13 +65,13 @@ class ThemeServiceTest {
 
         LocalDate now = LocalDate.now();
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time1, theme1, member, ReservationStatus.RESERVED)
+            new Reservation(now.minusDays(2), time1, theme1, member)
         );
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time2, theme1, member, ReservationStatus.RESERVED)
+            new Reservation(now.minusDays(2), time2, theme1, member)
         );
         jpaReservationRepository.save(
-            new Reservation(now.minusDays(2), time1, theme3, member, ReservationStatus.RESERVED)
+            new Reservation(now.minusDays(2), time1, theme3, member)
         );
 
         // when
@@ -92,35 +82,5 @@ class ThemeServiceTest {
                 new PopularThemeResponse(theme1.getName(), theme1.getDescription(), theme1.getThumbnail()),
                 new PopularThemeResponse(theme3.getName(), theme3.getDescription(), theme3.getThumbnail())
         );
-    }
-
-    static class ThemeConfig {
-
-        @Bean
-        public ThemeRepository themeRepository(JpaThemeRepository jpaThemeRepository) {
-            return new JpaThemeRepositoryAdaptor(jpaThemeRepository);
-        }
-
-        @Bean
-        public ReservationRepository reservationRepository(JpaReservationRepository jpaReservationRepository) {
-            return new JpaReservationRepositoryAdapter(jpaReservationRepository);
-        }
-
-        @Bean
-        public ThemeQueryService themeQueryService(ThemeRepository themeRepository) {
-            return new ThemeQueryService(themeRepository);
-        }
-
-        @Bean
-        public ThemeCommandService themeCommandService(ThemeRepository themeRepository,
-                                                       ReservationRepository reservationRepository) {
-            return new ThemeCommandService(themeRepository, reservationRepository);
-        }
-
-        @Bean
-        public ThemeFacadeService themeService(ThemeQueryService themeQueryService,
-                                               ThemeCommandService themeCommandService) {
-            return new ThemeFacadeService(themeQueryService, themeCommandService);
-        }
     }
 }

@@ -5,10 +5,16 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 import roomescape.common.exception.BusinessException;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@EqualsAndHashCode(of = "id")
 public class Theme {
 
     @Id
@@ -23,9 +29,6 @@ public class Theme {
 
     @Column(nullable = false)
     private String thumbnail;
-
-    public Theme() {
-    }
 
     public Theme(final String name, final String description, final String thumbnail) {
         validateIsNonNull(name);
@@ -52,38 +55,5 @@ public class Theme {
         if (something.isEmpty()) {
             throw new BusinessException("테마 정보는 비어있을 수 없습니다.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    @Override
-    public boolean equals(final Object object) {
-        if (!(object instanceof Theme that)) {
-            return false;
-        }
-
-        if (getId() == null && that.getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
     }
 }

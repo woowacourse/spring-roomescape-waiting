@@ -5,8 +5,15 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import lombok.AccessLevel;
+import lombok.EqualsAndHashCode;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Entity
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter
+@EqualsAndHashCode(of = "id")
 public class Member {
 
     @Id
@@ -22,9 +29,6 @@ public class Member {
     @Embedded
     private Password password;
 
-    public Member() {
-    }
-
     public Member(final Name name, final Email email, final Password password) {
         this.id = null;
         this.name = name;
@@ -33,22 +37,6 @@ public class Member {
     }
 
     public boolean isSamePassword(final String password) {
-        return this.password.getPassword().equals(password);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name.getName();
-    }
-
-    public String getEmail() {
-        return email.getEmail();
-    }
-
-    public String getPassword() {
-        return password.getPassword();
+        return this.password.password().equals(password);
     }
 }

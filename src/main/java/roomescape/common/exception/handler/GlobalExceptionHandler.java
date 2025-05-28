@@ -15,8 +15,8 @@ import roomescape.common.exception.handler.dto.ExceptionResponse;
 public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
-    public ResponseEntity<ExceptionResponse> handleNullPointer(final BusinessException exception,
-                                                               final HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleBusinessException(final BusinessException exception,
+                                                                     final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI()
         );
@@ -25,7 +25,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(UnauthorizedException.class)
-    public ResponseEntity<ExceptionResponse> handleUnauthorize(final UnauthorizedException exception, final HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleUnauthorizedException(final UnauthorizedException exception, final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = createErrorResponse(
             HttpStatus.UNAUTHORIZED, exception.getMessage(), request.getRequestURI()
         );
@@ -34,7 +34,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(ForbiddenException.class)
-    public ResponseEntity<ExceptionResponse> handleForbidden(final ForbiddenException exception, final HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleForbiddenException(final ForbiddenException exception, final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = createErrorResponse(
             HttpStatus.FORBIDDEN, exception.getMessage(), request.getRequestURI()
         );
@@ -43,8 +43,8 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<ExceptionResponse> handleIllegalArgument(final IllegalArgumentException exception,
-                                                                   final HttpServletRequest request) {
+    public ResponseEntity<ExceptionResponse> handleIllegalArgumentException(final IllegalArgumentException exception,
+                                                                            final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = createErrorResponse(
             HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI()
         );
@@ -53,7 +53,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadable(
+    public ResponseEntity<ExceptionResponse> handleHttpMessageNotReadableException(
         final HttpMessageNotReadableException exception, final HttpServletRequest request
     ) {
         Throwable rootCause = exception.getRootCause();
@@ -76,10 +76,10 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ExceptionResponse> handleException(final Exception exception,
                                                              final HttpServletRequest request) {
         ExceptionResponse exceptionResponse = createErrorResponse(
-            HttpStatus.BAD_REQUEST, exception.getMessage(), request.getRequestURI()
+            HttpStatus.INTERNAL_SERVER_ERROR, exception.getMessage(), request.getRequestURI()
         );
 
-        return ResponseEntity.badRequest().body(exceptionResponse);
+        return ResponseEntity.internalServerError().body(exceptionResponse);
     }
 
     private ExceptionResponse createErrorResponse(final HttpStatus httpStatus, final String msg, final String uri) {

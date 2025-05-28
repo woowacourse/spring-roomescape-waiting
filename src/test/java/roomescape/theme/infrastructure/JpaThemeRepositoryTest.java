@@ -8,13 +8,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Name;
 import roomescape.member.domain.Password;
 import roomescape.member.infrastructure.JpaMemberRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.infrastructure.JpaReservationRepository;
 import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.reservation.time.infrastructure.JpaReservationTimeRepository;
@@ -44,15 +45,15 @@ class JpaThemeRepositoryTest {
             new Member(new Name("율무"), new Email("test@email.com"), new Password("password"))
         );
         LocalDate now = LocalDate.now();
-        jpaReservationRepository.save(new Reservation(now.minusDays(1), time, theme, member, ReservationStatus.RESERVED));
-        jpaReservationRepository.save(new Reservation(now.minusDays(2), time, theme, member, ReservationStatus.RESERVED));
-        jpaReservationRepository.save(new Reservation(now.minusDays(8), time, theme, member, ReservationStatus.RESERVED));
+        jpaReservationRepository.save(new Reservation(now.minusDays(1), time, theme, member));
+        jpaReservationRepository.save(new Reservation(now.minusDays(2), time, theme, member));
+        jpaReservationRepository.save(new Reservation(now.minusDays(8), time, theme, member));
 
         LocalDate start = LocalDate.now().minusDays(4);
         LocalDate end = LocalDate.now();
-        int limit = 1;
+        Pageable pageable = PageRequest.of(0, 1);
 
-        List<Theme> popularThemes = jpaThemeRepository.findPopularThemes(start, end, limit);
+        List<Theme> popularThemes = jpaThemeRepository.findPopularThemes(start, end, pageable);
 
         System.out.println(theme.getId());
         Assertions.assertThat(popularThemes).containsExactly(theme);
