@@ -2,9 +2,9 @@ package roomescape.reservation.service;
 
 import jakarta.transaction.Transactional;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.WaitingOrder;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.dto.MyReservationResponse;
 
@@ -20,20 +20,20 @@ public class MyReservationService {
 
     @Transactional
     public List<MyReservationResponse> findAllMyReservationByMember(final Long memberId) {
-        WaitingOrder waitingOrder = new WaitingOrder();
+        AtomicLong waitingOrder = new AtomicLong(WAITING_ORDER_START_VALUE);
 
         return reservationRepository.findAllByMemberId(memberId)
                 .stream()
-                .map(reservation -> generateMyReservation(reservation, waitingOrder))
+                .map(reservation -> generateMyReservationResponse(reservation, waitingOrder))
                 .toList();
     }
 
-    private MyReservationResponse generateMyReservation(
+    private MyReservationResponse generateMyReservationResponse(
             final Reservation reservation,
-            final WaitingOrder waitingOrder
+            final AtomicLong waitingOrder
     ) {
         if (reservation.isWaiting()) {
-            return MyReservationResponse.from(reservation, waitingOrder.issueNextWaitingOrder());
+            return MyReservationResponse.from(reservation, waitingOrder.incrementAndGet());
         }
         return MyReservationResponse.from(reservation, WAITING_ORDER_START_VALUE);
     }
