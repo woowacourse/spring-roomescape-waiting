@@ -82,7 +82,7 @@ class WaitingTest {
     @DisplayName("과거 대기 데이터인지 확인할 수 있다.")
     public class isPastWaiting {
 
-        @DisplayName("과거 대기 데이터인 경우 false 리턴")
+        @DisplayName("과거 대기 데이터인 경우 true 리턴")
         @Test
         void checkPastWaiting() {
             // given
@@ -98,7 +98,7 @@ class WaitingTest {
             assertThat(isPast).isTrue();
         }
 
-        @DisplayName("과거 대기 데이터가 아닌 경우 true 리턴")
+        @DisplayName("과거 대기 데이터가 아닌 경우 false 리턴")
         @Test
         void checkNotPastWaiting() {
             // given
