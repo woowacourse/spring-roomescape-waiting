@@ -250,7 +250,7 @@ class ThemeServiceTest {
             // when & then
             assertThatThrownBy(() -> themeService.deleteThemeById(theme.getId()))
                     .isInstanceOf(BadRequestException.class)
-                    .hasMessage("이미 예약이 존재하는 예약시간입니다.");
+                    .hasMessage("이미 예약 대기가 존재하는 테마입니다.");
         }
     }
 }
