@@ -2,7 +2,6 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.InvalidRequestException;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
@@ -30,13 +29,11 @@ public class ReservationChecker {
         this.memberRepository = memberRepository;
     }
 
-    @Transactional(readOnly = true)
     public Reservation createReservationWithoutId(UserReservationRequest dto, Member member) {
         ReservationRequest request = new ReservationRequest(dto.date(), dto.timeId(), dto.themeId(), member.getId());
         return createReservationWithoutId(request);
     }
 
-    @Transactional(readOnly = true)
     public Reservation createReservationWithoutId(ReservationRequest dto) {
         ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
@@ -52,7 +49,6 @@ public class ReservationChecker {
         return dto.createWithoutId(reservationTime, theme, member);
     }
 
-    @Transactional(readOnly = true)
     public Waiting createWaitingWithoutId(WaitingRequest dto, Member member) {
         ReservationTime reservationTime = reservationTimeRepository.findById(dto.timeId())
                 .orElseThrow(() -> new NotFoundException("[ERROR] 예약 시간을 찾을 수 없습니다. id : " + dto.timeId()));
