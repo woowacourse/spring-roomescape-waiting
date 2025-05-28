@@ -48,8 +48,18 @@ public class WaitingController {
         return ResponseEntity.created(URI.create("/waiting/" + waitingResponse.id())).body(waitingResponse);
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/mine/{id}")
     @Authority(Role.GENERAL)
+    public ResponseEntity<Void> deleteMineWaitingById(
+            @PathVariable("id") Long id,
+            @RequiredAccessToken AccessTokenContent token
+    ) {
+        waitingService.deleteMineWaitingById(token.id(), id);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/{id}")
+    @Authority(Role.ADMIN)
     public ResponseEntity<Void> deleteWaitingById(
             @PathVariable("id") Long id
     ) {

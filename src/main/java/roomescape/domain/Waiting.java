@@ -54,6 +54,10 @@ public class Waiting extends AuditedEntity {
         return dateTime.isBefore(LocalDateTime.now());
     }
 
+    public boolean isEqualMember(long memberId) {
+        return getMember().isEqualMemberId(memberId);
+    }
+
     public Long getId() {
         return id;
     }

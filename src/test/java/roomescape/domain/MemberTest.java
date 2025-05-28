@@ -39,7 +39,7 @@ class MemberTest {
         @Test
         void cannotCreateBecauseTooLongName() {
             // given
-            String tooLongName = "1" .repeat(256);
+            String tooLongName = "1".repeat(256);
 
             // when & then
             assertThatThrownBy(() -> new Member(1L, Role.GENERAL, tooLongName, "test@test.com", "qwer1234!"))
@@ -61,7 +61,7 @@ class MemberTest {
         @Test
         void cannotCreateBecauseTooLongEmail() {
             // given
-            String tooLongEmail = "1" .repeat(256);
+            String tooLongEmail = "1".repeat(256);
 
             // when & then
             assertThatThrownBy(() -> new Member(1L, Role.GENERAL, "이름", tooLongEmail, "비밀번호"))
@@ -95,7 +95,7 @@ class MemberTest {
         @Test
         void cannotCreateBecauseTooLongPassword() {
             // given
-            String tooLongPassword = "i" .repeat(51);
+            String tooLongPassword = "i".repeat(51);
             // when & then
             assertThatThrownBy(() -> new Member(1L, Role.GENERAL, "이름", "test@test.com", tooLongPassword))
                     .isInstanceOf(IllegalArgumentException.class)
@@ -172,6 +172,31 @@ class MemberTest {
 
             // then
             assertThat(isMember).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("회원의 ID를 확인할 수 있다.")
+    public class isEqualMemberId {
+
+        @DisplayName("회원의 ID가 같지 않은 경우 ")
+        @Test
+        void isEqualMember() {
+            // given
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@email.com", "qwer1234!");
+
+            // when & then
+            assertThat(member.isEqualMemberId(1L)).isTrue();
+        }
+
+        @DisplayName("sample")
+        @Test
+        void isNotEqualMember() {
+            // given
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@email.com", "qwer1234!");
+
+            // when & then
+            assertThat(member.isEqualMemberId(2L)).isFalse();
         }
     }
 }

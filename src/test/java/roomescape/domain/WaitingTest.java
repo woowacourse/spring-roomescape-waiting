@@ -114,4 +114,35 @@ class WaitingTest {
             assertThat(isPast).isFalse();
         }
     }
+
+    @Nested
+    @DisplayName("예약 대기의 회원을 확인할 수 있다.")
+    public class isEqualMember {
+
+        @DisplayName("예약 대기에 해당하는 회원의 경우 true 반환")
+        @Test
+        void isEqualMember() {
+            // given
+            Theme theme = new Theme(1L, "테마", "설명", "섬네일");
+            ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
+            Waiting waiting = new Waiting(1L, LocalDate.now(), theme, time, member);
+
+            // when & then
+            assertThat(waiting.isEqualMember(1L)).isTrue();
+        }
+
+        @DisplayName("예약 대기에 해당하는 회원의 경우 false 반환")
+        @Test
+        void isNotEqualMember() {
+            // given
+            Theme theme = new Theme(1L, "테마", "설명", "섬네일");
+            ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
+            Waiting waiting = new Waiting(1L, LocalDate.now(), theme, time, member);
+
+            // when & then
+            assertThat(waiting.isEqualMember(2L)).isFalse();
+        }
+    }
 }

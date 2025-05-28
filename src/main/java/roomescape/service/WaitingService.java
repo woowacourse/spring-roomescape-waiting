@@ -10,6 +10,7 @@ import roomescape.domain.Waiting;
 import roomescape.dto.business.WaitingCreationContent;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -64,6 +65,12 @@ public class WaitingService {
         waitingRepository.delete(waiting);
     }
 
+    public void deleteMineWaitingById(long memberId, long waitingId) {
+        Waiting waiting = getWaitingById(waitingId);
+        validateMineWaiting(memberId, waiting);
+        waitingRepository.delete(waiting);
+    }
+
     private Waiting getWaitingById(long waitingId) {
         return waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new NotFoundException("ID에 해당하는 대기가 존재하지 않습니다."));
@@ -104,6 +111,12 @@ public class WaitingService {
                 waiting.getTheme(), waiting.getDate(), waiting.getTime());
         if (!isExisted) {
             throw new BadRequestException("예약이 존재하지 않는 예약 대기는 허용하지 않습니다.");
+        }
+    }
+
+    private void validateMineWaiting(long memberId, Waiting waiting) {
+        if (!waiting.isEqualMember(memberId)) {
+            throw new ForbiddenException("다른 회원의 예약대기입니다.");
         }
     }
 }

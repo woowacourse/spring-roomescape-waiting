@@ -23,6 +23,7 @@ import roomescape.domain.Waiting;
 import roomescape.dto.business.WaitingCreationContent;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.exception.BadRequestException;
+import roomescape.exception.ForbiddenException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
@@ -277,6 +278,74 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.deleteWaitingById(100L))
                     .isInstanceOf(NotFoundException.class)
                     .hasMessage("ID에 해당하는 대기가 존재하지 않습니다.");
+        }
+    }
+
+    @Nested
+    @DisplayName("자신의 예약 대기를 삭제할 수 있다.")
+    public class deleteMineWaitingById {
+
+        @DisplayName("자신의 예약 대기를 삭제할 수 있다.")
+        @Test
+        void canDeleteMineWaiting() {
+            // given
+            ReservationTime time = entityManager.persist(
+                    ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
+            Reservation reservation = entityManager.persist(Reservation.createWithoutId(
+                    NEXT_DAY, time, theme, member));
+            Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
+
+            // when
+            waitingService.deleteMineWaitingById(member.getId(), waiting.getId());
+
+            // then
+            assertThat(entityManager.find(Waiting.class, waiting.getId())).isNull();
+
+        }
+
+        @DisplayName("존재하지 않는 예약을 삭제할 수 없다.")
+        @Test
+        void cannotDeleteEmptyWaiting() {
+            // given
+            ReservationTime time = entityManager.persist(
+                    ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "qwer1234!"));
+            Reservation reservation = entityManager.persist(Reservation.createWithoutId(
+                    NEXT_DAY, time, theme, member));
+
+            // when & then
+            assertThatThrownBy(() -> waitingService.deleteMineWaitingById(member.getId(), 100L))
+                    .isInstanceOf(NotFoundException.class)
+                    .hasMessage("ID에 해당하는 대기가 존재하지 않습니다.");
+        }
+
+        @DisplayName("자신의 것이 아닌 예약 대기를 삭제할 수 없다.")
+        @Test
+        void cannotDeleteOtherMemberWaiting() {
+            // given
+            ReservationTime time = entityManager.persist(
+                    ReservationTime.createWithoutId(LocalTime.of(10, 0)));
+            Theme theme = entityManager.persist(
+                    Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
+            Member otherMember = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원1", "member1@test.com", "qwer1234!"));
+            Member member = entityManager.persist(
+                    Member.createWithoutId(Role.GENERAL, "회원2", "member2@test.com", "qwer1234!"));
+            Reservation reservation = entityManager.persist(Reservation.createWithoutId(
+                    NEXT_DAY, time, theme, member));
+            Waiting waiting = entityManager.persist(Waiting.createWithoutId(NEXT_DAY, theme, time, member));
+
+            // when & then
+            assertThatThrownBy(() -> waitingService.deleteMineWaitingById(otherMember.getId(), waiting.getId()))
+                    .isInstanceOf(ForbiddenException.class)
+                    .hasMessage("다른 회원의 예약대기입니다.");
         }
     }
 }

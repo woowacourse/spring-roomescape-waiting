@@ -55,6 +55,10 @@ public class Member extends AuditedEntity {
         return this.role.equals(Role.GENERAL);
     }
 
+    public boolean isEqualMemberId(long memberId) {
+        return getId() == memberId;
+    }
+
     public Long getId() {
         return id;
     }
