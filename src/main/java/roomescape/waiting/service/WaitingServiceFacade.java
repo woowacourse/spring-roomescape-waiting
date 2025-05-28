@@ -44,14 +44,14 @@ public class WaitingServiceFacade {
         ReservationTime reservationTime = reservationTimeService.getReservationTimeByTimeId(waitingCreateRequest.timeId());
         Theme theme = themeService.getByThemeId(waitingCreateRequest.themeId());
         Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
-        Schedule schedule = scheduleService.getScheduleByDateAndTimeIdAndThemeId(waitingCreateRequest.date(), reservationTime.getId(), theme.getId());
+        Schedule schedule = scheduleService.getSchedule(waitingCreateRequest.date(), reservationTime.getId(), theme.getId());
         validateConflict(member, schedule);
         Waiting waiting = waitingService.createWaiting(waitingCreateRequest, schedule, member);
         return WaitingCreateResponse.from(waiting);
     }
 
     private void validateConflict(Member member, Schedule schedule) {
-        boolean isConflictReservation = reservationService.existsByMemberAndSchedule(member, schedule);
+        boolean isConflictReservation = reservationService.existsReservation(member, schedule);
         if (isConflictReservation) {
             throw new ConflictException("내 예약에 대기 요청 할 수 없습니다.");
         }
@@ -91,14 +91,14 @@ public class WaitingServiceFacade {
     }
 
     private List<ReservationTime> findAvailableTimes(ReservationCreateRequest request) {
-        return reservationTimeService.findByReservationDateAndThemeId(
+        return reservationTimeService.findByReservationTimes(
                 request.date(),
                 request.themeId()
         );
     }
 
     private void validateScheduleConflictInReservation(Schedule schedule) {
-        boolean existsSchedule = reservationService.existsBySchedule(schedule);
+        boolean existsSchedule = reservationService.existsReservation(schedule);
         if (existsSchedule) {
             throw new ConflictException("예약이 존재합니다.");
         }

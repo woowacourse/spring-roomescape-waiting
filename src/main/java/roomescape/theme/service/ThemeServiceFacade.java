@@ -32,6 +32,6 @@ public class ThemeServiceFacade {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findLimitedThemesByPopularDesc() {
-        return themeService.findLimitedThemesByPopularDesc();
+        return themeService.findPopularThemesByDesc();
     }
 }

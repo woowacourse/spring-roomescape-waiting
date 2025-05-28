@@ -42,6 +42,6 @@ public class ReservationTimeServiceFacade {
             LocalDate date,
             Long themeId
     ) {
-        return reservationTimeService.findAvailableReservationTimesByDateAndThemeId(date, themeId);
+        return reservationTimeService.findAvailableReservationTimes(date, themeId);
     }
 }

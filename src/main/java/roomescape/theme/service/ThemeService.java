@@ -38,7 +38,7 @@ public class ThemeService {
 
 
     @Transactional(readOnly = true)
-    public List<ThemeResponse> findLimitedThemesByPopularDesc() {
+    public List<ThemeResponse> findPopularThemesByDesc() {
         LocalDate fromDate = LocalDate.now().minusDays(7);
         LocalDate toDate = LocalDate.now().minusDays(1);
         List<Theme> themes = themeRepository.findTopByReservationCountDesc(fromDate, toDate, 10L);

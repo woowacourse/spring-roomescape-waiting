@@ -42,7 +42,7 @@ public class AdminReservationFacade {
 
         Schedule savedSchedule = scheduleService.createSchedule(adminReservationCreateRequest.date(), reservationTime, theme);
 
-        List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
+        List<ReservationTime> availableTimes = reservationTimeService.findByReservationTimes(
                 adminReservationCreateRequest.date(),
                 adminReservationCreateRequest.themeId()
         );

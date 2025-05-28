@@ -78,18 +78,18 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservationById(Long id) {
-        reservationRepository.deleteById(id);
+    public void deleteReservation(Long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 
     @Transactional(readOnly = true)
-    public boolean existsByScheduleTimeId(Long id) {
-        return reservationRepository.existsByScheduleTimeId(id);
+    public boolean existsReservation(Long timeId) {
+        return reservationRepository.existsByScheduleTimeId(timeId);
     }
 
     @Transactional(readOnly = true)
     public void validateReservationNonExistenceByTimeId(Long reservationTimeId) {
-        if (existsByScheduleTimeId(reservationTimeId)) {
+        if (existsReservation(reservationTimeId)) {
             throw new ConflictException("해당 예약 시간을 사용하는 예약이 존재합니다.");
         }
     }
@@ -102,12 +102,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
+    public boolean existsReservation(Member member, Schedule schedule) {
         return reservationRepository.existsByMemberAndSchedule(member, schedule);
     }
 
     @Transactional(readOnly = true)
-    public boolean existsBySchedule(Schedule schedule) {
+    public boolean existsReservation(Schedule schedule) {
         return reservationRepository.existsBySchedule(schedule);
     }
 

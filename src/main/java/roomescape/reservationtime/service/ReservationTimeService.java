@@ -42,7 +42,7 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTimeResponseWithBookedStatus> findAvailableReservationTimesByDateAndThemeId(
+    public List<ReservationTimeResponseWithBookedStatus> findAvailableReservationTimes(
             LocalDate date,
             Long themeId
     ) {
@@ -68,7 +68,7 @@ public class ReservationTimeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationTime> findByReservationDateAndThemeId(LocalDate date, Long themeId) {
-        return reservationTimeRepository.findByReservationDateAndThemeId(date, themeId);
+    public List<ReservationTime> findByReservationTimes(LocalDate reservationDate, Long themeId) {
+        return reservationTimeRepository.findByReservationDateAndThemeId(reservationDate, themeId);
     }
 }

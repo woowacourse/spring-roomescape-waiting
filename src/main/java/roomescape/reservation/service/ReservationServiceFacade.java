@@ -51,9 +51,9 @@ public class ReservationServiceFacade {
 
         Schedule savedSchedule;
 
-        boolean isExists = scheduleService.existsByDateAndTimeIdAndThemeId(reservationCreateRequest.date(), reservationTime.getId(), theme.getId());
+        boolean isExists = scheduleService.existsSchedule(reservationCreateRequest.date(), reservationTime.getId(), theme.getId());
         if (isExists) {
-            savedSchedule = scheduleService.getScheduleByDateAndTimeIdAndThemeId(reservationCreateRequest.date(), reservationTime.getId(), theme.getId());
+            savedSchedule = scheduleService.getSchedule(reservationCreateRequest.date(), reservationTime.getId(), theme.getId());
             boolean existsWaiting = waitingService.existsBySchedule(savedSchedule);
             if (existsWaiting) {
                 return createWaiting(reservationCreateRequest, member, savedSchedule);
@@ -62,7 +62,7 @@ public class ReservationServiceFacade {
             savedSchedule = scheduleService.createSchedule(reservationCreateRequest.date(), reservationTime, theme);
         }
 
-        List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
+        List<ReservationTime> availableTimes = reservationTimeService.findByReservationTimes(
                 reservationCreateRequest.date(),
                 reservationCreateRequest.themeId()
         );
@@ -82,7 +82,7 @@ public class ReservationServiceFacade {
     }
 
     private void validateConflict(Member member, Schedule savedSchedule) {
-        boolean isConflictReservation = reservationService.existsByMemberAndSchedule(member, savedSchedule);
+        boolean isConflictReservation = reservationService.existsReservation(member, savedSchedule);
         if (isConflictReservation) {
             throw new ConflictException("내 예약에 대기 요청 할 수 없습니다.");
         }
@@ -100,7 +100,7 @@ public class ReservationServiceFacade {
 
     @Transactional
     public void deleteReservationById(Long id) {
-        reservationService.deleteReservationById(id);
+        reservationService.deleteReservation(id);
     }
 
     @Transactional(readOnly = true)
