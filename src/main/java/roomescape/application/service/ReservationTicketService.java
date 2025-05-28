@@ -91,12 +91,13 @@ public class ReservationTicketService {
         Waiting nextWaiting = optionalNextWaiting.get();
 
         promoteToReservation(nextWaiting);
-        waitingRepository.delete(nextWaiting);
     }
 
     private void promoteToReservation(Waiting nextWaiting) {
         ReservationTicket convertedReservationTicket = convertToReservation(nextWaiting);
         reservationTicketRepository.save(convertedReservationTicket);
+
+        waitingRepository.delete(nextWaiting);
     }
 
     public List<MemberReservationResponseDto> getReservationsOfMember(LoginMember loginMember) {
