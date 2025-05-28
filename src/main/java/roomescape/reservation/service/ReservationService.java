@@ -100,9 +100,7 @@ public class ReservationService {
         reservationRepository.findReservationsBySlotAndStatus(slot, ReservationStatus.WAITING)
                 .stream()
                 .findFirst()
-                .ifPresent(waitingReservation -> {
-                    waitingReservation.confirmReservation();
-                });
+                .ifPresent(Reservation::confirmReservation);
     }
 
     public List<AvailableReservationTime> findAvailableReservationTimes(final LocalDate date, final Long themeId) {
