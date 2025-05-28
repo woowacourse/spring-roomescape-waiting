@@ -44,7 +44,7 @@ public class AuthController {
     @RequireRole(MemberRole.REGULAR)
     @GetMapping("/login/check")
     public ResponseEntity<CheckLoginResponse> checkLogin(final MemberInfo memberInfo) {
-        return ResponseEntity.ok(CheckLoginResponse.from(memberDataService.getMember(memberInfo.id())));
+        return ResponseEntity.ok(CheckLoginResponse.from(memberDataService.getById(memberInfo.id())));
     }
 
     @RequireRole(MemberRole.REGULAR)

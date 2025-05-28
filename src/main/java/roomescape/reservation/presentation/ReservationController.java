@@ -15,10 +15,10 @@ import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.presentation.dto.response.WaitingResponse;
-import roomescape.reservationslot.presentation.dto.request.ReservationSlotCreateRequest;
+import roomescape.reservationslot.presentation.dto.request.ConfirmedReservationCreateRequest;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 import roomescape.reservation.application.ReservationApplicationService;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
+import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
 
 @RestController
 public class ReservationController {
@@ -29,54 +29,54 @@ public class ReservationController {
         this.reservationApplicationService = reservationApplicationService;
     }
 
+    @RequireRole(MemberRole.REGULAR)
+    @PostMapping("/waiting-reservations")
+    public ResponseEntity<ReservationResponse> createWaitingReservation(
+            @RequestBody ConfirmedReservationCreateRequest request,
+            MemberInfo memberInfo
+    ) {
+        ReservationResponse reservationResponse = reservationApplicationService.createWaitingReservation(
+                request.date(), request.timeId(), request.themeId(), memberInfo.id());
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
+    }
+
     @GetMapping("/reservations")
-    public ResponseEntity<List<TotalReservationResponse>> findReservations(
+    public ResponseEntity<List<ConfirmedReservationResponse>> findByCriteria(
             @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        List<TotalReservationResponse> reservations = reservationApplicationService.findReservations(themeId,
+        List<ConfirmedReservationResponse> reservations = reservationApplicationService.findByCriteria(themeId,
                 memberId, dateFrom, dateTo);
         return ResponseEntity.ok(reservations);
     }
 
     @RequireRole(MemberRole.ADMIN)
-    @DeleteMapping("/reservations/{reservationId}")
-    public ResponseEntity<Void> deleteReservation(
-            @PathVariable("reservationId") Long reservationId
+    @GetMapping("/admin/waiting-reservations")
+    public ResponseEntity<List<WaitingResponse>> findWaitingReservations(
     ) {
-        reservationApplicationService.delete(reservationId);
-        return ResponseEntity.noContent().build();
+        List<WaitingResponse> responses = reservationApplicationService.findWaitingReservations();
+        return ResponseEntity.ok(responses);
     }
 
-    @RequireRole(MemberRole.REGULAR)
-    @PostMapping("/waiting-reservations")
-    public ResponseEntity<ReservationResponse> addWaitingReservations(
-            @RequestBody ReservationSlotCreateRequest request,
-            MemberInfo memberInfo
+    @RequireRole(MemberRole.ADMIN)
+    @DeleteMapping("/reservations/{reservationId}")
+    public ResponseEntity<Void> removeConfirmedReservation(
+            @PathVariable("reservationId") Long reservationId
     ) {
-        ReservationResponse reservationResponse = reservationApplicationService.addWaitingReservation(
-                request.date(), request.timeId(), request.themeId(), memberInfo.id());
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
+        reservationApplicationService.removeById(reservationId);
+        return ResponseEntity.noContent().build();
     }
 
     @RequireRole(MemberRole.REGULAR)
     @DeleteMapping("/waiting-reservations/{reservationSlotId}")
-    public ResponseEntity<Void> deleteWaitingReservations(
+    public ResponseEntity<Void> removeWaitingReservation(
             @PathVariable Long reservationSlotId,
             MemberInfo memberInfo
     ) {
-        reservationApplicationService.removeWaiting(reservationSlotId, memberInfo.id());
+        reservationApplicationService.removeWaitingReservation(reservationSlotId, memberInfo.id());
         return ResponseEntity.noContent().build();
-    }
-
-    @RequireRole(MemberRole.ADMIN)
-    @GetMapping("/admin/waiting-reservations")
-    public ResponseEntity<List<WaitingResponse>> findAllWaitingReservations(
-    ) {
-        List<WaitingResponse> responses = reservationApplicationService.findAllWaitingReservations();
-        return ResponseEntity.ok(responses);
     }
 
     @RequireRole(MemberRole.ADMIN)
@@ -84,7 +84,7 @@ public class ReservationController {
     public ResponseEntity<Void> removeWaitingReservation(
             @PathVariable Long waitingId
     ) {
-        reservationApplicationService.removeWaitingReservation(waitingId);
+        reservationApplicationService.removeWaitingReservationWithoutMemberId(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

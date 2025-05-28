@@ -5,12 +5,12 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import java.time.LocalDate;
 import org.junit.jupiter.api.Test;
 
-class ReservationSlotCreateRequestTest {
+class ConfirmedReservationCreateRequestTest {
 
     @Test
     void create_shouldThrowException_whenDateNull() {
         assertThatThrownBy(
-                () -> new ReservationSlotCreateRequest(
+                () -> new ConfirmedReservationCreateRequest(
                         null,
                         1L,
                         1L
@@ -21,7 +21,7 @@ class ReservationSlotCreateRequestTest {
     @Test
     void create_shouldThrowException_whenTimeIdNull() {
         assertThatThrownBy(
-                () -> new ReservationSlotCreateRequest(
+                () -> new ConfirmedReservationCreateRequest(
                         LocalDate.parse("2025-12-25"),
                         null,
                         1L
@@ -32,7 +32,7 @@ class ReservationSlotCreateRequestTest {
     @Test
     void create_shouldThrowException_whenThemeIdNull() {
         assertThatThrownBy(
-                () -> new ReservationSlotCreateRequest(
+                () -> new ConfirmedReservationCreateRequest(
                         LocalDate.parse("2025-12-25"),
                         1L,
                         null
@@ -43,7 +43,7 @@ class ReservationSlotCreateRequestTest {
     @Test
     void create_shouldThrowException_whenDateformatIllegal() {
         assertThatThrownBy(
-                () -> new ReservationSlotCreateRequest(
+                () -> new ConfirmedReservationCreateRequest(
                         LocalDate.parse("2025-12"),
                         1L,
                         1L

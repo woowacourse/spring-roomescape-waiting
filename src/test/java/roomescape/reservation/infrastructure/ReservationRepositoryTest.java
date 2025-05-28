@@ -51,7 +51,7 @@ class ReservationRepositoryTest {
     @BeforeEach
     public void setup() {
         member = memberRepository.save(TestFixture.makeMember());
-        reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
+        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
 
         ReservationSlot reservationSlot = new ReservationSlot(FUTURE_DATE, reservationTime, theme);
@@ -73,12 +73,13 @@ class ReservationRepositoryTest {
 
     @Test
     void findByThemeIdAndDateBetweenAndReservationMemberId() {
-        Theme theme2 = themeRepository.save(Theme.of("논리", "셜록 논리 게임 with Vector", "image.png"));
+        Theme theme2 = themeRepository.save(new Theme("논리", "셜록 논리 게임 with Vector", "image.png"));
 
-        ReservationTime reservationTime2 = ReservationTime.withUnassignedId(LocalTime.of(11, 0));
+        ReservationTime reservationTime2 = new ReservationTime(LocalTime.of(11, 0));
         reservationTime2 = reservationTimeRepository.save(reservationTime2);
 
-        ReservationSlot reservationSlot2 = TestFixture.makeReservation(FUTURE_DATE, reservationTime2, member, theme2);
+        ReservationSlot reservationSlot2 = TestFixture.makeConfirmedReservation(FUTURE_DATE, reservationTime2, member,
+                theme2);
         reservationSlotRepository.save(reservationSlot2);
 
         List<Reservation> filteredReservations = reservationRepository.findByThemeIdAndDateBetweenAndReservationMemberId(

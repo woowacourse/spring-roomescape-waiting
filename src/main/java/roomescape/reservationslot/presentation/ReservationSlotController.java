@@ -11,11 +11,11 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
+import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.presentation.dto.request.AdminReservationSlotCreateRequest;
-import roomescape.reservationslot.presentation.dto.request.ReservationSlotCreateRequest;
-import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
+import roomescape.reservationslot.presentation.dto.request.ConfirmedReservationCreateRequest;
+import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 
 @RestController
 public class ReservationSlotController {
@@ -28,29 +28,29 @@ public class ReservationSlotController {
 
     @RequireRole(MemberRole.REGULAR)
     @PostMapping("/reservations")
-    public ResponseEntity<TotalReservationResponse> createConfirmedReservation(
-            @RequestBody ReservationSlotCreateRequest request,
+    public ResponseEntity<ConfirmedReservationResponse> createConfirmedReservation(
+            @RequestBody ConfirmedReservationCreateRequest request,
             MemberInfo memberInfo
     ) {
-        TotalReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(request.date(),
-                request.timeId(), request.themeId(), memberInfo.id(), LocalDateTime.now());
+        ConfirmedReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(
+                request.date(), request.timeId(), request.themeId(), memberInfo.id(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @RequireRole(MemberRole.ADMIN)
     @PostMapping("/admin/reservations")
-    public ResponseEntity<TotalReservationResponse> createConfirmedReservation(
+    public ResponseEntity<ConfirmedReservationResponse> createConfirmedReservation(
             @RequestBody AdminReservationSlotCreateRequest request
     ) {
-        TotalReservationResponse dto = reservationSlotApplicationService.createConfirmedReservation(request.date(),
+        ConfirmedReservationResponse dto = reservationSlotApplicationService.createConfirmedReservation(request.date(),
                 request.timeId(), request.themeId(), request.memberId(), LocalDateTime.now());
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
     @RequireRole(MemberRole.REGULAR)
     @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationSlotResponse>> findMyReservations(MemberInfo memberInfo) {
-        List<MyReservationSlotResponse> myReservations = reservationSlotApplicationService.findMyReservations(
+    public ResponseEntity<List<MyReservationResponse>> findMyReservations(MemberInfo memberInfo) {
+        List<MyReservationResponse> myReservations = reservationSlotApplicationService.findMyReservations(
                 memberInfo);
         return ResponseEntity.ok().body(myReservations);
     }

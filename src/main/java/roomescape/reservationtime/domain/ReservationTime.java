@@ -21,28 +21,11 @@ public class ReservationTime {
     @Column(name = "start_at", nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
-        this.id = id;
+    public ReservationTime(final LocalTime startAt) {
         this.startAt = startAt;
     }
 
     protected ReservationTime() {
-    }
-
-    private ReservationTime(final LocalTime startAt) {
-        this.startAt = startAt;
-    }
-
-    public static ReservationTime withUnassignedId(final LocalTime startAt) {
-        return new ReservationTime(startAt);
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
     }
 
     @Override
@@ -56,5 +39,13 @@ public class ReservationTime {
     @Override
     public int hashCode() {
         return Objects.hashCode(getId());
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalTime getStartAt() {
+        return startAt;
     }
 }

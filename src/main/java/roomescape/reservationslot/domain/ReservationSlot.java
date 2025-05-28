@@ -79,7 +79,7 @@ public class ReservationSlot {
     }
 
     public long findRank(final Reservation reservation) {
-        validateReservationExist(reservation);
+        validateReservationExists(reservation);
         List<Reservation> sortedReservations = new ArrayList<>(reservations)
                 .stream()
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
@@ -103,12 +103,12 @@ public class ReservationSlot {
         boolean memberExists = reservations.stream()
                 .anyMatch(reservation -> reservation.getMember().getId().equals(member.getId()));
         if (memberExists) {
-            throw new ReservationAlreadyExistsException("이미 예약 대기중입니다.");
+            throw new ReservationAlreadyExistsException("이미 예약 중입니다.");
         }
     }
 
-    private void validateReservationExist(final Reservation givenReservation) {
-        if (!reservations.contains(givenReservation)) {
+    private void validateReservationExists(final Reservation reservation) {
+        if (!reservations.contains(reservation)) {
             throw new ReservationNotFoundException("해당 예약을 찾을 수 없습니다.");
         }
     }

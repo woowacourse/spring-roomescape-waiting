@@ -13,6 +13,10 @@ import roomescape.theme.exception.InvalidThemeException;
 @Table(name = "themes")
 public class Theme {
 
+    private static final int MAX_NAME_LENGTH = 10;
+    private static final int MAX_DESCRIPTION_LENGTH = 100;
+    private static final int MAX_THUMBNAIL_LENGTH = 100;
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "theme_id")
@@ -39,31 +43,20 @@ public class Theme {
     protected Theme() {
     }
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
-        this.id = id;
-        this.name = name;
-        this.description = description;
-        this.thumbnail = thumbnail;
-    }
-
-    public static Theme of(final String name, final String description, final String thumbnail) {
-        return new Theme(name, description, thumbnail);
-    }
-
     private void validateNameLength(final String value) {
-        if (value.length() > 10) {
+        if (value.length() > MAX_NAME_LENGTH) {
             throw new InvalidThemeException("이름은 10글자 이내여야 합니다.");
         }
     }
 
     private void validateDescriptionLength(final String value) {
-        if (value.length() > 100) {
+        if (value.length() > MAX_DESCRIPTION_LENGTH) {
             throw new InvalidThemeException("설명은 100글자 이내여야 합니다.");
         }
     }
 
     private void validateThumbnailLength(final String value) {
-        if (value.length() > 100) {
+        if (value.length() > MAX_THUMBNAIL_LENGTH) {
             throw new InvalidThemeException("썸네일은 100글자 이내여야 합니다.");
         }
     }

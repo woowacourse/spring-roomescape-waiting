@@ -12,14 +12,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.member.infrastructure.MemberRepository;
-import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
-import roomescape.member.domain.Member;
 import roomescape.member.application.MemberDataService;
+import roomescape.member.domain.Member;
+import roomescape.member.infrastructure.MemberRepository;
+import roomescape.reservation.application.ReservationDataService;
+import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
+import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.exception.ReservationTimeAlreadyExistsException;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
@@ -27,16 +28,15 @@ import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
-import roomescape.theme.domain.Theme;
 import roomescape.theme.application.ThemeDataService;
-import roomescape.reservation.application.ReservationDataService;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
 @DataJpaTest
 @Import(TestConfig.class)
 class ReservationTimeApplicationServiceTest {
 
-    private static final LocalDate futureDate = TestFixture.makeFutureDate();
+    private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
 
     private Theme theme = TestFixture.makeTheme();
@@ -62,12 +62,12 @@ class ReservationTimeApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(reservationSlotRepository);
+        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(
+                reservationSlotRepository);
         ReservationTimeDataService reservationTimeDataService = new ReservationTimeDataService(
                 reservationTimeRepository, reservationSlotDataService);
-        reservationTimeApplicationService = new ReservationTimeApplicationService(reservationTimeDataService,
-                reservationSlotDataService);
-        ThemeDataService themeDataService = new ThemeDataService(themeRepository, reservationSlotRepository);
+        reservationTimeApplicationService = new ReservationTimeApplicationService(reservationTimeDataService);
+        ThemeDataService themeDataService = new ThemeDataService(themeRepository);
         MemberDataService memberDataService = new MemberDataService(memberRepository);
         theme = themeRepository.save(theme);
         member = memberRepository.save(member);
@@ -103,43 +103,45 @@ class ReservationTimeApplicationServiceTest {
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
 
-        List<ReservationTimeResponse> result = reservationTimeApplicationService.getReservationTimes();
+        List<ReservationTimeResponse> result = reservationTimeApplicationService.findAll();
 
         assertThat(result).hasSize(2);
     }
 
     @Test
-    void deleteReservationTime_shouldRemoveSuccessfully() {
+    void removeByIdReservationTime_shouldRemoveSuccessfully() {
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(13, 30));
         ReservationTimeResponse response = reservationTimeApplicationService.create(request);
 
-        reservationTimeApplicationService.delete(response.id());
+        reservationTimeApplicationService.removeById(response.id());
 
-        List<ReservationTimeResponse> result = reservationTimeApplicationService.getReservationTimes();
+        List<ReservationTimeResponse> result = reservationTimeApplicationService.findAll();
         assertThat(result).isEmpty();
     }
 
     @Test
-    void deleteReservationTime_shouldThrowException_WhenReservationExists() {
+    void removeByIdReservationTime_shouldThrowException_WhenReservationExists() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.now()));
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(),
+                theme.getId(), member.getId(),
                 afterOneHour);
-        assertThatThrownBy(() -> reservationTimeApplicationService.delete(reservationTimeResponse.id()))
+        assertThatThrownBy(() -> reservationTimeApplicationService.removeById(reservationTimeResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
                 .hasMessageContaining("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     @Test
-    void getAvailableReservationTimes_shouldReturnAllAvailableReservationTimes() {
+    void findAvailableReservationTimes_shouldReturnAllAvailable() {
         ReservationTimeResponse reservationTimeResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateRequest(LocalTime.of(12, 0)));
 
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(), theme.getId(), member.getId(),
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, reservationTimeResponse.id(),
+                theme.getId(), member.getId(),
                 afterOneHour);
-        List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeApplicationService.getAvailableReservationTimes(
+        List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(
                 futureDate, theme.getId());
 
         assertThat(

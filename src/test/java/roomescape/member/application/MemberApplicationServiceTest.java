@@ -49,7 +49,7 @@ public class MemberApplicationServiceTest {
         memberApplicationService.signup(new SignupRequest("member1@gmail.com", "password", "member1"));
         memberApplicationService.signup(new SignupRequest("member2@gmail.com", "password", "member2"));
         memberApplicationService.signup(new SignupRequest("member3@gmail.com", "password", "member3"));
-        List<MemberResponse> memberResponses = memberApplicationService.findAllRegularMembers();
+        List<MemberResponse> memberResponses = memberApplicationService.findAllRegular();
         assertThat(memberResponses.size()).isEqualTo(3);
     }
 }

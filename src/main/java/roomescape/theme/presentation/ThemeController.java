@@ -29,27 +29,27 @@ public class ThemeController {
         this.themeApplicationService = themeApplicationService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<ThemeResponse>> getThemes() {
-        return ResponseEntity.ok(themeApplicationService.getThemes());
-    }
-
-    @GetMapping("/popular")
-    public ResponseEntity<List<ThemeResponse>> getPopularThemes() {
-        return ResponseEntity.ok(themeApplicationService.getPopularThemes(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
-    }
-
     @RequireRole(MemberRole.ADMIN)
     @PostMapping
-    public ResponseEntity<ThemeResponse> createTheme(
+    public ResponseEntity<ThemeResponse> create(
             @RequestBody ThemeCreateRequest request
     ) {
         return ResponseEntity.status(HttpStatus.CREATED).body(themeApplicationService.create(request));
     }
 
+    @GetMapping
+    public ResponseEntity<List<ThemeResponse>> findAll() {
+        return ResponseEntity.ok(themeApplicationService.findAll());
+    }
+
+    @GetMapping("/popular")
+    public ResponseEntity<List<ThemeResponse>> findPopular() {
+        return ResponseEntity.ok(themeApplicationService.findPopular(POPULAR_THEMES_DAYS, POPULAR_THEMES_LIMIT));
+    }
+
     @RequireRole(MemberRole.ADMIN)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(
+    public ResponseEntity<Void> delete(
             @PathVariable("id") Long id
     ) {
         themeApplicationService.delete(id);

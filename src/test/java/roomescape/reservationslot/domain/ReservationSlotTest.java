@@ -19,7 +19,7 @@ class ReservationSlotTest {
     @Test
     void createReservation_shouldThrowException_whenTimeIsBeforeNow() {
         LocalDate date = LocalDate.now().minusDays(1);
-        ReservationTime reservationTime = ReservationTime.withUnassignedId(LocalTime.now().minusHours(1));
+        ReservationTime reservationTime = new ReservationTime(LocalTime.now().minusHours(1));
         ReservationSlot reservationSlot = new ReservationSlot(date, reservationTime, theme);
         assertThatThrownBy(() -> reservationSlot.addReservation(makeMember(), NOW_DATETIME))
                 .isInstanceOf(InvalidReservationSlotException.class)

@@ -9,9 +9,9 @@ import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.ReservationDataService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
+import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
 import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
+import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.application.ThemeDataService;
@@ -38,25 +38,22 @@ public class ReservationSlotApplicationService {
         this.reservationDataService = slotReservationDataService;
     }
 
-    public void delete(Long id) {
-        reservationSlotDataService.delete(id);
-    }
-
-    public TotalReservationResponse createConfirmedReservation(final LocalDate date, final Long timeId,
-                                                               final Long themeId,
-                                                               final Long memberId, final LocalDateTime now) {
+    public ConfirmedReservationResponse createConfirmedReservation(final LocalDate date, final Long timeId,
+                                                                   final Long themeId, final Long memberId,
+                                                                   final LocalDateTime now) {
         reservationSlotDataService.validateReservationSlotDoesNotExists(date, timeId, themeId);
-        ReservationTime time = reservationTimeDataService.findReservationTime(timeId);
-        Theme theme = themeDataService.findTheme(themeId);
-        Member member = memberDataService.getMember(memberId);
+
+        ReservationTime time = reservationTimeDataService.getById(timeId);
+        Theme theme = themeDataService.getById(themeId);
+        Member member = memberDataService.getById(memberId);
         ReservationSlot reservationSlot = reservationSlotDataService.saveReservationSlotWithReservation(member, date,
-                time, theme,
-                now);
+                time, theme, now);
+
         Reservation reservation = reservationSlot.findConfirmedReservation();
-        return TotalReservationResponse.of(reservation, reservationSlot, time, theme, member);
+        return ConfirmedReservationResponse.of(reservation, reservationSlot);
     }
 
-    public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {
+    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
         return reservationDataService.findMyReservations(memberInfo);
     }
 }

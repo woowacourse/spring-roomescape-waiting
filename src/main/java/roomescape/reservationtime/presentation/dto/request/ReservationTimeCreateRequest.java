@@ -15,6 +15,6 @@ public record ReservationTimeCreateRequest(
     }
 
     public ReservationTime toReservationTime() {
-        return ReservationTime.withUnassignedId(startAt);
+        return new ReservationTime(startAt);
     }
 }

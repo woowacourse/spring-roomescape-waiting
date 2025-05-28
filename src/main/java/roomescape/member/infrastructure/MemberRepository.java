@@ -8,9 +8,9 @@ import roomescape.member.domain.MemberRole;
 
 public interface MemberRepository extends ListCrudRepository<Member, Long> {
 
-    List<Member> findByMemberRole(MemberRole memberRole);
-
     Optional<Member> findByEmail(String email);
+
+    List<Member> findByMemberRole(MemberRole memberRole);
 
     boolean existsByEmail(String email);
 }

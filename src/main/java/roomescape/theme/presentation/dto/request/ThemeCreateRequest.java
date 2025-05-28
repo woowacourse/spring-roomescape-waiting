@@ -20,6 +20,6 @@ public record ThemeCreateRequest(
     }
 
     public Theme toTheme() {
-        return Theme.of(name, description, thumbnail);
+        return new Theme(name, description, thumbnail);
     }
 }

@@ -16,7 +16,7 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.infrastructure.ReservationRepository;
-import roomescape.reservation.presentation.dto.response.TotalReservationResponse;
+import roomescape.reservation.presentation.dto.response.ConfirmedReservationResponse;
 import roomescape.reservationslot.application.ReservationSlotApplicationService;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
@@ -30,7 +30,7 @@ import roomescape.theme.infrastructure.ThemeRepository;
 @Import(TestConfig.class)
 class ReservationApplicationServiceTest {
 
-    private static final LocalDate futureDate = TestFixture.makeFutureDate();
+    private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
 
     private Long timeId;
@@ -62,7 +62,7 @@ class ReservationApplicationServiceTest {
                 reservationSlotRepository);
         MemberDataService memberDataService = new MemberDataService(memberRepository);
         ReservationDataService reservationDataService = new ReservationDataService(reservationRepository);
-        ThemeDataService themeDataService = new ThemeDataService(themeRepository, reservationSlotRepository);
+        ThemeDataService themeDataService = new ThemeDataService(themeRepository);
         ReservationTimeDataService reservationTimeDataService = new ReservationTimeDataService(
                 reservationTimeRepository, reservationSlotDataService);
         reservationApplicationService = new ReservationApplicationService(
@@ -73,7 +73,7 @@ class ReservationApplicationServiceTest {
                 reservationTimeDataService, themeDataService,
                 memberDataService, reservationDataService);
 
-        ReservationTime time2 = ReservationTime.withUnassignedId(LocalTime.of(9, 0));
+        ReservationTime time2 = new ReservationTime(LocalTime.of(9, 0));
         timeId = reservationTimeRepository.save(time2).getId();
         themeId = themeRepository.save(TestFixture.makeTheme()).getId();
         memberId = memberRepository.save(TestFixture.makeMember()).getId();
@@ -82,11 +82,14 @@ class ReservationApplicationServiceTest {
     @Test
     void findFilteredReservations_shouldReturnAllReservations() {
         // given
-        Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId, memberId, afterOneHour);
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId, afterOneHour);
+        Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId, memberId,
+                afterOneHour);
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId,
+                afterOneHour);
         // when
-        List<TotalReservationResponse> result = reservationApplicationService.findReservations(null, null, null, null);
+        List<ConfirmedReservationResponse> result = reservationApplicationService.findByCriteria(null, null, null,
+                null);
 
         // then
         assertThat(result).hasSize(2);
@@ -95,12 +98,15 @@ class ReservationApplicationServiceTest {
     @Test
     void findFilteredReservations_shouldReturnFilteredReservations() {
         // given
-        Long timeId2 = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0))).getId();
-        reservationSlotApplicationService.createConfirmedReservation(futureDate.minusDays(1), timeId, themeId, memberId, afterOneHour);
-        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId, afterOneHour);
+        Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
+        reservationSlotApplicationService.createConfirmedReservation(futureDate.minusDays(1), timeId, themeId, memberId,
+                afterOneHour);
+        reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId2, themeId, memberId,
+                afterOneHour);
 
         // when
-        List<TotalReservationResponse> result = reservationApplicationService.findReservations(null, null, futureDate,
+        List<ConfirmedReservationResponse> result = reservationApplicationService.findByCriteria(null, null,
+                futureDate,
                 null);
 
         // then
@@ -108,12 +114,13 @@ class ReservationApplicationServiceTest {
     }
 
     @Test
-    void deleteReservation_shouldRemoveSuccessfully() {
-        TotalReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(futureDate, timeId, themeId,
+    void removeByIdReservation_shouldRemoveSuccessfully() {
+        ConfirmedReservationResponse response = reservationSlotApplicationService.createConfirmedReservation(futureDate,
+                timeId, themeId,
                 memberId, afterOneHour);
-        reservationApplicationService.delete(response.id());
+        reservationApplicationService.removeById(response.id());
 
-        List<TotalReservationResponse> result = reservationApplicationService.findReservations(themeId, memberId,
+        List<ConfirmedReservationResponse> result = reservationApplicationService.findByCriteria(themeId, memberId,
                 futureDate, futureDate.plusDays(1));
         assertThat(result).isEmpty();
     }

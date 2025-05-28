@@ -2,33 +2,35 @@ package roomescape.theme.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.Assertions;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.common.config.TestConfig;
+import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.fixture.TestFixture;
+import roomescape.member.application.MemberApplicationService;
+import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.member.presentation.dto.request.SignupRequest;
 import roomescape.member.presentation.dto.response.SignUpResponse;
-import roomescape.member.application.MemberApplicationService;
-import roomescape.member.application.MemberDataService;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
+import roomescape.reservationtime.application.ReservationTimeApplicationService;
+import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeResponse;
-import roomescape.reservationtime.application.ReservationTimeApplicationService;
-import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.presentation.dto.request.ThemeCreateRequest;
@@ -38,6 +40,7 @@ import roomescape.theme.presentation.dto.response.ThemeResponse;
 @Import(TestConfig.class)
 class ThemeApplicationServiceTest {
 
+    private static final LocalDate FUTURE_DATE = LocalDate.now().plusDays(7);
     @Autowired
     private ThemeRepository themeRepository;
 
@@ -61,14 +64,17 @@ class ThemeApplicationServiceTest {
 
     @BeforeEach
     void setUp() {
-        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(reservationSlotRepository);
-        themeApplicationService = new ThemeApplicationService(new ThemeDataService(themeRepository,
-                reservationSlotRepository),
-                reservationSlotDataService);
+        ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(
+                reservationSlotRepository);
+        Clock clock = Clock.fixed(FUTURE_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(),
+                ZoneId.systemDefault());
+        themeApplicationService = new ThemeApplicationService(new ThemeDataService(themeRepository),
+                reservationSlotDataService, clock);
         MemberDataService memberDataService = new MemberDataService(memberRepository);
         memberApplicationService = new MemberApplicationService(memberDataService, myPasswordEncoder);
-        reservationTimeApplicationService = new ReservationTimeApplicationService(new ReservationTimeDataService(reservationTimeRepository,
-                reservationSlotDataService), reservationSlotDataService);
+        reservationTimeApplicationService = new ReservationTimeApplicationService(
+                new ReservationTimeDataService(reservationTimeRepository,
+                        reservationSlotDataService));
     }
 
     @Test
@@ -76,7 +82,7 @@ class ThemeApplicationServiceTest {
         ThemeResponse themeResponse = themeApplicationService.create(
                 new ThemeCreateRequest("논리", "논리 게임 with Vector", "image.png"));
         themeApplicationService.delete(themeResponse.id());
-        assertThat(themeApplicationService.getThemes().size()).isEqualTo(0);
+        assertThat(themeApplicationService.findAll().size()).isEqualTo(0);
     }
 
     @Test
@@ -89,7 +95,7 @@ class ThemeApplicationServiceTest {
     }
 
     @Test
-    void getPopularThemes() {
+    void findPopular() {
         String email = "regular2@gmail.com";
         String password = "password";
         String name = "regular2";
@@ -126,63 +132,74 @@ class ThemeApplicationServiceTest {
         ThemeResponse themeResponse12 = themeApplicationService.create(
                 new ThemeCreateRequest("음악", "멜로디 탐정: 잃어버린 노래", "lost_melody.png"));
 
-        ReservationTimeResponse reservationTime1 = reservationTimeApplicationService.create(
+        ReservationTimeResponse reservationTimeResponse1 = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 0)));
-        ReservationTimeResponse reservationTime2 = reservationTimeApplicationService.create(
+        ReservationTimeResponse reservationTimeResponse2 = reservationTimeApplicationService.create(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 0)));
 
-        LocalDate nowDate = LocalDate.now();
+        ReservationTime savedReservationTime = findReservationTime(reservationTimeResponse1);
+        ReservationTime savedReservationTime2 = findReservationTime(reservationTimeResponse2);
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(1), makeReservationTime(reservationTime1), member,
-                        makeTheme(themeResponse1)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(1), savedReservationTime,
+                        member,
+                        findTheme(themeResponse1)));
 
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(2), makeReservationTime(reservationTime1), member,
-                        makeTheme(themeResponse2)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(2), savedReservationTime,
+                        member,
+                        findTheme(themeResponse2)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(2), makeReservationTime(reservationTime2), member,
-                        makeTheme(themeResponse2)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(2), savedReservationTime2,
+                        member,
+                        findTheme(themeResponse2)));
 
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(3), makeReservationTime(reservationTime1), member,
-                        makeTheme(themeResponse4)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(3), savedReservationTime,
+                        member,
+                        findTheme(themeResponse4)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(3), makeReservationTime(reservationTime2), member,
-                        makeTheme(themeResponse5)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(3), savedReservationTime2,
+                        member,
+                        findTheme(themeResponse5)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(4), makeReservationTime(reservationTime1), member,
-                        makeTheme(themeResponse6)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(4), savedReservationTime,
+                        member,
+                        findTheme(themeResponse6)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(4), makeReservationTime(reservationTime2), member,
-                        makeTheme(themeResponse7)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(4), savedReservationTime2,
+                        member,
+                        findTheme(themeResponse7)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(5), makeReservationTime(reservationTime1), member,
-                        makeTheme(themeResponse8)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(5), savedReservationTime,
+                        member,
+                        findTheme(themeResponse8)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(5), makeReservationTime(reservationTime2), member,
-                        makeTheme(themeResponse9)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(5), savedReservationTime2,
+                        member,
+                        findTheme(themeResponse9)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(6), makeReservationTime(reservationTime1), member,
-                        makeTheme(themeResponse10)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(6), savedReservationTime,
+                        member,
+                        findTheme(themeResponse10)));
         reservationSlotRepository.save(
-                TestFixture.makeReservation(nowDate.minusDays(6), makeReservationTime(reservationTime2), member,
-                        makeTheme(themeResponse11)));
+                TestFixture.makeConfirmedReservation(FUTURE_DATE.minusDays(6), savedReservationTime2,
+                        member,
+                        findTheme(themeResponse11)));
 
-        List<ThemeResponse> themes = themeApplicationService.getPopularThemes(7, 10);
+        List<ThemeResponse> themes = themeApplicationService.findPopular(7, 10);
 
-        Assertions.assertAll(
-                () -> assertThat(themes.size()).isEqualTo(10),
-                () -> assertThat(themes).doesNotContain(themeResponse3, themeResponse12),
-                () -> assertThat(themes.getFirst()).isEqualTo(themeResponse2)
-        );
+        SoftAssertions.assertSoftly(softAssertions -> {
+            softAssertions.assertThat(themes.size()).isEqualTo(10);
+            softAssertions.assertThat(themes).doesNotContain(themeResponse3, themeResponse12);
+            softAssertions.assertThat(themes.getFirst()).isEqualTo(themeResponse2);
+        });
     }
 
-    private ReservationTime makeReservationTime(final ReservationTimeResponse reservationTimeResponse) {
-        return new ReservationTime(reservationTimeResponse.id(), reservationTimeResponse.startAt());
+    private ReservationTime findReservationTime(final ReservationTimeResponse reservationTimeResponse) {
+        return reservationTimeRepository.findById(reservationTimeResponse.id()).orElseThrow();
     }
 
-    private Theme makeTheme(final ThemeResponse themeResponse) {
-        return new Theme(themeResponse.id(), themeResponse.name(), themeResponse.description(),
-                themeResponse.thumbnail());
+    private Theme findTheme(final ThemeResponse themeResponse) {
+        return themeRepository.findById(themeResponse.id()).orElseThrow();
     }
 }

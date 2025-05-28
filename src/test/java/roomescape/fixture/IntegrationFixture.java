@@ -16,7 +16,7 @@ public class IntegrationFixture {
     public static final String REGULAR2_EMAIL = "alice@gmail.com";
     public static final String ADMIN_EMAIL = "admin@gmail.com";
     public static final String PASSWORD = "password";
-    public static final String FUTURE_DATE = TestFixture.makeFutureDate().toString();
+    public static final String FUTURE_DATE = TestFixture.makeAfterOneWeekDate().toString();
     public static final String TOKEN = "token";
 
     public static String loginAndGetAuthToken(final String email, final String password) {

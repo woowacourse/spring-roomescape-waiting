@@ -23,14 +23,14 @@ public class MemberController {
         this.memberApplicationService = memberApplicationService;
     }
 
-    @GetMapping
-    public ResponseEntity<List<MemberResponse>> findAllRegularMembers() {
-        return ResponseEntity.ok(memberApplicationService.findAllRegularMembers());
-    }
-
     @PostMapping
     public ResponseEntity<SignUpResponse> signUp(final @RequestBody SignupRequest signupRequest) {
         SignUpResponse response = memberApplicationService.signup(signupRequest);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @GetMapping
+    public ResponseEntity<List<MemberResponse>> findAllRegular() {
+        return ResponseEntity.ok(memberApplicationService.findAllRegular());
     }
 }

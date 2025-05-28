@@ -25,15 +25,19 @@ public class MemberApplicationService {
     public SignUpResponse signup(final SignupRequest signupRequest) {
         String encodedPassword = myPasswordEncoder.encode(signupRequest.password());
         Member member = new Member(signupRequest.name(), signupRequest.email(), encodedPassword, MemberRole.REGULAR);
-        if (memberDataService.existsByEmail(signupRequest.email())) {
-            throw new MemberDuplicatedException("이미 존재하는 회원입니다.");
-        }
-        return SignUpResponse.from(memberDataService.save(member));
+        validateMemberExists(signupRequest);
+        return SignUpResponse.from(memberDataService.create(member));
     }
 
-    public List<MemberResponse> findAllRegularMembers() {
+    public List<MemberResponse> findAllRegular() {
         return memberDataService.findByMemberRole(MemberRole.REGULAR).stream()
                 .map(member -> new MemberResponse(member.getId(), member.getName()))
                 .toList();
+    }
+
+    private void validateMemberExists(final SignupRequest signupRequest) {
+        if (memberDataService.existsByEmail(signupRequest.email())) {
+            throw new MemberDuplicatedException("이미 존재하는 회원입니다.");
+        }
     }
 }

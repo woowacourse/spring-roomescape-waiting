@@ -10,7 +10,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
-import roomescape.reservationslot.presentation.dto.response.MyReservationSlotResponse;
+import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 
 @Service
 public class ReservationDataService {
@@ -25,10 +25,10 @@ public class ReservationDataService {
         return reservationRepository.save(reservation);
     }
 
-    public List<MyReservationSlotResponse> findMyReservations(final MemberInfo memberInfo) {
+    public List<MyReservationResponse> findMyReservations(final MemberInfo memberInfo) {
         return reservationRepository.findByReservationMemberId(memberInfo.id())
                 .stream()
-                .map(MyReservationSlotResponse::from)
+                .map(MyReservationResponse::from)
                 .toList();
     }
 
@@ -49,8 +49,8 @@ public class ReservationDataService {
         return reservationRepository.findAllWaitingReservations();
     }
 
-    public List<Reservation> findFilteredReservations(final Long themeId, final Long memberId,
-                                                      final LocalDate startDate, final LocalDate endDate) {
+    public List<Reservation> findByCriteria(final Long themeId, final Long memberId,
+                                            final LocalDate startDate, final LocalDate endDate) {
         return reservationRepository.findByThemeIdAndDateBetweenAndReservationMemberId(themeId, startDate, endDate,
                 memberId);
     }

@@ -17,7 +17,6 @@ import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -46,9 +45,10 @@ class ReservationSlotRepositoryTest {
     @BeforeEach
     public void setup() {
         member = memberRepository.save(TestFixture.makeMember());
-        reservationTime = reservationTimeRepository.save(ReservationTime.withUnassignedId(LocalTime.of(10, 0)));
+        reservationTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         theme = themeRepository.save(TestFixture.makeTheme());
-        reservationSlotRepository.save(TestFixture.makeReservation(FUTURE_DATE, reservationTime, member, theme));
+        reservationSlotRepository.save(
+                TestFixture.makeConfirmedReservation(FUTURE_DATE, reservationTime, member, theme));
     }
 
     @Test
@@ -72,22 +72,6 @@ class ReservationSlotRepositoryTest {
                 theme.getId());
 
         assertThat(existsByDateAndTimeIdAndThemeId).isTrue();
-    }
-
-    @Test
-    void findAvailableTimesByDateAndThemeId() {
-        ReservationTime reservationTime2 = reservationTimeRepository.save(
-                ReservationTime.withUnassignedId(LocalTime.of(11, 0)));
-        ReservationTime reservationTime3 = reservationTimeRepository.save(
-                ReservationTime.withUnassignedId(LocalTime.of(12, 0)));
-
-        reservationSlotRepository.save(TestFixture.makeReservation(FUTURE_DATE, reservationTime2, member, theme));
-        reservationSlotRepository.save(TestFixture.makeReservation(FUTURE_DATE, reservationTime3, member, theme));
-
-        List<AvailableReservationTimeResponse> bookedTimesByDateAndThemeId = reservationSlotRepository.findBookedTimesByDateAndThemeId(
-                FUTURE_DATE, theme.getId());
-
-        assertThat(bookedTimesByDateAndThemeId.size()).isEqualTo(3);
     }
 
     @Test
