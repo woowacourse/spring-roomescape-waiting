@@ -20,7 +20,7 @@ public class ReservationSlotDataService {
         this.reservationSlotRepository = reservationSlotRepository;
     }
 
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         reservationSlotRepository.deleteById(id);
     }
 
@@ -52,7 +52,7 @@ public class ReservationSlotDataService {
         return reservationSlotRepository.existsByThemeId(themeId);
     }
 
-    public boolean hasOnlyOneReservation(final Long reservationSlotId) {
+    public boolean hasSingleReservation(final Long reservationSlotId) {
         return reservationSlotRepository.hasOnlyOneReservation(reservationSlotId);
     }
 }

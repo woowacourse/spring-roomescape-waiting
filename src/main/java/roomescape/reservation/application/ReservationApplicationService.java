@@ -63,7 +63,7 @@ public class ReservationApplicationService {
     public void removeWaitingReservation(final Long reservationSlotId, final Long memberId) {
         reservationDataService.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
         if (reservationDataService.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId)) {
-            reservationSlotDataService.delete(reservationSlotId);
+            reservationSlotDataService.deleteById(reservationSlotId);
         }
     }
 
@@ -75,7 +75,7 @@ public class ReservationApplicationService {
         Reservation reservation = reservationDataService.getById(reservationId);
         reservationDataService.deleteById(reservationId);
 
-        deleteReservationSlotIfExists(reservation);
+        deleteReservationSlotIfOnlyOneReservation(reservation);
     }
 
     private ConfirmedReservationResponse mapToConfirmedReservationResponse(final Reservation reservation) {
@@ -83,10 +83,10 @@ public class ReservationApplicationService {
         return ConfirmedReservationResponse.of(reservation, reservationSlot);
     }
 
-    private void deleteReservationSlotIfExists(final Reservation reservation) {
-        Long slotId = reservation.getReservationSlot().getId();
-        if (reservationSlotDataService.hasOnlyOneReservation(slotId)) {
-            reservationSlotDataService.delete(slotId);
+    private void deleteReservationSlotIfOnlyOneReservation(final Reservation reservation) {
+        Long reservationSlotId = reservation.getReservationSlot().getId();
+        if (reservationSlotDataService.hasSingleReservation(reservationSlotId)) {
+            reservationSlotDataService.deleteById(reservationSlotId);
         }
     }
 }
