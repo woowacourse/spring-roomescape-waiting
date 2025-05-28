@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.exception.BadRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
@@ -52,6 +53,6 @@ public class ThemeService {
 
     public Theme findByIdOrThrow(Long id) {
         return themeRepository.findById(id)
-            .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 테마입니다."));
+            .orElseThrow(() -> new BadRequestException("존재하지 않는 테마입니다."));
     }
 }
