@@ -6,6 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -47,81 +48,104 @@ class WaitingServiceTest {
         cleanUp.all();
     }
 
-    @Test
-    void 예약을_대기한다() {
-        Theme theme = themeDbFixture.공포();
-        Member waiter = memberDbFixture.유저1_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
+    @Nested
+    class WaitContext {
 
-        WaitingRequest request = new WaitingRequest(
-                reservationDateTime.reservationDate().date(),
-                reservationDateTime.reservationTime().getId(),
-                theme.getId()
-        );
-        roomescape.waiting.controller.response.WaitingResponse response = waitingService.wait(request, waiter.getId());
+        Theme theme;
+        Member waiter;
+        ReservationDateTime slot;
+        WaitingRequest request;
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(response.id()).isNotNull();
-            softly.assertThat(response.member()).isEqualTo(MemberResponse.from(waiter));
-            softly.assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
-            softly.assertThat(response.date()).isEqualTo(reservationDateTime.reservationDate().date());
-            softly.assertThat(response.time())
-                    .isEqualTo(ReservationTimeResponse.from(reservationDateTime.reservationTime()));
-        });
+        @BeforeEach
+        void init() {
+            theme = themeDbFixture.공포();
+            waiter = memberDbFixture.유저1_생성();
+            slot = reservationDateTimeDbFixture.내일_열시();
+
+            request = new WaitingRequest(
+                    slot.reservationDate().date(),
+                    slot.reservationTime().getId(),
+                    theme.getId()
+            );
+        }
+
+        @Test
+        void 예약을_대기한다() {
+            WaitingResponse response = waitingService.wait(request, waiter.getId());
+
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(response.id()).isNotNull();
+                softly.assertThat(response.member()).isEqualTo(MemberResponse.from(waiter));
+                softly.assertThat(response.theme()).isEqualTo(ThemeResponse.from(theme));
+                softly.assertThat(response.date()).isEqualTo(slot.reservationDate().date());
+                softly.assertThat(response.time())
+                        .isEqualTo(ReservationTimeResponse.from(slot.reservationTime()));
+            });
+        }
+
+        @Test
+        void 같은_유저가_대기를_중복해서_할_수_없다() {
+            waitingRepository.save(Waiting.wait(waiter, slot, theme, LocalDateTime.now()));
+
+            assertThatThrownBy(() -> waitingService.wait(request, waiter.getId()))
+                    .isInstanceOf(InvalidArgumentException.class)
+                    .hasMessage("이미 대기 중인 예약입니다.");
+        }
     }
 
-    @Test
-    void 대기중인_예약을_조회한다() {
-        Member waiter = memberDbFixture.유저1_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-        waitingRepository.save(Waiting.wait(
-                waiter, reservationDateTime, theme, LocalDateTime.now()));
+    @Nested
+    class QueryContext {
 
-        List<WaitingResponse> responses = waitingService.getWaitings();
+        Member waiter;
+        ReservationDateTime slot;
+        Theme theme;
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(responses).hasSize(1);
-            softly.assertThat(responses.getFirst().id()).isNotNull();
-            softly.assertThat(responses.getFirst().member()).isEqualTo(MemberResponse.from(waiter));
-            softly.assertThat(responses.getFirst().theme()).isEqualTo(ThemeResponse.from(theme));
-            softly.assertThat(responses.getFirst().date()).isEqualTo(reservationDateTime.reservationDate().date());
-            softly.assertThat(responses.getFirst().time())
-                    .isEqualTo(ReservationTimeResponse.from(reservationDateTime.reservationTime()));
-        });
+        @BeforeEach
+        void init() {
+            waiter = memberDbFixture.유저1_생성();
+            slot = reservationDateTimeDbFixture.내일_열시();
+            theme = themeDbFixture.공포();
+
+            waitingRepository.save(Waiting.wait(waiter, slot, theme, LocalDateTime.now()));
+        }
+
+        @Test
+        void 대기중인_예약을_조회한다() {
+            List<WaitingResponse> responses = waitingService.getWaitings();
+
+            SoftAssertions.assertSoftly(softly -> {
+                softly.assertThat(responses).hasSize(1);
+                softly.assertThat(responses.getFirst().id()).isNotNull();
+                softly.assertThat(responses.getFirst().member()).isEqualTo(MemberResponse.from(waiter));
+                softly.assertThat(responses.getFirst().theme()).isEqualTo(ThemeResponse.from(theme));
+                softly.assertThat(responses.getFirst().date()).isEqualTo(slot.reservationDate().date());
+                softly.assertThat(responses.getFirst().time())
+                        .isEqualTo(ReservationTimeResponse.from(slot.reservationTime()));
+            });
+        }
     }
 
-    @Test
-    void 같은_유저가_대기를_중복해서_할_수_없다() {
-        Member waiter = memberDbFixture.유저1_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-        Waiting waiting = Waiting.wait(waiter, reservationDateTime, theme, LocalDateTime.now());
-        waitingRepository.save(waiting);
+    @Nested
+    class CancelContext {
 
-        WaitingRequest request = new WaitingRequest(
-                reservationDateTime.reservationDate().date(),
-                reservationDateTime.reservationTime().getId(),
-                theme.getId()
-        );
+        Waiting savedWaiting;
 
-        assertThatThrownBy(() -> waitingService.wait(request, waiter.getId()))
-                .isInstanceOf(InvalidArgumentException.class)
-                .hasMessage("이미 대기 중인 예약입니다.");
-    }
+        @BeforeEach
+        void init() {
+            Member waiter = memberDbFixture.유저1_생성();
+            ReservationDateTime slot = reservationDateTimeDbFixture.내일_열시();
+            Theme theme = themeDbFixture.공포();
+            savedWaiting = waitingRepository.save(
+                    Waiting.wait(waiter, slot, theme, LocalDateTime.now()));
+        }
 
-    @Test
-    void 사용자가_예약_대기를_취소한다() {
-        Member waiter = memberDbFixture.유저1_생성();
-        ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
-        Theme theme = themeDbFixture.공포();
-        Waiting waiting = Waiting.wait(waiter, reservationDateTime, theme, LocalDateTime.now());
-        Waiting savedWaiting = waitingRepository.save(waiting);
+        @Test
+        void 사용자가_예약_대기를_취소한다() {
+            waitingService.cancel(savedWaiting.getId());
 
-        waitingService.cancel(savedWaiting.getId());
-
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(waitingRepository.existsById(savedWaiting.getId())).isFalse();
-        });
+            SoftAssertions.assertSoftly(softly ->
+                    softly.assertThat(waitingRepository.existsById(savedWaiting.getId())).isFalse()
+            );
+        }
     }
 }
