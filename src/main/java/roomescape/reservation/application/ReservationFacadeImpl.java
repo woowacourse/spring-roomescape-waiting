@@ -2,23 +2,24 @@ package roomescape.reservation.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.auth.aop.ForbiddenException;
 import roomescape.auth.session.UserSession;
-import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
+import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationId;
-import roomescape.reservation.ui.ReservationSearchWebRequest;
-import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
-import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.ui.dto.ReservationResponse;
-import roomescape.theme.domain.ThemeId;
+import roomescape.theme.application.service.ThemeQueryService;
+import roomescape.theme.domain.Theme;
+import roomescape.timeslot.application.service.ReservationTimeQueryService;
+import roomescape.timeslot.domain.TimeSlot;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserId;
 
-import java.time.LocalDate;
 import java.util.List;
 
 @Service
@@ -28,6 +29,8 @@ public class ReservationFacadeImpl implements ReservationFacade {
     private final ReservationQueryService reservationQueryService;
     private final ReservationCommandService reservationCommandService;
     private final UserQueryService userQueryService;
+    private final ReservationTimeQueryService reservationTimeQueryService;
+    private final ThemeQueryService themeQueryService;
 
     @Override
     public List<ReservationResponse> getAll() {
@@ -41,47 +44,40 @@ public class ReservationFacadeImpl implements ReservationFacade {
     }
 
     @Override
-    public List<AvailableReservationTimeWebResponse> getAvailable(final LocalDate date, final Long themeId) {
-        final AvailableReservationTimeServiceRequest request = new AvailableReservationTimeServiceRequest(
-                ReservationDate.from(date),
-                ThemeId.from(themeId));
-
-        return reservationQueryService.getTimesWithBookedStatus(request).stream()
-                .map(AvailableReservationTimeWebResponse::from)
-                .toList();
-    }
-
-    @Override
-    public List<ReservationResponse> getByParams(final ReservationSearchWebRequest request) {
-        final List<Reservation> reservations = reservationQueryService.getByParams(request.toServiceRequest());
+    public List<ReservationResponse> getAllBySearchFilter(final ReservationSearchFilterRequest request) {
+        final List<Reservation> reservations = reservationQueryService.getAllBySearchFilter(request);
         final List<UserId> userIds = reservations.stream()
                 .map(Reservation::getUserId)
                 .toList();
 
         final List<User> users = userQueryService.getAllByIds(userIds);
-
         return ReservationResponse.from(reservations, users);
     }
 
     @Override
-    public List<ReservationResponse> getAllByUserId(final Long userId) {
-        final User user = userQueryService.getById(UserId.from(userId));
-        return ReservationResponse.from(
-                reservationQueryService.getAllByUserId(
-                        UserId.from(userId)), user);
+    public List<SlotSequenceResponse> getAllSlotSequenceByUserId(final UserId userId) {
+        return reservationQueryService.getAllSlotSequenceResponseByUserId(userId);
     }
 
     @Override
-    public ReservationResponse create(final CreateReservationWithUserIdWebRequest request, final UserSession userSession) {
+    public ReservationResponse create(final CreateReservationRequest request) {
+        final TimeSlot timeSlot = reservationTimeQueryService.get(request.timeId());
+        final Theme theme = themeQueryService.get(request.themeId());
+
         final Reservation reservation = reservationCommandService.create(
-                request.toServiceRequest());
+                request.toDomain(timeSlot, theme));
 
         final User user = userQueryService.getById(reservation.getUserId());
         return ReservationResponse.from(reservation, user);
     }
 
     @Override
-    public void delete(final Long id) {
-        reservationCommandService.delete(ReservationId.from(id));
+    public void delete(final ReservationId id, final UserSession userSession) {
+        final Reservation target = reservationQueryService.getById(id);
+        if (userSession.canManage(target.getUserId())) {
+            reservationCommandService.delete(target);
+            return;
+        }
+        throw new ForbiddenException(userSession.id(), userSession.role(), target.getUserId());
     }
 }

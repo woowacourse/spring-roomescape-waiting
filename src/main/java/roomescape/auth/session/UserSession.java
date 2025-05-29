@@ -16,6 +16,13 @@ public record UserSession(UserId id,
         validate(id, name, role);
     }
 
+    public boolean canManage(final UserId userId) {
+        if (role == UserRole.ADMIN) {
+            return true;
+        }
+        return this.id.equals(userId);
+    }
+
     private void validate(final UserId id, final UserName name, final UserRole role) {
         Validator.of(UserSession.class)
                 .validateNotNull(Fields.id, id, DomainTerm.USER_ID.label())

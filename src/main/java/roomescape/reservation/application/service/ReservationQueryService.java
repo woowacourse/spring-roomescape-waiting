@@ -3,24 +3,22 @@ package roomescape.reservation.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
-import roomescape.reservation.application.dto.AvailableReservationTimeServiceResponse;
-import roomescape.reservation.application.dto.ThemeToBookCountServiceResponse;
-import roomescape.reservation.domain.BookedCount;
-import roomescape.reservation.domain.BookedStatus;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.exception.NotFoundException;
+import roomescape.reservation.application.dto.ReservationIdWithSequenceResponse;
+import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
+import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.application.service.ReservationTimeQueryService;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeId;
-import roomescape.reservation.ui.ReservationSearchRequest;
-import roomescape.theme.domain.ThemeId;
+import roomescape.reservation.domain.ReservationSlot;
+import roomescape.theme.domain.Theme;
 import roomescape.user.domain.UserId;
 
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -28,35 +26,29 @@ import java.util.Set;
 public class ReservationQueryService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeQueryService reservationTimeQueryService;
+
+    public boolean existsBySlot(final ReservationSlot slot) {
+        return reservationRepository.existsBySlot(slot);
+    }
+
+    public boolean existsBySlotAndUserId(final ReservationSlot slot, final UserId userId) {
+        return reservationRepository.existsBySlotAndUserId(slot, userId);
+    }
+
+    public Reservation getById(final ReservationId id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DomainTerm.RESERVATION, id));
+    }
 
     public List<Reservation> getAll() {
         return reservationRepository.findAll();
     }
 
-    public List<AvailableReservationTimeServiceResponse> getTimesWithBookedStatus(
-            final AvailableReservationTimeServiceRequest request) {
-        final List<ReservationTime> allTimes = reservationTimeQueryService.getAll();
-        final Set<ReservationTimeId> bookedTimeIds = new HashSet<>(reservationRepository.findTimeIdByParams(
-                request.date(),
-                request.themeId())
-        );
-        return allTimes.stream()
-                .map(time -> createAvailabilityResponse(time, bookedTimeIds))
-                .toList();
+    public List<Reservation> getAllByUserId(final UserId userId) {
+        return reservationRepository.findAllByUserId(userId);
     }
 
-    public List<ThemeToBookCountServiceResponse> getRanking(final ReservationDate startDate,
-                                                            final ReservationDate endDate,
-                                                            final int bookCount) {
-
-        return reservationRepository.findThemesToBookedCountByParamsOrderByBookedCount(startDate, endDate, bookCount)
-                .entrySet().stream()
-                .map(entry -> new ThemeToBookCountServiceResponse(entry.getKey(), BookedCount.from(entry.getValue())))
-                .toList();
-    }
-
-    public List<Reservation> getByParams(final ReservationSearchRequest request) {
+    public List<Reservation> getAllBySearchFilter(final ReservationSearchFilterRequest request) {
         return reservationRepository.findAllByParams(
                 request.userId(),
                 request.themeId(),
@@ -65,27 +57,26 @@ public class ReservationQueryService {
         );
     }
 
-    public List<Reservation> getAllByUserId(final UserId userId) {
-        return reservationRepository.findAllByUserId(userId);
+    public List<SlotSequenceResponse> getAllSlotSequenceResponseByUserId(final UserId userId) {
+        final Map<ReservationId, Reservation> reservations = getAllByUserId(userId).stream()
+                .collect(Collectors.toMap(Reservation::getId, reservation -> reservation));
+
+        final List<ReservationIdWithSequenceResponse> reservationSequences =
+                reservationRepository.findAllReservationSequencesByIds(
+                        reservations.keySet().stream().toList());
+
+        return reservationSequences.stream()
+                .map(reservationIdWithSequence -> new SlotSequenceResponse(
+                        reservationIdWithSequence.reservationId(),
+                        reservations.get(reservationIdWithSequence.reservationId()).getSlot(),
+                        reservationIdWithSequence.sequence()))
+                .toList();
     }
 
-    public boolean existsByTimeId(final ReservationTimeId timeId) {
-        return reservationRepository.existsByParams(timeId);
-    }
+    public List<Theme> getRanking(final ReservationDate startDate,
+                                  final ReservationDate endDate,
+                                  final int N) {
 
-    public boolean existsByParams(final ReservationDate date,
-                                  final ReservationTimeId timeId,
-                                  final ThemeId themeId) {
-        return reservationRepository.existsByParams(date, timeId, themeId);
-    }
-
-    private AvailableReservationTimeServiceResponse createAvailabilityResponse(final ReservationTime time,
-                                                                               final Set<ReservationTimeId> bookedTimeIds) {
-        final int bookingCount = (int) bookedTimeIds.stream()
-                .filter(id -> id.equals(time.getId()))
-                .count();
-
-        final BookedStatus bookedStatus = BookedStatus.from(bookingCount);
-        return new AvailableReservationTimeServiceResponse(time, bookedStatus);
+        return reservationRepository.findTopNThemesToBookedCountByParamsOrderByBookedCountDesc(startDate, endDate, N);
     }
 }

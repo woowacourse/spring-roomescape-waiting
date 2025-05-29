@@ -2,7 +2,7 @@ package roomescape.reservation.exception;
 
 import org.springframework.http.HttpStatus;
 import roomescape.common.exception.base.BusinessException;
-import roomescape.reservation.time.domain.ReservationTime;
+import roomescape.timeslot.domain.ReservationTime;
 
 import java.time.LocalDateTime;
 

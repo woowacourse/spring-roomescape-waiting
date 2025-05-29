@@ -1,25 +1,24 @@
 package roomescape.reservation.application;
 
 import roomescape.auth.session.UserSession;
-import roomescape.reservation.ui.ReservationSearchWebRequest;
-import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
-import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.ui.dto.ReservationResponse;
+import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
+import roomescape.reservation.domain.ReservationId;
+import roomescape.user.domain.UserId;
 
-import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationFacade {
 
     List<ReservationResponse> getAll();
 
-    List<AvailableReservationTimeWebResponse> getAvailable(LocalDate date, Long themeId);
+    List<ReservationResponse> getAllBySearchFilter(ReservationSearchFilterRequest request);
 
-    List<ReservationResponse> getByParams(ReservationSearchWebRequest request);
+    List<SlotSequenceResponse> getAllSlotSequenceByUserId(UserId userId);
 
-    List<ReservationResponse> getAllByUserId(Long userId);
+    ReservationResponse create(CreateReservationRequest request);
 
-    ReservationResponse create(CreateReservationWithUserIdWebRequest request, UserSession userSession);
-
-    void delete(Long id);
+    void delete(ReservationId id, UserSession userSession);
 }

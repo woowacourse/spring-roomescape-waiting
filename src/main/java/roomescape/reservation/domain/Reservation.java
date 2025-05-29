@@ -4,6 +4,8 @@ import jakarta.persistence.AttributeOverride;
 import jakarta.persistence.Column;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -16,8 +18,8 @@ import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
-import roomescape.reservation.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+import roomescape.timeslot.domain.ReservationTime;
 import roomescape.user.domain.UserId;
 
 import java.time.LocalDateTime;
@@ -44,15 +46,15 @@ public class Reservation extends BaseEntity {
 
     @Embedded
     @AttributeOverride(
-            name = BookedStatus.Fields.sequence,
-            column = @Column(name = Fields.status))
-    private BookedStatus status;
-
-    @ManyToOne
+            name = ReservationTime.Fields.value,
+            column = @Column(name = Fields.time))
     private ReservationTime time;
 
     @ManyToOne
     private Theme theme;
+
+    @Enumerated(EnumType.STRING)
+    private BookedStatus status;
 
     public Reservation(final UserId userId,
                        final ReservationDate date,
@@ -68,18 +70,18 @@ public class Reservation extends BaseEntity {
         this.status = status;
     }
 
-    public Reservation(final Long id,
-                       final UserId userId,
-                       final ReservationDate date,
-                       final ReservationTime time,
-                       final Theme theme,
-                       final BookedStatus status
+    private Reservation(final Long id,
+                        final UserId userId,
+                        final ReservationDate date,
+                        final ReservationTime time,
+                        final Theme theme,
+                        final BookedStatus status
     ) {
         super(id);
         validate(userId, date, time, theme);
         this.userId = userId;
         this.date = date;
-        this.time = time;
+        this.time = ReservationTime.from(time.getValue());
         this.theme = theme;
         this.status = status;
     }
@@ -89,14 +91,14 @@ public class Reservation extends BaseEntity {
                                      final ReservationDate date,
                                      final ReservationTime time,
                                      final Theme theme) {
-        return new Reservation(id.getValue(), userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(id.getValue(), userId, date, time, theme, BookedStatus.WAITING);
     }
 
     public static Reservation withoutId(final UserId userId,
                                         final ReservationDate date,
                                         final ReservationTime time,
                                         final Theme theme) {
-        return new Reservation(userId, date, time, theme, BookedStatus.from(0));
+        return new Reservation(userId, date, time, theme, BookedStatus.WAITING);
     }
 
     private static void validate(
@@ -125,7 +127,15 @@ public class Reservation extends BaseEntity {
         }
     }
 
+    public void approved() {
+        this.status = BookedStatus.APPROVED;
+    }
+
     public ReservationId getId() {
         return ReservationId.from(id);
+    }
+
+    public ReservationSlot getSlot() {
+        return ReservationSlot.of(date, time, theme);
     }
 }

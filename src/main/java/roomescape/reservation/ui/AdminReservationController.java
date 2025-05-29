@@ -9,29 +9,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.aop.RequiredRoles;
 import roomescape.auth.session.UserSession;
 import roomescape.auth.session.annotation.SignInUser;
-import roomescape.common.uri.UriFactory;
 import roomescape.reservation.application.ReservationFacade;
-import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
+import roomescape.reservation.application.dto.ReservationResponse;
+import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
-import roomescape.reservation.ui.dto.ReservationResponse;
+import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
 import roomescape.user.domain.UserRole;
 
 import java.net.URI;
-import java.time.LocalDate;
 import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
 @RequiredRoles(UserRole.ADMIN)
-@RequestMapping(AdminReservationController.BASE_PATH)
+@RequestMapping("/admin/reservations")
 public class AdminReservationController {
-
-    public static final String BASE_PATH = "/admin/reservations";
 
     private final ReservationFacade reservationFacade;
 
@@ -41,34 +38,33 @@ public class AdminReservationController {
         return ResponseEntity.ok(reservations);
     }
 
-    @GetMapping("/times")
-    public ResponseEntity<List<AvailableReservationTimeWebResponse>> getAvailable(
-            @RequestParam final LocalDate date,
-            @RequestParam final Long themeId) {
-        final List<AvailableReservationTimeWebResponse> reservations = reservationFacade.getAvailable(date, themeId);
-        return ResponseEntity.ok(reservations);
-    }
-
     @GetMapping("/search")
     public ResponseEntity<List<ReservationResponse>> searchReservations(
             @ModelAttribute final ReservationSearchWebRequest request) {
         return ResponseEntity.ok(
-                reservationFacade.getByParams(request));
+                reservationFacade.getAllBySearchFilter(request.toServiceRequest()));
     }
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(
-            @RequestBody final CreateReservationWithUserIdWebRequest request,
-            @SignInUser final UserSession userSession) {
-        final ReservationResponse reservationResponse = reservationFacade.create(request, userSession);
-        final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
+            @RequestBody final CreateReservationWithUserIdWebRequest request) {
+        final ReservationResponse response = reservationFacade.create(request.toServiceRequest());
+
+        final URI location = ServletUriComponentsBuilder
+                .fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.reservationId())
+                .toUri();
+
         return ResponseEntity.created(location)
-                .body(reservationResponse);
+                .body(response);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable final Long id) {
-        reservationFacade.delete(id);
+    public ResponseEntity<Void> delete(@PathVariable final Long id,
+                                       @SignInUser final UserSession userSession) {
+        reservationFacade.delete(
+                ReservationId.from(id), userSession);
         return ResponseEntity.noContent().build();
     }
 }

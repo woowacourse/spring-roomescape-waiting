@@ -1,6 +1,6 @@
 package roomescape.user.application;
 
-import roomescape.user.ui.dto.UserResponse;
+import roomescape.user.application.dto.UserResponse;
 
 import java.util.List;
 

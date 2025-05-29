@@ -71,8 +71,8 @@ public class RequiredRoleAspect {
 
     private boolean isAnnotatedUserSession(final Object arg, final Annotation[] annotations) {
         return arg instanceof UserSession &&
-                Arrays.stream(annotations)
-                        .anyMatch(annotation -> annotation.annotationType().equals(SignInUser.class));
+               Arrays.stream(annotations)
+                       .anyMatch(annotation -> annotation.annotationType().equals(SignInUser.class));
     }
 
     private UserSession extractUserSessionFromRequest() {

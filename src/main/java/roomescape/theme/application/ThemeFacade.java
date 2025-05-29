@@ -1,7 +1,7 @@
 package roomescape.theme.application;
 
-import roomescape.theme.ui.dto.CreateThemeWebRequest;
-import roomescape.theme.ui.dto.ThemeResponse;
+import roomescape.theme.application.dto.CreateThemeRequest;
+import roomescape.theme.application.dto.ThemeResponse;
 
 import java.util.List;
 
@@ -11,7 +11,7 @@ public interface ThemeFacade {
 
     List<ThemeResponse> getRanking();
 
-    ThemeResponse create(CreateThemeWebRequest createThemeWebRequest);
+    ThemeResponse create(CreateThemeRequest request);
 
     void delete(Long id);
 }

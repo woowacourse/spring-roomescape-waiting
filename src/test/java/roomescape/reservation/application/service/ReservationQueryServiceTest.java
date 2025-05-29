@@ -7,18 +7,20 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.Email;
+import roomescape.reservation.application.dto.ReservationSearchFilterRequest;
+import roomescape.reservation.application.dto.SlotSequenceResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.time.domain.ReservationTime;
-import roomescape.reservation.time.domain.ReservationTimeRepository;
-import roomescape.reservation.ui.ReservationSearchRequest;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.domain.ThemeThumbnail;
-import roomescape.user.application.service.UserQueryService;
+import roomescape.timeslot.domain.ReservationTime;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 import roomescape.user.domain.User;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRepository;
@@ -42,23 +44,21 @@ class ReservationQueryServiceTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
     private UserRepository userRepository;
-    @Autowired
-    private UserQueryService userQueryService;
 
     @Test
     @DisplayName("예약을 조회할 수 있다")
     void createAndFindReservation() {
         // given
-        final ReservationTime reservationTime = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+        final TimeSlot timeSlot = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(
@@ -76,13 +76,13 @@ class ReservationQueryServiceTest {
         final Reservation given1 = Reservation.withoutId(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                reservationTime,
+                timeSlot.getStartAt(),
                 theme);
 
         final Reservation given2 = Reservation.withoutId(
                 user.getId(),
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                reservationTime,
+                timeSlot.getStartAt(),
                 theme);
 
         final Reservation saved1 = reservationRepository.save(given1);
@@ -124,9 +124,9 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+        final TimeSlot time = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme1 = themeRepository.save(
                 Theme.withoutId(ThemeName.from("공포1"),
@@ -147,25 +147,25 @@ class ReservationQueryServiceTest {
                 Reservation.withoutId(
                         me.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme1
                 )
         );
 
         final Reservation reservation2 = reservationRepository.save(
                 Reservation.withoutId(
-                        notMe.getId(),
+                        me.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme2
                 )
         );
 
-        final Reservation reservation3 = reservationRepository.save(
+        reservationRepository.save(
                 Reservation.withoutId(
-                        me.getId(),
+                        notMe.getId(), // 나 아님
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme3
                 )
         );
@@ -175,12 +175,12 @@ class ReservationQueryServiceTest {
 
         // then
         assertThat(reservations).hasSize(2);
-        assertThat(reservations).contains(reservation1, reservation3);
+        assertThat(reservations).contains(reservation1, reservation2);
     }
 
     @Test
     @DisplayName("테마 아이디, 유저 아이디, 시작/끝 날짜 조건으로 검색할 수 있다")
-    void getByParams() {
+    void getAllBySearchFilter() {
         // given
         final User user = userRepository.save(
                 User.withoutId(
@@ -191,9 +191,9 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
-                        LocalTime.of(10, 0)));
+        final TimeSlot time = timeSlotRepository.save(
+                TimeSlot.withoutId(
+                        ReservationTime.from(LocalTime.of(10, 0))));
 
         final Theme theme = themeRepository.save(
                 Theme.withoutId(ThemeName.from("공포1"),
@@ -204,14 +204,14 @@ class ReservationQueryServiceTest {
                 Reservation.withoutId(
                         user.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
-                        time,
+                        time.getStartAt(),
                         theme
                 )
         );
 
         // when
-        final List<Reservation> foundByThemeIdAndUserIdAndDateToFrom = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeIdAndUserIdAndDateToFrom = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         user.getId(),
                         ReservationDate.from(LocalDate.now()),
@@ -219,8 +219,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> foundByThemeIdAndUserIdAndDateTo = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeIdAndUserIdAndDateTo = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         user.getId(),
                         ReservationDate.from(LocalDate.now()),
@@ -228,8 +228,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> foundByThemeIdAndUserId = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeIdAndUserId = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         user.getId(),
                         null,
@@ -237,8 +237,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> foundByThemeId = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> foundByThemeId = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         theme.getId(),
                         null,
                         null,
@@ -246,8 +246,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> noFilter = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> noFilter = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         null,
                         null,
                         null,
@@ -255,8 +255,8 @@ class ReservationQueryServiceTest {
                 )
         );
 
-        final List<Reservation> wrongFilter = reservationQueryService.getByParams(
-                new ReservationSearchRequest(
+        final List<Reservation> wrongFilter = reservationQueryService.getAllBySearchFilter(
+                new ReservationSearchFilterRequest(
                         null,
                         null,
                         ReservationDate.from(LocalDate.now().plusMonths(1)),
@@ -273,5 +273,91 @@ class ReservationQueryServiceTest {
             assertThat(noFilter.contains(reservation)).isTrue();
             assertThat(wrongFilter.isEmpty()).isTrue();
         });
+    }
+
+    @Test
+    @DisplayName("특정 슬롯(날짜+시간+테마)에 해당하는 모든 예약을 조회할 수 있다")
+    void findAllBySlot() {
+        // given
+        final Theme theme = themeRepository.save(Theme.withoutId(
+                ThemeName.from("공포"),
+                ThemeDescription.from("지구별 방탈출 최고"),
+                ThemeThumbnail.from("www.making.com")));
+        final User user1 = userRepository.save(User.withoutId(
+                UserName.from("강산"),
+                Email.from("email@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final User user2 = userRepository.save(User.withoutId(
+                UserName.from("다른사람"),
+                Email.from("email2@email.com"),
+                Password.fromEncoded("1234"),
+                UserRole.NORMAL));
+        final ReservationDate date = ReservationDate.from(LocalDate.of(2025, 8, 5));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+
+        final Reservation r1 = reservationRepository.save(Reservation.withoutId(user1.getId(), date, time, theme));
+        final Reservation r2 = reservationRepository.save(Reservation.withoutId(user2.getId(), date, time, theme));
+
+        final ReservationSlot slot = ReservationSlot.of(date, time, theme);
+
+        // when
+        final var found = reservationRepository.findAll().stream()
+                .filter(r -> r.getSlot().equals(slot))
+                .toList();
+
+        // then
+        assertThat(found).containsExactlyInAnyOrder(r1, r2);
+    }
+
+    @Test
+    @DisplayName("유저가 예약한 예약들의 슬롯 내 순번을 확인할 수 있다")
+    void getAllSlotSequenceResponseByUserId() {
+        // given
+        final User user1 = userRepository.save(
+                User.withoutId(
+                        UserName.from("유저1"),
+                        Email.from("user1@email.com"),
+                        Password.fromEncoded("pw"),
+                        UserRole.NORMAL));
+        final User user2 = userRepository.save(
+                User.withoutId(
+                        UserName.from("유저2"),
+                        Email.from("user2@email.com"),
+                        Password.fromEncoded("pw"),
+                        UserRole.NORMAL));
+        final User user3 = userRepository.save(
+                User.withoutId(
+                        UserName.from("유저3"),
+                        Email.from("user3@email.com"),
+                        Password.fromEncoded("pw"),
+                        UserRole.NORMAL));
+
+        final Theme theme = themeRepository.save(
+                Theme.withoutId(
+                        ThemeName.from("테마1"),
+                        ThemeDescription.from("desc"),
+                        ThemeThumbnail.from("thumb")));
+        final ReservationTime time = ReservationTime.from(LocalTime.of(10, 0));
+        final ReservationDate date1 = ReservationDate.from(LocalDate.of(2025, 6, 1));
+        final ReservationDate date2 = ReservationDate.from(LocalDate.of(2025, 6, 2));
+
+        final Reservation r1_1 = reservationRepository.save(Reservation.withoutId(user1.getId(), date1, time, theme));
+        final Reservation r1_2 = reservationRepository.save(Reservation.withoutId(user2.getId(), date1, time, theme));
+        final Reservation r1_3 = reservationRepository.save(Reservation.withoutId(user3.getId(), date1, time, theme));
+
+        final Reservation r2_1 = reservationRepository.save(Reservation.withoutId(user3.getId(), date2, time, theme));
+        final Reservation r2_2 = reservationRepository.save(Reservation.withoutId(user2.getId(), date2, time, theme));
+        final Reservation r2_3 = reservationRepository.save(Reservation.withoutId(user1.getId(), date2, time, theme));
+
+        // when
+        final List<SlotSequenceResponse> allSlotSequenceResponseByUser1 =
+                reservationQueryService.getAllSlotSequenceResponseByUserId(user1.getId());
+
+        // then
+        assertThat(allSlotSequenceResponseByUser1).hasSize(2);
+        assertThat(allSlotSequenceResponseByUser1.contains(new SlotSequenceResponse(r1_1.getId(), r1_1.getSlot(), 1))).isTrue();
+        assertThat(allSlotSequenceResponseByUser1.contains(new SlotSequenceResponse(r2_3.getId(), r2_3.getSlot(), 3))).isTrue();
+
     }
 }

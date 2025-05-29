@@ -4,6 +4,11 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
+import roomescape.reservation.application.dto.CreateReservationRequest;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.theme.domain.ThemeId;
+import roomescape.timeslot.domain.TimeSlotId;
+import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 
@@ -16,19 +21,19 @@ public record CreateReservationWebRequest(LocalDate date,
         validate(date, timeId, themeId);
     }
 
-    public CreateReservationWithUserIdWebRequest toRequestWithUserId(final Long userId) {
-        return new CreateReservationWithUserIdWebRequest(
-                date,
-                timeId,
-                themeId,
-                userId
+    public CreateReservationRequest toRequestWithUserId(final UserId userId) {
+        return new CreateReservationRequest(
+                userId,
+                ReservationDate.from(date),
+                TimeSlotId.from(timeId),
+                ThemeId.from(themeId)
         );
     }
 
     private void validate(final LocalDate date, final Long timeId, final Long themeId) {
         Validator.of(CreateReservationWithUserIdWebRequest.class)
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
-                .validateNotNull(Fields.timeId, timeId, DomainTerm.RESERVATION_TIME_ID.label())
+                .validateNotNull(Fields.timeId, timeId, DomainTerm.TIME_SLOT_ID.label())
                 .validateNotNull(Fields.themeId, themeId, DomainTerm.THEME_ID.label());
     }
 }

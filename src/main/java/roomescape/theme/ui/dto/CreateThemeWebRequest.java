@@ -4,7 +4,7 @@ import lombok.AccessLevel;
 import lombok.experimental.FieldNameConstants;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
-import roomescape.theme.application.dto.CreateThemeServiceRequest;
+import roomescape.theme.application.dto.CreateThemeRequest;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
@@ -20,8 +20,8 @@ public record CreateThemeWebRequest(
         validate(name, description, thumbnail);
     }
 
-    public CreateThemeServiceRequest toServiceRequest() {
-        return new CreateThemeServiceRequest(
+    public CreateThemeRequest toServiceRequest() {
+        return new CreateThemeRequest(
                 ThemeName.from(name),
                 ThemeDescription.from(description),
                 ThemeThumbnail.from(thumbnail));

@@ -2,13 +2,15 @@ package roomescape.user.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.user.application.dto.UserResponse;
 import roomescape.user.application.service.UserQueryService;
-import roomescape.user.ui.dto.UserResponse;
 
 import java.util.List;
 
 @Service
 @RequiredArgsConstructor
+@Transactional
 public class UserFacadeImpl implements UserFacade {
 
     private final UserQueryService userQueryService;

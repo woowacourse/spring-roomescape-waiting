@@ -9,11 +9,20 @@ import java.util.List;
 
 public class ForbiddenException extends AuthException {
 
-    public ForbiddenException(final UserId id,
+    public ForbiddenException(final UserId userId,
                               final UserRole role,
                               final List<UserRole> requiredRole) {
         super(
-                buildLogMessage(id, role, requiredRole),
+                buildLogMessage(userId, role, requiredRole),
+                buildUserMessage()
+        );
+    }
+
+    public ForbiddenException(final UserId userId,
+                              final UserRole role,
+                              final UserId targetUserId) {
+        super(
+                buildLogMessage(userId, role, targetUserId),
                 buildUserMessage()
         );
     }
@@ -21,14 +30,23 @@ public class ForbiddenException extends AuthException {
     private static String buildLogMessage(final UserId id,
                                           final UserRole role,
                                           final List<UserRole> requiredRoles) {
-        final String requiredRolesStr = String.join(", ",
+        final String requiredRoleInfo = String.join(", ",
                 requiredRoles.stream()
                         .map(UserRole::name)
                         .toList());
 
         return String.format(
                 "Forbidden access: user(id=%s, role=%s) tried to access resource requiring roles=[%s]",
-                id.getValue(), role.name(), requiredRolesStr);
+                id.getValue(), role.name(), requiredRoleInfo);
+    }
+
+    private static String buildLogMessage(final UserId id,
+                                          final UserRole role,
+                                          final UserId targetUserId) {
+
+        return String.format(
+                "Forbidden access: user(id=%s, role=%s) tried to access resource belonging to user(id=%s)",
+                id.getValue(), role.name(), targetUserId.getValue());
     }
 
     private static String buildUserMessage() {

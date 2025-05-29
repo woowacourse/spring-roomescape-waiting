@@ -18,8 +18,9 @@ public enum DomainTerm {
     THEME_THUMBNAIL("테마 썸네일"),
 
     // Time 도메인
+    TIME_SLOT("예약 시간 슬롯"),
+    TIME_SLOT_ID("예약 시간 슬롯 식별자"),
     RESERVATION_TIME("예약 시간"),
-    RESERVATION_TIME_ID("예약 시간 식별자"),
 
     // User 도메인
     USER("유저"),

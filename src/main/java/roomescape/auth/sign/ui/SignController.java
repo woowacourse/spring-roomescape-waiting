@@ -7,13 +7,13 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.session.UserSession;
 import roomescape.auth.session.annotation.SignInUser;
 import roomescape.auth.sign.application.SignFacade;
 import roomescape.auth.sign.ui.dto.SignInWebRequest;
 import roomescape.auth.sign.ui.dto.SignUpWebRequest;
 import roomescape.auth.sign.ui.dto.UserSessionResponse;
-import roomescape.common.uri.UriFactory;
 
 import java.net.URI;
 
@@ -40,8 +40,19 @@ public class SignController {
     public ResponseEntity<Long> create(@RequestBody final SignUpWebRequest request) {
         final Long userId = signFacade.signUp(request.toServiceRequest()).getValue();
 
-        // TODO add UserController
-        final URI location = UriFactory.buildPath("/users", String.valueOf(userId));
+        final URI location = ServletUriComponentsBuilder
+                .fromPath("/users")
+                .path("/{id}")
+                .buildAndExpand(userId)
+                .toUri();
+
         return ResponseEntity.created(location).body(userId);
+    }
+
+    @PostMapping("/sign-out")
+    public ResponseEntity<Void> create(final HttpServletResponse httpServletResponse) {
+        signFacade.signOut(httpServletResponse::addCookie);
+
+        return ResponseEntity.ok().build();
     }
 }
