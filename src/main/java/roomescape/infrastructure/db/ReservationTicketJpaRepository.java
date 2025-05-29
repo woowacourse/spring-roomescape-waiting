@@ -10,25 +10,27 @@ import roomescape.model.Theme;
 
 public interface ReservationTicketJpaRepository extends JpaRepository<ReservationTicket, Long> {
 
-    Optional<ReservationTicket> findByReservation_DateAndReservation_ReservationTimeAndReservation_Theme(LocalDate date,
-                                                                                                         ReservationTime time,
-                                                                                                         Theme theme);
+    Optional<ReservationTicket> findByReservationSpec_DateAndReservationSpec_ReservationTimeAndReservationSpec_Theme(
+            LocalDate date,
+            ReservationTime time,
+            Theme theme);
 
-    List<ReservationTicket> findByReservation_ThemeIdAndReservation_MemberIdAndReservation_DateBetween(
+    List<ReservationTicket> findByReservationSpec_ThemeIdAndReservationSpec_MemberIdAndReservationSpec_DateBetween(
             Long themeId,
             Long memberId,
             LocalDate dateAfter,
             LocalDate dateBefore);
 
-    List<ReservationTicket> findByReservation_ThemeIdAndReservation_Date(final Long themeId, final LocalDate date);
+    List<ReservationTicket> findByReservationSpec_ThemeIdAndReservationSpec_Date(final Long themeId,
+                                                                                 final LocalDate date);
 
-    List<ReservationTicket> findByReservation_MemberId(Long id);
+    List<ReservationTicket> findByReservationSpec_MemberId(Long id);
 
-    List<ReservationTicket> findByReservation_ThemeId(Long id);
+    List<ReservationTicket> findByReservationSpec_ThemeId(Long id);
 
-    List<ReservationTicket> findByReservation_ReservationTimeId(Long id);
+    List<ReservationTicket> findByReservationSpec_ReservationTimeId(Long id);
 
-    Optional<ReservationTicket> findByReservation_ThemeAndReservation_ReservationTimeAndReservation_Date(
+    Optional<ReservationTicket> findByReservationSpec_ThemeAndReservationSpec_ReservationTimeAndReservationSpec_Date(
             Theme theme,
             ReservationTime reservationTime,
             LocalDate date

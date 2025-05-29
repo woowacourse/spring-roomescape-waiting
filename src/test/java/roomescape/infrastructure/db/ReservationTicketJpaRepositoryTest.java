@@ -11,7 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -46,7 +46,7 @@ class ReservationTicketJpaRepositoryTest {
         Member savedMember = memberJpaRepository.save(member);
 
         ReservationTicket reservationTicketInRange = new ReservationTicket(
-                new Reservation(
+                new ReservationSpec(
                         LocalDate.now().plusDays(1),
                         savedReservationTime,
                         savedTheme,
@@ -54,7 +54,7 @@ class ReservationTicketJpaRepositoryTest {
                         LocalDate.now()
                 ));
 
-        ReservationTicket secondReservationTicketOutOfRange = new ReservationTicket(new Reservation(
+        ReservationTicket secondReservationTicketOutOfRange = new ReservationTicket(new ReservationSpec(
                 LocalDate.now().plusDays(3),
                 savedReservationTime,
                 savedTheme,
@@ -66,7 +66,7 @@ class ReservationTicketJpaRepositoryTest {
         reservationTicketJpaRepository.save(secondReservationTicketOutOfRange);
 
         // when
-        List<ReservationTicket> actual = reservationTicketJpaRepository.findByReservation_ThemeIdAndReservation_MemberIdAndReservation_DateBetween(
+        List<ReservationTicket> actual = reservationTicketJpaRepository.findByReservationSpec_ThemeIdAndReservationSpec_MemberIdAndReservationSpec_DateBetween(
                 savedTheme.getId(),
                 savedMember.getId(),
                 LocalDate.now().plusDays(1),
@@ -102,7 +102,7 @@ class ReservationTicketJpaRepositoryTest {
         Member member = new Member("도기", "email@gmail.com", "password", Role.ADMIN);
         Member savedMember = memberJpaRepository.save(member);
 
-        ReservationTicket reservationTicketInRange = new ReservationTicket(new Reservation(
+        ReservationTicket reservationTicketInRange = new ReservationTicket(new ReservationSpec(
                 LocalDate.now().plusDays(1),
                 savedReservationTime,
                 savedTheme,
@@ -110,7 +110,7 @@ class ReservationTicketJpaRepositoryTest {
                 LocalDate.now()
         ));
 
-        ReservationTicket secondReservationTicketOutOfRange = new ReservationTicket(new Reservation(
+        ReservationTicket secondReservationTicketOutOfRange = new ReservationTicket(new ReservationSpec(
                 LocalDate.now().plusDays(3),
                 savedReservationTime,
                 savedTheme,
@@ -122,7 +122,7 @@ class ReservationTicketJpaRepositoryTest {
         reservationTicketJpaRepository.save(secondReservationTicketOutOfRange);
 
         // when
-        Optional<ReservationTicket> actual = reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTimeAndReservation_Theme(
+        Optional<ReservationTicket> actual = reservationTicketJpaRepository.findByReservationSpec_DateAndReservationSpec_ReservationTimeAndReservationSpec_Theme(
                 LocalDate.now().plusDays(1),
                 savedReservationTime,
                 theme
@@ -144,12 +144,12 @@ class ReservationTicketJpaRepositoryTest {
         ReservationTime time = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(10, 0)));
 
         ReservationTicket reservationTicket = new ReservationTicket(
-                new Reservation(LocalDate.now(), time, theme, member,
+                new ReservationSpec(LocalDate.now(), time, theme, member,
                         LocalDate.now().minusDays(1)));
         reservationTicketJpaRepository.save(reservationTicket);
 
         // when
-        List<ReservationTicket> found = reservationTicketJpaRepository.findByReservation_ThemeId(theme.getId());
+        List<ReservationTicket> found = reservationTicketJpaRepository.findByReservationSpec_ThemeId(theme.getId());
 
         // then
         assertThat(found).isNotEmpty();
@@ -165,12 +165,12 @@ class ReservationTicketJpaRepositoryTest {
         ReservationTime time = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(14, 0)));
 
         ReservationTicket reservationTicket = new ReservationTicket(
-                new Reservation(LocalDate.now(), time, theme, member,
+                new ReservationSpec(LocalDate.now(), time, theme, member,
                         LocalDate.now().minusDays(1)));
         reservationTicketJpaRepository.save(reservationTicket);
 
         // when
-        List<ReservationTicket> reservationTickets = reservationTicketJpaRepository.findByReservation_MemberId(
+        List<ReservationTicket> reservationTickets = reservationTicketJpaRepository.findByReservationSpec_MemberId(
                 member.getId());
 
         // then
@@ -187,12 +187,12 @@ class ReservationTicketJpaRepositoryTest {
         ReservationTime time = reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(16, 0)));
 
         ReservationTicket reservationTicket = new ReservationTicket(
-                new Reservation(LocalDate.now(), time, theme, member,
+                new ReservationSpec(LocalDate.now(), time, theme, member,
                         LocalDate.now().minusDays(1)));
         reservationTicketJpaRepository.save(reservationTicket);
 
         // when
-        List<ReservationTicket> result = reservationTicketJpaRepository.findByReservation_ReservationTimeId(
+        List<ReservationTicket> result = reservationTicketJpaRepository.findByReservationSpec_ReservationTimeId(
                 time.getId());
 
         // then

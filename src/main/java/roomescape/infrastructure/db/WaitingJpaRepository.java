@@ -13,14 +13,14 @@ import roomescape.model.Waiting;
 
 public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
 
-    List<Waiting> findByReservation_MemberId(Long id);
+    List<Waiting> findByReservationSpec_MemberId(Long id);
 
     @Query("""
              SELECT COUNT(w) FROM Waiting w
              WHERE w.registeredAt < :registeredAt AND 
-                     w.reservation.date = :date AND
-                    w.reservation.theme = :theme AND 
-                    w.reservation.reservationTime = :reservationTime
+                     w.reservationSpec.date = :date AND
+                    w.reservationSpec.theme = :theme AND 
+                    w.reservationSpec.reservationTime = :reservationTime
             """)
     int countWaitingBefore(
             @Param("registeredAt") LocalDateTime registeredAt,
@@ -32,9 +32,9 @@ public interface WaitingJpaRepository extends JpaRepository<Waiting, Long> {
 
     @Query("""
             SELECT w FROM Waiting w
-                    WHERE  w.reservation.date = :date AND
-                    w.reservation.reservationTime = :reservationTime AND
-                    w.reservation.theme = :theme
+                    WHERE  w.reservationSpec.date = :date AND
+                    w.reservationSpec.reservationTime = :reservationTime AND
+                    w.reservationSpec.theme = :theme
             ORDER BY w.registeredAt ASC
             LIMIT 1
             """)

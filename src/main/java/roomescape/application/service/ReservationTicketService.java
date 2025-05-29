@@ -13,7 +13,7 @@ import roomescape.dto.request.ReservationTicketRegisterDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationTicketResponseDto;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
@@ -118,18 +118,18 @@ public class ReservationTicketService {
     }
 
     private void assertReservationIsNotDuplicated(ReservationTicket reservationTicket) {
-        if (reservationTicketRepository.isDuplicated(reservationTicket.getReservation())) {
+        if (reservationTicketRepository.isDuplicated(reservationTicket.getReservationSpec())) {
             throw new DuplicatedException("이미 예약이 존재합니다.");
         }
     }
 
     private ReservationTicket convertToReservation(Waiting nextWaiting) {
         return new ReservationTicket(
-                new Reservation(
+                new ReservationSpec(
                         nextWaiting.getReservationDate(),
                         nextWaiting.getReservationTime(),
                         nextWaiting.getTheme(),
-                        nextWaiting.getReservation().getMember(),
+                        nextWaiting.getReservationSpec().getMember(),
                         nextWaiting.getRegisteredAt().toLocalDate()
                 ));
     }

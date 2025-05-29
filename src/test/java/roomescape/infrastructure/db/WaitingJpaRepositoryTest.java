@@ -12,7 +12,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
@@ -51,7 +51,7 @@ class WaitingJpaRepositoryTest {
         LocalDate reservationDate = LocalDate.now().plusDays(1);
         Waiting targetWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(12, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -63,7 +63,7 @@ class WaitingJpaRepositoryTest {
 
         Waiting secondOrderWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -75,7 +75,7 @@ class WaitingJpaRepositoryTest {
 
         Waiting differentThemeWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 anotherTheme,
@@ -112,7 +112,7 @@ class WaitingJpaRepositoryTest {
         LocalDate reservationDate = LocalDate.now().plusDays(1);
         Waiting targetWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(12, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -124,7 +124,7 @@ class WaitingJpaRepositoryTest {
 
         Waiting secondOrderWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -165,7 +165,7 @@ class WaitingJpaRepositoryTest {
         LocalDate reservationDate = LocalDate.now().plusDays(1);
         Waiting targetWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(12, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -177,7 +177,7 @@ class WaitingJpaRepositoryTest {
 
         Waiting anotherWaiting = waitingJpaRepository.save(new Waiting(
                         LocalDateTime.of(LocalDate.now(), LocalTime.of(13, 30)),
-                        new Reservation(
+                        new ReservationSpec(
                                 reservationDate,
                                 savedReservationTime,
                                 savedTheme,
@@ -188,7 +188,7 @@ class WaitingJpaRepositoryTest {
         );
 
         // when
-        List<Waiting> actual = waitingJpaRepository.findByReservation_MemberId(savedMember.getId());
+        List<Waiting> actual = waitingJpaRepository.findByReservationSpec_MemberId(savedMember.getId());
 
         // then
         List<Long> ids = actual.stream()

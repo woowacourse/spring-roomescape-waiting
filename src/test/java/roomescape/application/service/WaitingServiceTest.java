@@ -24,7 +24,7 @@ import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -78,7 +78,7 @@ public class WaitingServiceTest {
             LocalDate date = LocalDate.now().plusDays(1);
 
             ReservationTicket reservationTicket = reservationTicketJpaRepository.save(
-                    new ReservationTicket(new Reservation(
+                    new ReservationTicket(new ReservationSpec(
                             date,
                             reservationTime,
                             theme,
@@ -101,20 +101,20 @@ public class WaitingServiceTest {
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
-                                    .getReservation()
+                                    .getReservationSpec()
                                     .getMember()
                                     .getId()
                     ).isEqualTo(user.getId()),
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
-                                    .getReservation()
+                                    .getReservationSpec()
                                     .getDate()
                     ).isEqualTo(date),
                     () -> assertThat(
                             waitingJpaRepository.findAll()
                                     .getFirst()
-                                    .getReservation()
+                                    .getReservationSpec()
                                     .getTheme()
                                     .getId()
                     ).isEqualTo(theme.getId())
@@ -135,7 +135,7 @@ public class WaitingServiceTest {
             LocalDate date = LocalDate.now().minusDays(1);
 
             ReservationTicket reservationTicket = reservationTicketJpaRepository.save(
-                    new ReservationTicket(new Reservation(
+                    new ReservationTicket(new ReservationSpec(
                             date,
                             reservationTime,
                             theme,
@@ -187,7 +187,7 @@ public class WaitingServiceTest {
 
             Waiting waiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new Reservation(
+                    new ReservationSpec(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -214,7 +214,7 @@ public class WaitingServiceTest {
 
             Waiting waiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new Reservation(
+                    new ReservationSpec(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -253,7 +253,7 @@ public class WaitingServiceTest {
 
             Waiting waiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new Reservation(
+                    new ReservationSpec(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -264,7 +264,7 @@ public class WaitingServiceTest {
 
             Waiting anotherWaiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new Reservation(
+                    new ReservationSpec(
                             LocalDate.now().plusDays(1),
                             anotherReservationTime,
                             theme,
@@ -300,7 +300,7 @@ public class WaitingServiceTest {
 
             Waiting firstWaiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new Reservation(
+                    new ReservationSpec(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,
@@ -311,7 +311,7 @@ public class WaitingServiceTest {
 
             Waiting secondWaiting = waitingJpaRepository.save(new Waiting(
                     LocalDateTime.now(),
-                    new Reservation(
+                    new ReservationSpec(
                             LocalDate.now().plusDays(1),
                             reservationTime,
                             theme,

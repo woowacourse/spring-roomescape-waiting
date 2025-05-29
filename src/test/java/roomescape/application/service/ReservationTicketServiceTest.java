@@ -25,7 +25,7 @@ import roomescape.infrastructure.db.MemberJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.db.WaitingJpaRepository;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -149,7 +149,7 @@ class ReservationTicketServiceTest {
         Member savedMember = memberJpaRepository.save(member);
 
         ReservationTicket reservationTicket = new ReservationTicket(
-                new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+                new ReservationSpec(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                         savedMember, LocalDate.now()));
         ReservationTicket savedReservationTicket = reservationTicketRepository.save(reservationTicket);
 
@@ -183,7 +183,7 @@ class ReservationTicketServiceTest {
 
         Waiting firstWaiting = waitingJpaRepository.save(new Waiting(
                 LocalDateTime.now(),
-                new Reservation(
+                new ReservationSpec(
                         LocalDate.now().plusDays(1),
                         reservationTime,
                         theme,
@@ -194,7 +194,7 @@ class ReservationTicketServiceTest {
 
         Waiting secondWaiting = waitingJpaRepository.save(new Waiting(
                 LocalDateTime.now().plusHours(1),
-                new Reservation(
+                new ReservationSpec(
                         LocalDate.now().plusDays(1),
                         reservationTime,
                         theme,
@@ -203,7 +203,7 @@ class ReservationTicketServiceTest {
                 )
         ));
 
-        ReservationTicket reservationTicket = reservationTicketRepository.save(new ReservationTicket(new Reservation(
+        ReservationTicket reservationTicket = reservationTicketRepository.save(new ReservationTicket(new ReservationSpec(
                 LocalDate.now().plusDays(1),
                 reservationTime,
                 theme,

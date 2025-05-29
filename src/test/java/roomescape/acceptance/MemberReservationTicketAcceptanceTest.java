@@ -19,7 +19,7 @@ import roomescape.infrastructure.db.ReservationTimeJpaRepository;
 import roomescape.infrastructure.db.ThemeJpaRepository;
 import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -60,7 +60,7 @@ class MemberReservationTicketAcceptanceTest {
         Member savedMember = this.memberJpaRepository.save(member);
 
         ReservationTicket reservationTicket = new ReservationTicket(
-                new Reservation(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
+                new ReservationSpec(LocalDate.now().plusDays(1), savedReservationTime, savedTheme,
                         savedMember, LocalDate.now()));
         ReservationTicket savedReservationTicket = this.reservationTicketJpaRepository.save(reservationTicket);
 

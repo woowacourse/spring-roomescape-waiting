@@ -32,35 +32,35 @@ public class Waiting {
             @AssociationOverride(name = "theme", joinColumns = @JoinColumn(name = "theme_id")),
             @AssociationOverride(name = "member", joinColumns = @JoinColumn(name = "member_id"))
     })
-    private Reservation reservation;
+    private ReservationSpec reservationSpec;
 
-    public Waiting(LocalDateTime registeredAt, Reservation reservation) {
+    public Waiting(LocalDateTime registeredAt, ReservationSpec reservationSpec) {
         this.registeredAt = registeredAt;
-        this.reservation = reservation;
+        this.reservationSpec = reservationSpec;
     }
 
-    public Waiting(Reservation reservation) {
+    public Waiting(ReservationSpec reservationSpec) {
         this.registeredAt = LocalDateTime.now();
-        this.reservation = reservation;
+        this.reservationSpec = reservationSpec;
     }
 
     public boolean ownBy(Member comparedMember) {
-        return reservation.getMember().getId().equals(comparedMember.getId());
+        return reservationSpec.getMember().getId().equals(comparedMember.getId());
     }
 
     public String getThemeName() {
-        return this.reservation.getTheme().getName();
+        return this.reservationSpec.getTheme().getName();
     }
 
     public LocalDate getReservationDate() {
-        return this.reservation.getDate();
+        return this.reservationSpec.getDate();
     }
 
     public ReservationTime getReservationTime() {
-        return this.reservation.getReservationTime();
+        return this.reservationSpec.getReservationTime();
     }
 
     public Theme getTheme() {
-        return this.reservation.getTheme();
+        return this.reservationSpec.getTheme();
     }
 }

@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
@@ -48,24 +48,24 @@ class ThemeJpaRepositoryTest {
         memberJpaRepository.save(member);
 
         ReservationTicket reservationTicket = new ReservationTicket(
-                new Reservation(LocalDate.now().minusDays(1), reservationTime, theme, member,
+                new ReservationSpec(LocalDate.now().minusDays(1), reservationTime, theme, member,
                         LocalDate.now().minusDays(3
                         )));
         reservationTicketJpaRepository.save(reservationTicket);
 
         ReservationTicket reservationTicket1 = new ReservationTicket(
-                new Reservation(LocalDate.now().minusDays(2), reservationTime, theme, member,
+                new ReservationSpec(LocalDate.now().minusDays(2), reservationTime, theme, member,
                         LocalDate.now().minusDays(3
                         )));
         reservationTicketJpaRepository.save(reservationTicket1);
 
         ReservationTicket reservationTicket2 = new ReservationTicket(
-                new Reservation(LocalDate.now().minusDays(2), reservationTime, theme1, member,
+                new ReservationSpec(LocalDate.now().minusDays(2), reservationTime, theme1, member,
                         LocalDate.now().minusDays(3)));
         reservationTicketJpaRepository.save(reservationTicket2);
 
         ReservationTicket reservationTicket3 = new ReservationTicket(
-                new Reservation(LocalDate.now().minusDays(2), reservationTime1, theme, member,
+                new ReservationSpec(LocalDate.now().minusDays(2), reservationTime1, theme, member,
                         LocalDate.now().minusDays(3)));
         reservationTicketJpaRepository.save(reservationTicket3);
 

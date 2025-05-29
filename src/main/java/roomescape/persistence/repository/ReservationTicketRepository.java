@@ -3,13 +3,13 @@ package roomescape.persistence.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.persistence.vo.Period;
 
 public interface ReservationTicketRepository {
 
-    boolean isDuplicated(Reservation reservation);
+    boolean isDuplicated(ReservationSpec reservationSpec);
 
     List<ReservationTicket> findForThemeAndMemberInPeriod(
             Long themeId,
@@ -29,5 +29,5 @@ public interface ReservationTicketRepository {
 
     ReservationTicket findById(Long id);
 
-    Optional<ReservationTicket> findForThemeAndReservationTimeOnDate(Reservation reservation);
+    Optional<ReservationTicket> findForThemeAndReservationTimeOnDate(ReservationSpec reservationSpec);
 }

@@ -35,7 +35,7 @@ public class WaitingRepositoryImpl implements WaitingRepository {
 
     @Override
     public List<Waiting> findForMember(Long id) {
-        return waitingJpaRepository.findByReservation_MemberId(id);
+        return waitingJpaRepository.findByReservationSpec_MemberId(id);
     }
 
     @Override

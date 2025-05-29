@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 @Embeddable
 @Getter
 @NoArgsConstructor
-public class Reservation {
+public class ReservationSpec {
 
     @Column(nullable = false)
     private LocalDate date;
@@ -25,7 +25,7 @@ public class Reservation {
     @ManyToOne(optional = false)
     private Member member;
 
-    public Reservation(
+    public ReservationSpec(
             LocalDate date,
             ReservationTime reservationTime,
             Theme theme,

@@ -14,7 +14,7 @@ import roomescape.dto.response.MemberWaitingResponseDto;
 import roomescape.dto.response.WaitingAdminResponseDto;
 import roomescape.dto.response.WaitingResponseDto;
 import roomescape.model.Member;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.model.ReservationTime;
 import roomescape.model.Theme;
@@ -36,33 +36,33 @@ public class WaitingService {
     private final ReservationTicketRepository reservationTicketRepository;
 
     public WaitingResponseDto registerWaiting(LoginMember loginMember, WaitingRegisterDto waitingRegisterDto) {
-        Reservation reservation = createReservation(loginMember, waitingRegisterDto);
-        validateReservationExistsForWaiting(reservation);
+        ReservationSpec reservationSpec = createReservation(loginMember, waitingRegisterDto);
+        validateReservationExistsForWaiting(reservationSpec);
 
-        Waiting waiting = new Waiting(reservation);
+        Waiting waiting = new Waiting(reservationSpec);
         Waiting savedWaiting = waitingRepository.save(waiting);
 
         return new WaitingResponseDto(savedWaiting.getId());
     }
 
-    private Reservation createReservation(LoginMember loginMember, WaitingRegisterDto waitingRegisterDto) {
+    private ReservationSpec createReservation(LoginMember loginMember, WaitingRegisterDto waitingRegisterDto) {
         Member member = memberRepository.findById(loginMember.id());
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRegisterDto.time());
         Theme theme = themeRepository.findById(waitingRegisterDto.theme());
 
-        Reservation reservation = new Reservation(
+        ReservationSpec reservationSpec = new ReservationSpec(
                 waitingRegisterDto.date(),
                 reservationTime,
                 theme,
                 member,
                 LocalDate.now()
         );
-        return reservation;
+        return reservationSpec;
     }
 
-    private void validateReservationExistsForWaiting(Reservation reservation) {
+    private void validateReservationExistsForWaiting(ReservationSpec reservationSpec) {
         Optional<ReservationTicket> foundReservationTicket = reservationTicketRepository.findForThemeAndReservationTimeOnDate(
-                reservation);
+                reservationSpec);
 
         if (foundReservationTicket.isEmpty()) {
             throw new OperationNotAllowedException("예약 내역이 존재하지 않아 대기를 등록할 수 없습니다.");

@@ -19,30 +19,30 @@ public class ReservationTicket {
     private Long id;
 
     @Embedded
-    private Reservation reservation;
+    private ReservationSpec reservationSpec;
 
-    public ReservationTicket(Reservation reservation) {
-        this.reservation = reservation;
+    public ReservationTicket(ReservationSpec reservationSpec) {
+        this.reservationSpec = reservationSpec;
     }
 
     public Member getMember() {
-        return reservation.getMember();
+        return reservationSpec.getMember();
     }
 
     public LocalDate getDate() {
-        return reservation.getDate();
+        return reservationSpec.getDate();
     }
 
     public ReservationTime getReservationTime() {
-        return reservation.getReservationTime();
+        return reservationSpec.getReservationTime();
     }
 
     public Theme getTheme() {
-        return reservation.getTheme();
+        return reservationSpec.getTheme();
     }
 
     public boolean ownBy(Member comparedMember) {
-        return reservation.getMember().getId().equals(comparedMember.getId());
+        return reservationSpec.getMember().getId().equals(comparedMember.getId());
     }
 
 }

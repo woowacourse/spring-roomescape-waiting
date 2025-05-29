@@ -14,7 +14,7 @@ class ReservationTicketTest {
         // given
         LocalDateTime dateTime = LocalDateTime.now().minusDays(1);
 
-        assertThatThrownBy(() -> new ReservationTicket(new Reservation(
+        assertThatThrownBy(() -> new ReservationTicket(new ReservationSpec(
                 dateTime.toLocalDate(),
                 new ReservationTime(dateTime.toLocalTime()),
                 new Theme(1L, "공포", "무서워요", "image")

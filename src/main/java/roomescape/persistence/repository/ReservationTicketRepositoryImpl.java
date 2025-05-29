@@ -7,7 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
 import roomescape.common.exception.NotFoundException;
 import roomescape.infrastructure.db.ReservationTicketJpaRepository;
-import roomescape.model.Reservation;
+import roomescape.model.ReservationSpec;
 import roomescape.model.ReservationTicket;
 import roomescape.persistence.vo.Period;
 
@@ -18,18 +18,18 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
     private final ReservationTicketJpaRepository reservationTicketJpaRepository;
 
     @Override
-    public boolean isDuplicated(Reservation reservation) {
-        return reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTimeAndReservation_Theme(
-                        reservation.getDate(),
-                        reservation.getReservationTime(),
-                        reservation.getTheme()
+    public boolean isDuplicated(ReservationSpec reservationSpec) {
+        return reservationTicketJpaRepository.findByReservationSpec_DateAndReservationSpec_ReservationTimeAndReservationSpec_Theme(
+                        reservationSpec.getDate(),
+                        reservationSpec.getReservationTime(),
+                        reservationSpec.getTheme()
                 )
                 .isPresent();
     }
 
     @Override
     public List<ReservationTicket> findForThemeAndMemberInPeriod(Long themeId, Long memberId, Period period) {
-        return reservationTicketJpaRepository.findByReservation_ThemeIdAndReservation_MemberIdAndReservation_DateBetween(
+        return reservationTicketJpaRepository.findByReservationSpec_ThemeIdAndReservationSpec_MemberIdAndReservationSpec_DateBetween(
                 themeId,
                 memberId,
                 period.startDate(),
@@ -39,12 +39,12 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
 
     @Override
     public List<ReservationTicket> findForThemeOnDate(Long themeId, LocalDate date) {
-        return reservationTicketJpaRepository.findByReservation_ThemeIdAndReservation_Date(themeId, date);
+        return reservationTicketJpaRepository.findByReservationSpec_ThemeIdAndReservationSpec_Date(themeId, date);
     }
 
     @Override
     public List<ReservationTicket> findForMember(Long memberId) {
-        return reservationTicketJpaRepository.findByReservation_MemberId(memberId);
+        return reservationTicketJpaRepository.findByReservationSpec_MemberId(memberId);
     }
 
     @Override
@@ -70,12 +70,12 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
 
     @Override
     public Optional<ReservationTicket> findForThemeAndReservationTimeOnDate(
-            Reservation reservation
+            ReservationSpec reservationSpec
     ) {
-        return reservationTicketJpaRepository.findByReservation_ThemeAndReservation_ReservationTimeAndReservation_Date(
-                reservation.getTheme(),
-                reservation.getReservationTime(),
-                reservation.getDate()
+        return reservationTicketJpaRepository.findByReservationSpec_ThemeAndReservationSpec_ReservationTimeAndReservationSpec_Date(
+                reservationSpec.getTheme(),
+                reservationSpec.getReservationTime(),
+                reservationSpec.getDate()
         );
     }
 }
