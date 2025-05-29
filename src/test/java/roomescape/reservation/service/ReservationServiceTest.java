@@ -145,7 +145,7 @@ class ReservationServiceTest {
                 reservationRepository.save(reservation);
 
                 // when
-                reservationService.cancelById(reservation.getId());
+                reservationService.cancelById(reservation.getId(), member);
 
                 // then
                 assertThat(reservationRepository.findById(reservation.getId()).get().getStatus())

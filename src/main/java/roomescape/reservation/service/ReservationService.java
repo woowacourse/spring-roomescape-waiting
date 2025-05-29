@@ -6,6 +6,7 @@ import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.exception.AccessDeniedException;
 import roomescape.common.exception.DataExistException;
 import roomescape.common.exception.DataNotFoundException;
 import roomescape.common.exception.PastDateException;
@@ -77,9 +78,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void cancelById(final Long id) {
+    public void cancelById(final Long id, final Member member) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new DataNotFoundException("해당 예약 데이터가 존재하지 않습니다. id = " + id));
+
+        if (member.isUser() && !reservation.isOwnedBy(member)) {
+            throw new AccessDeniedException("예약 삭제 권한이 없습니다.");
+        }
 
         if (reservation.isConfirmed()) {
             approveNextWaitingReservation(reservation.getSlot());

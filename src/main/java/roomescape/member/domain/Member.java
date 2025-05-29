@@ -8,10 +8,12 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
+@EqualsAndHashCode(of = "id")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Entity
@@ -31,5 +33,13 @@ public class Member {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public boolean isAdmin() {
+        return role == Role.ADMIN;
+    }
+
+    public boolean isUser() {
+        return role == Role.USER;
     }
 }

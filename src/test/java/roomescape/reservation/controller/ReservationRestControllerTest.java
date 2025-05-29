@@ -68,28 +68,36 @@ class ReservationRestControllerTest {
                 final String token = jwtTokenProvider.createToken(payload);
                 final Map<String, String> params = createConfirmReservationRequestJsonMap("2026-10-15", "1", "1");
 
+                // 예약 생성
                 RestAssured.given().log().all()
-                                .contentType(ContentType.JSON)
-                                .cookie("token", token)
-                                .body(params)
-                                .when().post("/reservations")
-                                .then().log().all()
-                                .statusCode(HttpStatus.CREATED.value());
+                        .contentType(ContentType.JSON)
+                        .cookie("token", token)
+                        .body(params)
+                        .when().post("/reservations")
+                        .then().log().all()
+                        .statusCode(HttpStatus.CREATED.value());
 
                 // when & then
                 RestAssured.given().log().all()
-                                .when().delete("/reservations/1")
-                                .then().log().all()
-                                .statusCode(HttpStatus.NO_CONTENT.value());
+                        .cookie("token", token)  // 토큰 추가
+                        .when().delete("/reservations/1")
+                        .then().log().all()
+                        .statusCode(HttpStatus.NO_CONTENT.value());
         }
 
         @Test
         void 삭제할_예약_정보가_없는_경우_not_found를_반환한다() {
+                // given
+                final String payload = "wooga@gmail.com";
+                final String token = jwtTokenProvider.createToken(payload);
+
+                // when & then
                 RestAssured.given().log().all()
-                                .contentType(ContentType.JSON)
-                                .when().delete("/reservations/1")
-                                .then().log().all()
-                                .statusCode(HttpStatus.NOT_FOUND.value());
+                        .contentType(ContentType.JSON)
+                        .cookie("token", token)  // 토큰 추가
+                        .when().delete("/reservations/1")
+                        .then().log().all()
+                        .statusCode(HttpStatus.NOT_FOUND.value());
         }
 
         @Test

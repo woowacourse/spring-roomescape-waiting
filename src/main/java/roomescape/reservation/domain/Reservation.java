@@ -106,4 +106,8 @@ public class Reservation {
         }
         this.status = ReservationStatus.WAITING_CANCELED;
     }
+
+    public boolean isOwnedBy(Member member) {
+        return this.member.equals(member);
+    }
 }
