@@ -23,30 +23,13 @@ class ReservationTest {
             // given
             Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qweqw123!");
             LocalDate nullDate = null;
-            ReservationStatus status = ReservationStatus.BOOKED;
             ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
             Theme theme = new Theme(1L, "이름", "설명", "썸네일");
 
             // when & then
-            assertThatThrownBy(() -> new Reservation(1L, nullDate, status, time, theme, member))
+            assertThatThrownBy(() -> new Reservation(1L, nullDate, time, theme, member))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("비어있는 예약날짜로 예약을 생성할 수 없습니다.");
-        }
-
-        @DisplayName("비어있는 예약상태로는 예약을 생성할 수 없다")
-        @Test
-        void cannotCreateReservationWithNullStatus() {
-            // given
-            Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qweqw123!");
-            LocalDate date = NEXT_DAY;
-            ReservationStatus nullStatus = null;
-            ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-            Theme theme = new Theme(1L, "이름", "설명", "썸네일");
-
-            // when & then
-            assertThatThrownBy(() -> new Reservation(1L, date, nullStatus, time, theme, member))
-                    .isInstanceOf(IllegalArgumentException.class)
-                    .hasMessage("비어있는 예약상태로 예약을 생성할 수 없습니다.");
         }
 
         @DisplayName("비어있는 예약시간으로는 예약을 생성할 수 없다")
@@ -55,12 +38,11 @@ class ReservationTest {
             // given
             Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qweqw123!");
             LocalDate date = NEXT_DAY;
-            ReservationStatus status = ReservationStatus.BOOKED;
             ReservationTime nullTime = null;
             Theme theme = new Theme(1L, "이름", "설명", "썸네일");
 
             // when & then
-            assertThatThrownBy(() -> new Reservation(1L, date, status, nullTime, theme, member))
+            assertThatThrownBy(() -> new Reservation(1L, date, nullTime, theme, member))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("비어있는 예약시간으로는 예약을 생성할 수 없습니다.");
         }
@@ -71,13 +53,12 @@ class ReservationTest {
             // given
             Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qweqw123!");
             LocalDate date = NEXT_DAY;
-            ReservationStatus status = ReservationStatus.BOOKED;
             ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(10, 0));
             Theme nullTheme = null;
 
             // when & then
             assertThatThrownBy(
-                    () -> new Reservation(1L, date, status, time, nullTheme, member))
+                    () -> new Reservation(1L, date, time, nullTheme, member))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("비어있는 테마로는 예약을 생성할 수 없습니다.");
         }
@@ -88,13 +69,12 @@ class ReservationTest {
             // given
             Member nullMember = null;
             LocalDate date = NEXT_DAY;
-            ReservationStatus status = ReservationStatus.BOOKED;
             ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(10, 0));
             Theme theme = new Theme(1L, "이름", "설명", "썸네일");
 
             // when & then
             assertThatThrownBy(
-                    () -> new Reservation(1L, date, status, time, theme, nullMember))
+                    () -> new Reservation(1L, date, time, theme, nullMember))
                     .isInstanceOf(IllegalArgumentException.class)
                     .hasMessage("비어있는 멤버로는 예약을 생성할 수 없습니다.");
         }
@@ -111,7 +91,7 @@ class ReservationTest {
             ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
             Theme theme = new Theme(1L, "회원", "설명", "섬네일");
             Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
-            Reservation reservation = new Reservation(1L, YESTERDAY, ReservationStatus.BOOKED, time, theme, member);
+            Reservation reservation = new Reservation(1L, YESTERDAY, time, theme, member);
 
             // when
             boolean isPast = reservation.isPastDateTime();
@@ -127,7 +107,7 @@ class ReservationTest {
             ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
             Theme theme = new Theme(1L, "회원", "설명", "섬네일");
             Member member = new Member(1L, Role.GENERAL, "회원", "test@test.com", "qwer1234!");
-            Reservation reservation = new Reservation(1L, NEXT_DAY, ReservationStatus.BOOKED, time, theme, member);
+            Reservation reservation = new Reservation(1L, NEXT_DAY, time, theme, member);
 
             // when
             boolean isPast = reservation.isPastDateTime();

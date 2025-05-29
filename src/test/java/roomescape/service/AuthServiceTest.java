@@ -15,8 +15,7 @@ import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
-import roomescape.exception.global.AuthorizationException;
-import roomescape.exception.local.NotFoundMemberException;
+import roomescape.exception.LoginFailException;
 import roomescape.repository.MemberRepository;
 import roomescape.utility.JwtTokenProvider;
 
@@ -77,8 +76,8 @@ public class AuthServiceTest {
 
             // when & then
             assertThatThrownBy(() -> authService.login(wrongLoginRequest))
-                    .isInstanceOf(NotFoundMemberException.class)
-                    .hasMessage("해당 유저를 찾을 수 없습니다.");
+                    .isInstanceOf(LoginFailException.class)
+                    .hasMessage("이메일에 해당하는 회원이 존재하지 않습니다.");
         }
 
         @DisplayName("비밀번호가 맞지 않을 경우 로그인이 불가능하다.")
@@ -94,7 +93,7 @@ public class AuthServiceTest {
 
             // when & then
             assertThatThrownBy(() -> authService.login(wrongLoginRequest))
-                    .isInstanceOf(AuthorizationException.class)
+                    .isInstanceOf(LoginFailException.class)
                     .hasMessage("로그인 정보가 올바르지 않습니다.");
         }
     }

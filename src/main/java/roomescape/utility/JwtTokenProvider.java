@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Role;
 import roomescape.dto.business.AccessTokenContent;
-import roomescape.exception.global.AuthorizationException;
+import roomescape.exception.UnauthorizedException;
 
 @Component
 public class JwtTokenProvider {
@@ -39,15 +39,11 @@ public class JwtTokenProvider {
     }
 
     public AccessTokenContent parseAccessToken(String accessToken) {
-        try {
-            Claims tokenPayload = parseToken(accessToken);
-            return new AccessTokenContent(
-                    tokenPayload.get("id", Long.class),
-                    Role.valueOf(tokenPayload.get("role", String.class)),
-                    tokenPayload.get("name", String.class));
-        } catch (JwtException | IllegalArgumentException e) {
-            throw new AuthorizationException("토큰 파싱 실패");
-        }
+        Claims tokenPayload = parseToken(accessToken);
+        return new AccessTokenContent(
+                tokenPayload.get("id", Long.class),
+                Role.valueOf(tokenPayload.get("role", String.class)),
+                tokenPayload.get("name", String.class));
     }
 
     private String makeToken(Map<String, Object> params) {
@@ -61,7 +57,7 @@ public class JwtTokenProvider {
                     .signWith(secretKey)
                     .compact();
         } catch (JwtException e) {
-            throw new AuthorizationException("토큰 생성 실패");
+            throw new UnauthorizedException("토큰 생성에 실패했습니다.");
         }
     }
 
@@ -73,7 +69,7 @@ public class JwtTokenProvider {
                     .parseSignedClaims(token)
                     .getPayload();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new AuthorizationException("토큰 파싱 실패");
+            throw new UnauthorizedException("토큰이 유효하지 않습니다.");
         }
     }
 }

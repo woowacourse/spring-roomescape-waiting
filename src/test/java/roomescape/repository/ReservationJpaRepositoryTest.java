@@ -17,7 +17,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
@@ -41,7 +40,7 @@ public class ReservationJpaRepositoryTest {
         theme = entityManager.persist(
                 Theme.createWithoutId("테마", "테마 설명", "thumbnail.jpg"));
         member = entityManager.persist(
-                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123"));
+                Member.createWithoutId(Role.GENERAL, "회원", "member@test.com", "password123!"));
     }
 
     @Nested
@@ -53,11 +52,11 @@ public class ReservationJpaRepositoryTest {
         void canFindReservationsByMemberFilter() {
             // given
             Member otherMember = entityManager.persist(
-                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123"));
+                    Member.createWithoutId(Role.GENERAL, "다른회원", "otherMember@test.com", "password123!"));
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+                    TODAY, reservationTime, theme, member));
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, theme, otherMember));
+                    TODAY, reservationTime, theme, otherMember));
             entityManager.flush();
 
             // when
@@ -78,9 +77,9 @@ public class ReservationJpaRepositoryTest {
             Theme otherTheme = entityManager.persist(
                     Theme.createWithoutId("다른테마", "설명", "thumbnail.jpg"));
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+                    TODAY, reservationTime, theme, member));
             entityManager.persist(Reservation.createWithoutId(
-                    TODAY, ReservationStatus.BOOKED, reservationTime, otherTheme, member));
+                    TODAY, reservationTime, otherTheme, member));
             entityManager.flush();
 
             // when
@@ -99,11 +98,11 @@ public class ReservationJpaRepositoryTest {
         void canFindReservationsByDateFilter() {
             // given
             entityManager.persist(
-                    Reservation.createWithoutId(YESTERDAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+                    Reservation.createWithoutId(YESTERDAY, reservationTime, theme, member));
             entityManager.persist(
-                    Reservation.createWithoutId(TODAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+                    Reservation.createWithoutId(TODAY, reservationTime, theme, member));
             entityManager.persist(
-                    Reservation.createWithoutId(NEXT_DAY, ReservationStatus.BOOKED, reservationTime, theme, member));
+                    Reservation.createWithoutId(NEXT_DAY, reservationTime, theme, member));
             entityManager.flush();
 
             // when

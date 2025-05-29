@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
@@ -12,6 +13,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.config.annotation.Authority;
+import roomescape.domain.Role;
 import roomescape.dto.business.ThemeCreationContent;
 import roomescape.dto.request.ThemeCreationRequest;
 import roomescape.dto.response.ThemeResponse;
@@ -40,8 +43,9 @@ public class ThemeController {
     }
 
     @PostMapping
+    @Authority(Role.ADMIN)
     public ResponseEntity<ThemeResponse> addTheme(
-            @RequestBody ThemeCreationRequest request
+            @Valid @RequestBody ThemeCreationRequest request
     ) {
         ThemeCreationContent creationContent = new ThemeCreationContent(request);
         ThemeResponse resDto = themeService.addTheme(creationContent);
@@ -49,6 +53,7 @@ public class ThemeController {
     }
 
     @DeleteMapping("/{id}")
+    @Authority(Role.ADMIN)
     public ResponseEntity<Void> deleteThemeById(
             @PathVariable("id") Long id
     ) {

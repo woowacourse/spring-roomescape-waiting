@@ -10,11 +10,11 @@ import roomescape.domain.ReservationTime;
 import roomescape.dto.business.ReservationTimeCreationContent;
 import roomescape.dto.business.ReservationTimeWithBookState;
 import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.exception.local.AlreadyReservedTimeException;
-import roomescape.exception.local.DuplicateReservationException;
-import roomescape.exception.local.NotFoundReservationTimeException;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 @Transactional
@@ -22,13 +22,15 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationTimeService(
             ReservationTimeRepository timeRepository,
-            ReservationRepository reservationRepository
+            ReservationRepository reservationRepository, WaitingRepository waitingRepository
     ) {
         this.timeRepository = timeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationTimeResponse> findAllReservationTimes() {
@@ -38,9 +40,9 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    public List<ReservationTimeWithBookState> findReservationTimesWithBookState(long themeId, LocalDate date) {
+    public List<ReservationTimeWithBookState> findReservationTimesWithBooking(long themeId, LocalDate date) {
         List<ReservationTime> allTimes = timeRepository.findAllOrderByStartAt();
-        List<ReservationTime> bookedTimes = timeRepository.findReservationTimesWithBookState(themeId, date);
+        List<ReservationTime> bookedTimes = timeRepository.findReservationTimesWithBooking(themeId, date);
         return calculateAllTimesWithBookedState(allTimes, bookedTimes);
     }
 
@@ -51,28 +53,35 @@ public class ReservationTimeService {
         return new ReservationTimeResponse(savedReservationTime);
     }
 
-    public void deleteReservationTimeById(Long id) {
-        ReservationTime reservationTime = getReservationTimeById(id);
+    public void deleteReservationTimeById(Long timeId) {
+        ReservationTime reservationTime = getReservationTimeById(timeId);
         validateReservationInTime(reservationTime);
-        timeRepository.deleteById(id);
+        validateWaitingInTime(reservationTime);
+        timeRepository.deleteById(timeId);
     }
 
     private void validateDuplicateTime(LocalTime startAt) {
         boolean alreadyExistTime = timeRepository.existsByStartAt(startAt);
         if (alreadyExistTime) {
-            throw new DuplicateReservationException();
+            throw new BadRequestException("중복된 예약시간입니다.");
         }
     }
 
     private void validateReservationInTime(ReservationTime reservationTime) {
         if (reservationRepository.existsByReservationTime(reservationTime)) {
-            throw new AlreadyReservedTimeException();
+            throw new BadRequestException("이미 예약이 존재하는 예약 시간입니다.");
+        }
+    }
+
+    private void validateWaitingInTime(ReservationTime reservationTime) {
+        if (waitingRepository.existsByTime(reservationTime)) {
+            throw new BadRequestException("이미 예약 대기가 존재하는 예약 시간입니다.");
         }
     }
 
     private ReservationTime getReservationTimeById(Long reservationTimeId) {
         return timeRepository.findById(reservationTimeId)
-                .orElseThrow(NotFoundReservationTimeException::new);
+                .orElseThrow(() -> new NotFoundException("ID에 해당하는 예약시간은 존재하지 않습니다."));
     }
 
     private List<ReservationTimeWithBookState> calculateAllTimesWithBookedState(

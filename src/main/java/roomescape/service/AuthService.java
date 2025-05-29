@@ -6,8 +6,7 @@ import roomescape.domain.Member;
 import roomescape.dto.business.AccessTokenContent;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.AccessTokenResponse;
-import roomescape.exception.global.AuthorizationException;
-import roomescape.exception.local.NotFoundMemberException;
+import roomescape.exception.LoginFailException;
 import roomescape.repository.MemberRepository;
 import roomescape.utility.JwtTokenProvider;
 
@@ -33,12 +32,12 @@ public class AuthService {
 
     private Member getMemberByEmail(String email) {
         return memberRepository.findOneByEmail(email)
-                .orElseThrow(NotFoundMemberException::new);
+                .orElseThrow(() -> new LoginFailException("이메일에 해당하는 회원이 존재하지 않습니다."));
     }
 
     private void validatePasswordForLogin(Member member, String password) {
         if (!member.isEqualPassword(password)) {
-            throw new AuthorizationException("로그인 정보가 올바르지 않습니다.");
+            throw new LoginFailException("로그인 정보가 올바르지 않습니다.");
         }
     }
 }

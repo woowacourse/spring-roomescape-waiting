@@ -28,7 +28,7 @@ public interface ReservationTimeRepository extends JpaRepository<ReservationTime
                 AND r.date = :date
             )
             """)
-    List<ReservationTime> findReservationTimesWithBookState(
+    List<ReservationTime> findReservationTimesWithBooking(
             @Param("themeId") long themeId,
             @Param("date") LocalDate date
     );

@@ -9,7 +9,7 @@ import jakarta.persistence.Lob;
 import java.util.Objects;
 
 @Entity
-public class Theme {
+public class Theme extends AuditedEntity {
 
     private static final int MAX_NAME_LENGTH = 50;
     private static final int MAX_THUMBNAIL_LENGTH = 600;

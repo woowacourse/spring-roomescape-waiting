@@ -174,4 +174,29 @@ class MemberTest {
             assertThat(isMember).isFalse();
         }
     }
+
+    @Nested
+    @DisplayName("회원의 ID를 확인할 수 있다.")
+    public class isEqualMemberId {
+
+        @DisplayName("회원의 ID가 같지 않은 경우 ")
+        @Test
+        void isEqualMember() {
+            // given
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@email.com", "qwer1234!");
+
+            // when & then
+            assertThat(member.isEqualMemberId(1L)).isTrue();
+        }
+
+        @DisplayName("sample")
+        @Test
+        void isNotEqualMember() {
+            // given
+            Member member = new Member(1L, Role.GENERAL, "회원", "test@email.com", "qwer1234!");
+
+            // when & then
+            assertThat(member.isEqualMemberId(2L)).isFalse();
+        }
+    }
 }
