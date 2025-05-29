@@ -29,8 +29,8 @@ public class WaitingReservationApplicationService {
 
     public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId,
                                       final Long memberId) {
-        ReservationSlot slot = reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(date,
-                timeId, themeId);
+        ReservationSlot slot = reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(date, timeId,
+                themeId);
         Member member = memberDataService.getById(memberId);
         Reservation reservation = slot.addReservation(member, LocalDateTime.now());
         reservationDataService.save(reservation);
@@ -45,22 +45,12 @@ public class WaitingReservationApplicationService {
                 .toList();
     }
 
-    public void cancel(final Long reservationSlotId, final Long memberId) {
+    public void cancelByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
         reservationDataService.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
-        if (reservationDataService.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId)) {
-            reservationSlotDataService.deleteById(reservationSlotId);
-        }
     }
 
-    public void cancelWaitingReservationWithoutMemberId(final Long reservationId) {
+    public void cancel(final Long reservationId) {
         Reservation reservation = reservationDataService.getById(reservationId);
-        reservationDataService.cancelWaitingReservation(reservation);
-        cleanupEmptyReservationSlot(reservation.getReservationSlot().getId());
-    }
-
-    private void cleanupEmptyReservationSlot(final Long slotId) {
-        if (reservationSlotDataService.hasSingleReservation(slotId)) {
-            reservationSlotDataService.deleteById(slotId);
-        }
+        reservationDataService.cancel(reservation);
     }
 }
