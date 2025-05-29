@@ -1,10 +1,10 @@
 package roomescape.reservation.service;
 
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
-import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberService;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
@@ -16,60 +16,72 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 
 @Service
+@AllArgsConstructor
 public class ReservationServiceFacade {
+
     private final ReservationService reservationService;
     private final MemberService memberService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
-    @Autowired
-    public ReservationServiceFacade(
-        ReservationService reservationService,
-        MemberService memberService,
-        ReservationTimeService reservationTimeService,
-        ThemeService themeService
-    ) {
-        this.reservationService = reservationService;
-        this.memberService = memberService;
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
-    }
-
+    @Transactional
     public ReservationResponse createReservation(
         ReservationCreateRequest reservationCreateRequest,
         MemberPrincipal memberPrincipal
     ) {
-        ReservationTime reservationTime = reservationTimeService.findById(reservationCreateRequest.timeId())
-            .orElseThrow(() -> new BadRequestException("올바른 예약 시간을 찾을 수 없습니다."));
-
-        Theme theme = themeService.findById(reservationCreateRequest.themeId())
-            .orElseThrow(() -> new BadRequestException("올바른 방탈출 테마가 없습니다."));
-
-        Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
-
+        ReservationTime reservationTime = reservationTimeService.findByIdOrThrow(reservationCreateRequest.timeId());
+        Theme theme = themeService.findByIdOrThrow(reservationCreateRequest.themeId());
+        Member member = memberService.findByPrincipalOrThrow(memberPrincipal);
         List<ReservationTime> availableTimes = reservationTimeService.findByReservationDateAndThemeId(
             reservationCreateRequest.date(),
             reservationCreateRequest.themeId()
         );
-        return reservationService.createReservation(
+
+        return reservationService.create(
             reservationTime,
+            reservationCreateRequest.date(),
             theme,
             member,
-            availableTimes,
-            reservationCreateRequest
+            availableTimes
         );
     }
 
+    @Transactional
+    public ReservationResponse createWaiting(
+        ReservationCreateRequest reservationCreateRequest,
+        MemberPrincipal memberPrincipal
+    ) {
+        ReservationTime reservationTime = reservationTimeService.findByIdOrThrow(reservationCreateRequest.timeId());
+        Theme theme = themeService.findByIdOrThrow(reservationCreateRequest.themeId());
+        Member member = memberService.findByPrincipalOrThrow(memberPrincipal);
+
+        return reservationService.createWaiting(
+            reservationCreateRequest.date(),
+            reservationTime,
+            theme,
+            member
+        );
+    }
+
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         return reservationService.findAll();
     }
 
-    public void deleteReservationById(Long id) {
-        reservationService.deleteReservationById(id);
+    @Transactional
+    public void deleteById(Long id) {
+        reservationService.deleteById(id);
     }
 
-    public List<MyReservationResponse> findMyReservations(MemberPrincipal memberPrincipal) {
-        Member member = memberService.findExistingMemberByPrincipal(memberPrincipal);
+    @Transactional(readOnly = true)
+    public List<MyReservationResponse> findMine(MemberPrincipal memberPrincipal) {
+        Member member = memberService.findByPrincipalOrThrow(memberPrincipal);
         return reservationService.findAllByMember(member);
+    }
+
+    @Transactional
+    public void deleteWaiting(Long id, MemberPrincipal memberPrincipal) {
+        Member member = memberService.findByPrincipalOrThrow(memberPrincipal);
+        reservationService.deleteWaiting(id, member);
     }
 }

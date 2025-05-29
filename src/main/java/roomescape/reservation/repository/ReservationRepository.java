@@ -2,10 +2,14 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 public interface ReservationRepository {
+
     Reservation save(Reservation reservation);
 
     List<Reservation> findAll();
@@ -22,4 +26,20 @@ public interface ReservationRepository {
     );
 
     List<Reservation> findAllByMember(Member member);
+
+    Optional<Reservation> findByLowestPriorityByDateAndTimeAndTheme(
+        LocalDate date,
+        ReservationTime time,
+        Theme theme
+    );
+
+    long findWaitingOrder(Reservation reservation);
+
+    Optional<Reservation> findById(Long id);
+
+    void delete(Reservation reservation);
+
+    List<Reservation> findHighestPriorityWaitings();
+
+    boolean isHighestPriorityWaiting(Reservation reservation);
 }

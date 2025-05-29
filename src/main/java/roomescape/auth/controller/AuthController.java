@@ -2,6 +2,7 @@ package roomescape.auth.controller;
 
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -16,14 +17,11 @@ import roomescape.auth.infrastructure.methodargument.MemberPrincipal;
 import roomescape.auth.service.AuthServiceFacade;
 
 @RestController
+@AllArgsConstructor
 public class AuthController {
+
     private final AuthServiceFacade authService;
     private final AuthorizationHandler authorizationHandler;
-
-    public AuthController(AuthServiceFacade authService, AuthorizationHandler authorizationHandler) {
-        this.authService = authService;
-        this.authorizationHandler = authorizationHandler;
-    }
 
     @PostMapping("/login")
     public ResponseEntity<Void> login(HttpServletResponse response, @RequestBody @Valid LoginRequest request) {

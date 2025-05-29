@@ -8,19 +8,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Table;
 import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.exception.DomainValidationException;
+import lombok.AccessLevel;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import roomescape.exception.BadRequestException;
 
 @Entity
+@Getter
+@NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Table(name = "reservation_time")
 public class ReservationTime {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @Column(nullable = false, unique = true)
     private LocalTime startAt;
-
-    public ReservationTime() {
-    }
 
     public ReservationTime(Long id, LocalTime startAt) {
         validate(startAt);
@@ -28,41 +31,26 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    public static ReservationTime generateWithPrimaryKey(ReservationTime reservationTime, Long newPrimaryKey) {
+    public static ReservationTime createWithPrimaryKey(ReservationTime reservationTime, Long newPrimaryKey) {
         return new ReservationTime(newPrimaryKey, reservationTime.startAt);
     }
 
     private void validate(LocalTime startAt) {
         if (startAt == null) {
-            throw new DomainValidationException("startAt(시작 시간)은 비어있을 수 없습니다.");
+            throw new BadRequestException("예약 시간은 비어있을 수 없습니다.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
     }
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
+        if (!(o instanceof ReservationTime that)) {
             return false;
         }
-        ReservationTime that = (ReservationTime) o;
-        if (that.getId() == null || id == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
+        return Objects.equals(id, that.id) && Objects.equals(startAt, that.startAt);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hash(id, startAt);
     }
 }

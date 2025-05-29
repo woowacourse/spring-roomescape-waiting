@@ -7,6 +7,7 @@ public record AuthorizationPayload(
     String name,
     MemberRole role
 ) {
+
     public static AuthorizationPayload fromMember(Member member) {
         return new AuthorizationPayload(
             member.getName(),

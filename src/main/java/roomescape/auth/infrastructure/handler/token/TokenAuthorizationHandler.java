@@ -10,8 +10,7 @@ public abstract class TokenAuthorizationHandler implements AuthorizationHandler 
 
     @Override
     public final Optional<AuthorizationPrincipal> getPrincipal(HttpServletRequest request) {
-        String token = getToken(request);
-        return Optional.ofNullable(token)
+        return getToken(request)
             .map(AuthorizationPrincipal::new);
     }
 
@@ -25,7 +24,7 @@ public abstract class TokenAuthorizationHandler implements AuthorizationHandler 
         removeToken(response);
     }
 
-    protected abstract String getToken(HttpServletRequest request);
+    protected abstract Optional<String> getToken(HttpServletRequest request);
 
     protected abstract void setToken(HttpServletResponse response, String token);
 

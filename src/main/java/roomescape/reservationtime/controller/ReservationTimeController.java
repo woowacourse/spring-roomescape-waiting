@@ -3,7 +3,7 @@ package roomescape.reservationtime.controller;
 import java.net.URI;
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,28 +19,25 @@ import roomescape.reservationtime.dto.response.ReservationTimeResponseWithBooked
 import roomescape.reservationtime.service.ReservationTimeServiceFacade;
 
 @RestController
+@AllArgsConstructor
 @RequestMapping("/times")
 public class ReservationTimeController {
-    private final ReservationTimeServiceFacade reservationTimeService;
 
-    @Autowired
-    public ReservationTimeController(ReservationTimeServiceFacade reservationTimeService) {
-        this.reservationTimeService = reservationTimeService;
-    }
+    private final ReservationTimeServiceFacade reservationTimeService;
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(
         @RequestBody ReservationTimeCreateRequest reservationTimeCreateRequest) {
-        ReservationTimeResponse createdReservationTime = reservationTimeService.createReservationTime(
+        ReservationTimeResponse response = reservationTimeService.createReservationTime(
             reservationTimeCreateRequest);
-        URI location = URI.create("/times/" + createdReservationTime.id());
-        return ResponseEntity.created(location).body(createdReservationTime);
+        URI location = URI.create("/times/" + response.id());
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> read() {
-        List<ReservationTimeResponse> reservationTimes = reservationTimeService.findAll();
-        return ResponseEntity.ok(reservationTimes);
+        List<ReservationTimeResponse> response = reservationTimeService.findAll();
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/{id}")
@@ -50,11 +47,12 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/search")
-    public ResponseEntity<List<ReservationTimeResponseWithBookedStatus>> read(
+    public ResponseEntity<List<ReservationTimeResponseWithBookedStatus>> search(
         @RequestParam(required = false) LocalDate date,
-        @RequestParam(required = false) Long themeId) {
-        List<ReservationTimeResponseWithBookedStatus> response = reservationTimeService.findAvailableReservationTimesByDateAndThemeId(
-            date, themeId);
+        @RequestParam(required = false) Long themeId
+    ) {
+        List<ReservationTimeResponseWithBookedStatus> response = reservationTimeService.
+            findAvailableReservationTimesByDateAndThemeId(date, themeId);
         return ResponseEntity.ok(response);
     }
 }

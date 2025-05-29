@@ -15,6 +15,7 @@ public record AdminReservationCreateRequest(
     @NotNull(message = "예약자 정보가 존재하지 않습니다")
     Long memberId
 ) {
+
     public ReservationCreateRequest toReservationCreateRequest() {
         return new ReservationCreateRequest(date, timeId, themeId);
     }

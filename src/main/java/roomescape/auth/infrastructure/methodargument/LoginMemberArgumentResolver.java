@@ -10,7 +10,6 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.infrastructure.AuthorizationPayload;
 import roomescape.exception.UnauthorizedException;
 
-@Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override

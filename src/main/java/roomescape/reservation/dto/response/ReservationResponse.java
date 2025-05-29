@@ -14,11 +14,12 @@ public record ReservationResponse(
     @JsonProperty("theme") ThemeResponse themeResponse,
     @JsonProperty("member") LoginMemberResponse loginMemberResponse
 ) {
-    public static ReservationResponse from(Reservation reservation) {
+
+    public static ReservationResponse fromReservation(Reservation reservation) {
         return new ReservationResponse(reservation.getId(),
             reservation.getDate(),
-            ReservationTimeResponse.from(reservation.getTime()),
-            ThemeResponse.from(reservation.getTheme()),
+            ReservationTimeResponse.fromReservationTime(reservation.getTime()),
+            ThemeResponse.fromTheme(reservation.getTheme()),
             LoginMemberResponse.from(reservation.getMember())
         );
     }

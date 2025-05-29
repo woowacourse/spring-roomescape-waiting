@@ -10,4 +10,5 @@ public record LoginRequest(
     @NotBlank(message = "패스워드는 빈 값이 올 수 없습니다")
     String password
 ) {
+    
 }

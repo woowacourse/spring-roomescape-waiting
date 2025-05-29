@@ -3,12 +3,13 @@ package roomescape.reservation.repository.jdbc;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.exception.DomainValidationException;
+import roomescape.exception.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.domain.Reservation;
@@ -41,7 +42,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         Long generatedKey = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
 
-        return Reservation.generateWithPrimaryKey(reservation, generatedKey);
+        return Reservation.createWithPrimaryKey(reservation, generatedKey);
     }
 
     @Override
@@ -50,6 +51,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id as reservation_id,
                 r.date as reservation_date,
+                r.priority as reservation_priority,
                 t.id as time_id,
                 t.start_at as time_start_at,
                 m.id as member_id,
@@ -72,27 +74,34 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return jdbcTemplate.query(
             query,
-            (resultSet, rowNum) -> new Reservation(
-                resultSet.getLong("reservation_id"),
-                resultSet.getDate("reservation_date").toLocalDate(),
-                new ReservationTime(
-                    resultSet.getLong("time_id"),
-                    resultSet.getTime("time_start_at").toLocalTime()
-                ),
-                new Theme(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("theme_description"),
-                    resultSet.getString("theme_thumbnail")
-                ),
-                new Member(
-                    resultSet.getLong("member_id"),
-                    resultSet.getString("member_name"),
-                    resultSet.getString("member_email"),
-                    MemberRole.valueOf(resultSet.getString("role")),
-                    resultSet.getString("member_password")
-                )
-            )
+            (resultSet, rowNum) -> {
+                Reservation reservationWithoutPrimaryKey = new Reservation(
+                    null,
+                    resultSet.getDate("reservation_date").toLocalDate(),
+                    new ReservationTime(
+                        resultSet.getLong("time_id"),
+                        resultSet.getTime("time_start_at").toLocalTime()
+                    ),
+                    new Theme(
+                        resultSet.getLong("theme_id"),
+                        resultSet.getString("theme_name"),
+                        resultSet.getString("theme_description"),
+                        resultSet.getString("theme_thumbnail")
+                    ),
+                    new Member(
+                        resultSet.getLong("member_id"),
+                        resultSet.getString("member_name"),
+                        resultSet.getString("member_email"),
+                        MemberRole.valueOf(resultSet.getString("role")),
+                        resultSet.getString("member_password")
+                    ),
+                    resultSet.getInt("reservation_priority")
+                );
+                return Reservation.createWithPrimaryKey(
+                    reservationWithoutPrimaryKey,
+                    resultSet.getLong("reservation_id")
+                );
+            }
         );
     }
 
@@ -103,6 +112,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             SELECT
                 r.id as reservation_id,
                 r.date as reservation_date,
+                r.priority as reservation_priority,
                 t.id as time_id,
                 t.start_at as time_start_at,
                 m.id as member_id,
@@ -147,7 +157,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("member_email"),
                     MemberRole.valueOf(resultSet.getString("role")),
                     resultSet.getString("member_password")
-                )
+                ),
+                resultSet.getInt("reservation_priority")
             ),
             themeId, memberId, dateFrom, dateTo
         );
@@ -159,6 +170,57 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllByMember(Member member) {
         return List.of();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public Optional<Reservation> findByLowestPriorityByDateAndTimeAndTheme(
+        LocalDate date,
+        ReservationTime time,
+        Theme theme
+    ) {
+        return Optional.empty();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public long findWaitingOrder(Reservation reservation) {
+        return 0;
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public Optional<Reservation> findById(Long id) {
+        return Optional.empty();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public void delete(Reservation reservation) {
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public List<Reservation> findHighestPriorityWaitings() {
+        return List.of();
+    }
+
+    /**
+     * 이 메서드는 현재 사용 중이지 않습니다. 추후 JdbcReservationRepository 사용 시 세부 사항을 구현해야 합니다.
+     */
+    @Override
+    public boolean isHighestPriorityWaiting(Reservation reservation) {
+        return false;
     }
 
     @Override
@@ -179,7 +241,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         final String query = "DELETE FROM reservation WHERE id = ?";
         int affectedRows = jdbcTemplate.update(query, id);
         if (affectedRows == 0) {
-            throw new DomainValidationException("예약을 삭제할 수 없습니다. 존재하지 않는 예약입니다.");
+            throw new BadRequestException("예약을 삭제할 수 없습니다. 존재하지 않는 예약입니다.");
         }
     }
 }

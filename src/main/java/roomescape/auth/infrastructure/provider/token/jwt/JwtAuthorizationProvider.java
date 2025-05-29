@@ -15,6 +15,7 @@ import roomescape.member.domain.MemberRole;
 
 @Component
 public class JwtAuthorizationProvider extends TokenAuthorizationProvider {
+
     private static final String NAME_KEY = "name";
     private static final String ROLE_KEY = "role";
 
