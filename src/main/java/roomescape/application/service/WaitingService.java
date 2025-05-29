@@ -84,10 +84,7 @@ public class WaitingService {
         List<Waiting> myWaitings = waitingRepository.findForMember(loginMember.id());
 
         return myWaitings.stream()
-                .map(waiting -> {
-                    int count = waitingRepository.countWaitingBefore(waiting);
-                    return new MemberWaitingResponseDto(waiting, count + 1);
-                })
+                .map(this::toMemberWaitingResponseDto)
                 .toList();
     }
 
@@ -99,6 +96,11 @@ public class WaitingService {
         return waitingRepository.findAll().stream()
                 .map(WaitingAdminResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    private MemberWaitingResponseDto toMemberWaitingResponseDto(Waiting waiting) {
+        int count = waitingRepository.countWaitingBefore(waiting);
+        return new MemberWaitingResponseDto(waiting, count + 1);
     }
 }
 
