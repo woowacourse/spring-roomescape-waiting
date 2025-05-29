@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.service.WaitingAdminService;
+import roomescape.application.service.WaitingService;
 import roomescape.dto.response.WaitingAdminResponseDto;
 
 @RestController
@@ -17,17 +17,17 @@ import roomescape.dto.response.WaitingAdminResponseDto;
 @RequiredArgsConstructor
 public class WaitingAdminController {
 
-    private final WaitingAdminService waitingAdminService;
+    private final WaitingService waitingService;
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<WaitingAdminResponseDto> getWaitings() {
-        return waitingAdminService.getAllWaitings();
+        return waitingService.getAllWaitings();
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void rejectWaiting(@PathVariable Long id) {
-        waitingAdminService.rejectWaiting(id);
+        waitingService.rejectWaiting(id);
     }
 }

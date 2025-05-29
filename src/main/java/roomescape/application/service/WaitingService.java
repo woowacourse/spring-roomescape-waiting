@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.OperationNotAllowedException;
@@ -11,6 +12,7 @@ import roomescape.common.exception.UnauthorizedException;
 import roomescape.dto.LoginMember;
 import roomescape.dto.request.WaitingRegisterDto;
 import roomescape.dto.response.MemberWaitingResponseDto;
+import roomescape.dto.response.WaitingAdminResponseDto;
 import roomescape.dto.response.WaitingResponseDto;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
@@ -85,6 +87,16 @@ public class WaitingService {
                     return new MemberWaitingResponseDto(waiting, count + 1);
                 })
                 .toList();
+    }
+
+    public void rejectWaiting(Long id) {
+        waitingRepository.rejectById(id);
+    }
+
+    public List<WaitingAdminResponseDto> getAllWaitings() {
+        return waitingRepository.findAll().stream()
+                .map(WaitingAdminResponseDto::new)
+                .collect(Collectors.toList());
     }
 }
 
