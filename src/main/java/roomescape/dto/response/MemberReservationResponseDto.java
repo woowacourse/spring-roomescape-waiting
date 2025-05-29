@@ -3,7 +3,6 @@ package roomescape.dto.response;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Reservation;
-import roomescape.domain.WaitingWithRank;
 
 public record MemberReservationResponseDto(
         Long id,
@@ -25,13 +24,13 @@ public record MemberReservationResponseDto(
         );
     }
 
-    public static MemberReservationResponseDto from(final WaitingWithRank waitingWithRank) {
+    public static MemberReservationResponseDto from(final WaitingWithRankDto waitingWithRankDto) {
         return new MemberReservationResponseDto(
-                waitingWithRank.waiting().getId(),
-                waitingWithRank.waiting().getTheme().getName(),
-                waitingWithRank.waiting().getDate(),
-                waitingWithRank.waiting().getReservationTime().getStartAt(),
-                waitingWithRank.rank().toString()
+                waitingWithRankDto.waiting().getId(),
+                waitingWithRankDto.waiting().getTheme().getName(),
+                waitingWithRankDto.waiting().getDate(),
+                waitingWithRankDto.waiting().getReservationTime().getStartAt(),
+                waitingWithRankDto.rank().toString()
         );
     }
 }

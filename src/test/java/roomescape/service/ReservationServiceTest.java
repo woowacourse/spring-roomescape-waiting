@@ -22,10 +22,10 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
-import roomescape.domain.WaitingWithRank;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.WaitingWithRankDto;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -151,14 +151,14 @@ class ReservationServiceTest {
         LoginMember loginMember = LoginMember.from(savedReservation.getMember());
 
         Waiting savedWaiting = createSaveWaiting(savedReservation);
-        WaitingWithRank waitingWithRank = new WaitingWithRank(savedWaiting, 1L);
+        WaitingWithRankDto waitingWithRankDto = new WaitingWithRankDto(savedWaiting, 1L);
 
         //when
         List<MemberReservationResponseDto> response = reservationService.getReservationsOfMember(loginMember);
 
         /**/
         MemberReservationResponseDto reservationResponse = MemberReservationResponseDto.from(savedReservation);
-        MemberReservationResponseDto waitingRanksResponse = MemberReservationResponseDto.from(waitingWithRank);
+        MemberReservationResponseDto waitingRanksResponse = MemberReservationResponseDto.from(waitingWithRankDto);
 
         //then
         assertThat(response).hasSize(2);

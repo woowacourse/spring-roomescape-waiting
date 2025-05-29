@@ -13,11 +13,11 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
-import roomescape.domain.WaitingWithRank;
 import roomescape.dto.request.ReservationRegisterDto;
 import roomescape.dto.request.ReservationSearchDto;
 import roomescape.dto.response.MemberReservationResponseDto;
 import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.WaitingWithRankDto;
 import roomescape.repository.MemberRepository;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -73,14 +73,14 @@ public class ReservationService {
 
     public List<MemberReservationResponseDto> getReservationsOfMember(final LoginMember loginMember) {
         final List<Reservation> reservations = reservationRepository.findAllByMemberId(loginMember.getId());
-        final List<WaitingWithRank> waitingWithRanks = waitingRepository.findWaitingsWithRankByMemberId(
+        final List<WaitingWithRankDto> waitingWithRankDtos = waitingRepository.findWaitingsWithRankByMemberId(
                 loginMember.getId());
 
-        return getMemberReservationResponseDtos(reservations, waitingWithRanks);
+        return getMemberReservationResponseDtos(reservations, waitingWithRankDtos);
     }
 
     private List<MemberReservationResponseDto> getMemberReservationResponseDtos(final List<Reservation> reservations,
-                                                                                final List<WaitingWithRank> waitingList) {
+                                                                                final List<WaitingWithRankDto> waitingList) {
         final List<MemberReservationResponseDto> reservationResponse = reservations.stream()
                 .map(MemberReservationResponseDto::from)
                 .toList();
