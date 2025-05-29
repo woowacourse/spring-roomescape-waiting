@@ -26,11 +26,12 @@ public class AdminInterceptor implements HandlerInterceptor {
         Cookie[] cookies = request.getCookies();
         String jwtToken = CookieManager.extractTokenFromCookies(cookies);
         if (jwtToken == null) {
+            response.setStatus(401);
             return false;
         }
         Long id = jwtTokenProvider.findMemberIdByToken(jwtToken);
         Member member = memberService.findMemberById(id);
-        if (member == null || !member.getRole().equals(Role.ADMIN)) {
+        if (!member.getRole().equals(Role.ADMIN)) {
             response.setStatus(401);
             return false;
         }

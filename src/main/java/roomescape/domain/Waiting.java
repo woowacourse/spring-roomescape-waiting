@@ -7,12 +7,11 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import roomescape.exception.reservation.ReservationFieldRequiredException;
-import roomescape.exception.reservation.ReservationInPastException;
+import roomescape.exception.waiting.WaitingFieldRequiredException;
 
 @Entity
-public class Reservation {
+public class Waiting {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,20 +23,16 @@ public class Reservation {
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
+    public Waiting() {
+    }
+
+    public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
         validate(date, time, theme, member);
         this.id = id;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.member = member;
-    }
-
-    public Reservation(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        this(null, date, time, theme, member);
-    }
-
-    public Reservation() {
     }
 
     private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
@@ -49,25 +44,25 @@ public class Reservation {
 
     private void validateDate(LocalDate date) {
         if (date == null) {
-            throw new ReservationFieldRequiredException("날짜");
+            throw new WaitingFieldRequiredException("날짜");
         }
     }
 
     private void validateTime(ReservationTime time) {
         if (time == null) {
-            throw new ReservationFieldRequiredException("시간");
+            throw new WaitingFieldRequiredException("시간");
         }
     }
 
     private void validateTheme(Theme theme) {
         if (theme == null) {
-            throw new ReservationFieldRequiredException("테마");
+            throw new WaitingFieldRequiredException("테마");
         }
     }
 
     private void validateMember(Member member) {
         if (member == null) {
-            throw new ReservationFieldRequiredException("멤버");
+            throw new WaitingFieldRequiredException("멤버");
         }
     }
 

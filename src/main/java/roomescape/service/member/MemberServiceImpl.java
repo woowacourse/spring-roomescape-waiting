@@ -2,6 +2,7 @@ package roomescape.service.member;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.enums.Role;
 import roomescape.dto.login.LoginRequest;
@@ -23,17 +24,20 @@ public class MemberServiceImpl implements MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     @Override
     public List<MemberResponse> findAllMembers() {
         List<Member> members = memberRepository.findAll();
         return members.stream().map(MemberResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     @Override
     public Member findMemberById(Long id) {
         return memberRepository.findById(id).orElseThrow(() -> new MemberNotFoundException(id));
     }
 
+    @Transactional
     @Override
     public MemberResponse addMember(SignupRequest signupRequest) {
         Member member = new Member(null, signupRequest.name(), signupRequest.email(), signupRequest.password(),
@@ -42,6 +46,7 @@ public class MemberServiceImpl implements MemberService {
         return MemberResponse.from(addedMember);
     }
 
+    @Transactional
     @Override
     public String createToken(LoginRequest loginRequest) {
         Member foundMember = memberRepository.findMemberByEmailAndPassword(loginRequest.email(),
