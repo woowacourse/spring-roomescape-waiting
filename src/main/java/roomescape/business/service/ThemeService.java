@@ -8,10 +8,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.Theme;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
 import roomescape.util.CurrentUtil;
@@ -20,28 +19,30 @@ import roomescape.util.CurrentUtil;
 @Transactional(readOnly = true)
 public class ThemeService {
 
+    private final QueryService queryService;
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
     private final CurrentUtil currentUtil;
 
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository, final CurrentUtil currentUtil) {
+    public ThemeService(final QueryService queryService,
+                        final ThemeRepository themeRepository,
+                        final CurrentUtil currentUtil) {
+
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
         this.currentUtil = currentUtil;
+        this.queryService = queryService;
     }
 
     @Transactional
     public ThemeResponse insert(final ThemeRequest themeRequest) {
         validateNameIsNotDuplicate(themeRequest.name());
         final Theme theme = themeRequest.toDomain();
-        final Long id = themeRepository.save(theme)
-                .getId();
+        final Long id = themeRepository.save(theme).getId();
         return new ThemeResponse(id, theme.getName(), theme.getDescription(), theme.getThumbnail());
     }
 
     private void validateNameIsNotDuplicate(final String name) {
         if (themeRepository.existsByName(name)) {
-            throw new DuplicateException("추가 하려는 테마 이름이 이미 존재합니다.");
+            throw new BadRequestException("추가 하려는 테마 이름이 이미 존재합니다.");
         }
     }
 
@@ -67,15 +68,14 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> findPopularThemes() {
-        final LocalDate now = currentUtil.getCurrentDate();
-        final LocalDate endDate = now;
-        final LocalDate startDate = now.minusDays(7);
+        final LocalDate endDate = currentUtil.getCurrentDate();
+        final LocalDate startDate = endDate.minusDays(7);
         return findPopularThemesBetween(startDate, endDate);
     }
 
     private List<ThemeResponse> findPopularThemesBetween(final LocalDate startDate, final LocalDate endDate) {
         final List<Theme> themes = themeRepository.findAll();
-        final List<Reservation> reservations = reservationRepository.findByDateBetween(startDate, endDate);
+        final List<Reservation> reservations = queryService.findByDateBetween(startDate, endDate);
         final Map<Long, Long> themeReservationCount = calculateThemeReservationCount(reservations);
         final List<Theme> sortedThemes = sortedThemesByReservationCount(themes, themeReservationCount);
         return sortedThemes.stream()

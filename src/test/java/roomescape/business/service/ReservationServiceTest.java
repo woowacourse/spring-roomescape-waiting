@@ -5,57 +5,83 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
-import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidDateAndTimeException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.MemberRepository;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
+import roomescape.infrastructure.repository.WaitingRepository;
+import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationMineResponse;
+import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.util.CurrentUtil;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-reservationService.sql")
 public class ReservationServiceTest {
 
     private static final LocalDate MAX_DATE_FIXTURE = LocalDate.of(9999, 12, 31);
 
-    private final ReservationService reservationService;
-    private final ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private WaitingRepository waitingRepository;
+    @Autowired
+    private QueryService queryService;
+    @Autowired
+    private MemberRepository memberRepository;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
+
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public CurrentUtil currentUtil() {
+            return new CurrentUtil() {
+                @Override
+                public LocalDate getCurrentDate() {
+                    return LocalDate.of(2025, 5, 10);
+                }
+
+                @Override
+                public LocalDateTime getCurrentDateTime() {
+                    return LocalDateTime.of(2025, 5, 10, 12, 0);
+                }
+            };
+        }
+    }
 
     // data-reservationService.sql
     private final Long memberId = 100L;
     private final Long timeId = 100L;
     private final Long themeId = 100L;
 
-    @Autowired
-    public ReservationServiceTest(final MemberRepository memberRepository,
-                                  final ReservationTimeRepository reservationTimeRepository,
-                                  final ThemeRepository themeRepository,
-                                  final ReservationRepository reservationRepository) {
-
-        this.reservationService = new ReservationService(reservationRepository,
-                memberRepository,
-                reservationTimeRepository,
-                themeRepository);
-        this.reservationRepository = reservationRepository;
-    }
-
     @Test
     @DisplayName("방탈출 예약 요청 객체로 방탈출 예약을 저장한다")
     void insert() {
         // when
-        final ReservationResponse reservationResponse = reservationService.insert(MAX_DATE_FIXTURE, memberId, timeId,
-                themeId);
+        final ReservationResponse reservationResponse = reservationService.insert(
+                new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, themeId)
+        );
 
         // then
         assertAll(
@@ -82,7 +108,6 @@ public class ReservationServiceTest {
         );
     }
 
-
     @Test
     @DisplayName("존재하지 않는 사용자로 예약하면 예외가 발생한다")
     void insertWhenNotExistMember() {
@@ -90,7 +115,8 @@ public class ReservationServiceTest {
         final Long notExistMemberId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.insert(MAX_DATE_FIXTURE, notExistMemberId, timeId, themeId))
+        assertThatThrownBy(() -> reservationService.insert(
+                new ReservationRequest(MAX_DATE_FIXTURE, notExistMemberId, timeId, themeId)))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -101,7 +127,8 @@ public class ReservationServiceTest {
         final Long notExistTimeId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.insert(MAX_DATE_FIXTURE, memberId, notExistTimeId, themeId))
+        assertThatThrownBy(() -> reservationService.insert(
+                new ReservationRequest(MAX_DATE_FIXTURE, memberId, notExistTimeId, themeId)))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -112,7 +139,8 @@ public class ReservationServiceTest {
         final Long notExistThemeId = 999L;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.insert(MAX_DATE_FIXTURE, memberId, timeId, notExistThemeId))
+        assertThatThrownBy(() -> reservationService.insert(
+                new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, notExistThemeId)))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -120,23 +148,23 @@ public class ReservationServiceTest {
     @DisplayName("예약하려는 방탈출 예약과 동일한 날짜, 시간, 테마가 이미 존재한다면 예외가 발생한다")
     void insertWhenDuplicateDateAndTimeAndTheme() {
         // given
-        reservationService.insert(MAX_DATE_FIXTURE, memberId, timeId, themeId);
+        reservationService.insert(new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, themeId));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.insert(MAX_DATE_FIXTURE, memberId, timeId, themeId))
-                .isInstanceOf(DuplicateException.class);
+        assertThatThrownBy(
+                () -> reservationService.insert(new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, themeId)))
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
     @DisplayName("예약 시간이 현재를 기준으로 과거라면 예외가 발생한다")
     void insertWhenDateAndTimeIsPast() {
-        // TODO: 현재 시간을 비교하는 유틸을 인터페이스로 구현하여 테스트 완성도 높이기
         // given
         final LocalDate pastDate = LocalDate.MIN;
 
         // when & then
-        assertThatThrownBy(() -> reservationService.insert(pastDate, memberId, timeId, themeId))
-                .isInstanceOf(InvalidDateAndTimeException.class);
+        assertThatThrownBy(() -> reservationService.insert(new ReservationRequest(pastDate, memberId, timeId, themeId)))
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -175,12 +203,13 @@ public class ReservationServiceTest {
     @DisplayName("id를 통해 방탈출 예약을 삭제한다")
     void deleteById() {
         // given
-        final ReservationResponse reservationResponse = reservationService.insert(MAX_DATE_FIXTURE, memberId, timeId,
-                themeId);
+        final ReservationResponse reservationResponse = reservationService.insert(
+                new ReservationRequest(MAX_DATE_FIXTURE, memberId, timeId, themeId));
         final Long id = reservationResponse.id();
+        final LoginMember loginMember = new LoginMember(1L, "mimi", "email", "USER");
 
         // when
-        reservationService.deleteById(id);
+        reservationService.deleteById(id, loginMember);
 
         // then
         final Optional<Reservation> findReservation = reservationRepository.findById(id);
@@ -192,9 +221,10 @@ public class ReservationServiceTest {
     void deleteByIdWhenNotExistReservation() {
         // given
         final Long notExistId = 999L;
+        final LoginMember loginMember = new LoginMember(1L, "mimi", "email", "USER");
 
         // when & then
-        assertThatThrownBy(() -> reservationService.deleteById(notExistId))
+        assertThatThrownBy(() -> reservationService.deleteById(notExistId, loginMember))
                 .isInstanceOf(NotFoundException.class);
     }
 
@@ -211,6 +241,29 @@ public class ReservationServiceTest {
         assertAll(
                 () -> assertThat(reservationMineResponses).hasSize(3),
                 () -> assertThat(reservationMineResponses.get(0).status()).isEqualTo("예약")
+        );
+    }
+
+    @Test
+    @DisplayName("예약 삭제 시 대기 인원이 있으면 첫 번째 대기자가 예약으로 승격된다")
+    void deleteReservationPromotesWaiting() {
+        // given
+        final long firstWaitingId = 100L;
+        final long originalReservationId = 100L;
+        final long firstWaitingMemberId = 101L;
+        final int originalMemberReservationCount = 3;
+        final int firstWaitingMemberReservationCount = 1;
+        final LoginMember firstWaitingMember = new LoginMember(firstWaitingMemberId, "lee", "lee@test.com", "USER");
+
+        // when
+        reservationService.deleteById(originalReservationId, firstWaitingMember);
+
+        // then
+        assertAll(
+                () -> assertThat(reservationRepository.findById(originalReservationId)).isNotPresent(),
+                () -> assertThat(reservationRepository.findByMemberId(memberId)).hasSize(originalMemberReservationCount-1),
+                () -> assertThat(waitingRepository.findById(firstWaitingId)).isNotPresent(),
+                () -> assertThat(reservationRepository.findByMemberId(firstWaitingMemberId)).hasSize(firstWaitingMemberReservationCount+1)
         );
     }
 }

@@ -7,6 +7,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
+import roomescape.exception.BadRequestException;
 
 class ThemeTest {
 
@@ -17,7 +18,7 @@ class ThemeTest {
     void validateName(final String name) {
         // when & then
         assertThatThrownBy(() -> new Theme(name, "소개", "썸네일"))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -25,7 +26,7 @@ class ThemeTest {
     void validateDescription() {
         // when & then
         assertThatThrownBy(() -> new Theme("예약자명", null, "썸네일"))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test
@@ -33,6 +34,6 @@ class ThemeTest {
     void validateThumbnail() {
         // when & then
         assertThatThrownBy(() -> new Theme("예약자명", "소개", null))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 }

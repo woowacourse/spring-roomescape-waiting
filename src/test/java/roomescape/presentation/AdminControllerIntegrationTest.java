@@ -18,9 +18,9 @@ import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.MemberRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.LoginRequest;
 import roomescape.presentation.dto.ReservationRequest;
 
@@ -85,7 +85,7 @@ class AdminControllerIntegrationTest {
                 .body("member.id", equalTo(1))
                 .body("theme.id", equalTo(1))
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.startAt", equalTo("14:00:00"));
+                .body("time.startAt", equalTo("14:00"));
     }
 
     @Test
@@ -206,8 +206,8 @@ class AdminControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 응답한다")
-    void createReservation_WithDuplicateDateTime_Returns409() {
+    @DisplayName("이미 예약된 시간에 예약을 시도하면 400 상태코드를 응답한다")
+    void createReservation_WithDuplicateDateTime_Returns400() {
         // given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
         reservationTimeRepository.save(reservationTime);
@@ -248,7 +248,7 @@ class AdminControllerIntegrationTest {
                 .when()
                 .post("/admin/reservations")
                 .then()
-                .statusCode(HttpStatus.CONFLICT.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test

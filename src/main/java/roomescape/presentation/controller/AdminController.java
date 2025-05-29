@@ -41,14 +41,16 @@ public class AdminController {
         return "admin/theme";
     }
 
+    @GetMapping("/waiting")
+    public String waiting() {
+        return "admin/waiting";
+    }
+
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservationByAdmin(
             @RequestBody final ReservationRequest reservationRequest
     ) {
-        final ReservationResponse reservationResponse = reservationService.insert(reservationRequest.date(),
-                reservationRequest.memberId(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId());
+        final ReservationResponse reservationResponse = reservationService.insert(reservationRequest);
 
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(reservationResponse);

@@ -5,42 +5,55 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.jdbc.Sql;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Theme;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
 import roomescape.util.CurrentUtil;
 
-@DataJpaTest
+@SpringBootTest
+@Transactional
 @Sql("classpath:data-themeService.sql")
 class ThemeServiceTest {
 
-    private ThemeService themeService;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
-
     @Autowired
-    public ThemeServiceTest(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-    }
+    private ThemeService themeService;
+    @Autowired
+    private QueryService queryService;
+    @Autowired
+    private ThemeRepository themeRepository;
+    @Autowired
+    private CurrentUtil currentUtil;
 
-    @BeforeEach
-    void setUp() {
-        final CurrentUtil currentUtil = () -> LocalDate.of(2025, 5, 10);
-        themeService = new ThemeService(themeRepository, reservationRepository, currentUtil);
+    @TestConfiguration
+    static class TestConfig {
+        @Bean
+        public CurrentUtil currentUtil() {
+            return new CurrentUtil() {
+                @Override
+                public LocalDate getCurrentDate() {
+                    return LocalDate.of(2025, 5, 10);
+                }
+
+                @Override
+                public LocalDateTime getCurrentDateTime() {
+                    return LocalDateTime.of(2025, 5, 10, 12, 0);
+                }
+            };
+        }
     }
 
     @Test
@@ -69,7 +82,7 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.insert(themeRequest))
-                .isInstanceOf(DuplicateException.class);
+                .isInstanceOf(BadRequestException.class);
     }
 
     @Test

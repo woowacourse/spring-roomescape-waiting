@@ -8,51 +8,52 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
-import roomescape.exception.DuplicateException;
+import roomescape.exception.BadRequestException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.PlayTimeRequest;
-import roomescape.presentation.dto.PlayTimeResponse;
-import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.presentation.dto.AvailableReservationTimeResponse;
+import roomescape.presentation.dto.ReservationTimeRequest;
+import roomescape.presentation.dto.ReservationTimeResponse;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
+    private final QueryService queryService;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository, final ReservationRepository reservationRepository) {
+    public ReservationTimeService(final QueryService queryService,
+                                  final ReservationTimeRepository reservationTimeRepository) {
+
+        this.queryService = queryService;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
-    public PlayTimeResponse insert(final PlayTimeRequest playTimeRequest) {
-        validateStartAtIsNotDuplicate(playTimeRequest.startAt());
-        final ReservationTime reservationTime = playTimeRequest.toDomain();
+    public ReservationTimeResponse insert(final ReservationTimeRequest reservationTimeRequest) {
+        validateStartAtIsNotDuplicate(reservationTimeRequest.startAt());
+        final ReservationTime reservationTime = reservationTimeRequest.toDomain();
         final ReservationTime insertReservationTime = reservationTimeRepository.save(reservationTime);
-        return PlayTimeResponse.from(insertReservationTime);
+        return ReservationTimeResponse.from(insertReservationTime);
     }
 
     private void validateStartAtIsNotDuplicate(final LocalTime startAt) {
         if (reservationTimeRepository.existsByStartAt(startAt)) {
-            throw new DuplicateException("추가 하려는 시간이 이미 존재합니다.");
+            throw new BadRequestException("추가 하려는 시간이 이미 존재합니다.");
         }
     }
 
-    public List<PlayTimeResponse> findAll() {
+    public List<ReservationTimeResponse> findAll() {
         return reservationTimeRepository.findAll()
                 .stream()
-                .map(PlayTimeResponse::from)
+                .map(ReservationTimeResponse::from)
                 .toList();
     }
 
-    public PlayTimeResponse findById(final Long id) {
+    public ReservationTimeResponse findById(final Long id) {
         final ReservationTime reservationTime = reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("해당하는 방탈출 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(id)));
-        return PlayTimeResponse.from(reservationTime);
+        return ReservationTimeResponse.from(reservationTime);
     }
 
     @Transactional
@@ -63,18 +64,19 @@ public class ReservationTimeService {
         reservationTimeRepository.deleteById(id);
     }
 
-    public List<ReservationAvailableTimeResponse> findAvailableTimes(final LocalDate date, final Long themeId) {
-        final List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
+    public List<AvailableReservationTimeResponse> findAvailableTimes(final LocalDate date, final Long themeId) {
+        final List<Reservation> reservations = queryService.findByDateAndThemeId(date, themeId);
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(reservationTime -> {
-                    boolean isAlreadyBooked = containPlayTime(reservations, reservationTime);
-                    return ReservationAvailableTimeResponse.from(reservationTime, isAlreadyBooked);
+                    boolean isAlreadyBooked = containReservationTime(reservations, reservationTime);
+                    return AvailableReservationTimeResponse.from(reservationTime, isAlreadyBooked);
                 })
                 .collect(Collectors.toList());
     }
 
-    private boolean containPlayTime(final List<Reservation> reservations, final ReservationTime reservationTime) {
+    private boolean containReservationTime(final List<Reservation> reservations,
+                                           final ReservationTime reservationTime) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isSameReservationTime(reservationTime));
     }

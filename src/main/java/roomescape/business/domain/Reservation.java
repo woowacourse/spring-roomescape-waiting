@@ -9,31 +9,38 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import roomescape.exception.BadRequestException;
 
 @Entity
-@Table(name = "reservation")
+@Table(
+        name = "reservation",
+        uniqueConstraints = @UniqueConstraint(columnNames = {"date", "reservation_time_id", "theme_id"})
+)
 public class Reservation {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private LocalDate date;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id")
+    @JoinColumn(name = "member_id", nullable = false)
     private Member member;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_time_id")
-    private ReservationTime reservationTime;
+    @JoinColumn(name = "reservation_time_id", nullable = false)
+    private ReservationTime time;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
+    @JoinColumn(name = "theme_id", nullable = false)
     private Theme theme;
 
-    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime reservationTime,
+    public Reservation(final Long id, final LocalDate date, final Member member, final ReservationTime time,
                        final Theme theme
     ) {
         validateDate(date);
@@ -41,12 +48,18 @@ public class Reservation {
         this.id = id;
         this.date = date;
         this.member = member;
-        this.reservationTime = reservationTime;
+        this.time = time;
         this.theme = theme;
     }
 
-    public Reservation(final LocalDate date, final Member member, final ReservationTime reservationTime, final Theme theme) {
-        this(null, date, member, reservationTime, theme);
+    private void validateDate(final LocalDate date) {
+        if (date == null) {
+            throw new BadRequestException("date 필드가 null 입니다.");
+        }
+    }
+
+    public Reservation(final LocalDate date, final Member member, final ReservationTime time, final Theme theme) {
+        this(null, date, member, time, theme);
     }
 
     public Reservation() {
@@ -65,21 +78,24 @@ public class Reservation {
         return member;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Theme getTheme() {
         return theme;
     }
 
-    public boolean isSameReservationTime(final ReservationTime reservationTime) {
-        return this.reservationTime.isSameReservationTime(reservationTime);
+    public boolean isSameReservationTime(final ReservationTime targetReservationTime) {
+        return time.isSameReservationTime(targetReservationTime);
     }
 
-    private void validateDate(final LocalDate date) {
-        if (date == null) {
-            throw new IllegalArgumentException("date 필드가 null 입니다.");
-        }
+    public boolean isSameMember(Long id) {
+        return member.isSameMember(id);
+    }
+
+    public boolean isPast(final LocalDateTime target) {
+        return date.isBefore(target.toLocalDate()) ||
+                (date.isEqual(target.toLocalDate()) && time.isPast(target.toLocalTime()));
     }
 }

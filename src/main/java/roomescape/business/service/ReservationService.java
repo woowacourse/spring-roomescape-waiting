@@ -4,56 +4,72 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
-import roomescape.exception.DuplicateException;
-import roomescape.exception.InvalidDateAndTimeException;
-import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.exception.BadRequestException;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.presentation.dto.LoginMember;
 import roomescape.presentation.dto.ReservationMineResponse;
+import roomescape.presentation.dto.ReservationRequest;
 import roomescape.presentation.dto.ReservationResponse;
+import roomescape.presentation.dto.WaitingRequest;
+import roomescape.presentation.dto.WaitingResponse;
+import roomescape.util.CurrentUtil;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
 
+    private final QueryService queryService;
+    private final WaitingService waitingService;
     private final ReservationRepository reservationRepository;
-    private final MemberRepository memberRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final CurrentUtil currentUtil;
 
-    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository,
-                              final ReservationTimeRepository reservationTimeRepository, final ThemeRepository themeRepository
-    ) {
+    public ReservationService(final QueryService queryService,
+                              final WaitingService waitingService,
+                              final ReservationRepository reservationRepository,
+                              final CurrentUtil currentUtil) {
+        this.queryService = queryService;
+        this.waitingService = waitingService;
         this.reservationRepository = reservationRepository;
-        this.memberRepository = memberRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
+        this.currentUtil = currentUtil;
     }
 
     @Transactional
-    public ReservationResponse insert(final LocalDate date, final Long memberId, final Long timeId,
-                                      final Long themeId
-    ) {
-        validateMemberIdExists(memberId);
-        validateTimeIdExists(timeId);
-        validateThemeIdExists(themeId);
+    public ReservationResponse insert(final ReservationRequest reservationRequest) {
+        final LocalDate date = reservationRequest.date();
+        final Long timeId = reservationRequest.timeId();
+        final Long themeId = reservationRequest.themeId();
+
         validateIsDuplicate(date, timeId, themeId);
-        final ReservationTime reservationTime = reservationTimeRepository.findById(timeId).get();
+        final ReservationTime reservationTime = queryService.getReservationTimeById(timeId);
         validateDateAndTimeIsFuture(date, reservationTime.getStartAt());
 
-        final Theme theme = themeRepository.findById(themeId).get();
-        final Member member = memberRepository.findById(memberId).get();
+        final Theme theme = queryService.getThemeById(themeId);
+        final Member member = queryService.getMemberById(reservationRequest.memberId());
+
         final Reservation reservation = new Reservation(date, member, reservationTime, theme);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return ReservationResponse.from(savedReservation);
+    }
+
+    private void validateIsDuplicate(final LocalDate date, final Long timeId, final Long themeId) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+            throw new BadRequestException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
+        }
+    }
+
+    private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
+        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
+        if (reservationDateTime.isBefore(currentUtil.getCurrentDateTime())) {
+            throw new BadRequestException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
+        }
     }
 
     public List<ReservationResponse> findAll() {
@@ -61,39 +77,6 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
-    }
-
-    private void validateMemberIdExists(final Long memberId) {
-        if (!memberRepository.existsById(memberId)) {
-            throw new NotFoundException("해당하는 사용자를 찾을 수 없습니다. 사용자 id: %d".formatted(memberId));
-        }
-    }
-
-    private void validateTimeIdExists(final Long timeId) {
-        if (!reservationTimeRepository.existsById(timeId)) {
-            throw new NotFoundException("해당하는 방탈출 예약 시간을 찾을 수 없습니다. 방탈출 id: %d".formatted(timeId));
-        }
-    }
-
-    private void validateThemeIdExists(final Long themeId) {
-        if (!themeRepository.existsById(themeId)) {
-            throw new NotFoundException("해당하는 테마를 찾을 수 없습니다. 테마 id: %d".formatted(themeId));
-        }
-    }
-
-    private void validateIsDuplicate(final LocalDate date, final Long playTimeId, final Long themeId) {
-        if (reservationRepository.existsByDateAndReservationTimeIdAndThemeId(date, playTimeId, themeId)) {
-            throw new DuplicateException("추가 하려는 예약과 같은 날짜, 시간, 테마의 예약이 이미 존재합니다.");
-        }
-    }
-
-    private void validateDateAndTimeIsFuture(final LocalDate date, final LocalTime time) {
-        final LocalDateTime now = LocalDateTime.now();
-
-        final LocalDateTime reservationDateTime = LocalDateTime.of(date, time);
-        if (reservationDateTime.isBefore(now)) {
-            throw new InvalidDateAndTimeException("방탈출 예약 날짜와 시간이 현재보다 과거일 수 없습니다.");
-        }
     }
 
     public List<ReservationResponse> findAllFilter(final Long memberId, final Long themeId, final LocalDate startDate,
@@ -105,14 +88,41 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteById(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new NotFoundException("해당하는 방탈출 예약을 찾을 수 없습니다. 방탈출 id: %d".formatted(id));
-        }
+    public void deleteById(final Long id, final LoginMember loginMember) {
+        final Reservation reservation = queryService.getReservationById(id);
+        validateNotPast(reservation);
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
+
+        promoteFirstWaitingToReservation(reservation, loginMember);
+    }
+
+    private void promoteFirstWaitingToReservation(final Reservation reservation, final LoginMember loginMember) {
+        final Optional<WaitingResponse> waiting = waitingService.deleteFirstBySameConditionReservation(
+                WaitingRequest.from(reservation));
+
+        if (waiting.isEmpty()) {
+            return;
+        }
+        Reservation newReservation = new Reservation(reservation.getDate(),
+                queryService.getMemberById(loginMember.id()), reservation.getTime(), reservation.getTheme());
+        reservationRepository.save(newReservation);
+    }
+
+    private void validateNotPast(final Reservation reservation) {
+        if (reservation.isPast(currentUtil.getCurrentDateTime())) {
+            throw new BadRequestException("이전 예약은 삭제할 수 없습니다.");
+        }
     }
 
     public List<ReservationMineResponse> findByMemberId(final Long memberId) {
+        final List<ReservationMineResponse> reservations = getByMemberId(memberId);
+        final List<ReservationMineResponse> waitings = waitingService.findByMemberId(memberId);
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .toList();
+    }
+
+    private List<ReservationMineResponse> getByMemberId(final Long memberId) {
         return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(ReservationMineResponse::from)

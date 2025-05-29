@@ -1,4 +1,4 @@
-package roomescape.persistence.repository;
+package roomescape.infrastructure.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import roomescape.business.domain.Theme;

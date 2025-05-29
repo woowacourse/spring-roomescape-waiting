@@ -23,10 +23,10 @@ import roomescape.business.domain.Member;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
-import roomescape.persistence.repository.MemberRepository;
-import roomescape.persistence.repository.ReservationRepository;
-import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.persistence.repository.ThemeRepository;
+import roomescape.infrastructure.repository.MemberRepository;
+import roomescape.infrastructure.repository.ReservationRepository;
+import roomescape.infrastructure.repository.ReservationTimeRepository;
+import roomescape.infrastructure.repository.ThemeRepository;
 import roomescape.presentation.dto.LoginRequest;
 import roomescape.presentation.dto.ReservationRequest;
 
@@ -69,7 +69,7 @@ class ReservationControllerIntegrationTest {
 
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                null,
+                1L,
                 1L,
                 1L
         );
@@ -93,7 +93,7 @@ class ReservationControllerIntegrationTest {
                 .statusCode(HttpStatus.CREATED.value())
                 .body("theme.name", equalTo("테마1"))
                 .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.startAt", equalTo("14:00:00"));
+                .body("time.startAt", equalTo("14:00"));
     }
 
     @Test
@@ -163,7 +163,7 @@ class ReservationControllerIntegrationTest {
 
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                null,
+                1L,
                 1L,
                 1L
         );
@@ -189,6 +189,7 @@ class ReservationControllerIntegrationTest {
 
         // when & then
         given()
+                .cookie("token", token)
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when()
                 .delete("/reservations/{id}", reservationId)
@@ -321,7 +322,15 @@ class ReservationControllerIntegrationTest {
         Member member = new Member("이름1", "USER", "이메일1", "비밀번호1");
         memberRepository.save(member);
 
+        final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
         given()
+                .cookie("token", token)
                 .when()
                 .delete("/reservations/{id}", 999L)
                 .then()
@@ -367,7 +376,7 @@ class ReservationControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 시간에 예약을 시도하면 409 상태코드를 반환한다")
+    @DisplayName("이미 예약된 시간에 예약을 시도하면 400 상태코드를 반환한다")
     void createByLoginMember_WithDuplicateDateTime_ReturnsConflict() {
         // given
         ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
@@ -381,7 +390,7 @@ class ReservationControllerIntegrationTest {
 
         final ReservationRequest request = new ReservationRequest(
                 LocalDate.now().plusDays(1),
-                null,
+                1L,
                 1L,
                 1L
         );
@@ -409,7 +418,7 @@ class ReservationControllerIntegrationTest {
                 .when()
                 .post("/reservations")
                 .then()
-                .statusCode(HttpStatus.CONFLICT.value());
+                .statusCode(HttpStatus.BAD_REQUEST.value());
     }
 
     @Test
