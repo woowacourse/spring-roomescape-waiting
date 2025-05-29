@@ -3,7 +3,10 @@ package roomescape.reservation.service;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -98,17 +101,22 @@ public class ReservationService {
                 .map(ReservationAndWaitingResponse::from)
                 .forEach(responses::add);
 
-        for (Waiting waiting : waitingRepository.findAllByMember(member)) {
-            List<Waiting> waitings = waitingRepository.findAllByDateAndTimeIdAndThemeIdOrderByCreatedAt(
-                    waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId());
-            int position = 0;
-            for (int i = 0; i < waitings.size(); i++) {
-                if (waitings.get(i).getId().equals(waiting.getId())) {
-                    position = i;
-                    break;
+        List<Waiting> memberWaitings = waitingRepository.findAllByMemberOrderByCreatedAt(member);
+
+        Map<String, List<Waiting>> grouped = memberWaitings.stream()
+                .collect(Collectors.groupingBy(w ->
+                                w.getDate() + "-" + w.getTime().getId() + "-" + w.getTheme().getId(),
+                        LinkedHashMap::new,
+                        Collectors.toList()
+                ));
+
+        for (List<Waiting> group : grouped.values()) {
+            for (int i = 0; i < group.size(); i++) {
+                Waiting w = group.get(i);
+                if (w.getMember().equals(member)) {
+                    responses.add(ReservationAndWaitingResponse.from(w, i));
                 }
             }
-            responses.add(ReservationAndWaitingResponse.from(waiting, position));
         }
 
         responses.sort(Comparator
