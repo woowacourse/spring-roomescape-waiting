@@ -9,11 +9,8 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationSearchFilter;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.timeslot.TimeSlot;
-import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.domain.user.User;
-import roomescape.domain.user.UserRepository;
 import roomescape.domain.waiting.Waiting;
 import roomescape.domain.waiting.WaitingRepository;
 import roomescape.exception.AlreadyExistedException;
@@ -25,22 +22,16 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final WaitingRepository waitingRepository;
-    private final TimeSlotRepository timeSlotRepository;
-    private final ThemeRepository themeRepository;
-    private final UserRepository userRepository;
+    private final EntityLookupService entityLookupService;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final WaitingRepository waitingRepository,
-            final TimeSlotRepository timeSlotRepository,
-            final ThemeRepository themeRepository,
-            final UserRepository userRepository
+            final EntityLookupService entityLookupService
     ) {
         this.reservationRepository = reservationRepository;
         this.waitingRepository = waitingRepository;
-        this.timeSlotRepository = timeSlotRepository;
-        this.themeRepository = themeRepository;
-        this.userRepository = userRepository;
+        this.entityLookupService = entityLookupService;
     }
 
     public Reservation saveReservation(final long userId,
@@ -48,29 +39,14 @@ public class ReservationService {
                                        final long timeId,
                                        final long themeId) {
 
-        User user = getUserById(userId);
-        TimeSlot timeSlot = getTimeSlotById(timeId);
-        Theme theme = getThemeById(themeId);
+        User user = entityLookupService.getUserById(userId);
+        TimeSlot timeSlot = entityLookupService.getTimeSlotById(timeId);
+        Theme theme = entityLookupService.getThemeById(themeId);
         validateDuplicateReservation(date, timeSlot, theme);
 
         Reservation reservation = Reservation.register(user, date, timeSlot, theme);
 
         return reservationRepository.save(reservation);
-    }
-
-    private User getUserById(final long userId) {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 사용자입니다."));
-    }
-
-    private TimeSlot getTimeSlotById(final long timeId) {
-        return timeSlotRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 타임 슬롯입니다."));
-    }
-
-    private Theme getThemeById(final long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
     private void validateDuplicateReservation(final LocalDate date, final TimeSlot timeSlot, final Theme theme) {
