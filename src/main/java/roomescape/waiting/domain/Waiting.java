@@ -1,0 +1,79 @@
+package roomescape.waiting.domain;
+
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
+import java.time.LocalDate;
+import java.util.Objects;
+import roomescape.member.domain.Member;
+import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.domain.Theme;
+
+@Entity
+public class Waiting {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+    private LocalDate date;
+    @ManyToOne
+    private ReservationTime time;
+    @ManyToOne
+    private Theme theme;
+    @OneToOne
+    private Member member;
+    private long priority;
+
+    public Waiting(Long id, LocalDate date, ReservationTime time, Theme theme, Member member, long priority) {
+        if (date == null || time == null || theme == null || member == null) {
+            throw new IllegalArgumentException();
+        }
+        this.id = id;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.member = member;
+        this.priority = priority;
+    }
+
+    public Waiting() {
+    }
+
+    public void pullPriority(final int amount) {
+        priority -= amount;
+    }
+
+    public boolean hasAfterPriority(final long other) {
+        return priority > other;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDate getDate() {
+        return date;
+    }
+
+    public ReservationTime getTime() {
+        return time;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public Member getMember() {
+        return member;
+    }
+
+    public long getPriority() {
+        return priority;
+    }
+
+    public boolean hasSameMemberId(long other) {
+        return Objects.equals(member.getId(), other);
+    }
+}

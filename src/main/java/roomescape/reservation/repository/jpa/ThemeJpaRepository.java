@@ -2,13 +2,14 @@ package roomescape.reservation.repository.jpa;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.domain.ThemeName;
-import org.springframework.data.jpa.repository.JpaRepository;
+import roomescape.reservation.repository.ThemeRepository;
 
-public interface ThemeJpaRepository extends JpaRepository<Theme, Long> {
+public interface ThemeJpaRepository extends JpaRepository<Theme, Long>, ThemeRepository {
 
     boolean existsByName(ThemeName name);
 

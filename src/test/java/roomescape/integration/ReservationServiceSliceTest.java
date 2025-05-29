@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -15,24 +15,16 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.CurrentDateTime;
-import roomescape.fake.TestCurrentDateTime;
 import roomescape.member.repository.MemberRepository;
-import roomescape.member.repository.jpa.MemberRepositoryImpl;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
-import roomescape.reservation.repository.jpa.ReservationTimeRepositoryImpl;
-import roomescape.reservation.repository.jpa.ThemeRepositoryImpl;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
@@ -40,12 +32,8 @@ import roomescape.reservation.service.dto.ReservationSearchCondition;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import(value = {ReservationRepositoryImpl.class, ReservationTimeRepositoryImpl.class,
-        ThemeRepositoryImpl.class, MemberRepositoryImpl.class})
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
-@Transactional
-@Sql(value = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
-public class ReservationServiceIntegrationTest {
+@Sql(value = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+public class ReservationServiceSliceTest {
 
     @Autowired
     ReservationRepository reservationRepository;
@@ -61,7 +49,8 @@ public class ReservationServiceIntegrationTest {
 
     @BeforeEach
     void init() {
-        currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
+        when(currentDateTime.getDate()).thenReturn(LocalDate.of(2025, 5, 1));
+        when(currentDateTime.getTime()).thenReturn(LocalTime.of(10, 0));
         reservationService = new ReservationService(reservationRepository, reservationTimeRepository, themeRepository,
                 memberRepository, currentDateTime);
     }
@@ -142,11 +131,14 @@ public class ReservationServiceIntegrationTest {
         assertThat(result).hasSize(13);
     }
 
-    @DisplayName("id를 기반으로 예약을 취소할 수 있다")
+    @DisplayName("예약을 취소할 수 있다")
     @Test
-    void cancelReservationById() {
+    void cancelById() {
+        // given
+        Reservation reservation = reservationRepository.findById(1L).get();
+
         // when
-        reservationService.cancelReservationById(1L);
+        reservationService.cancel(reservation);
 
         // then
         List<Reservation> reservations = reservationRepository.findAll();

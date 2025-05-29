@@ -7,6 +7,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import java.util.Objects;
 
 @Entity
 public class Member {
@@ -33,7 +34,7 @@ public class Member {
     }
 
     public boolean hasSameId(final long other) {
-        return id == other;
+        return Objects.equals(id, other);
     }
 
     public Long getId() {

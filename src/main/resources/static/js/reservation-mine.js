@@ -48,8 +48,7 @@ function requestDeleteWaiting(id) {
   /*
   TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
    */
-  const endpoint = '';
-  return fetch(endpoint, {
+  return fetch(`waiting/${id}`, {
     method: 'DELETE'
   }).then(response => {
     if (response.status === 204) return;

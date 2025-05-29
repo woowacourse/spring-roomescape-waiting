@@ -22,7 +22,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.controller.ReservationController;
 
 @ActiveProfiles({"test", "auth"})
@@ -146,7 +145,7 @@ public class MissionStepTest {
                 .statusCode(OK.value())
                 .body("size()", is(1));
 
-        RestAssured.given().log().all()
+        RestAssured.given().log().all().header("Cookie", "token=" + token)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(NO_CONTENT.value());

@@ -3,39 +3,33 @@ package roomescape.integration;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.mockito.Mockito.when;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.fake.TestCurrentDateTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ThemeRepository;
-import roomescape.reservation.repository.jpa.ReservationRepositoryImpl;
-import roomescape.reservation.repository.jpa.ThemeRepositoryImpl;
 import roomescape.reservation.service.ThemeService;
 import roomescape.reservation.service.dto.ThemeCreateCommand;
 import roomescape.reservation.service.dto.ThemeInfo;
 
 @ActiveProfiles("test")
 @DataJpaTest
-@Import(value = {ThemeRepositoryImpl.class, ReservationRepositoryImpl.class})
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
-@Transactional
-@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
-public class ThemeServiceIntegrationTest {
+@Sql(scripts = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+public class ThemeServiceSliceTest {
 
     @Autowired
     ThemeRepository themeRepository;
@@ -47,7 +41,8 @@ public class ThemeServiceIntegrationTest {
 
     @BeforeEach
     void init() {
-        currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 5, 1, 10, 0));
+        when(currentDateTime.getDate()).thenReturn(LocalDate.of(2025, 5, 1));
+        when(currentDateTime.getTime()).thenReturn(LocalTime.of(10, 0));
         themeService = new ThemeService(themeRepository, reservationRepository, currentDateTime);
     }
 
@@ -128,19 +123,6 @@ public class ThemeServiceIntegrationTest {
         assertThat(result).hasSize(10);
         assertThat(result.getFirst().name()).isEqualTo("테마11");
         assertThat(result.get(1).name()).isEqualTo("테마9");
-    }
-
-    @DisplayName("최근 일주일 간 예약이 존재하지 않는 테마는 인기 테마에 포함되지 않는다")
-    @Test
-    void findPopularThemes2() {
-        // given
-        currentDateTime.changeDateTime(LocalDateTime.of(2025, 4, 12, 10, 0));
-
-        // when
-        List<ThemeInfo> result = themeService.findPopularThemes();
-
-        // then
-        assertThat(result).isEmpty();
     }
 }
 

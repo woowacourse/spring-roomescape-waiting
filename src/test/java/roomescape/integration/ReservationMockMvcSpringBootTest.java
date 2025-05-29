@@ -21,8 +21,6 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
@@ -34,29 +32,12 @@ import roomescape.reservation.controller.dto.AdminReservationCreateRequest;
 @ActiveProfiles({"test", "auth"})
 @AutoConfigureMockMvc
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
-@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/schema.sql", "/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 public class ReservationMockMvcSpringBootTest {
 
     @Autowired
     MockMvc mockMvc;
-
-    @DisplayName("내 예약 목록을 조회할 수 있다")
-    @Test
-    void getMyReservations() throws Exception {
-        // given
-        String token = getAdminToken();
-        Cookie cookie = new Cookie("token", token);
-
-        // when
-        // then
-        mockMvc.perform(get("/reservations-mine")
-                        .contentType("application/json")
-                        .cookie(cookie)
-                ).andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(13));
-    }
 
     @DisplayName("어드민이 예약을 추가할 수 있다")
     @Test

@@ -3,6 +3,7 @@ package roomescape.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 
@@ -21,12 +22,6 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAll() {
         return reservations;
-    }
-
-    @Override
-    public void deleteById(final long id) {
-        Reservation reservation = findById(id);
-        reservations.remove(reservation);
     }
 
     @Override
@@ -74,10 +69,25 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
-    public Reservation findById(final long id) {
+    @Override
+    public boolean existsByDateAndThemeIdAndTimeIdAndMemberId(LocalDate date, long themeId, long timeId,
+                                                              long memberId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.getDate().equals(date))
+                .filter(reservation -> reservation.getTime().getId() == timeId)
+                .filter(reservation -> reservation.getTheme().getId() == themeId)
+                .anyMatch(reservation -> reservation.getMember().getId() == memberId);
+    }
+
+    @Override
+    public void delete(Reservation reservation) {
+        reservations.removeIf(r -> r.getId() == reservation.getId());
+    }
+
+    @Override
+    public Optional<Reservation> findById(final long id) {
         return reservations.stream()
                 .filter(reservation -> reservation.getId() == id)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
     }
 }

@@ -23,6 +23,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.dto.ReservationCreateCommand;
+import roomescape.reservation.service.dto.ReservationCreateFromWaitingCommand;
 import roomescape.reservation.service.dto.ReservationInfo;
 import roomescape.fake.FakeReservationRepository;
 import roomescape.fake.FakeReservationTimeRepository;
@@ -31,6 +32,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.Theme;
 import roomescape.reservation.service.dto.ReservationSearchCondition;
+import roomescape.waiting.domain.Waiting;
 
 class ReservationServiceTest {
 
@@ -145,7 +147,35 @@ class ReservationServiceTest {
         ReservationInfo result = reservationService.createReservation(command);
 
         // then
-        Reservation savedReservation = reservationRepository.findById(1L);
+        Reservation savedReservation = reservationRepository.findById(1L).get();
+        assertAll(
+                () -> assertThat(result.member().name()).isEqualTo(savedMember.getName()),
+                () -> assertThat(result.date()).isEqualTo(tomorrow),
+                () -> assertThat(result.time().startAt()).isEqualTo(savedTime.getStartAt()),
+                () -> assertThat(result.theme().name()).isEqualTo(savedTheme.getName()),
+                () -> assertThat(result.theme().description()).isEqualTo(savedTheme.getDescription()),
+                () -> assertThat(result.theme().thumbnail()).isEqualTo(savedTheme.getThumbnail()),
+                () -> assertThat(savedReservation.getName()).isEqualTo(savedMember.getName()),
+                () -> assertThat(savedReservation.getDate()).isEqualTo(command.date()),
+                () -> assertThat(savedReservation.getTime().getStartAt()).isEqualTo(savedTime.getStartAt()),
+                () -> assertThat(savedReservation.getTheme().getName()).isEqualTo(savedTheme.getName()),
+                () -> assertThat(savedReservation.getTheme().getDescription()).isEqualTo(savedTheme.getDescription()),
+                () -> assertThat(savedReservation.getTheme().getThumbnail()).isEqualTo(savedTheme.getThumbnail())
+        );
+    }
+
+    @DisplayName("대기 정보로부터 예약을 생성할 수 있다")
+    @Test
+    void createFromWaiting() {
+        // given
+        Waiting waiting = new Waiting(1L, tomorrow, savedTime, savedTheme, savedMember, 0L);
+        ReservationCreateFromWaitingCommand command = new ReservationCreateFromWaitingCommand(waiting);
+
+        // when
+        ReservationInfo result = reservationService.createReservationFromWaiting(command);
+
+        // then
+        Reservation savedReservation = reservationRepository.findById(1L).get();
         assertAll(
                 () -> assertThat(result.member().name()).isEqualTo(savedMember.getName()),
                 () -> assertThat(result.date()).isEqualTo(tomorrow),
@@ -166,10 +196,11 @@ class ReservationServiceTest {
     @Test
     void cancelById() {
         // given
-        reservationService.createReservation(createCommand);
+        ReservationInfo reservationInfo = reservationService.createReservation(createCommand);
+        Reservation reservation = reservationRepository.findById(reservationInfo.id()).get();
 
         // when
-        reservationService.cancelReservationById(1L);
+        reservationService.cancel(reservation);
 
         // then
         assertThat(reservationRepository.findAll()).isEmpty();
@@ -187,7 +218,7 @@ class ReservationServiceTest {
         reservationService.createReservation(command2);
 
         // when
-        List<ReservationInfo> result = reservationService.findReservationsByMemberId(savedMember.getId());
+        List<ReservationInfo> result = reservationService.findAllByMemberId(savedMember.getId());
 
         // then
         assertThat(result).containsExactlyElementsOf(List.of(createdReservation));

@@ -1,15 +1,11 @@
 package roomescape.reservation.domain;
 
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 
@@ -26,8 +22,6 @@ public class Reservation {
     private ReservationTime time;
     @ManyToOne
     private Theme theme;
-    @Enumerated(value = EnumType.STRING)
-    private ReservationStatus status;
 
     public Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime time,
                        final Theme theme) {
@@ -40,7 +34,6 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = ReservationStatus.RESERVED;
     }
 
     public Reservation() {
@@ -68,16 +61,6 @@ public class Reservation {
         if (time == null) {
             throw new IllegalArgumentException("시간을 입력해야 합니다.");
         }
-    }
-
-    public boolean isBefore(final LocalDateTime other) {
-        if (date.isBefore(other.toLocalDate())) {
-            return true;
-        }
-        if (date.equals(other.toLocalDate())) {
-            return time.isBefore(other.toLocalTime());
-        }
-        return false;
     }
 
     public boolean isSameTime(final ReservationTime other) {
@@ -118,10 +101,6 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 
     @Override

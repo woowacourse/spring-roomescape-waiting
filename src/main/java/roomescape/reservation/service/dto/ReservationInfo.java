@@ -3,15 +3,13 @@ package roomescape.reservation.service.dto;
 import java.time.LocalDate;
 import roomescape.member.service.dto.MemberInfo;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 
 public record ReservationInfo(
         Long id,
         MemberInfo member,
         LocalDate date,
         ReservationTimeInfo time,
-        ThemeInfo theme,
-        ReservationStatus status
+        ThemeInfo theme
 ) {
 
     public ReservationInfo(final Reservation reservation) {
@@ -20,8 +18,7 @@ public record ReservationInfo(
                 new MemberInfo(reservation.getMember()),
                 reservation.getDate(),
                 new ReservationTimeInfo(reservation.getTime()),
-                new ThemeInfo(reservation.getTheme()),
-                reservation.getStatus()
+                new ThemeInfo(reservation.getTheme())
         );
     }
 }

@@ -6,6 +6,5 @@ import roomescape.member.service.dto.TokenInfo;
 public interface TokenProvider {
 
     String createToken(Member member);
-
     TokenInfo parsePayload(String token);
 }

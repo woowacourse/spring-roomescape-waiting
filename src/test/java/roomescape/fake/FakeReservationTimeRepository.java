@@ -30,7 +30,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
         return Optional.ofNullable(reservationTime);
     }
 
-    public boolean existsByTime(final LocalTime reservationTime) {
+    public boolean existsByStartAt(final LocalTime reservationTime) {
         return times.stream()
                 .anyMatch(time -> time.getStartAt().equals(reservationTime));
     }

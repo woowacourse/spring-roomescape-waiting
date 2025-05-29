@@ -11,8 +11,6 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.web.servlet.MockMvc;
@@ -21,16 +19,15 @@ import org.springframework.transaction.annotation.Transactional;
 @ActiveProfiles({"test", "auth"})
 @AutoConfigureMockMvc
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Transactional
-@Sql(scripts = "/member-data.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
+@Sql(scripts = {"/schema.sql", "/member-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_CLASS)
 public class AdminRoleInterceptorMockMvcTest {
 
     @Autowired
     MockMvc mockMvc;
 
     @DisplayName("권한이 없는 멤버가 어드민 페이지에 접근하면 403으로 응답한다")
-    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
+    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time", "/admin/waiting"})
     @ParameterizedTest
     void should_Response403_WhenNotAdminMemberAccessAdminPage(String uri) throws Exception {
         // when
@@ -43,7 +40,7 @@ public class AdminRoleInterceptorMockMvcTest {
     }
 
     @DisplayName("관리자는 어드민 페이지에 접근할 수 있다")
-    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time"})
+    @ValueSource(strings = {"/admin", "/admin/reservation", "/admin/theme", "/admin/time", "/admin/waiting"})
     @ParameterizedTest
     void can_Access_WhenAdminAccessAdminPage(String uri) throws Exception {
         // when
