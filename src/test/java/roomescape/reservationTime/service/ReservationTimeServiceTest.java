@@ -2,12 +2,14 @@ package roomescape.reservationTime.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.reservation.domain.Reservation;
@@ -31,7 +33,8 @@ public class ReservationTimeServiceTest {
     void beforeEach() {
         ReservationTime reservationTime1 = ReservationTime.createWithoutId(LocalTime.of(10, 0));
         ReservationTime reservationTime2 = ReservationTime.createWithoutId(LocalTime.of(11, 0));
-        Theme theme = Theme.createWithId(1L, "테마", "테마", "테마");
+        Theme theme = Theme.createWithoutId("테마", "테마", "테마");
+        ReflectionTestUtils.setField(theme, "id", 1L);
 
         List<ReservationTime> reservationTimes = new ArrayList<>();
         List<Reservation> reservations = new ArrayList<>();
@@ -42,7 +45,7 @@ public class ReservationTimeServiceTest {
 
         reservationTime1 = reservationTimeRepository.findById(save.getId()).orElseThrow();
         ReservationRepository reservationRepository = new FakeReservationRepository(reservations);
-        Member member = Member.createWithId(1L, "홍길동", "a@com", "a", Role.USER);
+        Member member = Member.createWithoutId("홍길동", "a@com", "a", Role.USER);
         reservationRepository.save(Reservation.createWithoutId(
                 LocalDateTime.of(1999, 11, 2, 20, 10), member, LocalDate.of(2024, 10, 6), reservationTime1, theme));
 
@@ -66,9 +69,11 @@ public class ReservationTimeServiceTest {
         List<TimeConditionResponse> responses = reservationTimeService.getTimesWithCondition(
                 new TimeConditionRequest(localDate, themeId));
         // then
-        assertThat(responses).containsExactlyInAnyOrder(
-                new TimeConditionResponse(1L, LocalTime.of(10, 0), true),
-                new TimeConditionResponse(2L, LocalTime.of(11, 0), false)
-        );
+        assertThat(responses)
+                .extracting(TimeConditionResponse::startAt, TimeConditionResponse::alreadyBooked)
+                .containsExactlyInAnyOrder(
+                        tuple(LocalTime.of(10, 0), true),
+                        tuple(LocalTime.of(11, 0), false)
+                );
     }
 }

@@ -1,9 +1,10 @@
 package roomescape.reservation.dto.response;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.waiting.domain.Waiting;
 
 public record MyReservationResponse(
-        Long reservationId,
+        Long id,
         String theme,
         String date,
         String time,
@@ -16,6 +17,16 @@ public record MyReservationResponse(
                 reservation.getDate().toString(),
                 reservation.getReservationTime().toString(),
                 "예약"
+        );
+    }
+
+    public static MyReservationResponse fromWaiting(Waiting waiting, long rank) {
+        return new MyReservationResponse(
+                waiting.getId(),
+                waiting.getTheme().getName(),
+                waiting.getDate().toString(),
+                waiting.getTime().getStartAt().toString(),
+                String.valueOf(rank)
         );
     }
 }

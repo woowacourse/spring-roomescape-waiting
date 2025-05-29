@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationPeriod;
 import roomescape.theme.domain.Theme;
@@ -26,8 +27,10 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Theme save(Theme theme) {
         long currentIndex = index.incrementAndGet();
-        themes.add(Theme.createWithId(currentIndex, theme.getName(), theme.getDescription(), theme.getThumbnail()));
-        return theme.assignId(currentIndex);
+
+        ReflectionTestUtils.setField(theme, "id", currentIndex);
+        themes.add(theme);
+        return theme;
     }
 
     @Override
@@ -39,8 +42,9 @@ public class FakeThemeRepository implements ThemeRepository {
 
         Map<Theme, Long> themes = new HashMap<>();
         for (Reservation filterReservation : filterReservations) {
-            Theme theme = Theme.createWithId(filterReservation.getThemeId(), filterReservation.getThemeName(),
+            Theme theme = Theme.createWithoutId(filterReservation.getThemeName(),
                     filterReservation.getThemeDescription(), filterReservation.getThemeThumbnail());
+            ReflectionTestUtils.setField(theme, "id", filterReservation.getThemeId());
             themes.put(theme, themes.getOrDefault(theme, 0L) + 1);
         }
 

@@ -1,4 +1,5 @@
 ### 요구 사항
+
 - [x] 정상적으로 동작하지 않는 기능
     - [x] 예약 시간 추가 시 응답 코드 수정
     - [x] 예약 시간 삭제 시 응답 코드 수정
@@ -9,20 +10,33 @@
     - [x] 테마 조회 api 추가
     - [x] 테마 조회 api 추가
 - [x] 사용자 관련 기능
-    - [x] 사용자는 날짜와 테마를 선택하면 예약 가능한 시간을 확인할 수 있습니다.
-    - [x] 사용자는 예약 가능한 시간을 확인하고, 원하는 시간에 예약을 할 수 있습니다.
-    - [x] 예약 시 사용자 구분은 어드민과 동일하게 사용자의 이름으로 합니다.
-    - [x] /reservation 요청 시 사용자 예약 페이지를 응답합니다.
+    - [x] 사용자는 날짜와 테마를 선택하면 예약 가능한 시간을 확인할 수 있다.
+    - [x] 사용자는 예약 가능한 시간을 확인하고, 원하는 시간에 예약을 할 수 있다.
+    - [x] 예약 시 사용자 구분은 어드민과 동일하게 사용자의 이름으로 한다.
+    - [x] /reservation 요청 시 사용자 예약 페이지를 응답한다.
 - [x] 인기 테마 기능
     - [x] 최근 일주일 기준으로 예약이 많은 테마 10개 조회 가능
         - 8일인 경우 1일부터 7일까지의 예약 건수 많은 순서대로 10개의 테마를 조회할 수 있다.
     - [x] `/` 요청 시 인기 테마 페이지를 응답한다.
         - `templates/index.html`
-- [ ] 내 예약 목록을 조회하는 API 구현
-  - [ ] 내 예약 목록 호출 시 GET /reservation-mine 요청한다.
-  - [ ] `reservation-mine.html` 페이지가 응답된다.
+- [x] 내 예약 목록을 조회하는 API 구현
+    - [x] 내 예약 목록 호출 시 GET /reservation-mine 요청한다.
+    - [x] `reservation-mine.html` 페이지가 응답된다.
+- [x] 예약 대기 기능
+    - [x] 같은 테마, 날짜, 시간인 예약에 대해 예약 대기를 요청할 수 있다.
+    - [x] 내 예약 목록 조회 시 예약 대기 목록을 포함한다.
+    - [x] 대기 상태에 대기 번호를 포함한다.
+    - [x] 중복 예약이 불가능하다.
+    - [x] 예약 대기를 취소할 수 있다.
+- [x] 예약 대기 관리 기능
+    - [x] 어드민에서 예약 대기 관리를 할 수 있다..
+        - [x] 어드민은 예약 대기 목록을 조회할 수 있다
+        - [x] 어드민은 예약 대기를 취소시킬 수 있다
+    - [x] 예약 대기를 자동으로 승인할 수 있다.
+        - [x] 대기를 걸어둔 예약이 취소되면 대기 중이던 예약은 자동으로 승인된다.
 
 ### 예외 사항
+
 - [x] 시간 생성 시 시작 시간에 유효하지 않은 값이 입력되었을 때
 - [x] 예약 생성 시 예약자명, 날짜, 시간에 유효하지 않은 값이 입력 되었을 때
     - [x] 이름은 null 이거나 비워 있을 수 없다.
@@ -30,24 +44,25 @@
     - [x] 시간 번호는 null 일 수 없다.
 - [x] 특정 시간에 대한 예약이 존재하는데, 그 시간을 삭제하려 할 때
 
-### 정책
+### 예외사항
+
 - [x] 지나간 날짜와 시간에 대한 예약 생성은 불가능하다.
 - [x] 중복 예약은 불가능하다.
 
-
 ### JPA 전환
+
 - [x] 엔티티 매핑
-  - [x] Member
-  - [x] Theme
-  - [x] Reservation
-  - [x] ReservationTime
+    - [x] Member
+    - [x] Theme
+    - [x] Reservation
+    - [x] ReservationTime
 - [x] 연관관계 매핑
-  - [x] Reservation
+    - [x] Reservation
 - [x] 기존 레포지토리를 Spring Data Jpa 레포지토리로 교체
-  - [x] ThemeRepository
-  - [x] MemberRepository
-  - [x] ReservationRepository
-  - [x] ReservationTimeRepository
+    - [x] ThemeRepository
+    - [x] MemberRepository
+    - [x] ReservationRepository
+    - [x] ReservationTimeRepository
 
 # API 명세
 
@@ -249,6 +264,7 @@ Transfer-Encoding: chunked
 ```
 
 ### 쿠키를 이용한 예약 생성
+
 ```
 Request
 POST /reservations HTTP/1.1
@@ -264,7 +280,6 @@ host: localhost:8080
 ```
 
 ### 내 예약 목록 조회 기능
-
 
 ```
 Request

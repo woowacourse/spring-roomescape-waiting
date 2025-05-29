@@ -7,17 +7,20 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import roomescape.reservationTime.domain.ReservationTime;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+
 @DataJpaTest
+@Import(ReservationTimeRepositoryImpl.class)
 public class JpaReservationTimeRepositoryTest {
 
     @Autowired
-    private JpaReservationTimeRepository repository;
+    private ReservationTimeRepositoryImpl repository;
 
     @Test
     @DisplayName("저장 후 아이디 반환 테스트")

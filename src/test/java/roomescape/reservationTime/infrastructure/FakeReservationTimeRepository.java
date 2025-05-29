@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 
@@ -19,8 +20,11 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
         long currentIndex = index.incrementAndGet();
-        reservationTimes.add(ReservationTime.createWithId(currentIndex, reservationTime.getStartAt()));
-        return reservationTime.assignId(currentIndex);
+
+        ReflectionTestUtils.setField(reservationTime, "id", currentIndex);
+
+        reservationTimes.add(reservationTime);
+        return reservationTime;
     }
 
     @Override

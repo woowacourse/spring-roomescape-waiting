@@ -10,26 +10,29 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.MethodSource;
+
 @Sql(scripts = "/data/reservationConditionTest.sql")
 @DataJpaTest
+@Import(ReservationRepositoryImpl.class)
 class JpaReservationRepositoryTest {
 
     @Autowired
-    private JpaReservationRepository repository;
+    private ReservationRepositoryImpl repository;
 
     @Autowired
     private EntityManager em;
@@ -87,7 +90,7 @@ class JpaReservationRepositoryTest {
         repository.save(reservation2);
         repository.save(reservation3);
         // when
-        List<Reservation> reservations = repository.findByDateAndTheme_Id(LocalDate.of(2000, 11, 2), 1L);
+        List<Reservation> reservations = repository.findByDateAndThemeId(LocalDate.of(2000, 11, 2), 1L);
         // then
         assertThat(reservations).hasSize(2);
 
@@ -144,7 +147,7 @@ class JpaReservationRepositoryTest {
         em.persist(reservation);
         em.flush();
         // when
-        boolean existed = repository.existsByTime_Id(timeId);
+        boolean existed = repository.existsByTimeId(timeId);
         // then
         assertThat(existed).isEqualTo(expected);
     }
@@ -162,13 +165,13 @@ class JpaReservationRepositoryTest {
         em.flush();
         // when & then
         assertAll(
-                () -> assertThat(repository.existsByDateAndTime_StartAtAndTheme_Id(
+                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
                         LocalDate.of(2000, 11, 3), LocalTime.of(10, 0), 1L)).isFalse(),
-                () -> assertThat(repository.existsByDateAndTime_StartAtAndTheme_Id(
+                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
                         LocalDate.of(2000, 11, 2), LocalTime.of(10, 1), 1L)).isFalse(),
-                () -> assertThat(repository.existsByDateAndTime_StartAtAndTheme_Id(
+                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
                         LocalDate.of(2000, 11, 2), LocalTime.of(10, 0), 2L)).isFalse(),
-                () -> assertThat(repository.existsByDateAndTime_StartAtAndTheme_Id(
+                () -> assertThat(repository.existsByDateAndTimeStartAtAndThemeId(
                         LocalDate.of(2000, 11, 2), LocalTime.of(10, 0), 1L)).isTrue()
         );
     }
@@ -186,7 +189,7 @@ class JpaReservationRepositoryTest {
         em.persist(reservation);
         em.flush();
         // when
-        boolean existed = repository.existsByTheme_Id(themeId);
+        boolean existed = repository.existsByThemeId(themeId);
         // then
         assertThat(existed).isEqualTo(expected);
     }
@@ -206,7 +209,7 @@ class JpaReservationRepositoryTest {
     @DisplayName("본인 예약들을 조회한다.")
     void findByMemberId_test() {
         // when
-        List<Reservation> findReservations = repository.findByMember_Id(1L);
+        List<Reservation> findReservations = repository.findByMemberId(1L);
         // then
         assertThat(findReservations).hasSize(3);
         assertThat(findReservations.get(0).getName()).isEqualTo("코기");

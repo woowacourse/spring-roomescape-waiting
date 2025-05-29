@@ -10,6 +10,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.context.annotation.Import;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
@@ -23,10 +24,11 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
 @DataJpaTest
+@Import(ThemeRepositoryImpl.class)
 public class JpaThemeRepositoryTest {
 
     @Autowired
-    private JpaThemeRepository repository;
+    private ThemeRepositoryImpl repository;
 
     @Autowired
     private EntityManager em;

@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.admin.dto.AdminReservationRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
+import roomescape.waiting.service.WaitingService;
 
 @RestController
 @RequestMapping(ADMIN_BASE_URL)
@@ -21,9 +22,11 @@ public class AdminController {
     private static final String SLASH = "/";
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public AdminController(ReservationService reservationService) {
+    public AdminController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping("/reservations")
