@@ -7,6 +7,8 @@ import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Map;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -14,13 +16,19 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Reservation;
 import roomescape.dto.auth.LoginRequestDto;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.JpaThemeRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -123,6 +131,15 @@ class AdminReservationControllerTest {
         @Autowired
         JpaMemberRepository memberRepository;
 
+        @Autowired
+        JpaReservationRepository reservationRepository;
+
+        @Autowired
+        JpaReservationTimeRepository reservationTimeRepository;
+
+        @Autowired
+        JpaThemeRepository themeRepository;
+
         String loginToken;
 
         @BeforeEach
@@ -156,15 +173,19 @@ class AdminReservationControllerTest {
                     .getCookies();
             loginToken = cookies.get("token");
 
+
+            Optional<Member> byId = memberRepository.findById(1L);
+            Optional<ReservationTime> timebyId = reservationTimeRepository.findById(1L);
+            Optional<Theme> themebyId = themeRepository.findById(1L);
+
             for (int day = 1; day < 5; day++) {
-                AdminReservationCreateRequestDto dto1 = new AdminReservationCreateRequestDto(
-                        LocalDate.now().plusDays(day), 1L, 1L, 1L);
-                RestAssured.given().cookie("token", loginToken)
-                        .contentType(ContentType.JSON)
-                        .body(dto1)
-                        .when().post("/admin/reservations")
-                        .then()
-                        .statusCode(201);
+                Reservation reservation = new Reservation(
+                        null,
+                        byId.get(),
+                        LocalDate.of(2025,5,13 + day),
+                        timebyId.get(),
+                        themebyId.get());
+                reservationRepository.save(reservation);
             }
         }
 
