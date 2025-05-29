@@ -23,7 +23,7 @@ public class ReservationSlotDataService {
     public ReservationSlot getReservationSlotByDateAndTimeAndTheme(final LocalDate date, final Long timeId,
                                                                    final Long themeId) {
         return reservationSlotRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
-                .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간에 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간의 예약 슬롯이 존재하지 않습니다."));
     }
 
     public void validateReservationSlotDoesNotExists(final LocalDate date, final Long timeId, final Long themeId) {
@@ -40,8 +40,8 @@ public class ReservationSlotDataService {
         return reservationSlotRepository.existsByThemeId(themeId);
     }
 
-    public boolean hasSingleReservation(final Long reservationSlotId) {
-        return reservationSlotRepository.hasOnlyOneReservation(reservationSlotId);
+    public boolean isEmpty(final Long reservationSlotId) {
+        return reservationSlotRepository.isEmpty(reservationSlotId);
     }
 
     public void deleteById(Long id) {

@@ -52,7 +52,7 @@ public class WaitingReservationController {
             @PathVariable Long reservationSlotId,
             MemberInfo memberInfo
     ) {
-        waitingReservationApplicationService.cancel(reservationSlotId, memberInfo.id());
+        waitingReservationApplicationService.cancelByReservationSlotIdAndMemberId(reservationSlotId, memberInfo.id());
         return ResponseEntity.noContent().build();
     }
 
@@ -61,7 +61,7 @@ public class WaitingReservationController {
     public ResponseEntity<Void> cancel(
             @PathVariable Long waitingId
     ) {
-        waitingReservationApplicationService.cancelWaitingReservationWithoutMemberId(waitingId);
+        waitingReservationApplicationService.cancel(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

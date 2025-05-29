@@ -40,10 +40,6 @@ public class ReservationDataService {
                 memberId);
     }
 
-    public boolean existsByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
-        return reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
-    }
-
     public void validateWaitingOwner(final Long reservationSlotId, final Long memberId) {
         boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
         if (!doesExists) {
@@ -56,7 +52,7 @@ public class ReservationDataService {
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
     }
 
-    public void cancelWaitingReservation(final Reservation reservation) {
+    public void cancel(final Reservation reservation) {
         reservationRepository.delete(reservation);
     }
 
