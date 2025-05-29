@@ -122,9 +122,10 @@ class ReservationTicketJpaRepositoryTest {
         reservationTicketJpaRepository.save(secondReservationTicketOutOfRange);
 
         // when
-        Optional<ReservationTicket> actual = reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTime(
+        Optional<ReservationTicket> actual = reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTimeAndReservation_Theme(
                 LocalDate.now().plusDays(1),
-                savedReservationTime
+                savedReservationTime,
+                theme
         );
 
         // then

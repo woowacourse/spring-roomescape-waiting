@@ -9,7 +9,6 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.infrastructure.db.ReservationTicketJpaRepository;
 import roomescape.model.Reservation;
 import roomescape.model.ReservationTicket;
-import roomescape.model.ReservationTime;
 import roomescape.persistence.vo.Period;
 
 @Repository
@@ -19,8 +18,12 @@ public class ReservationTicketRepositoryImpl implements ReservationTicketReposit
     private final ReservationTicketJpaRepository reservationTicketJpaRepository;
 
     @Override
-    public boolean isDuplicatedForDateAndReservationTime(LocalDate date, ReservationTime time) {
-        return reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTime(date, time)
+    public boolean isDuplicated(Reservation reservation) {
+        return reservationTicketJpaRepository.findByReservation_DateAndReservation_ReservationTimeAndReservation_Theme(
+                        reservation.getDate(),
+                        reservation.getReservationTime(),
+                        reservation.getTheme()
+                )
                 .isPresent();
     }
 

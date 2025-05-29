@@ -10,8 +10,9 @@ import roomescape.model.Theme;
 
 public interface ReservationTicketJpaRepository extends JpaRepository<ReservationTicket, Long> {
 
-    Optional<ReservationTicket> findByReservation_DateAndReservation_ReservationTime(LocalDate date,
-                                                                                     ReservationTime time);
+    Optional<ReservationTicket> findByReservation_DateAndReservation_ReservationTimeAndReservation_Theme(LocalDate date,
+                                                                                                         ReservationTime time,
+                                                                                                         Theme theme);
 
     List<ReservationTicket> findByReservation_ThemeIdAndReservation_MemberIdAndReservation_DateBetween(
             Long themeId,

@@ -118,8 +118,7 @@ public class ReservationTicketService {
     }
 
     private void assertReservationIsNotDuplicated(ReservationTicket reservationTicket) {
-        if (reservationTicketRepository.isDuplicatedForDateAndReservationTime(reservationTicket.getDate(),
-                reservationTicket.getReservationTime())) {
+        if (reservationTicketRepository.isDuplicated(reservationTicket.getReservation())) {
             throw new DuplicatedException("이미 예약이 존재합니다.");
         }
     }
