@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.Role;
@@ -18,6 +19,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public SignupResponse createUser(SignupRequest request) {
         if (memberRepository.existsByEmail(request.email())) {
             throw new IllegalArgumentException("이미 가입된 이메일입니다");
@@ -28,6 +30,7 @@ public class MemberService {
         return SignupResponse.from(save);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAllMember() {
         List<Member> members = memberRepository.findAll();
         return members.stream()

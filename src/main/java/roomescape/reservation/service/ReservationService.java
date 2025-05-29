@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.util.DateTime;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
@@ -40,6 +41,7 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(final ReservationRequest request, final Long memberId) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 시간입니다."));
@@ -67,6 +69,7 @@ public class ReservationService {
         return ReservationResponse.from(save);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getReservations(ReservationConditionRequest request) {
         if (request.isEmpty()) {
             return reservationRepository.findAll().stream()
@@ -80,6 +83,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void deleteReservationById(final Long id) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 예약입니다."));
@@ -101,6 +105,7 @@ public class ReservationService {
     }
 
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMyReservations(final Long id) {
         List<Reservation> confirmedReservations = reservationRepository.findByMemberId(id);
         List<MyReservationResponse> confirmedResponses = confirmedReservations.stream()

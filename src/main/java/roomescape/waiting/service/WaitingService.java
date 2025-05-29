@@ -3,6 +3,7 @@ package roomescape.waiting.service;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.dto.request.LoginMember;
@@ -34,6 +35,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public WaitingResponse createWaiting(WaitingRequest request, LoginMember loginMember) {
         Member member = memberRepository.findById(loginMember.id())
                 .orElseThrow(() -> new IllegalArgumentException("회원을 찾을 수 없습니다"));
@@ -75,12 +77,14 @@ public class WaitingService {
         return WaitingResponse.from(savedWaiting);
     }
 
+    @Transactional
     public void cancelWaiting(Long waitingId) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElseThrow(() -> new IllegalArgumentException("대기 정보를 찾을 수 없습니다."));
         waitingRepository.delete(waiting);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> getAllWaitings() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::from)

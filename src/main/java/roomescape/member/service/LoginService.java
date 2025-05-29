@@ -2,6 +2,7 @@ package roomescape.member.service;
 
 import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.LoginException;
 import roomescape.common.util.DateTime;
 import roomescape.common.util.JwtTokenContainer;
@@ -23,6 +24,7 @@ public class LoginService {
         this.dateTime = dateTime;
     }
 
+    @Transactional(readOnly = true)
     public String loginAndReturnToken(LoginRequest request) {
         Optional<Member> loginMember = memberRepository.findByEmailAndPassword(request.email(),
                 request.password());
@@ -32,6 +34,7 @@ public class LoginService {
         return jwtTokenContainer.createJwtToken(loginMember.get(), dateTime.now());
     }
 
+    @Transactional(readOnly = true)
     public LoginMember loginCheck(String token) {
         jwtTokenContainer.validateToken(token);
         Long memberId = jwtTokenContainer.getMemberId(token);
