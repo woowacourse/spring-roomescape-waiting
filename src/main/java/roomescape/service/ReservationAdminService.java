@@ -30,8 +30,13 @@ public class ReservationAdminService {
         final ReservationTime reservationTime = findReservationTimeById(registerDto.timeId());
         final Theme theme = findThemeById(registerDto.themeId());
 
-        final Reservation reservation = new Reservation(registerDto.date(), reservationTime, theme, member,
-                LocalDate.now());
+        final Reservation reservation = new Reservation(
+                registerDto.date(),
+                reservationTime,
+                theme,
+                member,
+                LocalDate.now()
+        );
 
         reservationRepository.save(reservation);
     }
