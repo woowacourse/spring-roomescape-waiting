@@ -53,8 +53,8 @@ public class ConfirmedReservationApplicationService {
 
     public List<ConfirmedReservationWebResponse> findByCriteria(
             final ConfirmedReservationByCriteriaWebRequest request) {
-        List<Reservation> reservations = reservationDataService.findFirstByCriteria(request.themeId(), request.memberId(),
-                request.startDate(), request.endDate());
+        List<Reservation> reservations = reservationDataService.findFirstByCriteria(request.themeId(),
+                request.memberId(), request.startDate(), request.endDate());
         return reservations
                 .stream()
                 .map(Reservation::getReservationSlot)
@@ -69,8 +69,8 @@ public class ConfirmedReservationApplicationService {
 
     public void cancel(final Long reservationId) {
         Reservation reservation = reservationDataService.getById(reservationId);
-        reservationDataService.deleteById(reservationId);
         cleanupEmptyReservationSlot(reservation.getReservationSlot().getId());
+        reservationDataService.deleteById(reservationId);
     }
 
     private ReservationSlot createReservationSlot(final ReservationCreateWebRequest reservationCreateWebRequest) {
@@ -80,7 +80,7 @@ public class ConfirmedReservationApplicationService {
     }
 
     private void cleanupEmptyReservationSlot(final Long slotId) {
-        if (reservationSlotDataService.isEmpty(slotId)) {
+        if (reservationSlotDataService.hasSingleReservation(slotId)) {
             reservationSlotDataService.deleteById(slotId);
         }
     }

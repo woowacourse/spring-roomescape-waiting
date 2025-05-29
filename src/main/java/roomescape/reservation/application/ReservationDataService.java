@@ -46,6 +46,11 @@ public class ReservationDataService {
         }
     }
 
+    public Reservation getByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
+        return reservationRepository.findByReservationSlotIdAndMemberId(reservationSlotId, memberId)
+                .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
+    }
+
     public Reservation getById(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));

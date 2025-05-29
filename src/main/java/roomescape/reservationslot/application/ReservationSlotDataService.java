@@ -40,11 +40,16 @@ public class ReservationSlotDataService {
         return reservationSlotRepository.existsByThemeId(themeId);
     }
 
-    public boolean isEmpty(final Long reservationSlotId) {
-        return reservationSlotRepository.isEmpty(reservationSlotId);
+    public boolean hasSingleReservation(final Long reservationSlotId) {
+        return reservationSlotRepository.hasSingleReservation(reservationSlotId);
     }
 
     public void deleteById(Long id) {
         reservationSlotRepository.deleteById(id);
+    }
+
+    public ReservationSlot findById(final Long reservationSlotId) {
+        return reservationSlotRepository.findById(reservationSlotId)
+                .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간의 예약 슬롯이 존재하지 않습니다."));
     }
 }

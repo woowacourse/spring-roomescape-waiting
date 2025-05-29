@@ -26,10 +26,10 @@ public interface ReservationSlotRepository extends JpaRepository<ReservationSlot
     Optional<ReservationSlot> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     @Query("""
-                SELECT COUNT(r) = 0 
+                SELECT COUNT(r) = 1
                 FROM ReservationSlot rs
                 LEFT JOIN rs.reservations r
                 WHERE rs.id = :slotId
             """)
-    boolean isEmpty(Long slotId);
+    boolean hasSingleReservation(Long slotId);
 }
