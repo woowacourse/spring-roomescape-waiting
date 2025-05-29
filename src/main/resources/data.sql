@@ -5,65 +5,66 @@ TRUNCATE TABLE theme;
 TRUNCATE TABLE reservation_time;
 SET FOREIGN_KEY_CHECKS = 1;
 
+-- member
 INSERT INTO member (name, role, email, password)
-VALUES ("admin", "ADMIN", "admin@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
-INSERT INTO member (name, role, email, password)
-VALUES ("유저1", "USER", "user1@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
-INSERT INTO member (name, role, email, password)
-VALUES ("유저2", "USER", "user2@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
+VALUES
+    ("admin", "ADMIN", "admin@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"),
+    ("유저1", "USER", "user1@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"),
+    ("유저2", "USER", "user2@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"),
+    ("유저3", "USER", "user3@email.com", "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4");
 
 -- reservation_time
 INSERT INTO reservation_time (start_at)
-VALUES ('10:00');
-INSERT INTO reservation_time (start_at)
-VALUES ('11:00');
-INSERT INTO reservation_time (start_at)
-VALUES ('12:00');
+VALUES
+    ('10:00'),
+    ('11:00'),
+    ('12:00');
 
 -- theme
 INSERT INTO theme (name, description, thumbnail)
-VALUES ('레벨2 탈출',
-        '우테코 레벨2를 탈출하는 내용입니다.',
-        'https://example.com/image.jpg');
-INSERT INTO theme (name, description, thumbnail)
-VALUES ('지하 감옥',
-        '깊은 감옥에서 탈출하라!',
-        'https://example.com/jail.jpg');
+VALUES
+    ('레벨2 탈출', '우테코 레벨2를 탈출하는 내용입니다.','https://example.com/image.jpg'),
+    ('지하 감옥', '깊은 감옥에서 탈출하라!', 'https://example.com/jail.jpg');
 
--- reservation: 오래된 데이터
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-08', 2, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-07', 3, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-06', 1, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-05', 2, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-04', 3, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-03', 1, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-02', 2, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-01', 3, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-04-30', 1, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-04-29', 2, 2, 'RESERVED');
+-- reservation
+INSERT INTO reservation (member_id, date, time_id, theme_id, reserved_at)
+VALUES
+    (2, '2025-05-29', 2, 1, '2025-05-19 10:00:00'),
+    (3, '2025-05-28', 3, 2, '2025-05-19 10:00:00'),
+    (2, '2025-05-27', 1, 1, '2025-05-19 10:00:00'),
+    (3, '2025-05-26', 2, 2, '2025-05-19 10:00:00'),
+    (2, '2025-05-25', 3, 1, '2025-05-19 10:00:00'),
+    (3, '2025-05-24', 1, 2, '2025-05-19 10:00:00'),
+    (2, '2025-05-23', 2, 1, '2025-05-19 10:00:00'),
+    (3, '2025-05-22', 3, 2, '2025-05-19 10:00:00'),
+    (2, '2025-05-21', 1, 1, '2025-05-19 10:00:00'),
+    (3, '2025-05-20', 2, 2, '2025-05-19 10:00:00'),
+    (2, '2025-06-01', 1, 2, '2025-05-19 10:00:00'),
+    (3, '2025-06-02', 2, 1, '2025-05-19 10:00:00'),
+    (2, '2025-06-03', 3, 2, '2025-05-19 10:00:00'),
+    (3, '2025-06-04', 1, 1, '2025-05-19 10:00:00'),
+    (2, '2025-06-05', 2, 2, '2025-05-19 10:00:00');
 
--- reservation: 최근 데이터
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-09', 2, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-10', 3, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-11', 1, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-12', 2, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-13', 3, 2, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (3, '2025-05-14', 1, 1, 'RESERVED');
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (2, '2025-05-15', 2, 2, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id, reserved_at)
+VALUES
+    (2, '2025-05-30', 2, 1, '2025-05-19 10:00:00'),
+    (3, '2025-05-31', 2, 1, '2025-05-19 10:00:00');
+
+INSERT INTO waiting (member_id, theme_id, date, time_id, waited_at)
+VALUES
+    (4, 1, '2025-05-31', 2, '2025-05-19 10:02:00'),
+
+    (4, 1, '2025-06-01', 1, '2025-05-19 10:02:00'),
+    (2, 1, '2025-06-01', 1, '2025-05-19 10:03:00'),
+    (3, 1, '2025-06-01', 1, '2025-05-19 10:04:00'),
+
+    (4, 2, '2025-06-02', 2, '2025-05-19 10:05:00'),
+    (2, 2, '2025-06-02', 2, '2025-05-19 10:06:00'),
+    (3, 2, '2025-06-02', 2, '2025-05-19 10:07:00'),
+
+    (3, 1, '2025-06-03', 3, '2025-05-19 10:08:00'),
+    (4, 1, '2025-06-03', 3, '2025-05-19 10:09:00'),
+
+    (2, 2, '2025-06-04', 1, '2025-05-19 10:10:00'),
+    (4, 2, '2025-06-04', 1, '2025-05-19 10:11:00'),
+    (3, 2, '2025-06-04', 1, '2025-05-19 10:12:00');

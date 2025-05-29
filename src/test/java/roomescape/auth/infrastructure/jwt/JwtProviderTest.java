@@ -36,6 +36,4 @@ class JwtProviderTest {
         String role = jwtProvider.getRole(token).name();
         assertThat(role).isEqualTo(member.getRole().name());
     }
-
-
 }

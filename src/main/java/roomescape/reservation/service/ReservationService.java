@@ -1,12 +1,14 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.InvalidArgumentException;
-import roomescape.global.exception.NoElementsException;
 import roomescape.member.domain.Member;
 import roomescape.member.service.MemberQueryService;
 import roomescape.reservation.controller.response.MyReservationResponse;
@@ -19,7 +21,9 @@ import roomescape.reservation.service.command.ReserveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.service.ReservationTimeService;
+import roomescape.waiting.repository.WaitingRepository;
 
+@Slf4j
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
 @Service
@@ -29,41 +33,37 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final MemberQueryService memberQueryService;
+    private final WaitingRepository waitingRepository;
 
     @Transactional
-    public ReservationResponse reserve(ReserveCommand reserveCommand) {
-        LocalDate date = reserveCommand.date();
-        Long timeId = reserveCommand.timeId();
+    public ReservationResponse reserve(ReserveCommand command) {
+        LocalDate date = command.date();
+        Long timeId = command.timeId();
+        Long themeId = command.themeId();
 
-        isAlreadyReservedTime(date, timeId);
+        isAlreadyReserved(date, timeId, themeId);
 
         ReservationDateTime reservationDateTime = ReservationDateTime.create(
-                new ReservationDate(date), reservationTimeService.getReservationTime(timeId)
-        );
-        Theme theme = themeService.getTheme(reserveCommand.themeId());
-        Member reserver = memberQueryService.getMember(reserveCommand.memberId());
+                new ReservationDate(date), reservationTimeService.getReservationTime(timeId));
+        Theme theme = themeService.getTheme(themeId);
+        Member reserver = memberQueryService.getMember(command.memberId());
 
-        Reservation reserved = Reservation.reserve(reserver, reservationDateTime, theme);
-        Reservation saved = reservationRepository.save(reserved);
+        LocalDateTime reservedAt = LocalDateTime.now();
+        Reservation reservation = Reservation.reserve(reserver, reservationDateTime, theme, reservedAt);
+        Reservation saved = reservationRepository.save(reservation);
 
         return ReservationResponse.from(saved);
     }
 
-    private void isAlreadyReservedTime(LocalDate date, Long timeId) {
-        if (reservationRepository.hasReservationWithDateTime(date, timeId)) {
-            throw new InvalidArgumentException("이미 예약이 존재하는 시간입니다.");
+    private void isAlreadyReserved(LocalDate date, Long timeId, Long themeId) {
+        if (reservationRepository.existsBy(date, timeId, themeId)) {
+            throw new InvalidArgumentException("이미 예약했습니다.");
         }
     }
 
     @Transactional
-    public void deleteById(Long id) {
-        Reservation reservation = getReservation(id);
-        reservationRepository.deleteById(reservation.getId());
-    }
-
-    private Reservation getReservation(Long id) {
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new NoElementsException("예약을 찾을 수 없습니다."));
+    public void delete(Long id) {
+        reservationRepository.deleteById(id);
     }
 
     public List<ReservationResponse> getFilteredReservations(
@@ -83,7 +83,6 @@ public class ReservationService {
         return ReservationResponse.from(reservations);
     }
 
-
     private List<ReservationResponse> getAllReservations() {
         List<Reservation> reservations = reservationRepository.findAll();
 
@@ -91,7 +90,14 @@ public class ReservationService {
     }
 
     public List<MyReservationResponse> getMyReservations(Long memberId) {
-        List<Reservation> myReservations = reservationRepository.findByMemberId(memberId);
-        return MyReservationResponse.from(myReservations);
+        return Stream.concat(
+                        reservationRepository.findByMemberId(memberId)
+                                .stream()
+                                .map(MyReservationResponse::from),
+                        waitingRepository.findWaitingWithRankByMemberId(memberId)
+                                .stream()
+                                .map(MyReservationResponse::from)
+                )
+                .toList();
     }
 }

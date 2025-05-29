@@ -3,6 +3,7 @@ package roomescape.reservation;
 import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
+import java.time.LocalDateTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,7 +58,7 @@ public class ReservationAdminApiTest {
         Theme theme = themeDbFixture.공포();
         ReservationDateTime dateTime = reservationDateTimeDbFixture.내일_열시();
 
-        reservationRepository.save(Reservation.reserve(member1, dateTime, theme));
+        reservationRepository.save(Reservation.reserve(member1, dateTime, theme, LocalDateTime.now()));
 
         RestAssured.given().log().all()
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)
@@ -83,7 +84,9 @@ public class ReservationAdminApiTest {
         Theme theme = themeDbFixture.공포();
         ReservationDateTime dateTime = reservationDateTimeDbFixture.내일_열시();
 
-        Long id = reservationRepository.save(Reservation.reserve(member1, dateTime, theme)).getId();
+        Long id = reservationRepository.save(
+                Reservation.reserve(member1, dateTime, theme, LocalDateTime.now())
+        ).getId();
 
         RestAssured.given().log().all()
                 .cookie("token", StubTokenProvider.ADMIN_STUB_TOKEN)

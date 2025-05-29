@@ -32,6 +32,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     document.getElementById('reserve-button').addEventListener('click', onReservationButtonClick);
+    document.getElementById('wait-button').addEventListener('click', onWaitButtonClick);
 });
 
 function renderTheme(themes) {
@@ -59,7 +60,7 @@ function createSlot(type, text, id, booked) {
     if (type === 'time') {
         div.setAttribute('data-time-booked', booked);
         if (booked) {
-            div.classList.add('disabled');
+            div.classList.add('booked');
         }
     }
     return div;
@@ -140,18 +141,22 @@ function checkDateAndThemeAndTime() {
     const selectedThemeElement = document.querySelector('.theme-slot.active');
     const selectedTimeElement = document.querySelector('.time-slot.active');
     const reserveButton = document.getElementById("reserve-button");
+    const waitButton = document.getElementById("wait-button");
 
     if (selectedDate && selectedThemeElement && selectedTimeElement) {
         if (selectedTimeElement.getAttribute('data-time-booked') === 'true') {
             // 선택된 시간이 이미 예약된 경우
             reserveButton.classList.add("disabled");
+            waitButton.classList.remove("disabled"); // 예약 대기 버튼 활성화
         } else {
             // 선택된 시간이 예약 가능한 경우
             reserveButton.classList.remove("disabled");
+            waitButton.classList.add("disabled");
         }
     } else {
         // 날짜, 테마, 시간 중 하나라도 선택되지 않은 경우
         reserveButton.classList.add("disabled");
+        waitButton.classList.add("disabled");
     }
 }
 
@@ -182,7 +187,7 @@ function onReservationButtonClick() {
             body: JSON.stringify(reservationData)
         })
             .then(response => {
-                if (!response.ok) throw new Error('Reservation failed');
+                if (!response.ok) throw new Error('예약에 실패했습니다');
                 return response.json();
             })
             .then(data => {
@@ -195,6 +200,45 @@ function onReservationButtonClick() {
             });
     } else {
         alert("예약을 생성하기 전에 날짜, 테마, 시간을 먼저 선택해주세요!");
+    }
+}
+
+function onWaitButtonClick() {
+    const selectedDate = document.getElementById("datepicker").value;
+    const selectedThemeId = document.querySelector('.theme-slot.active')?.getAttribute('data-theme-id');
+    const selectedTimeId = document.querySelector('.time-slot.active')?.getAttribute('data-time-id');
+
+    if (selectedDate && selectedThemeId && selectedTimeId) {
+        const reservationData = {
+            date: selectedDate,
+            themeId: selectedThemeId,
+            timeId: selectedTimeId
+        };
+
+        /*
+        TODO: [3단계] 예약 대기 생성 요청 API 호출
+         */
+        fetch('/waiting', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(reservationData)
+        })
+            .then(response => {
+                if (!response.ok) throw new Error('예약 대기에 실패했습니다');
+                return response.json();
+            })
+            .then(data => {
+                alert('예약 대기에 성공했습니다!');
+                window.location.href = "/";
+            })
+            .catch(error => {
+                alert("예약 대기 과정에서 오류가 발생했습니다.");
+                console.error(error);
+            });
+    } else {
+        alert("예약 대기를 생성하기 전에 날짜, 테마, 시간을 먼저 선택해주세요!");
     }
 }
 

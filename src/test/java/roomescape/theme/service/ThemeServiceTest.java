@@ -3,6 +3,7 @@ package roomescape.theme.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
@@ -91,7 +92,7 @@ class ThemeServiceTest {
         Member reserver = memberDbFixture.유저1_생성();
         ReservationDateTime reservationDateTime = reservationDateTimeDbFixture.내일_열시();
         Reservation reservation = Reservation.reserve(
-                reserver, reservationDateTime, theme
+                reserver, reservationDateTime, theme, LocalDateTime.now()
         );
         reservationRepository.save(reservation);
 
@@ -135,7 +136,7 @@ class ThemeServiceTest {
     private void addReservation(int count, Member member, ReservationDate date, ReservationTime time, Theme theme) {
         for (int i = 0; i < count; i++) {
             reservationRepository.save(Reservation.reserve(
-                    member, new ReservationDateTime(date, time), theme
+                    member, new ReservationDateTime(date, time), theme, LocalDateTime.now()
             ));
         }
     }

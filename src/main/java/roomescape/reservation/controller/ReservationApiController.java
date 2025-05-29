@@ -31,13 +31,12 @@ public class ReservationApiController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationResponse>> createReservation(
+    public ResponseEntity<ApiResponse<ReservationResponse>> reserve(
             @RequestBody @Valid ReserveByUserRequest request,
             @Authenticated Long memberId
     ) {
         ReservationResponse response = reservationService.reserve(
-                ReserveCommand.byUser(request, memberId)
-        );
+                ReserveCommand.byUser(request, memberId));
 
         return ResponseEntity
                 .status(CREATED)
@@ -49,8 +48,8 @@ public class ReservationApiController {
             @Authenticated Long memberId
     ) {
         List<MyReservationResponse> responses = reservationService.getMyReservations(memberId);
+
         return ResponseEntity.ok(
-                ApiResponse.success(GET_MY_RESERVATIONS, responses)
-        );
+                ApiResponse.success(GET_MY_RESERVATIONS, responses));
     }
 }

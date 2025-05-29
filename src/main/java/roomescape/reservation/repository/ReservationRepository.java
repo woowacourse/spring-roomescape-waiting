@@ -7,28 +7,31 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.Theme;
 
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    default boolean hasReservationWithDateTime(LocalDate date, Long timeId) {
-        return existsByDateAndTimeId(date, timeId);
-    }
-
-    default boolean hasReservationWithTime(Long timeId) {
-        return existsByTimeId(timeId);
-    }
-
-    default boolean hasReservationWithTheme(Long themeId) {
+    default boolean existsBy(Long themeId) {
         return existsByThemeId(themeId);
+    }
+
+    default boolean existsBy(LocalDate date, Long timeId, Long themeId) {
+        return existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Query("""
             select exists
                 (select r from Reservation r
-                where r.reservationDatetime.reservationDate.date = :date and r.reservationDatetime.reservationTime.id = :timeId)
+                    where r.reservationDatetime.reservationDate.date = :date
+                    and r.reservationDatetime.reservationTime.id = :timeId
+                    and r.theme.id = :themeId)
             """)
-    boolean existsByDateAndTimeId(@Param(value = "date") LocalDate date, @Param(value = "timeId") Long timeId);
+    boolean existsByDateAndTimeIdAndThemeId(
+            LocalDate date,
+            Long timeId,
+            Long themeId
+    );
 
     @Query("""
              select exists
@@ -87,6 +90,18 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
             join fetch r.reservationDatetime.reservationTime
             join fetch r.theme
             where r.reserver.id = :memberId
+            order by r.reservationDatetime.reservationDate.date asc, r.reservationDatetime.reservationTime.startAt asc
             """)
     List<Reservation> findByMemberId(@Param("memberId") Long memberId);
+
+    @Query("""
+            select r
+            from Reservation r
+            join fetch r.reservationDatetime.reservationTime t
+            join fetch r.theme th
+            where r.reservationDatetime.reservationDate.date = :date
+              and t.id = :timeId
+              and th = :theme
+            """)
+    List<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Theme theme);
 }
