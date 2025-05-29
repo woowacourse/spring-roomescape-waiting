@@ -33,7 +33,7 @@ public class JpaReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
-        return reservationListCrudRepository.findByDateAndThemeId(date, themeId);
+        return reservationListCrudRepository.findByDetails_DateAndDetails_Theme_Id(date, themeId);
     }
 
     @Override
@@ -49,17 +49,22 @@ public class JpaReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findByTimeId(Long id) {
-        return reservationListCrudRepository.findByTimeId(id);
+        return reservationListCrudRepository.findByDetails_Time_Id(id);
     }
 
     @Override
     public Optional<Reservation> findByThemeId(Long id) {
-        return reservationListCrudRepository.findByThemeId(id);
+        return reservationListCrudRepository.findByDetails_Theme_Id(id);
     }
 
     @Override
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        return reservationListCrudRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+        return reservationListCrudRepository.existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(date, timeId, themeId);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeIdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId) {
+        return reservationListCrudRepository.existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(date, timeId, themeId, memberId);
     }
 
     @Override

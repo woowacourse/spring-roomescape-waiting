@@ -8,12 +8,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.NotFoundException;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.Password;
 import roomescape.member.domain.Role;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeReservationTimeRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationDetails;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
@@ -82,8 +84,8 @@ class ReservationTimeServiceTest {
 
             ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
             Theme theme = new Theme(1L, "ABC", "DEF", "https://");
-            Member member = new Member(1L, "어드민", "admin@gmail.com", "wooteco7", Role.ADMIN);
-            Reservation reservation = new Reservation(1L, member, LocalDate.now().plusDays(1), reservationTime, theme, ReservationStatus.RESERVED);
+            Member member = new Member(1L, "어드민", new Email("admin@gmail.com"), new Password("wooteco7"), Role.ADMIN);
+            Reservation reservation = new Reservation(1L, member, new ReservationDetails(LocalDate.now().plusDays(1), reservationTime, theme));
             reservationRepository.save(reservation);
 
             List<AvailableReservationTimeResponse> availableReservationTimes = reservationTimeService.findAvailableReservationTimes(LocalDate.now().plusDays(1), 1L);

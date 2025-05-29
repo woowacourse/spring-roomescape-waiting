@@ -17,7 +17,7 @@ import roomescape.theme.repository.ThemeRepository;
 @Transactional(readOnly = true)
 public class ThemeService {
 
-    public static final int POPULAR_THEME_LIMIT = 10;
+    private static final int POPULAR_THEME_LIMIT = 10;
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;

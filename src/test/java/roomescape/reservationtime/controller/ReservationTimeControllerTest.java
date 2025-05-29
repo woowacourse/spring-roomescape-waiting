@@ -34,7 +34,7 @@ class ReservationTimeControllerTest {
 
         adminCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(admin.getPassword(), admin.getEmail()))
+                .body(new LoginRequest(admin.getPasswordValue(), admin.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -43,7 +43,7 @@ class ReservationTimeControllerTest {
 
         userCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(user.getPassword(), user.getEmail()))
+                .body(new LoginRequest(user.getPasswordValue(), user.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -140,23 +140,22 @@ class ReservationTimeControllerTest {
         @DisplayName("지정된 예약 시간을 삭제할 수 있다")
         @Test
         void deleteTimeTest() {
-            RestAssured.given().log().all()
-                    .header("Cookie", adminCookie)
-                    .when().delete("/reservations/1")
-                    .then().log().all()
-                    .statusCode(204);
+            ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(LocalTime.of(15, 30));
 
             RestAssured.given().log().all()
                     .header("Cookie", adminCookie)
-                    .when().delete("/times/1")
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when().post("/times")
                     .then().log().all()
-                    .statusCode(204);
+                    .statusCode(201)
+                    .body("id", is(2));
 
             RestAssured.given().log().all()
-                    .when().get("/times")
+                    .header("Cookie", adminCookie)
+                    .when().delete("/times/2")
                     .then().log().all()
-                    .statusCode(200)
-                    .body("size()", is(0));
+                    .statusCode(204);
         }
 
         @DisplayName("예약된 내역이 존재하는 시간은 삭제할 수 없다")

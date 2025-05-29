@@ -14,7 +14,7 @@ import roomescape.fixture.LoginMemberFixture;
 import roomescape.member.domain.Member;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationDetails;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -91,10 +91,10 @@ class ThemeServiceTest {
             Member member = LoginMemberFixture.getUser();
 
             // when
-            themeRepository.addReservation(new Reservation(1L, member, LocalDate.now().minusDays(1), reservationTime, theme1, ReservationStatus.RESERVED));
-            themeRepository.addReservation(new Reservation(2L, member, LocalDate.now().minusDays(2), reservationTime, theme2, ReservationStatus.RESERVED));
-            themeRepository.addReservation(new Reservation(3L, member, LocalDate.now().minusDays(3), reservationTime, theme2, ReservationStatus.RESERVED));
-            themeRepository.addReservation(new Reservation(4L, member, LocalDate.now().minusDays(10), reservationTime, theme1, ReservationStatus.RESERVED));
+            themeRepository.addReservation(new Reservation(1L, member, new ReservationDetails(LocalDate.now().minusDays(1), reservationTime, theme1)));
+            themeRepository.addReservation(new Reservation(2L, member, new ReservationDetails(LocalDate.now().minusDays(2), reservationTime, theme2)));
+            themeRepository.addReservation(new Reservation(3L, member, new ReservationDetails(LocalDate.now().minusDays(3), reservationTime, theme2)));
+            themeRepository.addReservation(new Reservation(4L, member, new ReservationDetails(LocalDate.now().minusDays(10), reservationTime, theme1)));
             List<ThemeResponse> responses = themeService.findPopularThemes();
 
             // then

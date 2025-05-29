@@ -57,7 +57,7 @@ class LoginServiceTest {
     @Test
     void createTokenExceptionTest() {
         // given
-        LoginRequest request = new LoginRequest("", "admin@gmail.com");
+        LoginRequest request = new LoginRequest("asdfasdf", "admin@gmail.com");
 
         // when & then
         assertThatThrownBy(() -> loginService.createToken(request)).isInstanceOf(InvalidAuthorizationException.class);

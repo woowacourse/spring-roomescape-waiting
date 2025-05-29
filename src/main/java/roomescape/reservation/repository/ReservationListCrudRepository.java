@@ -15,18 +15,20 @@ public interface ReservationListCrudRepository extends ListCrudRepository<Reserv
     @Query("""
             SELECT r FROM Reservation r
             JOIN FETCH r.member
-            JOIN FETCH r.time
-            JOIN FETCH r.theme
+            JOIN FETCH r.details.time
+            JOIN FETCH r.details.theme
             """)
     List<Reservation> findAll();
 
-    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findByDetails_DateAndDetails_Theme_Id(LocalDate date, Long themeId);
 
-    Optional<Reservation> findByTimeId(Long id);
+    Optional<Reservation> findByDetails_Time_Id(Long id);
 
-    Optional<Reservation> findByThemeId(Long id);
+    Optional<Reservation> findByDetails_Theme_Id(Long id);
 
-    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_Id(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsByDetails_DateAndDetails_Time_IdAndDetails_Theme_IdAndMemberId(LocalDate date, Long timeId, Long themeId, Long memberId);
 
     List<Reservation> findAllByMemberId(Long memberId);
 }

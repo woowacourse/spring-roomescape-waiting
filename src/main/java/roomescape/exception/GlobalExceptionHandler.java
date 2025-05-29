@@ -17,7 +17,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({
             DuplicateContentException.class,
-            InvalidRequestException.class
+            InvalidRequestException.class,
+            IllegalArgumentException.class
     })
     public ProblemDetail handleBadRequestException(Exception ex, HttpServletRequest request) {
         return GlobalProblemDetail.of(HttpStatus.BAD_REQUEST, List.of(ex.getMessage()), request.getRequestURI());

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.InvalidAuthorizationException;
 import roomescape.fixture.FakeMemberRepositoryFixture;
+import roomescape.member.domain.Email;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.repository.FakeTokenProvider;
@@ -32,7 +33,7 @@ class MemberServiceTest {
         assertAll(
                 () -> assertThat(member.getId()).isEqualTo(1L),
                 () -> assertThat(member.getName()).isEqualTo("어드민"),
-                () -> assertThat(member.getEmail()).isEqualTo("admin@gmail.com")
+                () -> assertThat(member.getEmail()).isEqualTo(new Email("admin@gmail.com"))
         );
     }
 

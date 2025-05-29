@@ -36,7 +36,7 @@ class ThemeControllerTest {
 
         adminCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(admin.getPassword(), admin.getEmail()))
+                .body(new LoginRequest(admin.getPasswordValue(), admin.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -45,7 +45,7 @@ class ThemeControllerTest {
 
         userCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(user.getPassword(), user.getEmail()))
+                .body(new LoginRequest(user.getPasswordValue(), user.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -200,23 +200,22 @@ class ThemeControllerTest {
         @DisplayName("저장된 테마를 삭제할 수 있다")
         @Test
         void deleteThemeTest() {
-            RestAssured.given().log().all()
-                    .header("Cookie", adminCookie)
-                    .when().delete("/reservations/1")
-                    .then().log().all()
-                    .statusCode(204);
+            ThemeCreateRequest request = new ThemeCreateRequest("테마", "설명", "https://");
 
             RestAssured.given().log().all()
                     .header("Cookie", adminCookie)
-                    .when().delete("/themes/1")
+                    .contentType(ContentType.JSON)
+                    .body(request)
+                    .when().post("/themes")
                     .then().log().all()
-                    .statusCode(204);
+                    .statusCode(201)
+                    .body("id", is(2));
 
             RestAssured.given().log().all()
-                    .when().get("/themes")
+                    .header("Cookie", adminCookie)
+                    .when().delete("/themes/2")
                     .then().log().all()
-                    .statusCode(200)
-                    .body("size()", is(0));
+                    .statusCode(204);
         }
 
         @DisplayName("예약된 내역이 존재하는 테마는 삭제할 수 없다")

@@ -2,18 +2,17 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.DuplicateContentException;
 import roomescape.exception.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.MemberReservationResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.UserReservationRequest;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.util.TokenProvider;
 
 @Service
 @Transactional(readOnly = true)
@@ -21,12 +20,10 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationChecker reservationChecker;
-    private final TokenProvider tokenProvider;
 
-    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker, TokenProvider tokenProvider) {
+    public ReservationService(ReservationRepository reservationRepository, ReservationChecker reservationChecker) {
         this.reservationRepository = reservationRepository;
         this.reservationChecker = reservationChecker;
-        this.tokenProvider = tokenProvider;
     }
 
     @Transactional
@@ -67,19 +64,13 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
-        if (reservationRepository.findById(id).isEmpty()) {
+    public Reservation deleteReservation(Long id) {
+        Optional<Reservation> reservation = reservationRepository.findById(id);
+        if (reservation.isEmpty()) {
             throw new NotFoundException("[ERROR] 등록된 예약만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다.");
         }
 
         reservationRepository.deleteById(id);
-    }
-
-    public List<MemberReservationResponse> findAllMemberReservations(String token) {
-        Long memberId = tokenProvider.getMemberIdFromToken(token);
-        List<Reservation> reservations = reservationRepository.findAllByMemberId(memberId);
-        return reservations.stream()
-                .map(MemberReservationResponse::from)
-                .toList();
+        return reservation.get();
     }
 }

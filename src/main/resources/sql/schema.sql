@@ -31,10 +31,23 @@ CREATE TABLE IF NOT EXISTS reservation
     member_id BIGINT,
     time_id BIGINT,
     theme_id BIGINT,
-    status ENUM('RESERVED'),
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     UNIQUE (date, time_id, theme_id)
+);
+
+CREATE TABLE IF NOT EXISTS waiting
+(
+    id   BIGINT       NOT NULL AUTO_INCREMENT,
+    date DATE NOT NULL,
+    member_id BIGINT,
+    time_id BIGINT,
+    theme_id BIGINT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES member (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    UNIQUE (date, time_id, theme_id, member_id)
 );

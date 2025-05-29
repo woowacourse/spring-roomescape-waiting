@@ -16,9 +16,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.member.domain.Member;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.fixture.LoginMemberFixture;
+import roomescape.member.domain.Member;
 
 import static org.hamcrest.Matchers.is;
 
@@ -36,7 +36,7 @@ class AuthControllerTest {
 
         userCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(user.getPassword(), user.getEmail()))
+                .body(new LoginRequest(user.getPasswordValue(), user.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -45,7 +45,7 @@ class AuthControllerTest {
 
         adminCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(admin.getPassword(), admin.getEmail()))
+                .body(new LoginRequest(admin.getPasswordValue(), admin.getEmailValue()))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];
@@ -63,7 +63,7 @@ class AuthControllerTest {
                     .when().get("/members")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(2));
+                    .body("size()", is(3));
         }
 
         @DisplayName("일반 유저는 전체 멤버 목록을 조회할 수 없다")

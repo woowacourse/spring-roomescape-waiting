@@ -28,14 +28,14 @@ public class ReservationSpecification {
     }
 
     public static Specification<Reservation> equalThemeId(Long themeId) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("theme").get("id"), themeId);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("details").get("theme").get("id"), themeId);
     }
 
     public static Specification<Reservation> dateFrom(LocalDate from) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("date"), from);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.greaterThanOrEqualTo(root.get("details").get("date"), from);
     }
 
     public static Specification<Reservation> dateTo(LocalDate to) {
-        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("date"), to);
+        return (root, query, criteriaBuilder) -> criteriaBuilder.lessThanOrEqualTo(root.get("details").get("date"), to);
     }
 }

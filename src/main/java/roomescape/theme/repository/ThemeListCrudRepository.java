@@ -13,8 +13,8 @@ public interface ThemeListCrudRepository extends ListCrudRepository<Theme, Long>
     @Query("""
             SELECT t
             FROM Theme t
-            JOIN Reservation r ON r.theme = t
-            WHERE r.date >= :from AND r.date < :to
+            JOIN Reservation r ON r.details.theme = t
+            WHERE r.details.date >= :from AND r.details.date < :to
             GROUP BY t
             ORDER BY COUNT(r.id) DESC
             """)

@@ -1,15 +1,14 @@
 package roomescape.view.controller;
 
 import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.auth.dto.LoginRequest;
-import roomescape.fixture.LoginMemberFixture;
-import roomescape.member.domain.Member;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class UserPageControllerTest {
@@ -43,13 +42,22 @@ class UserPageControllerTest {
 
     @DisplayName("reservation-mine 페이지를 반환한다")
     @Test
-    @DirtiesContext
-    @Sql("/test-data.sql")
     void reservationMinePageTest() {
-        Member user = LoginMemberFixture.getUser();
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "브라운");
+        params.put("email", "brown@gmail.com");
+        params.put("password", "wooteco7");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/members")
+                .then().log().all()
+                .statusCode(200);
+
         String userCookie = RestAssured
                 .given().log().all()
-                .body(new LoginRequest(user.getPassword(), user.getEmail()))
+                .body(new LoginRequest("wooteco7", "brown@gmail.com"))
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .when().post("/login")
                 .then().log().all().extract().header("Set-Cookie").split(";")[0];

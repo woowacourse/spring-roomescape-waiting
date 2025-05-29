@@ -1,19 +1,18 @@
 package roomescape.member.domain;
 
+import jakarta.persistence.Convert;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.regex.Pattern;
+import java.util.Objects;
+import roomescape.member.repository.EmailConverter;
+import roomescape.member.repository.PasswordConverter;
 
 @Entity
 public class Member {
-
-    private static final String EMAIL_REGEX = "^[a-zA-Z0-9+-\\_.]+@[a-zA-Z0-9-]+\\.[a-zA-Z0-9-.]+$";
-    public static final int MIN_PASSWORD_SIZE = 8;
-    public static final int MAX_PASSWORD_SIZE = 50;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -21,17 +20,19 @@ public class Member {
 
     private String name;
 
-    private String email;
+    @Convert(converter = EmailConverter.class)
+    private Email email;
 
-    private String password;
+    @Convert(converter = PasswordConverter.class)
+    private Password password;
 
     @Enumerated(value = EnumType.STRING)
     private Role role;
 
-    public Member() {
+    private Member() {
     }
 
-    public Member(Long id, String name, String email, String password, Role role) {
+    public Member(Long id, String name, Email email, Password password, Role role) {
         validateName(name);
         validateEmail(email);
         validatePassword(password);
@@ -50,23 +51,15 @@ public class Member {
         }
     }
 
-    private void validateEmail(String email) {
+    private void validateEmail(Email email) {
         if (email == null) {
             throw new IllegalArgumentException("[ERROR] 이메일이 없습니다.");
         }
-        if (!Pattern.matches(EMAIL_REGEX, email)) {
-            throw new IllegalArgumentException("[ERROR] 이메일 형식이 아닙니다.");
-        }
     }
 
-    private void validatePassword(String password) {
+    private void validatePassword(Password password) {
         if (password == null) {
             throw new IllegalArgumentException("[ERROR] 비밀번호가 없습니다.");
-        }
-
-        String trimmedPassword = password.trim();
-        if (trimmedPassword.length() < MIN_PASSWORD_SIZE || trimmedPassword.length() > MAX_PASSWORD_SIZE) {
-            throw new IllegalArgumentException("[ERROR] 비밀번호는 8자 이상, 50자 이하여야 합니다.");
         }
     }
 
@@ -84,15 +77,35 @@ public class Member {
         return name;
     }
 
-    public String getEmail() {
+    public Email getEmail() {
         return email;
     }
 
-    public String getPassword() {
+    public String getEmailValue() {
+        return email.getValue();
+    }
+
+    public Password getPassword() {
         return password;
+    }
+
+    public String getPasswordValue() {
+        return password.getValue();
     }
 
     public Role getRole() {
         return role;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof Member that)) return false;
+        return Objects.equals(name, that.name) && Objects.equals(email, that.email) && Objects.equals(password, that.password)
+                && role == that.role;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, email, password, role);
     }
 }
