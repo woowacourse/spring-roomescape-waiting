@@ -233,6 +233,9 @@ function requestCreate(reservation) {
     return fetch('/admin/reservations', requestOptions)
         .then(response => {
             if (response.status === 201) return response.json();
+            if (response.status === 400) {
+                alert('이미 해당 날짜에 예약이 존재합니다.');
+            }
             throw new Error('Create failed');
         });
 }

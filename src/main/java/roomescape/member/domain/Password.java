@@ -24,8 +24,4 @@ public class Password {
     public static Password createForMember(@NonNull final String password) {
         return new Password(password);
     }
-
-    public boolean matchesPassword(final String password) {
-        return value.equals(password);
-    }
 }
