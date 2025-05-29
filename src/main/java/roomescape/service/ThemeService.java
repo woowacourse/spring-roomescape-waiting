@@ -23,8 +23,8 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
-    public ThemeResponse createTheme(final ThemeCreateRequest requestDto) {
-        Theme requestTheme = requestDto.createWithoutId();
+    public ThemeResponse createTheme(final ThemeCreateRequest request) {
+        Theme requestTheme = request.toDomain();
         try {
             Theme savedTheme = themeRepository.save(requestTheme);
             return ThemeResponse.from(savedTheme);

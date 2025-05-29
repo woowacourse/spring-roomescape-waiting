@@ -27,8 +27,8 @@ public class MemberController {
     }
 
     @PostMapping("/members")
-    public ResponseEntity<MemberSignupResponse> signup(@RequestBody SignUpRequest requestDto) {
-        MemberSignupResponse memberSignupResponseDto = memberService.registerMember(requestDto);
-        return ResponseEntity.ok().body(memberSignupResponseDto);
+    public ResponseEntity<MemberSignupResponse> signup(@RequestBody SignUpRequest request) {
+        MemberSignupResponse response = memberService.registerMember(request);
+        return ResponseEntity.ok().body(response);
     }
 }

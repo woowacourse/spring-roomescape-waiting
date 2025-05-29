@@ -13,7 +13,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.dto.auth.LoginInfo;
-import roomescape.dto.reservation.MyReservationResponse;
+import roomescape.dto.reservation.MyReservationAndWaitingsResponse;
 import roomescape.dto.reservation.ReservationCreateRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.exception.DuplicateContentException;
@@ -178,8 +178,8 @@ class ReservationServiceTest {
         // given
         LocalDate from = LocalDate.now();
         LocalDate to = LocalDate.now().plusDays(7);
-        long themeId = 1L;
-        long memberId = 1L;
+        Long themeId = 1L;
+        Long memberId = 1L;
 
         Reservation reservation1 = testReservation;
         Reservation reservation2 = new Reservation(2L, testMember, testDate.plusDays(2), testReservationTime, testTheme);
@@ -238,16 +238,16 @@ class ReservationServiceTest {
         when(reservationRepository.findReservationsByMemberId(loginInfo.id())).thenReturn(reservations);
 
         // when
-        List<MyReservationResponse> responses = reservationService.findMyReservations(loginInfo);
+        List<MyReservationAndWaitingsResponse> responses = reservationService.findMyReservations(loginInfo.id());
 
         // then
         assertThat(responses).hasSize(2);
-        assertThat(responses.get(0).reservationId()).isEqualTo(1L);
+        assertThat(responses.get(0).id()).isEqualTo(1L);
         assertThat(responses.get(0).theme()).isEqualTo(testTheme.getName());
         assertThat(responses.get(0).date()).isEqualTo(testDate);
         assertThat(responses.get(0).time()).isEqualTo(testReservationTime.getStartAt());
         assertThat(responses.get(0).status()).isEqualTo("예약");
         
-        assertThat(responses.get(1).reservationId()).isEqualTo(2L);
+        assertThat(responses.get(1).id()).isEqualTo(2L);
     }
 }

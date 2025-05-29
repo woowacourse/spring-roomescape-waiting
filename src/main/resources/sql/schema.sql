@@ -36,3 +36,16 @@ CREATE TABLE IF NOT EXISTS reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (member_id) REFERENCES member (id)
 );
+
+CREATE TABLE IF NOT EXISTS waiting
+(
+    id        BIGINT NOT NULL AUTO_INCREMENT,
+    date      DATE   NOT NULL,
+    time_id   BIGINT,
+    theme_id  BIGINT,
+    member_id BIGINT,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    FOREIGN KEY (member_id) REFERENCES member (id)
+);
