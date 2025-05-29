@@ -30,19 +30,6 @@ public class ReservationDataService {
                 .toList();
     }
 
-    @Transactional
-    public void deleteByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
-        validateWaitingOwner(reservationSlotId, memberId);
-        reservationRepository.deleteByReservationIdAndMemberId(reservationSlotId, memberId);
-    }
-
-    public void validateWaitingOwner(final Long reservationSlotId, final Long memberId) {
-        boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
-        if (!doesExists) {
-            throw new ReservationOwnerException("자신의 예약 대기가 아닙니다.");
-        }
-    }
-
     public List<Reservation> findAllWaitingReservations() {
         return reservationRepository.findAllWaitingReservations();
     }
@@ -53,12 +40,23 @@ public class ReservationDataService {
                 memberId);
     }
 
+    public boolean existsByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
+        return reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
+    }
+
+    public void validateWaitingOwner(final Long reservationSlotId, final Long memberId) {
+        boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
+        if (!doesExists) {
+            throw new ReservationOwnerException("자신의 예약 대기가 아닙니다.");
+        }
+    }
+
     public Reservation getById(final Long reservationId) {
         return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
     }
 
-    public void removeWaitingReservation(final Reservation reservation) {
+    public void cancelWaitingReservation(final Reservation reservation) {
         reservationRepository.delete(reservation);
     }
 
@@ -66,7 +64,9 @@ public class ReservationDataService {
         reservationRepository.deleteById(reservationId);
     }
 
-    public boolean existsByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
-        return reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
+    @Transactional
+    public void deleteByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
+        validateWaitingOwner(reservationSlotId, memberId);
+        reservationRepository.deleteByReservationIdAndMemberId(reservationSlotId, memberId);
     }
 }

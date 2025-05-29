@@ -2,7 +2,6 @@ package roomescape.reservation.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;

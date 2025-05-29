@@ -61,7 +61,7 @@ public class WaitingReservationController {
     public ResponseEntity<Void> cancel(
             @PathVariable Long waitingId
     ) {
-        waitingReservationApplicationService.removeWaitingReservationWithoutMemberId(waitingId);
+        waitingReservationApplicationService.cancelWaitingReservationWithoutMemberId(waitingId);
         return ResponseEntity.noContent().build();
     }
 }

@@ -52,9 +52,9 @@ public class WaitingReservationApplicationService {
         }
     }
 
-    public void removeWaitingReservationWithoutMemberId(final Long reservationId) {
+    public void cancelWaitingReservationWithoutMemberId(final Long reservationId) {
         Reservation reservation = reservationDataService.getById(reservationId);
-        reservationDataService.removeWaitingReservation(reservation);
+        reservationDataService.cancelWaitingReservation(reservation);
         cleanupEmptyReservationSlot(reservation.getReservationSlot().getId());
     }
 
