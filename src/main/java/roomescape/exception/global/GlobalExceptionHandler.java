@@ -72,4 +72,10 @@ public class GlobalExceptionHandler {
         log.error("예외 발생: ", e);
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
     }
+
+    @ExceptionHandler(Exception.class)
+    public ProblemDetail handleException(Exception e) {
+        log.error("예외 발생: ", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.INTERNAL_SERVER_ERROR, "서버에서 알 수 없는 오류가 발생했습니다.");
+    }
 }

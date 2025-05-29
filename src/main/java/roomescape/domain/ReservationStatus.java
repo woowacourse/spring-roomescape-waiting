@@ -6,8 +6,9 @@ import lombok.Getter;
 public enum ReservationStatus {
 
     RESERVED("예약"),
-    CANCELED("취소됨"),
-    COMPLETED("완료됨");
+    WAITING("대기"),
+    CANCELED("취소"),
+    COMPLETED("완료");
 
     private final String description;
 
