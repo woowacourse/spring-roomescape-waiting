@@ -80,7 +80,7 @@ public class ConfirmedReservationApplicationService {
     }
 
     private void cleanupEmptyReservationSlot(final Long slotId) {
-        if (reservationSlotDataService.hasSingleReservation(slotId)) {
+        if (reservationSlotDataService.isEmpty(slotId)) {
             reservationSlotDataService.deleteById(slotId);
         }
     }
