@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
@@ -20,6 +21,7 @@ import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.dto.request.LoginMember;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -59,6 +61,9 @@ public class WaitingServiceTest {
     @Mock
     private ThemeRepository themeRepository;
 
+    @Mock
+    private ReservationRepository reservationRepository;
+
     @InjectMocks
     private WaitingService waitingService;
 
@@ -85,7 +90,8 @@ public class WaitingServiceTest {
                 .thenReturn(0L);
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(waiting);
-
+        when(reservationRepository.existsByDateAndTimeStartAtAndThemeId(date, LocalTime.of(10, 0), themeId))
+                .thenReturn(true);
         // when
         WaitingResponse response = waitingService.createWaiting(request, loginMember);
 
@@ -111,8 +117,8 @@ public class WaitingServiceTest {
         ReflectionTestUtils.setField(waiting, "id", 1L);
 
         setUp(memberId, timeId, themeId);
-        when(waitingRepository.existsByMemberIdAndDateAndTimeId(
-                memberId, date, timeId)).thenReturn(true);
+        when(reservationRepository.existsByDateAndTimeStartAtAndThemeId(date, LocalTime.of(10, 0), themeId))
+                .thenReturn(false);
 
         // when & then
         assertThatThrownBy(() -> waitingService.createWaiting(request, loginMember))

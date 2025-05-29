@@ -8,6 +8,7 @@ import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.member.domain.Member;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -68,5 +69,15 @@ public class Waiting {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public Reservation apporve(LocalDateTime now) {
+        return Reservation.createWithoutId(
+                now,
+                member,
+                date,
+                time,
+                theme
+        );
     }
 }

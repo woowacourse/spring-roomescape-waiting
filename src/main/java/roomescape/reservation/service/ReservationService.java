@@ -93,25 +93,13 @@ public class ReservationService {
         );
 
         if (!waitings.isEmpty()) {
-            approveWaiting(waitings);
+            Waiting firstWaiting = waitings.getFirst();
+            Reservation approveReservation = firstWaiting.apporve(dateTime.now());
+            reservationRepository.save(approveReservation);
+            waitingRepository.delete(firstWaiting);
         }
-
     }
 
-    private void approveWaiting(List<Waiting> waitings) {
-        Waiting firstWaiting = waitings.get(0);
-
-        Reservation newReservation = Reservation.createWithoutId(
-                dateTime.now(),
-                firstWaiting.getMember(),
-                firstWaiting.getDate(),
-                firstWaiting.getTime(),
-                firstWaiting.getTheme()
-        );
-        reservationRepository.save(newReservation);
-
-        waitingRepository.delete(firstWaiting);
-    }
 
     public List<MyReservationResponse> getMyReservations(final Long id) {
         List<Reservation> confirmedReservations = reservationRepository.findByMemberId(id);
