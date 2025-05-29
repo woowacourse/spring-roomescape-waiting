@@ -3,6 +3,7 @@ package roomescape.application.service;
 import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.DuplicatedException;
 import roomescape.dto.request.ReservationAdminRegisterDto;
 import roomescape.model.Member;
 import roomescape.model.Reservation;
@@ -24,13 +25,24 @@ public class ReservationTicketAdminService {
     private final MemberRepository memberRepository;
 
     public void saveReservation(ReservationAdminRegisterDto registerDto) {
+        ReservationTicket reservationTicket = createReservationTicket(registerDto);
+        assertReservationIsNotDuplicated(reservationTicket);
+
+        reservationTicketRepository.save(reservationTicket);
+    }
+
+    private ReservationTicket createReservationTicket(ReservationAdminRegisterDto registerDto) {
         Member member = memberRepository.findById(registerDto.memberId());
         ReservationTime reservationTime = reservationTimeRepository.findById(registerDto.timeId());
         Theme theme = themeRepository.findById(registerDto.themeId());
 
-        ReservationTicket reservationTicket = new ReservationTicket(
+        return new ReservationTicket(
                 new Reservation(registerDto.date(), reservationTime, theme, member, LocalDate.now()));
+    }
 
-        reservationTicketRepository.save(reservationTicket);
+    private void assertReservationIsNotDuplicated(ReservationTicket reservationTicket) {
+        if (reservationTicketRepository.isDuplicated(reservationTicket.getReservation())) {
+            throw new DuplicatedException("이미 예약이 존재합니다.");
+        }
     }
 }
