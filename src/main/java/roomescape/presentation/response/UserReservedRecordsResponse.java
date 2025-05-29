@@ -10,7 +10,8 @@ public record UserReservedRecordsResponse(
         ThemeResponse theme,
         LocalDate date,
         TimeSlotResponse time,
-        String status
+        String type,
+        Long waitingRank
 ) {
 
     public static List<UserReservedRecordsResponse> fromReservations(
@@ -29,7 +30,8 @@ public record UserReservedRecordsResponse(
                 ThemeResponse.fromTheme(reservation.theme()),
                 reservation.date(),
                 TimeSlotResponse.fromTimeSlot(reservation.timeSlot()),
-                "예약"
+                "RESERVATION",
+                null
         );
     }
 
@@ -49,7 +51,8 @@ public record UserReservedRecordsResponse(
                 ThemeResponse.fromTheme(waitingWithRank.waiting().theme()),
                 waitingWithRank.waiting().date(),
                 TimeSlotResponse.fromTimeSlot(waitingWithRank.waiting().timeSlot()),
-                waitingWithRank.rank() + "번째 예약대기"
+                "WAITING",
+                waitingWithRank.rank()
         );
     }
 }

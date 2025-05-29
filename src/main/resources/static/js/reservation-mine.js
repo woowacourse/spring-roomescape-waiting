@@ -22,17 +22,14 @@ function render(data) {
         const theme = item.theme.name;
         const date = item.date;
         const time = item.time.startAt;
-        const status = item.status;
+        const status = getStatusText(item.type, item.waitingRank);
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
         row.insertCell(3).textContent = status;
 
-        /*
-        예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-         */
-        if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+        if (item.type === 'WAITING') {
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';
@@ -45,6 +42,16 @@ function render(data) {
             row.insertCell(4).textContent = '';
         }
     });
+}
+
+function getStatusText(type, waitingRank) {
+    if (type === 'RESERVATION') {
+        return '예약';
+    }
+    if (type === 'WAITING') {
+        return `${waitingRank}번째 예약대기`;
+    }
+    return '';
 }
 
 function requestDeleteWaiting(id) {
