@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,10 +52,10 @@ class ReservationServiceTest {
     WaitingRepository waitingRepository;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    ThemeRepository themeRepository;
 
-    @AfterEach
-    void tearDown() {
+    @BeforeEach
+    void tear() {
         reservationRepository.deleteAllInBatch();
         waitingRepository.deleteAllInBatch();
         reservationTimeRepository.deleteAllInBatch();
@@ -67,11 +67,16 @@ class ReservationServiceTest {
     @Test
     void test1() {
         // given
+
+        Theme theme = new Theme("test", "test", "test");
+        Theme savedTheme = themeRepository.save(theme);
+
+        ReservationTime savedTime = reservationTimeRepository.save(new ReservationTime(LocalTime.of(23, 0)));
         LocalDate tomorrow = LocalDate.now().plusDays(1);
         ReservationRegisterDto request = new ReservationRegisterDto(
                 tomorrow.toString(),
-                1L,
-                1L
+                savedTime.getId(),
+                savedTheme.getId()
         );
 
         LoginMember loginMember = getLoginMember();
