@@ -1,7 +1,6 @@
 package roomescape.application.service;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +36,16 @@ public class WaitingService {
     private final ReservationTicketRepository reservationTicketRepository;
 
     public WaitingResponseDto registerWaiting(LoginMember loginMember, WaitingRegisterDto waitingRegisterDto) {
+        Reservation reservation = createReservation(loginMember, waitingRegisterDto);
+        validateReservationExistsForWaiting(reservation);
+
+        Waiting waiting = new Waiting(reservation);
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        return new WaitingResponseDto(savedWaiting.getId());
+    }
+
+    private Reservation createReservation(LoginMember loginMember, WaitingRegisterDto waitingRegisterDto) {
         Member member = memberRepository.findById(loginMember.id());
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRegisterDto.time());
         Theme theme = themeRepository.findById(waitingRegisterDto.theme());
@@ -48,14 +57,7 @@ public class WaitingService {
                 member,
                 LocalDate.now()
         );
-
-        validateReservationExistsForWaiting(reservation);
-
-        Waiting waiting = new Waiting(LocalDateTime.now(), reservation);
-
-        Waiting savedWaiting = waitingRepository.save(waiting);
-
-        return new WaitingResponseDto(savedWaiting.getId());
+        return reservation;
     }
 
     private void validateReservationExistsForWaiting(Reservation reservation) {

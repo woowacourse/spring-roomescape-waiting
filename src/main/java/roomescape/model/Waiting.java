@@ -39,6 +39,11 @@ public class Waiting {
         this.reservation = reservation;
     }
 
+    public Waiting(Reservation reservation) {
+        this.registeredAt = LocalDateTime.now();
+        this.reservation = reservation;
+    }
+
     public boolean ownBy(Member comparedMember) {
         return reservation.getMember().getId().equals(comparedMember.getId());
     }
