@@ -53,7 +53,7 @@ public class ConfirmedReservationApplicationService {
 
     public List<ConfirmedReservationWebResponse> findByCriteria(
             final ConfirmedReservationByCriteriaWebRequest request) {
-        List<Reservation> reservations = reservationDataService.findByCriteria(request.themeId(), request.memberId(),
+        List<Reservation> reservations = reservationDataService.findFirstByCriteria(request.themeId(), request.memberId(),
                 request.startDate(), request.endDate());
         return reservations
                 .stream()

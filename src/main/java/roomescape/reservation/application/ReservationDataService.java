@@ -24,7 +24,7 @@ public class ReservationDataService {
     }
 
     public List<MyReservationResponse> findMyReservations(final Long memberId) {
-        return reservationRepository.findByReservationMemberId(memberId)
+        return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
                 .toList();
@@ -34,10 +34,9 @@ public class ReservationDataService {
         return reservationRepository.findAllWaitingReservations();
     }
 
-    public List<Reservation> findByCriteria(final Long themeId, final Long memberId,
-                                            final LocalDate startDate, final LocalDate endDate) {
-        return reservationRepository.findByThemeIdAndDateBetweenAndReservationMemberId(themeId, startDate, endDate,
-                memberId);
+    public List<Reservation> findFirstByCriteria(final Long themeId, final Long memberId,
+                                                 final LocalDate startDate, final LocalDate endDate) {
+        return reservationRepository.findFirstByCriteria(themeId, startDate, endDate, memberId);
     }
 
     public void validateWaitingOwner(final Long reservationSlotId, final Long memberId) {
@@ -63,6 +62,6 @@ public class ReservationDataService {
     @Transactional
     public void deleteByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
         validateWaitingOwner(reservationSlotId, memberId);
-        reservationRepository.deleteByReservationIdAndMemberId(reservationSlotId, memberId);
+        reservationRepository.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
     }
 }
