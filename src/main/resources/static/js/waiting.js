@@ -40,10 +40,6 @@ function render(data) {
 //     const row = event.target.closest('tr');
 //     const id = row.cells[0].textContent;
 //
-//     /*
-//     TODO: [4단계] 예약 대기 목록 관리 기능
-//           예약 대기 승인 API 호출
-//      */
 //     const endpoint = '' + id;
 //     return fetch(endpoint, {
 //         method: ''
