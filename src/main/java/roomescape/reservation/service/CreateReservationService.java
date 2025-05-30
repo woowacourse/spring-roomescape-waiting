@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.dto.LoginMember;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.EntityNotFoundException;
@@ -31,6 +32,7 @@ public class CreateReservationService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public ReservationResponse create(final ReservationCreateRequest request) {
         if (isAlreadyBooked(request)) {
             throw new DuplicatedException("중복되는 예약이 존재합니다.");
