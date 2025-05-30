@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -10,7 +11,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.service.dto.AvailableReservationTimeResponse;
 import roomescape.service.dto.ReservationTimeRequest;
 import roomescape.service.dto.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
@@ -29,6 +32,15 @@ public class ReservationTimeController {
     public ResponseEntity<List<ReservationTimeResponse>> reservationTimeList() {
         return ResponseEntity.status(HttpStatus.OK).body(reservationTimeService.findReservationTimes());
     }
+
+    @GetMapping("/available-times")
+    public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableTimes(
+            @RequestParam("date") final LocalDate date,
+            @RequestParam("themeId") final long themeId
+    ) {
+        return ResponseEntity.status(HttpStatus.OK).body(reservationTimeService.getAvailableTimes(date, themeId));
+    }
+
 
     @PostMapping()
     public ResponseEntity<ReservationTimeResponse> reservationTimeAdd(

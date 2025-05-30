@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Base64;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
@@ -19,6 +19,7 @@ public class AuthService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public Member getMemberByEmailAndPassword(final LoginRequest loginRequest) {
         final Member member = memberRepository.findByEmail(loginRequest.email())
                 .orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자를 찾을 수 없습니다."));
@@ -28,6 +29,7 @@ public class AuthService {
         return member;
     }
 
+    @Transactional
     public void updateSessionId(final Member member, final String sessionId) {
         final Member foundMember = memberRepository.findById(member.getId())
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 회원을 찾을 수 없습니다."));

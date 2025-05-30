@@ -1,5 +1,6 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -44,5 +45,10 @@ public class ReservationTimeRepositoryImpl implements ReservationTimeRepository 
     @Override
     public boolean existsById(final long id) {
         return reservationTimeJpaRepository.existsById(id);
+    }
+
+    @Override
+    public List<ReservationTime> findAvailableTimesByDateAndThemeId(final LocalDate date, final Long themeId) {
+        return reservationTimeJpaRepository.findAvailableTimesByDateAndThemeId(date, themeId);
     }
 }

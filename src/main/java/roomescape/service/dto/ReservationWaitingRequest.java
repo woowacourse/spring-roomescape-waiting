@@ -3,7 +3,7 @@ package roomescape.service.dto;
 import java.time.LocalDate;
 import org.springframework.format.annotation.DateTimeFormat;
 
-public record AdminReservationRequest(
+public record ReservationWaitingRequest(
         @DateTimeFormat(pattern = "yyyy-MM-dd")
         LocalDate date,
         long themeId,

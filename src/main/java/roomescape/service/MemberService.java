@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.Base64;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.service.dto.MemberRegisterRequest;
@@ -19,6 +20,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public MemberRegisterResponse addMember(final MemberRegisterRequest request) {
         validateDuplicateEmail(request.email());
         validateDuplicateName(request.name());
@@ -31,12 +33,14 @@ public class MemberService {
         return MemberRegisterResponse.from(memberRepository.save(newMember));
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> getAllMembers() {
         return memberRepository.findAll().stream()
                 .map(MemberResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public Member getMemberById(final long id) {
         return memberRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("[ERROR] 사용자가 존재하지 않습니다."));
     }

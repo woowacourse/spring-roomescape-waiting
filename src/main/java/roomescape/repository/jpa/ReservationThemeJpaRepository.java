@@ -11,15 +11,12 @@ public interface ReservationThemeJpaRepository extends JpaRepository<Reservation
 
     boolean existsByName(final String name);
 
-    @Query("""
-        SELECT th.id, th.name, th.description, th.thumbnail, COUNT(*) AS reservation_count
-        FROM Reservation r
-        JOIN r.theme th
-        WHERE CAST(r.date AS date) BETWEEN 
-              FUNCTION('DATE_SUB', CURRENT_DATE, 7) AND 
-              FUNCTION('DATE_SUB', CURRENT_DATE, 1)
-        GROUP BY th.id, th.name, th.description, th.thumbnail
-        ORDER BY reservation_count DESC
-        LIMIT 10""")
+    @Query(value = """
+        SELECT rt.* FROM reservation_theme rt
+        JOIN reservation r ON rt.id = r.theme_id
+        WHERE r.date BETWEEN DATEADD(DAY, -7, CURRENT_DATE) AND DATEADD(DAY, -1, CURRENT_DATE)
+        GROUP BY rt.id, rt.name, rt.description, rt.thumbnail
+        ORDER BY COUNT(*) DESC
+        LIMIT 10""", nativeQuery = true)
     List<ReservationTheme> findWeeklyThemeOrderByCountDesc();
 }

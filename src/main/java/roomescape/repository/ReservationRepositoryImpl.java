@@ -43,8 +43,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                                                                           final LocalDate dateFrom,
                                                                           final LocalDate dateTo) {
         Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
-                .and(ReservationSpecification.betweenDateFromAndDateTo(dateFrom, dateTo))
-                .and(ReservationSpecification.hasThemeId(memberId));
+                .and(ReservationSpecification.betweenDateFromAndDateTo(dateFrom, dateTo));
         return reservationJpaRepository.findAll(spec);
     }
 
@@ -71,5 +70,11 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     @Override
     public boolean existByTimeId(final long timeId) {
         return reservationJpaRepository.existsByTimeId(timeId);
+    }
+
+    @Override
+    public boolean existsByMemberIdAndDateAndThemeIdAndTimeId(final Long memberId, final LocalDate date,
+                                                              final long themeId, final long timeId) {
+        return reservationJpaRepository.existsByMemberIdAndDateAndThemeIdAndTimeId(memberId, date, themeId, timeId);
     }
 }
