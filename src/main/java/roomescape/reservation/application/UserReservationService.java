@@ -46,5 +46,4 @@ public class UserReservationService {
         Member member = memberRepository.getById(request.memberId());
         return request.toReservationDetails(member, reservationTime, reservationTheme);
     }
-
 }

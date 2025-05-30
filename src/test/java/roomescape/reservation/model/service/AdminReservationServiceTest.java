@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.ReservationTestFixture;
 import roomescape.member.model.Member;
+import roomescape.reservation.application.AdminReservationService;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
@@ -24,10 +25,10 @@ import roomescape.reservation.model.repository.WaitingRepository;
 @SpringBootTest
 @Transactional
 @ActiveProfiles("test")
-class WaitingManagementTest {
+class AdminReservationServiceTest {
 
     @Autowired
-    private WaitingManagement waitingManagement;
+    private AdminReservationService adminReservationService;
 
     @Autowired
     private WaitingRepository waitingRepository;
@@ -66,7 +67,7 @@ class WaitingManagementTest {
         waitingRepository.save(waitingFirst);
         waitingRepository.save(waitingSecond);
 
-        Optional<Reservation> result = waitingManagement.promoteWaiting(theme, tomorrow, time);
+        Optional<Reservation> result = adminReservationService.promoteWaiting(theme, tomorrow, time);
         assertThat(result).isPresent();
         assertThat(result.get().getMember()).isEqualTo(member1);
         assertThat(waitingRepository.findAll()).hasSize(1);
@@ -77,6 +78,6 @@ class WaitingManagementTest {
     @DisplayName("대기자가 없으면 optional을 반환한다")
     @Test
     void NoWaitingReturnsOptional() {
-        assertThat(waitingManagement.promoteWaiting(theme, tomorrow, time)).isEmpty();
+        assertThat(adminReservationService.promoteWaiting(theme, tomorrow, time)).isEmpty();
     }
 }
