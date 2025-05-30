@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-    fetch('/admin/waiting/reservation') // 내 예약 목록 조회 API 호출
+    fetch('/admin/reservations/pending') // 내 예약 목록 조회 API 호출
         .then(response => {
             if (response.status === 200) return response.json();
             throw new Error('Read failed');
@@ -59,7 +59,7 @@ function deny(event) {
     TODO: [4단계] 예약 대기 목록 관리 기능
           예약 대기 거절 API 호출
      */
-    const endpoint = `/admin/waiting/reservation/${id}/deny`;
+    const endpoint = `/admin/reservations/${id}/pending/deny`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

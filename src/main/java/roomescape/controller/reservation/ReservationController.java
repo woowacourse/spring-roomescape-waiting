@@ -24,12 +24,12 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<ReservationResponse>> reservationList() {
         return ResponseEntity.status(HttpStatus.OK).body(reservationService.getAllReservations());
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final ReservationRequest request, final Long memberId) {
         final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
                 memberId,
@@ -39,6 +39,18 @@ public class ReservationController {
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(
                 reservationService.addReservation(createReservationRequest));
+    }
+
+    @PostMapping("/pending")
+    public ResponseEntity<ReservationResponse> addPendingReservation(@RequestBody @Valid final ReservationRequest request, final Long memberId) {
+        final CreateReservationRequest createReservationRequest = new CreateReservationRequest(
+                memberId,
+                request.date(),
+                request.themeId(),
+                request.timeId()
+        );
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+                reservationService.addPendingReservation(createReservationRequest));
     }
 
     @DeleteMapping("/{id}")

@@ -38,9 +38,13 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new NoSuchElementException("[ERROR] 존재하는 시간이 없습니다."));
     }
 
-    public List<ReservationTimeResponse> findReservationTimes() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        return reservationTimes.stream().map(ReservationTimeResponse::from).toList();
+    public List<ReservationTimeResponse> findReservationTimesInfo() {
+        return findReservationTimes().stream()
+                .map(ReservationTimeResponse::from).toList();
+    }
+
+    public List<ReservationTime> findReservationTimes() {
+        return reservationTimeRepository.findAll();
     }
 
     private void validateUniqueReservationTime(final ReservationTime reservationTime) {

@@ -91,13 +91,13 @@ class ReservationTimeServiceTest {
 
     @Test
     @DisplayName("모든 예약 시간을 검색한다")
-    void findReservationTimesTest() {
+    void findReservationTimesInfoTest() {
         // given
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(12, 12));
         reservationTimeService.addReservationTime(reservationTimeRequest);
 
         // when
-        List<ReservationTimeResponse> reservationTimes = reservationTimeService.findReservationTimes();
+        List<ReservationTimeResponse> reservationTimes = reservationTimeService.findReservationTimesInfo();
 
 
         // then

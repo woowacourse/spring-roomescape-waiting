@@ -8,8 +8,10 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationitem.ReservationTheme;
 import roomescape.domain.reservationitem.ReservationThemeRepository;
+import roomescape.domain.reservationitem.ReservationTime;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.response.ReservationThemeResponse;
+import roomescape.dto.response.ReservationTimeWithAvailabilityResponse;
 
 @RequiredArgsConstructor
 @Service
@@ -20,6 +22,8 @@ public class ReservationThemeService {
     public static final int POPULAR_THEME_DATE_TO = 1;
 
     private final ReservationThemeRepository reservationThemeRepository;
+    private final ReservationTimeService reservationTimeService;
+    private final ReservationItemService reservationItemService;
 
     public List<ReservationThemeResponse> findReservationThemes() {
         List<ReservationTheme> reservationThemes = reservationThemeRepository.findAll();
@@ -44,6 +48,18 @@ public class ReservationThemeService {
         validateUniqueThemes(reservationTheme);
         ReservationTheme saved = reservationThemeRepository.save(reservationTheme);
         return ReservationThemeResponse.from(saved);
+    }
+
+    public List<ReservationTimeWithAvailabilityResponse> findReservationTimeOfTheme(long themeId, LocalDate date) {
+        final ReservationTheme theme = getThemeById(themeId);
+
+        List<ReservationTime> availableReservationTime = reservationTimeService.findReservationTimes();
+        return availableReservationTime.stream()
+                .map(reservationTime -> {
+                            boolean isBooked = reservationItemService.isExistReservationItem(date, reservationTime, theme);
+                            return ReservationTimeWithAvailabilityResponse.from(reservationTime, isBooked);
+                        }
+                ).toList();
     }
 
     public void removeReservationTheme(final long id) {

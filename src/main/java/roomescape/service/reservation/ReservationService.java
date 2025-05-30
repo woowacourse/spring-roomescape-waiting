@@ -30,37 +30,60 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
 
     public ReservationResponse addReservation(final CreateReservationRequest request) {
-        final long timeId = request.timeId();
-        final long themeId = request.themeId();
-        final LocalDate date = request.date();
+        return createReservation(request, ReservationStatus.ACCEPTED, false);
+    }
+
+    public ReservationResponse addPendingReservation(final CreateReservationRequest request) {
+        return createReservation(request, ReservationStatus.PENDING, true);
+    }
+
+    private ReservationResponse createReservation(
+            final CreateReservationRequest request,
+            final ReservationStatus status,
+            final boolean requiresExistingReservation) {
 
         final Member member = memberService.getMemberById(request.memberId());
-        final ReservationTime time = reservationTimeService.getReservationTimeById(timeId);
-        final ReservationTheme theme = reservationThemeService.getThemeById(themeId);
+        final ReservationTime time = reservationTimeService.getReservationTimeById(request.timeId());
+        final ReservationTheme theme = reservationThemeService.getThemeById(request.themeId());
+        final LocalDate date = request.date();
 
-        final ReservationStatus reservationStatus = checkReservationStatus(date, time, theme);
-        final ReservationItem reservationItem = reservationItemService.createReservationItemIfNotExist(
-                date, time, theme
-        );
-        if (reservationRepository.existsByMemberAndReservationItem(member, reservationItem)) {
-            throw new IllegalArgumentException("[ERROR] 이미 예약을 등록하였습니다.");
-        }
+        validateReservationAvailability(date, time, theme, requiresExistingReservation);
+
+        final ReservationItem reservationItem = reservationItemService.createReservationItemIfNotExist(date, time, theme);
+
+        validateDuplicateReservation(member, reservationItem);
 
         final Reservation saved = reservationRepository.save(
                 Reservation.builder()
                         .member(member)
                         .reservationItem(reservationItem)
-                        .reservationStatus(reservationStatus)
+                        .reservationStatus(status)
                         .build()
         );
         return ReservationResponse.from(saved);
     }
 
-    private ReservationStatus checkReservationStatus(LocalDate date, ReservationTime time, ReservationTheme theme) {
-        if (reservationItemService.isExistReservationItem(date, time, theme)) {
-            return ReservationStatus.PENDING;
+    private void validateReservationAvailability(
+            final LocalDate date,
+            final ReservationTime time,
+            final ReservationTheme theme,
+            final boolean requiresExistingReservation) {
+
+        final boolean reservationExists = reservationItemService.isExistReservationItem(date, time, theme);
+
+        if (requiresExistingReservation && !reservationExists) {
+            throw new IllegalArgumentException("[ERROR] 대기 예약은 기존 예약이 있을 때만 가능합니다.");
         }
-        return ReservationStatus.ACCEPTED;
+
+        if (!requiresExistingReservation && reservationExists) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약된 시간입니다.");
+        }
+    }
+
+    private void validateDuplicateReservation(final Member member, final ReservationItem reservationItem) {
+        if (reservationRepository.existsByMemberAndReservationItem(member, reservationItem)) {
+            throw new IllegalArgumentException("[ERROR] 이미 예약을 등록하였습니다.");
+        }
     }
 
     public List<ReservationResponse> getAllReservations() {

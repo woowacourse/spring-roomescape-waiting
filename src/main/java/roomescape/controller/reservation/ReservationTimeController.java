@@ -23,12 +23,12 @@ public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
 
-    @GetMapping()
+    @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> reservationTimeList() {
-        return ResponseEntity.status(HttpStatus.OK).body(reservationTimeService.findReservationTimes());
+        return ResponseEntity.status(HttpStatus.OK).body(reservationTimeService.findReservationTimesInfo());
     }
 
-    @PostMapping()
+    @PostMapping
     public ResponseEntity<ReservationTimeResponse> reservationTimeAdd(
             @RequestBody @Valid ReservationTimeRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationTimeService.addReservationTime(request));
