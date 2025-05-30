@@ -26,12 +26,12 @@ public class RoleInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
             throws Exception {
+        if (!(handler instanceof final HandlerMethod handlerMethod)) {
+            return true;
+        }
         String path = request.getRequestURI();
         if (path.startsWith(ADMIN)) {
             return validateToken(request, MemberRole.ADMIN);
-        }
-        if (!(handler instanceof final HandlerMethod handlerMethod)) {
-            return true;
         }
         return validateToken(request, handlerMethod);
     }
