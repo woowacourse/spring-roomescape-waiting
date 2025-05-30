@@ -32,7 +32,7 @@ public class Reservation {
 
     private Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
                         final Theme theme) {
-        validateNull(member, date, reservationTime, theme);
+        validateNotNull(member, date, reservationTime, theme);
         this.id = id;
         this.member = member;
         this.date = date;
@@ -53,7 +53,7 @@ public class Reservation {
         return new Reservation(null, member, date, reservationTime, theme);
     }
 
-    private static void validateNull(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
+    private static void validateNotNull(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
         if (member == null) {
             throw new ArgumentNullException("member");
         }

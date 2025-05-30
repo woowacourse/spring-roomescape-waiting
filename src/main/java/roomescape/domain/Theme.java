@@ -25,7 +25,7 @@ public class Theme {
     private String thumbnail;
 
     public Theme(Long id, String name, String description, String thumbnail) {
-        validateNull(name, description, thumbnail);
+        validateNotNull(name, description, thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
@@ -35,7 +35,11 @@ public class Theme {
     protected Theme() {
     }
 
-    private void validateNull(String name, String description, String thumbnail) {
+    public static Theme createWithoutId(String name, String description, String thumbnail) {
+        return new Theme(null, name, description, thumbnail);
+    }
+
+    private void validateNotNull(String name, String description, String thumbnail) {
         if (name == null || name.isBlank()) {
             throw new ArgumentNullException("name");
         }
@@ -45,10 +49,6 @@ public class Theme {
         if (thumbnail == null || thumbnail.isBlank()) {
             throw new ArgumentNullException("thumbnail");
         }
-    }
-
-    public static Theme createWithoutId(String name, String description, String thumbnail) {
-        return new Theme(null, name, description, thumbnail);
     }
 
     public Long getId() {
