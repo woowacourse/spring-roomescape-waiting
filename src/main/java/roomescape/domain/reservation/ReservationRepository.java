@@ -23,7 +23,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     List<Reservation> findByReservationSlotThemeIdAndMemberIdAndReservationSlotDateBetween(
             @Param("themeId") Long themeId,
             @Param("memberId") Long memberId,
-            @Param("frm") LocalDate from,
+            @Param("from") LocalDate from,
             @Param("to") LocalDate to);
 
     @EntityGraph(attributePaths = {"member", "reservationSlot.time"})

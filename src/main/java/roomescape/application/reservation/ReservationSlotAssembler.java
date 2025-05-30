@@ -12,12 +12,12 @@ import roomescape.domain.reservation.ThemeRepository;
 @Component
 public class ReservationSlotAssembler {
 
-    private final ReservationTimeRepository reservationTImeRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationSlotAssembler(ReservationTimeRepository reservationTImeRepository,
+    public ReservationSlotAssembler(ReservationTimeRepository reservationTimeRepository,
                                     ThemeRepository themeRepository) {
-        this.reservationTImeRepository = reservationTImeRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
     }
 
@@ -26,7 +26,7 @@ public class ReservationSlotAssembler {
     }
 
     private ReservationTime getReservationTimeById(Long timeId) {
-        return reservationTImeRepository.findById(timeId)
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
     }
 
