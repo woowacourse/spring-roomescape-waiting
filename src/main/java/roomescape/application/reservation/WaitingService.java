@@ -56,6 +56,7 @@ public class WaitingService {
         waitingRepository.save(waiting);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingWitStatusResult> findWaitingRanks(Long memberId) {
         Member member = getMemberById(memberId);
         List<WaitingRank> waitingRanks = waitingRepository.findWaitingRankByMember(member);
@@ -64,10 +65,12 @@ public class WaitingService {
                 .toList();
     }
 
+    @Transactional
     public void delete(Long waitingId) {
         waitingRepository.deleteById(waitingId);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResult> findAllWaitings() {
         List<Waiting> waitings = waitingRepository.findAllWithMemberAndThemeAndTime();
         return waitings.stream()

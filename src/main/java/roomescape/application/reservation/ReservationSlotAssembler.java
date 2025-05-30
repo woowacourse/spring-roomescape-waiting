@@ -2,6 +2,7 @@ package roomescape.application.reservation;
 
 import java.time.LocalDate;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservation.ReservationTime;
@@ -21,6 +22,7 @@ public class ReservationSlotAssembler {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public ReservationSlot assemble(LocalDate date, Long timeId, Long themeId) {
         return new ReservationSlot(date, getReservationTimeById(timeId), getThemeById(themeId));
     }

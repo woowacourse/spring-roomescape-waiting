@@ -50,6 +50,7 @@ public class ReservationService {
         return reservationRepository.save(reservation).getId();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResult> findAll() {
         List<Reservation> reservations = reservationRepository.findAllWithMemberAndTimeAndTheme();
         return reservations.stream()
@@ -57,11 +58,13 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public ReservationResult findById(Long reservationId) {
         Reservation reservation = getReservationById(reservationId);
         return ReservationResult.from(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResult> findReservationsBy(ReservationSearchParam reservationSearchParam) {
         List<Reservation> reservations = reservationRepository.findByReservationSlotThemeIdAndMemberIdAndReservationSlotDateBetween(
                 reservationSearchParam.themeId(),
@@ -74,6 +77,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWithStatusResult> findReservationsWithStatus(Long memberId) {
         return reservationRepository.findAllByMemberId(memberId)
                 .stream()

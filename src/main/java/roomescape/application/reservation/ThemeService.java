@@ -28,6 +28,7 @@ public class ThemeService {
         this.clock = clock;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResult> findAll() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -49,6 +50,7 @@ public class ThemeService {
         return theme.getId();
     }
 
+    @Transactional(readOnly = true)
     public ThemeResult findById(Long id) {
         Theme theme = getThemeById(id);
         return ThemeResult.from(theme);
@@ -62,6 +64,7 @@ public class ThemeService {
         themeRepository.deleteById(themeId);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResult> findRankBetweenDate() {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDate = today.minusDays(7);

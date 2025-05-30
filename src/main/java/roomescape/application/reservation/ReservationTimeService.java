@@ -39,11 +39,13 @@ public class ReservationTimeService {
         return reservationTime.getId();
     }
 
+    @Transactional(readOnly = true)
     public ReservationTimeResult findById(Long reservationTimeId) {
         ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
         return toReservationResult(reservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResult> findAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
@@ -51,6 +53,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
                                                                                    LocalDate reservationDate) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
