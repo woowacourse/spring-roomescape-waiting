@@ -64,7 +64,7 @@ public class ReservationSlot {
 
     public Reservation addReservation(final Member member, final LocalDateTime now) {
         validateDateTime(date, time.getStartAt(), now);
-        validateMemberReserved(member);
+        validateMemberNotReserved(member);
         Reservation reservation = new Reservation(member, this);
         reservations.add(reservation);
         return reservation;
@@ -90,7 +90,7 @@ public class ReservationSlot {
     public Reservation findConfirmedReservation() {
         return reservations.stream()
                 .min(Comparator.comparing(Reservation::getCreatedAt))
-                .orElseThrow(() -> new ReservationSlotNotFoundException("현재 예약한 멤버가 없습니다."));
+                .orElseThrow(() -> new ReservationNotFoundException("예약이 존재하지 않습니다."));
     }
 
     private void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
@@ -99,7 +99,7 @@ public class ReservationSlot {
         }
     }
 
-    private void validateMemberReserved(final Member member) {
+    private void validateMemberNotReserved(final Member member) {
         boolean memberExists = reservations.stream()
                 .anyMatch(reservation -> reservation.getMember().getId().equals(member.getId()));
         if (memberExists) {
