@@ -37,14 +37,6 @@ class ThemeRepositoryTest {
     private MemberRepository memberRepository;
 
     @Test
-    void findAll() {
-        themeRepository.save(new Theme("추리", "셜록 추리 게임 with Danny", "image.png"));
-        themeRepository.save(new Theme("논리", "논리 게임 with Vector", "image.png"));
-
-        assertThat(themeRepository.findAll().size()).isEqualTo(2);
-    }
-
-    @Test
     void findPopular() {
         Member member = TestFixture.makeMember();
         memberRepository.save(member);

@@ -79,35 +79,64 @@ class ReservationTimeApplicationServiceTest {
     }
 
     @Test
-    void createReservationTime_shouldThrowException_IfDuplicated() {
-        LocalTime time = LocalTime.of(1, 1);
+    void createReservationTime_shouldReturnResponse_WhenSuccessful() {
+        // given
+        LocalTime time = LocalTime.of(9, 0);
         ReservationTimeCreateWebRequest request = new ReservationTimeCreateWebRequest(time);
 
+        // when
+        ReservationTimeWebResponse response = reservationTimeApplicationService.create(request);
+
+        // then
+        assertThat(response.startAt()).isEqualTo(time);
+    }
+
+    @Test
+    void createReservationTime_shouldThrowException_IfDuplicated() {
+        // given
+        LocalTime time = LocalTime.of(1, 1);
+        ReservationTimeCreateWebRequest request = new ReservationTimeCreateWebRequest(time);
         reservationTimeApplicationService.create(request);
 
+        // when & then
         assertThatThrownBy(() -> reservationTimeApplicationService.create(request))
                 .isInstanceOf(ReservationTimeDuplicatedException.class)
                 .hasMessageContaining("중복된 예약 시간을 생성할 수 없습니다.");
     }
 
     @Test
-    void createReservationTime_shouldReturnResponse_WhenSuccessful() {
-        LocalTime time = LocalTime.of(9, 0);
-        ReservationTimeCreateWebRequest request = new ReservationTimeCreateWebRequest(time);
-
-        ReservationTimeWebResponse response = reservationTimeApplicationService.create(request);
-
-        assertThat(response.startAt()).isEqualTo(time);
-    }
-
-    @Test
     void findAll() {
+        // given
         reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(10, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
 
+        // when
         List<ReservationTimeWebResponse> result = reservationTimeApplicationService.findAll();
 
+        // then
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void findAvailableReservationTimes_shouldReturnAllAvailable() {
+        // given
+        ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
+                new ReservationTimeCreateWebRequest(LocalTime.of(10, 0)));
+        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
+        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(12, 0)));
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, reservationTimeWebResponse.id(), theme.getId(),
+                        member.getId(), afterOneHour));
+
+        // when
+        List<AvailableReservationTimeWebResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(
+                futureDate, theme.getId());
+
+        // then
+        assertThat(availableReservationTimes.stream()
+                .filter(AvailableReservationTimeWebResponse::alreadyBooked)
+                .count())
+                .isEqualTo(1L);
     }
 
     @Test
@@ -123,32 +152,16 @@ class ReservationTimeApplicationServiceTest {
 
     @Test
     void removeByIdReservationTime_shouldThrowException_WhenReservationExists() {
+        // given
         ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateWebRequest(LocalTime.now()));
         confirmedReservationApplicationService.create(
                 new ConfirmedReservationCreateRequest(futureDate, reservationTimeWebResponse.id(),
                         theme.getId(), member.getId(), afterOneHour));
+
+        // when & then
         assertThatThrownBy(() -> reservationTimeApplicationService.removeById(reservationTimeWebResponse.id()))
                 .isInstanceOf(ReservationTimeInUseException.class)
                 .hasMessageContaining("해당 시간에 대한 예약이 존재하여 삭제할 수 없습니다.");
-    }
-
-    @Test
-    void findAvailableReservationTimes_shouldReturnAllAvailable() {
-        ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
-                new ReservationTimeCreateWebRequest(LocalTime.of(10, 0)));
-        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
-        reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(12, 0)));
-
-        confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, reservationTimeWebResponse.id(),
-                        theme.getId(), member.getId(), afterOneHour));
-        List<AvailableReservationTimeWebResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(
-                futureDate, theme.getId());
-
-        assertThat(availableReservationTimes.stream()
-                .filter(AvailableReservationTimeWebResponse::alreadyBooked)
-                .count())
-                .isEqualTo(1L);
     }
 }

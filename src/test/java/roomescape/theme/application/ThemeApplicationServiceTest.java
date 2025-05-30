@@ -4,10 +4,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,11 +25,15 @@ import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.member.presentation.dto.request.SignupWebRequest;
 import roomescape.member.presentation.dto.response.SignUpWebResponse;
+import roomescape.reservation.application.ConfirmedReservationApplicationService;
+import roomescape.reservation.application.ReservationDataService;
+import roomescape.reservation.application.dto.request.ConfirmedReservationCreateRequest;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.application.ReservationTimeApplicationService;
 import roomescape.reservationtime.application.ReservationTimeDataService;
 import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
@@ -41,6 +47,7 @@ import roomescape.theme.presentation.dto.response.ThemeWebResponse;
 class ThemeApplicationServiceTest {
 
     private static final LocalDate FUTURE_DATE = LocalDate.now().plusDays(7);
+
     @Autowired
     private ThemeRepository themeRepository;
 
@@ -56,11 +63,20 @@ class ThemeApplicationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    private ThemeDataService themeDataService;
+
+    private ReservationTimeDataService reservationTimeDataService;
+
+    private ReservationDataService reservationDataService;
+
     private ThemeApplicationService themeApplicationService;
 
     private MemberApplicationService memberApplicationService;
 
     private ReservationTimeApplicationService reservationTimeApplicationService;
+
+    private ConfirmedReservationApplicationService confirmedReservationApplicationService;
+
 
     @BeforeEach
     void setUp() {
@@ -68,25 +84,53 @@ class ThemeApplicationServiceTest {
                 reservationSlotRepository);
         Clock clock = Clock.fixed(FUTURE_DATE.atStartOfDay(ZoneId.systemDefault()).toInstant(),
                 ZoneId.systemDefault());
-        themeApplicationService = new ThemeApplicationService(new ThemeDataService(themeRepository),
-                reservationSlotDataService, clock);
+        themeDataService = new ThemeDataService(themeRepository);
+        themeApplicationService = new ThemeApplicationService(themeDataService, reservationSlotDataService, clock);
         MemberDataService memberDataService = new MemberDataService(memberRepository);
         memberApplicationService = new MemberApplicationService(memberDataService, myPasswordEncoder);
         reservationTimeApplicationService = new ReservationTimeApplicationService(
                 new ReservationTimeDataService(reservationTimeRepository,
                         reservationSlotDataService));
+        reservationTimeDataService = new ReservationTimeDataService(reservationTimeRepository,
+                reservationSlotDataService);
+        confirmedReservationApplicationService = new ConfirmedReservationApplicationService(reservationSlotDataService,
+                reservationTimeDataService, themeDataService, memberDataService, reservationDataService);
     }
 
     @Test
-    void delete() {
+    void delete_whenValidRequest_removesSuccessfully() {
+        // given
         ThemeWebResponse themeWebResponse = themeApplicationService.create(
                 new ThemeCreateWebRequest("논리", "논리 게임 with Vector", "image.png"));
+
+        // when
         themeApplicationService.delete(themeWebResponse.id());
+
+        // then
         assertThat(themeApplicationService.findAll().size()).isEqualTo(0);
     }
 
     @Test
-    void create() {
+    void delete_throwsException_removesSuccessfully() {
+        // given
+        LocalTime now = LocalTime.now();
+        ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
+                new ReservationTimeCreateWebRequest(now));
+        ThemeWebResponse themeWebResponse = themeApplicationService.create(
+                new ThemeCreateWebRequest("논리", "논리 게임 with Vector", "image.png"));
+        SignUpWebResponse signup = memberApplicationService.signup(new SignupWebRequest("Mint", "password", "mint"));
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, reservationTimeWebResponse.id(),
+                        themeWebResponse.id(), signup.id(), LocalDateTime.now()));
+
+        // when & then
+        Assertions.assertThatThrownBy(() -> themeApplicationService.delete(themeWebResponse.id()))
+                .isInstanceOf(ReservationTimeInUseException.class)
+                .hasMessageContaining("해당 테마에 대한 예약이 존재하여 삭제할 수 없습니다.");
+    }
+
+    @Test
+    void create_whenValidRequest_findSuccessfully() {
         ThemeWebResponse themeWebResponse = themeApplicationService.create(
                 new ThemeCreateWebRequest("논리", "논리 게임 with Vector", "image.png"));
 
@@ -95,11 +139,12 @@ class ThemeApplicationServiceTest {
     }
 
     @Test
-    void findPopular() {
+    void findPopular_whenValidRequest_findSuccessfully() {
         String email = "regular2@gmail.com";
         String password = "password";
         String name = "regular2";
-        SignUpWebResponse signUpWebResponse = memberApplicationService.signup(new SignupWebRequest(email, password, name));
+        SignUpWebResponse signUpWebResponse = memberApplicationService.signup(
+                new SignupWebRequest(email, password, name));
         Member member = memberRepository.findById(signUpWebResponse.id()).get();
 
         ThemeWebResponse themeWebResponse1 = themeApplicationService.create(

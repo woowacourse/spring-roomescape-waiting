@@ -67,6 +67,8 @@ class ConfirmedReservationApplicationServiceTest {
     private Long memberId;
     private Long reservationId;
 
+    private WaitingReservationApplicationService waitingReservationApplicationService;
+
     @BeforeEach
     void setUp() {
         ReservationSlotDataService reservationSlotDataService = new ReservationSlotDataService(
@@ -80,6 +82,8 @@ class ConfirmedReservationApplicationServiceTest {
                 reservationSlotDataService,
                 reservationTimeDataService, themeDataService,
                 memberDataService, reservationDataService);
+        waitingReservationApplicationService = new WaitingReservationApplicationService(reservationSlotDataService,
+                memberDataService, reservationDataService);
 
         timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0))).getId();
         themeId = themeRepository.save(TestFixture.makeTheme()).getId();
@@ -87,6 +91,84 @@ class ConfirmedReservationApplicationServiceTest {
         reservationId = confirmedReservationApplicationService.create(
                 new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
                         afterOneHour)).id();
+    }
+
+    @Test
+    void create_whenValidRequest_returnReservations() {
+        // when
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(tomorrow, timeId, themeId, memberId,
+                        afterOneHour));
+
+        // then
+        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
+                new ConfirmedReservationByCriteriaWebRequest(null, null, tomorrow, tomorrow.plusDays(1)));
+
+        ConfirmedReservationWebResponse response = result.getFirst();
+        Assertions.assertAll(
+                () -> assertThat(result).hasSize(1),
+                () -> assertThat(response.member().id()).isEqualTo(memberId),
+                () -> assertThat(response.date()).isEqualTo(tomorrow),
+                () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0))
+        );
+    }
+
+    @Test
+    void create_whenDuplicateTimeSlot_throwsReservationSlotDuplicatedException() {
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.create(
+                        new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId, afterOneHour)))
+                .isInstanceOf(ReservationSlotDuplicatedException.class)
+                .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
+    }
+
+    @Test
+    void create_whenTimeIdNotFound_throwsReservationTimeNotFoundException() {
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.create(
+                        new ConfirmedReservationCreateRequest(futureDate, 999L, themeId, memberId,
+                                afterOneHour)))
+                .isInstanceOf(ReservationTimeNotFoundException.class)
+                .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
+    }
+
+    @Test
+    void create_whenThemeIdNotFound_throwsThemeNotFoundException() {
+        assertThatThrownBy(
+                () -> confirmedReservationApplicationService.create(
+                        new ConfirmedReservationCreateRequest(futureDate, timeId, 999L, memberId,
+                                afterOneHour)))
+                .isInstanceOf(ThemeNotFoundException.class)
+                .hasMessageContaining("요청한 id와 일치하는 테마 정보가 없습니다.");
+    }
+
+    @Test
+    void create_whenMemberIdNotFound_throwsMemberNotFoundException() {
+        assertThatThrownBy(
+                () -> waitingReservationApplicationService.create(
+                        new WaitingReservationCreateRequest(futureDate, timeId, themeId, 999L)))
+                .isInstanceOf(MemberNotFoundException.class)
+                .hasMessageContaining("존재하지 않은 멤버입니다.");
+    }
+
+    @Test
+    void findByCriteria_whenValidRequest_returnsReservation() {
+        // when
+        Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
+        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
+                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId, afterOneHour));
+
+        // then
+        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
+                new ConfirmedReservationByCriteriaWebRequest(themeId2, null, null, null));
+
+        Assertions.assertAll(
+                () -> assertThat(response.member().name()).isEqualTo("Mint"),
+                () -> assertThat(response.date()).isEqualTo(futureDate),
+                () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0)),
+                () -> assertThat(result).hasSize(1)
+        );
     }
 
     @Test
@@ -133,54 +215,6 @@ class ConfirmedReservationApplicationServiceTest {
             softAssertions.assertThat(result).isEmpty();
             softAssertions.assertThat(reservationSlotRepository.findById(reservationId)).isEmpty();
         });
-    }
-
-    @Test
-    void create_whenValidRequest_returnsReservation() {
-        // when
-        Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
-        ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId, afterOneHour));
-
-        // then
-        List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
-                new ConfirmedReservationByCriteriaWebRequest(themeId2, null, null, null));
-
-        Assertions.assertAll(
-                () -> assertThat(response.member().name()).isEqualTo("Mint"),
-                () -> assertThat(response.date()).isEqualTo(futureDate),
-                () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0)),
-                () -> assertThat(result).hasSize(1)
-        );
-    }
-
-    @Test
-    void create_whenDuplicateTimeSlot_throwsReservationSlotDuplicatedException() {
-        assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(
-                        new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId, afterOneHour)))
-                .isInstanceOf(ReservationSlotDuplicatedException.class)
-                .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
-    }
-
-    @Test
-    void create_whenTimeIdNotFound_throwsReservationTimeNotFoundException() {
-        assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(
-                        new ConfirmedReservationCreateRequest(futureDate, 999L, themeId, memberId,
-                                afterOneHour)))
-                .isInstanceOf(ReservationTimeNotFoundException.class)
-                .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
-    }
-
-    @Test
-    void create_whenThemeIdNotFound_throwsThemeNotFoundException() {
-        assertThatThrownBy(
-                () -> confirmedReservationApplicationService.create(
-                        new ConfirmedReservationCreateRequest(futureDate, timeId, 999L, memberId,
-                                afterOneHour)))
-                .isInstanceOf(ThemeNotFoundException.class)
-                .hasMessageContaining("요청한 id와 일치하는 테마 정보가 없습니다.");
     }
 
     @Test

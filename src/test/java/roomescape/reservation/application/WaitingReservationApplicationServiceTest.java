@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import org.assertj.core.api.Assertions;
 import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -19,6 +20,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.application.dto.request.ConfirmedReservationCreateRequest;
+import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.presentation.dto.response.WaitingWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
@@ -56,6 +58,7 @@ class WaitingReservationApplicationServiceTest {
 
     private Long timeId;
     private Long themeId;
+    private Long memberId;
     private Long memberId2;
     private Long reservationId;
 
@@ -77,7 +80,7 @@ class WaitingReservationApplicationServiceTest {
 
         timeId = reservationTimeRepository.save(new ReservationTime(LocalTime.of(9, 0))).getId();
         themeId = themeRepository.save(TestFixture.makeTheme()).getId();
-        Long memberId = memberRepository.save(TestFixture.makeMember()).getId();
+        memberId = memberRepository.save(TestFixture.makeMember()).getId();
         memberId2 = memberRepository.save(new Member("Free", "free@gmail.com", "password", MemberRole.REGULAR))
                 .getId();
         reservationId = confirmedReservationApplicationService.create(
@@ -90,7 +93,8 @@ class WaitingReservationApplicationServiceTest {
         // given
 
         // when
-        waitingReservationApplicationService.create(futureDate, timeId, themeId, memberId2);
+        waitingReservationApplicationService.create(
+                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId2));
 
         // then
         List<WaitingWebResponse> all = waitingReservationApplicationService.findAll();
@@ -106,8 +110,10 @@ class WaitingReservationApplicationServiceTest {
         Long memberId3 = memberRepository.save(new Member("Vector", "vector@gmail.com", "password",
                 MemberRole.REGULAR)).getId();
         reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(futureDate, timeId, themeId);
-        waitingReservationApplicationService.create(futureDate, timeId, themeId, memberId2);
-        waitingReservationApplicationService.create(futureDate, timeId, themeId, memberId3);
+        waitingReservationApplicationService.create(
+                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId2));
+        waitingReservationApplicationService.create(
+                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId3));
 
         // when
         List<WaitingWebResponse> all = waitingReservationApplicationService.findAll();
@@ -121,9 +127,11 @@ class WaitingReservationApplicationServiceTest {
         // Given
         Long memberId3 = memberRepository.save(new Member("Vector", "vector@gmail.com", "password",
                 MemberRole.REGULAR)).getId();
-        ReservationResponse reservationResponse = waitingReservationApplicationService.create(futureDate, timeId,
-                themeId, memberId2);
-        waitingReservationApplicationService.create(futureDate, timeId, themeId, memberId3);
+        ReservationResponse reservationResponse = waitingReservationApplicationService.create(
+                new WaitingReservationCreateRequest(futureDate, timeId,
+                        themeId, memberId2));
+        waitingReservationApplicationService.create(
+                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId3));
 
         // When
         waitingReservationApplicationService.cancelByReservationSlotIdAndMemberId(
@@ -132,6 +140,14 @@ class WaitingReservationApplicationServiceTest {
         // Then
         List<WaitingWebResponse> all = waitingReservationApplicationService.findAll();
         assertThat(all.size()).isOne();
+    }
+
+    @Test
+    void cancelByReservationSlotIdAndMemberId_whenInvalidReservationSlotId_returnVoid() {
+        Assertions.assertThatThrownBy(
+                        () -> waitingReservationApplicationService.cancelByReservationSlotIdAndMemberId(999L, memberId))
+                .isInstanceOf(ReservationNotFoundException.class)
+                .hasMessageContaining("존재하지 않는 예약입니다.");
     }
 
     @Test
