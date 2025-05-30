@@ -36,7 +36,7 @@ public class CreateReservationService {
             throw new DuplicatedException("중복되는 예약이 존재합니다.");
         }
 
-        Reservation reservation = createReservation(request);
+        Reservation reservation = buildReservationFrom(request);
         validateReservationDateTime(reservation);
 
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -50,7 +50,7 @@ public class CreateReservationService {
         );
     }
 
-    private Reservation createReservation(final ReservationCreateRequest request) {
+    private Reservation buildReservationFrom(final ReservationCreateRequest request) {
         ReservationTime reservationTime = getReservationTime(request);
         Theme theme = getTheme(request);
         LoginMember loginMember = request.loginMember();
