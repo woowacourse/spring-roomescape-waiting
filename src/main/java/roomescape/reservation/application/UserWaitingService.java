@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.member.model.Member;
 import roomescape.member.model.MemberRepository;
-import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.request.CreateWaitingServiceRequest;
 import roomescape.reservation.application.dto.response.WaitingServiceResponse;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
@@ -25,7 +25,7 @@ public class UserWaitingService {
     private final MemberRepository memberRepository;
     private final WaitingValidator waitingValidator;
 
-    public WaitingServiceResponse create(CreateReservationServiceRequest request) {
+    public WaitingServiceResponse create(CreateWaitingServiceRequest request) {
         waitingValidator.validateNoDuplication(request.date(), request.timeId(), request.themeId(),
             request.memberId());
 

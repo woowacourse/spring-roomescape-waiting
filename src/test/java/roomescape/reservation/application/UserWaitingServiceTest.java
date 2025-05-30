@@ -16,7 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.ReservationTestFixture;
 import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.member.model.Member;
-import roomescape.reservation.application.dto.request.CreateReservationServiceRequest;
+import roomescape.reservation.application.dto.request.CreateWaitingServiceRequest;
 import roomescape.reservation.application.dto.response.WaitingServiceResponse;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
@@ -64,7 +64,7 @@ class UserWaitingServiceTest {
     @DisplayName("예약 대기 생성 성공")
     @Test
     void createWaitingSuccess() {
-        CreateReservationServiceRequest request = new CreateReservationServiceRequest(
+        CreateWaitingServiceRequest request = new CreateWaitingServiceRequest(
             member1.getId(), tomorrow, time.getId(), theme.getId()
         );
         WaitingServiceResponse response = userWaitingService.create(request);
@@ -78,7 +78,7 @@ class UserWaitingServiceTest {
     @DisplayName("중복 예약 대기 생성시 예외 발생")
     @Test
     void createWaitingDuplicateException() {
-        CreateReservationServiceRequest request = new CreateReservationServiceRequest(
+        CreateWaitingServiceRequest request = new CreateWaitingServiceRequest(
             member1.getId(), tomorrow, time.getId(), theme.getId()
         );
         userWaitingService.create(request);
