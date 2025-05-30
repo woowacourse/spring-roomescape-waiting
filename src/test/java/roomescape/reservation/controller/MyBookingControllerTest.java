@@ -57,7 +57,16 @@ class MyBookingControllerTest {
             .cookie(cookie);
         mockMvc.perform(request)
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(2));
+            .andExpect(jsonPath("$.length()").value(2))
+            .andExpect(jsonPath("$[0].theme").value("테마1"))
+            .andExpect(jsonPath("$[0].date").value("2025-05-05"))
+            .andExpect(jsonPath("$[0].time").value("13:05"))
+            .andExpect(jsonPath("$[0].status").value("예약"))
+            .andExpect(jsonPath("$[1].reservationId").value(2L))
+            .andExpect(jsonPath("$[1].theme").value("테마2"))
+            .andExpect(jsonPath("$[1].date").value("2025-05-05"))
+            .andExpect(jsonPath("$[1].time").value("13:05"))
+            .andExpect(jsonPath("$[1].status").value("예약"));
     }
 
     private String login() throws Exception {

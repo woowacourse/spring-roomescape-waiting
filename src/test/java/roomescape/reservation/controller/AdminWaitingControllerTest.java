@@ -54,7 +54,13 @@ class AdminWaitingControllerTest {
         mockMvc.perform(get("/admin/waitings")
                 .cookie(cookie))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.length()").value(1));
+            .andExpect(jsonPath("$.length()").value(1))
+            .andExpect(jsonPath("$[0].id").value(1L))
+            .andExpect(jsonPath("$[0].name").value("두리"))
+            .andExpect(jsonPath("$[0].theme").value("테마"))
+            .andExpect(jsonPath("$[0].date").value("2025-05-24"))
+            .andExpect(jsonPath("$[0].startAt").value("10:00"));
+
     }
 
     @Test
