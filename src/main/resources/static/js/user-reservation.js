@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     flatpickr("#datepicker", {
         inline: true,
+        minDate: "today",
         onChange: function (selectedDates, dateStr, instance) {
             if (dateStr === '') return;
             checkDate();
@@ -88,7 +89,7 @@ function checkDateAndTheme() {
 }
 
 function fetchAvailableTimes(date, themeId) {
-    const params = new URLSearchParams({date, themeId});
+    const params = new URLSearchParams({ date, themeId });
     /*
     TODO: [3단계] 사용자 예약 - 예약 가능 시간 조회 API 호출
           요청 포맷에 맞게 설정
