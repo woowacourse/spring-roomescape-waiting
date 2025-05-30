@@ -10,6 +10,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OrderBy;
 import jakarta.persistence.Table;
 import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
@@ -51,6 +52,7 @@ public class ReservationSlot {
     private Theme theme;
 
     @OneToMany(mappedBy = "reservationSlot", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
+    @OrderBy("createdAt ASC")
     private List<Reservation> reservations = new ArrayList<>();
 
     public ReservationSlot(final LocalDate date, final ReservationTime time, final Theme theme) {
@@ -80,17 +82,16 @@ public class ReservationSlot {
 
     public long findRank(final Reservation reservation) {
         validateReservationExists(reservation);
-        List<Reservation> sortedReservations = reservations
-                .stream()
-                .sorted(Comparator.comparing(Reservation::getCreatedAt))
-                .toList();
-        return sortedReservations.indexOf(reservation);
+        return reservations.stream()
+                .filter(r -> r.getCreatedAt().isBefore(reservation.getCreatedAt()))
+                .count();
     }
 
     public Reservation findConfirmedReservation() {
-        return reservations.stream()
-                .min(Comparator.comparing(Reservation::getCreatedAt))
-                .orElseThrow(() -> new ReservationNotFoundException("예약이 존재하지 않습니다."));
+        if (reservations.isEmpty()) {
+            throw new ReservationNotFoundException("예약이 존재하지 않습니다.");
+        }
+        return reservations.getFirst();
     }
 
     private void validateDateTime(LocalDate date, LocalTime time, LocalDateTime now) {
