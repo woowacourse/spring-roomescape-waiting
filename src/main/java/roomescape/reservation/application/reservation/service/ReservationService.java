@@ -101,7 +101,6 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationInfo> findReservations() {
         return reservationRepository.findAll().stream()
                 .map(ReservationInfo::new)

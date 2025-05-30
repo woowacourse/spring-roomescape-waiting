@@ -3,7 +3,7 @@ VALUES
     ('어드민1', 'admin1@email.com', 'adminpw1', 'ADMIN'),
     ('어드민2', 'admin2@email.com', 'adminpw2', 'ADMIN'),
     ('유저1', 'user1@email.com', 'userpw1', 'USER'),
-    ('유저2', 'user2email.com', 'userpw2', 'USER');
+    ('유저2', 'user2@email.com', 'userpw2', 'USER');
 
 INSERT INTO TIME_SLOT (START_AT)
 VALUES

@@ -11,7 +11,6 @@ import java.security.Key;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.common.exception.RoomescapeException;
 
 @Component
 public class JwtTokenProvider implements TokenProvider {
@@ -53,7 +52,7 @@ public class JwtTokenProvider implements TokenProvider {
 
             return claims.getSubject();
         } catch (JwtException | IllegalArgumentException e) {
-            throw new RoomescapeException("유효하지 않거나 만료된 JWT 토큰입니다.", e);
+            throw new IllegalArgumentException("유효하지 않거나 만료된 JWT 토큰입니다.", e);
         }
     }
 

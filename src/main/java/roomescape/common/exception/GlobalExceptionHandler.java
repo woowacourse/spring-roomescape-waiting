@@ -47,7 +47,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RoomescapeException.class)
-    public ResponseEntity<ErrorResponse> handleIllegalArgumentException(
+    public ResponseEntity<ErrorResponse> handleRoomescapeException(
             final RoomescapeException e,
             final HttpServletRequest request
     ) {
@@ -97,7 +97,7 @@ public class GlobalExceptionHandler {
             final HttpServletRequest request
     ) {
         log.error("Unexpected error", e);
-        return createErrorResponse(INTERNAL_SERVER_ERROR, e.getMessage(), request);
+        return createErrorResponse(INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다.", request);
     }
 
     private ResponseEntity<ErrorResponse> createErrorResponse(

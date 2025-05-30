@@ -94,7 +94,7 @@ public class WaitingServiceIntegrationTest {
         final LocalDate date = LocalDate.of(2025, 5, 5);
         final WaitingCreateCommand request1 = new WaitingCreateCommand(date, 1L, 1L, 11L);
         waitingService.createWaiting(request1);
-        final WaitingCreateCommand request2 = new WaitingCreateCommand(date, 1L, 1L, 10L);;
+        final WaitingCreateCommand request2 = new WaitingCreateCommand(date, 1L, 1L, 10L);
         // when & then
         assertThatCode(() -> waitingService.createWaiting(request2))
                 .doesNotThrowAnyException();

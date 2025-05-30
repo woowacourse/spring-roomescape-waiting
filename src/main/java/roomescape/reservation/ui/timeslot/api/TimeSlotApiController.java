@@ -17,6 +17,7 @@ import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
 import roomescape.reservation.application.timeslot.dto.TimeSlotCreateCommand;
 import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
 import roomescape.reservation.application.timeslot.service.TimeSlotService;
+import roomescape.reservation.ui.timeslot.dto.TimeSlotAvailabilityResponse;
 import roomescape.reservation.ui.timeslot.dto.TimeSlotCreateRequest;
 import roomescape.reservation.ui.timeslot.dto.TimeSlotResponse;
 
@@ -56,11 +57,14 @@ public class TimeSlotApiController {
     }
 
     @GetMapping("/availability")
-    public ResponseEntity<List<TimeSlotAvailabilityInfo>> findAvailableTimes(
+    public ResponseEntity<List<TimeSlotAvailabilityResponse>> findAvailableTimes(
             @RequestParam("date") final LocalDate date,
             @RequestParam("themeId") final long themeId
     ) {
-        final List<TimeSlotAvailabilityInfo> responses = timeSlotService.findAvailableTimeSlots(date, themeId);
+        final List<TimeSlotAvailabilityInfo> timeInfos = timeSlotService.findAvailableTimeSlots(date, themeId);
+        final List<TimeSlotAvailabilityResponse> responses = timeInfos.stream()
+                .map(TimeSlotAvailabilityResponse::new)
+                .toList();
         return ResponseEntity.ok().body(responses);
     }
 }
