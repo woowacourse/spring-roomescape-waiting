@@ -1,29 +1,24 @@
-package roomescape.reservationtime.presentation;
+package roomescape.reservationtime.presentation.controller.admin;
 
-import java.time.LocalDate;
-import java.util.List;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.annotation.RequireRole;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservationtime.application.ReservationTimeApplicationService;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
-import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 
 @RestController
-public class ReservationTimeController {
+public class AdminReservationTimeController {
 
     private final ReservationTimeApplicationService reservationTimeApplicationService;
 
-    public ReservationTimeController(final ReservationTimeApplicationService reservationTimeApplicationService) {
+    public AdminReservationTimeController(final ReservationTimeApplicationService reservationTimeApplicationService) {
         this.reservationTimeApplicationService = reservationTimeApplicationService;
     }
 
@@ -34,19 +29,6 @@ public class ReservationTimeController {
     ) {
         ReservationTimeWebResponse dto = reservationTimeApplicationService.create(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
-    }
-
-    @GetMapping("/times")
-    public ResponseEntity<List<ReservationTimeWebResponse>> findAll() {
-        return ResponseEntity.ok(reservationTimeApplicationService.findAll());
-    }
-
-    @GetMapping("/times/available")
-    public ResponseEntity<List<AvailableReservationTimeWebResponse>> findAvailable(
-            @RequestParam("date") LocalDate date,
-            @RequestParam("themeId") Long themeId
-    ) {
-        return ResponseEntity.ok(reservationTimeApplicationService.findAvailable(date, themeId));
     }
 
     @RequireRole(MemberRole.ADMIN)
