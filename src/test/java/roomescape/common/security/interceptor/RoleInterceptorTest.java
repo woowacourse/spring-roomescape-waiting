@@ -11,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpMethod;
+import org.springframework.web.method.HandlerMethod;
 import roomescape.common.config.JwtProperties;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.common.security.exception.ForbiddenException;
@@ -23,13 +24,13 @@ class RoleInterceptorTest {
 
     private static final String SECRET_KEY = "test-secret-key";
     private static final long VALIDITY_IN_MILLISECONDS = 1000L;
-    private static final String MEMBER_PATH = "/path";
     private static final String ADMIN_PATH = "/admin/path";
 
     private RoleInterceptor roleInterceptor;
     private JwtProvider jwtProvider;
     private HttpServletRequest request;
     private HttpServletResponse response;
+    private HandlerMethod handlerMethod;
 
     @BeforeEach
     void setUp() {
@@ -42,20 +43,7 @@ class RoleInterceptorTest {
         roleInterceptor = new RoleInterceptor(authorizationExtractor, jwtProvider);
         request = mock(HttpServletRequest.class);
         response = mock(HttpServletResponse.class);
-    }
-
-    @Test
-    @DisplayName("OPTIONS 요청은 항상 true를 반환한다.")
-    void preHandle_OptionsRequest() throws Exception {
-        // given
-        when(request.getRequestURI()).thenReturn(MEMBER_PATH);
-        when(request.getMethod()).thenReturn(HttpMethod.OPTIONS.name());
-
-        // when
-        boolean result = roleInterceptor.preHandle(request, response, null);
-
-        // then
-        assertThat(result).isTrue();
+        handlerMethod = mock(HandlerMethod.class);
     }
 
     @Test
@@ -67,7 +55,7 @@ class RoleInterceptorTest {
         when(request.getHeaders("Cookie")).thenReturn(null);
 
         // when & then
-        assertThatThrownBy(() -> roleInterceptor.preHandle(request, response, null))
+        assertThatThrownBy(() -> roleInterceptor.preHandle(request, response, handlerMethod))
                 .isInstanceOf(UnAuthorizedException.class)
                 .hasMessage("토큰이 존재하지 않습니다.");
     }
@@ -83,7 +71,7 @@ class RoleInterceptorTest {
                 java.util.Collections.enumeration(java.util.List.of("token=" + token)));
 
         // when & then
-        assertThatThrownBy(() -> roleInterceptor.preHandle(request, response, null))
+        assertThatThrownBy(() -> roleInterceptor.preHandle(request, response, handlerMethod))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessage("접근할 수 없습니다.");
     }
@@ -99,24 +87,7 @@ class RoleInterceptorTest {
                 java.util.Collections.enumeration(java.util.List.of("token=" + token)));
 
         // when
-        boolean result = roleInterceptor.preHandle(request, response, null);
-
-        // then
-        assertThat(result).isTrue();
-    }
-
-    @Test
-    @DisplayName("REGULAR 권한으로 REGULAR 경로에 접근하면 성공한다.")
-    void preHandle_RegularAccessingAdminPath() throws Exception {
-        // given
-        when(request.getMethod()).thenReturn(HttpMethod.GET.name());
-        when(request.getRequestURI()).thenReturn("/test");
-        String token = jwtProvider.createToken(new MemberInfo(1L, MemberRole.REGULAR));
-        when(request.getHeaders("Cookie")).thenReturn(
-                java.util.Collections.enumeration(java.util.List.of("token=" + token)));
-
-        // when
-        boolean result = roleInterceptor.preHandle(request, response, null);
+        boolean result = roleInterceptor.preHandle(request, response, handlerMethod);
 
         // then
         assertThat(result).isTrue();

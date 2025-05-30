@@ -17,7 +17,7 @@ public record ConfirmedReservationWebResponse(
     public static ConfirmedReservationWebResponse of(ReservationSlot reservationSlot) {
         Reservation confirmedReservation = reservationSlot.findConfirmedReservation();
         return new ConfirmedReservationWebResponse(confirmedReservation.getId(),
-                MemberWebResponse.from(reservationSlot.findReservedMember()), reservationSlot.getDate(),
+                MemberWebResponse.from(reservationSlot.findConfirmedMember()), reservationSlot.getDate(),
                 ReservationTimeWebResponse.from(reservationSlot.getTime()),
                 ThemeWebResponse.from(reservationSlot.getTheme())
         );

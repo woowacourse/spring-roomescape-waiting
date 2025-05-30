@@ -70,7 +70,7 @@ public class ReservationSlot {
         return reservation;
     }
 
-    public Member findReservedMember() {
+    public Member findConfirmedMember() {
         return reservations.stream()
                 .sorted(Comparator.comparing(Reservation::getCreatedAt))
                 .map(Reservation::getMember)

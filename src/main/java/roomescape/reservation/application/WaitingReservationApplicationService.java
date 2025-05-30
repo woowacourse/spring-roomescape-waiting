@@ -46,14 +46,14 @@ public class WaitingReservationApplicationService {
     public void cancelByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
         Reservation reservation = reservationDataService.getByReservationSlotIdAndMemberId(reservationSlotId, memberId);
         reservationDataService.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
-        ReservationSlot reservationSlot = reservationSlotDataService.findById(reservationSlotId);
+        ReservationSlot reservationSlot = reservationSlotDataService.getById(reservationSlotId);
         reservationSlot.getReservations().remove(reservation);
     }
 
     public void cancel(final Long reservationId) {
         Reservation reservation = reservationDataService.getById(reservationId);
         reservationDataService.cancel(reservation);
-        ReservationSlot reservationSlot = reservationSlotDataService.findById(reservation.getReservationSlot().getId());
+        ReservationSlot reservationSlot = reservationSlotDataService.getById(reservation.getReservationSlot().getId());
         reservationSlot.getReservations().remove(reservation);
     }
 }

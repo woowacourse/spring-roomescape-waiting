@@ -20,7 +20,7 @@ public class ReservationSlotDataService {
         return reservationSlotRepository.save(reservationSlot);
     }
 
-    public ReservationSlot findById(final Long reservationSlotId) {
+    public ReservationSlot getById(final Long reservationSlotId) {
         return reservationSlotRepository.findById(reservationSlotId)
                 .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간의 예약 슬롯이 존재하지 않습니다."));
     }

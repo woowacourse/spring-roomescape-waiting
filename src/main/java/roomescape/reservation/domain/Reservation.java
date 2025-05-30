@@ -46,7 +46,7 @@ public class Reservation {
     }
 
     public boolean isReserved() {
-        return reservationSlot.findReservedMember().equals(member);
+        return reservationSlot.findConfirmedMember().equals(member);
     }
 
     @Override

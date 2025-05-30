@@ -128,8 +128,7 @@ class WaitingReservationApplicationServiceTest {
         Long memberId3 = memberRepository.save(new Member("Vector", "vector@gmail.com", "password",
                 MemberRole.REGULAR)).getId();
         ReservationResponse reservationResponse = waitingReservationApplicationService.create(
-                new WaitingReservationCreateRequest(futureDate, timeId,
-                        themeId, memberId2));
+                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId2));
         waitingReservationApplicationService.create(
                 new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId3));
 
