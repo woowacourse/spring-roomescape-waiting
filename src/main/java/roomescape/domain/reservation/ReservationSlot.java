@@ -36,8 +36,6 @@ public class ReservationSlot {
 
     public void validateReservable(LocalDateTime currentDateTime) {
         LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
-        System.out.println(reservationDateTime);
-        System.out.println(currentDateTime);
         if (reservationDateTime.isBefore(currentDateTime)) {
             throw new BusinessRuleViolationException("지난 날짜와 시간에 대한 예약은 불가능합니다.");
         }
