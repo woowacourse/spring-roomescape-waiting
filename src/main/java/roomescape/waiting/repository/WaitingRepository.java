@@ -17,13 +17,6 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
     @Query("SELECT w FROM Waiting w JOIN FETCH w.reservationInformation.time JOIN FETCH w.reservationInformation.theme JOIN FETCH w.member")
     List<Waiting> findAll();
 
-    @Query("""
-    SELECT w
-    FROM Waiting w
-    WHERE w.reservationInformation = :reservationInformation
-    ORDER BY w.createdAt ASC
-    LIMIT 1
-    """)
     Waiting findFirstByReservationInformation(ReservationInformation reservationInformation);
 
     @Query("""
