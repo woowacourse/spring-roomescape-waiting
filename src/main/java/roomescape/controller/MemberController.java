@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +25,7 @@ public class MemberController {
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public RegisterUserResponse signup(@RequestBody final RegisterMemberRequest registerMemberRequest) {
+    public RegisterUserResponse signup(@Valid @RequestBody RegisterMemberRequest registerMemberRequest) {
         RegisterMemberParam registerMemberParam = registerMemberRequest.toServiceParam();
         MemberResult memberResult = memberService.create(registerMemberParam);
         return RegisterUserResponse.from(memberResult);

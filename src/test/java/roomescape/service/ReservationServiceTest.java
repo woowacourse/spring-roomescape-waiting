@@ -46,6 +46,9 @@ class ReservationServiceTest {
     @Autowired
     private MemberRepository memberRepository;
 
+    @Autowired
+    private WaitingRepository waitingRepository;
+
     @Test
     void 예약을_생성한다() {
         //given
@@ -72,7 +75,7 @@ class ReservationServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationService.create(createReservationParam, LocalDateTime.now()))
                 .isInstanceOf(NotFoundReservationTimeException.class)
-                .hasMessage("1에 해당하는 정보가 없습니다.");
+                .hasMessage("1에 해당하는 시간 정보가 없습니다.");
     }
 
     @Test
@@ -82,9 +85,10 @@ class ReservationServiceTest {
         ReservationTime reservationTime = reservationTimeRepository.save(TestFixture.createDefaultReservationTime());
         Member member = memberRepository.save(TestFixture.createDefaultMember());
         Reservation reservation = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme));
+        Waiting waiting = waitingRepository.save(TestFixture.createWaiting(member, TEST_DATE, reservationTime, theme));
 
         //when
-        reservationService.deleteById(reservation.getId());
+        reservationService.deleteByIdAndApproveFirstWaiting(reservation.getId());
 
         //then
         assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
@@ -98,7 +102,6 @@ class ReservationServiceTest {
         Member member = memberRepository.save(TestFixture.createDefaultMember());
         Reservation reservation1 = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE, reservationTime, theme));
         Reservation reservation2 = reservationRepository.save(TestFixture.createDefaultReservation(member, TEST_DATE.plusDays(1), reservationTime, theme));
-
 
         //when
         List<ReservationResult> reservationResults = reservationService.findAll();

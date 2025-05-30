@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.exception.DeletionNotAllowedException;
 import roomescape.exception.NotFoundReservationTimeException;
@@ -15,6 +16,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
@@ -25,6 +27,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTimeResult create(CreateReservationTimeParam createReservationTimeParam) {
         LocalTime startAt = createReservationTimeParam.startAt();
         ReservationTimePolicy.checkAvailabilty(startAt);
@@ -64,6 +67,7 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteById(Long reservationTimeId) {
         if (reservationRepository.existsByTimeId(reservationTimeId)) {
             throw new DeletionNotAllowedException("해당 예약 시간에 예약이 존재합니다.");

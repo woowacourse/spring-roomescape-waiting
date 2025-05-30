@@ -60,6 +60,12 @@ public class GlobalExceptionHandler {
         return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, "입력하신 예약 시간 정보를 찾지 못했습니다.");
     }
 
+    @ExceptionHandler(NotFoundWaitingException.class)
+    public ProblemDetail handleNotFoundWaitingException(NotFoundWaitingException e) {
+        log.error("예외 발생: ", e);
+        return ProblemDetail.forStatusAndDetail(HttpStatus.BAD_REQUEST, e.getMessage());
+    }
+
     @ExceptionHandler(DeletionNotAllowedException.class)
     public ProblemDetail handleDeletionNotAllowedException(DeletionNotAllowedException e) {
         log.error("예외 발생: ", e);

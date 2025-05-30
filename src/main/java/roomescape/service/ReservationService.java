@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.*;
 import roomescape.exception.*;
 import roomescape.service.param.CreateReservationParam;
@@ -12,29 +13,34 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationService(final ReservationRepository reservationRepository, final MemberRepository memberRepository, final ThemeRepository themeRepository, final ReservationTimeRepository reservationTimeRepository) {
+    public ReservationService(ReservationRepository reservationRepository,
+                              MemberRepository memberRepository,
+                              ThemeRepository themeRepository,
+                              ReservationTimeRepository reservationTimeRepository,
+                              WaitingRepository waitingRepository) {
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
         this.reservationTimeRepository = reservationTimeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public ReservationResult create(CreateReservationParam createReservationParam, LocalDateTime currentDateTime) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(createReservationParam.timeId()).orElseThrow(
-                () -> new NotFoundReservationTimeException(createReservationParam.timeId() + "에 해당하는 정보가 없습니다."));
-        Theme theme = themeRepository.findById(createReservationParam.themeId()).orElseThrow(
-                () -> new NotFoundThemeException(createReservationParam.themeId() + "에 해당하는 정보가 없습니다."));
-        Member member = memberRepository.findById(createReservationParam.memberId()).orElseThrow(
-                () -> new NotFoundMemberException(createReservationParam.memberId() + "에 해당하는 정보가 없습니다."));
+        ReservationTime reservationTime = getReservationTimeFromRepository(createReservationParam.timeId());
+        Theme theme = getThemeFromRepository(createReservationParam.themeId());
+        Member member = getMemberFromRepository(createReservationParam.memberId());
 
-        validateUniqueReservation(createReservationParam, reservationTime, theme);
+        validateDuplicateReservation(createReservationParam, reservationTime, theme);
         validateReservationDateTime(createReservationParam, currentDateTime, reservationTime);
 
         Reservation reservation = Reservation.createNew(member, createReservationParam.date(), reservationTime, theme);
@@ -42,8 +48,15 @@ public class ReservationService {
         return ReservationResult.from(reservation);
     }
 
-    public void deleteById(Long reservationId) {
+    @Transactional
+    public void deleteByIdAndApproveFirstWaiting(Long reservationId) {
+        Reservation reservation = getReservationFromRepository(reservationId);
         reservationRepository.deleteById(reservationId);
+        Schedule schedule = reservation.getSchedule();
+        Waiting waiting = getWaitingFromRepository(schedule);
+
+        Reservation newReservation = Reservation.createNew(waiting.getMember(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        reservationRepository.save(newReservation);
     }
 
     public List<ReservationResult> findAll() {
@@ -66,13 +79,38 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResult> findMemberReservationsById(Long memberId) {
+    public List<ReservationResult> findReservationsByMemberId(Long memberId) {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
         return ReservationResult.from(reservations);
     }
 
-    private void validateUniqueReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(createReservationParam.date(), reservationTime.getId(), theme.getId())) {
+    private Waiting getWaitingFromRepository(final Schedule schedule) {
+        return waitingRepository.findTopByScheduleOrderByCreatedAt(schedule)
+                .orElseThrow(() -> new NotFoundWaitingException("해당하는 예약 대기를 찾을 수 없습니다."));
+    }
+
+    private Reservation getReservationFromRepository(Long reservationId) {
+        return reservationRepository.findById(reservationId).orElseThrow(
+                () -> new NotFoundReservationException(reservationId + "에 해당하는 정보가 없습니다."));
+    }
+
+    private Member getMemberFromRepository(Long memberId) {
+        return memberRepository.findById(memberId).orElseThrow(
+                () -> new NotFoundWaitingException(memberId + "에 해당하는 멤버 정보가 없습니다."));
+    }
+
+    private ReservationTime getReservationTimeFromRepository(Long reservationTimeId) {
+        return reservationTimeRepository.findById(reservationTimeId).orElseThrow(
+                () -> new NotFoundReservationTimeException(reservationTimeId + "에 해당하는 시간 정보가 없습니다."));
+    }
+
+    private Theme getThemeFromRepository(Long themeId) {
+        return themeRepository.findById(themeId).orElseThrow(
+                () -> new NotFoundThemeException(themeId + "에 해당하는 테마 정보가 없습니다."));
+    }
+
+    private void validateDuplicateReservation(final CreateReservationParam createReservationParam, final ReservationTime reservationTime, final Theme theme) {
+        if (reservationRepository.existsBySchedule(new Schedule(createReservationParam.date(), reservationTime, theme))) {
             throw new UnAvailableReservationException("테마에 대해 날짜와 시간이 중복된 예약이 존재합니다.");
         }
     }

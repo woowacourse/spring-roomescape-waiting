@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.request.CreateReservationAdminRequest;
@@ -12,17 +13,17 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/admin")
-public class AdminController {
+public class ReservationAdminController {
 
     private final ReservationService reservationService;
 
-    public AdminController(final ReservationService reservationService) {
+    public ReservationAdminController(final ReservationService reservationService) {
         this.reservationService = reservationService;
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/reservations")
-    public ReservationResponse createReservation(@RequestBody CreateReservationAdminRequest reservationRequest) {
+    public ReservationResponse createReservation(@Valid @RequestBody CreateReservationAdminRequest reservationRequest) {
         CreateReservationParam createReservationParam = CreateReservationParam.from(reservationRequest);
         ReservationResult reservationResult = reservationService.create(createReservationParam, LocalDateTime.now());
         return ReservationResponse.from(reservationResult);
