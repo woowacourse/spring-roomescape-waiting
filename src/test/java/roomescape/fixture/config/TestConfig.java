@@ -6,6 +6,7 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
+import roomescape.global.util.DateTimeService;
 import roomescape.member.application.MemberService;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.application.ReservationService;
@@ -20,8 +21,8 @@ import roomescape.theme.infrastructure.ThemeRepository;
 public class TestConfig {
 
     @Bean
-    public Clock clock() {
-        return Clock.fixed(Instant.parse("2000-01-01T00:00:00Z"), ZoneOffset.UTC);
+    public DateTimeService dateTimeService() {
+        return new DateTimeService(Clock.fixed(Instant.parse("2000-01-01T00:00:00Z"), ZoneOffset.UTC));
     }
 
     @Bean
@@ -30,8 +31,8 @@ public class TestConfig {
     }
 
     @Bean
-    public ThemeService themeService(final ThemeRepository themeRepository, final Clock clock) {
-        return new ThemeService(themeRepository, clock);
+    public ThemeService themeService(final ThemeRepository themeRepository, final DateTimeService dateTimeService) {
+        return new ThemeService(themeRepository, dateTimeService);
     }
 
     @Bean
@@ -39,9 +40,10 @@ public class TestConfig {
                                                  final ReservationTimeRepository reservationTimeRepository,
                                                  final ReservationSlotRepository reservationSlotRepository,
                                                  final ThemeRepository themeRepository,
-                                                 final MemberRepository memberRepository, final Clock clock) {
+                                                 final MemberRepository memberRepository,
+                                                 final DateTimeService dateTimeService) {
         return new ReservationService(reservationRepository, reservationSlotRepository, reservationTimeRepository,
-                themeRepository, memberRepository, clock);
+                themeRepository, memberRepository, dateTimeService);
     }
 
     @Bean

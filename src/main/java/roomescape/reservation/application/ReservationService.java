@@ -1,8 +1,6 @@
 package roomescape.reservation.application;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.resource.AlreadyExistException;
+import roomescape.global.util.DateTimeService;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.BookingStatus;
@@ -39,7 +38,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
-    private final Clock clock;
+    private final DateTimeService dateTimeService;
 
     @Transactional
     public MemberReservationResponse createForMember(final MemberCreateReservationRequest request,
@@ -138,7 +137,7 @@ public class ReservationService {
         final ReservationTime time = reservationTimeRepository.getByIdOrThrow(timeId);
         final Theme theme = themeRepository.getByIdOrThrow(themeId);
 
-        return reservationSlotRepository.save(new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
+        return reservationSlotRepository.save(new ReservationSlot(date, time, theme, dateTimeService.now()));
     }
 
     private void resolveSlotAfterChange(final ReservationSlot reservationSlot) {

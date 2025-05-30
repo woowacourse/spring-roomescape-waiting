@@ -11,9 +11,7 @@ import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVA
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_2;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayNameGeneration;
@@ -26,6 +24,7 @@ import roomescape.auth.domain.MemberAuthInfo;
 import roomescape.exception.auth.AuthorizationException;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.fixture.config.TestConfig;
+import roomescape.global.util.DateTimeService;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.Reservation;
@@ -68,12 +67,12 @@ class ReservationServiceTest {
     MemberRepository memberRepository;
 
     @Autowired
-    Clock clock;
+    DateTimeService dateTimeService;
 
     @Test
     void 사용자_예약_생성_시_이전_예약이_존재하지_않으면_예약_상태로_예약을_생성한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
@@ -94,7 +93,7 @@ class ReservationServiceTest {
     @Test
     void 사용자_예약_생성_시_이전_예약이_존재하면_대기_상태로_예약을_생성한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
@@ -117,7 +116,7 @@ class ReservationServiceTest {
     @Test
     void 관리자_권한으로_예약을_생성한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
@@ -160,7 +159,7 @@ class ReservationServiceTest {
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final ReservationSlot reservationSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time, theme, dateTimeService.now()));
 
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
         final Reservation savedReservation = reservationRepository.save(new Reservation(member1, reservationSlot));

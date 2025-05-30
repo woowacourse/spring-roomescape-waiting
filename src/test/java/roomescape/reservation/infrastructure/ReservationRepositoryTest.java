@@ -11,9 +11,7 @@ import static roomescape.fixture.domain.ReservationTimeFixture.NOT_SAVED_RESERVA
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_1;
 import static roomescape.fixture.domain.ThemeFixture.NOT_SAVED_THEME_2;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.stream.Stream;
@@ -28,6 +26,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import roomescape.exception.resource.ResourceNotFoundException;
 import roomescape.fixture.config.TestConfig;
+import roomescape.global.util.DateTimeService;
 import roomescape.member.domain.Member;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservation.domain.BookingStatus;
@@ -58,17 +57,17 @@ class ReservationRepositoryTest {
     ReservationTimeRepository reservationTimeRepository;
 
     @Autowired
-    Clock clock;
+    DateTimeService dateTimeService;
 
     @Test
     void ID_값에_해당하는_예약을_반환한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
         final ReservationSlot reservationSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time, theme, dateTimeService.now()));
 
         final Reservation saved = reservationRepository.save(new Reservation(member, reservationSlot));
 
@@ -94,14 +93,14 @@ class ReservationRepositoryTest {
     @Test
     void 사용자가_이미_예약한_정보의_존재_여부를_반환한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
         final Theme theme2 = themeRepository.save(NOT_SAVED_THEME_2());
         final ReservationSlot reservationSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme1, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time, theme1, dateTimeService.now()));
         final ReservationSlot notReservedSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme2, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time, theme2, dateTimeService.now()));
 
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
@@ -123,7 +122,7 @@ class ReservationRepositoryTest {
     @Test
     void 사용자의_예약_목록을_조회한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final Theme theme1 = themeRepository.save(NOT_SAVED_THEME_1());
@@ -132,15 +131,15 @@ class ReservationRepositoryTest {
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
         final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date, time1, theme1, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time1, theme1, dateTimeService.now()));
         reservationRepository.save(new Reservation(member, reservationSlot1));
 
         final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date, time2, theme1, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time2, theme1, dateTimeService.now()));
         reservationRepository.save(new Reservation(member, reservationSlot2));
 
         final ReservationSlot reservationSlot3 = reservationSlotRepository.save(
-                new ReservationSlot(date, time2, theme2, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time2, theme2, dateTimeService.now()));
         reservationRepository.save(new Reservation(member, reservationSlot3));
 
         reservationSlotRepository.save(reservationSlot1);
@@ -163,19 +162,19 @@ class ReservationRepositoryTest {
     void 테마ID_사용자ID_날짜_범위에_해당하는_예약_목록을_조회한다(final int fromPlusDays, final int toPlusDays, final List<LocalTime> times,
                                             final List<Integer> plusDays) {
         // given
-        final LocalDate from = LocalDate.now(clock).plusDays(fromPlusDays);
-        final LocalDate to = LocalDate.now(clock).plusDays(toPlusDays);
+        final LocalDate from = dateTimeService.today().plusDays(fromPlusDays);
+        final LocalDate to = dateTimeService.today().plusDays(toPlusDays);
 
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
-        final LocalDate date1 = LocalDate.now(clock).plusDays(1);
+        final LocalDate date1 = dateTimeService.today().plusDays(1);
         final ReservationTime time1 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final ReservationSlot reservationSlot1 = reservationSlotRepository.save(
-                new ReservationSlot(date1, time1, theme, LocalDateTime.now(clock)));
+                new ReservationSlot(date1, time1, theme, dateTimeService.now()));
 
-        final LocalDate date2 = LocalDate.now(clock).plusDays(5);
+        final LocalDate date2 = dateTimeService.today().plusDays(5);
         final ReservationTime time2 = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_2());
         final ReservationSlot reservationSlot2 = reservationSlotRepository.save(
-                new ReservationSlot(date2, time2, theme, LocalDateTime.now(clock)));
+                new ReservationSlot(date2, time2, theme, dateTimeService.now()));
 
         final Member member = memberRepository.save(NOT_SAVED_MEMBER_1());
 
@@ -187,7 +186,7 @@ class ReservationRepositoryTest {
                 member.getId(), from, to);
 
         // then
-        final List<LocalDate> expected = plusDays.stream().map(plusDay -> LocalDate.now(clock).plusDays(plusDay))
+        final List<LocalDate> expected = plusDays.stream().map(plusDay -> dateTimeService.today().plusDays(plusDay))
                 .toList();
         assertAll(() -> assertThat(found).extracting(reservation -> reservation.getReservationSlot().getDate())
                 .containsExactlyInAnyOrderElementsOf(expected), () -> assertThat(found).extracting(
@@ -198,7 +197,7 @@ class ReservationRepositoryTest {
     @Test
     void 해당_예약의_대기_순번을_조회한다() {
         // given
-        final LocalDate date = LocalDate.now(clock).plusDays(1);
+        final LocalDate date = dateTimeService.today().plusDays(1);
         final ReservationTime time = reservationTimeRepository.save(NOT_SAVED_RESERVATION_TIME_1());
         final Theme theme = themeRepository.save(NOT_SAVED_THEME_1());
         final Member member1 = memberRepository.save(NOT_SAVED_MEMBER_1());
@@ -206,7 +205,7 @@ class ReservationRepositoryTest {
         final Member member3 = memberRepository.save(NOT_SAVED_MEMBER_3());
 
         final ReservationSlot reservationSlot = reservationSlotRepository.save(
-                new ReservationSlot(date, time, theme, LocalDateTime.now(clock)));
+                new ReservationSlot(date, time, theme, dateTimeService.now()));
         reservationRepository.save(new Reservation(null, BookingStatus.RESERVED, member1, reservationSlot));
         final Reservation target = new Reservation(null, BookingStatus.WAITING, member2, reservationSlot);
         reservationRepository.save(target);

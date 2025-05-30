@@ -1,6 +1,5 @@
 package roomescape.theme.application;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +8,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.resource.AlreadyExistException;
 import roomescape.exception.resource.ResourceInUseException;
+import roomescape.global.util.DateTimeService;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 import roomescape.theme.ui.dto.CreateThemeRequest;
@@ -19,7 +19,7 @@ import roomescape.theme.ui.dto.ThemeResponse;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final Clock clock;
+    private final DateTimeService dateTimeService;
 
     @Transactional
     public ThemeResponse create(final CreateThemeRequest request) {
@@ -51,7 +51,7 @@ public class ThemeService {
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
-        final LocalDate dateTo = LocalDate.now(clock);
+        final LocalDate dateTo = dateTimeService.today();
         final LocalDate dateFrom = dateTo.minusDays(7);
         final int limit = 10;
 

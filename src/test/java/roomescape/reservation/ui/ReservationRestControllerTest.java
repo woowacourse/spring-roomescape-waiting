@@ -13,8 +13,6 @@ import static roomescape.fixture.ui.ThemeApiFixture.createThemes;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
-import java.time.Clock;
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -26,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.global.util.DateTimeService;
 import roomescape.reservation.ui.dto.response.AvailableReservationTimeResponse;
 import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 
@@ -35,7 +34,7 @@ import roomescape.reservation.ui.dto.response.MemberReservationResponse;
 class ReservationRestControllerTest {
 
     @Autowired
-    Clock clock;
+    DateTimeService dateTimeService;
 
     private List<ValidatableResponse> createReservationTimeResponses;
     private List<ValidatableResponse> createThemeResponses;
@@ -44,7 +43,7 @@ class ReservationRestControllerTest {
 
     @BeforeEach
     void setUp() {
-        date = LocalDate.now(clock).plusDays(1).toString();
+        date = dateTimeService.today().plusDays(1).toString();
         final Map<String, String> adminCookies = adminLoginAndGetCookies();
         // 관리자 권한으로 예약 시간 추가 (3개)
         createReservationTimeResponses = createReservationTimes(adminCookies, 3);
