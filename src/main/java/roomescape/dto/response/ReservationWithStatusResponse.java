@@ -21,7 +21,7 @@ public record ReservationWithStatusResponse(
                 reservation.getDate(),
                 dto,
                 reservation.getTheme().getName(),
-                Status.CONFIRMED.toString()
+                Status.CONFIRMED.getStatus()
         );
     }
 

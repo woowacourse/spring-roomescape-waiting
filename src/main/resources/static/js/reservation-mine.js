@@ -28,10 +28,16 @@ function render(data) {
         const time = item.time.startAt;
         const status = item.status;
 
+        const statusMap = {
+            'CONFIRMED': '예약 완료'
+        };
+
+        const displayStatus = statusMap[status] || status;
+
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+        row.insertCell(3).textContent = displayStatus;
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
