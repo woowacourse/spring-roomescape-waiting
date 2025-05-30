@@ -12,8 +12,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.ReservationTestFixture;
 import roomescape.member.model.Member;
+import roomescape.reservation.application.UserWaitingService;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
@@ -24,6 +26,7 @@ import roomescape.reservation.model.repository.WaitingRepository;
 
 @SpringBootTest
 @Transactional
+@ActiveProfiles("test")
 class WaitingValidatorTest {
 
     @Autowired
@@ -33,7 +36,7 @@ class WaitingValidatorTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
-    private WaitingValidator waitingValidator;
+    private UserWaitingService userWaitingService;
 
     @PersistenceContext
     EntityManager em;
@@ -59,7 +62,7 @@ class WaitingValidatorTest {
     @Test
     void noExceptionWhenNoDuplication() {
         assertDoesNotThrow(() ->
-            waitingValidator.validateNoDuplication(LocalDate.now(), 1L, 1L, 1L)
+            userWaitingService.validateNoDuplication(LocalDate.now(), 1L, 1L, 1L)
         );
     }
 
@@ -70,7 +73,7 @@ class WaitingValidatorTest {
         waitingRepository.save(waiting);
 
         assertThatThrownBy(
-            () -> waitingValidator.validateNoDuplication(waiting.getDate(),
+            () -> userWaitingService.validateNoDuplication(waiting.getDate(),
                 waiting.getTime().getId(), waiting.getTheme().getId(), waiting.getMember().getId()))
             .isInstanceOf(
                 InvalidReservationTimeException.class);
@@ -83,7 +86,7 @@ class WaitingValidatorTest {
         reservationRepository.save(reservation);
 
         assertThatThrownBy(
-            () -> waitingValidator.validateNoDuplication(reservation.getDate(),
+            () -> userWaitingService.validateNoDuplication(reservation.getDate(),
                 reservation.getTime().getId(), reservation.getTheme().getId(),
                 reservation.getMember().getId())).isInstanceOf(
             InvalidReservationTimeException.class);
