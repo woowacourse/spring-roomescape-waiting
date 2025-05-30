@@ -19,19 +19,26 @@ public class WaitingManagement {
 
     public Optional<Reservation> promoteWaiting(ReservationTheme theme, LocalDate date,
         ReservationTime time) {
-        return waitingRepository
+        Optional<Waiting> waiting = waitingRepository
             .findAllByThemeAndDateAndTime(theme, date, time)
             .stream()
-            .min(Comparator.comparing(Waiting::getId))
-            .map(waiting -> {
-                Reservation reservation = Reservation.builder()
-                    .date(waiting.getDate())
-                    .time(waiting.getTime())
-                    .theme(waiting.getTheme())
-                    .member(waiting.getMember())
-                    .build();
-                waitingRepository.delete(waiting);
-                return reservation;
-            });
+            .min(Comparator.comparing(Waiting::getId));
+
+        if (waiting.isEmpty()) {
+            return Optional.empty();
+        }
+
+        Waiting waitingToPromote = waiting.get();
+
+        Reservation promotedReservation = Reservation.builder()
+            .date(waitingToPromote.getDate())
+            .time(waitingToPromote.getTime())
+            .theme(waitingToPromote.getTheme())
+            .member(waitingToPromote.getMember())
+            .build();
+
+        waitingRepository.delete(waitingToPromote);
+
+        return Optional.of(promotedReservation);
     }
 }
