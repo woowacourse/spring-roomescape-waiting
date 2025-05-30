@@ -17,8 +17,10 @@ import roomescape.reservation.application.dto.response.MyBookingServiceResponse;
 import roomescape.reservation.model.entity.Reservation;
 import roomescape.reservation.model.entity.ReservationTheme;
 import roomescape.reservation.model.entity.ReservationTime;
+import roomescape.reservation.model.entity.Waiting;
 import roomescape.reservation.model.repository.ReservationRepository;
 import roomescape.reservation.model.repository.WaitingRepository;
+import roomescape.reservation.model.vo.WaitingWithRank;
 
 @SpringBootTest
 class MyBookingServiceMockTest {
@@ -67,7 +69,7 @@ class MyBookingServiceMockTest {
 
     @Test
     @DisplayName("memberId로 올바른 응답을 반환한다")
-    void getAllByMemberId() {
+    void getAllReservationByMemberId() {
         Member member1 = new Member("1234", Role.USER, "a@naver.com", "유저2", 1L);
 
         Reservation beforeTodayReservation = Reservation.builder()
@@ -84,12 +86,25 @@ class MyBookingServiceMockTest {
             .date(today.plusDays(2))
             .member(member1)
             .build();
+        Waiting waiting = Waiting.builder()
+            .id(1L)
+            .theme(theme1)
+            .time(time2Pm)
+            .date(today.plusDays(2))
+            .member(member1)
+            .build();
+
+        WaitingWithRank waitingWithRank = new WaitingWithRank(waiting, 1L);
         List<Reservation> reservations = List.of(beforeTodayReservation, afterTodayReservation);
         given(reservationRepository.findAllByMemberId(1L)).willReturn(reservations);
+        List<WaitingWithRank> waitingWithRanks = List.of(waitingWithRank);
+        given(waitingRepository.findWaitingWithRankByMemberId(1L)).willReturn(waitingWithRanks);
+
 
         List<MyBookingServiceResponse> expected = List.of(
             MyBookingServiceResponse.from(beforeTodayReservation),
-            MyBookingServiceResponse.from(afterTodayReservation)
+            MyBookingServiceResponse.from(afterTodayReservation),
+            MyBookingServiceResponse.from(waitingWithRank)
         );
         assertThat(myBookingService.getAllByMemberId(1L)).isEqualTo(expected);
     }
