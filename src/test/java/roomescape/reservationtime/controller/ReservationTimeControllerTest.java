@@ -1,11 +1,8 @@
 package roomescape.reservationtime.controller;
 
-import jakarta.transaction.Transactional;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.http.ResponseEntity;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,7 +24,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 @ActiveProfiles("test")
@@ -67,7 +64,8 @@ class ReservationTimeControllerTest {
         for (ReservationTimeCreateRequest createTimeRequest : createTimeRequests) {
             reservationTimeController.create(createTimeRequest);
         }
-        List<ReservationTimeResponse> reservationTimes = reservationTimeServiceFacade.findAll();
+        ResponseEntity<List<ReservationTimeResponse>> reservationTimesResponseEntity = reservationTimeController.getReservationTimes();
+        List<ReservationTimeResponse> reservationTimes = reservationTimesResponseEntity.getBody();
         assertThat(reservationTimes).hasSize(3);
     }
 
@@ -87,7 +85,7 @@ class ReservationTimeControllerTest {
         themeController.create(new ThemeCreateRequest("test theme", "test description", "test thumbnail"));
         memberController.signup(new MemberSignUpRequest("test", "test@test.com", "1234"));
         reservationController.create(new ReservationCreateRequest(LocalDate.now().plusDays(1), 1L, 1L), memberPrincipal);
-        ResponseEntity<List<ReservationTimeResponseWithBookedStatus>> bookedReservationTimes = reservationTimeController.read(LocalDate.now().plusDays(1), 1L);
+        ResponseEntity<List<ReservationTimeResponseWithBookedStatus>> bookedReservationTimes = reservationTimeController.searchReservationTimes(LocalDate.now().plusDays(1), 1L);
         List<ReservationTimeResponseWithBookedStatus> body = bookedReservationTimes.getBody();
         assertAll(
                 () -> assertThat(bookedReservationTimes.getStatusCodeValue()).isEqualTo(200),

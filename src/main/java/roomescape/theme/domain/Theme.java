@@ -57,21 +57,12 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Theme theme = (Theme) o;
-        if (theme.getId() == null || getId() == null) {
-            return false;
-        }
-        return Objects.equals(getId(), theme.getId());
+        if (!(o instanceof Theme theme)) return false;
+        return Objects.equals(id, theme.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hashCode(id);
     }
 }

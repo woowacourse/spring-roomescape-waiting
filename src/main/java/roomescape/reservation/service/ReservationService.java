@@ -2,23 +2,22 @@ package roomescape.reservation.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ConflictException;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.dto.request.AdminReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.dto.request.ReservationSearchConditionRequest;
-import roomescape.reservation.dto.response.MyReservationJsonResponse;
-import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.MyReservationAndWaitingResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
+import roomescape.schedule.domain.Schedule;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ReservationService {
@@ -31,20 +30,17 @@ public class ReservationService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(
-            ReservationTime reservationTime,
-            Theme theme,
             Member member,
             List<ReservationTime> availableTimes,
+            Schedule schedule,
             ReservationCreateRequest reservationCreateRequest
     ) {
-        validateNotPast(LocalDateTime.of(reservationCreateRequest.date(), reservationTime.getStartAt()));
-
-        validateReservationTimeConflict(availableTimes, reservationTime);
-
+        validateNotPast(schedule.getDateTime());
+        validateReservationTimeConflict(availableTimes, schedule.getTime());
         Reservation reservation = reservationRepository.save(
-                reservationCreateRequest.toReservation(reservationTime, theme, member));
-
+                reservationCreateRequest.toReservation(schedule, member));
         return ReservationResponse.from(reservation);
     }
 
@@ -54,25 +50,26 @@ public class ReservationService {
         }
     }
 
-    private void validateReservationTimeConflict(List<ReservationTime> availableTimes,
-                                                 ReservationTime reservationTime) {
+    private void validateReservationTimeConflict(List<ReservationTime> availableTimes, ReservationTime reservationTime) {
         if (!availableTimes.contains(reservationTime)) {
             throw new ConflictException("이미 해당 시간과 테마에 예약이 존재하여 예약할 수 없습니다.");
         }
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findAll() {
         List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream().map(ReservationResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> findByCondition(
             ReservationSearchConditionRequest reservationSearchConditionRequest) {
-        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndVisitDateBetween(
-                reservationSearchConditionRequest.getThemeId(),
-                reservationSearchConditionRequest.getMemberId(),
-                reservationSearchConditionRequest.getDateFrom(),
-                reservationSearchConditionRequest.getDateTo()
+        List<Reservation> reservations = reservationRepository.findByMemberAndThemeAndDateBetween(
+                reservationSearchConditionRequest.themeId(),
+                reservationSearchConditionRequest.memberId(),
+                reservationSearchConditionRequest.dateFrom(),
+                reservationSearchConditionRequest.dateTo()
         );
 
         return reservations.stream()
@@ -80,37 +77,51 @@ public class ReservationService {
                 .toList();
     }
 
-    public void deleteReservationById(Long id) {
-        reservationRepository.deleteById(id);
+    @Transactional
+    public void deleteReservation(Long reservationId) {
+        reservationRepository.deleteById(reservationId);
     }
 
-    public boolean existsByTimeId(Long id) {
-        return reservationRepository.existsByTimeId(id);
+    @Transactional(readOnly = true)
+    public boolean existsReservation(Long timeId) {
+        return reservationRepository.existsByScheduleTimeId(timeId);
     }
 
+    @Transactional(readOnly = true)
     public void validateReservationNonExistenceByTimeId(Long reservationTimeId) {
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
+        if (existsReservation(reservationTimeId)) {
             throw new ConflictException("해당 예약 시간을 사용하는 예약이 존재합니다.");
         }
     }
 
-    public List<MyReservationResponse> findAllByMember(Member member) {
-        List<Reservation> reservations = reservationRepository.findAllByMember(member);
-        return reservations.stream()
-                .map(reservation ->
-                        MyReservationJsonResponse.fromReservationAndStatus(
-                                reservation,
-                                getReservationStatus(reservation)
-                        )
-                )
-                .collect(Collectors.toList());
+    @Transactional(readOnly = true)
+    public List<MyReservationAndWaitingResponse> findAllByMember(Member member) {
+        return reservationRepository.findAllByMember(member).stream()
+                .map(MyReservationAndWaitingResponse::fromReservationAndStatus)
+                .toList();
     }
 
-    private ReservationStatus getReservationStatus(Reservation reservation) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            return ReservationStatus.COMPLETED;
-        }
-        return ReservationStatus.RESERVED;
+    @Transactional(readOnly = true)
+    public boolean existsReservation(Member member, Schedule schedule) {
+        return reservationRepository.existsByMemberAndSchedule(member, schedule);
+    }
+
+    @Transactional(readOnly = true)
+    public boolean existsReservation(Schedule schedule) {
+        return reservationRepository.existsBySchedule(schedule);
+    }
+
+    @Transactional
+    public ReservationResponse createAdminReservation(
+            AdminReservationCreateRequest adminReservationCreateRequest,
+            Member member,
+            List<ReservationTime> availableTimes,
+            Schedule savedSchedule) {
+        return createReservation(
+                member,
+                availableTimes,
+                savedSchedule,
+                adminReservationCreateRequest.toReservationCreateRequest()
+        );
     }
 }

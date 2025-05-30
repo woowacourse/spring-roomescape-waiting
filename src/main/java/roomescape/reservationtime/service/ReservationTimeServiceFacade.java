@@ -1,14 +1,14 @@
 package roomescape.reservationtime.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.response.ReservationTimeResponse;
 import roomescape.reservationtime.dto.response.ReservationTimeResponseWithBookedStatus;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Service
 public class ReservationTimeServiceFacade {
@@ -21,31 +21,27 @@ public class ReservationTimeServiceFacade {
         this.reservationService = reservationService;
     }
 
+    @Transactional
     public ReservationTimeResponse createReservationTime(ReservationTimeCreateRequest request) {
         return reservationTimeService.createReservationTime(request);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findAll() {
         return reservationTimeService.findAll();
     }
 
+    @Transactional
     public void deleteReservationTimeById(Long id) {
         reservationService.validateReservationNonExistenceByTimeId(id);
         reservationTimeService.deleteReservationTimeById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponseWithBookedStatus> findAvailableReservationTimesByDateAndThemeId(
-        LocalDate date,
-        Long themeId
+            LocalDate date,
+            Long themeId
     ) {
-        return reservationTimeService.findAvailableReservationTimesByDateAndThemeId(date, themeId);
-    }
-
-    public Optional<ReservationTime> findById(Long id) {
-        return reservationTimeService.findById(id);
-    }
-
-    public List<ReservationTime> findByReservationDateAndThemeId(LocalDate date, Long themeId) {
-        return reservationTimeService.findByReservationDateAndThemeId(date, themeId);
+        return reservationTimeService.findAvailableReservationTimes(date, themeId);
     }
 }

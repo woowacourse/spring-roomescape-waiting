@@ -1,11 +1,6 @@
 package roomescape.auth.infrastructure.provider.token.jwt;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
-import io.jsonwebtoken.JwtException;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
-import java.util.Date;
+import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.auth.infrastructure.AuthorizationPayload;
@@ -13,14 +8,16 @@ import roomescape.auth.infrastructure.provider.token.TokenAuthorizationProvider;
 import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.MemberRole;
 
+import java.util.Date;
+
 @Component
 public class JwtAuthorizationProvider extends TokenAuthorizationProvider {
     private final String secretKey;
-    private final long validityInMilliseconds;
+    private final Long validityInMilliseconds;
 
     public JwtAuthorizationProvider(
-        @Value("${jwt.secret-key}") String secretKey,
-        @Value("${jwt.validity-in-milliseconds}") long validityInMilliseconds
+            @Value("${jwt.secret-key}") String secretKey,
+            @Value("${jwt.validity-in-milliseconds}") Long validityInMilliseconds
     ) {
         this.secretKey = secretKey;
         this.validityInMilliseconds = validityInMilliseconds;
@@ -36,19 +33,19 @@ public class JwtAuthorizationProvider extends TokenAuthorizationProvider {
         Date validity = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
-            .setClaims(claims)
-            .setIssuedAt(now)
-            .setExpiration(validity)
-            .signWith(SignatureAlgorithm.HS256, secretKey)
-            .compact();
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(SignatureAlgorithm.HS256, secretKey)
+                .compact();
     }
 
     @Override
     public AuthorizationPayload getPayload(String token) {
         Claims claims = Jwts.parser()
-            .setSigningKey(secretKey)
-            .parseClaimsJws(token)
-            .getBody();
+                .setSigningKey(secretKey)
+                .parseClaimsJws(token)
+                .getBody();
 
         String name = claims.get("name", String.class);
         MemberRole role = MemberRole.valueOf(claims.get("role", String.class));

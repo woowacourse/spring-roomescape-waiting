@@ -3,10 +3,9 @@ package roomescape.reservation.domain;
 import jakarta.persistence.*;
 import roomescape.exception.DomainValidationException;
 import roomescape.member.domain.Member;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
+import roomescape.schedule.domain.Schedule;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 @Entity
@@ -16,16 +15,9 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private LocalDate date;
-
-    @ManyToOne
-    @JoinColumn(name = "time_id", nullable = false)
-    private ReservationTime time;
-
-    @ManyToOne
-    @JoinColumn(name = "theme_id", nullable = false)
-    private Theme theme;
+    @OneToOne
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
 
     @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
@@ -34,40 +26,32 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public Reservation(Long id, LocalDate date, ReservationTime time, Theme theme, Member member) {
-        validate(date, time, theme, member);
+    public Reservation(Long id, Schedule schedule, Member member) {
+        validate(schedule, member);
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.schedule = schedule;
         this.member = member;
     }
 
-    public static Reservation generateWithPrimaryKey(Reservation reservation, Long newPrimaryKey) {
-        return new Reservation(newPrimaryKey, reservation.date, reservation.time, reservation.theme,
-                reservation.member);
-    }
-
-    private void validate(LocalDate date, ReservationTime time, Theme theme, Member member) {
-        if (date == null || time == null || theme == null || member == null) {
+    private void validate(Schedule schedule, Member member) {
+        if (schedule == null || member == null) {
             throw new DomainValidationException("예약 정보가 비어있습니다.");
         }
+    }
+
+    public ReservationStatus getStatus() {
+        if (schedule.isBefore(LocalDateTime.now())) {
+            return ReservationStatus.COMPLETED;
+        }
+        return ReservationStatus.RESERVED;
     }
 
     public Long getId() {
         return id;
     }
 
-    public LocalDate getDate() {
-        return date;
-    }
-
-    public ReservationTime getTime() {
-        return time;
-    }
-
-    public Theme getTheme() {
-        return theme;
+    public Schedule getSchedule() {
+        return schedule;
     }
 
     public Member getMember() {
@@ -76,21 +60,12 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        Reservation that = (Reservation) o;
-        if (id == null && that.id == null) {
-            return false;
-        }
-        return Objects.equals(getId(), that.getId());
+        if (!(o instanceof Reservation that)) return false;
+        return Objects.equals(id, that.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(getId());
+        return Objects.hashCode(id);
     }
 }

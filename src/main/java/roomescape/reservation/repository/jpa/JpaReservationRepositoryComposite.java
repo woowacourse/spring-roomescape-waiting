@@ -1,15 +1,15 @@
 package roomescape.reservation.repository.jpa;
 
-import java.time.LocalDate;
-import java.util.List;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.schedule.domain.Schedule;
+
+import java.time.LocalDate;
+import java.util.List;
 
 @Repository
-@ConditionalOnProperty(name = "repository.strategy", havingValue = "jpa")
 public class JpaReservationRepositoryComposite implements ReservationRepository {
     private final JpaReservationRepository jpaReservationRepository;
 
@@ -33,27 +33,37 @@ public class JpaReservationRepositoryComposite implements ReservationRepository 
     }
 
     @Override
-    public boolean existsByTimeId(Long id) {
-        return jpaReservationRepository.existsByTimeId(id);
+    public boolean existsByScheduleTimeId(Long id) {
+        return jpaReservationRepository.existsByScheduleTimeId(id);
     }
 
     @Override
-    public List<Reservation> findByMemberAndThemeAndVisitDateBetween(
-        Long themeId,
-        Long memberId,
-        LocalDate dateFrom,
-        LocalDate dateTo
+    public List<Reservation> findByMemberAndThemeAndDateBetween(
+            Long themeId,
+            Long memberId,
+            LocalDate dateFrom,
+            LocalDate dateTo
     ) {
-        return jpaReservationRepository.findByMemberAndThemeAndVisitDateBetween(
-            themeId,
-            memberId,
-            dateFrom,
-            dateTo
+        return jpaReservationRepository.findByMemberAndThemeAndDateBetween(
+                themeId,
+                memberId,
+                dateFrom,
+                dateTo
         );
     }
 
     @Override
     public List<Reservation> findAllByMember(Member member) {
         return jpaReservationRepository.findAllByMember(member);
+    }
+
+    @Override
+    public boolean existsByMemberAndSchedule(Member member, Schedule schedule) {
+        return jpaReservationRepository.existsByMemberAndSchedule(member, schedule);
+    }
+
+    @Override
+    public boolean existsBySchedule(Schedule schedule) {
+        return jpaReservationRepository.existsBySchedule(schedule);
     }
 }

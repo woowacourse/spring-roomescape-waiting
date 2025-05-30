@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.request.LoginRequest;
 import roomescape.auth.infrastructure.AuthorizationPayload;
 import roomescape.auth.infrastructure.AuthorizationPrincipal;
@@ -18,16 +19,17 @@ public class AuthServiceFacade {
     private final AuthorizationProvider authorizationProvider;
 
     public AuthServiceFacade(
-        MemberService memberService,
-        AuthorizationProvider authorizationProvider
+            MemberService memberService,
+            AuthorizationProvider authorizationProvider
     ) {
         this.memberService = memberService;
         this.authorizationProvider = authorizationProvider;
     }
 
+    @Transactional
     public AuthorizationPrincipal login(LoginRequest request) {
         Member member = memberService.findByEmail(request.email())
-            .orElseThrow(() -> new UnauthorizedException("인증되지 않은 유저 정보입니다."));
+                .orElseThrow(() -> new UnauthorizedException("인증되지 않은 유저 정보입니다."));
         if (checkInvalidLogin(member, request)) {
             throw new UnauthorizedException("인증되지 않은 유저 정보입니다.");
         }
@@ -38,6 +40,7 @@ public class AuthServiceFacade {
         return member.checkInvalidLogin(request.email(), request.password());
     }
 
+    @Transactional(readOnly = true)
     public void validateMemberExistence(MemberPrincipal memberPrincipal) {
         if (!memberService.existsByName(memberPrincipal.name())) {
             throw new NotFoundException("존재하지 않는 유저 정보입니다.");

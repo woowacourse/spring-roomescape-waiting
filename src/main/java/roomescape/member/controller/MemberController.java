@@ -1,7 +1,6 @@
 package roomescape.member.controller;
 
 import jakarta.validation.Valid;
-import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +11,8 @@ import roomescape.auth.dto.request.MemberSignUpRequest;
 import roomescape.auth.dto.response.MemberSignUpResponse;
 import roomescape.member.dto.response.MemberNameSelectResponse;
 import roomescape.member.service.MemberServiceFacade;
+
+import java.util.List;
 
 @RestController
 public class MemberController {
@@ -25,7 +26,7 @@ public class MemberController {
 
     @GetMapping("/members")
     public ResponseEntity<List<MemberNameSelectResponse>> getMembers() {
-        List<MemberNameSelectResponse> memberNames = memberService.findMemberNames();
+        List<MemberNameSelectResponse> memberNames = memberService.getMemberNames();
         return ResponseEntity.ok(memberNames);
     }
 

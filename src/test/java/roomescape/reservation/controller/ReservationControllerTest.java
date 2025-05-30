@@ -5,11 +5,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
-import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.ActiveProfiles;
 import roomescape.auth.infrastructure.AuthorizationPayload;
 import roomescape.auth.infrastructure.AuthorizationPrincipal;
 import roomescape.auth.infrastructure.provider.AuthorizationProvider;
@@ -17,12 +16,7 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.member.fixture.MemberFixture;
 import roomescape.member.repository.MemberRepository;
-import roomescape.repository.fake.FakeMemberRepository;
-import roomescape.repository.fake.FakeReservationRepository;
-import roomescape.repository.fake.FakeReservationTimeRepository;
-import roomescape.repository.fake.FakeThemeRepository;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -33,6 +27,7 @@ import java.time.LocalTime;
 
 import static org.hamcrest.Matchers.equalTo;
 
+@ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class ReservationControllerTest {
@@ -137,28 +132,5 @@ class ReservationControllerTest {
                 .cookie("token", principal.value())
                 .body(request)
                 .when().post("/reservations");
-    }
-
-    @TestConfiguration
-    static class TestConfig {
-        @Bean
-        public MemberRepository memberRepository() {
-            return new FakeMemberRepository();
-        }
-
-        @Bean
-        ReservationRepository reservationRepository() {
-            return new FakeReservationRepository();
-        }
-
-        @Bean
-        public ThemeRepository themeRepository() {
-            return new FakeThemeRepository(reservationRepository());
-        }
-
-        @Bean
-        public ReservationTimeRepository reservationTimeRepository() {
-            return new FakeReservationTimeRepository(reservationRepository());
-        }
     }
 }

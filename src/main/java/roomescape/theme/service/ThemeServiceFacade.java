@@ -1,39 +1,37 @@
 package roomescape.theme.service;
 
-import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
-import roomescape.theme.domain.Theme;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.dto.request.ThemeCreateRequest;
 import roomescape.theme.dto.response.ThemeResponse;
+
+import java.util.List;
 
 @Service
 public class ThemeServiceFacade {
     private final ThemeService themeService;
 
-    public ThemeServiceFacade(
-        ThemeService themeService
-    ) {
+    public ThemeServiceFacade(ThemeService themeService) {
         this.themeService = themeService;
     }
 
+    @Transactional
     public ThemeResponse createTheme(ThemeCreateRequest request) {
         return themeService.createTheme(request);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         return themeService.findAll();
     }
 
+    @Transactional
     public void deleteThemeById(Long id) {
         themeService.deleteThemeById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findLimitedThemesByPopularDesc() {
-        return themeService.findLimitedThemesByPopularDesc();
-    }
-
-    public Optional<Theme> findById(Long id) {
-        return themeService.findById(id);
+        return themeService.findPopularThemesByDesc();
     }
 }
