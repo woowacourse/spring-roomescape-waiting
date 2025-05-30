@@ -74,6 +74,11 @@ public class ReservationService {
         final List<Reservation> myReservations = reservationRepository.findByMemberId(member.getId());
         final List<ReservationWaiting> myReservationWaitings = reservationWaitingRepository.findByMemberId(
                 member.getId());
+        return myPageReservationResponses(myReservations, myReservationWaitings);
+    }
+
+    private List<MyPageReservationResponse> myPageReservationResponses(final List<Reservation> myReservations,
+                                                                       final List<ReservationWaiting> myReservationWaitings) {
         final List<MyPageReservationResponse> myPageReservationResponses = myReservations.stream()
                 .map(MyPageReservationResponse::from)
                 .collect(Collectors.toList());
