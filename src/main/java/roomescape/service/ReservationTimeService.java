@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.AvailableReservationTimeResponse;
@@ -25,6 +26,7 @@ public class ReservationTimeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ReservationTimeResponse addReservationTime(final ReservationTimeRequest request) {
         ReservationTime reservationTime = new ReservationTime(request.startAt());
         validateUniqueReservationTime(reservationTime);
@@ -32,17 +34,20 @@ public class ReservationTimeService {
         return ReservationTimeResponse.from(saved);
     }
 
+    @Transactional
     public void removeReservationTime(final long id) {
         validateExistTime(id);
         validateExistReservation(id);
         reservationTimeRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> findReservationTimes() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream().map(ReservationTimeResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public ReservationTime getById(final long id) {
         return reservationTimeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("[ERROR] 예약 시간을 찾을 수 없습니다."));
     }

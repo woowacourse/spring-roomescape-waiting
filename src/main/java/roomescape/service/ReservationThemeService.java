@@ -3,6 +3,7 @@ package roomescape.service;
 import java.util.List;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTheme;
 import roomescape.repository.ReservationRepository;
 import roomescape.service.dto.ReservationThemeRequest;
@@ -21,16 +22,19 @@ public class ReservationThemeService {
         this.reservationThemeRepository = reservationThemeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationThemeResponse> findReservationThemes() {
         List<ReservationTheme> reservationThemes = reservationThemeRepository.findAll();
         return reservationThemes.stream().map(ReservationThemeResponse::from).toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationThemeResponse> findPopularThemes() {
         List<ReservationTheme> popularReservationThemes = reservationThemeRepository.findWeeklyThemeOrderByCountDesc();
         return popularReservationThemes.stream().map(ReservationThemeResponse::from).toList();
     }
 
+    @Transactional
     public ReservationThemeResponse addReservationTheme(final ReservationThemeRequest request) {
         final ReservationTheme reservationTheme = ReservationTheme.builder()
                 .name(request.name())
@@ -42,12 +46,14 @@ public class ReservationThemeService {
         return ReservationThemeResponse.from(saved);
     }
 
+    @Transactional
     public void removeReservationTheme(final long id) {
         validateExistTheme(id);
         validateExistReservation(id);
         reservationThemeRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public ReservationTheme getById(final long id) {
         return reservationThemeRepository.findById(id).orElseThrow(() -> new NoSuchElementException("[ERROR] 테마를 찾을 수 없습니다."));
     }

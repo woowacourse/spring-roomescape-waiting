@@ -50,7 +50,7 @@ public class ReservationService {
         return ReservationResponse.fromV2(saved);
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
                 .map(ReservationResponse::fromV2)
