@@ -5,8 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import roomescape.common.exception.RoomescapeException;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 

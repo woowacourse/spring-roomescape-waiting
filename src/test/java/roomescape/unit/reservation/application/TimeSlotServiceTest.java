@@ -12,17 +12,17 @@ import org.junit.jupiter.api.Test;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.application.timeslot.dto.TimeSlotAvailabilityInfo;
-import roomescape.reservation.application.timeslot.dto.TimeSlotCreateCommand;
-import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
-import roomescape.reservation.application.timeslot.service.TimeSlotService;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationRepository;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.timeslot.TimeSlot;
-import roomescape.reservation.domain.timeslot.TimeSlotRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.fake.FakeReservationRepository;
 import roomescape.support.fake.FakeTimeSlotRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.timeslot.application.dto.TimeSlotAvailabilityInfo;
+import roomescape.timeslot.application.dto.TimeSlotCreateCommand;
+import roomescape.timeslot.application.dto.TimeSlotInfo;
+import roomescape.timeslot.application.service.TimeSlotService;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 
 class TimeSlotServiceTest {
 

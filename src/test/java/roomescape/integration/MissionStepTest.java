@@ -22,8 +22,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.ui.reservation.api.ReservationApiController;
-import roomescape.reservation.ui.reservation.dto.ReservationResponse;
+import roomescape.reservation.presentation.controller.api.ReservationApiController;
+import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.support.util.DateUtil;
 import roomescape.support.util.SqlFixture;
 

@@ -22,24 +22,24 @@ import roomescape.member.application.dto.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
-import roomescape.reservation.application.reservation.dto.ReservationInfo;
-import roomescape.reservation.application.reservation.dto.ReservationMineInfo;
-import roomescape.reservation.application.reservation.dto.ReservationSearchCondition;
-import roomescape.reservation.application.reservation.service.ReservationService;
-import roomescape.reservation.application.theme.dto.ThemeInfo;
-import roomescape.reservation.application.timeslot.dto.TimeSlotInfo;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.timeslot.TimeSlot;
-import roomescape.reservation.domain.timeslot.TimeSlotRepository;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.ReservationInfo;
+import roomescape.reservation.application.dto.ReservationMineInfo;
+import roomescape.reservation.application.dto.ReservationSearchCondition;
+import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.domain.Reservation;
 import roomescape.support.fake.FakeMemberRepository;
 import roomescape.support.fake.FakeReservationRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.fake.FakeWaitingRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.application.dto.TimeSlotInfo;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 
 class ReservationServiceTest {
 

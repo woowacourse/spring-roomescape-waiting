@@ -6,9 +6,9 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.common.exception.RoomescapeException;
-import roomescape.reservation.domain.waiting.Waiting;
-import roomescape.reservation.domain.waiting.WaitingRepository;
-import roomescape.reservation.domain.waiting.WaitingWithRank;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingWithRank;
 
 public class FakeWaitingRepository implements WaitingRepository {
 

@@ -16,18 +16,18 @@ import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.application.waiting.dto.WaitingCreateCommand;
-import roomescape.reservation.application.waiting.dto.WaitingInfo;
-import roomescape.reservation.application.waiting.service.WaitingService;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.timeslot.TimeSlot;
-import roomescape.reservation.domain.timeslot.TimeSlotRepository;
 import roomescape.support.fake.FakeMemberRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.fake.FakeWaitingRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
+import roomescape.waiting.application.dto.WaitingCreateCommand;
+import roomescape.waiting.application.dto.WaitingInfo;
+import roomescape.waiting.application.service.WaitingService;
 
 public class WaitingServiceTest {
 

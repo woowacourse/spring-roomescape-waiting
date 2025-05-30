@@ -19,14 +19,14 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.MemberRepository;
-import roomescape.reservation.application.reservation.dto.ReservationCreateCommand;
-import roomescape.reservation.application.reservation.dto.ReservationInfo;
-import roomescape.reservation.application.reservation.service.ReservationService;
-import roomescape.reservation.domain.reservation.ReservationRepository;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.timeslot.TimeSlotRepository;
-import roomescape.reservation.domain.waiting.WaitingRepository;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
+import roomescape.reservation.application.dto.ReservationInfo;
+import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.domain.TimeSlotRepository;
+import roomescape.waiting.domain.WaitingRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)

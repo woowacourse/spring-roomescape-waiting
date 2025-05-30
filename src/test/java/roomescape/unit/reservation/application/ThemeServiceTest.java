@@ -19,19 +19,19 @@ import roomescape.common.datetime.CurrentDateTime;
 import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
-import roomescape.reservation.application.theme.dto.ThemeInfo;
-import roomescape.reservation.application.theme.service.ThemeService;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationRepository;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.timeslot.TimeSlot;
-import roomescape.reservation.domain.timeslot.TimeSlotRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.fake.FakeReservationRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.application.dto.ThemeCreateCommand;
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.theme.application.service.ThemeService;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {

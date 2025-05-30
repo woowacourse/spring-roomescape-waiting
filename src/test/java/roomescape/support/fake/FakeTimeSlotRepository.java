@@ -4,8 +4,8 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import roomescape.reservation.domain.timeslot.TimeSlot;
-import roomescape.reservation.domain.timeslot.TimeSlotRepository;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 
 public class FakeTimeSlotRepository implements TimeSlotRepository {
 

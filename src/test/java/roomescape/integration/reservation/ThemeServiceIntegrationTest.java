@@ -15,13 +15,13 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.exception.RoomescapeException;
-import roomescape.reservation.application.theme.dto.ThemeCreateCommand;
-import roomescape.reservation.application.theme.dto.ThemeInfo;
-import roomescape.reservation.application.theme.service.ThemeService;
-import roomescape.reservation.domain.reservation.ReservationRepository;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.application.dto.ThemeCreateCommand;
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.theme.application.service.ThemeService;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
