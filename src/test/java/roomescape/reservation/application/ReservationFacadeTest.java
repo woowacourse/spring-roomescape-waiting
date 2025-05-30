@@ -14,8 +14,6 @@ import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationViewQueryService;
-import roomescape.reservation.application.service.WaitingReservationCommandService;
-import roomescape.reservation.application.service.WaitingReservationQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationStatus;
@@ -24,7 +22,6 @@ import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
-import roomescape.reservation.ui.dto.WaitingReservationResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
@@ -59,12 +56,6 @@ class ReservationFacadeTest {
     private ReservationViewQueryService reservationViewQueryService;
 
     @Mock
-    private WaitingReservationCommandService waitingReservationCommandService;
-
-    @Mock
-    private WaitingReservationQueryService waitingReservationQueryService;
-
-    @Mock
     private ReservationCommandService reservationCommandService;
 
     @Mock
@@ -92,27 +83,6 @@ class ReservationFacadeTest {
         //then
         assertThat(result).hasSize(2);
         then(reservationQueryService).should(times(1)).getAll();
-    }
-
-    @Test
-    @DisplayName("모든 예약을 조회할 수 있다")
-    void getAllWaiting() {
-        //given
-        List<WaitingReservation> waiting = List.of(
-                createWaiting(1L, 1),
-                createWaiting(2L, 2)
-        );
-        given(waitingReservationQueryService.getAll()).willReturn(waiting);
-
-        List<User> users = List.of(createUser(1L));
-        given(userQueryService.getAllByIds(anyList())).willReturn(users);
-
-        //when
-        List<WaitingReservationResponse> result = reservationFacade.getAllWaiting();
-
-        //then
-        assertThat(result).hasSize(2);
-        then(waitingReservationQueryService).should(times(1)).getAll();
     }
 
     @Test
@@ -277,23 +247,6 @@ class ReservationFacadeTest {
         assertThatThrownBy(() -> reservationFacade.delete(nonExistentReservationId))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("[RESERVATION] not found");
-    }
-
-    @Test
-    @DisplayName("예약 대기를 성공적으로 승격한다")
-    void promotionWaiting() {
-        //given
-        CreateReservationWithUserIdWebRequest request = createCreateRequest();
-        Reservation reservation = createReservation(1L);
-        given(userQueryService.getById(any())).willReturn(createUser(1L));
-        given(reservationCommandService.create(any())).willReturn(reservation);
-        //when
-        ReservationResponse result = reservationFacade.promotionWaiting(1L, request);
-
-        //then
-        assertThat(result).isNotNull();
-        then(reservationCommandService).should(times(1)).create(any());
-        then(waitingReservationCommandService).should(times(1)).delete(any());
     }
 
     private Reservation createReservation(Long id) {

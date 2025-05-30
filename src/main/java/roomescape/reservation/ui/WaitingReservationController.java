@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.session.Session;
 import roomescape.auth.session.annotation.UserSession;
 import roomescape.common.uri.UriFactory;
-import roomescape.reservation.application.ReservationFacade;
+import roomescape.reservation.application.WaitingReservationFacade;
 import roomescape.reservation.application.dto.SimpleWaitingReservationResponse;
 import roomescape.reservation.ui.dto.CreateReservationWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
@@ -28,11 +28,11 @@ public class WaitingReservationController {
 
     public static final String BASE_PATH = "/reservations/waiting";
 
-    private final ReservationFacade reservationFacade;
+    private final WaitingReservationFacade waitingReservationFacade;
 
     @GetMapping
     public ResponseEntity<List<WaitingReservationResponse>> getAll() {
-        final List<WaitingReservationResponse> reservations = reservationFacade.getAllWaiting();
+        final List<WaitingReservationResponse> reservations = waitingReservationFacade.getAll();
         return ResponseEntity.ok(reservations);
     }
 
@@ -41,7 +41,7 @@ public class WaitingReservationController {
             @RequestBody final CreateReservationWebRequest request,
             @UserSession final Session session
     ) {
-        final SimpleWaitingReservationResponse reservationResponse = reservationFacade.addWaiting(
+        final SimpleWaitingReservationResponse reservationResponse = waitingReservationFacade.create(
                 request.toRequestWithUserId(session.userId())
         );
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.waitingReservationId()));
@@ -51,7 +51,7 @@ public class WaitingReservationController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable final Long id) {
-        reservationFacade.deleteWaiting(id);
+        waitingReservationFacade.delete(id);
         return ResponseEntity.noContent().build();
     }
 
@@ -61,7 +61,7 @@ public class WaitingReservationController {
             @RequestBody final CreateReservationWebRequest request,
             @UserSession final Session session
     ) {
-        final ReservationResponse reservationResponse = reservationFacade.promotionWaiting(
+        final ReservationResponse reservationResponse = waitingReservationFacade.promotion(
                 id, request.toRequestWithUserId(session.userId())
         );
         final URI location = UriFactory.buildPath(BASE_PATH, String.valueOf(reservationResponse.reservationId()));
