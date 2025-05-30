@@ -55,12 +55,12 @@ class WaitingServiceTest extends AbstractServiceIntegrationTest {
         Theme theme = themeRepository.save(Theme.create("테마", "설명", "이미지"));
         ReservationTime time = reservationTimeRepository.save(ReservationTime.create(LocalTime.of(13, 0)));
         reservationRepository.save(Reservation.create(
-                LocalDateTime.now(clock).minusDays(1),
+                LocalDateTime.now(clock).minusDays(2),
                 member1,
-                new ReservationSlot(LocalDate.now(clock), time, theme))
+                new ReservationSlot(LocalDate.now(clock).plusDays(1), time, theme))
         );
         CreateWaitingParam createWaitingParam = new CreateWaitingParam(
-                LocalDate.now(clock),
+                LocalDate.now(clock).plusDays(1),
                 member2.getId(),
                 time.getId(),
                 theme.getId()
@@ -73,7 +73,7 @@ class WaitingServiceTest extends AbstractServiceIntegrationTest {
         assertThat(waitingRepository.findById(1L))
                 .isPresent().get()
                 .extracting("member", "reservationSlot")
-                .contains(member2, new ReservationSlot(LocalDate.now(clock), time, theme));
+                .contains(member2, new ReservationSlot(LocalDate.now(clock).plusDays(1), time, theme));
     }
 
     @Test

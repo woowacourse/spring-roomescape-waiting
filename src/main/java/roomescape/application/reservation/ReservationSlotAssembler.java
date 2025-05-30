@@ -10,18 +10,18 @@ import roomescape.domain.reservation.Theme;
 import roomescape.domain.reservation.ThemeRepository;
 
 @Component
-public class ReservationSlotCreator {
+public class ReservationSlotAssembler {
 
     private final ReservationTimeRepository reservationTImeRepository;
     private final ThemeRepository themeRepository;
 
-    public ReservationSlotCreator(ReservationTimeRepository reservationTImeRepository,
-                                  ThemeRepository themeRepository) {
+    public ReservationSlotAssembler(ReservationTimeRepository reservationTImeRepository,
+                                    ThemeRepository themeRepository) {
         this.reservationTImeRepository = reservationTImeRepository;
         this.themeRepository = themeRepository;
     }
 
-    public ReservationSlot create(LocalDate date, Long timeId, Long themeId) {
+    public ReservationSlot assemble(LocalDate date, Long timeId, Long themeId) {
         return new ReservationSlot(date, getReservationTimeById(timeId), getThemeById(themeId));
     }
 

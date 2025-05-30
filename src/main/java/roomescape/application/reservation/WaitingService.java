@@ -24,25 +24,25 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
     private final MemberRepository memberRepository;
-    private final ReservationSlotCreator reservationSlotCreator;
+    private final ReservationSlotAssembler reservationSlotAssembler;
     private final Clock clock;
 
     public WaitingService(WaitingRepository waitingRepository,
                           ReservationRepository reservationRepository,
                           MemberRepository memberRepository,
-                          ReservationSlotCreator reservationSlotCreator,
+                          ReservationSlotAssembler reservationSlotAssembler,
                           Clock clock) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
         this.memberRepository = memberRepository;
-        this.reservationSlotCreator = reservationSlotCreator;
+        this.reservationSlotAssembler = reservationSlotAssembler;
         this.clock = clock;
     }
 
     @Transactional
     public void create(CreateWaitingParam waitingParam) {
         Member member = getMemberById(waitingParam.memberId());
-        ReservationSlot reservationSlot = reservationSlotCreator.create(
+        ReservationSlot reservationSlot = reservationSlotAssembler.assemble(
                 waitingParam.date(),
                 waitingParam.timeId(),
                 waitingParam.themeId()

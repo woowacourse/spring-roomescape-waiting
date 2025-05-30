@@ -21,16 +21,16 @@ import roomescape.domain.reservation.ReservationSlot;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationSlotCreator reservationSlotCreator;
+    private final ReservationSlotAssembler reservationSlotAssembler;
     private final MemberRepository memberRepository;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
-                              ReservationSlotCreator reservationSlotCreator,
+                              ReservationSlotAssembler reservationSlotAssembler,
                               MemberRepository memberRepository,
                               Clock clock) {
         this.reservationRepository = reservationRepository;
-        this.reservationSlotCreator = reservationSlotCreator;
+        this.reservationSlotAssembler = reservationSlotAssembler;
         this.memberRepository = memberRepository;
         this.clock = clock;
     }
@@ -38,7 +38,7 @@ public class ReservationService {
     @Transactional
     public Long create(CreateReservationParam createReservationParam) {
         Member member = getMemberById(createReservationParam.memberId());
-        ReservationSlot reservationSlot = reservationSlotCreator.create(
+        ReservationSlot reservationSlot = reservationSlotAssembler.assemble(
                 createReservationParam.date(),
                 createReservationParam.timeId(),
                 createReservationParam.themeId()
