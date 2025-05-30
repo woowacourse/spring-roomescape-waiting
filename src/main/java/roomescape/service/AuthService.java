@@ -1,6 +1,6 @@
 package roomescape.service;
 
-import jakarta.transaction.Transactional;
+import org.springframework.transaction.annotation.Transactional;
 import java.util.Base64;
 import java.util.NoSuchElementException;
 import org.springframework.stereotype.Service;
