@@ -14,6 +14,7 @@ import org.springframework.data.domain.PageRequest;
 import roomescape.common.config.TestConfig;
 import roomescape.fixture.TestFixture;
 import roomescape.member.domain.Member;
+import roomescape.member.domain.MemberRole;
 import roomescape.member.infrastructure.MemberRepository;
 import roomescape.reservationslot.infrastructure.ReservationSlotRepository;
 import roomescape.reservationtime.domain.ReservationTime;
@@ -38,7 +39,7 @@ class ThemeRepositoryTest {
 
     @Test
     void findPopular() {
-        Member member = TestFixture.makeMember();
+        Member member = new Member("Mint", "mint@gmail.com", "password", MemberRole.REGULAR);
         memberRepository.save(member);
 
         Theme theme1 = new Theme("추리", "셜록 홈즈: 실종된 보석의 비밀", "sherlock_jewel.png");

@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationslot.application.ReservationSlotDataService;
 import roomescape.reservationtime.exception.ReservationTimeInUseException;
 import roomescape.theme.domain.Theme;
@@ -11,6 +12,7 @@ import roomescape.theme.presentation.dto.request.ThemeCreateWebRequest;
 import roomescape.theme.presentation.dto.response.ThemeWebResponse;
 
 @Service
+@Transactional
 public class ThemeApplicationService {
 
     private final ThemeDataService themeDataService;

@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
 import roomescape.reservation.application.dto.request.ConfirmedReservationByCriteriaWebRequest;
@@ -18,6 +19,7 @@ import roomescape.theme.application.ThemeDataService;
 import roomescape.theme.domain.Theme;
 
 @Service
+@Transactional
 public class ConfirmedReservationApplicationService {
 
     private final ReservationSlotDataService reservationSlotDataService;

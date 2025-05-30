@@ -3,8 +3,10 @@ package roomescape.reservation.application;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.member.application.MemberDataService;
 import roomescape.member.domain.Member;
+import roomescape.reservation.application.dto.request.WaitingReservationCreateRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.presentation.dto.response.WaitingWebResponse;
 import roomescape.reservationslot.application.ReservationSlotDataService;
@@ -12,6 +14,7 @@ import roomescape.reservationslot.domain.ReservationSlot;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 @Service
+@Transactional
 public class WaitingReservationApplicationService {
 
     private final ReservationSlotDataService reservationSlotDataService;

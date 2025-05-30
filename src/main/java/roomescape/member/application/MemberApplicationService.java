@@ -2,6 +2,7 @@ package roomescape.member.application;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.security.application.MyPasswordEncoder;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
@@ -11,6 +12,7 @@ import roomescape.member.presentation.dto.response.MemberWebResponse;
 import roomescape.member.presentation.dto.response.SignUpWebResponse;
 
 @Service
+@Transactional
 public class MemberApplicationService {
 
     private final MemberDataService memberDataService;

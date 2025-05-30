@@ -3,7 +3,6 @@ package roomescape.fixture;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservationslot.domain.ReservationSlot;
@@ -36,9 +35,7 @@ public class TestFixture {
     }
 
     public static Member makeMember() {
-        Member member = new Member("Mint", "mint@gmail.com", "password", MemberRole.REGULAR);
-        ReflectionTestUtils.setField(member, "id", 4L);
-        return member;
+        return new Member("Mint", "mint@gmail.com", "password", MemberRole.REGULAR);
     }
 
     private static LocalDate makeAfterOneWeekDate() {

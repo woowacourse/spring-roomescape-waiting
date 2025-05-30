@@ -3,12 +3,14 @@ package roomescape.reservationtime.application;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.presentation.dto.request.ReservationTimeCreateWebRequest;
 import roomescape.reservationtime.presentation.dto.response.AvailableReservationTimeWebResponse;
 import roomescape.reservationtime.presentation.dto.response.ReservationTimeWebResponse;
 
 @Service
+@Transactional
 public class ReservationTimeApplicationService {
 
     private final ReservationTimeDataService reservationTimeDataService;

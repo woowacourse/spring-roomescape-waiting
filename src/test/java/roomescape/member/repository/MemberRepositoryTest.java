@@ -18,20 +18,19 @@ import roomescape.member.infrastructure.MemberRepository;
 @Import(TestConfig.class)
 class MemberRepositoryTest {
 
-    private static Member MEMBER;
-
     @Autowired
     private MemberRepository memberRepository;
 
+    private Member member;
+
     @BeforeEach
     void setup() {
-        MEMBER = TestFixture.makeMember();
-        memberRepository.save(MEMBER);
+        member = memberRepository.save(TestFixture.makeMember());
     }
 
     @Test
     void existsByEmail_memberExist_true() {
-        boolean doesExist = memberRepository.existsByEmail(MEMBER.getEmail());
+        boolean doesExist = memberRepository.existsByEmail(member.getEmail());
         assertThat(doesExist).isTrue();
     }
 

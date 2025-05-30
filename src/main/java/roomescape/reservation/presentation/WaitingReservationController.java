@@ -13,7 +13,7 @@ import roomescape.common.security.annotation.RequireRole;
 import roomescape.common.security.dto.request.MemberInfo;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.WaitingReservationApplicationService;
-import roomescape.reservation.application.WaitingReservationCreateRequest;
+import roomescape.reservation.application.dto.request.WaitingReservationCreateRequest;
 import roomescape.reservation.presentation.dto.request.ConfirmedReservationCreateWebRequest;
 import roomescape.reservation.presentation.dto.response.WaitingWebResponse;
 import roomescape.reservationslot.presentation.dto.response.ReservationResponse;

@@ -1,4 +1,4 @@
-package roomescape.reservation.application;
+package roomescape.reservation.application.dto.request;
 
 import java.time.LocalDate;
 
