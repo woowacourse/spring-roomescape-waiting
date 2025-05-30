@@ -42,9 +42,6 @@ public class ReservationSlot {
         if (date == null) {
             throw new ReservationException("Date cannot be null");
         }
-        if (!date.isAfter(LocalDate.now())) {
-            throw new ReservationException("과거 시간은 예약할 수 없습니다.");
-        }
     }
 
     private void validateTime(final ReservationTime time) {
