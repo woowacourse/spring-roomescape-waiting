@@ -18,7 +18,7 @@ public interface ReservationWaitingJpaRepository extends JpaRepository<Reservati
         AND rw2.date = rw1.date
         AND rw2.time.id = rw1.time.id  
         AND rw2.theme.id = rw1.theme.id
-        AND rw2.createdAt > rw1.createdAt
+        AND rw2.createdAt < rw1.createdAt
         """)
     int findWaitingOrderById(final long id);
 
