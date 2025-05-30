@@ -27,7 +27,5 @@ public interface ReservationRepository {
 
     List<ThemeBookingCount> findThemesToBookedCount(ReservationDate startDate, ReservationDate endDate, int count);
 
-    List<Reservation> findAllByParams(Long userId, Long themeId, ReservationDate reservationDate, ReservationDate reservationDate1);
-
-    void updateUserId(Long id, Long userId);
+    List<Reservation> findAllByParams(Long userId, Long themeId, ReservationDate from, ReservationDate to);
 }

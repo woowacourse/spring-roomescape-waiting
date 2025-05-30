@@ -23,7 +23,7 @@ public interface JpaWaitingReservationRepository extends JpaRepository<WaitingRe
             """)
     int findMaxWaitingByParams(ReservationDate date, ReservationTime time, Theme theme);
 
-    @Modifying(clearAutomatically = true)
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
     @Query("""
             UPDATE WaitingReservation w 
             SET w.waitingOrder = w.waitingOrder - 1 

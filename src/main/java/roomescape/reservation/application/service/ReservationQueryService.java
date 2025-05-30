@@ -3,6 +3,8 @@ package roomescape.reservation.application.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceRequest;
 import roomescape.reservation.application.dto.AvailableReservationTimeServiceResponse;
 import roomescape.reservation.application.dto.ReservationSearchRequest;
@@ -78,5 +80,10 @@ public class ReservationQueryService {
                                   final Long timeId,
                                   final Long themeId) {
         return reservationRepository.existsByParams(date, timeId, themeId);
+    }
+
+    public Reservation findById(final Long id) {
+        return reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(DomainTerm.RESERVATION_ID, id));
     }
 }

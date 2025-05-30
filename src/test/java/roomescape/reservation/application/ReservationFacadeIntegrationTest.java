@@ -147,7 +147,7 @@ class ReservationFacadeIntegrationTest {
 
     @Test
     @DisplayName("예약 삭제 후, 대기된 예약이 있을 시 승격시킨다.")
-    void deleteAndPromtionWhenExsistWaiting() {
+    void deleteAndPromotionWhenExistWaiting() {
         // given
         long userId1 = 1L;
         final Reservation reservation = reservationRepository.save(Reservation.of(userId1,

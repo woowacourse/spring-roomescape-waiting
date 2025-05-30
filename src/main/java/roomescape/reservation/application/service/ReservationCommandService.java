@@ -53,10 +53,6 @@ public class ReservationCommandService {
         throw new NotFoundException(DomainTerm.RESERVATION, id);
     }
 
-    public void updateUserId(final Long id, final Long userId) {
-        reservationRepository.updateUserId(id, userId);
-    }
-
     private boolean isExistsByParams(final ReservationDate date,
                                      final Long timeId,
                                      final Long themeId) {

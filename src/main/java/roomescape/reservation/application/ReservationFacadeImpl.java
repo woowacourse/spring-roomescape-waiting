@@ -28,7 +28,6 @@ import roomescape.user.domain.User;
 import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -99,11 +98,11 @@ public class ReservationFacadeImpl implements ReservationFacade {
     @Override
     @Transactional
     public void delete(final Long id) {
-        Optional<Long> waitingId = reservationViewQueryService.findFirstWaitingByReservationId(id);
-        waitingId.ifPresentOrElse(
-                waiting -> promotionWaiting(id, waiting),
-                () -> reservationCommandService.delete(id)
-        );
+        reservationViewQueryService.findFirstWaitingByReservationId(id)
+                .ifPresentOrElse(
+                        waitingId -> updateForPromotion(id, waitingId),
+                        () -> reservationCommandService.delete(id)
+                );
     }
 
     @Override
@@ -151,9 +150,10 @@ public class ReservationFacadeImpl implements ReservationFacade {
         return ReservationResponse.from(reservation, user);
     }
 
-    private void promotionWaiting(final Long id, final Long waiting) {
-        final Long userId = waitingReservationQueryService.findUserIdById(waiting);
-        reservationCommandService.updateUserId(id, userId);
-        waitingReservationCommandService.delete(waiting);
+    private void updateForPromotion(final Long id, final Long waitingId) {
+        final Long userId = waitingReservationQueryService.findUserIdById(waitingId);
+        Reservation reservation = reservationQueryService.findById(id);
+        reservation.updateForPromotion(userId);
+        waitingReservationCommandService.delete(waitingId);
     }
 }

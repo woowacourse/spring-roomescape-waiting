@@ -111,4 +111,14 @@ public class Reservation {
             throw new PastTimeReservationException(time, now);
         }
     }
+
+    public void updateForPromotion(final Long userId) {
+        validateUserId(userId);
+        this.userId = userId;
+    }
+
+    private static void validateUserId(final Long userId) {
+        Validator.of(Reservation.class)
+                .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label());
+    }
 }
