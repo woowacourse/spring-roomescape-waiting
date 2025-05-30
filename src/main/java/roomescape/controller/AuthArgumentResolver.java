@@ -11,7 +11,7 @@ import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.controller.util.CookieHandler;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.controller.annotation.AdminMember;
+import roomescape.controller.annotation.AdminOnly;
 import roomescape.controller.annotation.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.exception.UnauthorizationException;
@@ -34,7 +34,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return (parameter.hasParameterAnnotation(CurrentMember.class) || parameter.hasParameterAnnotation(AdminMember.class))
+        return (parameter.hasParameterAnnotation(CurrentMember.class) || parameter.hasParameterAnnotation(AdminOnly.class))
                 && parameter.getParameterType().equals(LoginInfo.class);
     }
 
@@ -47,7 +47,7 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         Long id = jwtTokenProvider.extractId(token);
         Member loginMember = memberQueryService.findMemberById(id);
 
-        if (parameter.hasParameterAnnotation(AdminMember.class) && loginMember.getRole() != Role.ADMIN) {
+        if (parameter.hasParameterAnnotation(AdminOnly.class) && loginMember.getRole() != Role.ADMIN) {
                 throw new UnauthorizationException("관리자 권한이 없는 사용자입니다.");
         }
         return new LoginInfo(loginMember);

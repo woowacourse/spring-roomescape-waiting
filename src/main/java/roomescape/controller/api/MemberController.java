@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.annotation.AdminMember;
+import roomescape.controller.annotation.AdminOnly;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.auth.SignUpRequestDto;
 import roomescape.dto.member.MemberResponseDto;
@@ -28,11 +28,10 @@ public class MemberController {
         this.memberCommandService = memberCommandService;
     }
 
+    @AdminOnly
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<MemberResponseDto> getMembers(
-            @AdminMember LoginInfo loginInfo
-    ) {
+    public List<MemberResponseDto> getMembers() {
         return memberQueryService.findAllMembers();
     }
 

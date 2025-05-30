@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.annotation.AdminMember;
+import roomescape.controller.annotation.AdminOnly;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
@@ -41,19 +41,19 @@ public class ThemeController {
         return themeQueryService.findPopularThemes();
     }
 
+    @AdminOnly
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ThemeResponseDto postTheme(
-            @AdminMember LoginInfo loginInfo,
             @RequestBody final ThemeCreateRequestDto requestDto
     ) {
         return themeCommandService.createTheme(requestDto);
     }
 
+    @AdminOnly
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteTheme(
-            @AdminMember LoginInfo loginInfo,
             @PathVariable("id") final Long id
     ) {
         themeCommandService.deleteThemeById(id);
