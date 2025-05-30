@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.error.exception.BadRequestException;
 import roomescape.global.error.exception.ConflictException;
 import roomescape.member.entity.Member;
@@ -19,7 +20,7 @@ import roomescape.member.entity.RoleType;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.dto.request.ReservationAdminCreateRequest;
 import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.request.ReservationReadFilteredRequest;
+import roomescape.reservation.dto.request.ReservationFindFilteredRequest;
 import roomescape.reservation.entity.ReservationTime;
 import roomescape.reservation.repository.ReservationTimeRepository;
 import roomescape.reservation.service.ReservationService;
@@ -28,6 +29,7 @@ import roomescape.theme.repository.ThemeRepository;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Transactional
 class ReservationIntegrationTest {
 
     @Autowired
@@ -114,7 +116,7 @@ class ReservationIntegrationTest {
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(member.getId(), request))
                 .isInstanceOf(ConflictException.class)
-                .hasMessage("해당 날짜와 시간에 이미 예약이 존재합니다.");
+                .hasMessage("중복된 예약입니다.");
     }
 
     @Test
@@ -154,7 +156,7 @@ class ReservationIntegrationTest {
         var request = new ReservationCreateRequest(date, time.getId(), theme.getId());
         reservationService.createReservation(member.getId(), request);
 
-        var filterRequest = new ReservationReadFilteredRequest(
+        var filterRequest = new ReservationFindFilteredRequest(
                 theme.getId(),
                 member.getId(),
                 date,

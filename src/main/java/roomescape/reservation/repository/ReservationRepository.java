@@ -2,6 +2,7 @@ package roomescape.reservation.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.member.entity.Member;
@@ -12,9 +13,9 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query(value = """
             SELECT r
             FROM Reservation r
-            JOIN ReservationTime rt ON r.time.id = rt.id
-            JOIN Theme t ON r.theme.id = t.id
-            JOIN Member m ON r.member.id = m.id
+            JOIN FETCH ReservationTime rt ON r.time.id = rt.id
+            JOIN FETCH Theme t ON r.theme.id = t.id
+            JOIN FETCH Member m ON r.member.id = m.id
             WHERE r.theme.id = :themeId AND r.member.id = :memberId AND r.date >= :dateFrom AND r.date <= :dateTo
             ORDER BY r.date, rt.startAt
             """)
@@ -24,5 +25,7 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
 
     boolean existsByTimeId(Long timeId);
 
-    boolean existsByDateAndTimeId(LocalDate date, Long timeId);
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
+    Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

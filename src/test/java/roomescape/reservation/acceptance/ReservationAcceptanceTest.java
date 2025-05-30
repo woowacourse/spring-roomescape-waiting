@@ -87,7 +87,7 @@ class ReservationAcceptanceTest {
         TestHelper.postWithToken("/reservations", reservationRequest, token)
                 .then()
                 .statusCode(HttpStatus.CONFLICT.value())
-                .body(equalTo("해당 날짜와 시간에 이미 예약이 존재합니다."));
+                .body(equalTo("중복된 예약입니다."));
     }
 
     @Test
@@ -103,7 +103,7 @@ class ReservationAcceptanceTest {
         TestHelper.postWithToken("/reservations", reservationRequest, token);
 
         // when & then
-        TestHelper.get("/reservations")
+        TestHelper.getWithToken("/admin/reservations", token)
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(1))
@@ -128,11 +128,11 @@ class ReservationAcceptanceTest {
         TestHelper.postWithToken("/reservations", reservationRequest, token);
 
         // when & then
-        TestHelper.deleteWithToken("/reservations/1", token)
+        TestHelper.deleteWithToken("/admin/reservations/1", token)
                 .then()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
-        TestHelper.get("/reservations")
+        TestHelper.getWithToken("/admin/reservations", token)
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("$", hasSize(0));
@@ -149,7 +149,7 @@ class ReservationAcceptanceTest {
                 1L
         );
         TestHelper.postWithToken("/reservations", reservationRequest, token);
-        String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
+        String url = String.format("/admin/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
                 1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
 
         // when & then
@@ -191,7 +191,7 @@ class ReservationAcceptanceTest {
         Member nonAdminMember = new Member("일반회원", "user@email.com", "password", RoleType.USER);
         memberRepository.save(nonAdminMember);
         String token = TestHelper.login("user@email.com", "password");
-        String url = String.format("/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
+        String url = String.format("/admin/reservations/filtered?themeId=%d&memberId=%d&dateFrom=%s&dateTo=%s",
                 1L, 1L, LocalDate.now(), LocalDate.now().plusDays(7));
 
         // when & then
