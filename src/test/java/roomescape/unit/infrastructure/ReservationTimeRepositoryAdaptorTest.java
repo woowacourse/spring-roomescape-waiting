@@ -67,7 +67,7 @@ class ReservationTimeRepositoryAdaptorTest {
         //when & then
         reservationTimeRepositoryAdaptor.save(reservationTime);
         List<ReservationTime> reservationTimes = reservationTimeRepositoryAdaptor.findAll();
-        
+
         assertThat(reservationTimes.size()).isEqualTo(4);
     }
 }

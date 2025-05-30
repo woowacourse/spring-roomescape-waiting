@@ -103,7 +103,7 @@ public class ThemeApiTest {
         ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
         Member member = memberRepository.save(new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER));
         reservationRepository.save(Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme));
-        
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
