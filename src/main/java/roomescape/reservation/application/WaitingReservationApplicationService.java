@@ -1,6 +1,5 @@
 package roomescape.reservation.application;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
@@ -27,11 +26,10 @@ public class WaitingReservationApplicationService {
         this.reservationDataService = reservationDataService;
     }
 
-    public ReservationResponse create(final LocalDate date, final Long timeId, final Long themeId,
-                                      final Long memberId) {
-        ReservationSlot slot = reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(date, timeId,
-                themeId);
-        Member member = memberDataService.getById(memberId);
+    public ReservationResponse create(final WaitingReservationCreateRequest createRequest) {
+        ReservationSlot slot = reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(createRequest.date(),
+                createRequest.timeId(), createRequest.themeId());
+        Member member = memberDataService.getById(createRequest.memberId());
         Reservation reservation = slot.addReservation(member, LocalDateTime.now());
         reservationDataService.save(reservation);
 
