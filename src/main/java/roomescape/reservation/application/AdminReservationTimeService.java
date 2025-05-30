@@ -3,21 +3,22 @@ package roomescape.reservation.application;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.global.exception.BusinessRuleViolationException;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.request.CreateReservationTimeServiceRequest;
 import roomescape.reservation.application.dto.response.ReservationTimeServiceResponse;
 import roomescape.reservation.model.entity.ReservationTime;
-import roomescape.reservation.model.exception.ReservationException;
 import roomescape.reservation.model.repository.ReservationTimeRepository;
-import roomescape.reservation.model.service.ReservationTimeValidator;
+import roomescape.reservation.model.service.ReservationTimeOperation;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class AdminReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationTimeValidator reservationTimeValidator;
+    private final ReservationTimeOperation reservationTimeOperation;
 
+    @Transactional
     public ReservationTimeServiceResponse create(CreateReservationTimeServiceRequest request) {
         ReservationTime reservationTime = reservationTimeRepository.save(request.toReservationTime());
         return ReservationTimeServiceResponse.withoutBook(reservationTime);
@@ -30,14 +31,9 @@ public class AdminReservationTimeService {
                 .toList();
     }
 
+    @Transactional
     public void delete(Long id) {
         ReservationTime reservationTime = reservationTimeRepository.getById(id);
-        try {
-            reservationTimeValidator.validateNotInUse(id);
-        } catch (ReservationException e) {
-            throw new BusinessRuleViolationException(e.getMessage(), e);
-        }
-
-        reservationTimeRepository.remove(reservationTime);
+        reservationTimeOperation.removeTime(reservationTime);
     }
 }

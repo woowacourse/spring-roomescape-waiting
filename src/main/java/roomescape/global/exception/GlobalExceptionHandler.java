@@ -35,6 +35,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ExceptionResponse handleValidationException(MethodArgumentNotValidException e) {
+        log.warn("경고", e);
         String exceptionMessage = e.getBindingResult().getFieldErrors().stream()
                 .map(error -> error.getField() + ": " + error.getDefaultMessage())
                 .collect(Collectors.joining("\n"));
@@ -45,6 +46,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(value = HttpMessageNotReadableException.class)
     public ExceptionResponse handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        log.warn("경고", e);
         Throwable rootCause = e.getRootCause();
         String exceptionMessage = "잘못된 형식의 값이 입력되었습니다.";
         if (rootCause instanceof DateTimeException) {
@@ -57,6 +59,7 @@ public class GlobalExceptionHandler {
     @ResponseStatus(BAD_REQUEST)
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ExceptionResponse handleMethodArgumentTypeMismatchException(MethodArgumentTypeMismatchException e) {
+        log.warn("경고", e);
         String exceptionMessage = "잘못된 형식의 값이 입력되었습니다.";
         return new ExceptionResponse(BAD_REQUEST.value(), exceptionMessage, LocalDateTime.now());
     }

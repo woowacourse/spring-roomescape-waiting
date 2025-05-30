@@ -1,4 +1,4 @@
-package roomescape.domain.entity;
+package roomescape.reservation.entity;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -18,7 +18,7 @@ class ReservationTest {
 
     @DisplayName("예약을 생성할 수 있다")
     @Test
-    void createFutureReservationSuccess() {
+    void createFutureSuccess() {
         //given
         ReservationDetails details = new ReservationDetails(
                 LocalDate.now().plusDays(10),
@@ -28,7 +28,7 @@ class ReservationTest {
                 );
 
         //when
-        Reservation reservation = Reservation.createFutureReservation(details);
+        Reservation reservation = Reservation.createFuture(details);
 
         //then
         assertThat(reservation.getDate()).isEqualTo(details.date());
@@ -37,7 +37,7 @@ class ReservationTest {
 
     @DisplayName("예약 생성시 예약 시간이 과거 시간이면 예외를 발생시킨다")
     @Test
-    void createFutureReservationExceptionIfPastGetTime() {
+    void createFutureExceptionIfPastGetTime() {
         //given
         ReservationDetails details = new ReservationDetails(
                 LocalDate.now().minusDays(1),
@@ -47,7 +47,7 @@ class ReservationTest {
         );
 
         //when & then
-        assertThatThrownBy(() -> Reservation.createFutureReservation(details))
+        assertThatThrownBy(() -> Reservation.createFuture(details))
                 .isInstanceOf(InvalidReservationTimeException.class);
     }
 }

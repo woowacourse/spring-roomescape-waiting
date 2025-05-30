@@ -4,10 +4,12 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
+import roomescape.reservation.model.vo.Schedule;
 
 public interface ReservationRepository {
 
-    List<Reservation> getAll();
+    List<Reservation> getAllByStatuses(List<ReservationStatus> statuses);
 
     Reservation save(Reservation reservation);
 
@@ -15,13 +17,11 @@ public interface ReservationRepository {
 
     Reservation getById(Long id);
 
-    void remove(Reservation reservation);
+    boolean existDuplicatedSchedule(Schedule schedule);
 
-    boolean existDuplicatedDateTime(LocalDate date, Long timeId, Long themeId);
+    boolean existsActiveByThemeId(Long reservationThemeId);
 
-    boolean existsByThemeId(Long reservationThemeId);
-
-    boolean existsByTimeId(Long reservationTimeId);
+    boolean existsActiveByTimeId(Long reservationTimeId);
 
     List<Reservation> getSearchReservations(Long themeId, Long memberId, LocalDate from, LocalDate to);
 

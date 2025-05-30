@@ -32,16 +32,11 @@ public class ReservationTheme {
     private String thumbnail;
 
     @Builder
-    public ReservationTheme(Long id, String name, String description, String thumbnail) {
+    public ReservationTheme(String name, String description, String thumbnail) {
         validateNotBlank(name, description, thumbnail);
-        this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    public ReservationTheme(String name, String description, String thumbnail) {
-        this(null, name, description, thumbnail);
     }
 
     private void validateNotBlank(String name, String description, String thumbnail) {

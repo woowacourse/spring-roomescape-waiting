@@ -6,8 +6,7 @@ import roomescape.reservation.application.dto.response.ReservationTimeServiceRes
 
 public record ReservationTimeResponse(
         Long id,
-        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "HH:mm")
-        LocalTime startAt,
+        @JsonFormat(pattern = "HH:mm") LocalTime startAt,
         boolean isBooked
 ) {
 

@@ -26,7 +26,7 @@ function render(data) {
         row.insertCell(3).textContent = item.time.startAt;
 
         const actionCell = row.insertCell(row.cells.length);
-        actionCell.appendChild(createActionButton('삭제', 'btn-danger', deleteRow));
+        actionCell.appendChild(createActionButton('취소', 'btn-danger', deleteRow));
     });
 }
 
@@ -161,12 +161,12 @@ function requestCreate(reservation) {
 
 function requestDelete(id) {
     const requestOptions = {
-        method: 'DELETE',
+        method: 'POST',
     };
 
-    return fetch(`${RESERVATION_API_ENDPOINT}/${id}`, requestOptions)
+    return fetch(`${RESERVATION_API_ENDPOINT}/${id}/cancel`, requestOptions)
         .then(response => {
-            if (response.status !== 204) throw new Error('Delete failed');
+            if (response.status !== 200) throw new Error('Cancel failed');
         });
 }
 

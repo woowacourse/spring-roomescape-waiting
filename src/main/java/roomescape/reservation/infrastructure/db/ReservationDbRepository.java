@@ -1,5 +1,7 @@
 package roomescape.reservation.infrastructure.db;
 
+import static roomescape.reservation.model.entity.vo.ReservationStatus.*;
+
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
@@ -9,7 +11,9 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.exception.ResourceNotFoundException;
 import roomescape.reservation.infrastructure.db.dao.ReservationJpaRepository;
 import roomescape.reservation.model.entity.Reservation;
+import roomescape.reservation.model.entity.vo.ReservationStatus;
 import roomescape.reservation.model.repository.ReservationRepository;
+import roomescape.reservation.model.vo.Schedule;
 
 @Repository
 @RequiredArgsConstructor
@@ -18,8 +22,8 @@ public class ReservationDbRepository implements ReservationRepository {
     private final ReservationJpaRepository reservationJpaRepository;
 
     @Override
-    public List<Reservation> getAll() {
-        return reservationJpaRepository.findAll();
+    public List<Reservation> getAllByStatuses(List<ReservationStatus> reservationStatuses) {
+        return reservationJpaRepository.findAllByStatusIn(reservationStatuses);
     }
 
     @Override
@@ -39,23 +43,18 @@ public class ReservationDbRepository implements ReservationRepository {
     }
 
     @Override
-    public void remove(Reservation reservation) {
-        reservationJpaRepository.delete(reservation);
+    public boolean existDuplicatedSchedule(Schedule schedule) {
+        return reservationJpaRepository.existsByDateAndTimeIdAndThemeIdAndStatus(schedule.date(), schedule.timeId(), schedule.themeId(), CONFIRMED);
     }
 
     @Override
-    public boolean existDuplicatedDateTime(LocalDate date, Long timeId, Long themeId) {
-        return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public boolean existsActiveByThemeId(Long reservationThemeId) {
+        return reservationJpaRepository.existsByThemeIdAndDateGreaterThanEqual(reservationThemeId, LocalDate.now());
     }
 
     @Override
-    public boolean existsByThemeId(Long reservationThemeId) {
-        return reservationJpaRepository.existsByThemeId(reservationThemeId);
-    }
-
-    @Override
-    public boolean existsByTimeId(Long reservationTimeId) {
-        return reservationJpaRepository.existsByTimeId(reservationTimeId);
+    public boolean existsActiveByTimeId(Long reservationTimeId) {
+        return reservationJpaRepository.existsByTimeIdAndDateGreaterThanEqual(reservationTimeId, LocalDate.now());
     }
 
     @Override

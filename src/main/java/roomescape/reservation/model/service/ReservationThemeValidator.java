@@ -11,8 +11,8 @@ public class ReservationThemeValidator {
 
     private final ReservationRepository reservationRepository;
 
-    public void validateNotInUse(Long reservationThemeId) {
-        if (reservationRepository.existsByThemeId(reservationThemeId)) {
+    public void validateNotUsedInActive(Long reservationThemeId) {
+        if (reservationRepository.existsActiveByThemeId(reservationThemeId)) {
             throw new ReservationThemeInUseException("해당 테마를 사용중인 예약이 존재합니다.");
         }
     }
