@@ -46,7 +46,10 @@ public class Reservation {
         this.reservationStatus = ReservationStatus.ACCEPTED;
     }
 
-    public void changeStatusToDenied() {
+    public void deny() {
+        if (this.reservationStatus != ReservationStatus.PENDING) {
+            throw new IllegalArgumentException("[ERROR] 대기 상태의 예약만 거절할 수 있습니다.");
+        }
         this.reservationStatus = ReservationStatus.DENIED;
     }
 }

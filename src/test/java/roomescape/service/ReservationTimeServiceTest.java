@@ -25,6 +25,7 @@ import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.member.MemberService;
+import roomescape.service.reservation.ReservationCreationService;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.ReservationThemeService;
 import roomescape.service.reservation.ReservationTimeService;
@@ -48,6 +49,9 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationCreationService reservationCreationService;
 
     @Test
     @DisplayName("예약 시간을 성공적으로 추가한다")
@@ -114,7 +118,7 @@ class ReservationTimeServiceTest {
                 new ReservationThemeRequest("test", "test", "test"));
         final ReservationTimeResponse time = reservationTimeService.addReservationTime(
                 new ReservationTimeRequest(LocalTime.now()));
-        final ReservationResponse reservation = reservationService.addReservation(
+        final ReservationResponse reservation = reservationCreationService.addReservation(
                 new CreateReservationRequest(member.id(), LocalDate.now().plusDays(1), theme.id(), time.id())
         );
 

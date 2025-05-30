@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.WaitingReservationResponse;
+import roomescape.service.reservation.ReservationCreationService;
 import roomescape.service.reservation.ReservationService;
 
 @RequiredArgsConstructor
@@ -25,10 +26,11 @@ import roomescape.service.reservation.ReservationService;
 public class AdminReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationCreationService reservationCreationService;
 
     @PostMapping
     public ResponseEntity<ReservationResponse> addReservation(@RequestBody @Valid final CreateReservationRequest request) {
-        ReservationResponse response = reservationService.addReservation(request);
+        ReservationResponse response = reservationCreationService.addReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 

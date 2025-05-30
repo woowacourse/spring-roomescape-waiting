@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.reservation.ReservationCreationService;
 import roomescape.service.reservation.ReservationService;
 
 @RequiredArgsConstructor
@@ -23,6 +24,7 @@ import roomescape.service.reservation.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationCreationService reservationCreationService;
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> reservationList() {
@@ -38,7 +40,7 @@ public class ReservationController {
                 request.timeId()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                reservationService.addReservation(createReservationRequest));
+                reservationCreationService.addReservation(createReservationRequest));
     }
 
     @PostMapping("/pending")
@@ -50,7 +52,7 @@ public class ReservationController {
                 request.timeId()
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(
-                reservationService.addPendingReservation(createReservationRequest));
+                reservationCreationService.addPendingReservation(createReservationRequest));
     }
 
     @DeleteMapping("/{id}")
