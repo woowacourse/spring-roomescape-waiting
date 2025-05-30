@@ -1,6 +1,7 @@
 package roomescape.fixture;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.fixture.TestFixture.FUTURE_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -16,7 +17,7 @@ public class IntegrationFixture {
     public static final String REGULAR2_EMAIL = "alice@gmail.com";
     public static final String ADMIN_EMAIL = "admin@gmail.com";
     public static final String PASSWORD = "password";
-    public static final String FUTURE_DATE = TestFixture.makeAfterOneWeekDate().toString();
+    public static final String FUTURE_DATE_TEXT = FUTURE_DATE.toString();
     public static final String TOKEN = "token";
 
     public static String loginAndGetAuthToken(final String email, final String password) {
@@ -34,7 +35,7 @@ public class IntegrationFixture {
         String authToken = loginAndGetAuthToken(REGULAR_EMAIL, PASSWORD);
 
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", FUTURE_DATE);
+        reservation.put("date", FUTURE_DATE_TEXT);
         reservation.put("timeId", 1);
         reservation.put("themeId", themeId);
 
@@ -94,7 +95,7 @@ public class IntegrationFixture {
 
         String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", FUTURE_DATE);
+        reservation.put("date", FUTURE_DATE_TEXT);
         reservation.put("timeId", 1L);
         reservation.put("themeId", 1L);
 

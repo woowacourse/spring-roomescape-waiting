@@ -2,8 +2,8 @@ package roomescape.reservationtime.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static roomescape.fixture.TestFixture.FUTURE_DATE;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -37,7 +37,6 @@ import roomescape.theme.infrastructure.ThemeRepository;
 @Import(TestConfig.class)
 class ReservationTimeApplicationServiceTest {
 
-    private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
 
     private Theme theme = TestFixture.makeTheme();
@@ -125,12 +124,12 @@ class ReservationTimeApplicationServiceTest {
         reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(11, 0)));
         reservationTimeApplicationService.create(new ReservationTimeCreateWebRequest(LocalTime.of(12, 0)));
         confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, reservationTimeWebResponse.id(), theme.getId(),
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, reservationTimeWebResponse.id(), theme.getId(),
                         member.getId(), afterOneHour));
 
         // when
         List<AvailableReservationTimeWebResponse> availableReservationTimes = reservationTimeApplicationService.findAvailable(
-                futureDate, theme.getId());
+                FUTURE_DATE, theme.getId());
 
         // then
         assertThat(availableReservationTimes.stream()
@@ -156,7 +155,7 @@ class ReservationTimeApplicationServiceTest {
         ReservationTimeWebResponse reservationTimeWebResponse = reservationTimeApplicationService.create(
                 new ReservationTimeCreateWebRequest(LocalTime.now()));
         confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, reservationTimeWebResponse.id(),
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, reservationTimeWebResponse.id(),
                         theme.getId(), member.getId(), afterOneHour));
 
         // when & then

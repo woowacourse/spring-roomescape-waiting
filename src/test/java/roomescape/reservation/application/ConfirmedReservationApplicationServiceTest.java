@@ -2,6 +2,7 @@ package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static roomescape.fixture.TestFixture.FUTURE_DATE;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -42,7 +43,6 @@ import roomescape.theme.infrastructure.ThemeRepository;
 @Import(TestConfig.class)
 class ConfirmedReservationApplicationServiceTest {
 
-    private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
 
     private ConfirmedReservationApplicationService confirmedReservationApplicationService;
@@ -89,7 +89,7 @@ class ConfirmedReservationApplicationServiceTest {
         themeId = themeRepository.save(TestFixture.makeTheme()).getId();
         memberId = memberRepository.save(TestFixture.makeMember()).getId();
         reservationId = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId,
                         afterOneHour)).id();
     }
 
@@ -118,7 +118,7 @@ class ConfirmedReservationApplicationServiceTest {
     void create_whenDuplicateTimeSlot_throwsReservationSlotDuplicatedException() {
         assertThatThrownBy(
                 () -> confirmedReservationApplicationService.create(
-                        new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId, afterOneHour)))
+                        new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId, afterOneHour)))
                 .isInstanceOf(ReservationSlotDuplicatedException.class)
                 .hasMessageContaining("해당 시간에 이미 예약 슬롯이 존재합니다.");
     }
@@ -127,7 +127,7 @@ class ConfirmedReservationApplicationServiceTest {
     void create_whenTimeIdNotFound_throwsReservationTimeNotFoundException() {
         assertThatThrownBy(
                 () -> confirmedReservationApplicationService.create(
-                        new ConfirmedReservationCreateRequest(futureDate, 999L, themeId, memberId,
+                        new ConfirmedReservationCreateRequest(FUTURE_DATE, 999L, themeId, memberId,
                                 afterOneHour)))
                 .isInstanceOf(ReservationTimeNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 예약 시간 정보가 없습니다.");
@@ -137,7 +137,7 @@ class ConfirmedReservationApplicationServiceTest {
     void create_whenThemeIdNotFound_throwsThemeNotFoundException() {
         assertThatThrownBy(
                 () -> confirmedReservationApplicationService.create(
-                        new ConfirmedReservationCreateRequest(futureDate, timeId, 999L, memberId,
+                        new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, 999L, memberId,
                                 afterOneHour)))
                 .isInstanceOf(ThemeNotFoundException.class)
                 .hasMessageContaining("요청한 id와 일치하는 테마 정보가 없습니다.");
@@ -147,7 +147,7 @@ class ConfirmedReservationApplicationServiceTest {
     void create_whenMemberIdNotFound_throwsMemberNotFoundException() {
         assertThatThrownBy(
                 () -> waitingReservationApplicationService.create(
-                        new WaitingReservationCreateRequest(futureDate, timeId, themeId, 999L)))
+                        new WaitingReservationCreateRequest(FUTURE_DATE, timeId, themeId, 999L)))
                 .isInstanceOf(MemberNotFoundException.class)
                 .hasMessageContaining("존재하지 않은 멤버입니다.");
     }
@@ -157,7 +157,7 @@ class ConfirmedReservationApplicationServiceTest {
         // when
         Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
         ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId, afterOneHour));
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, themeId2, memberId, afterOneHour));
 
         // then
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
@@ -165,7 +165,7 @@ class ConfirmedReservationApplicationServiceTest {
 
         Assertions.assertAll(
                 () -> assertThat(response.member().name()).isEqualTo("Mint"),
-                () -> assertThat(response.date()).isEqualTo(futureDate),
+                () -> assertThat(response.date()).isEqualTo(FUTURE_DATE),
                 () -> assertThat(response.time().startAt()).isEqualTo(LocalTime.of(9, 0)),
                 () -> assertThat(result).hasSize(1)
         );
@@ -176,7 +176,7 @@ class ConfirmedReservationApplicationServiceTest {
         // given
         Long timeId2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0))).getId();
         confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId2, themeId, memberId,
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId2, themeId, memberId,
                         afterOneHour));
         // when
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
@@ -191,7 +191,7 @@ class ConfirmedReservationApplicationServiceTest {
         // given
         Long themeId2 = themeRepository.save(new Theme("논리", "논리 게임 with Danny", "image.png")).getId();
         ConfirmedReservationWebResponse response = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId, afterOneHour));
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, themeId2, memberId, afterOneHour));
 
         // when
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
@@ -210,7 +210,7 @@ class ConfirmedReservationApplicationServiceTest {
 
         // then
         List<ConfirmedReservationWebResponse> result = confirmedReservationApplicationService.findByCriteria(
-                new ConfirmedReservationByCriteriaWebRequest(themeId, memberId, futureDate, futureDate.plusDays(1)));
+                new ConfirmedReservationByCriteriaWebRequest(themeId, memberId, FUTURE_DATE, FUTURE_DATE.plusDays(1)));
         SoftAssertions.assertSoftly(softAssertions -> {
             softAssertions.assertThat(result).isEmpty();
             softAssertions.assertThat(reservationSlotRepository.findById(reservationId)).isEmpty();
@@ -224,7 +224,7 @@ class ConfirmedReservationApplicationServiceTest {
         Long memberId2 = memberRepository.save(new Member("free", "free@gmail.com", "password", MemberRole.REGULAR))
                 .getId();
         confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId2, memberId2,
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, themeId2, memberId2,
                         afterOneHour));
 
         // when

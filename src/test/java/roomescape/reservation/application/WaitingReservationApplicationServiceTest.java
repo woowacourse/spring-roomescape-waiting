@@ -1,8 +1,8 @@
 package roomescape.reservation.application;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.fixture.TestFixture.FUTURE_DATE;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -36,7 +36,6 @@ import roomescape.theme.infrastructure.ThemeRepository;
 @Import(TestConfig.class)
 class WaitingReservationApplicationServiceTest {
 
-    private static final LocalDate futureDate = TestFixture.makeAfterOneWeekDate();
     private static final LocalDateTime afterOneHour = TestFixture.makeTimeAfterOneHour();
 
     private WaitingReservationApplicationService waitingReservationApplicationService;
@@ -84,7 +83,7 @@ class WaitingReservationApplicationServiceTest {
         memberId2 = memberRepository.save(new Member("Free", "free@gmail.com", "password", MemberRole.REGULAR))
                 .getId();
         reservationId = confirmedReservationApplicationService.create(
-                new ConfirmedReservationCreateRequest(futureDate, timeId, themeId, memberId,
+                new ConfirmedReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId,
                         afterOneHour)).id();
     }
 
@@ -94,7 +93,7 @@ class WaitingReservationApplicationServiceTest {
 
         // when
         waitingReservationApplicationService.create(
-                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId2));
+                new WaitingReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId2));
 
         // then
         List<WaitingWebResponse> all = waitingReservationApplicationService.findAll();
@@ -109,11 +108,11 @@ class WaitingReservationApplicationServiceTest {
         // given
         Long memberId3 = memberRepository.save(new Member("Vector", "vector@gmail.com", "password",
                 MemberRole.REGULAR)).getId();
-        reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(futureDate, timeId, themeId);
+        reservationSlotDataService.getReservationSlotByDateAndTimeAndTheme(FUTURE_DATE, timeId, themeId);
         waitingReservationApplicationService.create(
-                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId2));
+                new WaitingReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId2));
         waitingReservationApplicationService.create(
-                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId3));
+                new WaitingReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId3));
 
         // when
         List<WaitingWebResponse> all = waitingReservationApplicationService.findAll();
@@ -128,9 +127,9 @@ class WaitingReservationApplicationServiceTest {
         Long memberId3 = memberRepository.save(new Member("Vector", "vector@gmail.com", "password",
                 MemberRole.REGULAR)).getId();
         ReservationResponse reservationResponse = waitingReservationApplicationService.create(
-                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId2));
+                new WaitingReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId2));
         waitingReservationApplicationService.create(
-                new WaitingReservationCreateRequest(futureDate, timeId, themeId, memberId3));
+                new WaitingReservationCreateRequest(FUTURE_DATE, timeId, themeId, memberId3));
 
         // When
         waitingReservationApplicationService.cancelByReservationSlotIdAndMemberId(

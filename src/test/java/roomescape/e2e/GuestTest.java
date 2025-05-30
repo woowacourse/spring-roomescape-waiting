@@ -1,29 +1,20 @@
 package roomescape.e2e;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static roomescape.fixture.IntegrationFixture.FUTURE_DATE;
 import static roomescape.fixture.IntegrationFixture.PASSWORD;
 import static roomescape.fixture.IntegrationFixture.createReservationTime;
 import static roomescape.fixture.IntegrationFixture.createTheme;
-import static roomescape.fixture.IntegrationFixture.createRegularReservation;
 import static roomescape.fixture.IntegrationFixture.findThemesBySize;
 import static roomescape.fixture.IntegrationFixture.loginAndGetAuthToken;
 
 import io.restassured.RestAssured;
-import io.restassured.common.mapper.TypeRef;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.fixture.TestFixture;
 import roomescape.member.presentation.dto.request.SignupWebRequest;
-import roomescape.member.presentation.dto.response.MemberWebResponse;
-import roomescape.reservation.presentation.dto.response.ConfirmedReservationWebResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)

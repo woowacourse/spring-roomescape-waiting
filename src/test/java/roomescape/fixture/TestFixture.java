@@ -3,6 +3,7 @@ package roomescape.fixture;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.springframework.test.util.ReflectionTestUtils;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservationslot.domain.ReservationSlot;
@@ -13,6 +14,7 @@ public class TestFixture {
 
     public static final LocalDate FUTURE_DATE = TestFixture.makeAfterOneWeekDate();
     public static final LocalDateTime NOW_DATETIME = TestFixture.makeNowDateTime();
+    public static final LocalDate NOW_DATE = TestFixture.makeNowDate();
 
     public static Theme makeTheme() {
         return new Theme("추리", "셜록 추리 게임 with Danny", "image.png");
@@ -33,15 +35,21 @@ public class TestFixture {
         return new ReservationTime(localTime);
     }
 
-    public static LocalDateTime makeNowDateTime() {
-        return LocalDateTime.now();
+    public static Member makeMember() {
+        Member member = new Member("Mint", "mint@gmail.com", "password", MemberRole.REGULAR);
+        ReflectionTestUtils.setField(member, "id", 4L);
+        return member;
     }
 
-    public static LocalDate makeAfterOneWeekDate() {
+    private static LocalDate makeAfterOneWeekDate() {
         return LocalDate.now().plusDays(7);
     }
 
-    public static Member makeMember() {
-        return new Member("Mint", "mint@gmail.com", "password", MemberRole.REGULAR);
+    private static LocalDateTime makeNowDateTime() {
+        return LocalDateTime.now();
+    }
+
+    private static LocalDate makeNowDate() {
+        return LocalDate.now();
     }
 }
