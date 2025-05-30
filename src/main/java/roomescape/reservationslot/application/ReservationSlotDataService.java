@@ -20,13 +20,18 @@ public class ReservationSlotDataService {
         return reservationSlotRepository.save(reservationSlot);
     }
 
+    public ReservationSlot findById(final Long reservationSlotId) {
+        return reservationSlotRepository.findById(reservationSlotId)
+                .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간의 예약 슬롯이 존재하지 않습니다."));
+    }
+
     public ReservationSlot getReservationSlotByDateAndTimeAndTheme(final LocalDate date, final Long timeId,
                                                                    final Long themeId) {
         return reservationSlotRepository.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
                 .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간의 예약 슬롯이 존재하지 않습니다."));
     }
 
-    public void validateReservationSlotDoesNotExists(final LocalDate date, final Long timeId, final Long themeId) {
+    public void validateReservationSlotNotExists(final LocalDate date, final Long timeId, final Long themeId) {
         if (reservationSlotRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             throw new ReservationSlotDuplicatedException("해당 시간에 이미 예약 슬롯이 존재합니다.");
         }
@@ -46,10 +51,5 @@ public class ReservationSlotDataService {
 
     public void deleteById(Long id) {
         reservationSlotRepository.deleteById(id);
-    }
-
-    public ReservationSlot findById(final Long reservationSlotId) {
-        return reservationSlotRepository.findById(reservationSlotId)
-                .orElseThrow(() -> new ReservationSlotNotFoundException("해당 시간의 예약 슬롯이 존재하지 않습니다."));
     }
 }

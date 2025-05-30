@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.exception.ReservationOwnerException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationslot.presentation.dto.response.MyReservationResponse;
 
@@ -39,13 +38,6 @@ public class ReservationDataService {
         return reservationRepository.findFirstByCriteria(themeId, startDate, endDate, memberId);
     }
 
-    public void validateWaitingOwner(final Long reservationSlotId, final Long memberId) {
-        boolean doesExists = reservationRepository.existsByReservationSlotIdAndMemberId(reservationSlotId, memberId);
-        if (!doesExists) {
-            throw new ReservationOwnerException("자신의 예약 대기가 아닙니다.");
-        }
-    }
-
     public Reservation getByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
         return reservationRepository.findByReservationSlotIdAndMemberId(reservationSlotId, memberId)
                 .orElseThrow(() -> new ReservationNotFoundException("존재하지 않는 예약입니다."));
@@ -66,7 +58,6 @@ public class ReservationDataService {
 
     @Transactional
     public void deleteByReservationSlotIdAndMemberId(final Long reservationSlotId, final Long memberId) {
-        validateWaitingOwner(reservationSlotId, memberId);
         reservationRepository.deleteByReservationSlotIdAndMemberId(reservationSlotId, memberId);
     }
 }

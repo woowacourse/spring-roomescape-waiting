@@ -39,7 +39,7 @@ public class ConfirmedReservationApplicationService {
     }
 
     public ConfirmedReservationWebResponse create(final ConfirmedReservationCreateRequest request) {
-        reservationSlotDataService.validateReservationSlotDoesNotExists(request.date(), request.timeId(),
+        reservationSlotDataService.validateReservationSlotNotExists(request.date(), request.timeId(),
                 request.themeId());
 
         ReservationSlot slot = createReservationSlot(
