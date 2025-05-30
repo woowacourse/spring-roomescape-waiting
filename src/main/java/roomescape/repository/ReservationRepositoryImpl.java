@@ -43,8 +43,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
                                                                           final LocalDate dateFrom,
                                                                           final LocalDate dateTo) {
         Specification<Reservation> spec = Specification.where(ReservationSpecification.hasThemeId(themeId))
-                .and(ReservationSpecification.betweenDateFromAndDateTo(dateFrom, dateTo))
-                .and(ReservationSpecification.hasThemeId(memberId));
+                .and(ReservationSpecification.betweenDateFromAndDateTo(dateFrom, dateTo));
         return reservationJpaRepository.findAll(spec);
     }
 
