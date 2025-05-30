@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 import roomescape.dto.auth.SignUpRequestDto;
@@ -12,6 +13,7 @@ import roomescape.exception.UnauthorizationException;
 import roomescape.repository.JpaMemberRepository;
 
 @Service
+@Transactional
 public class MemberService {
 
     private final JpaMemberRepository memberRepository;

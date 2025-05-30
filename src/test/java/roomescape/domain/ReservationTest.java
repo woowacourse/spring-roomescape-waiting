@@ -5,6 +5,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
+import roomescape.domain.reservation.Reservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

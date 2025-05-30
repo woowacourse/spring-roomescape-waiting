@@ -3,7 +3,8 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.domain.Reservation;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.time.AvailableReservationTimeResponseDto;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
@@ -14,6 +15,7 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationTimeRepository;
 
 @Service
+@Transactional
 public class ReservationTimeService {
 
     private final JpaReservationTimeRepository reservationTimeRepository;

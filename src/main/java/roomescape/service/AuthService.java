@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.dto.auth.LoginRequestDto;
 import roomescape.exception.NotFoundException;
@@ -8,6 +9,7 @@ import roomescape.repository.JpaMemberRepository;
 import roomescape.util.JwtTokenProvider;
 
 @Service
+@Transactional(readOnly = true)
 public class AuthService {
 
     private final JpaMemberRepository memberRepository;

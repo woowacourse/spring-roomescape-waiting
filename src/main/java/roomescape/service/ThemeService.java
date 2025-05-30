@@ -1,11 +1,11 @@
 package roomescape.service;
 
-import java.awt.print.Pageable;
 import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
@@ -15,6 +15,7 @@ import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaThemeRepository;
 
 @Service
+@Transactional
 public class ThemeService {
 
     private final JpaThemeRepository themeRepository;

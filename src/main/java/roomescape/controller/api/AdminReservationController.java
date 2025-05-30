@@ -12,17 +12,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
 import roomescape.dto.reservation.ReservationResponseDto;
-import roomescape.service.ReservationService;
 import roomescape.service.dto.ReservationCreateDto;
+import roomescape.service.reservation.ReservationCommandService;
+import roomescape.service.reservation.ReservationQueryService;
 
 @RestController
 @RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
-    private final ReservationService reservationService;
+    private final ReservationCommandService reservationCommandService;
+    private final ReservationQueryService reservationQueryService;
 
-    public AdminReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public AdminReservationController(ReservationCommandService commandService, ReservationQueryService queryService) {
+        this.reservationCommandService = commandService;
+        this.reservationQueryService = queryService;
     }
 
     @PostMapping
@@ -30,7 +33,7 @@ public class AdminReservationController {
             @RequestBody AdminReservationCreateRequestDto requestDto) {
         ReservationCreateDto createDto = new ReservationCreateDto(requestDto.date(), requestDto.timeId(),
                 requestDto.themeId(), requestDto.memberId());
-        ReservationResponseDto responseDto = reservationService.createReservation(createDto);
+        ReservationResponseDto responseDto = reservationCommandService.createReservation(createDto);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }
 
@@ -40,7 +43,7 @@ public class AdminReservationController {
             @RequestParam("memberId") long memberId,
             @RequestParam("dateFrom") LocalDate dateFrom,
             @RequestParam("dateTo") LocalDate dateTo) {
-        List<ReservationResponseDto> reservationBetween = reservationService.findReservationBetween(themeId, memberId,
+        List<ReservationResponseDto> reservationBetween = reservationQueryService.findReservationBetween(themeId, memberId,
                 dateFrom, dateTo);
         return ResponseEntity.ok(reservationBetween);
     }
