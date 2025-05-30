@@ -39,11 +39,6 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
-        return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
-    }
-
-    @Override
     public Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem,
                                                                                      ReservationStatus reservationStatus) {
         return reservationJpaRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(reservationItem, reservationStatus);

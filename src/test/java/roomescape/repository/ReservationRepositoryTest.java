@@ -19,10 +19,10 @@ import roomescape.domain.member.Member;
 import roomescape.domain.member.MemberRepository;
 import roomescape.domain.member.MemberRole;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationitem.ReservationItem;
-import roomescape.domain.reservationitem.ReservationItemRepository;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationitem.ReservationItem;
+import roomescape.domain.reservationitem.ReservationItemRepository;
 import roomescape.domain.reservationitem.ReservationTheme;
 import roomescape.domain.reservationitem.ReservationThemeRepository;
 import roomescape.domain.reservationitem.ReservationTime;
@@ -98,37 +98,6 @@ public class ReservationRepositoryTest {
         reservationItem = reservationItemRepository.save(new ReservationItem(LocalDate.now().plusDays(1), time, theme));
         reservation = reservationRepository.save(
                 new Reservation(member, reservationItem, ReservationStatus.ACCEPTED)
-        );
-    }
-
-    @Test
-    @DisplayName("날짜와 시간 테마가 같은 예약이 있는지 확인한다.")
-    void existsByDateAndTimeIdAndThemeIdTest() {
-        // given
-        Long nonExistTimeId = 999L;
-        Long nonExistThemeId = 999L;
-        LocalDate nonExistDate = LocalDate.now().plusDays(2);
-
-        // when
-        final boolean exist = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getReservationItem().getDate(), time.getId(), theme.getId()
-        );
-        final boolean nonExist1 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getReservationItem().getDate(), nonExistTimeId, theme.getId()
-        );
-        final boolean nonExist2 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                reservation.getReservationItem().getDate(), time.getId(), nonExistThemeId
-        );
-        final boolean nonExist3 = reservationRepository.existByDateAndTimeIdAndThemeId(
-                nonExistDate, time.getId(), theme.getId()
-        );
-
-        // then
-        assertAll(
-                () -> assertThat(exist).isTrue(),
-                () -> assertThat(nonExist1).isFalse(),
-                () -> assertThat(nonExist2).isFalse(),
-                () -> assertThat(nonExist3).isFalse()
         );
     }
 

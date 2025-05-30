@@ -22,10 +22,6 @@ public interface ReservationRepository {
                                                                    final LocalDate dateFrom,
                                                                    final LocalDate dateTo);
 
-    boolean existByDateAndTimeIdAndThemeId(final LocalDate date,
-                                           final long timeId,
-                                           final long themeId);
-
     Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem,
                                                                                      ReservationStatus reservationStatus);
 
