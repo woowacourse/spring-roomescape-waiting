@@ -38,9 +38,9 @@ public class RegularConfirmedReservationController {
     }
 
     @RequireRole(MemberRole.REGULAR)
-    @GetMapping("/reservations-mine")
-    public ResponseEntity<List<MyReservationResponse>> findMine(MemberInfo memberInfo) {
-        List<MyReservationResponse> myReservations = confirmedReservationApplicationService.findMyReservations(
+    @GetMapping("/my-reservations")
+    public ResponseEntity<List<MyReservationResponse>> findReservationsByMemberId(MemberInfo memberInfo) {
+        List<MyReservationResponse> myReservations = confirmedReservationApplicationService.findReservationsByMemberId(
                 memberInfo.id());
         return ResponseEntity.ok().body(myReservations);
     }

@@ -119,7 +119,7 @@ public class RegularTest {
 
         List<MyReservationResponse> responses = RestAssured.given().log().all()
                 .cookie(TOKEN, user2Token)
-                .when().get("/reservations-mine")
+                .when().get("/my-reservations")
                 .then().log().all()
                 .statusCode(200)
                 .extract()
@@ -166,7 +166,7 @@ public class RegularTest {
 
         List<MyReservationResponse> responses = RestAssured.given().log().all()
                 .cookie(TOKEN, user2Token)
-                .when().get("/reservations-mine")
+                .when().get("/my-reservations")
                 .then().log().all()
                 .statusCode(200)
                 .extract()

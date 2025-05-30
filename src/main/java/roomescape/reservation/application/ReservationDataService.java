@@ -22,7 +22,7 @@ public class ReservationDataService {
         return reservationRepository.save(reservation);
     }
 
-    public List<MyReservationResponse> findMyReservations(final Long memberId) {
+    public List<MyReservationResponse> findReservationsByMemberId(final Long memberId) {
         return reservationRepository.findByMemberId(memberId)
                 .stream()
                 .map(MyReservationResponse::from)
