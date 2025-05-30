@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.service.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.ForbiddenException;
@@ -73,9 +74,11 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional
     public void delete(final Long id, LoginMember loginMember) {
         Reservation reservation = getAuthorizedReservation(id, loginMember);
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
         promoteFirstWaitingFor(reservation.getReservationInformation());
     }
 
