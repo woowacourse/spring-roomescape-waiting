@@ -16,12 +16,10 @@ public interface ReservationTimeJpaRepository extends JpaRepository<ReservationT
     @Query("""
         SELECT rt 
         FROM ReservationTime rt 
-        WHERE rt.id NOT IN (
-            SELECT r.time.id 
-            FROM Reservation r 
-            WHERE r.date = :date 
+        LEFT JOIN Reservation r ON rt.id = r.time.id 
+            AND r.date = :date 
             AND r.theme.id = :themeId
-        )
+        WHERE r.id IS NULL
         """)
     List<ReservationTime> findAvailableTimesByDateAndThemeId(
             @Param("date") final LocalDate date,
