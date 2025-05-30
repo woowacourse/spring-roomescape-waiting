@@ -47,10 +47,8 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         Long id = jwtTokenProvider.extractId(token);
         Member loginMember = memberQueryService.findMemberById(id);
 
-        if (parameter.hasParameterAnnotation(AdminMember.class)) {
-            if (loginMember.getRole() != Role.ADMIN) {
+        if (parameter.hasParameterAnnotation(AdminMember.class) && loginMember.getRole() != Role.ADMIN) {
                 throw new UnauthorizationException("관리자 권한이 없는 사용자입니다.");
-            }
         }
         return new LoginInfo(loginMember);
     }
