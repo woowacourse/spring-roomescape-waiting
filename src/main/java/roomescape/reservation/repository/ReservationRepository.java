@@ -83,8 +83,8 @@ public interface ReservationRepository extends JpaRepository<Reservation, Long> 
     @Query("SELECT COUNT(r) > 0 FROM Reservation r WHERE r.slot = :slot AND r.member = :member AND r.status = :status")
     boolean existsReservationBySlotAndMemberAndStatus(ReservationSlot slot, Member member, ReservationStatus status);
 
-    @Query("SELECT r FROM Reservation r WHERE r.slot = :slot AND r.status = :status ORDER BY r.id")
-    List<Reservation> findReservationsBySlotAndStatus(@Param("slot") ReservationSlot slot,
+    @Query("SELECT r FROM Reservation r WHERE r.slot = :slot AND r.status = :status ORDER BY r.id LIMIT 1")
+    Optional<Reservation> findFirstReservationsBySlotAndStatus(@Param("slot") ReservationSlot slot,
             @Param("status") ReservationStatus status);
 
     @Query("SELECT r FROM Reservation r WHERE r.status = :status")

@@ -102,9 +102,7 @@ public class ReservationService {
     }
 
     private void approveNextWaitingReservation(ReservationSlot slot) {
-        reservationRepository.findReservationsBySlotAndStatus(slot, ReservationStatus.WAITING)
-                .stream()
-                .findFirst()
+        reservationRepository.findFirstReservationsBySlotAndStatus(slot, ReservationStatus.WAITING)
                 .ifPresent(Reservation::confirmReservation);
     }
 
