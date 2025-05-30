@@ -12,8 +12,8 @@ public record AvailableReservationTimeResponse(
 ) {
     public static AvailableReservationTimeResponse from(final AvailableReservationTime availableReservationTime) {
         return new AvailableReservationTimeResponse(
-                availableReservationTime.time().getId(),
-                availableReservationTime.time().getStartAt(),
+                availableReservationTime.schedule().getReservationTime().getId(),
+                availableReservationTime.schedule().getStartAt(),
                 availableReservationTime.available()
         );
     }

@@ -10,14 +10,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.domain.member.Member;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberEncodedPassword;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberRole;
 import roomescape.integration.api.RestLoginMember;
+import roomescape.integration.fixture.MemberDbFixture;
 import roomescape.repository.MemberRepository;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
@@ -29,6 +24,9 @@ public class RestAssuredTestBase {
 
     @Autowired
     protected MemberRepository memberRepository;
+
+    @Autowired
+    protected MemberDbFixture memberDbFixture;
 
     @LocalServerPort
     int port;
@@ -48,28 +46,10 @@ public class RestAssuredTestBase {
         DBInitializer.truncate(jdbcTemplate);
     }
 
-
-    public RestLoginMember generateLoginMember() {
-        return generateLogin(MemberRole.MEMBER);
-    }
-
-    public RestLoginMember generateLoginAdmin() {
-        return generateLogin(MemberRole.ADMIN);
-    }
-
-    private RestLoginMember generateLogin(final MemberRole memberRole) {
-        PasswordEncoder encoder = new BCryptPasswordEncoder();
-        Member member = memberRepository.save(new Member(
-                null,
-                new MemberName("홍길동"),
-                new MemberEmail("leehyeonsu4888@gmail.com"),
-                new MemberEncodedPassword(encoder.encode("gustn111!!")),
-                memberRole
-        ));
-
+    public RestLoginMember generateLoginMember(Member member) {
         Map<String, Object> request = Map.of(
                 "password", "gustn111!!",
-                "email", "leehyeonsu4888@gmail.com"
+                "email", member.getEmail().email()
         );
         String sessionId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

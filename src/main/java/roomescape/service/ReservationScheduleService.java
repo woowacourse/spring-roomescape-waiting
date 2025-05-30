@@ -1,0 +1,84 @@
+package roomescape.service;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.schedule.ReservationDate;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
+import roomescape.domain.theme.Theme;
+import roomescape.domain.time.ReservationTime;
+import roomescape.repository.ReservationScheduleRepository;
+import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.ThemeRepository;
+
+@Service
+@Transactional(readOnly = true)
+public class ReservationScheduleService {
+
+    private final ReservationScheduleRepository reservationScheduleRepository;
+    private final Clock clock;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final ThemeRepository themeRepository;
+
+    public ReservationScheduleService(final ReservationScheduleRepository reservationScheduleRepository,
+                                      final Clock clock, final ReservationTimeRepository reservationTimeRepository,
+                                      final ThemeRepository themeRepository) {
+        this.reservationScheduleRepository = reservationScheduleRepository;
+        this.clock = clock;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+    }
+
+    @EventListener(ApplicationReadyEvent.class)
+    public void init() {
+        createSchedule();
+    }
+
+    @Scheduled(cron = "0 0 0 * * *")
+    @Transactional
+    public void createSchedule() {
+        LocalDate start = LocalDate.now(clock);
+        LocalDate end = start.plusMonths(2);
+        Set<LocalDate> scheduledDates = existingScheduledDates(start, end);
+        List<ReservationSchedule> newSchedules = generateNewSchedules(scheduledDates, start, end);
+        reservationScheduleRepository.saveAll(newSchedules);
+    }
+
+    private Set<LocalDate> existingScheduledDates(LocalDate start, LocalDate end) {
+        return reservationScheduleRepository.findSchedulesBetweenDates(start, end).stream()
+                .map(ReservationSchedule::getDate)
+                .collect(Collectors.toSet());
+    }
+
+    private List<ReservationSchedule> generateNewSchedules(
+            final Set<LocalDate> scheduledDates,
+            final LocalDate start,
+            final LocalDate end
+    ) {
+        List<ReservationTime> times = reservationTimeRepository.findAll();
+        List<Theme> themes = themeRepository.findAll();
+
+        return start.datesUntil(end)
+                .filter(date -> !scheduledDates.contains(date))
+                .flatMap(date -> themeTimeCombinations(date, times, themes).stream())
+                .toList();
+    }
+
+    private List<ReservationSchedule> themeTimeCombinations(
+            final LocalDate date,
+            final List<ReservationTime> times,
+            final List<Theme> themes
+    ) {
+        return themes.stream()
+                .flatMap(theme -> times.stream()
+                        .map(time -> new ReservationSchedule(null, new ReservationDate(date), time, theme)))
+                .toList();
+    }
+}

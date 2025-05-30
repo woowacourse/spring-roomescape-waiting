@@ -1,7 +1,7 @@
 package roomescape.integration.fixture;
 
 import java.time.LocalDate;
-import roomescape.domain.reservation.ReservationDate;
+import roomescape.domain.reservation.schedule.ReservationDate;
 
 public class ReservationDateFixture {
 

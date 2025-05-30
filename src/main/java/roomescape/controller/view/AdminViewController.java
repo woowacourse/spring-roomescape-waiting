@@ -27,4 +27,9 @@ public class AdminViewController {
     public String getAdminReservation() {
         return "admin/reservation-new";
     }
+
+    @GetMapping("/reservation/wait")
+    public String getAdminReservationWait() {
+        return "admin/waiting";
+    }
 }

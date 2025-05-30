@@ -1,0 +1,101 @@
+package roomescape.service;
+
+import java.util.List;
+import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRole;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationWait;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
+import roomescape.global.exception.AccessDeniedException;
+import roomescape.repository.MemberRepository;
+import roomescape.repository.ReservationRepository;
+import roomescape.repository.ReservationScheduleRepository;
+import roomescape.repository.ReservationWaitRepository;
+import roomescape.service.request.CreateReservationWaitRequest;
+import roomescape.service.response.MyReservationWaitResponse;
+import roomescape.service.response.ReservationResponse;
+import roomescape.service.response.ReservationWaitResponse;
+
+@Service
+@Transactional(readOnly = true)
+public class ReservationWaitService {
+
+    private final MemberRepository memberRepository;
+    private final ReservationScheduleRepository reservationScheduleRepository;
+    private final ReservationWaitRepository reservationWaitRepository;
+    private final ReservationRepository reservationRepository;
+
+    public ReservationWaitService(
+            final MemberRepository memberRepository,
+            final ReservationScheduleRepository reservationScheduleRepository,
+            final ReservationWaitRepository reservationWaitRepository,
+            final ReservationRepository reservationRepository) {
+        this.memberRepository = memberRepository;
+        this.reservationScheduleRepository = reservationScheduleRepository;
+        this.reservationWaitRepository = reservationWaitRepository;
+        this.reservationRepository = reservationRepository;
+    }
+
+    @Transactional
+    public ReservationWaitResponse createReservationWait(final CreateReservationWaitRequest request, Long memberId) {
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 멤버입니다."));
+        ReservationSchedule schedule = reservationScheduleRepository.findByReservationTime_IdAndTheme_IdAndReservationDate_Date(
+                request.time(),
+                request.theme(),
+                request.date()
+        ).orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 일정입니다."));
+        reservationRepository.findByScheduleId(schedule.getId())
+                .orElseThrow(() -> new IllegalStateException("해당 일정에 예약이 없어서 예약 대기가 불가능합니다."));
+        ReservationWait saved = reservationWaitRepository.save(new ReservationWait(null, member, schedule));
+        return ReservationWaitResponse.from(saved);
+    }
+
+    @Transactional
+    public ReservationResponse approveReservationWait(final Long waitId) {
+        ReservationWait reservationWait = reservationWaitRepository.findById(waitId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 대기입니다."));
+        ReservationSchedule schedule = reservationWait.getSchedule();
+        Optional<Reservation> reservation = reservationRepository.findByScheduleId(schedule.getId());
+        if (reservation.isPresent()) {
+            throw new IllegalStateException("예약 대기를 승인하려면 해당 예약 일정에 예약이 없어야 합니다.");
+        }
+        Reservation savedReservation = reservationRepository.save(new Reservation(
+                null,
+                reservationWait.getMember(),
+                reservationWait.getSchedule()
+        ));
+        reservationWaitRepository.deleteById(reservationWait.getId());
+        return ReservationResponse.from(savedReservation);
+    }
+
+    public void deleteReservationWait(
+            final Long waitId,
+            final Long memberId,
+            final MemberRole role
+    ) {
+        ReservationWait reservationWait = reservationWaitRepository.findById(waitId)
+                .orElseThrow(() -> new NoSuchElementException("존재하지 않는 예약 대기 입니다."));
+        if (role != MemberRole.ADMIN &&
+                !Objects.equals(reservationWait.getMember().getId(), memberId)
+        ) {
+            throw new AccessDeniedException("예약 대기는 어드민 또는 본인만 취소 가능합니다.");
+        }
+        reservationWaitRepository.deleteById(waitId);
+    }
+
+    public List<MyReservationWaitResponse> findAllMyWaitReservation(final Long memberId) {
+        List<ReservationWait> reservationWaits = reservationWaitRepository.findAllByMember_id(memberId);
+        return MyReservationWaitResponse.from(reservationWaits);
+    }
+
+    public List<ReservationWaitResponse> getAllWaitReservation() {
+        List<ReservationWait> reservationWaits = reservationWaitRepository.findAll();
+        return ReservationWaitResponse.from(reservationWaits);
+    }
+}

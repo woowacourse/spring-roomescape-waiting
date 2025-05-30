@@ -1,6 +1,5 @@
 package roomescape.domain.reservation;
 
-import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -8,11 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.schedule.ReservationSchedule;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.time.ReservationTime;
 
@@ -25,18 +26,12 @@ public class Reservation {
     private Long id;
 
     @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_id")
     private Member member;
 
-    @Embedded
-    private ReservationDate reservationDate;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "time_id")
-    private ReservationTime reservationTime;
-
-    @ManyToOne(optional = false, fetch = FetchType.LAZY)
-    @JoinColumn(name = "theme_id")
-    private Theme theme;
+    @OneToOne
+    @JoinColumn(name = "schedule_id")
+    private ReservationSchedule schedule;
 
     protected Reservation() {
     }
@@ -44,15 +39,11 @@ public class Reservation {
     public Reservation(
             final Long id,
             final Member member,
-            final ReservationDate reservationDate,
-            final ReservationTime reservationTime,
-            final Theme theme
+            final ReservationSchedule schedule
     ) {
         this.id = id;
         this.member = Objects.requireNonNull(member);
-        this.reservationDate = Objects.requireNonNull(reservationDate);
-        this.reservationTime = Objects.requireNonNull(reservationTime);
-        this.theme = Objects.requireNonNull(theme);
+        this.schedule = Objects.requireNonNull(schedule);
     }
 
     public Long getId() {
@@ -64,26 +55,22 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return reservationDate.date();
-    }
-
-    public LocalTime getStartAt() {
-        return reservationTime.getStartAt();
+        return schedule.getDate();
     }
 
     public ReservationTime getReservationTime() {
-        return reservationTime;
+        return schedule.getReservationTime();
     }
 
-    public Long getTimeId() {
-        return reservationTime.getId();
+    public LocalTime getStartAt() {
+        return schedule.getStartAt();
     }
 
     public Theme getTheme() {
-        return theme;
+        return schedule.getTheme();
     }
 
-    public ReservationDate getReservationDate() {
-        return reservationDate;
+    public ReservationSchedule getSchedule() {
+        return schedule;
     }
 }
