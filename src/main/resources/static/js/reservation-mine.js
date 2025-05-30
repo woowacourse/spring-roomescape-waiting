@@ -23,8 +23,8 @@ function render(data) {
         TODO: [2단계] 내 예약 목록 조회 기능
               response 명세에 맞춰 값 설정
          */
-        
-        const theme = item.themeId;
+
+        const theme = item.theme;
         const date = item.date
         const time = item.time
         const status = item.status
@@ -32,7 +32,12 @@ function render(data) {
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
-        row.insertCell(3).textContent = status;
+
+        if (status === "예약") {
+            row.insertCell(3).textContent = status
+        } else {
+            row.insertCell(3).textContent = status + "번째 예약대기";
+        }
 
         /*
         TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
@@ -56,7 +61,7 @@ function requestDeleteWaiting(id) {
     /*
     TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const endpoint = '/waiting/' + id;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {

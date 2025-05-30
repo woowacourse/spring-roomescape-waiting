@@ -1,7 +1,8 @@
-package roomescape.presentation.controller;
+package roomescape.presentation.controller.api;
 
 import jakarta.validation.Valid;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,15 +18,12 @@ import roomescape.dto.response.AvailableReservationTimeResponseDto;
 import roomescape.dto.response.ReservationTimeResponseDto;
 import roomescape.service.ReservationTimeService;
 
-@RestController
+@RequiredArgsConstructor
 @RequestMapping("/times")
+@RestController
 public class ReservationTimeController {
 
     private final ReservationTimeService reservationTimeService;
-
-    public ReservationTimeController(ReservationTimeService reservationTimeService) {
-        this.reservationTimeService = reservationTimeService;
-    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -36,20 +34,20 @@ public class ReservationTimeController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationTimeResponseDto addTime(
-            @RequestBody @Valid ReservationTimeRegisterDto reservationTimeRegisterDto) {
+            @RequestBody @Valid final ReservationTimeRegisterDto reservationTimeRegisterDto) {
         return reservationTimeService.saveTime(reservationTimeRegisterDto);
     }
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void deleteTime(@PathVariable("id") Long id) {
+    public void deleteTime(@PathVariable("id") final Long id) {
         reservationTimeService.deleteTime(id);
     }
 
     @GetMapping("/available")
     @ResponseStatus(HttpStatus.OK)
-    public List<AvailableReservationTimeResponseDto> findAvailableTimes(@RequestParam String date,
-                                                                        @RequestParam Long themeId) {
+    public List<AvailableReservationTimeResponseDto> findAvailableTimes(@RequestParam final String date,
+                                                                        @RequestParam final Long themeId) {
         return reservationTimeService.getAvailableTimes(date, themeId);
     }
 }

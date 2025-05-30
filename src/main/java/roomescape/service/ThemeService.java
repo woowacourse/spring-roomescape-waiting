@@ -3,17 +3,19 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicatedException;
 import roomescape.common.exception.ResourceInUseException;
+import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRegisterDto;
 import roomescape.dto.response.ThemeResponseDto;
-import roomescape.model.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 
+@RequiredArgsConstructor
 @Service
 public class ThemeService {
 
@@ -23,11 +25,6 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-    }
-
     @Transactional(readOnly = true)
     public List<ThemeResponseDto> getAllThemes() {
         return themeRepository.findAll().stream()
@@ -36,11 +33,11 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponseDto saveTheme(ThemeRegisterDto themeRegisterDto) {
+    public ThemeResponseDto saveTheme(final ThemeRegisterDto themeRegisterDto) {
         validateTheme(themeRegisterDto);
 
-        Theme theme = themeRegisterDto.convertToTheme();
-        Theme savedTheme = themeRepository.save(theme);
+        final Theme theme = themeRegisterDto.convertToTheme();
+        final Theme savedTheme = themeRepository.save(theme);
 
         return new ThemeResponseDto(
                 savedTheme.getId(),
@@ -50,15 +47,15 @@ public class ThemeService {
         );
     }
 
-    private void validateTheme(ThemeRegisterDto themeRegisterDto) {
-        boolean duplicatedNameExisted = themeRepository.existsByName(themeRegisterDto.name());
+    private void validateTheme(final ThemeRegisterDto themeRegisterDto) {
+        final boolean duplicatedNameExisted = themeRepository.existsByName(themeRegisterDto.name());
         if (duplicatedNameExisted) {
             throw new DuplicatedException("중복된 테마명은 등록할 수 없습니다.");
         }
     }
 
     @Transactional
-    public void deleteTheme(Long id) {
+    public void deleteTheme(final Long id) {
         validateAlreadyReservationForTheme(id);
         themeRepository.deleteById(id);
     }
@@ -70,10 +67,10 @@ public class ThemeService {
     }
 
     @Transactional(readOnly = true)
-    public List<ThemeResponseDto> findPopularThemes(String date) {
-        LocalDate startDate = LocalDate.parse(date);
-        LocalDate endDate = startDate.minusDays(POPULAR_DAY_RANGE);
-        PageRequest pageRequest = PageRequest.of(0, POPULAR_THEME_SIZE);
+    public List<ThemeResponseDto> findPopularThemes(final String date) {
+        final LocalDate startDate = LocalDate.parse(date);
+        final LocalDate endDate = startDate.minusDays(POPULAR_DAY_RANGE);
+        final PageRequest pageRequest = PageRequest.of(0, POPULAR_THEME_SIZE);
 
         return themeRepository.findTopReservedThemesSince(
                         startDate,

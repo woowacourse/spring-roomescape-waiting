@@ -9,10 +9,10 @@ import io.jsonwebtoken.SignatureException;
 import io.jsonwebtoken.UnsupportedJwtException;
 import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import roomescape.common.exception.UnauthorizedException;
 
-@Service
+@Component
 public class JwtProvider {
 
     private static final SignatureAlgorithm SIGNATURE_ALGORITHM = SignatureAlgorithm.HS256;
@@ -23,10 +23,10 @@ public class JwtProvider {
     @Value("${security.jwt.token.expire-length}")
     private long validityInMilliseconds;
 
-    public String createToken(String payload) {
-        Claims claims = Jwts.claims().setSubject(payload);
-        Date now = new Date();
-        Date expiredDate = new Date(now.getTime() + validityInMilliseconds);
+    public String createToken(final String payload) {
+        final Claims claims = Jwts.claims().setSubject(payload);
+        final Date now = new Date();
+        final Date expiredDate = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -36,9 +36,9 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String createToken(String payload, Date now) {
-        Claims claims = Jwts.claims().setSubject(payload);
-        Date expiredDate = new Date(now.getTime() + validityInMilliseconds);
+    public String createToken(final String payload, final Date now) {
+        final Claims claims = Jwts.claims().setSubject(payload);
+        final Date expiredDate = new Date(now.getTime() + validityInMilliseconds);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -48,7 +48,7 @@ public class JwtProvider {
                 .compact();
     }
 
-    public String getPayload(String token) {
+    public String getPayload(final String token) {
 
         validateToken(token);
 
@@ -59,7 +59,7 @@ public class JwtProvider {
                 .getSubject();
     }
 
-    public void validateToken(String token) {
+    public void validateToken(final String token) {
         try {
             Jwts.parser()
                     .setSigningKey(secretKey)

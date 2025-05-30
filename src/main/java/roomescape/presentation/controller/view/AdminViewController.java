@@ -4,9 +4,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-
-@Controller
 @RequestMapping("/admin")
+@Controller
 public class AdminViewController {
 
     @GetMapping
@@ -27,5 +26,10 @@ public class AdminViewController {
     @GetMapping("/theme")
     public String themePage() {
         return "admin/theme";
+    }
+
+    @GetMapping("/waiting")
+    public String waitingPage() {
+        return "admin/waiting";
     }
 }

@@ -3,7 +3,7 @@ package roomescape.dto.request;
 import jakarta.validation.constraints.NotBlank;
 import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
-import roomescape.model.ReservationTime;
+import roomescape.domain.ReservationTime;
 
 public record ReservationTimeRegisterDto(
         @NotBlank String startAt

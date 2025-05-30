@@ -1,16 +1,17 @@
 package roomescape.acceptance;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.response.MemberResponseDto;
-import roomescape.model.Role;
+import roomescape.domain.LoginMember;
+import roomescape.domain.Role;
 import roomescape.service.JwtProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -33,19 +34,19 @@ public class AuthAcceptanceTest {
         String token = jwtProvider.createToken(email);
 
         jdbcTemplate.update("INSERT INTO member"
-                        + " (name, email,password, role) VALUES (?, ?, ?, ?)"
+                            + " (name, email,password, role) VALUES (?, ?, ?, ?)"
                 , name, email, "password", Role.ADMIN.getValue());
 
         // when
-        MemberResponseDto memberResponseDto = RestAssured.given().log().all()
+        LoginMember loginMember = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .cookie("token", token)
                 .when().get("/login/check")
                 .then().log().all()
                 .statusCode(200)
-                .extract().as(MemberResponseDto.class);
+                .extract().as(LoginMember.class);
 
         // then
-        assertThat(memberResponseDto.name()).isEqualTo(name);
+        assertThat(loginMember.getEmail()).isEqualTo(email);
     }
 }

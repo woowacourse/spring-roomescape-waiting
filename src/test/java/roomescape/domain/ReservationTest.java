@@ -1,4 +1,4 @@
-package roomescape.model;
+package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 

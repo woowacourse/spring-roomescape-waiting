@@ -1,4 +1,4 @@
-package roomescape.model;
+package roomescape.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -13,9 +13,9 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-@Entity
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Entity
 public class Reservation {
 
     @Id
@@ -37,7 +37,8 @@ public class Reservation {
     @JoinColumn(nullable = false)
     private Member member;
 
-    public Reservation(LocalDate date, ReservationTime reservationTime, Theme theme, Member member, LocalDate today) {
+    public Reservation(final LocalDate date, final ReservationTime reservationTime, final Theme theme,
+                       final Member member, final LocalDate today) {
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
@@ -46,7 +47,7 @@ public class Reservation {
         validateReservationDateInFuture(today);
     }
 
-    private void validateReservationDateInFuture(LocalDate today) {
+    private void validateReservationDateInFuture(final LocalDate today) {
         if (!this.date.isAfter(today)) {
             throw new IllegalStateException("과거 및 당일 예약은 불가능합니다.");
         }

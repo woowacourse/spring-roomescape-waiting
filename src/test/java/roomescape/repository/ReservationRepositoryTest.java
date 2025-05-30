@@ -10,11 +10,11 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.model.Member;
-import roomescape.model.Reservation;
-import roomescape.model.ReservationTime;
-import roomescape.model.Role;
-import roomescape.model.Theme;
+import roomescape.domain.Member;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Role;
+import roomescape.domain.Theme;
 
 @DataJpaTest
 class ReservationRepositoryTest {
@@ -96,7 +96,7 @@ class ReservationRepositoryTest {
 
     @DisplayName("memberId에 해당하는 예약이 있다면 반환한다.")
     @Test
-    void findByMemberId() {
+    void findAllByMemberId() {
         //given
         LocalDate date = LocalDate.now().plusDays(1);
 
@@ -128,7 +128,7 @@ class ReservationRepositoryTest {
         reservationRepository.save(reservation2);
 
         //when
-        List<Reservation> actual = reservationRepository.findByMemberId(member.getId());
+        List<Reservation> actual = reservationRepository.findAllByMemberId(member.getId());
 
         //then
         assertThat(actual).hasSize(2);
@@ -361,4 +361,42 @@ class ReservationRepositoryTest {
         assertThat(actual).isFalse();
     }
 
+    @DisplayName("날짜, 테마, 시간으로 예약을 조회할 수 있다.")
+    @Test
+    void findByDateAndThemeIdAndReservationTimeId() {
+        //given
+        Reservation reservation = createReservation();
+
+        //when
+        Optional<Reservation> actual = reservationRepository.findByDateAndThemeIdAndReservationTimeId(
+                reservation.getDate(),
+                reservation.getTheme().getId(),
+                reservation.getReservationTime().getId()
+        );
+
+        //then
+        assertThat(actual.get()).isEqualTo(reservation);
+    }
+
+    private Reservation createReservation() {
+        LocalDate date = LocalDate.now().plusDays(1);
+
+        ReservationTime reservationTime = new ReservationTime(LocalTime.of(23, 30));
+        reservationTimeRepository.save(reservationTime);
+
+        Member member = new Member("도기", "email@example.com", "1234", Role.USER);
+        memberRepository.save(member);
+
+        Theme theme = new Theme("테마", "설명", "썸네일");
+        themeRepository.save(theme);
+
+        Reservation reservation = new Reservation(
+                date,
+                reservationTime,
+                theme,
+                member,
+                LocalDate.of(2025, 1, 1)
+        );
+        return reservationRepository.save(reservation);
+    }
 }

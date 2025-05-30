@@ -17,9 +17,9 @@ import org.springframework.web.bind.support.WebDataBinderFactory;
 import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.method.support.ModelAndViewContainer;
-import roomescape.dto.LoginMember;
-import roomescape.model.Member;
-import roomescape.model.Role;
+import roomescape.domain.LoginMember;
+import roomescape.domain.Member;
+import roomescape.domain.Role;
 import roomescape.presentation.support.CookieUtils;
 import roomescape.service.AuthService;
 
@@ -65,7 +65,7 @@ class LoginMemberArgumentResolverTest {
         // then
         assertAll(
                 () -> assertThat(result).isInstanceOf(LoginMember.class),
-                () -> assertThat(loginMember.email()).isEqualTo(email)
+                () -> assertThat(loginMember.getEmail()).isEqualTo(email)
         );
     }
 }
