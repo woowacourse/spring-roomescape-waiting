@@ -41,13 +41,13 @@ public class ConfirmedReservationApplicationService {
     }
 
     public ConfirmedReservationWebResponse create(final ConfirmedReservationCreateRequest request) {
-        reservationSlotDataService.validateReservationSlotNotExists(request.date(), request.timeId(),
+        reservationSlotDataService.validateReservationSlotNotExists(request.reservationDate(), request.timeId(),
                 request.themeId());
 
         ReservationSlot slot = createReservationSlot(
-                new ReservationCreateWebRequest(request.date(), request.timeId(), request.themeId()));
+                new ReservationCreateWebRequest(request.reservationDate(), request.timeId(), request.themeId()));
         Member member = memberDataService.getById(request.memberId());
-        slot.addReservation(member, request.now());
+        slot.addReservation(member, request.reservationDateTime());
         ReservationSlot savedSlot = reservationSlotDataService.save(slot);
 
         return ConfirmedReservationWebResponse.of(savedSlot);
