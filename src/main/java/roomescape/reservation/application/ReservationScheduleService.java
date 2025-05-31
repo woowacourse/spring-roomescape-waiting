@@ -1,5 +1,6 @@
 package roomescape.reservation.application;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.reservation.application.dto.MemberReservationRequest;
@@ -34,8 +35,12 @@ public class ReservationScheduleService {
             .orElseThrow(() -> new NotFoundException("선택한 예약 시간이 존재하지 않습니다."));
     }
 
-    private Theme findThemeById(final Long themeId) {
+    public Theme findThemeById(final Long themeId) {
         return themeRepository.findById(themeId)
             .orElseThrow(() -> new NotFoundException("선택한 테마가 존재하지 않습니다."));
+    }
+
+    public List<ReservationTime> getAllReservationTimes() {
+        return reservationTimeRepository.findAll();
     }
 }

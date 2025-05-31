@@ -9,16 +9,16 @@ import roomescape.reservation.domain.Reservation;
 @Repository
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId);
+    List<Reservation> findByReservationSchedule_DateAndReservationSchedule_Theme_Id(LocalDate date, Long themeId);
 
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(long themeId, long memberId, LocalDate start,
+    List<Reservation> findByReservationSchedule_Theme_IdAndMemberIdAndReservationSchedule_DateBetween(long themeId, long memberId, LocalDate start,
         LocalDate end);
 
-    boolean existsByTimeId(Long timeId);
+    boolean existsByReservationSchedule_ReservationTime_Id(Long timeId);
 
-    boolean existsByThemeId(Long themeId);
+    boolean existsByReservationSchedule_Theme_Id(Long themeId);
 
-    boolean existsByMemberIdAndThemeIdAndTimeIdAndDate(Long memberId, Long themeId, Long reservationTimeId,
+    boolean existsByMemberIdAndReservationSchedule_Theme_IdAndReservationSchedule_ReservationTime_IdAndReservationSchedule_Date(Long memberId, Long themeId, Long reservationTimeId,
         LocalDate date);
 
     List<Reservation> findByMemberId(Long memberId);

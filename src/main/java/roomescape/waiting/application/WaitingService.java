@@ -55,7 +55,7 @@ public class WaitingService {
     private void validateAlreadyReserved(final Waiting waiting) {
         Member member = waiting.getMember();
         ReservationSchedule schedule = waiting.getReservationSchedule();
-        boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
+        boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndReservationSchedule_Theme_IdAndReservationSchedule_ReservationTime_IdAndReservationSchedule_Date(
             member.getId(),
             schedule.getThemeId(),
             schedule.getReservationTimeId(),

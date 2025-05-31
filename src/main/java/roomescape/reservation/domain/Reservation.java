@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -20,13 +21,8 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private ReservationTime time;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
+    @Embedded
+    private ReservationSchedule reservationSchedule;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
@@ -37,24 +33,20 @@ public class Reservation {
 
     public Reservation(
         final Long id,
-        final LocalDate date,
-        final ReservationTime time,
-        final Theme theme,
+        final ReservationSchedule reservationSchedule,
         final Member member
     ) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.reservationSchedule = reservationSchedule;
         this.member = member;
     }
 
-    public Reservation(final LocalDate date, final ReservationTime time, final Theme theme, final Member member) {
-        this(null, date, time, theme, member);
+    public Reservation(final ReservationSchedule reservationSchedule, final Member member) {
+        this(null, reservationSchedule, member);
     }
 
     public boolean hasConflictWith(final ReservationTime reservationTime, final Theme theme) {
-        final LocalTime startAt = time.getStartAt();
+        final LocalTime startAt = this.reservationSchedule.getStartAt();
         return reservationTime.hasConflict(theme.getDuration(), startAt);
     }
 
@@ -67,15 +59,15 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return reservationSchedule.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return reservationSchedule.getReservationTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationSchedule.getTheme();
     }
 
     public Member getMember() {
@@ -83,12 +75,13 @@ public class Reservation {
     }
 
     public String getThemeName() {
-        return theme.getName();
+        return reservationSchedule.getThemeName();
     }
 
     public LocalTime getStartAt() {
-        return time.getStartAt();
+        return reservationSchedule.getStartAt();
     }
+
 
     @Override
     public boolean equals(final Object o) {

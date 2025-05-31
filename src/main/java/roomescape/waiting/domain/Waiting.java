@@ -47,8 +47,7 @@ public class Waiting {
 
     public Reservation convertToReservation() {
         return new Reservation(
-            this.getDate(), this.getReservationTime(), this.getTheme(), this.getMember()
-        );
+            this.reservationSchedule, this.member);
     }
 
     public Long getId() {
