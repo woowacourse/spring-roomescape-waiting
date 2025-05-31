@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +30,6 @@ public class FakeWaitingRepository implements WaitingRepository {
                 waiting.getMember(),
                 waiting.getTheme(),
                 waiting.getTime(),
-                LocalDateTime.now(),
                 WaitingStatus.PENDING);
         waitings.add(savedWaiting);
         return savedWaiting;

@@ -35,6 +35,7 @@ public enum ExceptionCause {
     UNAUTHORIZED_LOGIN_ACCESS("로그인 정보를 다시 확인해 주세요."),
 
     WAITING_STATUS_INVALID("예약 대기 상태가 잘못되었습니다"),
+    WAITING_STATUS_ALREADY_UPDATED("예약 대기 상태가 이미 업데이트 되었습니다."),
 
     INPUT_INVALID("값이 잘못되었습니다"),
 

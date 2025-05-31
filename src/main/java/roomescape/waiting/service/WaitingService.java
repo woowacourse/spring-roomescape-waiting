@@ -71,16 +71,22 @@ public class WaitingService {
     }
 
     @Transactional
-    public AdminWaitingUpdateResponse updateWaitingStatus(String status, Long waitingId) {
-        WaitingStatus waitingStatus = WaitingStatus.getStatus(status);
+    public AdminWaitingUpdateResponse approveWaitingToReservation(Long waitingId) {
         Waiting waiting = findWaitingById(waitingId);
-        if (waitingStatus == WaitingStatus.APPROVED) {
-            updateWaitingToReservation(waiting);
-        }
-        return AdminWaitingUpdateResponse.from(waitingStatus);
+        waiting.updateWaiting(WaitingStatus.APPROVED);
+        convertWaitingToReservation(waiting);
+        return AdminWaitingUpdateResponse.from(WaitingStatus.APPROVED);
     }
 
-    private void updateWaitingToReservation(Waiting waiting) {
+    @Transactional
+    public AdminWaitingUpdateResponse denyWaitingToReservation(Long waitingId) {
+        Waiting waiting = findWaitingById(waitingId);
+        waiting.updateWaiting(WaitingStatus.DENIED);
+        return AdminWaitingUpdateResponse.from(WaitingStatus.DENIED);
+
+    }
+
+    private void convertWaitingToReservation(Waiting waiting) {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(waiting.getDate(), waiting.getTime().getId(),
                 waiting.getTheme().getId())) {
             throw new ConflictException(ExceptionCause.RESERVATION_ALREADY_BOOKED);

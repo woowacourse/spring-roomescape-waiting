@@ -20,7 +20,6 @@ public class FakeWaitingRepositoryFixture {
                         new Member(1L, "어드민", "admin@gmail.com", "wooteco7", Role.USER),
                         new Theme(1L, "우테코", "방탈출", "https://"),
                         new ReservationTime(1L, LocalTime.of(10, 0)),
-                        LocalDateTime.now(),
                         WaitingStatus.PENDING)));
     }
 }

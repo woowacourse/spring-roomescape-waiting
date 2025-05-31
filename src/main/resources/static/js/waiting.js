@@ -44,7 +44,7 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}?status=APPROVED`;
+    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}/approve`;
     return fetch(endpoint, {
         method: 'POST'
     }).then(response => {
@@ -57,7 +57,7 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}?status=DENIED`;
+    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}/deny`;
     return fetch(endpoint, {
         method: 'POST'
     }).then(response => {

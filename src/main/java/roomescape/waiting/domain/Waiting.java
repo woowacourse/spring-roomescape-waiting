@@ -17,6 +17,8 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
+import roomescape.exception.BadRequestException;
+import roomescape.exception.ExceptionCause;
 import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
@@ -77,6 +79,14 @@ public class Waiting {
         this.theme = theme;
         this.time = time;
         this.status = status;
+    }
+
+    public void updateWaiting(WaitingStatus waitingStatus) {
+        if (this.status == WaitingStatus.PENDING && waitingStatus != WaitingStatus.PENDING) {
+            this.status = waitingStatus;
+            return;
+        }
+        throw new BadRequestException(ExceptionCause.WAITING_STATUS_ALREADY_UPDATED);
     }
 
     public Long getId() {

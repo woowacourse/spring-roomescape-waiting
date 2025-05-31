@@ -49,13 +49,9 @@ class AdminWaitingControllerTest {
     @DisplayName("예약 대기를 승인한다")
     @Test
     void acceptWaiting() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("status", "APPROVED");
-
         RestAssured.given().log().all()
                 .header("Cookie", adminCookie)
-                .params(params)
-                .when().post("/admin/waitings/1")
+                .when().post("/admin/waitings/1/approve")
                 .then().log().all()
                 .statusCode(200)
                 .body("message", is("예약 대기를 승인하였습니다."));
@@ -64,13 +60,9 @@ class AdminWaitingControllerTest {
     @DisplayName("예약 대기를 거부한다")
     @Test
     void denyWaiting() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("status", "DENIED");
-
         RestAssured.given().log().all()
                 .header("Cookie", adminCookie)
-                .params(params)
-                .when().post("/admin/waitings/1")
+                .when().post("/admin/waitings/1/deny")
                 .then().log().all()
                 .statusCode(200)
                 .body("message", is("예약 대기를 거절하였습니다."));
