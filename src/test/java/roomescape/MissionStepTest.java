@@ -1,8 +1,5 @@
 package roomescape;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.CoreMatchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Connection;
@@ -12,6 +9,8 @@ import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,13 +18,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.dto.response.ReservationResponseDto;
+import roomescape.dto.response.ReservationTicketResponseDto;
+import roomescape.infrastructure.db.ReservationTimeJpaRepository;
+import roomescape.infrastructure.db.ThemeJpaRepository;
+import roomescape.infrastructure.jwt.JjwtJwtTokenProvider;
 import roomescape.model.ReservationTime;
 import roomescape.model.Role;
 import roomescape.model.Theme;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
-import roomescape.service.JwtProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -35,24 +34,24 @@ public class MissionStepTest {
     private JdbcTemplate jdbcTemplate;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationTimeJpaRepository reservationTimeJpaRepository;
 
     @Autowired
-    private ThemeRepository themeRepository;
+    private ThemeJpaRepository themeJpaRepository;
 
     private String email;
 
     @Autowired
-    private JwtProvider jwtProvider;
+    private JjwtJwtTokenProvider jjwtJwtTokenProvider;
 
     @BeforeEach
     void beforeEachTest() {
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 10)));
-        themeRepository.save(new Theme("공포", "무서워요", "image"));
+        reservationTimeJpaRepository.save(new ReservationTime(LocalTime.of(10, 10)));
+        themeJpaRepository.save(new Theme("공포", "무서워요", "image"));
 
         this.email = "email@gmail.com";
         jdbcTemplate.update("INSERT INTO member"
-                            + " (name, email,password, role) VALUES (?, ?, ?, ?)"
+                        + " (name, email,password, role) VALUES (?, ?, ?, ?)"
                 , "히로", email, "password", Role.ADMIN.name());
     }
 
@@ -127,7 +126,7 @@ public class MissionStepTest {
         try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
             assertThat(connection).isNotNull();
             assertThat(connection.getCatalog()).isEqualTo("DATABASE");
-            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
+            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION_TICKET", null).next()).isTrue();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -137,17 +136,17 @@ public class MissionStepTest {
     @Test
     void 오단계() {
         jdbcTemplate.update(
-                "INSERT INTO reservation (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
+                "INSERT INTO reservation_ticket (date, reservation_time_id, theme_id, member_id) VALUES (?, ?, ?, ?)",
                 String.valueOf(LocalDate.now().plusDays(1)), "1", "1", "1");
 
-        List<ReservationResponseDto> reservations = RestAssured.given().log().all()
+        List<ReservationTicketResponseDto> reservations = RestAssured.given().log().all()
                 .cookie("token", createToken())
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationResponseDto.class);
+                .jsonPath().getList(".", ReservationTicketResponseDto.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket", Integer.class);
 
         assertThat(reservations.size()).isEqualTo(count);
     }
@@ -168,7 +167,7 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket", Integer.class);
         assertThat(count).isEqualTo(1);
 
         RestAssured.given().log().all()
@@ -177,7 +176,8 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(204);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation_ticket",
+                Integer.class);
         assertThat(countAfterDelete).isEqualTo(0);
     }
 
@@ -230,6 +230,6 @@ public class MissionStepTest {
     }
 
     private String createToken() {
-        return jwtProvider.createToken(email);
+        return jjwtJwtTokenProvider.createToken(email);
     }
 }

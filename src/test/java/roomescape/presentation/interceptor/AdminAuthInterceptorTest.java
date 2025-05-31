@@ -20,7 +20,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.dto.response.MemberResponseDto;
 import roomescape.model.Role;
 import roomescape.presentation.support.CookieUtils;
-import roomescape.service.AuthService;
+import roomescape.application.service.AuthService;
 
 @ExtendWith(MockitoExtension.class)
 class AdminAuthInterceptorTest {
@@ -56,7 +56,7 @@ class AdminAuthInterceptorTest {
     void test2() throws Exception {
         // given
         MockHttpServletRequest servletRequest = new MockHttpServletRequest();
-        servletRequest.setCookies(new Cookie("invalidValue", "temp"));
+        servletRequest.setCookies(new Cookie("invalidValue", "findNextWaiting"));
         NativeWebRequest webRequest = new ServletWebRequest(servletRequest);
 
         MockHttpServletResponse servletResponse = new MockHttpServletResponse();

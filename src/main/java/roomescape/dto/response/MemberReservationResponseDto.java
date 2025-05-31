@@ -2,23 +2,20 @@ package roomescape.dto.response;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.model.Reservation;
-import roomescape.model.ReservationStatus;
+import roomescape.model.ReservationTicket;
 
 public record MemberReservationResponseDto(
-        Long reservationId,
+        Long id,
         String theme,
         LocalDate date,
-        LocalTime time,
-        String status
+        LocalTime time
 ) {
-    public MemberReservationResponseDto(Reservation reservation) {
+    public MemberReservationResponseDto(ReservationTicket reservationTicket) {
         this(
-                reservation.getId(),
-                reservation.getTheme().getName(),
-                reservation.getDate(),
-                reservation.getReservationTime().getStartAt(),
-                ReservationStatus.RESERVED.getValue()
+                reservationTicket.getId(),
+                reservationTicket.getTheme().getName(),
+                reservationTicket.getDate(),
+                reservationTicket.getReservationTime().getStartAt()
         );
     }
 }
