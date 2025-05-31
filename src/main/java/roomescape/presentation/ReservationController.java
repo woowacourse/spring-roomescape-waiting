@@ -46,7 +46,7 @@ public class ReservationController {
     }
 
     @GetMapping("/my")
-    public List<ReservationWithStatusResponse> getMyReservation(@Authenticated Long id) {
-        return reservationService.findReservationByMemberId(id);
+    public List<ReservationWithStatusResponse> getMyBookingHistory(@Authenticated Long id) {
+        return reservationService.findBookingHistory(id);
     }
 }

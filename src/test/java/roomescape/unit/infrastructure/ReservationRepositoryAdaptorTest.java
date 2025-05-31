@@ -48,7 +48,6 @@ class ReservationRepositoryAdaptorTest {
 
     private List<Reservation> reservations;
 
-
     private Member member1;
     private Member member2;
     private Member member3;
@@ -61,7 +60,7 @@ class ReservationRepositoryAdaptorTest {
     private Theme theme2;
     private Theme theme3;
     private Theme theme4;
-    
+
     @BeforeEach
     void setUp() {
         reservationRepositoryAdaptor = new ReservationRepositoryAdaptor(jpaReservationRepository);

@@ -10,6 +10,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.repository.ReservationRepository;
 import roomescape.domain.repository.ReservationTimeRepository;
 import roomescape.domain.repository.ThemeRepository;
+import roomescape.domain.repository.WaitingRepository;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.TimeWithBookedResponse;
@@ -24,12 +25,16 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
-                                  ReservationRepository reservationRepository, ThemeRepository themeRepository) {
+    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
+                                  final ReservationRepository reservationRepository,
+                                  final ThemeRepository themeRepository,
+                                  final WaitingRepository waitingRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional(readOnly = true)
@@ -66,9 +71,17 @@ public class ReservationTimeService {
         if (reservationTimeRepository.findById(id).isEmpty()) {
             throw new ReservationTimeNotFoundException();
         }
-        if (!reservationRepository.findByReservationTimeId(id).isEmpty()) {
+        if (existReservation(id) || existWaiting(id)) {
             throw new ExistedReservationException();
         }
         reservationTimeRepository.deleteById(id);
+    }
+
+    private boolean existReservation(Long id) {
+        return !reservationRepository.findByReservationTimeId(id).isEmpty();
+    }
+
+    private boolean existWaiting(Long id) {
+        return !waitingRepository.findByReservationTimeId(id).isEmpty();
     }
 }

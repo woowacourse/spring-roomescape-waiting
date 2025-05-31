@@ -29,7 +29,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = Exception.class)
     public ResponseEntity<ErrorResponse> handleException(Exception e) {
-        e.printStackTrace();
         ErrorResponse body = new ErrorResponse("오류가 발생하였습니다. 관리자에게 문의해주세요");
         return ResponseEntity.internalServerError().body(body);
     }

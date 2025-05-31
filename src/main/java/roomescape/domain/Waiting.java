@@ -16,9 +16,9 @@ import roomescape.exception.PastDateTimeReservationException;
 
 @Entity
 @Table(uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"theme_id", "date", "reservation_time_id"})
+        @UniqueConstraint(columnNames = {"member_id", "theme_id", "date", "reservation_time_id"})
 })
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -36,27 +36,31 @@ public class Reservation {
     @Column(nullable = false)
     private LocalDate date;
 
-    private Reservation(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
-                        final Theme theme) {
+    @Column(nullable = false)
+    private LocalDateTime createAt;
+
+    public Waiting(final Long id, final Member member, final LocalDate date, final ReservationTime reservationTime,
+                   final Theme theme) {
         validateNotNull(member, date, reservationTime, theme);
         this.id = id;
         this.member = member;
         this.date = date;
         this.reservationTime = reservationTime;
         this.theme = theme;
+        this.createAt = LocalDateTime.now();
     }
 
-    protected Reservation() {
+    protected Waiting() {
     }
 
-    public static Reservation of(final Long id, final Member member, final LocalDate date,
-                                 final ReservationTime reservationTime, final Theme theme) {
-        return new Reservation(id, member, date, reservationTime, theme);
+    public static Waiting of(final Long id, final Member member, final LocalDate date,
+                             final ReservationTime reservationTime, final Theme theme) {
+        return new Waiting(id, member, date, reservationTime, theme);
     }
 
-    public static Reservation createWithoutId(final Member member, final LocalDate date,
-                                              final ReservationTime reservationTime, final Theme theme) {
-        return new Reservation(null, member, date, reservationTime, theme);
+    public static Waiting createWithoutId(final Member member, final LocalDate date,
+                                          final ReservationTime reservationTime, final Theme theme) {
+        return new Waiting(null, member, date, reservationTime, theme);
     }
 
     private static void validateNotNull(Member member, LocalDate date, ReservationTime reservationTime, Theme theme) {
@@ -81,6 +85,10 @@ public class Reservation {
         }
     }
 
+    public Reservation promoteToReservation() {
+        return Reservation.createWithoutId(member, date, reservationTime, theme);
+    }
+
     public Long getId() {
         return id;
     }
@@ -99,5 +107,9 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public LocalDateTime getCreateAt() {
+        return createAt;
     }
 }

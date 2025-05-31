@@ -68,7 +68,7 @@ class ReservationControllerTest {
                 LocalDate.of(2025, 1, 1),
                 new ReservationTimeResponse(1L, LocalTime.of(9, 0)), "themeName1", "예약");
 
-        given(reservationService.findReservationByMemberId(1L)).willReturn(List.of(response));
+        given(reservationService.findBookingHistory(1L)).willReturn(List.of(response));
         given(tokenProvider.extractSubject("accessToken")).willReturn("1");
         // when & then
 
@@ -86,6 +86,4 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
     }
-
-
 }

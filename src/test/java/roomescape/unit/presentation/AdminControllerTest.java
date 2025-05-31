@@ -26,6 +26,7 @@ import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.infrastructure.JwtTokenProvider;
 import roomescape.presentation.AdminController;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @WebMvcTest(value = {AdminController.class, AuthorizationExtractor.class})
 class AdminControllerTest {
@@ -38,6 +39,9 @@ class AdminControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    @MockitoBean
+    private WaitingService waitingService;
 
     @MockitoBean
     private JwtTokenProvider jwtTokenProvider;

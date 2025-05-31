@@ -1,7 +1,9 @@
 package roomescape.api;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -65,6 +67,7 @@ public class ThemeApiTest {
         themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
         themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
         themeRepository.save(Theme.createWithoutId("theme3", "desc", "thumb3"));
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -79,6 +82,7 @@ public class ThemeApiTest {
         // given
         themeRepository.save(Theme.createWithoutId("theme1", "desc", "thumb1"));
         Theme savedTheme = themeRepository.save(Theme.createWithoutId("theme2", "desc", "thumb2"));
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -99,6 +103,7 @@ public class ThemeApiTest {
         ReservationTime time = timeRepository.save(ReservationTime.createWithoutId(LocalTime.of(9, 0)));
         Member member = memberRepository.save(new Member(null, "name1", "email@domain.com", "password1", Role.MEMBER));
         reservationRepository.save(Reservation.createWithoutId(member, LocalDate.now().minusDays(1), time, theme));
+
         // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -107,7 +112,6 @@ public class ThemeApiTest {
                 .statusCode(400)
                 .body("message", equalTo("예약이 존재합니다."));
     }
-
 
     @Test
     @Sql(value = "/sql/data.sql")
@@ -119,6 +123,12 @@ public class ThemeApiTest {
         Theme theme1 = themeRepository.findById(1L).get();
         Theme theme2 = themeRepository.findById(2L).get();
         Theme theme3 = themeRepository.findById(3L).get();
+
+        assertAll(
+                () -> assertThat(theme1.getName()).isEqualTo("테마1"),
+                () -> assertThat(theme2.getName()).isEqualTo("테마2"),
+                () -> assertThat(theme3.getName()).isEqualTo("테마3")
+        );
 
         reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(1), time1, theme1));
         reservationRepository.save(Reservation.createWithoutId(member1, LocalDate.now().minusDays(2), time1, theme1));

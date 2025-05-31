@@ -28,6 +28,11 @@ public class PageController {
         return "admin/theme";
     }
 
+    @GetMapping("/admin/waiting")
+    public String getWaitingPage() {
+        return "admin/waiting";
+    }
+
     @GetMapping("/reservation")
     public String getReservationPage() {
         return "reservation";

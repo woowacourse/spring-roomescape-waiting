@@ -6,8 +6,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 class RoomescapeApplicationTest {
 
-        @Test
-        void contextLoads() {
-        }
+    @Test
+    void contextLoads() {
+    }
 
 }

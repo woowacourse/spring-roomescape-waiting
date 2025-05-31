@@ -20,7 +20,7 @@ public class ReservationTime {
     private LocalTime startAt;
 
     public ReservationTime(final Long id, final LocalTime startAt) {
-        validateNull(startAt);
+        validateNotNull(startAt);
         this.id = id;
         this.startAt = startAt;
     }
@@ -32,7 +32,7 @@ public class ReservationTime {
         return new ReservationTime(null, startAt);
     }
 
-    private void validateNull(LocalTime startAt) {
+    private void validateNotNull(LocalTime startAt) {
         if (startAt == null) {
             throw new ArgumentNullException("startAt");
         }
