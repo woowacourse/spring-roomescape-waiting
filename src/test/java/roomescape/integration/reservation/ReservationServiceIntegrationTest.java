@@ -53,7 +53,7 @@ public class ReservationServiceIntegrationTest {
 
     @BeforeEach
     void init() {
-        final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
+        final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 0);
         currentDateTime = new TestCurrentDateTime(now);
         reservationService = new ReservationService(reservationRepository, waitingRepository,
                 timeSlotRepository,
@@ -84,22 +84,22 @@ public class ReservationServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenDuplicateReservation() {
         // given
-        final ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 1L, 11L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 11L, 1L);
         reservationService.createReservation(request);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
+                .hasMessageContaining("이미 예약한 슬롯에 예약 할 수 없습니다.");
     }
 
     @DisplayName("날짜와 시간이 같아도 테마가 다르면 중복 예외가 발생하지 않는다")
     @Test
-    void shouldNot_ThrowException_WhenThemeIsDifferent() {
+    void shouldNot_ThrowException_WhenDifferentTheme() {
         // given
         final LocalDate date = LocalDate.of(2025, 5, 5);
-        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 11L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 11L, 1L);
         reservationService.createReservation(request);
-        final ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 1L, 10L);
+        final ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 10L, 1L);
         // when & then
         assertThatCode(() -> reservationService.createReservation(request2))
                 .doesNotThrowAnyException();
@@ -107,14 +107,14 @@ public class ReservationServiceIntegrationTest {
 
     @DisplayName("현재 혹은 과거 시간에 새로운 예약을 추가할 경우 예외가 발생한다")
     @Test
-    void should_ThrowException_WhenNotFuture() {
+    void should_ThrowException_WhenPastReservation() {
         // given
         final LocalDate date = currentDateTime.getDate().minusDays(1);
-        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 3L, 1L);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessageContaining("지나간 날짜와 시간은 예약할 수 없습니다.");
+                .hasMessageContaining("이미 지난 슬롯에 예약 대기를 할 수 없습니다.");
     }
 
     @DisplayName("모든 예약을 조회할 수 있다")

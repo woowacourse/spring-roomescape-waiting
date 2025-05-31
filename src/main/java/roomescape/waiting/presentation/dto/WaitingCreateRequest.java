@@ -11,6 +11,6 @@ public record WaitingCreateRequest(
 ) {
 
     public WaitingCreateCommand convertToCreateCommand(final long memberId) {
-        return new WaitingCreateCommand(date, memberId, timeId, themeId);
+        return new WaitingCreateCommand(date, timeId, themeId, memberId);
     }
 }

@@ -1,6 +1,5 @@
 package roomescape.support.fake;
 
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -16,28 +15,22 @@ public class FakeWaitingRepository implements WaitingRepository {
     private Long index = 1L;
 
     @Override
-    public boolean existsByReservation(final LocalDate date, final long timeId, final long themeId) {
+    public boolean existsByReservationId(final long reservationId) {
         return waitings.stream()
-                .anyMatch(waiting -> waiting.date() == date &&
-                        waiting.time().id() == timeId &&
-                        waiting.theme().id() == themeId);
+                .anyMatch(waiting -> waiting.reservation().id() == reservationId);
     }
 
     @Override
-    public     boolean existsByReservationAndMemberId(LocalDate date, long timeId, long themeId, long memberId) {
+    public boolean existsByReservationIdAndMemberId(final long reservationId, final long memberId) {
         return waitings.stream()
-                .anyMatch(waiting -> waiting.date() == date &&
-                        waiting.time().id() == timeId &&
-                        waiting.theme().id() == themeId &&
+                .anyMatch(waiting -> waiting.reservation().id() == reservationId &&
                         waiting.member().id() == memberId);
     }
 
     @Override
     public Waiting save(final Waiting waiting) {
-        final Waiting newWaiting = new Waiting(index++,
-                waiting.date(), waiting.time(), waiting.theme(), waiting.member());
+        final Waiting newWaiting = new Waiting(index++, waiting.reservation(), waiting.member());
         waitings.add(newWaiting);
-
         return newWaiting;
     }
 
@@ -63,10 +56,9 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findTopByReservation(final LocalDate date, final long timeId,
-                                                  final long themeId) {
+    public Optional<Waiting> findTopByReservationId(final long reservationId) {
         return waitings.stream()
-                .filter(waiting -> waiting.date() == date && waiting.time().id() == timeId && waiting.theme().id() == themeId)
+                .filter(waiting -> waiting.reservation().id() == reservationId)
                 .findFirst();
     }
 

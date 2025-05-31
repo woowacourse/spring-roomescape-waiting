@@ -2,6 +2,7 @@ package roomescape.theme.application.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.datetime.CurrentDateTime;
@@ -13,8 +14,10 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class ThemeService {
+
     private static final int POPULAR_THEME_FROM_DAYS_AGO = 7;
     private static final int POPULAR_THEME_TO_DAYS_AGO = 1;
     private static final int POPULAR_THEME_MAX_COUNT = 10;
@@ -22,13 +25,6 @@ public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
     private final CurrentDateTime currentDateTime;
-
-    public ThemeService(final ThemeRepository themeRepository, final ReservationRepository reservationRepository,
-                        final CurrentDateTime currentDateTime) {
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
-        this.currentDateTime = currentDateTime;
-    }
 
     @Transactional
     public ThemeInfo createTheme(final ThemeCreateCommand command) {

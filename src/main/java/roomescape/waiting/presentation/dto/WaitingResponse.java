@@ -16,10 +16,10 @@ public record WaitingResponse(
 
     public WaitingResponse(final WaitingInfo waitingInfo) {
         this(waitingInfo.id(),
-                waitingInfo.date(),
-                new TimeSlotResponse(waitingInfo.time()),
-                new ThemeResponse(waitingInfo.theme()),
-                new MemberResponse(waitingInfo.member())
+                waitingInfo.reservationInfo().date(),
+                new TimeSlotResponse(waitingInfo.reservationInfo().time()),
+                new ThemeResponse(waitingInfo.reservationInfo().theme()),
+                new MemberResponse(waitingInfo.reservationInfo().member())
         );
     }
 }

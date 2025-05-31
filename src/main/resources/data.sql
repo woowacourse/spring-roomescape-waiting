@@ -22,25 +22,25 @@ VALUES
     ('레벨4 탈출', '우테코 레벨4를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('레벨5 탈출', '우테코 레벨5를 탈출하는 내용입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID)
+INSERT INTO RESERVATION (DATE, TIME_ID, THEME_ID, MEMBER_ID)
 VALUES
-    (1, CURRENT_DATE + 1, 1, 1),
-    (2, CURRENT_DATE + 1, 2, 1),
-    (3, CURRENT_DATE + 1, 3, 1),
-    (4, CURRENT_DATE + 1, 4, 1),
-    (1, CURRENT_DATE + 2, 1, 2),
-    (1, CURRENT_DATE - 2, 1, 2),
-    (3, CURRENT_DATE - 1, 1, 2),
-    (3, CURRENT_DATE - 1, 2, 2),
-    (3, CURRENT_DATE - 1, 3, 2),
-    (3, CURRENT_DATE - 1, 4, 2),
-    (3, CURRENT_DATE - 1, 1, 1),
-    (3, CURRENT_DATE - 1, 1, 3),
-    (3, CURRENT_DATE - 1, 2, 3);
+    (CURRENT_DATE + 1, 1, 1, 1),
+    (CURRENT_DATE + 1, 2, 1, 2),
+    (CURRENT_DATE + 1, 3, 1, 3),
+    (CURRENT_DATE + 1, 4, 1, 4),
+    (CURRENT_DATE + 2, 1, 2, 1),
+    (CURRENT_DATE - 2, 1, 2, 1),
+    (CURRENT_DATE - 1, 1, 2, 3),
+    (CURRENT_DATE - 1, 2, 2, 3),
+    (CURRENT_DATE - 1, 3, 2, 3),
+    (CURRENT_DATE - 1, 4, 2, 3),
+    (CURRENT_DATE - 1, 1, 1, 3),
+    (CURRENT_DATE - 1, 1, 3, 3),
+    (CURRENT_DATE - 1, 2, 3, 3);
 
-INSERT INTO RESERVATION_WAITING (MEMBER_ID, DATE, TIME_ID, THEME_ID)
+INSERT INTO RESERVATION_WAITING (RESERVATION_ID, MEMBER_ID)
 VALUES
-    (1, CURRENT_DATE + 1, 2, 1),
-    (2, CURRENT_DATE + 1, 3, 1),
-    (4, CURRENT_DATE + 1, 3, 1),
-    (1, CURRENT_DATE + 1, 3, 1)
+    (2, 1),
+    (3, 2),
+    (3, 4),
+    (3, 1)

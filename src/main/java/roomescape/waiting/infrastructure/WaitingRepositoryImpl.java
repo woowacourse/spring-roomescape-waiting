@@ -1,6 +1,5 @@
 package roomescape.waiting.infrastructure;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Repository;
@@ -18,13 +17,13 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByReservation(final LocalDate date, final long timeId, final long themeId) {
-        return waitingJpaRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public boolean existsByReservationId(final long reservationId) {
+        return waitingJpaRepository.existsByReservationId(reservationId);
     }
 
     @Override
-    public     boolean existsByReservationAndMemberId(final LocalDate date, final long timeId, final long themeId, final long memberId) {
-        return waitingJpaRepository.existsByDateAndTimeIdAndThemeIdAndMemberId(date, timeId, themeId, memberId);
+    public boolean existsByReservationIdAndMemberId(final long reservationId, final long memberId) {
+        return waitingJpaRepository.existsByReservationIdAndMemberId(reservationId, memberId);
     }
 
     @Override
@@ -48,8 +47,7 @@ public class WaitingRepositoryImpl implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findTopByReservation(final LocalDate date, final long timeId,
-                                                  final long themeId) {
-        return waitingJpaRepository.findTopByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public Optional<Waiting> findTopByReservationId(final long reservationId) {
+        return waitingJpaRepository.findTopByReservationId(reservationId);
     }
 }

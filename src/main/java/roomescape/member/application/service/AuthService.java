@@ -1,5 +1,6 @@
 package roomescape.member.application.service;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomescapeException;
@@ -10,16 +11,12 @@ import roomescape.member.domain.MemberRepository;
 import roomescape.member.security.TokenProvider;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class AuthService {
 
     private final MemberRepository memberRepository;
     private final TokenProvider tokenProvider;
-
-    public AuthService(final MemberRepository memberRepository, final TokenProvider tokenProvider) {
-        this.memberRepository = memberRepository;
-        this.tokenProvider = tokenProvider;
-    }
 
     public String tokenLogin(final MemberLoginCommand command) {
         final Member loginMember = memberRepository.findByEmailAndPassword(command.email(), command.password())

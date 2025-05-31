@@ -16,7 +16,9 @@ import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.MemberRole;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.fake.FakeMemberRepository;
+import roomescape.support.fake.FakeReservationRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.fake.FakeWaitingRepository;
@@ -28,6 +30,7 @@ import roomescape.timeslot.domain.TimeSlotRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.application.dto.WaitingInfo;
 import roomescape.waiting.application.service.WaitingService;
+import roomescape.waiting.domain.WaitingRepository;
 
 public class WaitingServiceTest {
 
@@ -37,11 +40,12 @@ public class WaitingServiceTest {
     private final LocalDate yesterday = today.minusDays(1);
     private final LocalDate tomorrow = today.plusDays(1);
 
-    private final FakeWaitingRepository waitingRepository = new FakeWaitingRepository();
+    private final ReservationRepository reservationRepository = new FakeReservationRepository();
+    private final WaitingRepository waitingRepository = new FakeWaitingRepository();
     private final TimeSlotRepository timeSlotRepository = new FakeTimeSlotRepository();
     private final ThemeRepository themeRepository = new FakeThemeRepository();
     private final MemberRepository memberRepository = new FakeMemberRepository();
-    private final WaitingService waitingService = new WaitingService(waitingRepository, timeSlotRepository, themeRepository, memberRepository, currentDateTime);
+    private final WaitingService waitingService = new WaitingService(reservationRepository, waitingRepository, memberRepository, currentDateTime);
 
     private Member member1, member2;
     private TimeSlot time1, time2;
@@ -76,8 +80,8 @@ public class WaitingServiceTest {
     @Test
     void shouldNot_ThrowException_WhenThemeIsDifferent() {
         // given
-        final WaitingCreateCommand request1 = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), theme1.id());
-        final WaitingCreateCommand request2 = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), theme2.id());
+        final WaitingCreateCommand request1 = new WaitingCreateCommand(tomorrow, time1.id(), theme1.id(), member1.id());
+        final WaitingCreateCommand request2 = new WaitingCreateCommand(tomorrow, time1.id(), theme2.id(), member2.id());
         waitingService.createWaiting(request1);
         // when & then
         assertThatCode(() -> waitingService.createWaiting(request2))
@@ -88,7 +92,7 @@ public class WaitingServiceTest {
     @Test
     void validateTime() {
         // given
-        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, member1.id(), 3L, theme1.id());
+        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, 3L, theme1.id(), member1.id());
         // when & then
         assertThatThrownBy(() -> waitingService.createWaiting(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -99,7 +103,7 @@ public class WaitingServiceTest {
     @Test
     void validateTheme() {
         // given
-        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), 3L);
+        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, time1.id(), 3L, member1.id());
         // when & then
         assertThatThrownBy(() -> waitingService.createWaiting(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -110,7 +114,7 @@ public class WaitingServiceTest {
     @Test
     void validatePastTime() {
         // given
-        final WaitingCreateCommand request = new WaitingCreateCommand(yesterday, member1.id(), time1.id(), theme1.id());
+        final WaitingCreateCommand request = new WaitingCreateCommand(yesterday, time1.id(), theme1.id(), member1.id());
         // when & then
         assertThatThrownBy(() -> waitingService.createWaiting(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -121,11 +125,11 @@ public class WaitingServiceTest {
     @Test
     void create() {
         // given
-        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), theme1.id());
+        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, time1.id(), theme1.id(), member1.id());
         // when
         final WaitingInfo response = waitingService.createWaiting(request);
         // then
-        final boolean result = waitingRepository.existsByReservation(response.date(), response.time().id(), response.theme().id());
+        final boolean result = waitingRepository.existsByReservationId(response.reservationInfo().id());
         assertThat(result).isTrue();
     }
 
@@ -133,8 +137,8 @@ public class WaitingServiceTest {
     @Test
     void findWaitings() {
         // given
-        final WaitingCreateCommand request1 = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), theme1.id());
-        final WaitingCreateCommand request2 = new WaitingCreateCommand(tomorrow, member2.id(), time2.id(), theme2.id());
+        final WaitingCreateCommand request1 = new WaitingCreateCommand(tomorrow, time1.id(), theme1.id(), member1.id());
+        final WaitingCreateCommand request2 = new WaitingCreateCommand(tomorrow, time2.id(), theme2.id(), member2.id());
         waitingService.createWaiting(request1);
         waitingService.createWaiting(request2);
         // when
@@ -147,7 +151,7 @@ public class WaitingServiceTest {
     @Test
     void cancelById() {
         // given
-        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, member1.id(), time1.id(), theme1.id());
+        final WaitingCreateCommand request = new WaitingCreateCommand(tomorrow, time1.id(), theme1.id(), member1.id());
         final WaitingInfo response = waitingService.createWaiting(request);
         // when
         waitingService.cancelWaitingById(response.id());

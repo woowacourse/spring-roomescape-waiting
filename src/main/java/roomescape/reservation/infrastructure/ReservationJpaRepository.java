@@ -19,18 +19,20 @@ public interface ReservationJpaRepository extends JpaRepository<Reservation, Lon
     boolean existsByThemeId(long themeId);
 
     @NonNull
-    @EntityGraph(attributePaths = {"member", "time", "theme"})
+    @EntityGraph(attributePaths = {"time", "theme", "member"})
     List<Reservation> findAll();
 
-    @EntityGraph(attributePaths = {"member", "time"})
+    @EntityGraph(attributePaths = {"time", "theme", "member"})
     List<Reservation> findAllByDateAndThemeId(LocalDate date, long themeId);
 
-    @EntityGraph(attributePaths = {"theme", "time"})
+    @NonNull
+    @EntityGraph(attributePaths = {"time", "theme"})
     List<Reservation> findAllByMemberId(long id);
 
     @NonNull
-    @EntityGraph(attributePaths = {"member", "time", "theme"})
+    @EntityGraph(attributePaths = {"time", "theme", "member"})
     Optional<Reservation> findById(long id);
 
+    @EntityGraph(attributePaths = {"time", "theme", "member"})
     Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 }

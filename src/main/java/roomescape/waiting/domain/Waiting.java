@@ -7,15 +7,13 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
-import roomescape.timeslot.domain.TimeSlot;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 @Getter
@@ -29,18 +27,13 @@ public class Waiting {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDate date;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    private TimeSlot time;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    private Theme theme;
+    private Reservation reservation;
 
     @ManyToOne(fetch = FetchType.LAZY)
     private Member member;
 
-    public Waiting(final LocalDate date, final TimeSlot time, final Theme theme, Member member) {
-        this(null, date, time, theme, member);
+    public Waiting(final Reservation reservation, Member member) {
+        this(null, reservation, member);
     }
 }

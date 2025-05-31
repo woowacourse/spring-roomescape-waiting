@@ -97,7 +97,7 @@ class TimeSlotServiceTest {
         final TimeSlot time = new TimeSlot(response.id(), response.startAt());
         final Theme theme = new Theme(1L, "테마", "설명", "썸네일.png");
         final Member member = new Member("리버", "river@email.com", "riverpw", MemberRole.ADMIN);
-        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), member, time, theme));
+        reservationRepository.save(new Reservation(LocalDate.now().plusDays(1), time, theme, member));
         // when
         // then
         assertThatThrownBy(() -> timeSlotService.deleteTimeSlotById(response.id()))
@@ -114,7 +114,7 @@ class TimeSlotServiceTest {
         final Theme theme = new Theme(1L, "테마", "설명", "썸네일.png");
         final Member member = new Member("리버", "river@email.com", "riverpw", MemberRole.ADMIN);
         final LocalDate date = LocalDate.of(2025, 5, 1);
-        reservationRepository.save(new Reservation(1L, date, member, savedTime1, theme));
+        reservationRepository.save(new Reservation(1L, date, savedTime1, theme,  member));
         // when
         final List<TimeSlotAvailabilityInfo> result = timeSlotService.findAvailableTimeSlots(date, theme.id());
         // then

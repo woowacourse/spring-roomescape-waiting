@@ -2,6 +2,7 @@ package roomescape.timeslot.application.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomescapeException;
@@ -14,17 +15,12 @@ import roomescape.timeslot.domain.TimeSlot;
 import roomescape.timeslot.domain.TimeSlotRepository;
 
 @Service
+@RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class TimeSlotService {
 
     private final TimeSlotRepository timeSlotRepository;
     private final ReservationRepository reservationRepository;
-
-    public TimeSlotService(final TimeSlotRepository timeSlotRepository,
-                                  final ReservationRepository reservationRepository) {
-        this.timeSlotRepository = timeSlotRepository;
-        this.reservationRepository = reservationRepository;
-    }
 
     @Transactional
     public TimeSlotInfo createTimeSlot(final TimeSlotCreateCommand command) {
