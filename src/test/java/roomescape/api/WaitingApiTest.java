@@ -65,7 +65,7 @@ public class WaitingApiTest {
                 .contentType(ContentType.JSON)
                 .body(waiting)
                 .cookie("token", token)
-                .when().post("/api/waiting")
+                .when().post("/api/waitings")
                 .then().log().all()
                 .statusCode(201)
                 .body("date", equalTo("2026-08-05"))
@@ -84,7 +84,7 @@ public class WaitingApiTest {
                 Waiting.createWithoutId(member, LocalDate.of(2025, 1, 1), time, theme));
         // when & then
         RestAssured.given().log().all()
-                .when().delete("/api/waiting/{waitingId}", waiting.getId())
+                .when().delete("/api/waitings/{waitingId}", waiting.getId())
                 .then().log().all()
                 .statusCode(204);
 
@@ -113,7 +113,7 @@ public class WaitingApiTest {
                 .contentType(ContentType.JSON)
                 .body(waiting)
                 .cookie("token", token)
-                .when().post("/api/waiting")
+                .when().post("/api/waitings")
                 .then().log().all()
                 .statusCode(400);
     }

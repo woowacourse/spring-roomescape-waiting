@@ -15,7 +15,7 @@ import roomescape.dto.response.WaitingResponse;
 import roomescape.service.WaitingService;
 
 @RestController
-@RequestMapping(value = "/api/waiting")
+@RequestMapping(value = "/api/waitings")
 public class WaitingController {
     private final WaitingService waitingService;
 
