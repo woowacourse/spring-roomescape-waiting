@@ -6,31 +6,26 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.dto.auth.LoginRequestDto;
-import roomescape.dto.auth.SignUpRequestDto;
 
 import java.util.Map;
+import roomescape.util.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class AuthControllerTest {
 
     @Nested
     class MemberLoginTest {
-
-        @BeforeEach
-        void setUpRegistration() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
-
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
-                    .when().post("/members")
-                    .then().log().all()
-                    .statusCode(200);
-        }
 
         @DisplayName("등록된 회원이라면 로그인을 할 수 있다")
         @Test
@@ -102,34 +97,22 @@ class AuthControllerTest {
     @Nested
     class MemberLogoutTest {
 
+        @Autowired
+        private JwtTokenProvider jwtTokenProvider;
+
         String loginToken;
 
         @BeforeEach
         void setUpRegistration() {
-            SignUpRequestDto signUpRequestDto = new SignUpRequestDto("가이온", "hello@woowa.com", "password");
-
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(signUpRequestDto)
-                    .when().post("/members")
-                    .then().log().all()
-                    .statusCode(200);
-
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
-
-            Map<String, String> cookies = RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
-                    .when().post("/login")
-                    .getCookies();
-
-            loginToken = cookies.get("token");
+            loginToken = jwtTokenProvider.createToken(
+                    new Member(1L, "가이온", "hello@woowa.com", Role.USER, "password"));
         }
 
         @DisplayName("로그인 상태라면 로그아웃을 할 수있다")
         @Test
         void logoutMemberTest() {
-            RestAssured.given().cookie(loginToken).log().all()
+            RestAssured.given().log().all()
+                    .cookie(loginToken)
                     .contentType(ContentType.JSON)
                     .when().post("/logout")
                     .then().log().all()
@@ -139,7 +122,8 @@ class AuthControllerTest {
         @DisplayName("로그인 상태라면 로그아웃을 할 수있다")
         @Test
         void logoutMemberTest1() {
-            RestAssured.given().cookie(loginToken).log().all()
+            RestAssured.given().log().all()
+                    .cookie(loginToken)
                     .contentType(ContentType.JSON)
                     .when().post("/logout")
                     .then().log().all()

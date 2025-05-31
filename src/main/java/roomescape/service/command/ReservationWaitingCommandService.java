@@ -1,0 +1,96 @@
+package roomescape.service.command;
+
+import jakarta.persistence.EntityManager;
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.Theme;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.waiting.ReservationWaitingTicket;
+import roomescape.dto.auth.LoginInfo;
+import roomescape.dto.reservation.ReservationResponseDto;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.UnauthorizationException;
+import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.repository.JpaReservationTimeRepository;
+import roomescape.repository.JpaReservationWaitingTicketRepository;
+import roomescape.repository.JpaThemeRepository;
+import roomescape.service.dto.ReservationCreateDto;
+
+@Service
+@Transactional
+public class ReservationWaitingCommandService {
+
+    private final JpaReservationWaitingTicketRepository reservationWaitingTicketRepository;
+    private final JpaReservationRepository reservationRepository;
+    private final JpaReservationTimeRepository reservationTimeRepository;
+    private final JpaThemeRepository themeRepository;
+    private final JpaMemberRepository memberRepository;
+    private final Clock clock;
+
+    @Autowired
+    private EntityManager entityManager;
+
+    public ReservationWaitingCommandService(JpaReservationWaitingTicketRepository reservationWaitingTicketRepository,
+                                            JpaReservationRepository reservationRepository,
+                                            JpaReservationTimeRepository reservationTimeRepository,
+                                            JpaThemeRepository themeRepository, JpaMemberRepository memberRepository,
+                                            Clock clock) {
+        this.reservationWaitingTicketRepository = reservationWaitingTicketRepository;
+        this.reservationRepository = reservationRepository;
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.themeRepository = themeRepository;
+        this.memberRepository = memberRepository;
+        this.clock = clock;
+    }
+
+    public ReservationResponseDto createReservationWaiting(ReservationCreateDto request) {
+        ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
+                .orElseThrow(() -> new NotFoundException("예약 시간을 찾을 수 없습니다. id : " + request.timeId()));
+        Theme theme = themeRepository.findById(request.themeId())
+                .orElseThrow(() -> new NotFoundException("테마를 찾을 수 없습니다. id : " + request.themeId()));
+        Member member = memberRepository.findById(request.memberId())
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. id : " + request.memberId()));
+
+        List<Reservation> alreadyBookedReservations = reservationRepository.findReservationsByDateAndTimeIdAndThemeId(
+                request.date(),
+                request.timeId(),
+                request.themeId());
+        validateReservationWaitingAvailable(alreadyBookedReservations, member);
+
+        Reservation requestReservation = new Reservation(member, request.date(), reservationTime, theme, ReservationStatus.WAITING);
+        requestReservation.validateReservableTime(LocalDateTime.now(clock));
+
+        Reservation newReservation = reservationRepository.save(requestReservation);
+        reservationWaitingTicketRepository.save(new ReservationWaitingTicket(newReservation));
+        return ReservationResponseDto.of(newReservation);
+    }
+
+    public void deleteReservationWaiting(Long id, LoginInfo loginInfo) {
+        Reservation reservationWaiting = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("등록된 예약번호만 삭제할 수 있습니다. 입력된 번호는 " + id + "입니다."));
+
+        if (!reservationWaiting.getMember().isSameIdWith(loginInfo.id())) {
+            throw new UnauthorizationException("예약자만 예약 대기 취소가 가능합니다.");
+        }
+
+        reservationRepository.delete(reservationWaiting);
+    }
+
+    private static void validateReservationWaitingAvailable(List<Reservation> alreadyBookedReservations, Member member) {
+        if (alreadyBookedReservations.isEmpty()) {
+            throw new IllegalArgumentException("현재 예약이 존재하지 않습니다. 예약하기 기능을 이용해주세요.");
+        }
+        if (alreadyBookedReservations.stream()
+                .anyMatch(reservation -> reservation.getMember().equals(member))) {
+            throw new IllegalArgumentException("이미 예약한 이력이 있습니다.");
+        }
+    }
+}

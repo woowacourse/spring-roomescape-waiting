@@ -4,7 +4,7 @@ import roomescape.exception.AccessDeniedException;
 
 public enum Role {
     USER(() -> {
-        throw new AccessDeniedException("[ERROR] 관리자만 접근 가능합니다.");
+        throw new AccessDeniedException("관리자만 접근 가능합니다.");
     }),
     ADMIN(() -> {
     });

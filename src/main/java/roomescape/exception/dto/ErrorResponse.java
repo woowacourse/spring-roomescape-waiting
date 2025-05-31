@@ -1,4 +1,4 @@
-package roomescape.dto;
+package roomescape.exception.dto;
 
 import java.time.LocalDateTime;
 import org.springframework.http.HttpStatus;
@@ -18,7 +18,7 @@ public class ErrorResponse {
     }
 
     public String getMessage() {
-        return message;
+        return "[ERROR] " + message;
     }
 
     public LocalDateTime getTimestamp() {

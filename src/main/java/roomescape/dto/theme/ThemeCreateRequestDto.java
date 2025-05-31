@@ -1,10 +1,14 @@
 package roomescape.dto.theme;
 
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.slot.Theme;
 
-public record ThemeCreateRequestDto(String name, String description, String thumbnail) {
+public record ThemeCreateRequestDto
+        (String name,
+         String description,
+         String thumbnail
+) {
 
     public Theme createWithoutId() {
-        return new Theme(null, name, description, thumbnail);
+        return new Theme(name, description, thumbnail);
     }
 }

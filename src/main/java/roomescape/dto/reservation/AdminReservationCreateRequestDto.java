@@ -5,7 +5,8 @@ import java.time.LocalDate;
 
 public record AdminReservationCreateRequestDto(
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-        long themeId,
-        long timeId,
-        long memberId) {
+        Long themeId,
+        Long timeId,
+        Long memberId
+) {
 }

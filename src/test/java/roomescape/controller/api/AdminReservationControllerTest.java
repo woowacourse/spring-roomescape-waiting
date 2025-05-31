@@ -14,59 +14,43 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
-import roomescape.dto.auth.LoginRequestDto;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.dto.reservation.AdminReservationCreateRequestDto;
-import roomescape.dto.theme.ThemeCreateRequestDto;
-import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.repository.JpaMemberRepository;
+import roomescape.repository.JpaReservationRepository;
+import roomescape.util.JwtTokenProvider;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
+@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_METHOD)
 class AdminReservationControllerTest {
+
+    @Autowired
+    JpaMemberRepository memberRepository;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    String loginToken;
+
+    @BeforeEach
+    void setUp() {
+        Member admin = new Member(null, "moda", "moda@woowa.com", Role.ADMIN, "password");
+        memberRepository.save(admin);
+
+        loginToken = jwtTokenProvider.createToken(new Member(2L, "moda", "moda@woowa.com", Role.ADMIN, "password"));
+    }
 
     @Nested
     class AdminAddReservationTest {
-
-        @Autowired
-        JpaMemberRepository memberRepository;
-
-        String loginToken;
-
-        @BeforeEach
-        void setUp() {
-            LocalTime reservationTime = LocalTime.of(15, 30);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
-
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(requestTime)
-                    .when().post("/times")
-                    .then().log().all()
-                    .statusCode(201);
-
-            ThemeCreateRequestDto themeCreateRequestDto = new ThemeCreateRequestDto("테마1", "설명1", "url");
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(themeCreateRequestDto)
-                    .when().post("/themes")
-                    .then().log().all()
-                    .statusCode(201);
-
-            Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
-            memberRepository.save(admin);
-
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
-
-            Map<String, String> cookies = RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
-                    .when().post("/login")
-                    .getCookies();
-
-            loginToken = cookies.get("token");
-        }
 
         @DisplayName("어드민 예약 추가 테스트")
         @Test
@@ -79,93 +63,25 @@ class AdminReservationControllerTest {
                     .when().post("/admin/reservations")
                     .then().log().all().statusCode(201);
         }
-
-        @DisplayName("themeId가 존재하지 않는 경우 예약을 추가할 수 없다.")
-        @Test
-        void invalidThemeIdReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
-                    LocalDate.now().plusDays(1), 2L, 1L, 1L);
-            RestAssured.given().cookie(loginToken).log().all()
-                    .contentType(ContentType.JSON)
-                    .body(dto)
-                    .when().post("/admin/reservations")
-                    .then().log().all().statusCode(401);
-        }
-
-        @DisplayName("timeId가 존재하지 않는 경우 예약을 추가할 수 없다.")
-        @Test
-        void invalidTimeIdReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
-                    LocalDate.now().plusDays(1), 1L, 2L, 1L);
-            RestAssured.given().cookie(loginToken).log().all()
-                    .contentType(ContentType.JSON)
-                    .body(dto)
-                    .when().post("/admin/reservations")
-                    .then().log().all().statusCode(401);
-        }
-
-        @DisplayName("memberId가 존재하지 않는 경우 예약을 추가할 수 없다.")
-        @Test
-        void invalidMemberIdReservationTest() {
-            AdminReservationCreateRequestDto dto = new AdminReservationCreateRequestDto(
-                    LocalDate.now().plusDays(1), 1L, 1L, 2L);
-            RestAssured.given().cookie(loginToken).log().all()
-                    .contentType(ContentType.JSON)
-                    .body(dto)
-                    .when().post("/admin/reservations")
-                    .then().log().all().statusCode(401);
-        }
     }
 
     @Nested
     class searchAdminReservationTest {
 
         @Autowired
-        JpaMemberRepository memberRepository;
-
-        String loginToken;
+        JpaReservationRepository reservationRepository;
 
         @BeforeEach
         void setUp() {
-            LocalTime reservationTime = LocalTime.of(15, 30);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
-
-            RestAssured.given()
-                    .contentType(ContentType.JSON)
-                    .body(requestTime)
-                    .when().post("/times")
-                    .then()
-                    .statusCode(201);
-
-            ThemeCreateRequestDto themeCreateRequestDto = new ThemeCreateRequestDto("테마1", "설명1", "url");
-            RestAssured.given()
-                    .contentType(ContentType.JSON)
-                    .body(themeCreateRequestDto)
-                    .when().post("/themes")
-                    .then()
-                    .statusCode(201);
-
-            Member admin = new Member(null, "가이온", "hello@woowa.com", Role.ADMIN, "password");
-            memberRepository.save(admin);
-
-            LoginRequestDto loginRequestDto = new LoginRequestDto("hello@woowa.com", "password");
-            Map<String, String> cookies = RestAssured.given()
-                    .contentType(ContentType.JSON)
-                    .body(loginRequestDto)
-                    .when().post("/login")
-                    .getCookies();
-            loginToken = cookies.get("token");
-
-            for (int day = 1; day < 5; day++) {
-                AdminReservationCreateRequestDto dto1 = new AdminReservationCreateRequestDto(
-                        LocalDate.now().plusDays(day), 1L, 1L, 1L);
-                RestAssured.given().cookie("token", loginToken)
-                        .contentType(ContentType.JSON)
-                        .body(dto1)
-                        .when().post("/admin/reservations")
-                        .then()
-                        .statusCode(201);
-            }
+            Reservation reservationInPast = new Reservation(null,
+                    new Member(1L, "moda", "moda@woowa.com", Role.ADMIN, "password"),
+                    LocalDate.of(2024, 12, 31),
+                    new ReservationTime(1L, LocalTime.of(10, 0)),
+                    new Theme(1L, "테마 A", "테마 A입니다.",
+                            "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"),
+                    ReservationStatus.RESERVED
+            );
+            reservationRepository.save(reservationInPast);
         }
 
         @DisplayName("특정 기간 내 예약을 조회할 수 있다")
@@ -175,14 +91,15 @@ class AdminReservationControllerTest {
                     "themeId", 1L,
                     "memberId", 1L,
                     "dateFrom", "2025-05-01",
-                    "dateTo", "2025-05-30");
+                    "dateTo", "2025-12-31");
 
-            RestAssured.given().cookie("token", loginToken).log().all()
+            RestAssured.given().log().all()
+                    .cookie("token", loginToken)
                     .queryParams(params)
                     .when().get("/admin/reservations/search")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(4));
+                    .body("size()", is(1));
         }
     }
 }

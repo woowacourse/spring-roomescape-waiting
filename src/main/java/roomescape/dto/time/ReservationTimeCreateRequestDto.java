@@ -2,11 +2,13 @@ package roomescape.dto.time;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalTime;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTime;
 
-public record ReservationTimeCreateRequestDto(@JsonFormat(pattern = "HH:mm") LocalTime startAt) {
+public record ReservationTimeCreateRequestDto(
+        @JsonFormat(pattern = "HH:mm") LocalTime startAt
+) {
 
     public ReservationTime createWithoutId() {
-        return new ReservationTime(null, startAt);
+        return new ReservationTime(startAt);
     }
 }

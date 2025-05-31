@@ -1,50 +1,61 @@
 package roomescape.controller.api;
 
-import java.net.URI;
 import java.util.List;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.annotation.AdminOnly;
+import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
-import roomescape.service.ThemeService;
+import roomescape.service.query.ThemeQueryService;
+import roomescape.service.command.ThemeCommandService;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService themeService;
+    private final ThemeQueryService themeQueryService;
+    private final ThemeCommandService themeCommandService;
 
-    public ThemeController(ThemeService themeService) {
-        this.themeService = themeService;
+    public ThemeController(ThemeQueryService themeQueryService, ThemeCommandService themeCommandService) {
+        this.themeQueryService = themeQueryService;
+        this.themeCommandService = themeCommandService;
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponseDto>> getAllThemes() {
-        List<ThemeResponseDto> allThemes = themeService.findAllThemes();
-        return ResponseEntity.ok(allThemes);
-    }
-
-    @PostMapping
-    public ResponseEntity<ThemeResponseDto> postTheme(@RequestBody final ThemeCreateRequestDto requestDto) {
-        ThemeResponseDto responseDto = themeService.createTheme(requestDto);
-        return ResponseEntity.created(URI.create("themes/" + responseDto.id())).body(responseDto);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ThemeResponseDto> getAllThemes() {
+        return themeQueryService.findAllThemes();
     }
 
     @GetMapping("/popular")
-    public ResponseEntity<List<ThemeResponseDto>> getPopularThemes() {
-        List<ThemeResponseDto> popularThemes = themeService.findPopularThemes();
-        return ResponseEntity.ok(popularThemes);
+    @ResponseStatus(HttpStatus.OK)
+    public List<ThemeResponseDto> getPopularThemes() {
+        return themeQueryService.findPopularThemes();
     }
 
+    @AdminOnly
+    @PostMapping
+    @ResponseStatus(HttpStatus.CREATED)
+    public ThemeResponseDto postTheme(
+            @RequestBody final ThemeCreateRequestDto requestDto
+    ) {
+        return themeCommandService.createTheme(requestDto);
+    }
+
+    @AdminOnly
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") final Long id) {
-        themeService.deleteThemeById(id);
-        return ResponseEntity.noContent().build();
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deleteTheme(
+            @PathVariable("id") final Long id
+    ) {
+        themeCommandService.deleteThemeById(id);
     }
 }

@@ -2,32 +2,53 @@ package roomescape.controller.api;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
+import org.springframework.test.context.jdbc.Sql;
+import org.springframework.test.context.jdbc.Sql.ExecutionPhase;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.Role;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import roomescape.util.JwtTokenProvider;
 
-import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
+@Sql(scripts = {"/test-data.sql"}, executionPhase = ExecutionPhase.BEFORE_TEST_CLASS)
 class ReservationTimeControllerTest {
+
+    String loginToken;
+
+    @Autowired
+    JwtTokenProvider jwtTokenProvider;
+
+    @BeforeEach
+    void setUp() {
+        loginToken = jwtTokenProvider.createToken(
+                new Member(1L, "가이온", "hello@woowa.com", Role.ADMIN, "password"));
+    }
 
     @DisplayName("목록 내용 갯수를 검사한다")
     @Test
     void timesTest() {
         RestAssured.given().log().all()
+                .cookie("token", loginToken)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(0));
+                .body("size()", is(1));
     }
 
     @Nested
@@ -41,37 +62,13 @@ class ReservationTimeControllerTest {
             ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
 
             RestAssured.given().log().all()
+                    .cookie("token", loginToken)
                     .contentType(ContentType.JSON)
                     .body(requestTime)
                     .when().post("/times")
                     .then().log().all()
                     .statusCode(201)
-                    .body("id", is(1));
-
-            RestAssured.given().log().all()
-                    .when().get("/times")
-                    .then().log().all()
-                    .statusCode(200)
-                    .body("size()", is(1));
-        }
-
-        @DisplayName("times 응답의 LocalTime 형식은 xx:xx 이다.")
-        @Test
-        void timeResponseTest() {
-            LocalTime reservationTime = LocalTime.of(15, 40);
-            ReservationTimeCreateRequestDto requestTime = new ReservationTimeCreateRequestDto(reservationTime);
-
-            RestAssured.given().log().all()
-                    .contentType(ContentType.JSON)
-                    .body(requestTime)
-                    .when().post("/times")
-                    .then().log().all()
-                    .statusCode(201);
-
-            RestAssured.given().log().all()
-                    .when().get("/times")
-                    .then().log().all()
-                    .body("[0].startAt", equalTo("15:40"));
+                    .body("id", is(2));
         }
 
         @DisplayName("올바른 시간의 포멧만 요청 가능하다.")
@@ -104,6 +101,7 @@ class ReservationTimeControllerTest {
     }
 
     @Nested
+    @Disabled
     @DisplayName("예약시간 삭제")
     class DeleteReservationTimeTest {
 

@@ -4,21 +4,25 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
-import roomescape.domain.Theme;
+import org.springframework.data.repository.query.Param;
+import roomescape.domain.reservation.slot.Theme;
 
 public interface JpaThemeRepository extends JpaRepository<Theme, Long> {
 
+    boolean existsByName(String name);
+
     @Query(value = """
-            SELECT
-            th.id,
-            th.name,
-            th.description,
-            th.thumbnail
-            FROM theme as th
-            INNER JOIN reservation as r on r.theme_id = th.id
-            WHERE r.date >= ? and r.date < ?
+            SELECT th.*
+            FROM theme th
+            LEFT JOIN reservation r 
+                ON r.status = 'RESERVED' 
+                    AND r.theme_id = th.id
+                    AND r.date >= :from 
+                    AND r.date <= :to
             GROUP BY th.id
-            ORDER BY COUNT(th.id) DESC
+            ORDER BY COUNT(r.id) DESC
             """, nativeQuery = true)
-    List<Theme> findMostReservedThemesBetween(LocalDate start, LocalDate end);
+    List<Theme> findMostReservedThemesBetweenDate(
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 }
