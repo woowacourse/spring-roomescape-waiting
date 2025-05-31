@@ -93,10 +93,7 @@ public class ReservationService {
 
     public void deleteReservation(final Long id) {
         Reservation reservation = reservationRepository.getById(id);
-        Long deleteRank = reservation.getReservationStatus().getRank();
-        if (reservation.isBooked()) {
-            deleteRank = 0L;
-        }
+        Long deleteRank = reservation.getRank();
         List<ReservationStatus> reservationStatuses = reservationRepository.findAllWaiting(reservation.getDate(),
                 reservation.getTime(),
                 reservation.getTheme());

@@ -96,15 +96,15 @@ public class Reservation {
             final LocalDateTime currentDateTime,
             final Long rank
     ) {
-            return builder()
-                    .id(null)
-                    .date(date)
-                    .time(reservationTime)
-                    .theme(theme)
-                    .member(member)
-                    .currentDateTime(currentDateTime)
-                    .reservationStatus(ReservationStatus.waiting(rank))
-                    .build();
+        return builder()
+                .id(null)
+                .date(date)
+                .time(reservationTime)
+                .theme(theme)
+                .member(member)
+                .currentDateTime(currentDateTime)
+                .reservationStatus(ReservationStatus.waiting(rank))
+                .build();
     }
 
     private void validateFutureOrPresent(LocalDateTime currentDateTime) {
@@ -116,5 +116,13 @@ public class Reservation {
 
     public boolean isBooked() {
         return reservationStatus.getStatus() == Status.BOOKED;
+    }
+
+    public Long getRank() {
+        Long rank = reservationStatus.getRank();
+        if (isBooked()) {
+            rank = 0L;
+        }
+        return rank;
     }
 }
