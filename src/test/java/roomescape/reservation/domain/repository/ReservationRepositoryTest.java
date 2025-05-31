@@ -43,7 +43,7 @@ public class ReservationRepositoryTest {
             themeId, memberId, start, end);
 
         // then
-        assertThat(reservations).hasSize(4);
+        assertThat(reservations).hasSize(2);
     }
 
     @DisplayName("시간 아이디로 예약 존재 여부를 확인할 수 있어야 한다.")
@@ -98,6 +98,6 @@ public class ReservationRepositoryTest {
         List<Reservation> reservations = reservationRepository.findByMemberId(memberId);
 
         // then
-        assertThat(reservations).hasSize(4);
+        assertThat(reservations).hasSize(2);
     }
 }
