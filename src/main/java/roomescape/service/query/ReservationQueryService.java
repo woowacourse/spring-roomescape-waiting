@@ -11,6 +11,7 @@ import roomescape.domain.reservation.waiting.ReservationWaitingTicket;
 import roomescape.dto.auth.LoginInfo;
 import roomescape.dto.reservation.MyReservationResponseDto;
 import roomescape.dto.reservation.ReservationResponseDto;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.JpaReservationRepository;
 import roomescape.repository.JpaReservationWaitingTicketRepository;
 
@@ -70,9 +71,9 @@ public class ReservationQueryService {
         }).toList();
     }
 
-    private final ReservationWaitingRank calculateWaitingRank(Reservation reservationWaiting) {
+    private ReservationWaitingRank calculateWaitingRank(Reservation reservationWaiting) {
         ReservationWaitingTicket reservationWaitingTicket = waitingTicketRepository.findByReservationId(
-                reservationWaiting.getId()).get();
+                reservationWaiting.getId()).orElseThrow(NotFoundException::new);
         return waitingTicketRepository.countReservationWaitingsByThemeIdAndDateAndTimeIdAndCreatedAt(
                 reservationWaiting.getTheme().getId(),
                 reservationWaiting.getDate(),
