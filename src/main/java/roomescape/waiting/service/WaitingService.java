@@ -22,6 +22,7 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingStatus;
 import roomescape.waiting.dto.AdminWaitingResponse;
+import roomescape.waiting.dto.AdminWaitingUpdateRequest;
 import roomescape.waiting.dto.AdminWaitingUpdateResponse;
 import roomescape.waiting.dto.WaitingCreateRequest;
 import roomescape.waiting.dto.WaitingCreateResponse;
@@ -70,8 +71,17 @@ public class WaitingService {
                 .toList();
     }
 
+    public AdminWaitingUpdateResponse UpdateWaitingReservation(AdminWaitingUpdateRequest request,
+                                                               Long waitingId) {
+        WaitingStatus status = WaitingStatus.getStatus(request.status());
+        if(status == WaitingStatus.APPROVED) {
+            return approveWaitingToReservation(waitingId);
+        }
+        return denyWaitingToReservation(waitingId);
+    }
+
     @Transactional
-    public AdminWaitingUpdateResponse approveWaitingToReservation(Long waitingId) {
+    protected AdminWaitingUpdateResponse approveWaitingToReservation(Long waitingId) {
         Waiting waiting = findWaitingById(waitingId);
         waiting.updateWaiting(WaitingStatus.APPROVED);
         convertWaitingToReservation(waiting);
@@ -79,7 +89,7 @@ public class WaitingService {
     }
 
     @Transactional
-    public AdminWaitingUpdateResponse denyWaitingToReservation(Long waitingId) {
+    protected AdminWaitingUpdateResponse denyWaitingToReservation(Long waitingId) {
         Waiting waiting = findWaitingById(waitingId);
         waiting.updateWaiting(WaitingStatus.DENIED);
         return AdminWaitingUpdateResponse.from(WaitingStatus.DENIED);

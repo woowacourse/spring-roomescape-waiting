@@ -44,9 +44,13 @@ function approve(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}/approve`;
+    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}`;
     return fetch(endpoint, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: "APPROVED" })
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
@@ -57,9 +61,13 @@ function deny(event) {
     const row = event.target.closest('tr');
     const id = row.cells[0].textContent;
 
-    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}/deny`;
+    const endpoint = `${ADMIN_WAITING_END_POINT}/${id}`;
     return fetch(endpoint, {
-        method: 'POST'
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ status: "DENIED" })
     }).then(response => {
         if (response.status === 200) return;
         throw new Error('Delete failed');
