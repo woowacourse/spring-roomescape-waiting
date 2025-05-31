@@ -9,31 +9,39 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.Table;
+import java.util.Objects;
 import java.util.regex.Pattern;
 import lombok.AccessLevel;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import roomescape.auth.domain.AuthRole;
+import roomescape.exception.auth.AuthorizationException;
+import roomescape.reservation.domain.Reservation;
 
 @Entity
 @Table(name = "members")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Member {
 
     private static final String EMAIL_REGEX = "^[a-zA-Z0-9_+&*-]+(?:\\.[a-zA-Z0-9_+&*-]+)*@(?:[a-zA-Z0-9-]+\\.)+[a-zA-Z]{2,}$";
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
+
     @Column(nullable = false)
     private String name;
+
     @Column(nullable = false, unique = true)
     private String email;
+
     @Column(nullable = false)
     private String password;
+
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private AuthRole role;
@@ -88,5 +96,11 @@ public class Member {
 
     public boolean isAdmin() {
         return role == AuthRole.ADMIN;
+    }
+
+    public void validateDeletableReservation(final Reservation reservation) {
+        if (!this.isAdmin() && !Objects.equals(reservation.getMember(), this)) {
+            throw new AuthorizationException("삭제할 권한이 없습니다.");
+        }
     }
 }

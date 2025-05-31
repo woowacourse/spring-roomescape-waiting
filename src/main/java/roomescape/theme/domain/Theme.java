@@ -15,16 +15,20 @@ import lombok.NoArgsConstructor;
 @Table(name = "themes")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @Getter
-@EqualsAndHashCode(of = {"id"})
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class Theme {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @EqualsAndHashCode.Include
     private Long id;
+
     @Column(nullable = false, unique = true)
     private String name;
+
     @Column(nullable = false)
     private String description;
+
     @Column(nullable = false)
     private String thumbnail;
 

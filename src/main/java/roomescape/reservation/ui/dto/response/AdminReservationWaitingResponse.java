@@ -5,22 +5,21 @@ import java.time.LocalTime;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 
-public record MemberReservationResponse(
-        Long id,
-        String theme,
-        LocalDate date,
-        LocalTime time,
-        Long rank
+public record AdminReservationWaitingResponse(
+        Long reservationId,
+        String memberName,
+        String themeName,
+        LocalDate reservationDate,
+        LocalTime reservationStartAt
 ) {
-
-    public static MemberReservationResponse from(final Reservation reservation, final Long rank) {
+    public static AdminReservationWaitingResponse from(final Reservation reservation) {
         final ReservationSlot reservationSlot = reservation.getReservationSlot();
-        return new MemberReservationResponse(
+        return new AdminReservationWaitingResponse(
                 reservation.getId(),
+                reservation.getMember().getName(),
                 reservationSlot.getTheme().getName(),
                 reservationSlot.getDate(),
-                reservationSlot.getTime().getStartAt(),
-                rank
+                reservationSlot.getTime().getStartAt()
         );
     }
 }
