@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.NativeQuery;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.domain.Waiting;
@@ -12,7 +13,13 @@ import roomescape.waiting.domain.WaitingWithRank;
 @Repository
 public interface WaitingRepository extends JpaRepository<Waiting, Long> {
 
-    boolean existsByMemberIdAndReservationSchedule_Theme_IdAndReservationSchedule_ReservationTime_IdAndReservationSchedule_Date(
+    @Query("SELECT COUNT(w) > 0 "
+        + "FROM Waiting w "
+        + "WHERE w.member.id = :memberId "
+        + "AND w.reservationSchedule.theme.id = :themeId "
+        + "AND w.reservationSchedule.reservationTime.id = :reservationTimeId "
+        + "AND w.reservationSchedule.date = :date ")
+    boolean existsWaiting(
         Long memberId,
         Long themeId,
         Long reservationTimeId,
@@ -31,5 +38,15 @@ public interface WaitingRepository extends JpaRepository<Waiting, Long> {
         "WHERE w.member.id = :memberId")
     List<WaitingWithRank> findWaitingsWithRankByMemberId(Long memberId);
 
-    Optional<Waiting> findFirstByReservationSchedule_Theme_IdAndReservationSchedule_DateAndReservationSchedule_ReservationTime_IdOrderById(Long themeId, LocalDate date, Long reservationTimeId);
+
+    @NativeQuery(value = """
+        SELECT *
+        FROM waiting w
+        WHERE w.theme_id = ?
+        AND w.date = ?
+        AND w.reservation_time_id = ?
+        ORDER BY id
+        LIMIT 1
+        """)
+    Optional<Waiting> findFirstWaiting(Long themeId, LocalDate date, Long reservationTimeId);
 }

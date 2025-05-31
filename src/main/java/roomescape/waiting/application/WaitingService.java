@@ -69,7 +69,7 @@ public class WaitingService {
     private void validateAlreadyWaiting(final Waiting waiting) {
         Member member = waiting.getMember();
         ReservationSchedule schedule = waiting.getReservationSchedule();
-        boolean isAlreadyWaiting = waitingRepository.existsByMemberIdAndReservationSchedule_Theme_IdAndReservationSchedule_ReservationTime_IdAndReservationSchedule_Date(
+        boolean isAlreadyWaiting = waitingRepository.existsWaiting(
             member.getId(), schedule.getThemeId(), schedule.getReservationTimeId(),
             schedule.getDate());
         if (isAlreadyWaiting) {

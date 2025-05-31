@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.util.List;
 
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -67,4 +68,37 @@ public class WaitingRepositoryTest {
         assertThat(waitingsByMember3.getFirst().getRank()).isEqualTo(3);
     }
 
+    @Test
+    @DisplayName("유저가 동일한 날짜, 테마, 시간에 웨이팅이 있다면, true를 반환해야 한다.")
+    void already_waiting_case() {
+        // given
+        LocalDate currentDate = LocalDate.now().plusYears(1);
+        Member member = memberRepository.findById(1L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
+        Theme theme = themeRepository.findById(1L).get();
+        ReservationSchedule reservationSchedule = new ReservationSchedule(currentDate, theme, reservationTime);
+        Waiting waiting = new Waiting(member, reservationSchedule);
+        waitingRepository.save(waiting);
+
+        // when, then
+        assertThat(waitingRepository.existsWaiting(member.getId(), theme.getId(), reservationTime.getId(), currentDate))
+            .isTrue();
+    }
+
+    @Test
+    @DisplayName("유저가 동일한 날짜, 테마, 시간에 웨이팅이 없다면, false를 반환해야 한다.")
+    void already_not_waiting_case() {
+        // given
+        LocalDate currentDate = LocalDate.now().plusYears(1);
+        Member member = memberRepository.findById(1L).get();
+        ReservationTime reservationTime = reservationTimeRepository.findById(1L).get();
+        Theme theme = themeRepository.findById(1L).get();
+        ReservationSchedule reservationSchedule = new ReservationSchedule(currentDate, theme, reservationTime);
+        Waiting waiting = new Waiting(member, reservationSchedule);
+        waitingRepository.save(waiting);
+
+        // when, then
+        assertThat(waitingRepository.existsWaiting(member.getId(), 2L, reservationTime.getId(), currentDate))
+            .isFalse();
+    }
 }
