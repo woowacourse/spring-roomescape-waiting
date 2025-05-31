@@ -64,7 +64,7 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public void setStatus(ReservationStatus reservationStatus) {
+    public void changeStatus(ReservationStatus reservationStatus) {
         this.status = reservationStatus;
     }
 
