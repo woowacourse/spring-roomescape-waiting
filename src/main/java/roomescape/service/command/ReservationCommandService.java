@@ -99,6 +99,6 @@ public class ReservationCommandService {
                 .getReservation();
 
         waitingTicketRepository.deleteByReservationId(earliestWaiting.getId());
-        earliestWaiting.changeStatus(ReservationStatus.RESERVED);
+        earliestWaiting.changeStatusToReserved();
     }
 }
