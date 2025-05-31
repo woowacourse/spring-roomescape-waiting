@@ -60,14 +60,14 @@ public class WaitingRepositoryAdaptor implements WaitingRepository {
 
     @Override
     public List<WaitingWithRank> findByMemberIdSortedByCreateAt(final Long memberId) {
-        return jpaWaitingRepository.findByMemberIdSortedByCreateAt(memberId);
+        return jpaWaitingRepository.findWaitingWithRankByMemberId(memberId);
     }
 
     @Override
     public List<WaitingWithRank> findByDateAndReservationTimeAndThemeSortedByCreateAt(final LocalDate date,
                                                                                       final Long timeId,
                                                                                       final Long themeId) {
-        return jpaWaitingRepository.findByDateAndReservationTimeAndThemeSortedByCreateAt(date, timeId, themeId);
+        return jpaWaitingRepository.findWaitingWithRankByDateAndReservationTimeAndTheme(date, timeId, themeId);
     }
 
     @Override
