@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.member.Member;
 import roomescape.dto.member.MemberResponseDto;
+import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizationException;
 import roomescape.repository.JpaMemberRepository;
 
@@ -20,7 +21,7 @@ public class MemberQueryService {
 
     public Member findMemberById(long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new UnauthorizationException("유저를 찾을 수 없습니다. ID : " + id));
+                .orElseThrow(() -> new NotFoundException("유저를 찾을 수 없습니다. ID : " + id));
     }
 
     public List<MemberResponseDto> findAllMembers() {

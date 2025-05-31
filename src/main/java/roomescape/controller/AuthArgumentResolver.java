@@ -14,6 +14,7 @@ import roomescape.domain.member.Role;
 import roomescape.controller.annotation.AdminOnly;
 import roomescape.controller.annotation.CurrentMember;
 import roomescape.dto.auth.LoginInfo;
+import roomescape.exception.NotFoundException;
 import roomescape.exception.UnauthorizationException;
 import roomescape.service.query.MemberQueryService;
 import roomescape.util.JwtTokenProvider;
@@ -45,11 +46,19 @@ public class AuthArgumentResolver implements HandlerMethodArgumentResolver {
         Cookie[] cookies = nativeRequest.getCookies();
         String token = cookieHandler.extractCookie(cookies, "token");
         Long id = jwtTokenProvider.extractId(token);
-        Member loginMember = memberQueryService.findMemberById(id);
+        Member loginMember = findMemberById(id);
 
         if (parameter.hasParameterAnnotation(AdminOnly.class) && loginMember.getRole() != Role.ADMIN) {
                 throw new UnauthorizationException("관리자 권한이 없는 사용자입니다.");
         }
         return new LoginInfo(loginMember);
+    }
+
+    private Member findMemberById(Long id) {
+        try {
+            return memberQueryService.findMemberById(id);
+        } catch (NotFoundException e) {
+            throw new UnauthorizationException("유효하지 않은 토큰입니다.");
+        }
     }
 }

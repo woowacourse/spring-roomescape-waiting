@@ -24,6 +24,6 @@ public class CookieHandler {
                 return cookie.getValue();
             }
         }
-        throw new UnauthorizationException(" 접근 권한이 없습니다.");
+        throw new UnauthorizationException("접근 권한이 없습니다.");
     }
 }
