@@ -26,6 +26,11 @@ public class ViewController {
         return "admin/theme";
     }
 
+    @GetMapping("/admin/waiting")
+    public String getWaitingPage() {
+        return "admin/waiting";
+    }
+
     @GetMapping("/reservation")
     public String getUserReservationPage() {
         return "reservation";
