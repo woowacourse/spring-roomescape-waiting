@@ -10,18 +10,22 @@ public record ThemeResponse(
         String thumbnail
 ) {
 
-    public static ThemeResponse from(final Theme theme) {
+    public static List<ThemeResponse> fromThemes(
+            final List<Theme> themes
+    ) {
+        return themes.stream()
+                .map(ThemeResponse::fromTheme)
+                .toList();
+    }
+
+    public static ThemeResponse fromTheme(
+            final Theme theme
+    ) {
         return new ThemeResponse(
                 theme.id(),
                 theme.name(),
                 theme.description(),
                 theme.thumbnail()
         );
-    }
-
-    public static List<ThemeResponse> from(final List<Theme> themes) {
-        return themes.stream()
-                .map(ThemeResponse::from)
-                .toList();
     }
 }

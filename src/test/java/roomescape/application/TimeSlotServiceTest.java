@@ -1,83 +1,90 @@
 package roomescape.application;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.DomainFixtures.JUNK_THEME;
-import static roomescape.DomainFixtures.JUNK_USER;
 
 import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.ActiveProfiles;
-import roomescape.DateUtils;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.timeslot.TimeSlot;
 import roomescape.domain.timeslot.TimeSlotRepository;
 import roomescape.exception.InUseException;
+import roomescape.exception.NotFoundException;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class TimeSlotServiceTest {
 
+    @Autowired
     private TimeSlotService service;
 
     @Autowired
-    private ReservationRepository reservationRepository;
-    @Autowired
     private TimeSlotRepository timeSlotRepository;
 
-    @BeforeEach
-    void setUp() {
-        service = new TimeSlotService(reservationRepository, timeSlotRepository);
-    }
-
     @Test
-    @DisplayName("예약 시간을 추가할 수 있다.")
-    void registerTimeSlot() {
+    @DisplayName("새로운 시간대를 등록할 수 있다.")
+    void saveTimeSlot() {
         // given
-        var startAt = LocalTime.of(11, 0);
+        var startAt = LocalTime.of(16, 0);
 
         // when
-        var created = service.register(startAt);
+        TimeSlot created = service.saveTimeSlot(startAt);
 
         // then
-        var timeSlots = service.findAllTimeSlots();
+        var timeSlots = timeSlotRepository.findAll();
         assertThat(timeSlots).contains(created);
     }
 
     @Test
-    @DisplayName("예약 시간을 삭제할 수 있다.")
-    void deleteTimeSlot() {
-        // given
-        var startAt = LocalTime.of(11, 0);
-        var target = service.register(startAt);
-
+    @DisplayName("모든 시간대를 조회할 수 있다.")
+    void findAllTimeSlots() {
         // when
-        service.removeById(target.id());
+        var timeSlots = service.findAllTimeSlots();
 
         // then
-        var timeSlots = service.findAllTimeSlots();
-        assertThat(timeSlots).doesNotContain(target);
+        assertThat(timeSlots).hasSize(3);
     }
 
     @Test
-    @DisplayName("예약 시간을 삭제할 때 해당 시간에 대한 예약이 존재하면 예외 발생")
-    void deleteTimeSlotWithReservation() {
+    @DisplayName("시간대를 삭제할 수 있다.")
+    void removeById() {
         // given
-        var timeSlotToBeRemoved = service.register(LocalTime.of(10, 0));
-        var reservationWithTheTimeSlot = Reservation.ofExisting(1L, JUNK_USER, DateUtils.tomorrow(),
-                timeSlotToBeRemoved, JUNK_THEME);
-        reservationRepository.save(reservationWithTheTimeSlot);
+        var timeSlotId = 3L;
+
+        // when
+        service.removeById(timeSlotId);
+
+        // then
+        var timeSlots = service.findAllTimeSlots();
+        assertThat(timeSlots).hasSize(2);
+    }
+
+    @Test
+    @DisplayName("예약이 있는 시간대 삭제 시 예외를 던진다.")
+    void removeById_WhenTimeSlotInUse() {
+        // given
+        var timeSlotId = 1L;
 
         // when & then
-        assertThatThrownBy(() -> service.removeById(timeSlotToBeRemoved.id()))
+        assertThatThrownBy(() -> service.removeById(timeSlotId))
                 .isInstanceOf(InUseException.class)
                 .hasMessage("삭제하려는 타임 슬롯을 사용하는 예약이 있습니다.");
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 시간 삭제 시 예외를 던진다.")
+    void removeById_WhenTimeSlotNotExists() {
+        // given
+        var notExistedTimeSlotId = 100000000000L;
+
+        // when & then
+        assertThatThrownBy(() -> service.removeById(notExistedTimeSlotId))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 타임슬롯입니다.");
     }
 }

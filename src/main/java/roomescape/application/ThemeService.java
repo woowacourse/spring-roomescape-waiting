@@ -15,6 +15,7 @@ import roomescape.exception.NotFoundException;
 public class ThemeService {
 
     private static final int MAX_THEME_FETCH_COUNT = 5;
+
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
 
@@ -26,8 +27,8 @@ public class ThemeService {
         this.themeRepository = themeRepository;
     }
 
-    public Theme register(final String name, final String description, final String thumbnail) {
-        var theme = new Theme(name, description, thumbnail);
+    public Theme saveTheme(final String name, final String description, final String thumbnail) {
+        Theme theme = Theme.register(name, description, thumbnail);
         return themeRepository.save(theme);
     }
 
@@ -35,19 +36,33 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
-    public void removeById(final long id) {
-        var reservations = reservationRepository.findByThemeId(id);
-        if (!reservations.isEmpty()) {
-            throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
-        }
-        themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
-        themeRepository.deleteById(id);
-    }
-
     public List<Theme> findPopularThemes(final LocalDate startDate, final LocalDate endDate, final int count) {
         int finalCount = Math.min(count, MAX_THEME_FETCH_COUNT);
         Pageable pageable = PageRequest.of(0, finalCount);
+
         return themeRepository.findRankingByPeriod(startDate, endDate, pageable);
+    }
+
+    public void removeById(final long id) {
+        validateThemeNotInUse(id);
+        validateThemeExists(id);
+
+        themeRepository.deleteById(id);
+    }
+
+    private void validateThemeNotInUse(long id) {
+        boolean isThemeInUse = reservationRepository.existsByThemeId(id);
+
+        if (isThemeInUse) {
+            throw new InUseException("삭제하려는 테마를 사용하는 예약이 있습니다.");
+        }
+    }
+
+    private void validateThemeExists(long id) {
+        boolean isThemeExists = themeRepository.existsById(id);
+
+        if (!isThemeExists) {
+            throw new NotFoundException("존재하지 않는 테마입니다.");
+        }
     }
 }

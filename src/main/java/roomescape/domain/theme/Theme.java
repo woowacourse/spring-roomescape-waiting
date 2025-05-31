@@ -27,13 +27,14 @@ public class Theme {
     private String description;
     private String thumbnail;
 
-    public Theme(final String name, final String description, final String thumbnail) {
-        this(null, name, description, thumbnail);
-    }
+    private Theme(final Long id,
+                  final String name,
+                  final String description,
+                  final String thumbnail) {
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
         validateNameLength(name);
         validateDescriptionLength(description);
+
         this.id = id;
         this.name = name;
         this.description = description;
@@ -41,6 +42,17 @@ public class Theme {
     }
 
     protected Theme() {
+    }
+
+    public static Theme ofExisting(final long id,
+                                   final String name,
+                                   final String description,
+                                   final String thumbnail) {
+        return new Theme(id, name, description, thumbnail);
+    }
+
+    public static Theme register(final String name, final String description, final String thumbnail) {
+        return new Theme(null, name, description, thumbnail);
     }
 
     private void validateNameLength(final String name) {

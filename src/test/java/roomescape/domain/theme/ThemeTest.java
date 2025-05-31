@@ -1,6 +1,6 @@
 package roomescape.domain.theme;
 
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -9,24 +9,30 @@ import roomescape.exception.BusinessRuleViolationException;
 class ThemeTest {
 
     @Test
-    @DisplayName("이름이 10자 초과이면 예외가 발생한다")
-    void nameLengthException() {
-        assertThatThrownBy(() -> new Theme(
-                1L,
-                "가".repeat(11),
-                "우테코 레벨2를 탈출하는 내용입니다.",
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        )).isInstanceOf(BusinessRuleViolationException.class);
+    @DisplayName("이름이 10자를 초과하는 경우 예외를 던진다.")
+    void validateName_WhenTooLong() {
+        // given
+        var tooLongName = "이름이10자를초과하는경우";
+        var description = "우테코 레벨1을 탈출하는 내용입니다.";
+        var thumbnail = "https://image.url";
+
+        // when & then
+        assertThatThrownBy(() -> Theme.register(tooLongName, description, thumbnail))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("이름은 10자를 넘길 수 없습니다.");
     }
 
     @Test
-    @DisplayName("설명이 50자 초과이면 예외가 발생한다")
-    void descriptionLengthException() {
-        assertThatThrownBy(() -> new Theme(
-                1L,
-                "레벨2 탈출",
-                "가".repeat(51),
-                "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
-        )).isInstanceOf(BusinessRuleViolationException.class);
+    @DisplayName("설명이 50자를 초과하는 경우 예외를 던진다.")
+    void validateDescription_WhenTooLong() {
+        // given
+        var name = "레벨1 탈출";
+        var tooLongDescription = "a".repeat(51);
+        var thumbnail = "https://image.url";
+
+        // when & then
+        assertThatThrownBy(() -> Theme.register(name, tooLongDescription, thumbnail))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessage("설명은 50자를 넘길 수 없습니다.");
     }
 }

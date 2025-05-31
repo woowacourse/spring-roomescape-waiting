@@ -25,10 +25,10 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약 추가 요청시, id를 포함한 예약 내용과 CREATED를 응답한다")
-    void reserve() {
+    void createReservation() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "popo@email.com", "password", "password"))
+                .body(Map.of("email", "user1@email.com", "password", "password1"))
                 .when().post("/login")
                 .then().statusCode(200)
                 .extract().response().getDetailedCookies().getValue("token");
@@ -52,7 +52,7 @@ class ReservationControllerTest {
 
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .body("size()", Matchers.is(8));
+                .body("size()", Matchers.is(3));
     }
 
     @Test

@@ -12,19 +12,23 @@ public record ReservationResponse(
         ThemeResponse theme
 ) {
 
-    public static ReservationResponse from(final Reservation reservation) {
-        return new ReservationResponse(
-                reservation.id(),
-                UserResponse.from(reservation.user()),
-                reservation.date(),
-                TimeSlotResponse.from(reservation.timeSlot()),
-                ThemeResponse.from(reservation.theme())
-        );
+    public static List<ReservationResponse> fromReservations(
+            final List<Reservation> reservations
+    ) {
+        return reservations.stream()
+                .map(ReservationResponse::fromReservation)
+                .toList();
     }
 
-    public static List<ReservationResponse> from(final List<Reservation> reservations) {
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
+    public static ReservationResponse fromReservation(
+            final Reservation reservation
+    ) {
+        return new ReservationResponse(
+                reservation.id(),
+                UserResponse.fromUser(reservation.user()),
+                reservation.date(),
+                TimeSlotResponse.fromTimeSlot(reservation.timeSlot()),
+                ThemeResponse.fromTheme(reservation.theme())
+        );
     }
 }

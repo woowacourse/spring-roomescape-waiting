@@ -7,39 +7,45 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.application.ReservationService;
 import roomescape.application.UserService;
 import roomescape.domain.user.User;
 import roomescape.presentation.auth.Authenticated;
 import roomescape.presentation.request.SignupRequest;
-import roomescape.presentation.response.UserReservationResponse;
+import roomescape.presentation.response.UserReservedRecordsResponse;
 import roomescape.presentation.response.UserResponse;
 
 @RestController
-@RequestMapping("/users")
 public class UserController {
 
     private final UserService userService;
-    private final ReservationService reservationService;
 
-    public UserController(final UserService userService, final ReservationService reservationService) {
+    public UserController(final UserService userService) {
         this.userService = userService;
-        this.reservationService = reservationService;
     }
 
-    @PostMapping
+    @PostMapping("/users")
     @ResponseStatus(CREATED)
-    public UserResponse register(@RequestBody @Valid final SignupRequest request) {
-        var user = userService.register(request.email(), request.password(), request.name());
-        return UserResponse.from(user);
+    public UserResponse createUser(
+            @RequestBody @Valid final SignupRequest request
+    ) {
+        User user = userService.saveUser(request.email(), request.password(), request.name());
+
+        return UserResponse.fromUser(user);
     }
 
-    @GetMapping("/reservations")
-    public List<UserReservationResponse> getAllReservationsByUser(@Authenticated final User user) {
-        var reservations = reservationService.getReservations(user.id());
-        return UserReservationResponse.from(reservations);
+    @GetMapping("/admin/users")
+    public List<UserResponse> readAllUsers() {
+        List<User> users = userService.findAllUsers();
+
+        return UserResponse.fromUsers(users);
+    }
+
+    @GetMapping("/users/reservations")
+    public List<UserReservedRecordsResponse> readAllRecordByUser(
+            @Authenticated final User user
+    ) {
+        return userService.findTotalRecordByUserId(user.id());
     }
 }

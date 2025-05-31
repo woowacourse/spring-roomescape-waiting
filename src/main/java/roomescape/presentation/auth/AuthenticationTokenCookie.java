@@ -18,7 +18,7 @@ public class AuthenticationTokenCookie extends Cookie {
     }
 
     public static AuthenticationTokenCookie fromRequest(final HttpServletRequest request) {
-        var cookies = request.getCookies();
+        Cookie[] cookies = request.getCookies();
         if (cookies == null) {
             return new AuthenticationTokenCookie(null, false);
         }
@@ -32,14 +32,14 @@ public class AuthenticationTokenCookie extends Cookie {
     }
 
     public static AuthenticationTokenCookie forResponse(final String token) {
-        var cookie = new AuthenticationTokenCookie(token, true);
+        AuthenticationTokenCookie cookie = new AuthenticationTokenCookie(token, true);
         cookie.setHttpOnly(true);
         cookie.setPath("/");
         return cookie;
     }
 
     public static AuthenticationTokenCookie forExpire() {
-        var cookie = new AuthenticationTokenCookie("", true);
+        AuthenticationTokenCookie cookie = new AuthenticationTokenCookie("", true);
         cookie.setMaxAge(0);
         return cookie;
     }

@@ -15,32 +15,35 @@ import roomescape.presentation.request.LoginRequest;
 import roomescape.presentation.response.UserResponse;
 
 @RestController
-public class LoginController {
+public class AuthController {
 
     private final AuthenticationService authenticationService;
 
-    public LoginController(final AuthenticationService authenticationService) {
+    public AuthController(final AuthenticationService authenticationService) {
         this.authenticationService = authenticationService;
     }
 
     @PostMapping("/login")
-    public void performLogin(
-            @RequestBody @Valid final LoginRequest request,
-            final HttpServletResponse response
+    public void login(
+            @RequestBody @Valid final LoginRequest request, final HttpServletResponse response
     ) {
-        var issuedToken = authenticationService.issueToken(request.email(), request.password());
-        var tokenCookie = AuthenticationTokenCookie.forResponse(issuedToken);
+        String issuedToken = authenticationService.issueToken(request.email(), request.password());
+        AuthenticationTokenCookie tokenCookie = AuthenticationTokenCookie.forResponse(issuedToken);
         response.addCookie(tokenCookie);
     }
 
     @GetMapping("/login/check")
-    public UserResponse getUser(@Authenticated final User user) {
-        return UserResponse.from(user);
+    public UserResponse checkLogin(
+            @Authenticated final User user
+    ) {
+        return UserResponse.fromUser(user);
     }
 
     @PostMapping("/logout")
-    public void performLogout(final HttpServletResponse response) throws IOException {
-        var tokenCookieForExpire = AuthenticationTokenCookie.forExpire();
+    public void logout(
+            final HttpServletResponse response
+    ) throws IOException {
+        AuthenticationTokenCookie tokenCookieForExpire = AuthenticationTokenCookie.forExpire();
         response.addCookie(tokenCookieForExpire);
         response.sendRedirect("/");
     }

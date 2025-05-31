@@ -8,16 +8,20 @@ public record UserResponse(
         String name
 ) {
 
-    public static UserResponse from(final User user) {
+    public static List<UserResponse> fromUsers(
+            final List<User> users
+    ) {
+        return users.stream()
+                .map(UserResponse::fromUser)
+                .toList();
+    }
+
+    public static UserResponse fromUser(
+            final User user
+    ) {
         return new UserResponse(
                 user.id(),
                 user.name()
         );
-    }
-
-    public static List<UserResponse> from(final List<User> users) {
-        return users.stream()
-                .map(UserResponse::from)
-                .toList();
     }
 }

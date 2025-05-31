@@ -18,28 +18,28 @@ class UserControllerTest {
 
     private static final Map<String, String> MEMBER_BODY = Map.of(
             "email", "razel@email.com",
-            "password", "razelpassword",
-            "name", "razel"
+            "password", "razel1234",
+            "name", "라젤"
     );
 
     @Test
     @DisplayName("멤버 추가 요청시, id를 포함한 멤버와 CREATED를 응답한다")
-    void addMemberTest() {
+    void addMember() {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(MEMBER_BODY)
                 .when().post("/users")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("name", Matchers.equalTo("razel"));
+                .body("name", Matchers.equalTo("라젤"));
     }
 
     @Test
     @DisplayName("예약 조회 요청시, 존재하는 모든 예약과 OK를 응답한다")
-    void getAllReservationsByUser() {
+    void readAllRecordByUser() {
         var token = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("email", "popo@email.com", "password", "password"))
+                .body(Map.of("email", "user1@email.com", "password", "password1"))
                 .when().post("/login")
                 .then().statusCode(200)
                 .extract().response().getDetailedCookies().getValue("token");

@@ -12,7 +12,7 @@ import org.springframework.test.context.ActiveProfiles;
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class LoginControllerTest {
+class AuthControllerTest {
 
     private static String getToken(String email, String password) {
         return RestAssured.given()
@@ -25,7 +25,7 @@ class LoginControllerTest {
 
     @DisplayName("어드민 계정으로 로그인 한다")
     @Test
-    void adminLoginTest() {
+    void adminLogin() {
         var token = getToken("admin@email.com", "password");
 
         RestAssured.given()
@@ -37,8 +37,8 @@ class LoginControllerTest {
 
     @DisplayName("사용자 계정으로 로그인 한다")
     @Test
-    void userLoginTest() {
-        final var token = getToken("popo@email.com", "password");
+    void userLogin() {
+        final var token = getToken("user1@email.com", "password1");
 
         RestAssured.given()
                 .contentType(ContentType.JSON)
@@ -49,7 +49,7 @@ class LoginControllerTest {
 
     @DisplayName("잘못된 비밀 번호로 로그인 하는 경우 예외를 던진다")
     @Test
-    void adminLoginTest_WhenPasswordIsWrong() {
+    void adminLogin_WhenPasswordIsWrong() {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "admin@email.com", "password", "wrong"))
@@ -59,7 +59,7 @@ class LoginControllerTest {
 
     @DisplayName("잘못된 이메일로 로그인 하는 경우 예외를 던진다")
     @Test
-    void adminLoginTest_WhenEmailNotExist() {
+    void adminLogin_WhenEmailNotExist() {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(Map.of("email", "wrong@email.com", "password", "password"))
@@ -69,8 +69,8 @@ class LoginControllerTest {
 
     @DisplayName("로그아웃 시 토큰 쿠키가 삭제되고 메인 페이지로 리다이렉트 된다")
     @Test
-    void logoutTest() {
-        var token = getToken("popo@email.com", "password");
+    void logout() {
+        var token = getToken("user1@email.com", "password1");
 
         RestAssured.given()
                 .cookie("token", token)

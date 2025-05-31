@@ -20,32 +20,44 @@ class TimeSlotControllerTest {
             "startAt", "13:00"
     );
 
+    private String getAdminToken() {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(Map.of("email", "admin@email.com", "password", "password"))
+                .when().post("/login")
+                .then().statusCode(200)
+                .extract().response().getDetailedCookies().getValue("token");
+    }
+
     @Test
     @DisplayName("예약 시간 추가 요청시, id를 포함한 예약 시간과 CREATED를 응답한다")
-    void addReservationTimeTest() {
+    void addReservationTime() {
+        var token = getAdminToken();
+
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
+                .cookie("token", token)
                 .body(RESERVATION_BODY)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("id", Matchers.equalTo(7))
+                .body("id", Matchers.equalTo(4))
                 .body("startAt", Matchers.equalTo("13:00:00"));
     }
 
     @Test
     @DisplayName("예약 시간 조회 요청시, 존재하는 모든 예약 시간과 OK를 응답한다")
-    void findAllReservationTimeTest() {
+    void findAllReservationTime() {
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value())
-                .body("size()", Matchers.is(6));
+                .body("size()", Matchers.is(3));
     }
 
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 없다면 NOT FOUND를 응답한다.")
-    void removeReservationTimeTest_WhenReservationTimeDoesNotExisted() {
+    void removeReservationTime_WhenReservationTimeDoesNotExisted() {
         RestAssured.given().log().all()
                 .when().delete("/times/1000")
                 .then().log().all()
@@ -54,10 +66,13 @@ class TimeSlotControllerTest {
 
     @Test
     @DisplayName("예약 시간 삭제 요청시, 주어진 아이디에 해당하는 예약 시간이 사용 중이라면 CONFLICT를 응답한다.")
-    void removeReservationTimeTest() {
+    void removeReservationTime() {
+        var token = getAdminToken();
+
         RestAssured.given().log().all()
-            .when().delete("/times/3")
-            .then().log().all()
-            .statusCode(HttpStatus.CONFLICT.value());
+                .cookie("token", token)
+                .when().delete("/admin/times/1")
+                .then().log().all()
+                .statusCode(HttpStatus.CONFLICT.value());
     }
 }

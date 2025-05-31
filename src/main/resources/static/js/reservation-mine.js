@@ -16,23 +16,20 @@ function render(data) {
         const row = tableBody.insertRow();
 
         /*
-        TODO: [2단계] 내 예약 목록 조회 기능
+        내 예약 목록 조회 기능
               response 명세에 맞춰 값 설정
          */
         const theme = item.theme.name;
         const date = item.date;
         const time = item.time.startAt;
-        const status = item.status;
+        const status = getStatusText(item.type, item.waitingRank);
 
         row.insertCell(0).textContent = theme;
         row.insertCell(1).textContent = date;
         row.insertCell(2).textContent = time;
         row.insertCell(3).textContent = status;
 
-        /*
-        TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 기능 구현 후 활성화
-         */
-        if (status !== '예약') { // 예약 대기 상태일 때 예약 대기 취소 버튼 추가하는 코드, 상태 값은 변경 가능
+        if (item.type === 'WAITING') {
             const cancelCell = row.insertCell(4);
             const cancelButton = document.createElement('button');
             cancelButton.textContent = '취소';
@@ -47,11 +44,23 @@ function render(data) {
     });
 }
 
+function getStatusText(type, waitingRank) {
+    if (type === 'RESERVATION') {
+        return '예약';
+    }
+    if (type === 'WAITING') {
+        return `${waitingRank}번째 예약대기`;
+    }
+    return '';
+}
+
 function requestDeleteWaiting(id) {
     /*
-    TODO: [3단계] 예약 대기 기능 - 예약 대기 취소 API 호출
+    예약 대기 기능 - 예약 대기 취소 API 호출
      */
-    const endpoint = '';
+    const WAITING_PATH = '/waitings';
+
+    const endpoint = `${WAITING_PATH}/${id}`;
     return fetch(endpoint, {
         method: 'DELETE'
     }).then(response => {
