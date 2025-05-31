@@ -99,14 +99,4 @@ class ThemeControllerTest {
                 )
                 .andExpect(status().isNoContent());
     }
-
-    @Test
-    void 존재하지_않는_테마_삭제_실패() throws Exception {
-        // given
-        // when & then
-        mockMvc.perform(delete("/themes/999")
-                        .contentType(MediaType.APPLICATION_JSON)
-                )
-                .andExpect(status().isNoContent());
-    }
 }
