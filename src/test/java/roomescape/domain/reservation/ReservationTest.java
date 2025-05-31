@@ -5,13 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDateTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
 import roomescape.domain.member.Role;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.Theme;
 import roomescape.exception.InvalidRequestException;
 
 class ReservationTest {

@@ -11,11 +11,11 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.Objects;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.domain.member.Member;
+import roomescape.domain.reservation.waiting.ReservationWaitingTicket;
+import roomescape.domain.reservation.slot.ReservationTime;
+import roomescape.domain.reservation.slot.Theme;
 import roomescape.exception.InvalidRequestException;
 
 @Entity
@@ -61,7 +61,7 @@ public class Reservation {
         this(null, member, date, time, theme, status);
     }
 
-    public Reservation() {
+    protected Reservation() {
     }
 
     public void setStatus(ReservationStatus reservationStatus) {

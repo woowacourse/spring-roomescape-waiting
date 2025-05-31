@@ -30,48 +30,48 @@ public class Member {
     private String password;
 
     public Member(Long id, String name, String email, Role role, String password) {
-        validateName(name);
-        validateEmail(email);
-        validatePassword(password);
         this.id = id;
-        this.name = Objects.requireNonNull(name);
-        this.email = Objects.requireNonNull(email);
+        this.name = ensureNameIsValid(name);
+        this.email = ensureEmailIsValid(email);
         this.role = Objects.requireNonNull(role, "역할이 존재해야 합니다.");
-        this.password = Objects.requireNonNull(password);
+        this.password = ensurePasswordIsValid(password);
     }
 
-    public Member() {
+    protected Member() {
     }
 
     public Member (String name, String email, Role role, String password) {
         this(null, name, email, role, password);
     }
 
-    private void validateName(String name) {
+    private String ensureNameIsValid(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("이름은 1글자 이상으로 이루어져야 합니다. ");
         }
         if (name.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("이름은 255자를 초과할 수 없습니다. 이름 길이 : " + name.length());
         }
+        return name;
     }
 
-    private void validateEmail(String email) {
+    private String ensureEmailIsValid(String email) {
         if (email == null || email.isBlank()) {
             throw new IllegalArgumentException("이메일은 1글자 이상으로 이루어져야 합니다. ");
         }
         if (email.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("이메일은 255자를 초과할 수 없습니다. 이메일 길이 : " + email.length());
         }
+        return email;
     }
 
-    private void validatePassword(String password) {
+    private String ensurePasswordIsValid(String password) {
         if (password == null || password.isBlank()) {
             throw new IllegalArgumentException("비밀번호는 1글자 이상으로 이루어져야 합니다. ");
         }
         if (password.length() > MAX_NAME_LENGTH) {
             throw new IllegalArgumentException("비밀번호는 255자를 초과할 수 없습니다. 비밀번호 길이 : " + password.length());
         }
+        return password;
     }
 
     @Override

@@ -1,12 +1,12 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservation.waiting;
 
-import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToOne;
 import java.time.LocalDateTime;
+import roomescape.domain.reservation.Reservation;
 
 @Entity
 public class ReservationWaitingTicket {
@@ -25,7 +25,7 @@ public class ReservationWaitingTicket {
         this.createdAt = LocalDateTime.now();
     }
 
-    public ReservationWaitingTicket() {
+    protected ReservationWaitingTicket() {
     }
 
     public Long getId() {

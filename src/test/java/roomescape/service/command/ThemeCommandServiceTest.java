@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.slot.Theme;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.repository.JpaThemeRepository;

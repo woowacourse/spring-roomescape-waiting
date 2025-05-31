@@ -5,7 +5,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.slot.Theme;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.repository.JpaThemeRepository;
 

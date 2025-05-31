@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.reservation.slot.ReservationTime;
 import roomescape.dto.time.ReservationTimeCreateRequestDto;
 import roomescape.dto.time.ReservationTimeResponseDto;
 import roomescape.exception.DuplicateContentException;

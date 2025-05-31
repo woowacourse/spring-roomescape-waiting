@@ -2,7 +2,7 @@ package roomescape.service.command;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Theme;
+import roomescape.domain.reservation.slot.Theme;
 import roomescape.dto.theme.ThemeCreateRequestDto;
 import roomescape.dto.theme.ThemeResponseDto;
 import roomescape.exception.DuplicateContentException;

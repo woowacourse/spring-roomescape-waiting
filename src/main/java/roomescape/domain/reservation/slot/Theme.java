@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.domain.reservation.slot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -21,9 +21,8 @@ public class Theme {
     private String thumbnail;
 
     public Theme(Long id, String name, String description, String thumbnail) {
-        validateName(name);
         this.id = id;
-        this.name = name;
+        this.name = ensureNameIsValid(name);
         this.description = Objects.requireNonNull(description,"테마 설명이 없습니다.");
         this.thumbnail = Objects.requireNonNull(thumbnail,"테마 이미지가 없습니다.");
     }
@@ -32,13 +31,14 @@ public class Theme {
         this(null, name, description, thumbnail);
     }
 
-    public Theme() {
+    protected Theme() {
     }
 
-    private void validateName(String name) {
+    private String ensureNameIsValid(String name) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("테마의 이름은 1글자 이상으로 이루어져야 합니다.");
         }
+        return name;
     }
 
     public Long getId() {

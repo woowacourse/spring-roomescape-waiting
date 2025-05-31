@@ -1,11 +1,10 @@
-package roomescape.domain;
+package roomescape.domain.reservation.slot;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.validation.constraints.NotNull;
 import java.time.LocalTime;
 import java.util.Objects;
 
@@ -27,7 +26,7 @@ public class ReservationTime {
         this(null, startAt);
     }
 
-    public ReservationTime() {
+    protected ReservationTime() {
     }
 
     public Long getId() {
