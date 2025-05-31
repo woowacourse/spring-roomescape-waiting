@@ -18,7 +18,8 @@ import roomescape.reservation.dto.AvailableReservationTimeRequest;
 import roomescape.reservation.dto.AvailableReservationTimeResponse;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateReservationResponse;
-import roomescape.reservation.dto.ReservationMineResponse;
+import roomescape.reservation.dto.ReservationWithRank;
+import roomescape.reservation.dto.ReservationsWithRankResponse;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -28,30 +29,9 @@ public class ReservationRestController {
 
     private final ReservationService reservationService;
 
-    @PostMapping
-    public ResponseEntity<CreateReservationResponse> createReservation(
-            @RequestBody final CreateReservationRequest createReservationRequest,
-            final Member member
-    ) {
-        final Reservation savedReservation = reservationService.save(
-                member,
-                createReservationRequest.date(),
-                createReservationRequest.timeId(),
-                createReservationRequest.themeId()
-        );
-        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(savedReservation));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable final Long id) {
-        reservationService.deleteById(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
     @GetMapping
     public ResponseEntity<List<CreateReservationResponse>> getReservations() {
-        final List<Reservation> reservations = reservationService.findAll();
+        final List<Reservation> reservations = reservationService.findAllConfirmReservations();
         final List<CreateReservationResponse> createReservationResponse = reservations.stream()
                 .map(CreateReservationResponse::from)
                 .toList();
@@ -59,28 +39,72 @@ public class ReservationRestController {
         return ResponseEntity.ok(createReservationResponse);
     }
 
+    @GetMapping("/waiting")
+    public ResponseEntity<List<ReservationsWithRankResponse>> getWaiting() {
+        final List<ReservationWithRank> waitings = reservationService.findAllWaitingReservations();
+        final List<ReservationsWithRankResponse> waitingsResponse = waitings.stream()
+                .map(ReservationsWithRankResponse::from)
+                .toList();
+
+        return ResponseEntity.ok(waitingsResponse);
+    }
+
+    @PostMapping
+    public ResponseEntity<CreateReservationResponse> createConfirmReservation(
+            @RequestBody final CreateReservationRequest createReservationRequest,
+            final Member member) {
+        final Reservation savedReservation = reservationService.saveConfirm(
+                member,
+                createReservationRequest.date(),
+                createReservationRequest.timeId(),
+                createReservationRequest.themeId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(savedReservation));
+    }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<CreateReservationResponse> createWaitingReservation(
+            @RequestBody final CreateReservationRequest createReservationRequest,
+            final Member member) {
+        final Reservation savedReservation = reservationService.saveWaiting(
+                member,
+                createReservationRequest.date(),
+                createReservationRequest.timeId(),
+                createReservationRequest.themeId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(CreateReservationResponse.from(savedReservation));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable final Long id,
+            Member member
+    ) {
+        reservationService.cancelById(id, member);
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteWaitingReservation(@PathVariable final Long id) {
+        reservationService.cancelWaitingById(id);
+        return ResponseEntity.noContent().build();
+    }
+
     @GetMapping("/available-times")
     public ResponseEntity<List<AvailableReservationTimeResponse>> getAvailableReservationTimes(
             @ModelAttribute final AvailableReservationTimeRequest request) {
-
         return ResponseEntity.ok(
-                reservationService.findAvailableReservationTimes(request.date(), request.themeId()).stream()
+                reservationService.findAvailableReservationTimes(request.date(), request.themeId())
+                        .stream()
                         .map(availableReservationTime -> new AvailableReservationTimeResponse(
                                 availableReservationTime.id(),
                                 availableReservationTime.startAt(),
-                                availableReservationTime.alreadyBooked()
-                        ))
-                        .toList()
-        );
+                                availableReservationTime.alreadyBooked()))
+                        .toList());
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<List<ReservationMineResponse>> getMyReservations(final Member member) {
-        final List<Reservation> reservations = reservationService.findByMember(member);
-        final List<ReservationMineResponse> reservationMineResponses = reservations.stream()
-                .map(ReservationMineResponse::from)
-                .toList();
+    public ResponseEntity<List<ReservationsWithRankResponse>> getMyReservations(final Member member) {
+        final List<ReservationsWithRankResponse> reservations = reservationService.findReservationsByMember(member);
 
-        return ResponseEntity.ok(reservationMineResponses);
+        return ResponseEntity.ok(reservations);
     }
 }

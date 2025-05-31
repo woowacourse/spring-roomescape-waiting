@@ -18,6 +18,7 @@ import roomescape.member.domain.Email;
 import roomescape.member.domain.Password;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
@@ -132,24 +133,25 @@ class ThemeServiceTest {
                 Role.USER);
         memberRepository.save(member);
 
-        final Reservation inlineReservation = new Reservation(member, now.minusDays(7), reservationTime,
-                theme1);
-        final Reservation outlineReservation = new Reservation(member, now.plusDays(10), reservationTime,
-                theme1);
-        final Reservation inlineReservation2 = new Reservation(member, now.minusDays(5), reservationTime,
-                theme1);
-        final Reservation inlineReservation3 = new Reservation(member, now.minusDays(4), reservationTime,
-                theme2);
-        final Reservation inlineReservation4 = new Reservation(member, now.minusDays(3), reservationTime,
-                theme2);
-        final Reservation inlineReservation5 = new Reservation(member, now.minusDays(5), reservationTime,
-                theme2);
+        final Reservation inlineReservation = new Reservation(member, new ReservationSlot(now.minusDays(7), reservationTime, theme1));
+        final Reservation outlineReservation = new Reservation(member, new ReservationSlot(now.plusDays(10), reservationTime, theme1));
+        final Reservation inlineReservation2 = new Reservation(member, new ReservationSlot(now.minusDays(5), reservationTime, theme1));
+        final Reservation inlineReservation3 = new Reservation(member, new ReservationSlot(now.minusDays(4), reservationTime, theme2));
+        final Reservation inlineReservation4 = new Reservation(member, new ReservationSlot(now.minusDays(3), reservationTime, theme2));
+        final Reservation inlineReservation5 = new Reservation(member, new ReservationSlot(now.minusDays(5), reservationTime, theme2));
+        System.out.println(1);
         reservationRepository.save(inlineReservation);
+        System.out.println(2);
         reservationRepository.save(outlineReservation);
+        System.out.println(3);
         reservationRepository.save(inlineReservation2);
+        System.out.println(4);
         reservationRepository.save(inlineReservation3);
+        System.out.println(5);
         reservationRepository.save(inlineReservation4);
+        System.out.println(6);
         reservationRepository.save(inlineReservation5);
+        System.out.println(7);
 
         // when
         final List<Theme> popularThemes = themeService.findPopularThemes();

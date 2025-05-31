@@ -17,9 +17,9 @@ public record AdminReservationResponse(
         return new AdminReservationResponse(
                 reservation.getId(),
                 MemberResponse.from(reservation.getMember()),
-                ThemeResponse.from(reservation.getTheme()),
-                ReservationTimeResponse.from(reservation.getTime()),
-                reservation.getDate()
+                ThemeResponse.from(reservation.getSlot().getTheme()),
+                ReservationTimeResponse.from(reservation.getSlot().getTime()),
+                reservation.getSlot().getDate()
         );
     }
 }

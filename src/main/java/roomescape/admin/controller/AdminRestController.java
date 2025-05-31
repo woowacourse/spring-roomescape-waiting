@@ -21,38 +21,34 @@ import roomescape.reservation.domain.Reservation;
 @RestController
 public class AdminRestController {
 
-    private final AdminService adminService;
+        private final AdminService adminService;
 
-    @PostMapping("/reservations")
-    public ResponseEntity<AdminReservationResponse> createReservation(
-            @RequestBody final AdminReservationRequest adminReservationRequest
-    ) {
-        final Long id = adminService.saveByAdmin(
-                adminReservationRequest.date(),
-                adminReservationRequest.themeId(),
-                adminReservationRequest.timeId(),
-                adminReservationRequest.memberId()
-        );
-        final Reservation found = adminService.getById(id);
+        @PostMapping("/reservations")
+        public ResponseEntity<AdminReservationResponse> createReservation(
+                        @RequestBody final AdminReservationRequest adminReservationRequest) {
+                final Long id = adminService.saveByAdmin(
+                                adminReservationRequest.date(),
+                                adminReservationRequest.themeId(),
+                                adminReservationRequest.timeId(),
+                                adminReservationRequest.memberId());
+                final Reservation found = adminService.getById(id);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(AdminReservationResponse.from(found));
-    }
+                return ResponseEntity.status(HttpStatus.CREATED).body(AdminReservationResponse.from(found));
+        }
 
-    @GetMapping("/searchable-reservations")
-    public ResponseEntity<List<AdminReservationResponse>> getReservationsBySearch(
-            @ModelAttribute ReservationSearchRequest searchRequest
-    ) {
-        final List<Reservation> searchedReservations = adminService.findByInFromTo(
-                searchRequest.themeId(),
-                searchRequest.memberId(),
-                searchRequest.dateFrom(),
-                searchRequest.dateTo()
-        );
+        @GetMapping("/searchable-reservations")
+        public ResponseEntity<List<AdminReservationResponse>> getReservationsBySearch(
+                        @ModelAttribute ReservationSearchRequest searchRequest) {
+                final List<Reservation> searchedReservations = adminService.findReservationsByThemeMemberAndDateRange(
+                                searchRequest.themeId(),
+                                searchRequest.memberId(),
+                                searchRequest.dateFrom(),
+                                searchRequest.dateTo());
 
-        final List<AdminReservationResponse> searchedResponses = searchedReservations.stream()
-                .map(AdminReservationResponse::from)
-                .toList();
+                final List<AdminReservationResponse> searchedResponses = searchedReservations.stream()
+                                .map(AdminReservationResponse::from)
+                                .toList();
 
-        return ResponseEntity.ok(searchedResponses);
-    }
+                return ResponseEntity.ok(searchedResponses);
+        }
 }
