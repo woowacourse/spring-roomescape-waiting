@@ -41,7 +41,7 @@ public class ThemeService {
 
     @Transactional
     public void deleteById(final Long id) {
-        if (reservationRepository.existsByReservationSchedule_Theme_Id(id)) {
+        if (reservationRepository.existsByThemeId(id)) {
             throw new BadRequestException("이 테마의 예약이 존재합니다.");
         }
         themeRepository.deleteById(id);

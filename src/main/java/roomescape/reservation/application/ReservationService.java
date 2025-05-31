@@ -89,7 +89,7 @@ public class ReservationService {
         final String date) {
         final List<ReservationTime> reservationTimes = reservationScheduleService.getAllReservationTimes();
         final Theme selectedTheme = reservationScheduleService.findThemeById(themeId);
-        final List<Reservation> bookedReservations = reservationRepository.findByReservationSchedule_DateAndReservationSchedule_Theme_Id(
+        final List<Reservation> bookedReservations = reservationRepository.findByDateAndThemeId(
             LocalDate.parse(date),
             themeId);
         return getAvailableReservationTimeResponses(reservationTimes, bookedReservations,
@@ -103,7 +103,7 @@ public class ReservationService {
         final LocalDate end
     ) {
         final List<Reservation> reservations = reservationRepository
-            .findByReservationSchedule_Theme_IdAndMemberIdAndReservationSchedule_DateBetween(themeId, memberId, start, end);
+            .findByThemeIdAndMemberIdAndDateBetween(themeId, memberId, start, end);
         return reservations.stream()
             .map(ReservationResponse::of)
             .toList();
@@ -121,7 +121,7 @@ public class ReservationService {
         final Member member = getMember(memberId);
         ReservationSchedule schedule = reservationScheduleService.createReservationSchedule(
             request);
-        final List<Reservation> sameTimeReservations = reservationRepository.findByReservationSchedule_DateAndReservationSchedule_Theme_Id(
+        final List<Reservation> sameTimeReservations = reservationRepository.findByDateAndThemeId(
             schedule.getDate(), schedule.getThemeId());
         validateIsBooked(sameTimeReservations, schedule);
         validatePastDateTime(schedule);
