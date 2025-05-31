@@ -18,14 +18,17 @@ public class Waiting {
     private LocalDateTime createdAt;
 
     @ManyToOne
+    @JoinColumn(name = "member_id")
     private Member member;
 
     private LocalDate date;
 
     @ManyToOne
+    @JoinColumn(name = "theme_id")
     private Theme theme;
 
     @ManyToOne
+    @JoinColumn(name = "time_id")
     private ReservationTime time;
 
     public Waiting(Long id, LocalDateTime createdAt, Member member, LocalDate date, Theme theme, ReservationTime time) {
