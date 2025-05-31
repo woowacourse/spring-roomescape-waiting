@@ -1,5 +1,6 @@
 package roomescape.waiting.domain;
 
+import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
@@ -11,6 +12,7 @@ import java.time.LocalTime;
 import java.util.Objects;
 import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSchedule;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -24,37 +26,23 @@ public class Waiting {
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     private Member member;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private ReservationTime reservationTime;
-
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    private Theme theme;
-
-    private LocalDate date;
+    @Embedded
+    private ReservationSchedule reservationSchedule;
 
     protected Waiting() {}
 
     public Waiting(
         final Long id,
         final Member member,
-        final ReservationTime reservationTime,
-        final Theme theme,
-        final LocalDate date
+        final ReservationSchedule reservationSchedule
     ) {
         this.id = id;
         this.member = member;
-        this.reservationTime = reservationTime;
-        this.theme = theme;
-        this.date = date;
+        this.reservationSchedule = reservationSchedule;
     }
 
-    public Waiting(
-        final Member member,
-        final ReservationTime reservationTime,
-        final Theme theme,
-        final LocalDate date
-    ) {
-        this(null, member, reservationTime, theme, date);
+    public Waiting(final Member member, final ReservationSchedule reservationSchedule) {
+        this(null, member, reservationSchedule);
     }
 
     public Reservation convertToReservation() {
@@ -67,20 +55,28 @@ public class Waiting {
         return id;
     }
 
+    public ReservationSchedule getReservationSchedule() {
+        return reservationSchedule;
+    }
+
     public Member getMember() {
         return member;
     }
 
+    public boolean isSameMemberId(Long memberId) {
+        return this.member.isSameMember(memberId);
+    }
+
     public ReservationTime getReservationTime() {
-        return reservationTime;
+        return reservationSchedule.getReservationTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return reservationSchedule.getTheme();
     }
 
     public LocalDate getDate() {
-        return date;
+        return reservationSchedule.getDate();
     }
 
     public String getMemberName() {
@@ -88,11 +84,11 @@ public class Waiting {
     }
 
     public String getThemeName() {
-        return theme.getName();
+        return reservationSchedule.getThemeName();
     }
 
     public LocalTime getReservationStartAt() {
-        return reservationTime.getStartAt();
+        return reservationSchedule.getStartAt();
     }
 
     @Override

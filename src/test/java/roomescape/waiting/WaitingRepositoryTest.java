@@ -12,6 +12,8 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.application.ReservationScheduleService;
+import roomescape.reservation.domain.ReservationSchedule;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -47,10 +49,12 @@ public class WaitingRepositoryTest {
         ReservationTime reservationTime = reservationTimeRepository.findById(3L).orElseThrow(); // 다른 예약 시간 사용
         LocalDate date = LocalDate.now().plusDays(15); // 더 먼 미래 날짜 사용
 
+        ReservationSchedule reservationSchedule = new ReservationSchedule(date, theme,
+            reservationTime);
         // 같은 테마, 같은 시간, 같은 날짜에 대기 등록 (순서대로 member1, member2, member3)
-        waitingRepository.save(new Waiting(member1, reservationTime, theme, date));
-        waitingRepository.save(new Waiting(member2, reservationTime, theme, date));
-        waitingRepository.save(new Waiting(member3, reservationTime, theme, date));
+        waitingRepository.save(new Waiting(member1, reservationSchedule));
+        waitingRepository.save(new Waiting(member2, reservationSchedule));
+        waitingRepository.save(new Waiting(member3, reservationSchedule));
 
         // when
         List<WaitingWithRank> waitingsByMember1 = waitingRepository.findWaitingsWithRankByMemberId(member1.getId());

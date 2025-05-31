@@ -77,7 +77,7 @@ public class ReservationService {
     public void deleteReservationAndGetFirstWaiting(final Long reservationId) {
         Reservation reservation = getReservation(reservationId);
         deleteById(reservation.getId());
-        waitingRepository.findFirstByThemeIdAndDateAndReservationTimeIdOrderById(
+        waitingRepository.findFirstByReservationSchedule_Theme_IdAndReservationSchedule_DateAndReservationSchedule_ReservationTime_IdOrderById(
             reservation.getTheme().getId(),
             reservation.getDate(),
             reservation.getTime().getId()

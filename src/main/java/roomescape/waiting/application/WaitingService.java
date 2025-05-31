@@ -7,79 +7,71 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.impl.NotFoundException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.repository.MemberRepository;
+import roomescape.reservation.application.ReservationScheduleService;
 import roomescape.reservation.application.dto.MemberReservationRequest;
 import roomescape.reservation.application.dto.MyReservation;
+import roomescape.reservation.domain.ReservationSchedule;
+import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.waiting.application.dto.WaitingIdResponse;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingWithRank;
-import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.ReservationTimeRepository;
 import roomescape.waiting.application.dto.WaitingInfoResponse;
 import roomescape.waiting.domain.repository.WaitingRepository;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.repository.ThemeRepository;
 
 @Service
 @Transactional(readOnly = true)
 public class WaitingService {
 
-    private final WaitingRepository waitingRepository;
+    private final ReservationScheduleService reservationScheduleService;
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
     private final MemberRepository memberRepository;
 
     public WaitingService(
-        final WaitingRepository waitingRepository,
+        final ReservationScheduleService reservationScheduleService,
         final ReservationRepository reservationRepository,
-        final ReservationTimeRepository reservationTimeRepository,
-        final ThemeRepository themeRepository,
+        final WaitingRepository waitingRepository,
         final MemberRepository memberRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
+        this.reservationScheduleService = reservationScheduleService;
         this.memberRepository = memberRepository;
     }
 
     @Transactional
-    public WaitingIdResponse addWaiting(
-        @Valid final MemberReservationRequest request,
-        final Long memberId
-    ) {
-        ReservationTime reservationTime = getReservationTime(request.timeId());
-        Member member = getMember(memberId);
-        Theme theme = getTheme(request.themeId());
-        Waiting waiting = new Waiting(member, reservationTime, theme, request.date());
-        validateAlreadyReserved(request, member, theme, reservationTime);
-        validateAlreadyWaiting(request, member, theme, reservationTime);
+    public WaitingIdResponse addWaiting(@Valid final MemberReservationRequest request,
+        final Long memberId) {
+        ReservationSchedule schedule = reservationScheduleService.createReservationSchedule(
+            request);
+        Member member = findMemberById(memberId);
+        Waiting waiting = new Waiting(member, schedule);
+        validateAlreadyReserved(waiting);
+        validateAlreadyWaiting(waiting);
         Waiting savedWaiting = waitingRepository.save(waiting);
         return WaitingIdResponse.from(savedWaiting);
     }
 
-    private void validateAlreadyReserved(
-        final MemberReservationRequest request,
-        final Member member,
-        final Theme theme,
-        final ReservationTime reservationTime
-    ) {
+    private void validateAlreadyReserved(final Waiting waiting) {
+        Member member = waiting.getMember();
+        ReservationSchedule schedule = waiting.getReservationSchedule();
         boolean isAlreadyReserved = reservationRepository.existsByMemberIdAndThemeIdAndTimeIdAndDate(
-            member.getId(), theme.getId(), reservationTime.getId(), request.date());
+            member.getId(),
+            schedule.getThemeId(),
+            schedule.getReservationTimeId(),
+            schedule.getDate()
+        );
         if (isAlreadyReserved) {
             throw new IllegalArgumentException("이미 예약이 되어있는 상태에서는, 대기할 수 없습니다.");
         }
     }
 
-    private void validateAlreadyWaiting(
-        final MemberReservationRequest request,
-        final Member member,
-        final Theme theme,
-        final ReservationTime reservationTime
-    ) {
-        boolean isAlreadyWaiting = waitingRepository.existsByMemberIdAndThemeIdAndReservationTimeIdAndDate(
-            member.getId(), theme.getId(), reservationTime.getId(), request.date());
+    private void validateAlreadyWaiting(final Waiting waiting) {
+        Member member = waiting.getMember();
+        ReservationSchedule schedule = waiting.getReservationSchedule();
+        boolean isAlreadyWaiting = waitingRepository.existsByMemberIdAndReservationSchedule_Theme_IdAndReservationSchedule_ReservationTime_IdAndReservationSchedule_Date(
+            member.getId(), schedule.getThemeId(), schedule.getReservationTimeId(),
+            schedule.getDate());
         if (isAlreadyWaiting) {
             throw new IllegalArgumentException("이미 대기중인 상태에서는, 추가로 대기할 수 없습니다.");
         }
@@ -95,8 +87,8 @@ public class WaitingService {
 
     @Transactional
     public void cancel(final Long memberId, final Long waitingId) {
-        Waiting waiting = getWaiting(waitingId);
-        if (!waiting.getMember().getId().equals(memberId)) {
+        Waiting waiting = findWaitingById(waitingId);
+        if (!waiting.isSameMemberId(memberId)) {
             throw new IllegalArgumentException("본인의 대기만 삭제할 수 있습니다.");
         }
         waitingRepository.deleteById(waitingId);
@@ -104,7 +96,7 @@ public class WaitingService {
 
     @Transactional
     public void cancelFromAdmin(final Long waitingId) {
-        getWaiting(waitingId);
+        findWaitingById(waitingId);
         waitingRepository.deleteById(waitingId);
     }
 
@@ -115,22 +107,12 @@ public class WaitingService {
             .toList();
     }
 
-    private ReservationTime getReservationTime(final Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-            .orElseThrow(() -> new NotFoundException("선택한 예약 시간이 존재하지 않습니다."));
-    }
-
-    private Theme getTheme(final Long themeId) {
-        return themeRepository.findById(themeId)
-            .orElseThrow(() -> new NotFoundException("선택한 테마가 존재하지 않습니다."));
-    }
-
-    private Member getMember(final Long memberId) {
+    private Member findMemberById(final Long memberId) {
         return memberRepository.findById(memberId)
             .orElseThrow(() -> new NotFoundException("선택한 멤버가 존재하지 않습니다."));
     }
 
-    private Waiting getWaiting(final Long waitingId) {
+    private Waiting findWaitingById(final Long waitingId) {
         return waitingRepository.findById(waitingId)
             .orElseThrow(() -> new NotFoundException("선택한 웨이팅이 존재하지 않습니다."));
     }
