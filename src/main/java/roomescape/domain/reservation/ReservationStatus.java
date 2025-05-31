@@ -5,7 +5,7 @@ public enum ReservationStatus {
     WAITING("대기"),
     ;
 
-    private String message;
+    private final String message;
 
     ReservationStatus(String message) {
         this.message = message;

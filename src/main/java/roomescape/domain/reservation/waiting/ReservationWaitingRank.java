@@ -1,7 +1,7 @@
 package roomescape.domain.reservation.waiting;
 
 public class ReservationWaitingRank {
-    private int rank;
+    private final int rank;
 
     public ReservationWaitingRank(int rank) {
         this.rank = rank;
