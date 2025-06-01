@@ -7,6 +7,7 @@ import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 
 @Entity
 public class Waiting {
@@ -86,5 +87,26 @@ public class Waiting {
 
     public ReservationTime getTime() {
         return time;
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        if (this.id == null || ((Waiting) o).id == null) {
+            return false;
+        }
+
+        final Waiting waiting = (Waiting) o;
+        return Objects.equals(id, waiting.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }
