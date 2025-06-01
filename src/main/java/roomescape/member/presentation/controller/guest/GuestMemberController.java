@@ -3,11 +3,14 @@ package roomescape.member.presentation.controller.guest;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.security.application.AuthService;
 import roomescape.common.security.dto.request.LoginRequest;
+import roomescape.common.security.dto.request.MemberInfo;
+import roomescape.common.security.dto.response.CheckLoginResponse;
 import roomescape.common.security.dto.response.LoginResponse;
 import roomescape.common.security.infrastructure.CookieManager;
 import roomescape.member.application.MemberApplicationService;
@@ -42,5 +45,10 @@ public class GuestMemberController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, cookieManager.makeCookie(TOKEN, loginResponse.accessToken()).toString())
                 .build();
+    }
+
+    @GetMapping("/login/check")
+    public ResponseEntity<CheckLoginResponse> checkLogin(final MemberInfo memberInfo) {
+        return ResponseEntity.ok(CheckLoginResponse.from(memberApplicationService.getById(memberInfo.id())));
     }
 }
