@@ -1,52 +1,41 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
-
-import roomescape.auth.dto.LoginMember;
-import roomescape.common.exception.AlreadyInUseException;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.auth.service.dto.LoginMember;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.member.domain.Member;
-import roomescape.member.repository.MemberRepository;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
-import roomescape.reservation.dto.response.BookedReservationTimeResponse;
-import roomescape.reservation.dto.request.FilteringReservationRequest;
-import roomescape.reservation.dto.response.MyReservationsResponse;
-import roomescape.reservation.dto.request.ReservationCreateRequest;
-import roomescape.reservation.dto.response.ReservationResponse;
-import roomescape.reservation.dto.response.ReservationTimeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.ReservationTimeRepository;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.reservation.service.dto.request.FilteringReservationRequest;
+import roomescape.reservation.service.dto.response.MyReservationsResponse;
+import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.service.dto.response.ReservationTimeWithBookedResponse;
+import roomescape.waiting.domain.ReservationInformation;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.repository.WaitingRepository;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 @Service
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
-            final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<ReservationResponse> getAll() {
@@ -57,25 +46,20 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<MyReservationsResponse> getAllMemberReservations(LoginMember loginMember) {
-        return reservationRepository.findAllByMemberId(loginMember.id())
-                .stream()
-                .map(MyReservationsResponse::from)
-                .toList();
-    }
-
-    public ReservationResponse create(final ReservationCreateRequest request) {
-        if (isAlreadyBooked(request)) {
-            throw new AlreadyInUseException("reservation is already in use");
-        }
-
-        Reservation reservation = createReservation(request);
-        LocalDateTime now = LocalDateTime.now();
-        validateDateTime(now, reservation.getDate(), reservation.getTime().getStartAt());
-
-        Reservation savedReservation = reservationRepository.save(reservation);
-
-        return ReservationResponse.from(savedReservation);
+    public List<MyReservationsResponse> getAllLoginMemberReservations(LoginMember loginMember) {
+        ArrayList<MyReservationsResponse> results = new ArrayList<>(
+                reservationRepository.findAllByMemberId(loginMember.id())
+                        .stream()
+                        .map(MyReservationsResponse::from)
+                        .toList()
+        );
+        results.addAll(
+                waitingRepository.findAllWaitingInfoByMemberId(loginMember.id())
+                        .stream()
+                        .map(MyReservationsResponse::from)
+                        .toList()
+        );
+        return Collections.unmodifiableList(results);
     }
 
     public List<ReservationResponse> findReservationByFiltering(final FilteringReservationRequest request) {
@@ -90,76 +74,35 @@ public class ReservationService {
                 .toList();
     }
 
-    private boolean isAlreadyBooked(final ReservationCreateRequest request) {
-        return reservationRepository.existsByDateAndTimeIdAndThemeId(
-                request.date(), request.timeId(), request.themeId()
-        );
-    }
-
-    private Reservation createReservation(final ReservationCreateRequest request) {
-        ReservationTime reservationTime = getReservationTime(request);
-        Theme theme = getTheme(request);
-        LoginMember loginMember = request.loginMember();
-        Member member = memberRepository.findById(loginMember.id())
-                .orElseThrow(() -> new EntityNotFoundException("등록되지 않은 회원입니다."));
-        return new Reservation(member, request.date(), reservationTime, theme);
-    }
-
-    private Theme getTheme(final ReservationCreateRequest request) {
-        Long themeId = request.themeId();
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new EntityNotFoundException("theme not found id =" + themeId));
-    }
-
-    private ReservationTime getReservationTime(final ReservationCreateRequest request) {
-        Long timeId = request.timeId();
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new EntityNotFoundException("reservationsTime not found id =" + timeId));
-    }
-
-    private void validateDateTime(final LocalDateTime now, final LocalDate date, final LocalTime time) {
-        LocalDateTime dateTime = LocalDateTime.of(date, time);
-
-        if (now.isAfter(dateTime)) {
-            throw new IllegalArgumentException("이미 지난 예약 시간입니다.");
-        }
-    }
-
-    public void delete(final Long id) {
-        if (!reservationRepository.existsById(id)) {
-            throw new EntityNotFoundException("존재하지 않는 예약입니다.");
-        }
+    @Transactional
+    public void delete(final Long id, LoginMember loginMember) {
+        Reservation reservation = getAuthorizedReservation(id, loginMember);
         reservationRepository.deleteById(id);
+        reservationRepository.flush();
+        promoteFirstWaitingFor(reservation.getReservationInformation());
     }
 
-    public List<BookedReservationTimeResponse> getAvailableTimes(final LocalDate date, final Long themeId) {
-        Map<ReservationTime, Boolean> allTimes = processAlreadyBookedTimesMap(date, themeId);
-
-        return allTimes.entrySet()
-                .stream()
-                .map(entry -> bookedReservationTimeResponseOf(entry.getKey(), entry.getValue()))
-                .toList();
+    private Reservation getAuthorizedReservation(final Long id, LoginMember loginMember) {
+        return switch (loginMember.role()) {
+            case MEMBER -> reservationRepository.findByIdAndMemberId(id, loginMember.id())
+                    .orElseThrow(() -> new ForbiddenException("삭제 권한이 없습니다."));
+            case ADMIN -> reservationRepository.findById(id)
+                    .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
+        };
     }
 
-    private Map<ReservationTime, Boolean> processAlreadyBookedTimesMap(final LocalDate date, final Long themeId) {
-        Set<ReservationTime> alreadyBookedTimes = getAlreadyBookedTimes(date, themeId);
-
-        return reservationTimeRepository.findAll()
-                .stream()
-                .collect(Collectors.toMap(Function.identity(), alreadyBookedTimes::contains));
+    private void promoteFirstWaitingFor(ReservationInformation reservationInformation) {
+        Waiting firstWaiting = waitingRepository.findFirstByReservationInformation(reservationInformation);
+        if (firstWaiting != null) {
+            waitingRepository.delete(firstWaiting);
+            reservationRepository.save(Reservation.of(firstWaiting));
+        }
     }
 
-    private BookedReservationTimeResponse bookedReservationTimeResponseOf(
-            final ReservationTime reservationTime,
-            final boolean isAlreadyBooked
-    ) {
-        return new BookedReservationTimeResponse(ReservationTimeResponse.from(reservationTime), isAlreadyBooked);
-    }
-
-    private Set<ReservationTime> getAlreadyBookedTimes(final LocalDate date, final Long themeId) {
-        return reservationRepository.findByDateAndThemeId(date, themeId)
-                .stream()
-                .map(Reservation::getTime)
-                .collect(Collectors.toSet());
+    public List<ReservationTimeWithBookedResponse> getReservationTimesWithBooked(final LocalDate date, final Long themeId) {
+         return reservationTimeRepository.findAllWithBooked(date, themeId)
+                 .stream()
+                 .map(ReservationTimeWithBookedResponse::from)
+                 .toList();
     }
 }

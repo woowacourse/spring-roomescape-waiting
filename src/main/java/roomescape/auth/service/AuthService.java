@@ -2,9 +2,9 @@ package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
 
-import roomescape.auth.dto.LoginMember;
-import roomescape.auth.dto.request.LoginRequest;
-import roomescape.auth.dto.response.LoginResponse;
+import roomescape.auth.service.dto.LoginMember;
+import roomescape.auth.service.dto.request.LoginRequest;
+import roomescape.auth.service.dto.response.LoginResponse;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.LoginFailException;
 import roomescape.member.domain.Email;

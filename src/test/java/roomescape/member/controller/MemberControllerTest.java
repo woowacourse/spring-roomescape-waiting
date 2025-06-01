@@ -1,21 +1,20 @@
 package roomescape.member.controller;
 
-import static org.hamcrest.CoreMatchers.is;
-
-import java.util.Map;
-
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
+import java.util.Map;
 
-@ActiveProfiles("test")
+import static org.hamcrest.CoreMatchers.is;
+
+@TestPropertySource(properties = "spring.sql.init.mode=never")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class MemberControllerTest {
@@ -47,6 +46,6 @@ class MemberControllerTest {
                 .when().get("/members")
                 .then()
                 .statusCode(HttpStatus.OK.value())
-                .body("size()", is(2));
+                .body("size()", is(1));
     }
 }

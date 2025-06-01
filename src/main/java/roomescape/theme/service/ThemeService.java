@@ -5,11 +5,12 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.AlreadyInUseException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.dto.request.ThemeRequest;
-import roomescape.theme.dto.response.ThemeResponse;
+import roomescape.theme.service.dto.request.ThemeRequest;
+import roomescape.theme.service.dto.response.ThemeResponse;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.repository.ThemeRepository;
 
@@ -39,6 +40,7 @@ public class ThemeService {
         return ThemeResponse.from(theme);
     }
 
+    @Transactional
     public void delete(final Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new AlreadyInUseException("Theme with id " + id + " is already in use");

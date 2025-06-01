@@ -152,6 +152,7 @@ class ReservationControllerTest {
                 .then().extract().path("id");
 
         RestAssured.given().log().all()
+                .cookie("token", tokenValue)
                 .when().delete("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(204);
@@ -160,7 +161,10 @@ class ReservationControllerTest {
     @DisplayName("존재하지 않는 예약을 삭제할 경우 NOT_FOUND 반환")
     @Test
     void test7() {
+        String tokenValue = getAdminLoginTokenValue();
+
         RestAssured.given().log().all()
+                .cookie("token", tokenValue)
                 .when().delete("/reservations/0")
                 .then().log().all()
                 .statusCode(404);
