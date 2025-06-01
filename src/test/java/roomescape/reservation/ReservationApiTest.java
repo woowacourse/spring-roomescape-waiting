@@ -14,7 +14,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.auth.dto.LoginRequest;
+import roomescape.fixture.api.LoginFixture;
 import roomescape.global.auth.JwtTokenProvider;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.CreateUserReservationRequest;
@@ -42,7 +42,7 @@ public class ReservationApiTest {
             RestAssured.port = port;
             TOKEN = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(new LoginRequest("aaa@gmail.com", "1234"))
+                    .body(LoginFixture.userLoginRequest())
                     .when().post("/login")
                     .then().log().all()
                     .extract().cookie(TOKEN_COOKIE_NAME);
@@ -59,7 +59,7 @@ public class ReservationApiTest {
                     .then().log().all()
                     .statusCode(201)
                     .body("id", Matchers.equalTo(4))
-                    .body("member.name", Matchers.equalTo("사용자1"));
+                    .body("member.name", Matchers.equalTo(LoginFixture.USER_NAME));
         }
 
         @DisplayName("쿠키 정보가 올바르지 않을 경우 401을 반환한다.")
@@ -121,7 +121,7 @@ public class ReservationApiTest {
 
         private static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
         private static final CreateReservationRequest REQUEST = new CreateReservationRequest(
-                TOMORROW, 1L, 1L, 1L);
+                TOMORROW, 1L, 1L, LoginFixture.USER_ID);
         private static String TOKEN;
 
         @LocalServerPort
@@ -132,7 +132,7 @@ public class ReservationApiTest {
             RestAssured.port = port;
             TOKEN = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(new LoginRequest("admin@gmail.com", "1234"))
+                    .body(LoginFixture.adminLoginRequest())
                     .when().post("/login")
                     .then().log().all()
                     .extract().cookie(TOKEN_COOKIE_NAME);
@@ -149,7 +149,7 @@ public class ReservationApiTest {
                     .then().log().all()
                     .statusCode(201)
                     .body("id", Matchers.equalTo(4))
-                    .body("member.name", Matchers.equalTo("사용자1"));
+                    .body("member.name", Matchers.equalTo(LoginFixture.USER_NAME));
         }
 
         @DisplayName("쿠키 정보가 올바르지 않을 경우 401을 반환한다.")
@@ -233,7 +233,7 @@ public class ReservationApiTest {
             // given
             String TOKEN = RestAssured.given().log().all()
                     .contentType(ContentType.JSON)
-                    .body(new LoginRequest("aaa@gmail.com", "1234"))
+                    .body(LoginFixture.userLoginRequest())
                     .when().post("/login")
                     .then().log().all()
                     .extract().cookie(TOKEN_COOKIE_NAME);
