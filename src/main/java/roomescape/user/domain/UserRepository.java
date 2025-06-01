@@ -7,13 +7,13 @@ import java.util.Optional;
 
 public interface UserRepository {
 
-    Optional<User> findById(UserId id);
+    Optional<User> findById(Long id);
 
     Optional<User> findByEmail(Email email);
 
     List<User> findAll();
 
-    List<User> findAllByIds(List<UserId> ids);
+    List<User> findAllByIds(List<Long> ids);
 
     User save(User user);
 }

@@ -6,15 +6,15 @@ import java.util.Optional;
 
 public interface ReservationTimeRepository {
 
-    boolean existsById(ReservationTimeId id);
+    boolean existsById(Long id);
 
     boolean existsByStartAt(LocalTime startAt);
 
-    Optional<ReservationTime> findById(ReservationTimeId id);
+    Optional<ReservationTime> findById(Long id);
 
     List<ReservationTime> findAll();
 
     ReservationTime save(ReservationTime reservationTime);
 
-    void deleteById(ReservationTimeId id);
+    void deleteById(Long id);
 }

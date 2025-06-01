@@ -7,33 +7,30 @@ import roomescape.common.validate.Validator;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.domain.ThemeId;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.user.domain.UserId;
 
 @FieldNameConstants(level = AccessLevel.PRIVATE)
-public record CreateReservationServiceRequest(UserId userId,
+public record CreateReservationServiceRequest(Long userId,
                                               ReservationDate date,
-                                              ReservationTimeId timeId,
-                                              ThemeId themeId) {
+                                              Long timeId,
+                                              Long themeId) {
 
     public CreateReservationServiceRequest {
         validate(userId, date, timeId, themeId);
     }
 
     public Reservation toDomain(final ReservationTime time, final Theme theme) {
-        return Reservation.withoutId(
+        return Reservation.of(
                 userId,
                 date,
                 time,
                 theme);
     }
 
-    private void validate(final UserId userId,
+    private void validate(final Long userId,
                           final ReservationDate date,
-                          final ReservationTimeId timeId,
-                          final ThemeId themeId) {
+                          final Long timeId,
+                          final Long themeId) {
         Validator.of(CreateReservationServiceRequest.class)
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())

@@ -19,7 +19,6 @@ import roomescape.reservation.exception.PastDateReservationException;
 import roomescape.reservation.exception.PastTimeReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDateTime;
 
@@ -34,11 +33,8 @@ public class Reservation {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Embedded
-    @AttributeOverride(
-            name = UserId.Fields.value,
-            column = @Column(name = Fields.userId))
-    private UserId userId;
+    @Column
+    private Long userId;
 
     @Embedded
     @AttributeOverride(
@@ -46,69 +42,50 @@ public class Reservation {
             column = @Column(name = Fields.date))
     private ReservationDate date;
 
-    @Embedded
-    @AttributeOverride(
-            name = BookedStatus.Fields.sequence,
-            column = @Column(name = Fields.status))
-    private BookedStatus status;
-
     @ManyToOne
     private ReservationTime time;
 
     @ManyToOne
     private Theme theme;
 
-    public Reservation(final UserId userId,
-                       final ReservationDate date,
-                       final ReservationTime time,
-                       final Theme theme,
-                       final BookedStatus status
+    private Reservation(final Long userId,
+                        final ReservationDate date,
+                        final ReservationTime time,
+                        final Theme theme
     ) {
         validate(userId, date, time, theme);
         this.userId = userId;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
-    public Reservation(final ReservationId id,
-                       final UserId userId,
+    public Reservation(final Long id,
+                       final Long userId,
                        final ReservationDate date,
                        final ReservationTime time,
-                       final Theme theme,
-                       final BookedStatus status
+                       final Theme theme
     ) {
         validate(id);
         validate(userId, date, time, theme);
-        this.id = id.getValue();
+        this.id = id;
         this.userId = userId;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
     }
 
-    public static Reservation withId(final ReservationId id,
-                                     final UserId userId,
-                                     final ReservationDate date,
-                                     final ReservationTime time,
-                                     final Theme theme) {
-        return new Reservation(id, userId, date, time, theme, BookedStatus.from(0));
+    public static Reservation of(final Long userId,
+                                 final ReservationDate date,
+                                 final ReservationTime time,
+                                 final Theme theme) {
+        return new Reservation(userId, date, time, theme);
     }
 
-    public static Reservation withoutId(final UserId userId,
-                                        final ReservationDate date,
-                                        final ReservationTime time,
-                                        final Theme theme) {
-        return new Reservation(userId, date, time, theme, BookedStatus.from(0));
-    }
-
-    private static void validate(
-            final UserId userId,
-            final ReservationDate date,
-            final ReservationTime time,
-            final Theme theme) {
+    private static void validate(final Long userId,
+                                 final ReservationDate date,
+                                 final ReservationTime time,
+                                 final Theme theme) {
         Validator.of(Reservation.class)
                 .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label())
                 .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
@@ -116,7 +93,7 @@ public class Reservation {
                 .validateNotNull(Fields.theme, theme, DomainTerm.THEME.label());
     }
 
-    private static void validate(final ReservationId id) {
+    private static void validate(final Long id) {
         Validator.of(Reservation.class)
                 .validateNotNull(Fields.id, id, DomainTerm.RESERVATION_ID.label());
     }
@@ -135,7 +112,13 @@ public class Reservation {
         }
     }
 
-    public ReservationId getId() {
-        return ReservationId.from(id);
+    public void updateForPromotion(final Long userId) {
+        validateUserId(userId);
+        this.userId = userId;
+    }
+
+    private static void validateUserId(final Long userId) {
+        Validator.of(Reservation.class)
+                .validateNotNull(Fields.userId, userId, DomainTerm.USER_ID.label());
     }
 }

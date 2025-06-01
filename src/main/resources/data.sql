@@ -16,4 +16,5 @@ VALUES ('레벨2 탈출',
         '깊은 감옥에서 탈출하라!',
         'https://example.com/jail.jpg');
 
-
+INSERT INTO reservations (user_id, date, time_id, theme_id)
+VALUES (2, CURRENT_DATE + 1, 1, 1);

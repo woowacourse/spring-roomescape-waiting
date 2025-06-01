@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.application.service.ThemeCommandService;
 import roomescape.theme.application.service.ThemeQueryService;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.ui.dto.CreateThemeWebRequest;
 import roomescape.theme.ui.dto.ThemeResponse;
 
@@ -47,6 +46,6 @@ public class ThemeFacadeImpl implements ThemeFacade {
 
     @Override
     public void delete(final Long id) {
-        themeCommandService.delete(ThemeId.from(id));
+        themeCommandService.delete(id);
     }
 }

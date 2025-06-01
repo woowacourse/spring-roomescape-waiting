@@ -7,13 +7,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
 import roomescape.reservation.domain.ReservationRepository;
-import roomescape.reservation.infrastructure.vo.ThemBookingCount;
-import roomescape.theme.domain.ThemeId;
+import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.user.domain.UserId;
 
 import java.util.List;
 import java.util.Optional;
@@ -23,30 +19,30 @@ import java.util.Optional;
 public class ReservationRepositoryImpl implements ReservationRepository {
 
     private final JpaReservationRepository jpaReservationRepository;
-
+    
     @Override
-    public boolean existsByParams(final ReservationId id) {
-        return jpaReservationRepository.existsById(id.getValue());
+    public boolean existsById(final Long id) {
+        return jpaReservationRepository.existsById(id);
     }
 
     @Override
-    public boolean existsByParams(final ReservationTimeId timeId) {
-        return jpaReservationRepository.existsByTimeId(timeId.getValue());
+    public boolean existsByParams(final Long timeId) {
+        return jpaReservationRepository.existsByTimeId(timeId);
     }
 
     @Override
-    public boolean existsByParams(final ReservationDate date, final ReservationTimeId timeId, final ThemeId themeId) {
-        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId.getValue(), themeId.getValue());
+    public boolean existsByParams(final ReservationDate date, final Long timeId, final Long themeId) {
+        return jpaReservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
     }
 
     @Override
-    public Optional<Reservation> findById(final ReservationId id) {
-        return jpaReservationRepository.findById(id.getValue());
+    public Optional<Reservation> findById(final Long id) {
+        return jpaReservationRepository.findById(id);
     }
 
     @Override
-    public List<ReservationTimeId> findTimeIdByParams(final ReservationDate date, final ThemeId themeId) {
-        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId.getValue()).stream()
+    public List<Long> findTimeIdByParams(final ReservationDate date, final Long themeId) {
+        return jpaReservationRepository.findAllByDateAndThemeId(date, themeId).stream()
                 .map(Reservation::getTime)
                 .map(ReservationTime::getId)
                 .toList();
@@ -58,7 +54,7 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByUserId(final UserId userId) {
+    public List<Reservation> findAllByUserId(final Long userId) {
         return jpaReservationRepository.findAllByUserId(userId);
     }
 
@@ -68,18 +64,18 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public void deleteById(final ReservationId id) {
-        jpaReservationRepository.deleteById(id.getValue());
+    public void deleteById(final Long id) {
+        jpaReservationRepository.deleteById(id);
     }
 
     @Override
-    public List<ThemBookingCount> findThemesToBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
+    public List<ThemeBookingCount> findThemesToBookedCount(final ReservationDate startDate, final ReservationDate endDate, final int count) {
         Pageable topN = PageRequest.of(0, count);
         return jpaReservationRepository.findThemesWithBookedCount(startDate, endDate, topN);
     }
 
     @Override
-    public List<Reservation> findAllByParams(final UserId userId, final ThemeId themeId, final ReservationDate from, final ReservationDate to) {
+    public List<Reservation> findAllByParams(final Long userId, final Long themeId, final ReservationDate from, final ReservationDate to) {
         Specification<Reservation> spec = Specification.where(ReservationSpecs.isMemberReservation(userId))
                 .and(ReservationSpecs.isThemeReservation(themeId))
                 .and(ReservationSpecs.isReservationByPeriod(from, to));

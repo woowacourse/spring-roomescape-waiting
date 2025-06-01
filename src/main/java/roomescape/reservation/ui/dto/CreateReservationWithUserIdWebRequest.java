@@ -6,9 +6,6 @@ import roomescape.common.domain.DomainTerm;
 import roomescape.common.validate.Validator;
 import roomescape.reservation.application.dto.CreateReservationServiceRequest;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.theme.domain.ThemeId;
-import roomescape.time.domain.ReservationTimeId;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 
@@ -24,10 +21,11 @@ public record CreateReservationWithUserIdWebRequest(LocalDate date,
 
     public CreateReservationServiceRequest toServiceRequest() {
         return new CreateReservationServiceRequest(
-                UserId.from(userId),
+                userId,
                 ReservationDate.from(date),
-                ReservationTimeId.from(timeId),
-                ThemeId.from(themeId));
+                timeId,
+                themeId
+        );
     }
 
     private void validate(final LocalDate date, final Long timeId, final Long themeId, final Long userId) {

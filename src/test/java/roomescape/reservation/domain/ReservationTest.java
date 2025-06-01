@@ -11,7 +11,6 @@ import roomescape.theme.domain.ThemeDescription;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
-import roomescape.user.domain.UserId;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -31,7 +30,7 @@ class ReservationTest {
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(null, date, time, theme))
+        assertThatThrownBy(() -> Reservation.of(null, date, time, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.userId");
     }
@@ -40,12 +39,12 @@ class ReservationTest {
     @DisplayName("예약 날짜가 null이면 예외가 발생한다")
     void throwExceptionWhenReservationDateIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(userId, null, time, theme))
+        assertThatThrownBy(() -> Reservation.of(userId, null, time, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.date");
     }
@@ -54,12 +53,12 @@ class ReservationTest {
     @DisplayName("예약 시간이 null이면 예외가 발생한다")
     void throwExceptionWhenReservationTimeIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(userId, date, null, theme))
+        assertThatThrownBy(() -> Reservation.of(userId, date, null, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.time");
     }
@@ -68,12 +67,12 @@ class ReservationTest {
     @DisplayName("테마가 null이면 예외가 발생한다")
     void throwExceptionWhenThemeIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
         ReservationTime time = createReservationTime();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withoutId(userId, date, time, null))
+        assertThatThrownBy(() -> Reservation.of(userId, date, time, null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.theme");
     }
@@ -82,13 +81,13 @@ class ReservationTest {
     @DisplayName("예약 ID가 null이면 예외가 발생한다")
     void throwExceptionWhenReservationIdIsNull() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate date = ReservationDate.from(LocalDate.now().plusDays(1));
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
 
         // when & then
-        assertThatThrownBy(() -> Reservation.withId(null, userId, date, time, theme))
+        assertThatThrownBy(() -> new Reservation(null, userId, date, time, theme))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: Reservation.id");
     }
@@ -97,11 +96,11 @@ class ReservationTest {
     @DisplayName("과거 날짜로 예약하면 예외가 발생한다")
     void throwExceptionWhenReservationDateIsInThePast() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate pastDate = ReservationDate.from(LocalDate.now().minusDays(1));
         ReservationTime time = createReservationTime();
         Theme theme = createTheme();
-        Reservation reservation = Reservation.withoutId(userId, pastDate, time, theme);
+        Reservation reservation = Reservation.of(userId, pastDate, time, theme);
         LocalDateTime now = LocalDateTime.now();
 
         // when & then
@@ -113,20 +112,21 @@ class ReservationTest {
     @DisplayName("같은 날짜의 과거 시간으로 예약하면 예외가 발생한다")
     void throwExceptionWhenReservationTimeIsInThePast() {
         // given
-        UserId userId = UserId.from(1L);
+        Long userId = 1L;
         ReservationDate todayDate = ReservationDate.from(LocalDate.now());
         LocalDateTime now = LocalDateTime.now();
-        ReservationTime pastTime = ReservationTime.withoutId(now.toLocalTime().minusHours(1));
+        ReservationTime pastTime = ReservationTime.of(now.toLocalTime().minusHours(1));
         Theme theme = createTheme();
-        Reservation reservation = Reservation.withoutId(userId, todayDate, pastTime, theme);
+        Reservation reservation = Reservation.of(userId, todayDate, pastTime, theme);
 
-        // when & then
+        // when
+        // then
         assertThatThrownBy(() -> reservation.validatePast(now))
                 .isInstanceOf(PastTimeReservationException.class);
     }
 
     private Theme createTheme() {
-        return Theme.withoutId(
+        return Theme.of(
                 ThemeName.from("테스트 테마"),
                 ThemeDescription.from("테스트 설명"),
                 ThemeThumbnail.from("test.jpg")
@@ -134,7 +134,7 @@ class ReservationTest {
     }
 
     private ReservationTime createReservationTime() {
-        return ReservationTime.withoutId((LocalTime.of(14, 0)));
+        return ReservationTime.of((LocalTime.of(14, 0)));
     }
 
 }

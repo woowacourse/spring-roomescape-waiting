@@ -10,7 +10,6 @@ import roomescape.time.application.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.application.service.ReservationTimeCommandService;
 import roomescape.time.application.service.ReservationTimeQueryService;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.ui.dto.CreateReservationTimeWebRequest;
 import roomescape.time.ui.dto.ReservationTimeResponse;
 
@@ -73,13 +72,10 @@ class ReservationTimeFacadeImplTest {
 
         reservationTimeFacade.delete(reservationTimeId);
 
-        then(reservationTimeCommandService).should(times(1)).delete(any(ReservationTimeId.class));
+        then(reservationTimeCommandService).should(times(1)).delete(any(Long.class));
     }
 
     private ReservationTime createReservationTime(Long id, LocalTime startAt) {
-        return ReservationTime.withId(
-                ReservationTimeId.from(id),
-                startAt
-        );
+        return new ReservationTime(id, startAt);
     }
 }

@@ -10,24 +10,25 @@ import roomescape.auth.sign.password.Password;
 import roomescape.common.domain.DomainTerm;
 import roomescape.common.domain.Email;
 import roomescape.common.exception.NotFoundException;
+import roomescape.reservation.application.dto.MyReservationsResponse;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.application.service.ReservationQueryService;
+import roomescape.reservation.application.service.ReservationViewQueryService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.domain.ReservationId;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.domain.ReservationView;
+import roomescape.reservation.domain.WaitingReservation;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.reservation.ui.dto.ReservationResponse;
 import roomescape.reservation.ui.dto.ReservationSearchWebRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeDescription;
-import roomescape.theme.domain.ThemeId;
 import roomescape.theme.domain.ThemeName;
 import roomescape.theme.domain.ThemeThumbnail;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.user.application.service.UserQueryService;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.domain.UserName;
 import roomescape.user.domain.UserRole;
 
@@ -50,6 +51,9 @@ class ReservationFacadeTest {
 
     @Mock
     private ReservationQueryService reservationQueryService;
+
+    @Mock
+    private ReservationViewQueryService reservationViewQueryService;
 
     @Mock
     private ReservationCommandService reservationCommandService;
@@ -101,16 +105,26 @@ class ReservationFacadeTest {
     void getAllByUserId() {
         //then
         Long userId = 1L;
-        given(userQueryService.getById(any())).willReturn(createUser(1L));
         List<Reservation> reservations = List.of(createReservation(1L));
-        given(reservationQueryService.getAllByUserId(any(UserId.class))).willReturn(reservations);
+        User user = createUser(userId);
+        List<ReservationView> reservationViews = List.of(new ReservationView(
+                "T-1",
+                userId,
+                reservations.get(0).getDate(),
+                reservations.get(0).getTime(),
+                reservations.get(0).getTheme(),
+                ReservationStatus.CONFIRMED,
+                0
+        ));
+        given(userQueryService.getById(any())).willReturn(user);
+        given(reservationViewQueryService.getAllByUserId(any(Long.class))).willReturn(reservationViews);
 
         //when
-        List<ReservationResponse> result = reservationFacade.getAllByUserId(userId);
+        List<MyReservationsResponse> result = reservationFacade.getAllByUserId(userId);
 
         //then
         assertThat(result).hasSize(1);
-        then(reservationQueryService).should(times(1)).getAllByUserId(any(UserId.class));
+        then(reservationViewQueryService).should(times(1)).getAllByUserId(any(Long.class));
     }
 
     @Test
@@ -118,9 +132,7 @@ class ReservationFacadeTest {
     void getAllByUserIdWithNonExistentUserId() {
         //given
         Long nonExistentUserId = 9999L;
-        given(userQueryService.getById(any())).willReturn(createUser(nonExistentUserId));
-        given(reservationQueryService.getAllByUserId(any(UserId.class)))
-                .willThrow(new NotFoundException(DomainTerm.USER_ID));
+        given(userQueryService.getById(any())).willThrow(new NotFoundException(DomainTerm.USER_ID));
 
         //when
         //then
@@ -219,7 +231,7 @@ class ReservationFacadeTest {
         reservationFacade.delete(reservationId);
 
         //then
-        then(reservationCommandService).should(times(1)).delete(any(ReservationId.class));
+        then(reservationCommandService).should(times(1)).delete(any(Long.class));
     }
 
     @Test
@@ -228,7 +240,7 @@ class ReservationFacadeTest {
         //given
         Long nonExistentReservationId = 9999L;
         willThrow(new NotFoundException(DomainTerm.RESERVATION))
-                .given(reservationCommandService).delete(any(ReservationId.class));
+                .given(reservationCommandService).delete(any(Long.class));
 
         //when
         //then
@@ -238,16 +250,35 @@ class ReservationFacadeTest {
     }
 
     private Reservation createReservation(Long id) {
-        return Reservation.withId(
-                ReservationId.from(id),
-                UserId.from(1L),
+        return new Reservation(
+                id,
+                1L,
                 ReservationDate.from(LocalDate.now().plusDays(1)),
-                ReservationTime.withId(
-                        ReservationTimeId.from(1L),
+                new ReservationTime(
+                        1L,
                         LocalTime.of(15, 0)
                 ),
-                Theme.withId(
-                        ThemeId.from(1L),
+                new Theme(
+                        1L,
+                        ThemeName.from("테스트테마"),
+                        ThemeDescription.from("설명"),
+                        ThemeThumbnail.from("thumbnail.jpg")
+                )
+        );
+    }
+
+    private WaitingReservation createWaiting(Long id, int waitingNumber) {
+        return new WaitingReservation(
+                id,
+                1L,
+                waitingNumber,
+                ReservationDate.from(LocalDate.now().plusDays(1)),
+                new ReservationTime(
+                        1L,
+                        LocalTime.of(15, 0)
+                ),
+                new Theme(
+                        1L,
                         ThemeName.from("테스트테마"),
                         ThemeDescription.from("설명"),
                         ThemeThumbnail.from("thumbnail.jpg")
@@ -264,8 +295,8 @@ class ReservationFacadeTest {
     }
 
     private User createUser(Long Id) {
-        return User.withId(
-                UserId.from(Id),
+        return new User(
+                Id,
                 UserName.from("테스트"),
                 Email.from("email@email.com"),
                 Password.fromEncoded("password"),

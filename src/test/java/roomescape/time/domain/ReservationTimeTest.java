@@ -14,7 +14,7 @@ class ReservationTimeTest {
         // given
         // when
         // then
-        assertThatThrownBy(() -> ReservationTime.withoutId(null))
+        assertThatThrownBy(() -> ReservationTime.of(null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationTime.startAt");
     }
@@ -24,7 +24,7 @@ class ReservationTimeTest {
         // given
         // when
         // then
-        assertThatThrownBy(() -> ReservationTime.withId(null, LocalTime.MIN))
+        assertThatThrownBy(() -> new ReservationTime(null, LocalTime.MIN))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("Validation failed [while checking null]: ReservationTime.id");
     }

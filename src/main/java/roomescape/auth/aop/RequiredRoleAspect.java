@@ -48,7 +48,7 @@ public class RequiredRoleAspect {
                 .anyMatch(session.role()::includes);
 
         if (!authorized) {
-            throw new ForbiddenException(session.id(), session.role(), List.of(requiredRoles));
+            throw new ForbiddenException(session.userId(), session.role(), List.of(requiredRoles));
         }
     }
 

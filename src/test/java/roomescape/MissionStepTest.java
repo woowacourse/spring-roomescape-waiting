@@ -72,14 +72,14 @@ public class MissionStepTest {
     @DisplayName("1단계: localhost:8080/admin 요청 시 어드민 메인 페이지가 성공적으로 응답된다")
     void first() {
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
                         UserRole.ADMIN));
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -96,14 +96,14 @@ public class MissionStepTest {
             "예약들을 조회할 수 있다")
     void second() {
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
                         UserRole.ADMIN));
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -127,12 +127,12 @@ public class MissionStepTest {
     void third() {
         // given
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now())
         );
 
         final Theme theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포 제목"),
                         ThemeDescription.from("공포 설명"),
                         ThemeThumbnail.from("gongpo.com/image/1")
@@ -140,7 +140,7 @@ public class MissionStepTest {
         );
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -148,13 +148,13 @@ public class MissionStepTest {
 
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
-                theme.getId().getValue(),
-                user.getId().getValue()
+                time.getId(),
+                theme.getId(),
+                user.getId()
         );
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -168,7 +168,7 @@ public class MissionStepTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("user.id", is(user.getId().getValue().intValue()));
+                .body("user.id", is(user.getId().intValue()));
 
         RestAssured.given().log().all()
                 .cookie(TokenType.ACCESS.getDescription(), jwtManager.generate(claims, TokenType.ACCESS).getValue())
@@ -209,25 +209,25 @@ public class MissionStepTest {
     void fifth() {
         // given
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now()));
 
         final Theme theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포 제목"),
                         ThemeDescription.from("공포 설명"),
                         ThemeThumbnail.from("gongpo.com/image/1")
                 ));
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
                         UserRole.ADMIN));
 
         final Reservation reservation = reservationRepository.save(
-                Reservation.withoutId(
+                Reservation.of(
                         user.getId(),
                         ReservationDate.from(LocalDate.now().plusDays(1)),
                         time,
@@ -235,7 +235,7 @@ public class MissionStepTest {
                 ));
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -260,18 +260,18 @@ public class MissionStepTest {
     void sixth() {
         // given
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now()));
 
         final Theme theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("공포 제목"),
                         ThemeDescription.from("공포 설명"),
                         ThemeThumbnail.from("gongpo.com/image/1")
                 ));
 
         final User user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("강산"),
                         Email.from("email@email.com"),
                         Password.fromEncoded("1234"),
@@ -279,13 +279,13 @@ public class MissionStepTest {
 
         final CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
-                theme.getId().getValue(),
-                user.getId().getValue()
+                time.getId(),
+                theme.getId(),
+                user.getId()
         );
 
         final Claims claims = Jwts.claims()
-                .add(Session.Fields.id, user.getId().getValue())
+                .add(Session.Fields.userId, user.getId())
                 .add(Session.Fields.name, user.getName().getValue())
                 .add(Session.Fields.role, user.getRole().name())
                 .build();
@@ -318,7 +318,7 @@ public class MissionStepTest {
     @DisplayName("시간으로 API를 관리할 수 있다")
     void seventh() {
         final ReservationTime time = reservationTimeRepository.save(
-                ReservationTime.withoutId(
+                ReservationTime.of(
                         LocalTime.now()));
 
         RestAssured.given().log().all()
@@ -328,7 +328,7 @@ public class MissionStepTest {
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
-                .when().delete("/times/%d".formatted(time.getId().getValue()))
+                .when().delete("/times/%d".formatted(time.getId()))
                 .then().log().all()
                 .statusCode(204);
     }

@@ -20,7 +20,7 @@ class UserTest {
         final UserRole role = UserRole.NORMAL;
 
         // when & then
-        assertThatThrownBy(() -> User.withId(null, name, email, password, role))
+        assertThatThrownBy(() -> new User(null, name, email, password, role))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: User.id");
     }
@@ -34,7 +34,7 @@ class UserTest {
         final UserRole role = UserRole.NORMAL;
 
         // when & then
-        assertThatThrownBy(() -> User.withoutId(null, email, password, role))
+        assertThatThrownBy(() -> User.of(null, email, password, role))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: User.name");
     }
@@ -48,7 +48,7 @@ class UserTest {
         final UserRole role = UserRole.NORMAL;
 
         // when & then
-        assertThatThrownBy(() -> User.withoutId(name, null, password, role))
+        assertThatThrownBy(() -> User.of(name, null, password, role))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: User.email");
     }
@@ -62,7 +62,7 @@ class UserTest {
         final UserRole role = UserRole.NORMAL;
 
         // when & then
-        assertThatThrownBy(() -> User.withoutId(name, email, null, role))
+        assertThatThrownBy(() -> User.of(name, email, null, role))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: User.password");
     }
@@ -76,7 +76,7 @@ class UserTest {
         final Password password = Password.fromEncoded("password");
 
         // when & then
-        assertThatThrownBy(() -> User.withoutId(name, email, password, null))
+        assertThatThrownBy(() -> User.of(name, email, password, null))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessageContaining("Validation failed [while checking null]: User.role");
     }

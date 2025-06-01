@@ -10,6 +10,12 @@ public enum DomainTerm {
     BOOKED_COUNT("예약 수"),
     BOOKED_STATUS("예약 상태"),
 
+    RESERVATION_WAITING_Id("예약 대기 식별자"),
+    RESERVATION_WAITING("예약 대기"),
+    RESERVATION_WAITING_ORDER("예약 대기 순서"),
+
+    RESERVATION_VIEW_ID("예약 조회 식별자"),
+
     // Theme 도메인
     THEME("테마"),
     THEME_ID("테마 식별자"),

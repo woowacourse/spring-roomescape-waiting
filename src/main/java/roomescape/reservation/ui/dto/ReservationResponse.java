@@ -8,7 +8,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.theme.ui.dto.ThemeResponse;
 import roomescape.time.ui.dto.ReservationTimeResponse;
 import roomescape.user.domain.User;
-import roomescape.user.domain.UserId;
 import roomescape.user.ui.dto.UserResponse;
 
 import java.time.LocalDate;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 public record ReservationResponse(Long reservationId,
                                   UserResponse user,
                                   LocalDate date,
-                                  int sequence,
                                   ReservationTimeResponse time,
                                   ThemeResponse theme) {
 
@@ -31,10 +29,9 @@ public record ReservationResponse(Long reservationId,
 
     public static ReservationResponse from(final Reservation domain, final User user) {
         return new ReservationResponse(
-                domain.getId().getValue(),
+                domain.getId(),
                 UserResponse.from(user),
                 domain.getDate().getValue(),
-                domain.getStatus().getSequence(),
                 roomescape.time.ui.dto.ReservationTimeResponse.from(domain.getTime()),
                 ThemeResponse.from(domain.getTheme()));
     }
@@ -46,12 +43,12 @@ public record ReservationResponse(Long reservationId,
     }
 
     public static List<ReservationResponse> from(final List<Reservation> domains, final List<User> users) {
-        final Map<UserId, User> userMap = users.stream()
+        final Map<Long, User> userMap = users.stream()
                 .collect(Collectors.toMap(User::getId, Function.identity()));
 
         return domains.stream()
                 .map(reservation -> {
-                    final UserId userId = reservation.getUserId();
+                    final Long userId = reservation.getUserId();
                     final User user = userMap.get(userId);
                     return ReservationResponse.from(reservation, user);
                 })

@@ -5,7 +5,6 @@ import org.springframework.stereotype.Service;
 import roomescape.time.application.dto.CreateReservationTimeServiceRequest;
 import roomescape.time.application.service.ReservationTimeCommandService;
 import roomescape.time.application.service.ReservationTimeQueryService;
-import roomescape.time.domain.ReservationTimeId;
 import roomescape.time.ui.dto.CreateReservationTimeWebRequest;
 import roomescape.time.ui.dto.ReservationTimeResponse;
 
@@ -34,6 +33,6 @@ public class ReservationTimeFacadeImpl implements ReservationTimeFacade {
 
     @Override
     public void delete(final Long id) {
-        reservationTimeCommandService.delete(ReservationTimeId.from(id));
+        reservationTimeCommandService.delete(id);
     }
 }

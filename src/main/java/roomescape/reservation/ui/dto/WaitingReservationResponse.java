@@ -1,0 +1,71 @@
+package roomescape.reservation.ui.dto;
+
+import lombok.AccessLevel;
+import lombok.experimental.FieldNameConstants;
+import roomescape.common.domain.DomainTerm;
+import roomescape.common.validate.Validator;
+import roomescape.reservation.domain.WaitingReservation;
+import roomescape.theme.ui.dto.ThemeResponse;
+import roomescape.time.ui.dto.ReservationTimeResponse;
+import roomescape.user.domain.User;
+import roomescape.user.ui.dto.UserResponse;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
+@FieldNameConstants(level = AccessLevel.PRIVATE)
+public record WaitingReservationResponse(Long id,
+                                         UserResponse user,
+                                         LocalDate date,
+                                         ReservationTimeResponse time,
+                                         ThemeResponse theme) {
+
+    public WaitingReservationResponse {
+        validate(id, user, date, time, theme);
+    }
+
+    public static WaitingReservationResponse from(final WaitingReservation domain, final User user) {
+        return new WaitingReservationResponse(
+                domain.getId(),
+                UserResponse.from(user),
+                domain.getDate().getValue(),
+                ReservationTimeResponse.from(domain.getTime()),
+                ThemeResponse.from(domain.getTheme()));
+    }
+
+    public static List<WaitingReservationResponse> from(final List<WaitingReservation> domains, final User user) {
+        return domains.stream()
+                .map(domain -> WaitingReservationResponse.from(domain, user))
+                .toList();
+    }
+
+    public static List<WaitingReservationResponse> from(final List<WaitingReservation> domains, final List<User> users) {
+        final Map<Long, User> userMap = users.stream()
+                .collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return domains.stream()
+                .map(reservation -> {
+                    final Long userId = reservation.getUserId();
+                    final User user = userMap.get(userId);
+                    return WaitingReservationResponse.from(reservation, user);
+                })
+                .toList();
+    }
+
+    private void validate(final Long reservationId,
+                          final UserResponse user,
+                          final LocalDate date,
+                          final ReservationTimeResponse time,
+                          final ThemeResponse theme
+    ) {
+        Validator.of(WaitingReservationResponse.class)
+                .validateNotNull(Fields.id, reservationId, DomainTerm.RESERVATION_ID.label())
+                .validateNotNull(Fields.user, user, DomainTerm.USER.label())
+                .validateNotNull(Fields.date, date, DomainTerm.RESERVATION_DATE.label())
+                .validateNotNull(Fields.time, time, DomainTerm.RESERVATION_TIME.label())
+                .validateNotNull(Fields.theme, theme, DomainTerm.THEME_ID.label());
+    }
+}

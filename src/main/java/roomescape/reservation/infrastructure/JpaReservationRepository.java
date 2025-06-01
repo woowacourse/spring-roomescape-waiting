@@ -3,12 +3,12 @@ package roomescape.reservation.infrastructure;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
-import roomescape.reservation.infrastructure.vo.ThemBookingCount;
-import roomescape.user.domain.UserId;
+import roomescape.reservation.infrastructure.vo.ThemeBookingCount;
 
 import java.util.List;
 
@@ -18,21 +18,25 @@ public interface JpaReservationRepository extends JpaRepository<Reservation, Lon
 
     boolean existsByDateAndTimeIdAndThemeId(ReservationDate date, Long timeId, Long themeId);
 
-    List<Reservation> findAllByUserId(UserId userId);
+    List<Reservation> findAllByUserId(Long userId);
 
     List<Reservation> findAllByDateAndThemeId(ReservationDate date, Long themeId);
 
     @Query("""
-            SELECT new roomescape.reservation.infrastructure.vo.ThemBookingCount(t, COUNT(r))
+            SELECT new roomescape.reservation.infrastructure.vo.ThemeBookingCount(t, COUNT(r))
             FROM Reservation r
             JOIN r.theme t
             WHERE r.date BETWEEN :startDate AND :endDate
             GROUP BY t
             ORDER BY COUNT(r) DESC
             """)
-    List<ThemBookingCount> findThemesWithBookedCount(
+    List<ThemeBookingCount> findThemesWithBookedCount(
             @Param("startDate") ReservationDate startDate,
             @Param("endDate") ReservationDate endDate,
             Pageable pageable);
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query("UPDATE Reservation r SET r.userId = :userId WHERE r.id = :id")
+    void updateUserId(@Param("id") Long id, @Param("userId") Long userId);
 }
 

@@ -13,6 +13,8 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.domain.ReservationRepository;
+import roomescape.reservation.domain.WaitingReservation;
+import roomescape.reservation.domain.WaitingReservationRepository;
 import roomescape.reservation.ui.dto.AvailableReservationTimeWebResponse;
 import roomescape.reservation.ui.dto.CreateReservationWithUserIdWebRequest;
 import roomescape.theme.domain.Theme;
@@ -54,6 +56,9 @@ class ReservationFacadeIntegrationTest {
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private WaitingReservationRepository waitingReservationRepository;
+
+    @Autowired
     private JdbcTemplate jdbcTemplate;
 
     private User user;
@@ -63,7 +68,7 @@ class ReservationFacadeIntegrationTest {
     @BeforeEach
     void setUp() {
         user = userRepository.save(
-                User.withoutId(
+                User.of(
                         UserName.from("테스트사용자"),
                         Email.from("test@example.com"),
                         Password.fromEncoded("encoded-password"),
@@ -72,7 +77,7 @@ class ReservationFacadeIntegrationTest {
         );
 
         theme = themeRepository.save(
-                Theme.withoutId(
+                Theme.of(
                         ThemeName.from("테스트테마"),
                         ThemeDescription.from("테마 설명"),
                         ThemeThumbnail.from("http://example.com/image.jpg")
@@ -80,7 +85,7 @@ class ReservationFacadeIntegrationTest {
         );
 
         time = timeRepository.save(
-                ReservationTime.withoutId(LocalTime.of(15, 0))
+                ReservationTime.of(LocalTime.of(15, 0))
         );
     }
 
@@ -91,11 +96,11 @@ class ReservationFacadeIntegrationTest {
         LocalDate targetDate = LocalDate.now().plusDays(1);
 
         ReservationTime anotherTime = timeRepository.save(
-                ReservationTime.withoutId(LocalTime.of(16, 0))
+                ReservationTime.of(LocalTime.of(16, 0))
         );
 
         reservationRepository.save(
-                Reservation.withoutId(
+                Reservation.of(
                         user.getId(),
                         ReservationDate.from(targetDate),
                         time,
@@ -106,14 +111,14 @@ class ReservationFacadeIntegrationTest {
         // when
         List<AvailableReservationTimeWebResponse> responses = reservationFacade.getAvailable(
                 targetDate,
-                theme.getId().getValue()
+                theme.getId()
         );
 
         // then
         assertThat(responses).isNotEmpty();
         assertThat(responses)
-                .anyMatch(response -> response.timeId().equals(anotherTime.getId().getValue()) && !response.isBooked())
-                .anyMatch(response -> response.timeId().equals(time.getId().getValue()) && response.isBooked());
+                .anyMatch(response -> response.timeId().equals(anotherTime.getId()) && !response.isBooked())
+                .anyMatch(response -> response.timeId().equals(time.getId()) && response.isBooked());
     }
 
     @Test
@@ -128,17 +133,42 @@ class ReservationFacadeIntegrationTest {
 
         CreateReservationWithUserIdWebRequest request = new CreateReservationWithUserIdWebRequest(
                 LocalDate.now().plusDays(1),
-                time.getId().getValue(),
-                theme.getId().getValue(),
-                user.getId().getValue()
+                time.getId(),
+                theme.getId(),
+                user.getId()
         );
 
         // when & then
         assertThatThrownBy(() -> reservationFacade.create(request))
                 .isInstanceOf(NotFoundException.class);
 
-        // 예약 수 변경 없음 확인 (트랜잭션 롤백 검증)
         assertThat(countReservations()).isEqualTo(initialReservationCount);
+    }
+
+    @Test
+    @DisplayName("예약 삭제 후, 대기된 예약이 있을 시 승격시킨다.")
+    void deleteAndPromotionWhenExistWaiting() {
+        // given
+        long userId1 = 1L;
+        final Reservation reservation = reservationRepository.save(Reservation.of(userId1,
+                ReservationDate.from(LocalDate.now().plusDays(1)),
+                time,
+                theme
+        ));
+        long userId2 = 2L;
+        final WaitingReservation waitingReservation = waitingReservationRepository.save(WaitingReservation.of(userId2,
+                1,
+                ReservationDate.from(LocalDate.now().plusDays(1)),
+                time,
+                theme
+        ));
+        //when
+        reservationFacade.delete(reservation.getId());
+        //then
+        assertThat(waitingReservationRepository.findAll()).isEmpty();
+        assertThat(reservationRepository.findAllByUserId(userId1)).isEmpty();
+        assertThat(reservationRepository.findAllByUserId(userId2).getFirst().getUserId())
+                .isEqualTo(waitingReservation.getUserId());
     }
 
     private int countReservations() {
@@ -150,7 +180,7 @@ class ReservationFacadeIntegrationTest {
     }
 
     private void clearAllUsers() {
-        jdbcTemplate.update("DELETE FROM reservations WHERE user_id = ?", user.getId().getValue());
+        jdbcTemplate.update("DELETE FROM reservations WHERE user_id = ?", user.getId());
         jdbcTemplate.update("DELETE FROM users");
     }
 }

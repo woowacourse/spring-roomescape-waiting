@@ -34,18 +34,14 @@ public class ReservationTime {
         this.startAt = startAt;
     }
 
-    private ReservationTime(final ReservationTimeId id, final LocalTime startAt) {
+    public ReservationTime(final Long id, final LocalTime startAt) {
         validate(id);
         validate(startAt);
-        this.id = id.getValue();
+        this.id = id;
         this.startAt = startAt;
     }
 
-    public static ReservationTime withId(final ReservationTimeId id, final LocalTime startAt) {
-        return new ReservationTime(id, startAt);
-    }
-
-    public static ReservationTime withoutId(final LocalTime startAt) {
+    public static ReservationTime of(final LocalTime startAt) {
         return new ReservationTime(startAt);
     }
 
@@ -54,16 +50,12 @@ public class ReservationTime {
                 .validateNotNull(Fields.startAt, startAt, DomainTerm.RESERVATION_TIME.label());
     }
 
-    private static void validate(final ReservationTimeId id) {
+    private static void validate(final Long id) {
         Validator.of(ReservationTime.class)
                 .validateNotNull(Fields.id, id, DomainTerm.RESERVATION_TIME_ID.label());
     }
 
     public boolean isBefore(final LocalTime time) {
         return startAt.isBefore(time);
-    }
-
-    public ReservationTimeId getId() {
-        return ReservationTimeId.from(id);
     }
 }

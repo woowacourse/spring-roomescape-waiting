@@ -21,7 +21,7 @@ public record ThemeResponse(
 
     public static ThemeResponse from(final Theme domain) {
         return new ThemeResponse(
-                domain.getId().getValue(),
+                domain.getId(),
                 domain.getName().getValue(),
                 domain.getDescription().getValue(),
                 String.valueOf(domain.getThumbnail().getValue()));

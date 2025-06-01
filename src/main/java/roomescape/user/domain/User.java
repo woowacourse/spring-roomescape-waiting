@@ -55,7 +55,7 @@ public class User {
     @Column(name = Fields.role)
     private UserRole role;
 
-    public User(final UserName name, final Email email, final Password password, final UserRole role) {
+    private User(final UserName name, final Email email, final Password password, final UserRole role) {
         validate(name, email, password, role);
         this.name = name;
         this.email = email;
@@ -63,28 +63,20 @@ public class User {
         this.role = role;
     }
 
-    public User(final UserId id, final UserName name, final Email email, final Password password, final UserRole role) {
+    public User(final Long id, final UserName name, final Email email, final Password password, final UserRole role) {
         validate(id);
         validate(name, email, password, role);
-        this.id = id.getValue();
+        this.id = id;
         this.name = name;
         this.email = email;
         this.password = password;
         this.role = role;
     }
 
-    public static User withId(final UserId id,
-                              final UserName name,
-                              final Email email,
-                              final Password password,
-                              final UserRole role) {
-        return new User(id, name, email, password, role);
-    }
-
-    public static User withoutId(final UserName name,
-                                 final Email email,
-                                 final Password password,
-                                 final UserRole role) {
+    public static User of(final UserName name,
+                          final Email email,
+                          final Password password,
+                          final UserRole role) {
         return new User(name, email, password, role);
     }
 
@@ -99,12 +91,8 @@ public class User {
                 .validateNotNull(Fields.role, role, DomainTerm.USER_ROLE.label());
     }
 
-    private static void validate(final UserId id) {
+    private static void validate(final Long id) {
         Validator.of(User.class)
                 .validateNotNull(Fields.id, id, DomainTerm.USER_ID.label());
-    }
-
-    public UserId getId() {
-        return UserId.from(id);
     }
 }

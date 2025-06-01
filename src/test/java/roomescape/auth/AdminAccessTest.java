@@ -38,7 +38,7 @@ class AdminAccessTest {
     void shouldReturn200WhenAdminAccessWithValidToken() {
         // given
         final Claims adminUserClaims = Jwts.claims()
-                .add(Session.Fields.id, 1)
+                .add(Session.Fields.userId, 1)
                 .add(Session.Fields.name, "임시")
                 .add(Session.Fields.role, UserRole.ADMIN.name())
                 .build();
@@ -63,7 +63,7 @@ class AdminAccessTest {
     void shouldReturn403WhenNonAdminUserAccess() {
         // given
         final Claims normalUserClaims = Jwts.claims()
-                .add(Session.Fields.id, 1)
+                .add(Session.Fields.userId, 1)
                 .add(Session.Fields.name, "임시")
                 .add(Session.Fields.role, UserRole.NORMAL.name())
                 .build();

@@ -44,37 +44,30 @@ public class Theme {
             column = @Column(name = Fields.thumbnail))
     private ThemeThumbnail thumbnail;
 
-    private Theme(final ThemeId id,
-                  final ThemeName name,
-                  final ThemeDescription description,
-                  final ThemeThumbnail thumbnail) {
+    public Theme(final Long id,
+                 final ThemeName name,
+                 final ThemeDescription description,
+                 final ThemeThumbnail thumbnail) {
         validate(id);
         validate(name, description, thumbnail);
-        this.id = id.getValue();
+        this.id = id;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    private Theme(final ThemeName name,
-                  final ThemeDescription description,
-                  final ThemeThumbnail thumbnail) {
+    protected Theme(final ThemeName name,
+                    final ThemeDescription description,
+                    final ThemeThumbnail thumbnail) {
         validate(name, description, thumbnail);
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
     }
 
-    public static Theme withId(final ThemeId id,
-                               final ThemeName name,
-                               final ThemeDescription description,
-                               final ThemeThumbnail thumbnail) {
-        return new Theme(id, name, description, thumbnail);
-    }
-
-    public static Theme withoutId(final ThemeName name,
-                                  final ThemeDescription description,
-                                  final ThemeThumbnail thumbnail) {
+    public static Theme of(final ThemeName name,
+                           final ThemeDescription description,
+                           final ThemeThumbnail thumbnail) {
         return new Theme(name, description, thumbnail);
     }
 
@@ -87,12 +80,8 @@ public class Theme {
                 .validateNotNull(Fields.thumbnail, thumbnail, DomainTerm.THEME_THUMBNAIL.label());
     }
 
-    private static void validate(final ThemeId id) {
+    private static void validate(final Long id) {
         Validator.of(Theme.class)
                 .validateNotNull(Fields.id, id, DomainTerm.THEME_ID.label());
-    }
-
-    public ThemeId getId() {
-        return ThemeId.from(id);
     }
 }

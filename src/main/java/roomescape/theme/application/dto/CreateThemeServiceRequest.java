@@ -21,7 +21,7 @@ public record CreateThemeServiceRequest(
     }
 
     public Theme toDomain() {
-        return Theme.withoutId(
+        return Theme.of(
                 name,
                 description,
                 thumbnail
