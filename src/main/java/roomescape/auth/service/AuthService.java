@@ -1,6 +1,7 @@
 package roomescape.auth.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.auth.dto.LoginRequest;
 import roomescape.auth.dto.TokenResponse;
 import roomescape.global.auth.JwtTokenProvider;
@@ -23,6 +24,7 @@ public class AuthService {
         this.jwtTokenProvider = jwtTokenProvider;
     }
 
+    @Transactional
     public TokenResponse createToken(final LoginRequest loginRequest) {
         final MemberEmail email = new MemberEmail(loginRequest.email());
         final String password = loginRequest.password();
@@ -33,11 +35,13 @@ public class AuthService {
         return new TokenResponse(token);
     }
 
+    @Transactional(readOnly = true)
     public LoginMember checkMember(final String token) {
         final Member member = findMemberByToken(token);
         return new LoginMember(member);
     }
 
+    @Transactional(readOnly = true)
     public LoginMember checkAdminMember(final String token) {
         final Member member = findMemberByToken(token);
         if (!member.hasRole(Role.ADMIN)) {

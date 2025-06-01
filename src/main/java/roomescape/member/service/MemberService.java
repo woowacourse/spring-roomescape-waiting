@@ -1,7 +1,7 @@
 package roomescape.member.service;
 
-import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberEmail;
@@ -9,6 +9,8 @@ import roomescape.member.domain.MemberName;
 import roomescape.member.dto.MemberResponse;
 import roomescape.member.dto.SignupRequest;
 import roomescape.member.repository.MemberRepository;
+
+import java.util.List;
 
 @Service
 public class MemberService {
@@ -19,6 +21,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional
     public MemberResponse createMember(final SignupRequest member) {
         final MemberName name = new MemberName(member.name());
         if (memberRepository.existsByName(name)) {
@@ -33,6 +36,7 @@ public class MemberService {
         return new MemberResponse(savedMember);
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResponse> findAll() {
         final List<Member> members = memberRepository.findAll();
         return members.stream()

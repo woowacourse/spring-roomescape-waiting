@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
@@ -45,12 +46,14 @@ public class ReservationService {
         this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(final CreateReservationRequest request) {
         final Reservation reservation = convertToReservation(request);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         final List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
@@ -58,6 +61,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getFilteredReservations(
             final Long memberId,
             final Long themeId,
@@ -74,6 +78,7 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMyReservations(final LoginMember loginMember) {
         final List<Reservation> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(loginMember.id());
         final List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
@@ -89,6 +94,7 @@ public class ReservationService {
         ).toList();
     }
 
+    @Transactional
     public void cancelReservationById(final long id) {
         reservationRepository.deleteById(id);
     }

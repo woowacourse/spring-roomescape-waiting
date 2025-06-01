@@ -1,6 +1,7 @@
 package roomescape.reservation.waiting.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
@@ -41,6 +42,7 @@ public class WaitingService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public WaitingResponse createWaiting(final CreateWaitingRequest request) {
         final ReservationTime time = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new BadRequestException("예약 시간이 존재하지 않습니다."));
@@ -53,6 +55,7 @@ public class WaitingService {
         return new WaitingResponse(savedWaiting);
     }
 
+    @Transactional
     public ReservationResponse approveWaiting(final long id) {
         final Waiting waiting = waitingRepository.findById(id)
                 .orElseThrow(() -> new BadRequestException("예약 대기가 존재하지 않습니다."));
@@ -63,12 +66,14 @@ public class WaitingService {
         return new ReservationResponse(reservation);
     }
 
+    @Transactional(readOnly = true)
     public List<WaitingResponse> getAllWaitings() {
         return waitingRepository.findAll().stream()
                 .map(WaitingResponse::new)
                 .toList();
     }
 
+    @Transactional
     public void cancelWaiting(final long id) {
         waitingRepository.deleteById(id);
     }
