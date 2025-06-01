@@ -3,19 +3,20 @@ package roomescape.repository.impl;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationRepository;
+import roomescape.domain.member.Member;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservationitem.ReservationItem;
 import roomescape.repository.jpa.ReservationJpaRepository;
 
+@RequiredArgsConstructor
 @Repository
 public class ReservationRepositoryImpl implements ReservationRepository {
 
     private final ReservationJpaRepository reservationJpaRepository;
-
-    public ReservationRepositoryImpl(final ReservationJpaRepository reservationJpaRepository) {
-        this.reservationJpaRepository = reservationJpaRepository;
-    }
 
     @Override
     public Optional<Reservation> findById(Long id) {
@@ -23,12 +24,12 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllReservationsV2() {
+    public List<Reservation> findAllReservations() {
         return reservationJpaRepository.findAll();
     }
 
     @Override
-    public Reservation saveWithMember(final Reservation reservation) {
+    public Reservation save(final Reservation reservation) {
         return reservationJpaRepository.save(reservation);
     }
 
@@ -38,8 +39,24 @@ public class ReservationRepositoryImpl implements ReservationRepository {
     }
 
     @Override
-    public boolean existByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
-        return reservationJpaRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    public Optional<Reservation> findFirstByReservationItemAndReservationStatusOrderByIdAsc(ReservationItem reservationItem,
+                                                                                     ReservationStatus reservationStatus) {
+        return reservationJpaRepository.findFirstByReservationItemAndReservationStatusOrderByIdAsc(reservationItem, reservationStatus);
+    }
+
+    @Override
+    public long countByReservationItemIdAndIdLessThan(Long reservationItemId, Long currentReservationId) {
+        return reservationJpaRepository.countByReservationItemIdAndIdLessThan(reservationItemId, currentReservationId);
+    }
+
+    @Override
+    public boolean existsByMemberAndReservationItem(Member member, ReservationItem reservationItem) {
+        return reservationJpaRepository.existsByMemberAndReservationItem(member, reservationItem);
+    }
+
+    @Override
+    public List<Reservation> findByReservationStatusOrderByIdDesc(ReservationStatus reservationStatus) {
+        return reservationJpaRepository.findByReservationStatusOrderByIdDesc(reservationStatus);
     }
 
     @Override

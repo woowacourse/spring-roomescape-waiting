@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,13 +13,16 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
-import roomescape.domain.MemberRepository;
+import roomescape.global.PasswordEncoder;
 import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
+import roomescape.service.auth.AuthService;
+import roomescape.service.member.MemberService;
 
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
@@ -37,9 +41,10 @@ class AuthServiceTest {
 
     @BeforeEach
     void setUp() {
-        MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
-        authService = new AuthService(memberRepository);
-        memberService = new MemberService(memberRepository);
+        final MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
+        final PasswordEncoder passwordEncoder = new PasswordEncoder();
+        memberService = new MemberService(memberRepository, passwordEncoder);
+        authService = new AuthService(memberService, passwordEncoder);
     }
 
     @Test
@@ -67,7 +72,7 @@ class AuthServiceTest {
 
         // when, then
         assertThatThrownBy(() -> authService.authenticate(loginRequest))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test

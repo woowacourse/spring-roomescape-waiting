@@ -16,16 +16,21 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
-import roomescape.controller.ReservationController;
+import roomescape.controller.reservation.ReservationController;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.ReservationResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 class MissionStepTest {
+
+    @LocalServerPort
+    private int port;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -37,6 +42,8 @@ class MissionStepTest {
 
     @BeforeEach
     void setUp() {
+        RestAssured.port = port;
+
         final LoginRequest loginRequest = new LoginRequest("admin@email.com", "1234");
         sessionId = RestAssured.given().contentType(ContentType.JSON)
                 .body(loginRequest)
@@ -167,8 +174,10 @@ class MissionStepTest {
                 .statusCode(201)
                 .body("id", greaterThan(0));
 
-        jdbcTemplate.update("INSERT INTO reservation_v2 (member_id, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                "1", "2023-08-05", 1, 1);
+        jdbcTemplate.update("INSERT INTO reservation_item(date, theme_id, time_id) VALUES (?, ?, ?)",
+                "2023-08-05", 1, 1);
+        jdbcTemplate.update("INSERT INTO reservation (member_id, reservation_item_id, reservation_status) VALUES (?, ?, ?)",
+                "1", 1, "ACCEPTED");
 
         List<ReservationResponse> reservations = RestAssured.given().log().all()
                 .sessionId(sessionId)
@@ -177,7 +186,7 @@ class MissionStepTest {
                 .statusCode(200).extract()
                 .jsonPath().getList(".", ReservationResponse.class);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_v2", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
 
         assertThat(reservations).hasSize(count);
     }
@@ -213,7 +222,7 @@ class MissionStepTest {
                 .then().log().all()
                 .statusCode(201);
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation_v2", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(count).isPositive();
 
         RestAssured.given().log().all()
@@ -222,7 +231,7 @@ class MissionStepTest {
                 .then().log().all()
                 .statusCode(204);
 
-        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation_v2", Integer.class);
+        Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(countAfterDelete).isLessThan(count);
     }
 

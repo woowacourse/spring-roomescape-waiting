@@ -8,6 +8,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.NoSuchElementException;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +16,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
-import roomescape.dto.request.AdminReservationRequest;
+import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
@@ -23,9 +24,14 @@ import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.ReservationThemeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.service.member.MemberService;
+import roomescape.service.reservation.ReservationCreationService;
+import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.ReservationThemeService;
+import roomescape.service.reservation.ReservationTimeService;
 
 @SpringBootTest
-@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@DirtiesContext(classMode = ClassMode.AFTER_EACH_TEST_METHOD)
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",
         "spring.jpa.hibernate.ddl-auto=create-drop"
@@ -43,6 +49,9 @@ class ReservationTimeServiceTest {
 
     @Autowired
     private ReservationService reservationService;
+
+    @Autowired
+    private ReservationCreationService reservationCreationService;
 
     @Test
     @DisplayName("예약 시간을 성공적으로 추가한다")
@@ -81,18 +90,18 @@ class ReservationTimeServiceTest {
 
         // when, then
         assertThatThrownBy(() -> reservationTimeService.removeReservationTime(id))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(NoSuchElementException.class);
     }
 
     @Test
     @DisplayName("모든 예약 시간을 검색한다")
-    void findReservationTimesTest() {
+    void findReservationTimesInfoTest() {
         // given
         ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(LocalTime.of(12, 12));
         reservationTimeService.addReservationTime(reservationTimeRequest);
 
         // when
-        List<ReservationTimeResponse> reservationTimes = reservationTimeService.findReservationTimes();
+        List<ReservationTimeResponse> reservationTimes = reservationTimeService.findReservationTimesInfo();
 
 
         // then
@@ -109,8 +118,8 @@ class ReservationTimeServiceTest {
                 new ReservationThemeRequest("test", "test", "test"));
         final ReservationTimeResponse time = reservationTimeService.addReservationTime(
                 new ReservationTimeRequest(LocalTime.now()));
-        final ReservationResponse reservation = reservationService.addReservationForAdmin(
-                new AdminReservationRequest(member.id(), LocalDate.now().plusDays(1), theme.id(), time.id())
+        final ReservationResponse reservation = reservationCreationService.addReservation(
+                new CreateReservationRequest(member.id(), LocalDate.now().plusDays(1), theme.id(), time.id())
         );
 
         // when, then

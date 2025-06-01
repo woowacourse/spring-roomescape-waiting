@@ -2,19 +2,17 @@ package roomescape.repository.impl;
 
 import java.util.List;
 import java.util.Optional;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Member;
-import roomescape.domain.MemberRepository;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.repository.jpa.MemberJpaRepository;
 
+@RequiredArgsConstructor
 @Repository
 public class MemberRepositoryImpl implements MemberRepository {
 
     private final MemberJpaRepository memberJpaRepository;
-
-    public MemberRepositoryImpl(final MemberJpaRepository memberJpaRepository) {
-        this.memberJpaRepository = memberJpaRepository;
-    }
 
     @Override
     public Member save(final Member member) {

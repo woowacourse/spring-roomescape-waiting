@@ -1,13 +1,11 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,11 +14,18 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.TestPropertySource;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.dto.request.CreateReservationRequest;
 import roomescape.dto.request.MemberRegisterRequest;
-import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.ReservationThemeRequest;
 import roomescape.dto.request.ReservationTimeRequest;
+import roomescape.dto.response.MyPageReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.service.member.MemberService;
+import roomescape.service.reservation.ReservationCreationService;
+import roomescape.service.reservation.ReservationService;
+import roomescape.service.reservation.ReservationThemeService;
+import roomescape.service.reservation.ReservationTimeService;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -34,6 +39,9 @@ class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Autowired
+    private ReservationCreationService reservationCreationService;
+
+    @Autowired
     private MemberService memberService;
 
     @Autowired
@@ -44,6 +52,8 @@ class ReservationServiceTest {
 
     private Long memberId1;
     private Long memberId2;
+    private Long memberId3;
+    private Long memberId4;
     private Long timeId;
     private Long themeId1;
     private Long themeId2;
@@ -53,8 +63,10 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        memberId1 = memberService.addMember(new MemberRegisterRequest("user1@example.com", "password1", "User One")).id();
-        memberId2 = memberService.addMember(new MemberRegisterRequest("user2@example.com", "password2", "User Two")).id();
+        memberId1 = memberService.addMember(new MemberRegisterRequest("user1@example.com", "password1", "User 1")).id();
+        memberId2 = memberService.addMember(new MemberRegisterRequest("user2@example.com", "password2", "User 2")).id();
+        memberId3 = memberService.addMember(new MemberRegisterRequest("user3@example.com", "password3", "User 3")).id();
+        memberId4 = memberService.addMember(new MemberRegisterRequest("user4@example.com", "password4", "User 4")).id();
 
         timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
 
@@ -65,116 +77,18 @@ class ReservationServiceTest {
         twoDaysLater = LocalDate.now().plusDays(2);
         threeDaysLater = LocalDate.now().plusDays(3);
 
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(tomorrow, themeId1, timeId), memberId1);
-
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(twoDaysLater, themeId2, timeId), memberId1);
-
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(twoDaysLater, themeId1, timeId), memberId2);
-
-        reservationService.addReservationWithMemberId(
-                new ReservationRequest(threeDaysLater, themeId2, timeId), memberId2);
-    }
-
-    @Test
-    @DisplayName("사용자의 id를 이용해 예약을 생성한다")
-    void createReservationTest() {
-        // given
-        Long memberId = memberService.addMember(new MemberRegisterRequest("new@example.com", "new-password", "new-name")).id();
-        Long timeId = reservationTimeService.addReservationTime(new ReservationTimeRequest(LocalTime.now())).id();
-        Long themeId = reservationThemeService.addReservationTheme(new ReservationThemeRequest("new Theme", "new Description", "new Thumbnail")).id();
-
-        ReservationRequest reservationRequest = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                themeId,
-                timeId
+        reservationCreationService.addReservation(
+                new CreateReservationRequest(memberId1, tomorrow, themeId1, timeId)
         );
-
-        // when
-        ReservationResponse reservationResponse = reservationService.addReservationWithMemberId(reservationRequest,
-                memberId);
-
-        // then
-        assertAll(
-                () -> assertThat(reservationResponse.id()),
-                () -> assertThat(reservationResponse.date()),
-                () -> assertThat(reservationResponse.name())
+        reservationCreationService.addReservation(
+                new CreateReservationRequest(memberId1, twoDaysLater, themeId2, timeId)
         );
-    }
-
-    @Test
-    @DisplayName("사용자가 없는 theme id 또는 time id를 이용해 예약을 생성한다")
-    void createReservationTest2() {
-        // given
-        Long nonExistTimeId = 999L;
-        Long nonExistThemeId = 999L;
-
-        ReservationRequest reservationRequest1 = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                nonExistThemeId,
-                timeId
+        reservationCreationService.addReservation(
+                new CreateReservationRequest(memberId2, twoDaysLater, themeId1, timeId)
         );
-
-        ReservationRequest reservationRequest2 = new ReservationRequest(
-                LocalDate.now().plusDays(1),
-                themeId1,
-                nonExistTimeId
+        reservationCreationService.addReservation(
+                new CreateReservationRequest(memberId2, threeDaysLater, themeId2, timeId)
         );
-
-        // when, then
-        assertAll(
-                () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest1, memberId1)
-                ).isInstanceOf(NoSuchElementException.class),
-                () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest2, memberId1)
-                ).isInstanceOf(NoSuchElementException.class)
-        );
-    }
-
-    @Test
-    @DisplayName("미래가 아닌 날짜로 예약 시도 시 예외 발생")
-    void createReservationTest3() {
-        // given
-        ReservationRequest reservationRequest1 = new ReservationRequest(
-                LocalDate.now(),
-                themeId1,
-                timeId
-        );
-
-        ReservationRequest reservationRequest2 = new ReservationRequest(
-                LocalDate.now().minusDays(1),
-                themeId1,
-                timeId
-        );
-
-        // when, then
-        assertAll(
-                () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest1, memberId1)
-                ).isInstanceOf(IllegalArgumentException.class),
-                () -> assertThatThrownBy(
-                        () -> reservationService.addReservationWithMemberId(reservationRequest2, memberId1)
-                ).isInstanceOf(IllegalArgumentException.class)
-        );
-    }
-
-
-    @DisplayName("예약이 중복되어 예외가 발생 한다.")
-    @Test
-    void duplicateTest() {
-        // given
-        ReservationRequest reservationRequest = new ReservationRequest(
-                tomorrow,
-                themeId1,
-                timeId
-        );
-
-        // when & then
-        assertThatThrownBy(() -> reservationService.addReservationWithMemberId(reservationRequest, memberId1))
-                .isInstanceOf(IllegalArgumentException.class);
     }
 
     @Test
@@ -353,5 +267,162 @@ class ReservationServiceTest {
 
         // then
         assertThat(result).isEmpty();
+    }
+
+    @Test
+    @DisplayName("대기 예약 삭제 시 예약만 삭제된다.")
+    void deletePendingReservationTest() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(5), themeId1, timeId
+        );
+        CreateReservationRequest pendingRequest = new CreateReservationRequest(
+                memberId2, LocalDate.now().plusDays(5), themeId1, timeId
+        );
+
+        ReservationResponse acceptedReservation = reservationCreationService.addReservation(acceptedRequest);
+        ReservationResponse pendingReservation = reservationCreationService.addPendingReservation(pendingRequest);
+
+        int initialReservationCount = reservationService.getAllReservations().size();
+
+        // when
+        reservationService.removeReservation(pendingReservation.id());
+
+        // then
+        List<ReservationResponse> remainingReservations = reservationService.getAllReservations();
+        assertThat(remainingReservations).hasSize(initialReservationCount - 1);
+        assertThat(remainingReservations)
+                .noneMatch(reservation -> reservation.id() == pendingReservation.id());
+        assertThat(remainingReservations)
+                .anyMatch(reservation -> reservation.id() == acceptedReservation.id());
+    }
+
+    @Test
+    @DisplayName("확정 예약 삭제 시 다음 대기가 있으면 예약 항목은 삭제되지 않고 다음 예약이 확정상태가 된다.")
+    void deleteAcceptedReservationAndHasPendingReservationTest() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(6), themeId1, timeId
+        );
+        CreateReservationRequest pendingRequest = new CreateReservationRequest(
+                memberId2, LocalDate.now().plusDays(6), themeId1, timeId
+        );
+
+        ReservationResponse acceptedReservation = reservationCreationService.addReservation(acceptedRequest);
+        ReservationResponse pendingReservation = reservationCreationService.addPendingReservation(pendingRequest);
+
+        int initialReservationCount = reservationService.getAllReservations().size();
+
+        // when
+        reservationService.removeReservation(acceptedReservation.id());
+
+        // then
+        List<ReservationResponse> remainingReservations = reservationService.getAllReservations();
+        assertThat(remainingReservations).hasSize(initialReservationCount - 1);
+
+        assertThat(remainingReservations)
+                .noneMatch(reservation -> reservation.id() == acceptedReservation.id());
+
+        assertThat(remainingReservations)
+                .anyMatch(reservation ->
+                        reservation.id() == pendingReservation.id() &&
+                                reservation.status().equals(ReservationStatus.ACCEPTED.description)
+                );
+    }
+
+    @Test
+    @DisplayName("확정 예약 삭제 시 다음 대기가 없으면 예약 항목과 예약 모두 삭제된다.")
+    void deleteAcceptedReservationAndNoPendingReservationTest() {
+        // given
+        CreateReservationRequest acceptedRequest = new CreateReservationRequest(
+                memberId1, LocalDate.now().plusDays(7), themeId1, timeId
+        );
+
+        ReservationResponse acceptedReservation = reservationCreationService.addReservation(acceptedRequest);
+        int initialReservationCount = reservationService.getAllReservations().size();
+
+        // when
+        reservationService.removeReservation(acceptedReservation.id());
+
+        // then
+        List<ReservationResponse> remainingReservations = reservationService.getAllReservations();
+        assertThat(remainingReservations).hasSize(initialReservationCount - 1);
+
+        assertThat(remainingReservations)
+                .noneMatch(reservation -> reservation.id() == acceptedReservation.id());
+
+        CreateReservationRequest newRequest = new CreateReservationRequest(
+                memberId2, LocalDate.now().plusDays(7), themeId1, timeId
+        );
+        ReservationResponse newReservation = reservationCreationService.addReservation(newRequest);
+        assertThat(newReservation.status()).isEqualTo(ReservationStatus.ACCEPTED.description);
+    }
+
+    @Test
+    @DisplayName("확정 예약 삭제 후 다음 대기 예약이 확정되면 priority가 0으로 변경된다.")
+    void priorityChangesAfterReservationDeletion() {
+        // given
+        LocalDate testDate = LocalDate.now().plusDays(11);
+
+        ReservationResponse acceptedReservation = reservationCreationService.addReservation(
+                new CreateReservationRequest(memberId1, testDate, themeId1, timeId)
+        );
+
+        ReservationResponse pendingReservation = reservationCreationService.addPendingReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+
+        List<MyPageReservationResponse> beforeDelete = reservationService.getReservationsByMemberId(memberId2);
+        assertThat(beforeDelete).anyMatch(
+                reservation ->
+                        reservation.reservationId().equals(pendingReservation.id()) && reservation.priority() == 1
+                );
+
+        // when
+        reservationService.removeReservation(acceptedReservation.id());
+
+        // then
+        List<MyPageReservationResponse> afterDeletion =
+                reservationService.getReservationsByMemberId(memberId2);
+        assertThat(afterDeletion).anyMatch(reservation ->
+                reservation.reservationId().equals(pendingReservation.id()) &&
+                        reservation.priority() == 0 &&
+                        reservation.status().equals(ReservationStatus.ACCEPTED.description)
+        );
+    }
+
+    @Test
+    @DisplayName("여러 대기 예약 중 하나가 삭제되면 뒤의 예약들의 priority가 앞당겨진다.")
+    void priorityUpdatesAfterMiddlePendingReservationDeletion() {
+        // given
+        LocalDate testDate = LocalDate.now().plusDays(12);
+
+        reservationCreationService.addReservation(new CreateReservationRequest(memberId1, testDate, themeId1, timeId));
+
+        ReservationResponse pending1Reservation = reservationCreationService.addPendingReservation(
+                new CreateReservationRequest(memberId2, testDate, themeId1, timeId)
+        );
+        ReservationResponse pending2Reservation = reservationCreationService.addPendingReservation(
+                new CreateReservationRequest(memberId3, testDate, themeId1, timeId)
+        );
+        ReservationResponse pending3Reservation = reservationCreationService.addPendingReservation(
+                new CreateReservationRequest(memberId4, testDate, themeId1, timeId)
+        );
+
+        // when
+        reservationService.removeReservation(pending1Reservation.id());
+
+        // then
+        List<MyPageReservationResponse> member1Reservations =
+                reservationService.getReservationsByMemberId(memberId3);
+        List<MyPageReservationResponse> member2Reservations =
+                reservationService.getReservationsByMemberId(memberId4);
+
+        assertThat(member1Reservations).anyMatch(reservation ->
+                        reservation.reservationId().equals(pending2Reservation.id()) && reservation.priority() == 1
+                );
+        assertThat(member2Reservations).anyMatch(reservation ->
+                        reservation.reservationId().equals(pending3Reservation.id()) && reservation.priority() == 2
+                );
     }
 }

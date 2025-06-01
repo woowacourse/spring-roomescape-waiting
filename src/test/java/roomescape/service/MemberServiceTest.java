@@ -13,13 +13,15 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.TestPropertySource;
 import roomescape.config.JpaConfig;
-import roomescape.domain.Member;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
 import roomescape.dto.request.MemberRegisterRequest;
 import roomescape.dto.response.MemberRegisterResponse;
 import roomescape.dto.response.MemberResponse;
-import roomescape.domain.MemberRepository;
+import roomescape.global.PasswordEncoder;
 import roomescape.repository.impl.MemberRepositoryImpl;
 import roomescape.repository.jpa.MemberJpaRepository;
+import roomescape.service.member.MemberService;
 
 @TestPropertySource(properties = {
         "spring.sql.init.mode=never",          // SQL 스크립트 실행 중지
@@ -37,7 +39,7 @@ class MemberServiceTest {
     @BeforeEach
     void setUp() {
         MemberRepository memberRepository = new MemberRepositoryImpl(memberJpaRepository);
-        memberService = new MemberService(memberRepository);
+        memberService = new MemberService(memberRepository, new PasswordEncoder());
     }
 
     @DisplayName("사용자를 정상적으로 추가한다")
