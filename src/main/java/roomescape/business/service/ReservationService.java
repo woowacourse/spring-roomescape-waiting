@@ -242,17 +242,10 @@ public class ReservationService {
                         waitInfo.getReservation().getTheme().getName(),
                         waitInfo.getReservation().getDate(),
                         waitInfo.getReservation().getReservationTime().getStartAt(),
-                        calculateStatus(waitInfo.getRank()),
+                        waitInfo.getRank(),
                         waitInfo.getId()
                 ))
                 .toList();
-    }
-
-    private String calculateStatus(final Long rank) {
-        if (rank == 1) {
-            return "예약";
-        }
-        return "%d번째 예약대기".formatted(rank);
     }
 
     public List<WaitResponse> findWaitInfoByStatusNotApprove() {
