@@ -84,6 +84,10 @@ public class Reservation {
         return this.status;
     }
 
+    public ReservationSlot getReservationSlot() {
+        return reservationSlot;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) {

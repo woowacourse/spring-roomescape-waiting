@@ -1,37 +1,32 @@
 package roomescape.application.reservation;
 
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.support.exception.NotFoundEntityException;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.Waiting;
-import roomescape.domain.reservation.WaitingRepository;
 
 @Service
 public class ReservationCancelService {
 
     private final ReservationRepository reservationRepository;
-    private final WaitingRepository waitingRepository;
+    private final WaitingPromotion waitingPromotion;
 
-    public ReservationCancelService(ReservationRepository reservationRepository, WaitingRepository waitingRepository) {
+    public ReservationCancelService(ReservationRepository reservationRepository,
+                                    WaitingPromotion waitingPromotion) {
         this.reservationRepository = reservationRepository;
-        this.waitingRepository = waitingRepository;
+        this.waitingPromotion = waitingPromotion;
     }
 
     @Transactional
     public void cancel(Long reservationId) {
-        Optional<Waiting> findWaiting = findTopStartedWaiting(reservationId);
+        Reservation reservation = getReservationById(reservationId);
         reservationRepository.deleteById(reservationId);
-        findWaiting.ifPresent(waiting -> {
-            Reservation reservation = waiting.toReservation();
-            reservationRepository.save(reservation);
-            waitingRepository.delete(waiting);
-        });
+        waitingPromotion.promoteTopWaiting(reservation.getReservationSlot());
     }
 
-    private Optional<Waiting> findTopStartedWaiting(Long reservationId) {
-        return reservationRepository.findReservationSlotById(reservationId)
-                .flatMap(waitingRepository::findTopByReservationSlotOrderByStartedAtAsc);
+    private Reservation getReservationById(Long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new NotFoundEntityException("해당 예약이 존재하지 않습니다."));
     }
 }
