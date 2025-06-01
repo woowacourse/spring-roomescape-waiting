@@ -23,7 +23,7 @@ class ReservationTest {
         Theme theme = new Theme(1L, "우테코", "방탈출", "https://");
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(1L, member, null, time, theme, ReservationStatus.RESERVED))
+        assertThatThrownBy(() -> new Reservation(1L, member, null, time, theme))
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -36,7 +36,7 @@ class ReservationTest {
         Theme theme = new Theme(1L, "우테코", "방탈출", "https://");
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(1L, member, date, null, theme, ReservationStatus.RESERVED))
+        assertThatThrownBy(() -> new Reservation(1L, member, date, null, theme))
                 .isInstanceOf(BadRequestException.class);
     }
 
@@ -49,7 +49,7 @@ class ReservationTest {
         Theme theme = new Theme(1L, "우테코", "방탈출", "https://");
 
         // when & then
-        assertThatThrownBy(() -> new Reservation(1L, null, date, time, theme, ReservationStatus.RESERVED))
+        assertThatThrownBy(() -> new Reservation(1L, null, date, time, theme))
                 .isInstanceOf(BadRequestException.class);
     }
 }

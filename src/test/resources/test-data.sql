@@ -9,5 +9,8 @@ VALUES ('테마 A', '테마 A입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6e
 INSERT INTO reservation_time (start_at)
 VALUES ('09:00');
 
-INSERT INTO reservation (member_id, date, time_id, theme_id, status)
-VALUES (1, '2025-05-11', 1, 1, 'RESERVED');
+INSERT INTO reservation (member_id, date, time_id, theme_id)
+VALUES (1, '2025-05-11', 1, 1);
+
+INSERT INTO waiting (member_id, date, time_id, theme_id, created_at, status)
+VALUES (1, '2025-06-30', 1, 1, '2025-05-30 09:00:00', 'PENDING');

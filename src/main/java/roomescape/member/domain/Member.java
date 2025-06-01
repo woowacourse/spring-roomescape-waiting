@@ -7,40 +7,35 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import java.util.List;
 import java.util.regex.Pattern;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ExceptionCause;
-import roomescape.reservation.domain.Reservation;
+import roomescape.exception.UnauthorizedException;
 
 @Entity
 @Table(name = "member")
 public class Member {
 
+    private static final Pattern EMAIL_PATTERN = Pattern.compile(
+            "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(name = "name", nullable = false)
     private String name;
 
-    @Column(nullable = false)
+    @Column(name = "email", nullable = false)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "password", nullable = false)
     private String password;
 
     @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name = "role", nullable = false)
     private Role role;
-
-    @OneToMany(mappedBy = "member")
-    private List<Reservation> reservations;
-
-    private static final Pattern EMAIL_PATTERN = Pattern.compile(
-            "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$");
 
     protected Member() {
     }
@@ -85,6 +80,12 @@ public class Member {
         int nameLength = name.length();
         if (nameLength < 1 || nameLength > 5) {
             throw new BadRequestException(ExceptionCause.MEMBER_NAME_INVALID_INPUT);
+        }
+    }
+
+    public void validateAdminOrThrow() {
+        if (!Role.isAdmin(role)) {
+            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_ACCESS);
         }
     }
 

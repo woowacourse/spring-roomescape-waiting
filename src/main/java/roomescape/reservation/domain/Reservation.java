@@ -2,16 +2,17 @@ package roomescape.reservation.domain;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
 import jakarta.persistence.TemporalType;
+import jakarta.validation.constraints.NotNull;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.BadRequestException;
 import roomescape.exception.ExceptionCause;
@@ -20,37 +21,37 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Entity
+@Table(name = "reservation")
 public class Reservation {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @JoinColumn(name = "member_id")
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @NotNull
     private Member member;
 
+    @Column(name = "date")
     @Temporal(TemporalType.DATE)
-    @Column(nullable = false)
+    @NotNull
     private LocalDate date;
 
+    @JoinColumn(name = "time_id")
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @NotNull
     private ReservationTime time;
 
+    @JoinColumn(name = "theme_id")
     @ManyToOne
-    @JoinColumn(nullable = false)
+    @NotNull
     private Theme theme;
-
-    @Enumerated(value = EnumType.STRING)
-    @Column(nullable = false)
-    private ReservationStatus status;
 
     protected Reservation() {
     }
 
-    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme,
-                       ReservationStatus status) {
+    public Reservation(Long id, Member member, LocalDate date, ReservationTime time, Theme theme) {
         validateMember(member);
         validateDate(date);
         validateReservationTime(time);
@@ -61,7 +62,28 @@ public class Reservation {
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.status = status;
+    }
+
+    public Reservation(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        validateMember(member);
+        validateDate(date);
+        validateReservationTime(time);
+        validateTheme(theme);
+
+        this.member = member;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+    }
+
+
+    public ReservationStatus getStatus() {
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime reservationDateTime = LocalDateTime.of(this.date, this.time.getStartAt());
+        if (reservationDateTime.isBefore(now)) {
+            return ReservationStatus.EXPIRED;
+        }
+        return ReservationStatus.RESERVED;
     }
 
     private void validateMember(Member member) {
@@ -106,10 +128,6 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 
     @Override

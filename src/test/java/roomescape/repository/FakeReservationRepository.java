@@ -9,9 +9,10 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import org.springframework.dao.DuplicateKeyException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -32,7 +33,7 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         long id = reservationId.getAndIncrement();
         Reservation newReservation = new Reservation(id, reservation.getMember(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme(), ReservationStatus.RESERVED);
+                reservation.getTime(), reservation.getTheme());
         reservations.add(newReservation);
         return newReservation;
     }
@@ -96,6 +97,14 @@ public class FakeReservationRepository implements ReservationRepository {
                 .filter(r -> r.getTheme().getId().equals(themeId))
                 .filter(r -> r.getTime().getId().equals(timeId))
                 .anyMatch(r -> r.getDate().equals(date));
+    }
+
+    @Override
+    public boolean existsByMemberAndDateAndTime(Member member, LocalDate date, ReservationTime time) {
+        return reservations.stream()
+                .filter(r -> r.getMember().equals(member))
+                .filter(r -> r.getDate().equals(date))
+                .anyMatch(r -> r.getTime().equals(time));
     }
 
     @Override

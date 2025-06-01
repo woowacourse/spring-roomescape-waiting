@@ -2,47 +2,26 @@
 
 ## 뷰
 ### 내 예약 페이지
-- [x] /reservation-mine 요청 시 내 예약 페이지를 응답한다
+- [x] /reservation-mine 요청 시 내 예약 페이지를 응답한다.
+  - [x] 내 예약 목록 조회 시 예약 대기 목록을 함께 보여준다.
+  - [x] 예약 목록의 상태는 만료 / 예약 / 예약 대기 / 예약 대기 거절 이 존재한다.
+
+### 관리자 예약대기 페이지
+- [x] /admin/reservation 요청 시 예약 대기 관리 페이지를 응답한다.
 
 ## 예약
-- [x] 로그인한 사용자의 예약 목록을 조회한다
+- [x] 로그인한 사용자의 예약 목록을 조회한다.
+- [x] 사용자는 예약이나 예약대기가 존재하는 동일 날짜, 시간에 중복이 불가능하다.
 
-## API 명세
-### 내 예약 목록 조회
+### 예약 대기
+사용자
+- [x] 예약 대기 요청을 할 수 있다.
+- [x] 예약 대기 취소를 할 수 있다.
 
-request
-```
-GET /reservations-mine HTTP/1.1
-cookie: token=eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwibmFtZSI6IuyWtOuTnOuvvCIsInJvbGUiOiJBRE1JTiJ9.vcK93ONRQYPFCxT5KleSM6b7cl1FE-neSLKaFyslsZM
-host: localhost:8080
-```
-
-response
-```
-HTTP/1.1 200 
-Content-Type: application/json
-
-[
-    {
-        "reservationId": 1,
-        "theme": "테마1",
-        "date": "2024-03-01",
-        "time": "10:00",
-        "status": "예약"
-    },
-    {
-        "reservationId": 2,
-        "theme": "테마2",
-        "date": "2024-03-01",
-        "time": "12:00",
-        "status": "예약"
-    },
-    {
-        "reservationId": 3,
-        "theme": "테마3",
-        "date": "2024-03-01",
-        "time": "14:00",
-        "status": "예약"
-    }
-]
-```
+관리자
+- [x] 예약 대기 목록을 조회할 수 있다.
+  - [x] 예약 취소가 발생하면, 다음 우선순위의 예약대기가 조회된다.
+- [x] 예약 대기를 승인할 수 있다.
+- [x] 예약 대기를 거절할 수 있다.
+  - [x] 예약 대기가 거절되면 '예약대기 승인 거절' 상태가 된다.
+  - [x] 예약 대기가 승인되면 예약이 자동으로 생성된다.

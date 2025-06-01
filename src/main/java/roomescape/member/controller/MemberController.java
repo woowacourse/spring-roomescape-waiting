@@ -2,27 +2,30 @@ package roomescape.member.controller;
 
 import java.util.List;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.dto.MemberReservationResponse;
-import roomescape.reservation.service.ReservationService;
+import roomescape.member.domain.Member;
+import roomescape.member.dto.MemberResponse;
+import roomescape.member.service.MemberService;
 
 @RestController
-@RequestMapping("/member")
+@RequestMapping("/members")
 public class MemberController {
 
-    private final ReservationService reservationService;
+    private final MemberService memberService;
 
-    public MemberController(ReservationService reservationService) {
-        this.reservationService = reservationService;
+    public MemberController(MemberService memberService) {
+        this.memberService = memberService;
     }
 
-    @GetMapping("/reservations")
-    public ResponseEntity<List<MemberReservationResponse>> getMemberReservations(
-            @CookieValue(name = "token", required = false) String token) {
-        List<MemberReservationResponse> allMemberReservations = reservationService.findAllMemberReservations(token);
-        return ResponseEntity.ok(allMemberReservations);
+    @GetMapping
+    public ResponseEntity<List<MemberResponse>> getAllMembers(Member member) {
+        member.validateAdminOrThrow();
+        List<MemberResponse> response = memberService.findAll()
+                .stream()
+                .map(value -> new MemberResponse(value.getId(), value.getName()))
+                .toList();
+        return ResponseEntity.ok().body(response);
     }
 }

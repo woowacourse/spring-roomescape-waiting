@@ -5,8 +5,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import roomescape.jwt.TokenProvider;
 import roomescape.member.service.MemberService;
-import roomescape.util.TokenProvider;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
@@ -21,11 +21,12 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new LoginMemberArgumentResolver(memberService));
+        resolvers.add(new LoginMemberArgumentResolver(tokenProvider, memberService));
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new LoginInterceptor(memberService, tokenProvider)).addPathPatterns("/admin/**");
+        registry.addInterceptor(new AdminAuthorizationInterceptor(tokenProvider, memberService))
+                .addPathPatterns("/admin", "/admin/**");
     }
 }

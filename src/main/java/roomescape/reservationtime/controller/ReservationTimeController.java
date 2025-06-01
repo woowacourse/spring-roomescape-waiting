@@ -13,10 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.exception.ExceptionCause;
-import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.reservationtime.dto.AvailableReservationTimeResponse;
 import roomescape.reservationtime.dto.ReservationTimeCreateRequest;
 import roomescape.reservationtime.dto.ReservationTimeResponse;
@@ -48,19 +45,15 @@ public class ReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> addReservationTime(
-            @Valid @RequestBody final ReservationTimeCreateRequest requestDto, Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
+            @Valid @RequestBody ReservationTimeCreateRequest requestDto, Member member) {
+        member.validateAdminOrThrow();
         ReservationTimeResponse responseDto = reservationTimeService.createReservationTime(requestDto);
         return ResponseEntity.created(URI.create("times/" + responseDto.id())).body(responseDto);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservationTime(@PathVariable Long id, Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
+        member.validateAdminOrThrow();
         reservationTimeService.deleteReservationTimeById(id);
         return ResponseEntity.noContent().build();
     }

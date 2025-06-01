@@ -6,6 +6,7 @@ public enum ExceptionCause {
     RESERVATION_ALREADY_BOOKED("해당 날짜와 테마로 이미 예약된 내역이 존재합니다."),
     RESERVATION_NOTFOUND("예약을 찾을 수 없습니다."),
     RESERVATION_DATE_EMPTY_INPUT("예약 날짜는 반드시 입력해야 합니다"),
+    RESERVATION_TIME_AND_DATE_DUPLICATE("날짜와 시간이 겹치는 예약이 존재합니다."),
 
     MEMBER_NOTFOUND("회원을 찾을 수 없습니다."),
     MEMBER_DUPLICATE_EMAIL("이미 가입한 이메일입니다."),
@@ -27,8 +28,14 @@ public enum ExceptionCause {
     THEME_THUMBNAIL_INVALID_INPUT("테마 이미지가 없습니다."),
     THEME_EXIST("해당 테마에 예약 기록이 존재합니다. 예약을 먼저 삭제해 주세요."),
 
-    UNAUTHORIZED_PAGE_ACCESS("접근 권한이 없습니다."),
+    WAITING_NOTFOUND("예약 대기를 찾을 수 없습니다."),
+    WAITING_TIME_AND_DATE_DUPLICATE("날짜와 시간이 겹치는 예약 대기가 존재합니다."),
+
+    UNAUTHORIZED_ACCESS("접근 권한이 없습니다."),
     UNAUTHORIZED_LOGIN_ACCESS("로그인 정보를 다시 확인해 주세요."),
+
+    WAITING_STATUS_INVALID("예약 대기 상태가 잘못되었습니다"),
+    WAITING_STATUS_ALREADY_UPDATED("예약 대기 상태가 이미 업데이트 되었습니다."),
 
     INPUT_INVALID("값이 잘못되었습니다"),
 

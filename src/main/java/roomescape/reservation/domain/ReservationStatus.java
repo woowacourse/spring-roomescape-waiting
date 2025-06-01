@@ -1,15 +1,17 @@
 package roomescape.reservation.domain;
 
 public enum ReservationStatus {
-    RESERVED("예약");
 
-    private final String name;
+    RESERVED("예약"),
+    EXPIRED("만료");
 
-    ReservationStatus(String name) {
-        this.name = name;
+    private final String label;
+
+    ReservationStatus(String label) {
+        this.label = label;
     }
 
-    public String getName() {
-        return name;
+    public String getLabel() {
+        return label;
     }
 }

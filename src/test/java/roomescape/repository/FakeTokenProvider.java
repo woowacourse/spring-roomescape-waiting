@@ -2,8 +2,8 @@ package roomescape.repository;
 
 import roomescape.exception.ExceptionCause;
 import roomescape.exception.UnauthorizedException;
+import roomescape.jwt.TokenProvider;
 import roomescape.member.domain.Member;
-import roomescape.util.TokenProvider;
 
 public class FakeTokenProvider implements TokenProvider {
 

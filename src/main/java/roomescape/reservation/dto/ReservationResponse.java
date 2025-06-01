@@ -9,19 +9,19 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.ThemeResponse;
 
 public record ReservationResponse(Long id, @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
-                                  NameResponse member,
+                                  MemberNameResponse member,
                                   ThemeResponse theme,
                                   ReservationTimeResponse time) {
 
     public static ReservationResponse from(Reservation reservation, ReservationTime reservationTime, Theme theme) {
-        NameResponse nameResponse = NameResponse.from(reservation.getMember());
+        MemberNameResponse memberNameResponse = MemberNameResponse.from(reservation.getMember());
         ReservationTimeResponse timeResponse = ReservationTimeResponse.from(reservationTime);
         ThemeResponse themeResponse = ThemeResponse.from(theme);
 
         return new ReservationResponse(
                 reservation.getId(),
                 reservation.getDate(),
-                nameResponse,
+                memberNameResponse,
                 themeResponse,
                 timeResponse);
     }

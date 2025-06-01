@@ -11,10 +11,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.exception.ExceptionCause;
-import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.theme.dto.ThemeCreateRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.service.ThemeService;
@@ -36,12 +33,9 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> addTheme(@Valid @RequestBody final ThemeCreateRequest requestDto,
+    public ResponseEntity<ThemeResponse> addTheme(@Valid @RequestBody ThemeCreateRequest requestDto,
                                                   Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
-
+        member.validateAdminOrThrow();
         ThemeResponse responseDto = themeService.createTheme(requestDto);
         return ResponseEntity.created(URI.create("themes/" + responseDto.id())).body(responseDto);
     }
@@ -53,11 +47,8 @@ public class ThemeController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTheme(@PathVariable("id") final Long id, Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
-
+    public ResponseEntity<Void> deleteTheme(@PathVariable("id") Long id, Member member) {
+        member.validateAdminOrThrow();
         themeService.deleteThemeById(id);
         return ResponseEntity.noContent().build();
     }

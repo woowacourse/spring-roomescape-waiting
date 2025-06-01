@@ -11,12 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.exception.ExceptionCause;
-import roomescape.exception.UnauthorizedException;
 import roomescape.member.domain.Member;
-import roomescape.member.domain.Role;
 import roomescape.reservation.dto.ReservationResponse;
-import roomescape.reservation.dto.UserReservationRequest;
+import roomescape.reservation.dto.UserReservationCreateRequest;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -31,25 +28,21 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations(Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
-        List<ReservationResponse> allReservations = reservationService.findAllReservationResponses();
+        member.validateAdminOrThrow();
+        List<ReservationResponse> allReservations = reservationService.findAllReservations();
         return ResponseEntity.ok(allReservations);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> addReservation(@Valid @RequestBody final UserReservationRequest request,
-                                                              Member member) {
+    public ResponseEntity<ReservationResponse> addReservation(
+            @Valid @RequestBody final UserReservationCreateRequest request,
+            Member member) {
         ReservationResponse responseDto = reservationService.createUserReservation(request, member);
         return ResponseEntity.created(URI.create("reservations/" + responseDto.id())).body(responseDto);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id, Member member) {
-        if (!Role.isAdmin(member.getRole())) {
-            throw new UnauthorizedException(ExceptionCause.UNAUTHORIZED_PAGE_ACCESS);
-        }
+    public ResponseEntity<Void> deleteReservation(@PathVariable("id") final Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
     }
