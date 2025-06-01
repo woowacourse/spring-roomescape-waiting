@@ -2,7 +2,6 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
-import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.ListCrudRepository;
 import org.springframework.data.repository.query.Param;
@@ -27,26 +26,18 @@ public interface WaitingRepository extends ListCrudRepository<Waiting, Long> {
     List<WaitingWithRank> findWaitingsWithRankByMemberId(@Param("memberId") final Long memberId);
 
     @Query("""
-                SELECT w.id FROM Waiting w
-                WHERE w.schedule.reservationDate.date = :date
-                  AND w.schedule.reservationTime.id = :timeId
-                  AND w.schedule.theme.id = :themeId
-                  AND w.member.id = :memberId
+            SELECT CASE WHEN EXISTS (
+                  SELECT 1 FROM Waiting w
+                  WHERE w.schedule.reservationDate.date = :date
+                    AND w.schedule.reservationTime.id = :timeId
+                    AND w.schedule.theme.id = :themeId
+                    AND w.member.id = :memberId
+              ) THEN TRUE ELSE FALSE END
             """)
-    List<Long> findIdsByScheduleAndMember(
+    boolean existsByScheduleAndMemberId(
             @Param("date") final LocalDate date,
             @Param("timeId") final Long timeId,
             @Param("themeId") final Long themeId,
-            @Param("memberId") final Long memberId,
-            Pageable pageable
+            @Param("memberId") final Long memberId
     );
-
-    default boolean existsByScheduleAndMemberId(
-            final LocalDate date,
-            final Long timeId,
-            final Long themeId,
-            final Long memberId
-    ) {
-        return !findIdsByScheduleAndMember(date, timeId, themeId, memberId, Pageable.ofSize(1)).isEmpty();
-    }
 }
