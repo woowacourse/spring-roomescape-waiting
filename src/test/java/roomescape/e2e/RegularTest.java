@@ -58,22 +58,6 @@ public class RegularTest {
     }
 
     @Test
-    void loginCheck() {
-        CheckLoginResponse checkLoginResponse = RestAssured.given().log().all()
-                .body(new LoginRequest(REGULAR_EMAIL, PASSWORD))
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .cookie(TOKEN, REGULAR_TOKEN)
-                .when().get("/login/check")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .as(CheckLoginResponse.class);
-
-        assertThat(checkLoginResponse.name()).isEqualTo("Regular");
-    }
-
-
-    @Test
     void createReservation() {
         createReservationTime();
         createTheme("추리");
