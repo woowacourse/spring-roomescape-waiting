@@ -26,12 +26,12 @@ public class RoleInterceptor implements HandlerInterceptor {
     @Override
     public boolean preHandle(final HttpServletRequest request, final HttpServletResponse response, final Object handler)
             throws Exception {
+        if (!(handler instanceof final HandlerMethod handlerMethod)) {
+            return true;
+        }
         String path = request.getRequestURI();
         if (path.startsWith(ADMIN)) {
             return validateToken(request, MemberRole.ADMIN);
-        }
-        if (!(handler instanceof final HandlerMethod handlerMethod)) {
-            return true;
         }
         return validateToken(request, handlerMethod);
     }
@@ -53,7 +53,8 @@ public class RoleInterceptor implements HandlerInterceptor {
         if (token == null) {
             throw new UnAuthorizedException("토큰이 존재하지 않습니다.");
         }
-        if ((memberRole == MemberRole.ADMIN) && (jwtProvider.getRole(token) != MemberRole.ADMIN)) {
+        MemberRole actualRole = jwtProvider.getRole(token);
+        if (memberRole != actualRole) {
             throw new ForbiddenException("접근할 수 없습니다.");
         }
         return true;

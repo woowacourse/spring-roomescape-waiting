@@ -5,33 +5,40 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Table;
 import java.time.LocalTime;
 import java.util.Objects;
 
 @Entity
+@Table(name = "reservation_times")
 public class ReservationTime {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "reservation_time_id")
     private Long id;
 
     @Column(name = "start_at", nullable = false, unique = true)
     private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
-        this.id = id;
+    public ReservationTime(final LocalTime startAt) {
         this.startAt = startAt;
     }
 
     protected ReservationTime() {
     }
 
-    private ReservationTime(final LocalTime startAt) {
-        this.startAt = startAt;
+    @Override
+    public boolean equals(final Object object) {
+        if (!(object instanceof final ReservationTime that)) {
+            return false;
+        }
+        return Objects.equals(getId(), that.getId());
     }
 
-    public static ReservationTime withUnassignedId(final LocalTime startAt) {
-        return new ReservationTime(startAt);
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(getId());
     }
 
     public Long getId() {
@@ -40,19 +47,5 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    @Override
-    public boolean equals(final Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-        ReservationTime that = (ReservationTime) o;
-        return Objects.equals(getId(), that.getId()) && Objects.equals(getStartAt(), that.getStartAt());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(getId(), getStartAt());
     }
 }

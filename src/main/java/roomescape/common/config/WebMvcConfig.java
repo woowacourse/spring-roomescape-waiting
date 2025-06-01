@@ -8,7 +8,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.common.security.infrastructure.AuthorizationExtractor;
 import roomescape.common.security.infrastructure.JwtProvider;
 import roomescape.common.security.interceptor.RoleInterceptor;
-import roomescape.common.security.resolver.AuthenticationPrincipalArgumentResolver;
+import roomescape.common.security.resolver.MemberInfoArgumentResolver;
 import roomescape.common.security.application.AuthService;
 
 @Configuration
@@ -30,7 +30,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
-        resolvers.add(new AuthenticationPrincipalArgumentResolver(authService, authorizationExtractor));
+        resolvers.add(new MemberInfoArgumentResolver(authService, authorizationExtractor));
     }
 
     @Override

@@ -1,6 +1,7 @@
 package roomescape.fixture;
 
 import static org.hamcrest.Matchers.is;
+import static roomescape.fixture.TestFixture.FUTURE_DATE;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -8,14 +9,15 @@ import java.util.HashMap;
 import java.util.Map;
 import org.springframework.http.MediaType;
 import roomescape.common.security.dto.request.LoginRequest;
-import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservationslot.presentation.dto.response.ReservationResponse;
 
 public class IntegrationFixture {
 
     public static final String REGULAR_EMAIL = "regular@gmail.com";
+    public static final String REGULAR2_EMAIL = "alice@gmail.com";
     public static final String ADMIN_EMAIL = "admin@gmail.com";
     public static final String PASSWORD = "password";
-    public static final String FUTURE_DATE = TestFixture.makeFutureDate().toString();
+    public static final String FUTURE_DATE_TEXT = FUTURE_DATE.toString();
     public static final String TOKEN = "token";
 
     public static String loginAndGetAuthToken(final String email, final String password) {
@@ -33,10 +35,9 @@ public class IntegrationFixture {
         String authToken = loginAndGetAuthToken(REGULAR_EMAIL, PASSWORD);
 
         Map<String, Object> reservation = new HashMap<>();
-        reservation.put("date", FUTURE_DATE);
+        reservation.put("date", FUTURE_DATE_TEXT);
         reservation.put("timeId", 1);
         reservation.put("themeId", themeId);
-        reservation.put("status", ReservationStatus.RESERVED);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -59,7 +60,7 @@ public class IntegrationFixture {
                 .contentType(ContentType.JSON)
                 .body(theme)
                 .cookie(TOKEN, authToken)
-                .when().post("/themes")
+                .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -74,7 +75,7 @@ public class IntegrationFixture {
                 .contentType(ContentType.JSON)
                 .body(reservationTime)
                 .cookie(TOKEN, authToken)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201);
     }
@@ -85,5 +86,28 @@ public class IntegrationFixture {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(size));
+    }
+
+    public static ReservationResponse makeWaitingReservations() {
+        createReservationTime();
+        createTheme("추리");
+        createRegularReservation(1L);
+
+        String user2Token = loginAndGetAuthToken(REGULAR2_EMAIL, PASSWORD);
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("date", FUTURE_DATE_TEXT);
+        reservation.put("timeId", 1L);
+        reservation.put("themeId", 1L);
+
+        ReservationResponse reservationResponse = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(TOKEN, user2Token)
+                .body(reservation)
+                .when().post("/waiting-reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .as(ReservationResponse.class);
+        return reservationResponse;
     }
 }

@@ -30,4 +30,9 @@ public class AdminController {
     public String showAdminThemePage() {
         return "admin/theme";
     }
+
+    @GetMapping("/waiting-reservation")
+    public String showAdminWaitingPage() {
+        return "admin/waiting";
+    }
 }

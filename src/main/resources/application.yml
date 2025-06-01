@@ -1,7 +1,7 @@
 spring:
   datasource:
     driver-class-name: org.h2.Driver
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    url: jdbc:h2:mem:database;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     username: sa
     password:
   h2:
@@ -24,5 +24,5 @@ cookie:
 security:
   jwt:
     token:
-      secret-key: ${JWT_SECRET_KEY:your-secret-key-here}
+      secret-key: ${JWT_SECRET_KEY:secret-key-default}
       expire-length: 900000 # 15분
