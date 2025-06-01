@@ -3,6 +3,7 @@ package roomescape.persistence.repository;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import roomescape.business.domain.WaitInfo;
 
@@ -24,6 +25,15 @@ public interface WaitInfoRepository extends JpaRepository<WaitInfo, Long> {
             LocalDate endDate,
             Long rank
     );
+
+    @Modifying
+    @Query("""
+                UPDATE WaitInfo w
+                SET w.rank = w.rank - 1
+                WHERE w.reservation.id = :reservationId
+                    AND w.rank > :rank
+            """)
+    void decrementRankByReservationIdAndRankGreaterThan(Long reservationId, Long rank);
 
     List<WaitInfo> findByMemberId(Long memberId);
 

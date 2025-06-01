@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
+import jakarta.persistence.EntityManager;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -42,6 +43,8 @@ public class ReservationServiceTest {
     private final ThemeRepository themeRepository;
     @Autowired
     private WaitInfoRepository waitInfoRepository;
+    private final EntityManager entityManager;
+
 
     @Autowired
     public ReservationServiceTest(
@@ -49,7 +52,8 @@ public class ReservationServiceTest {
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
             final ReservationRepository reservationRepository,
-            final WaitInfoRepository waitInfoRepository
+            final WaitInfoRepository waitInfoRepository,
+            EntityManager entityManager
     ) {
         this.reservationService = new ReservationService(reservationRepository,
                 memberRepository,
@@ -60,6 +64,7 @@ public class ReservationServiceTest {
         this.reservationTimeRepository = reservationTimeRepository;
         this.memberRepository = memberRepository;
         this.themeRepository = themeRepository;
+        this.entityManager = entityManager;
     }
 
 
@@ -527,6 +532,8 @@ public class ReservationServiceTest {
 
             // when
             reservationService.deleteById(waitInfoId);
+            entityManager.flush();
+            entityManager.clear();
 
             // then
             final Optional<WaitInfo> findWaitInfo = waitInfoRepository.findById(waitInfoId2);

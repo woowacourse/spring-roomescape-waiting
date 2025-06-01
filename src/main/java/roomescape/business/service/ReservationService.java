@@ -212,42 +212,13 @@ public class ReservationService {
         waitInfoRepository.deleteById(waitInfoId);
 
         final Long reservationId = waitInfo.getReservation().getId();
-        updateWaitInfosRankAfterDelete(reservationId);
+        final Long deletedWaitInfoRank = waitInfo.getRank();
+        waitInfoRepository.decrementRankByReservationIdAndRankGreaterThan(reservationId, deletedWaitInfoRank);
     }
 
     private WaitInfo getWaitInfoOrThrow(final Long waitInfoId) {
         return waitInfoRepository.findById(waitInfoId)
                 .orElseThrow(() -> new NotFoundException("해당하는 예약 대기를 찾을 수 없습니다. 예약 대기 id: %d".formatted(waitInfoId)));
-    }
-
-    private void updateWaitInfosRankAfterDelete(final Long reservationId) {
-        final List<WaitInfo> waitInfos = getSortedWaitInfosByCreatedAt(reservationId);
-        reassignRanks(waitInfos);
-    }
-
-    private List<WaitInfo> getSortedWaitInfosByCreatedAt(final Long reservationId) {
-        return waitInfoRepository.findByReservationId(reservationId)
-                .stream()
-                .sorted((w1, w2) -> w1.getCreatedAt().compareTo(w2.getCreatedAt()))
-                .toList();
-    }
-
-    private void reassignRanks(final List<WaitInfo> waitInfos) {
-        for (int i = 0; i < waitInfos.size(); i++) {
-            final WaitInfo waitInfo = waitInfos.get(i);
-            final WaitInfo updatedWaitInfo = new WaitInfo(
-                    waitInfo.getId(),
-                    waitInfo.getMember(),
-                    waitInfo.getReservation(),
-                    calculateRank(i),
-                    waitInfo.getCreatedAt()
-            );
-            waitInfoRepository.save(updatedWaitInfo);
-        }
-    }
-
-    private Long calculateRank(int index) {
-        return (long) index + RANK_START_VALUE;
     }
 
     @Transactional
