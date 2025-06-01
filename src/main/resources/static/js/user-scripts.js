@@ -4,7 +4,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
 document.getElementById('logout-btn').addEventListener('click', function (event) {
   event.preventDefault();
-  fetch('/logout', {
+  fetch('/auth/logout', {
     method: 'POST', // 또는 서버 설정에 따라 GET 일 수도 있음
     credentials: 'include' // 쿠키를 포함시키기 위해 필요
   })
@@ -23,7 +23,7 @@ document.getElementById('logout-btn').addEventListener('click', function (event)
 });
 
 function updateUIBasedOnLogin() {
-  fetch('/login/check') // 로그인 상태 확인 API 호출
+  fetch('/auth/login/check') // 로그인 상태 확인 API 호출
       .then(response => {
         if (!response.ok) { // 요청이 실패하거나 로그인 상태가 아닌 경우
           throw new Error('Not logged in or other error');
@@ -63,7 +63,7 @@ function login() {
     return; // 필수 입력 필드가 비어있으면 여기서 함수 실행을 중단
   }
 
-  fetch('/login', {
+  fetch('/auth/login', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json'

@@ -6,7 +6,7 @@ import roomescape.member.domain.MemberRole;
 public record LoginMemberInfo(long id, String name, String email, MemberRole memberRole) {
 
     public LoginMemberInfo(final Member member) {
-        this(member.id(), member.memberName().name(), member.email(), member.role());
+        this(member.id(), member.getNameOfMember(), member.email(), member.role());
     }
 
     public boolean isNotAdmin() {

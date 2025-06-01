@@ -4,9 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeName;
-import roomescape.reservation.domain.theme.ThemeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeName;
+import roomescape.theme.domain.ThemeRepository;
 
 public class FakeThemeRepository implements ThemeRepository {
 

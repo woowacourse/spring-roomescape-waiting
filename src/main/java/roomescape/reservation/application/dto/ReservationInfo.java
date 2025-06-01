@@ -2,16 +2,19 @@ package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
 import roomescape.member.application.dto.MemberInfo;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationStatus;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.presentation.util.ReservationStatusDisplay;
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.timeslot.application.dto.TimeSlotInfo;
 
 public record ReservationInfo(
-        Long id,
+        long id,
         MemberInfo member,
         LocalDate date,
-        ReservationTimeInfo time,
+        TimeSlotInfo time,
         ThemeInfo theme,
-        ReservationStatus status
+        String status
 ) {
 
     public ReservationInfo(final Reservation reservation) {
@@ -19,9 +22,9 @@ public record ReservationInfo(
                 reservation.id(),
                 new MemberInfo(reservation.member()),
                 reservation.date(),
-                new ReservationTimeInfo(reservation.time()),
+                new TimeSlotInfo(reservation.time()),
                 new ThemeInfo(reservation.theme()),
-                reservation.status()
+                ReservationStatusDisplay.display(ReservationStatus.BOOKED)
         );
     }
 }

@@ -5,7 +5,7 @@ import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
-import roomescape.reservation.domain.util.ValidationUtils;
+import roomescape.common.exception.RoomescapeException;
 
 @Embeddable
 @Getter
@@ -25,14 +25,19 @@ public class MemberName {
     }
 
     private void validate(final String name) {
-        ValidationUtils.validateNonNull(name, "멤버 이름은 필수입니다.");
-        ValidationUtils.validateNonBlank(name, "멤버 이름은 공백이 아니어야 합니다.");
+        validateMissing(name);
         validateLength(name);
+    }
+
+    private void validateMissing(final String name) {
+        if (name == null || name.isBlank()) {
+            throw new RoomescapeException("멤버 이름은 null 또는 공백이 아니어야 합니다.");
+        }
     }
 
     private void validateLength(final String name) {
         if (name.length() < MIN_LENGTH || name.length() > MAX_LENGTH) {
-            throw new IllegalArgumentException(String.format("멤버 이름은 최소 %d글자, 최대 %d글자여야합니다.", MIN_LENGTH, MAX_LENGTH));
+            throw new RoomescapeException(String.format("멤버 이름은 최소 %d글자, 최대 %d글자여야합니다.", MIN_LENGTH, MAX_LENGTH));
         }
     }
 }

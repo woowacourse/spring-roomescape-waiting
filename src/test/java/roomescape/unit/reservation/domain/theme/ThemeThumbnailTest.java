@@ -8,18 +8,19 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
-import roomescape.reservation.domain.theme.ThemeThumbnail;
+import roomescape.common.exception.RoomescapeException;
+import roomescape.theme.domain.ThemeThumbnail;
 
 public class ThemeThumbnailTest {
 
-    @DisplayName("테마 썸네일은 jpg, jpeg, png 형식이 아니면 예외가 발생한다.")
+    @DisplayName("테마 썸네일은 jpg, jpeg, png 형식이 아니면 예외가 발생한다")
     @ParameterizedTest
     @MethodSource("invalidThumbnails")
     @NullAndEmptySource
     void validate(final String thumbnail) {
         // when & then
         assertThatThrownBy(() -> new ThemeThumbnail(thumbnail))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(RoomescapeException.class);
     }
 
     private static Stream<Arguments> invalidThumbnails() {

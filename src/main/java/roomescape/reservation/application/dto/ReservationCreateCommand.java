@@ -2,14 +2,13 @@ package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
 import roomescape.member.domain.Member;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.time.ReservationTime;
+import roomescape.reservation.domain.Reservation;
+import roomescape.theme.domain.Theme;
+import roomescape.timeslot.domain.TimeSlot;
 
-public record ReservationCreateCommand(LocalDate date, long memberId, Long timeId, Long themeId) {
+public record ReservationCreateCommand(LocalDate date, long timeId, long themeId, long memberId) {
 
-    public Reservation convertToReservation(final Member member, final ReservationTime reservationTime,
-                                            final Theme theme) {
-        return new Reservation(null, member, date, reservationTime, theme);
+    public Reservation convertToEntity(final TimeSlot timeSlot, final Theme theme, final Member member) {
+        return new Reservation(date, timeSlot, theme, member);
     }
 }

@@ -3,7 +3,7 @@ package roomescape.support.util;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
 
 public class TestCurrentDateTime implements CurrentDateTime {
 

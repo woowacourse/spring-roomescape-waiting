@@ -15,22 +15,23 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRole;
-import roomescape.reservation.application.dto.ThemeCreateCommand;
-import roomescape.reservation.application.dto.ThemeInfo;
-import roomescape.reservation.application.service.ThemeService;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationRepository;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTime;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.fake.FakeReservationRepository;
-import roomescape.support.fake.FakeReservationTimeRepository;
 import roomescape.support.fake.FakeThemeRepository;
+import roomescape.support.fake.FakeTimeSlotRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.application.dto.ThemeCreateCommand;
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.theme.application.service.ThemeService;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -38,11 +39,11 @@ class ThemeServiceTest {
     private final CurrentDateTime currentDateTime = new TestCurrentDateTime(LocalDateTime.of(2025, 4, 30, 10, 0));
     private final ThemeRepository fakeThemeRepository = new FakeThemeRepository();
     private final ReservationRepository fakeReservationRepository = new FakeReservationRepository();
-    private final ReservationTimeRepository fakeReservationTimeRepository = new FakeReservationTimeRepository();
+    private final TimeSlotRepository fakeTimeSlotRepository = new FakeTimeSlotRepository();
     private final ThemeService themeService = new ThemeService(fakeThemeRepository, fakeReservationRepository,
             currentDateTime);
 
-    @DisplayName("저장할 테마 이름이 중복될 경우 예외가 발생한다.")
+    @DisplayName("저장할 테마 이름이 중복될 경우 예외가 발생한다")
     @Test
     void validateNameDuplication() {
         // given
@@ -52,11 +53,11 @@ class ThemeServiceTest {
         // when
         // then
         assertThatThrownBy(() -> themeService.createTheme(request2))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 이름의 테마는 이미 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("해당 이름의 테마는 이미 존재합니다.");
     }
 
-    @DisplayName("테마를 저장할 수 있다.")
+    @DisplayName("테마를 저장할 수 있다")
     @Test
     void create() {
         // given
@@ -75,45 +76,45 @@ class ThemeServiceTest {
         );
     }
 
-    @DisplayName("테마 목록을 조회할 수 있다.")
+    @DisplayName("테마 목록을 조회할 수 있다")
     @Test
-    void findAll() {
+    void findThemes() {
         // given
         final ThemeCreateCommand request1 = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
         final ThemeCreateCommand request2 = new ThemeCreateCommand("테마2", "설명2", "썸네일2.png");
         themeService.createTheme(request1);
         themeService.createTheme(request2);
         // when
-        final List<ThemeInfo> result = themeService.findAll();
+        final List<ThemeInfo> result = themeService.findThemes();
         // then
         assertThat(result).hasSize(2);
     }
 
-    @DisplayName("예약이 존재하는 테마를 삭제할 경우 예외가 발생한다.")
+    @DisplayName("예약이 존재하는 테마를 삭제할 경우 예외가 발생한다")
     @Test
     void illegalDelete() {
         // given
-        final ReservationTime reservationTime = new ReservationTime(LocalTime.of(11, 0));
-        final ReservationTime saveTime = fakeReservationTimeRepository.save(reservationTime);
-        final Member member = new Member(null, "멤버", "member@email.com", "memberpw", MemberRole.ADMIN);
+        final TimeSlot timeSlot = new TimeSlot(LocalTime.of(11, 0));
+        final TimeSlot saveTime = fakeTimeSlotRepository.save(timeSlot);
+        final Member member = new Member("멤버", "member@email.com", "memberpw", MemberRole.ADMIN);
 
         final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
-        final Theme savedTheme = fakeThemeRepository.save(request.convertToTheme());
+        final Theme savedTheme = fakeThemeRepository.save(request.convertToEntity());
         fakeReservationRepository.save(
-                new Reservation(null, member, LocalDate.now().plusDays(1), saveTime, savedTheme));
+                new Reservation(LocalDate.now().plusDays(1), saveTime, savedTheme, member));
 
         // when & then
         assertThatThrownBy(() -> themeService.deleteThemeById(savedTheme.id()))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약이 존재하는 테마는 삭제할 수 없습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약이 존재하는 테마는 삭제할 수 없습니다.");
     }
 
-    @DisplayName("테마를 삭제할 수 있다.")
+    @DisplayName("테마를 삭제할 수 있다")
     @Test
     void deleteThemeById() {
         // given
         final ThemeCreateCommand request = new ThemeCreateCommand("테마1", "설명1", "썸네일1.png");
-        final Theme savedTheme = fakeThemeRepository.save(request.convertToTheme());
+        final Theme savedTheme = fakeThemeRepository.save(request.convertToEntity());
         // when
         themeService.deleteThemeById(savedTheme.id());
         // then

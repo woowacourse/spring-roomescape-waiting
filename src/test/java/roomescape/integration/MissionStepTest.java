@@ -2,187 +2,280 @@ package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
-import static org.springframework.http.HttpStatus.CREATED;
-import static org.springframework.http.HttpStatus.NO_CONTENT;
-import static org.springframework.http.HttpStatus.OK;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
 import java.lang.reflect.Field;
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDate;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.ui.web.ReservationController;
+import roomescape.reservation.presentation.controller.api.ReservationApiController;
+import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.support.util.DateUtil;
+import roomescape.support.util.SqlFixture;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql(
-        value = "/schema.sql",
-        statements = "insert into member(name, email, password, role) values('레오', 'admin@gmail.com', 'qwer!', 'ADMIN')"
-)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = {"/schema.sql"})
 public class MissionStepTest {
+    
+    private static final String COOKIE_NAME = "token";
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     @Autowired
-    private ReservationController reservationController;
+    private ReservationApiController reservationApiController;
 
-    @DisplayName("1단계: 홈페이지에 접근할 수 있다.")
     @Test
-    void testHomePage() {
-        final String token = getAdminToken();
-        RestAssured.given().log().all().header("Cookie", "token=" + token)
+    void 일단계() {
+        // given
+        insertDummyDataExceptReservation();
+        final String token = extractTokenOfAdminLoginMember();
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie(COOKIE_NAME, token)
                 .when().get("/admin")
                 .then().log().all()
-                .statusCode(OK.value());
+                .statusCode(HttpStatus.OK.value());
     }
 
-    @DisplayName("2단계: 예약을 조회할 수 있다.")
     @Test
-    void testGetReservationPage() {
-        final String token = getAdminToken();
-        RestAssured.given().log().all().header("Cookie", "token=" + token)
+    void 이단계() {
+        // given
+        insertDummyDatas();
+        final String token = extractTokenOfAdminLoginMember();
+
+        // when & then
+        RestAssured.given().log().all()
+                .cookie(COOKIE_NAME, token)
                 .when().get("/admin/reservation")
                 .then().log().all()
-                .statusCode(OK.value());
+                .statusCode(HttpStatus.OK.value());
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(OK.value())
-                .body("size()", is(0));
+                .statusCode(HttpStatus.OK.value())
+                .contentType("application/json")
+                .body("size()", is(8));
     }
 
-    @DisplayName("4단계: 데이터베이스를 적용할 수 있다.")
     @Test
-    void testDatabaseConnection() {
-        try (final Connection connection = jdbcTemplate.getDataSource().getConnection()) {
-            assertThat(connection).isNotNull();
-            assertThat(connection.getCatalog()).isEqualTo("DATABASE");
-            assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null).next()).isTrue();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
-    }
+    void 삼단계() {
+        // given
+        insertDummyDataExceptReservation();
+        final Map<String, Object> params = createDummyReservationParams();
+        final String token = extractTokenOfAdminLoginMember();
 
-    @DisplayName("7단계: 시간 관리 기능을 사용할 수 있다.")
-    @Test
-    void testTimeAPIs() {
-        final Map<String, String> params = new HashMap<>();
-        params.put("startAt", "10:00");
-
+        // when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(CREATED.value());
-
-        RestAssured.given().log().all()
-                .when().get("/times")
-                .then().log().all()
-                .statusCode(OK.value())
-                .body("size()", is(1));
-
-        RestAssured.given().log().all()
-                .when().delete("/times/1")
-                .then().log().all()
-                .statusCode(NO_CONTENT.value());
-    }
-
-    @DisplayName("8단계: 예약을 추가하고 취소할 수 있다.")
-    @Test
-    void testCreateDeleteReservation() {
-        final String token = getAdminToken();
-
-        final Map<String, String> params = new HashMap<>();
-        params.put("startAt", "10:00");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(CREATED.value());
-
-        final Map<String, String> themeParams = new HashMap<>();
-        themeParams.put("name", "테마");
-        themeParams.put("description", "설명");
-        themeParams.put("thumbnail", "썸네일.png");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(themeParams)
-                .when().post("/themes")
-                .then().log().all()
-                .statusCode(CREATED.value());
-
-        final Map<String, Object> reservation = new HashMap<>();
-        final String date = LocalDate.now().plusDays(1).toString();
-        reservation.put("date", date);
-        reservation.put("timeId", 1);
-        reservation.put("themeId", 1);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation).header("Cookie", "token=" + token)
+                .cookie(COOKIE_NAME, token)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(CREATED.value());
+                .statusCode(HttpStatus.CREATED.value())
+                .body("id", is(1));
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(OK.value())
+                .statusCode(HttpStatus.OK.value())
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/1")
                 .then().log().all()
-                .statusCode(NO_CONTENT.value());
+                .statusCode(HttpStatus.NO_CONTENT.value());
 
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(OK.value())
+                .statusCode(HttpStatus.OK.value())
                 .body("size()", is(0));
     }
 
-    @DisplayName("9단계: Layered Architecture 를 도입한다.")
     @Test
-    void testLayeredArchitecture() {
+    void 사단계() {
+        try (Connection connection = jdbcTemplate.getDataSource().getConnection()) {
+            assertAll(
+                    () -> assertThat(connection).isNotNull(),
+                    () -> assertThat(connection.getCatalog()).isEqualTo("DATABASE"),
+                    () -> assertThat(connection.getMetaData().getTables(null, null, "RESERVATION", null)
+                            .next()).isTrue()
+            );
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void 오단계() {
+        // given
+        insertDummyDataExceptReservation();
+
+        // when & then
+        jdbcTemplate.update("INSERT INTO RESERVATION (MEMBER_ID, DATE, TIME_ID, THEME_ID) VALUES (?, ?, ?, ?)", 1, DateUtil.tomorrow().toString(), 1, 1);
+
+        final List<ReservationResponse> reservations = RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value()).extract()
+                .jsonPath().getList(".", ReservationResponse.class);
+
+        final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM RESERVATION", Integer.class);
+
+        assertThat(reservations.size()).isEqualTo(count);
+    }
+
+    @Test
+    void 육단계() {
+        // given
+        insertDummyDataExceptReservation();
+        final Map<String, Object> params = createDummyReservationParams();
+        final String token = extractTokenOfAdminLoginMember();
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(COOKIE_NAME, token)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        final Integer count = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM RESERVATION", Integer.class);
+        assertThat(count).isEqualTo(1);
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+
+        final Integer countAfterDelete = jdbcTemplate.queryForObject("SELECT COUNT(1) FROM RESERVATION", Integer.class);
+        assertThat(countAfterDelete).isEqualTo(0);
+    }
+
+    @Test
+    void 칠단계() {
+        // given
+        final Map<String, String> params = new HashMap<>();
+        params.put("startAt", "10:30");
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .when().get("/times")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", is(1));
+
+        RestAssured.given().log().all()
+                .when().delete("/times/1")
+                .then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
+    @Test
+    void 팔단계() {
+        // given
+        insertDummyDataExceptReservation();
+        final Map<String, Object> params = createDummyReservationParams();
+        final String token = extractTokenOfAdminLoginMember();
+
+        // when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .cookie(COOKIE_NAME, token)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.CREATED.value());
+
+        RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.OK.value())
+                .body("size()", is(1));
+    }
+
+    @Test
+    void 구단계() {
+        // given & when
         boolean isJdbcTemplateInjected = false;
 
-        for (Field field : reservationController.getClass().getDeclaredFields()) {
+        for (Field field : reservationApiController.getClass().getDeclaredFields()) {
             if (field.getType().equals(JdbcTemplate.class)) {
                 isJdbcTemplateInjected = true;
                 break;
             }
         }
 
+        // then
         assertThat(isJdbcTemplateInjected).isFalse();
     }
 
-    private String getAdminToken() {
-        final Map<String, String> loginParams = new HashMap<>();
-        loginParams.put("email", "admin@gmail.com");
-        loginParams.put("password", "qwer!");
+    private void insertDummyData(final String sql) {
+        jdbcTemplate.update(sql);
+    }
 
-        return RestAssured.given().log().all()
+    private void insertDummyDataExceptReservation() {
+        insertDummyData(SqlFixture.INSERT_MEMBERS);
+        insertDummyData(SqlFixture.INSERT_TIME_SLOTS);
+        insertDummyData(SqlFixture.INSERT_THEMES);
+    }
+
+    private void insertDummyDatas() {
+        SqlFixture.INSERT_ALL.forEach(jdbcTemplate::update);
+    }
+
+    private Map<String, Object> createDummyReservationParams() {
+        final Map<String, Object> params = new HashMap<>();
+        params.put("memberId", "1");
+        params.put("date", DateUtil.tomorrow().toString());
+        params.put("timeId", "1");
+        params.put("themeId", "1");
+        return params;
+    }
+
+    private String extractTokenOfAdminLoginMember() {
+        final Map<String, String> loginParams = new HashMap<>();
+        loginParams.put("email", "admin1@email.com");
+        loginParams.put("password", "adminpw1");
+
+        final ExtractableResponse<Response> response = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(loginParams)
-                .when().post("/login")
+                .when().post("/auth/login")
                 .then().log().all()
-                .extract().cookie("token");
+                .statusCode(200)
+                .extract();
+
+        String token = response.cookie(COOKIE_NAME);
+        if (token == null) {
+            throw new IllegalStateException("로그인 응답에서 토큰 쿠키를 찾을 수 없습니다.");
+        }
+
+        return token;
     }
 }

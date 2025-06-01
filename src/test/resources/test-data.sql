@@ -1,15 +1,17 @@
-insert into member (name, email, password, role)
-values
-    ('레오', 'admin@gmail.com', 'qwer!', 'ADMIN');
+INSERT INTO MEMBER (NAME, EMAIL, PASSWORD, ROLE)
+VALUES
+    ('리버', 'river@email.com', 'qwer!', 'ADMIN'),
+    ('유저1', 'user1@email.com', 'qwer!', 'USER'),
+    ('유저2', 'user2@email.com', 'qwer!', 'USER');
 
-insert into reservation_time (start_at)
-values
+INSERT INTO TIME_SLOT (START_AT)
+VALUES
     ('10:00'),
     ('15:00'),
     ('16:00');
 
-insert into theme (name, description, thumbnail)
-values
+INSERT INTO THEME (NAME, DESCRIPTION, THUMBNAIL)
+VALUES
     ('테마1',  '테마1입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마2',  '테마2입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마3',  '테마3입니다.',  'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
@@ -22,18 +24,26 @@ values
     ('테마10', '테마10입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg'),
     ('테마11', '테마11입니다.', 'https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg');
 
-insert into reservation (date, member_id, time_id, theme_id, status)
-values
-    ('2025-04-30', 1, 1, 11, 'RESERVED'),
-    ('2025-04-30', 1, 2, 11, 'RESERVED'),
-    ('2025-04-29', 1, 1, 11, 'RESERVED'),
-    ('2025-04-29', 1, 2,  9, 'RESERVED'),
-    ('2025-04-28', 1, 2,  9, 'RESERVED'),
-    ('2025-04-28', 1, 1,  8, 'RESERVED'),
-    ('2025-04-27', 1, 1,  1, 'RESERVED'),
-    ('2025-04-27', 1, 2,  2, 'RESERVED'),
-    ('2025-04-26', 1, 1,  3, 'RESERVED'),
-    ('2025-04-26', 1, 2,  4, 'RESERVED'),
-    ('2025-04-25', 1, 1,  5, 'RESERVED'),
-    ('2025-04-25', 1, 2,  6, 'RESERVED'),
-    ('2025-04-24', 1, 1,  7, 'RESERVED');
+INSERT INTO RESERVATION (DATE, TIME_ID, THEME_ID, MEMBER_ID)
+VALUES
+    ('2025-04-30', 1, 11, 1),
+    ('2025-04-30', 2, 11, 2),
+    ('2025-04-30', 2, 10, 3),
+    ('2025-04-29', 1, 11, 1),
+    ('2025-04-29', 2,  9, 1),
+    ('2025-04-28', 2,  9, 2),
+    ('2025-04-28', 1,  8, 1),
+    ('2025-04-27', 1,  1, 1),
+    ('2025-04-27', 2,  2, 1),
+    ('2025-04-26', 1,  3, 1),
+    ('2025-04-26', 2,  4, 1),
+    ('2025-04-25', 1,  5, 1),
+    ('2025-04-25', 2,  6, 1),
+    ('2025-04-24', 1,  7, 1);
+
+INSERT INTO RESERVATION_WAITING (RESERVATION_ID, MEMBER_ID)
+VALUES
+    (2, 1),
+    (4, 2),
+    (4, 2),
+    (4, 3);

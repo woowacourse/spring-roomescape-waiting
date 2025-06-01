@@ -6,8 +6,8 @@ import jakarta.servlet.http.HttpServletResponse;
 import java.util.Arrays;
 import java.util.Optional;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.common.error.MissingLoginException;
-import roomescape.common.error.NoPermissionException;
+import roomescape.common.exception.MissingLoginException;
+import roomescape.common.exception.NoPermissionException;
 import roomescape.member.application.dto.LoginMemberInfo;
 import roomescape.member.application.service.AuthService;
 

@@ -16,28 +16,30 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
-import roomescape.common.time.CurrentDateTime;
+import roomescape.common.datetime.CurrentDateTime;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.application.dto.MemberInfo;
 import roomescape.member.domain.Member;
 import roomescape.member.domain.MemberRepository;
 import roomescape.member.domain.MemberRole;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
+import roomescape.reservation.application.dto.ReservationMineInfo;
 import roomescape.reservation.application.dto.ReservationSearchCondition;
-import roomescape.reservation.application.dto.ReservationTimeInfo;
-import roomescape.reservation.application.dto.ThemeInfo;
 import roomescape.reservation.application.service.ReservationService;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.theme.Theme;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTime;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.support.fake.FakeMemberRepository;
 import roomescape.support.fake.FakeReservationRepository;
-import roomescape.support.fake.FakeReservationTimeRepository;
 import roomescape.support.fake.FakeThemeRepository;
+import roomescape.support.fake.FakeTimeSlotRepository;
+import roomescape.support.fake.FakeWaitingRepository;
 import roomescape.support.util.TestCurrentDateTime;
-
+import roomescape.theme.application.dto.ThemeInfo;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.application.dto.TimeSlotInfo;
+import roomescape.timeslot.domain.TimeSlot;
+import roomescape.timeslot.domain.TimeSlotRepository;
 
 class ReservationServiceTest {
 
@@ -47,26 +49,27 @@ class ReservationServiceTest {
     private final LocalDate tomorrow = today.plusDays(1);
 
     private final FakeReservationRepository reservationRepository = new FakeReservationRepository();
-    private final ReservationTimeRepository reservationTimeRepository = new FakeReservationTimeRepository();
+    private final FakeWaitingRepository waitingRepository = new FakeWaitingRepository();
+    private final TimeSlotRepository timeSlotRepository = new FakeTimeSlotRepository();
     private final ThemeRepository themeRepository = new FakeThemeRepository();
     private final MemberRepository memberRepository = new FakeMemberRepository();
-    private final ReservationService reservationService = new ReservationService(reservationRepository,
-            reservationTimeRepository, themeRepository, memberRepository, currentDateTime);
+    private final ReservationService reservationService = new ReservationService(reservationRepository, waitingRepository,
+            timeSlotRepository, themeRepository, memberRepository, currentDateTime);
 
     private Member member1, member2;
-    private ReservationTime time1, time2;
+    private TimeSlot time1, time2;
     private Theme theme1, theme2;
 
     @BeforeEach
     void setUp() {
-        member1 = memberRepository.save(new Member(null, "리버1", "river1@gmail.com", "riverpw1", MemberRole.ADMIN));
-        member2 = memberRepository.save(new Member(null, "리버2", "river2@gmail.com", "riverpw2", MemberRole.ADMIN));
+        member1 = memberRepository.save(new Member("리버1", "river1@gmail.com", "riverpw1", MemberRole.ADMIN));
+        member2 = memberRepository.save(new Member("리버2", "river2@gmail.com", "riverpw2", MemberRole.ADMIN));
 
-        time1 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-        time2 = reservationTimeRepository.save(new ReservationTime(LocalTime.of(12, 0)));
+        time1 = timeSlotRepository.save(new TimeSlot(LocalTime.of(11, 0)));
+        time2 = timeSlotRepository.save(new TimeSlot(LocalTime.of(12, 0)));
 
-        theme1 = themeRepository.save(new Theme(null, "우테코탈출1", "우테코탈출1 설명, ", "우테코탈출1 썸네일.jpg"));
-        theme2 = themeRepository.save(new Theme(null, "우테코탈출2", "우테코탈출2 설명, ", "우테코탈출2 썸네일.jpg"));
+        theme1 = themeRepository.save(new Theme("우테코탈출1", "우테코탈출1 설명, ", "우테코탈출1 썸네일.jpg"));
+        theme2 = themeRepository.save(new Theme("우테코탈출2", "우테코탈출2 설명, ", "우테코탈출2 썸네일.jpg"));
     }
 
     @DisplayName("날짜와 시간과 테마가 중복되는 예약을 할 경우 예외가 발생한다")
@@ -78,11 +81,11 @@ class ReservationServiceTest {
         reservationService.createReservation(request);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 시간에 이미 예약이 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("해당 시간에 이미 예약이 존재합니다.");
     }
 
-    @DisplayName("날짜와 시간이 같아도 테마가 다르면 예외가 발생하지 않는다")
+    @DisplayName("날짜와 시간이 같아도 테마가 다르면 예약을 할 경우 예외가 발생하지 않는다")
     @Test
     void shouldNot_ThrowException_WhenThemeIsDifferent() {
         // given
@@ -103,8 +106,8 @@ class ReservationServiceTest {
         final ReservationCreateCommand request = new ReservationCreateCommand(tomorrow, member1.id(), 3L, theme1.id());
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약 시간이 존재하지 않습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("예약 시간이 존재하지 않습니다.");
     }
 
     @DisplayName("테마가 존재하지 않을 경우 예외가 발생한다")
@@ -114,8 +117,8 @@ class ReservationServiceTest {
         final ReservationCreateCommand request = new ReservationCreateCommand(tomorrow, member1.id(), time1.id(), 3L);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("테마가 존재하지 않습니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("테마가 존재하지 않습니다.");
     }
 
     @DisplayName("과거 시간에 예약할 경우 예외가 발생한다")
@@ -126,8 +129,8 @@ class ReservationServiceTest {
                 theme1.id());
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("지나간 날짜와 시간은 예약할 수 없습니다.");
     }
 
     @DisplayName("예약을 생성할 수 있다")
@@ -139,11 +142,12 @@ class ReservationServiceTest {
         // when
         final ReservationInfo response = reservationService.createReservation(request);
         // then
-        final Reservation result = reservationRepository.findById(response.id());
+        final Reservation result = reservationRepository.findByDateAndTimeIdAndThemeId(response.date(), response.time().id(), response.theme().id())
+                .orElseThrow(() -> new AssertionError("예약이 저장되지 않았습니다."));;
         assertAll(
                 () -> assertThat(result.date()).isEqualTo(response.date()),
                 () -> assertThat(new MemberInfo(result.member())).isEqualTo(response.member()),
-                () -> assertThat(new ReservationTimeInfo(result.time())).isEqualTo(response.time()),
+                () -> assertThat(new TimeSlotInfo(result.time())).isEqualTo(response.time()),
                 () -> assertThat(new ThemeInfo(result.theme())).isEqualTo(response.theme())
         );
     }
@@ -159,7 +163,7 @@ class ReservationServiceTest {
         reservationService.createReservation(request1);
         reservationService.createReservation(request2);
         // when
-        final List<ReservationInfo> result = reservationService.getReservations();
+        final List<ReservationInfo> result = reservationService.findReservations();
         // then
         assertThat(result).hasSize(2);
     }
@@ -174,12 +178,12 @@ class ReservationServiceTest {
         // when
         reservationService.cancelReservationById(response.id());
         // then
-        assertThat(reservationService.getReservations()).isEmpty();
+        assertThat(reservationService.findReservations()).isEmpty();
     }
 
     @DisplayName("멤버 예약 목록을 조회할 수 있다")
     @Test
-    void findReservationsByMember() {
+    void findReservationsBySearchConditionByMember() {
         // given
         final ReservationCreateCommand request1 = new ReservationCreateCommand(tomorrow, member1.id(), time1.id(),
                 theme1.id());
@@ -188,15 +192,19 @@ class ReservationServiceTest {
         final ReservationInfo response1 = reservationService.createReservation(request1);
         reservationService.createReservation(request2);
         // when
-        final List<ReservationInfo> result = reservationService.findReservationsByMemberId(response1.id());
+        final ReservationMineInfo result = reservationService.findReservationsByMemberId(response1.id()).getFirst();
         // then
-        assertThat(result).containsExactlyElementsOf(List.of(response1));
+        assertAll(
+                () -> assertThat(result.date() == response1.date()).isTrue(),
+                () -> assertThat(result.timeInfo().startAt() == response1.time().startAt()).isTrue(),
+                () -> assertThat(result.themeInfo().name() == response1.theme().name()).isTrue()
+        );
     }
 
     @DisplayName("기간을 지정하지 않은 예약 목록을 조회하다")
     @MethodSource(value = "searchConditions")
     @ParameterizedTest()
-    void getReservationsOfNullDate(ReservationSearchCondition condition, int expectedSize) {
+    void findReservationsBySearchConditionOfNullDate(ReservationSearchCondition condition, int expectedSize) {
         // given
         final ReservationCreateCommand request1 = new ReservationCreateCommand(tomorrow, member1.id(), time1.id(),
                 theme1.id());
@@ -217,7 +225,7 @@ class ReservationServiceTest {
         reservationService.createReservation(request5);
 
         // then
-        assertThat(reservationService.getReservations(condition)).hasSize(expectedSize);
+        assertThat(reservationService.findReservationsBySearchCondition(condition)).hasSize(expectedSize);
     }
 
     private static Stream<Arguments> searchConditions() {

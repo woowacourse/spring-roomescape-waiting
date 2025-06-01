@@ -3,8 +3,10 @@ package roomescape.support.fake;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationRepository;
+import java.util.Optional;
+import roomescape.common.exception.RoomescapeException;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -33,15 +35,15 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        final Reservation newReservation = new Reservation(index++, reservation.member(), reservation.date(),
-                reservation.time(), reservation.theme());
+        final Reservation newReservation = new Reservation(index++, reservation.date(), reservation.time(), reservation.theme(), reservation.member());
         reservations.add(newReservation);
         return newReservation;
     }
 
     @Override
     public void deleteById(final long id) {
-        final Reservation reservation = findById(id);
+        final Reservation reservation = findById(id)
+                .orElseThrow(() -> new RoomescapeException("예약이 존재하지 않습니다."));;
         reservations.remove(reservation);
     }
 
@@ -59,9 +61,9 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByMemberId(final long id) {
+    public List<Reservation> findAllByMemberId(final long memberId) {
         return reservations.stream()
-                .filter(reservation -> reservation.member().id() == id)
+                .filter(reservation -> reservation.member().id() == memberId)
                 .toList();
     }
 
@@ -75,10 +77,17 @@ public class FakeReservationRepository implements ReservationRepository {
                 .toList();
     }
 
-    public Reservation findById(final long id) {
+    @Override
+    public Optional<Reservation> findById(final long id) {
         return reservations.stream()
                 .filter(reservation -> reservation.id() == id)
-                .findFirst()
-                .orElseThrow();
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeId(final LocalDate date, final long timeId, final long themeId) {
+        return reservations.stream()
+                .filter(reservation -> reservation.date().equals(date) && reservation.time().id() == timeId && reservation.theme().id() == themeId)
+                .findFirst();
     }
 }

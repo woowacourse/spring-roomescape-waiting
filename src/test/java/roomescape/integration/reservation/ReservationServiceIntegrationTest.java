@@ -17,29 +17,33 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.common.exception.RoomescapeException;
 import roomescape.member.domain.MemberRepository;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.application.service.ReservationService;
-import roomescape.reservation.domain.reservation.Reservation;
-import roomescape.reservation.domain.reservation.ReservationRepository;
-import roomescape.reservation.domain.theme.ThemeRepository;
-import roomescape.reservation.domain.time.ReservationTimeRepository;
+import roomescape.reservation.domain.ReservationRepository;
 import roomescape.support.util.TestCurrentDateTime;
+import roomescape.theme.domain.ThemeRepository;
+import roomescape.timeslot.domain.TimeSlotRepository;
+import roomescape.waiting.domain.WaitingRepository;
 
 @SpringBootTest
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-@Sql({"/schema.sql", "/test-data.sql"})
+@Sql(scripts = {"/schema.sql", "/test-data.sql"})
 public class ReservationServiceIntegrationTest {
 
     @Autowired
     private ReservationRepository reservationRepository;
 
     @Autowired
+    private WaitingRepository waitingRepository;
+
+    @Autowired
     private ThemeRepository themeRepository;
 
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private TimeSlotRepository timeSlotRepository;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -49,9 +53,10 @@ public class ReservationServiceIntegrationTest {
 
     @BeforeEach
     void init() {
-        final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 00);
+        final LocalDateTime now = LocalDateTime.of(2025, 5, 1, 10, 0);
         currentDateTime = new TestCurrentDateTime(now);
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository,
+        reservationService = new ReservationService(reservationRepository, waitingRepository,
+                timeSlotRepository,
                 themeRepository,
                 memberRepository,
                 currentDateTime);
@@ -68,7 +73,7 @@ public class ReservationServiceIntegrationTest {
         // then
         assertAll(
                 () -> assertThat(result.id()).isNotNull(),
-                () -> assertThat(result.member().name()).isEqualTo("레오"),
+                () -> assertThat(result.member().name()).isEqualTo("리버"),
                 () -> assertThat(result.date()).isEqualTo(date),
                 () -> assertThat(result.time().id()).isNotNull(),
                 () -> assertThat(result.time().startAt()).isEqualTo(LocalTime.of(10, 0))
@@ -79,22 +84,22 @@ public class ReservationServiceIntegrationTest {
     @Test
     void should_ThrowException_WhenDuplicateReservation() {
         // given
-        final ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 1L, 11L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(LocalDate.of(2025, 5, 5), 1L, 11L, 1L);
         reservationService.createReservation(request);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 시간에 이미 예약이 존재합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("이미 예약한 슬롯에 예약 할 수 없습니다.");
     }
 
     @DisplayName("날짜와 시간이 같아도 테마가 다르면 중복 예외가 발생하지 않는다")
     @Test
-    void shouldNot_ThrowException_WhenThemeIsDifferent() {
+    void shouldNot_ThrowException_WhenDifferentTheme() {
         // given
         final LocalDate date = LocalDate.of(2025, 5, 5);
-        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 11L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 11L, 1L);
         reservationService.createReservation(request);
-        final ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 1L, 10L);
+        final ReservationCreateCommand request2 = new ReservationCreateCommand(date, 1L, 10L, 1L);
         // when & then
         assertThatCode(() -> reservationService.createReservation(request2))
                 .doesNotThrowAnyException();
@@ -102,21 +107,21 @@ public class ReservationServiceIntegrationTest {
 
     @DisplayName("현재 혹은 과거 시간에 새로운 예약을 추가할 경우 예외가 발생한다")
     @Test
-    void should_ThrowException_WhenNotFuture() {
+    void should_ThrowException_WhenPastReservation() {
         // given
         final LocalDate date = currentDateTime.getDate().minusDays(1);
-        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 1L, 3L);
+        final ReservationCreateCommand request = new ReservationCreateCommand(date, 1L, 3L, 1L);
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
+                .isInstanceOf(RoomescapeException.class)
+                .hasMessageContaining("이미 지난 슬롯에 예약 대기를 할 수 없습니다.");
     }
 
     @DisplayName("모든 예약을 조회할 수 있다")
     @Test
-    void getReservations() {
+    void findReservations() {
         // when
-        final List<ReservationInfo> result = reservationService.getReservations();
+        final List<ReservationInfo> result = reservationService.findReservations();
         // then
         assertThat(result).hasSize(13);
     }
@@ -125,9 +130,10 @@ public class ReservationServiceIntegrationTest {
     @Test
     void cancelReservationById() {
         // when
+        final List<ReservationInfo> beforeCancelReservations = reservationService.findReservations();
         reservationService.cancelReservationById(1L);
         // then
-        final List<Reservation> reservations = reservationRepository.findAll();
-        assertThat(reservations).hasSize(12);
+        final List<ReservationInfo> afterCancelReservations = reservationService.findReservations();
+        assertThat(afterCancelReservations).hasSize(beforeCancelReservations.size() - 1);
     }
 }

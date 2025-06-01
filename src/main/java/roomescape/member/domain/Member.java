@@ -19,8 +19,7 @@ import lombok.experimental.Accessors;
 @EqualsAndHashCode(of = "id")
 public class Member {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Embedded
@@ -33,7 +32,7 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberRole role;
 
-    public Member(Long id, String name, String email, String password, MemberRole role) {
+    public Member(final Long id, final String name, final String email, final String password, final MemberRole role) {
         this.id = id;
         this.memberName = new MemberName(name);
         this.email = email;
@@ -41,7 +40,15 @@ public class Member {
         this.role = role;
     }
 
+    public Member(final String name, final String email, final String password, final MemberRole role) {
+        this(null, name, email, password, role);
+    }
+
     public boolean isSameId(long id) {
         return this.id == id;
+    }
+
+    public String getNameOfMember() {
+        return this.memberName.name();
     }
 }
