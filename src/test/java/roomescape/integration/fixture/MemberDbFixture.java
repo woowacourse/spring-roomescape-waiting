@@ -1,5 +1,6 @@
 package roomescape.integration.fixture;
 
+import static roomescape.integration.fixture.MemberEmailFixture.이메일_leehyeonsu48888지메일;
 import static roomescape.integration.fixture.MemberEmailFixture.이메일_leehyeonsu4888지메일;
 import static roomescape.integration.fixture.MemberNameFixture.한스;
 import static roomescape.integration.fixture.MemberPasswordFixture.비밀번호_gustn111느낌표두개;
@@ -25,10 +26,10 @@ public class MemberDbFixture {
         return createMember(한스, 이메일_leehyeonsu4888지메일, 비밀번호_gustn111느낌표두개, MemberRole.MEMBER);
     }
 
-    public Member leehyeonsu4888_지메일_gustn111느낌표두개() {
-        return createMember(한스, 이메일_leehyeonsu4888지메일, 비밀번호_gustn111느낌표두개, MemberRole.MEMBER);
+    public Member 한스_leehyeonsu48888_지메일_어드민() {
+        return createMember(한스, 이메일_leehyeonsu48888지메일, 비밀번호_gustn111느낌표두개, MemberRole.ADMIN);
     }
-    
+
     public Member createMember(
             final MemberName name,
             final MemberEmail email,

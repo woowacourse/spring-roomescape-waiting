@@ -21,7 +21,7 @@ class MemberServiceTest extends ServiceTestBase {
     void 모든_멤버를_조회한다() {
         // given
         var member1 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
-        var member2 = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        var member2 = memberDbFixture.한스_leehyeonsu48888_지메일_어드민();
 
         // when
         var allMembers = sut.findAllMembers();

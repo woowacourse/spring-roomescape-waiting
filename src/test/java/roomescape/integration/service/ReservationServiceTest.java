@@ -158,7 +158,7 @@ class ReservationServiceTest extends ServiceTestBase {
     void 멤버로_예약을_조회할_수_있다() {
         // given
         var member1 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
-        var member2 = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        var member2 = memberDbFixture.한스_leehyeonsu48888_지메일_어드민();
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
         reservationDbFixture.예약_생성(예약날짜_오늘, reservationTime, theme, member1);

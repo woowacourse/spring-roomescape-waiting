@@ -18,7 +18,7 @@ class MemberRestTest extends RestAssuredTestBase {
     @BeforeEach
     void setUp() {
         memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
-        memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        memberDbFixture.한스_leehyeonsu48888_지메일_어드민();
     }
 
     @Test

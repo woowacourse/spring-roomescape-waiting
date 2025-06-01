@@ -183,12 +183,12 @@ class WaitingServiceTest extends ServiceTestBase {
     @Test
     void 대기_삭제_권한이_없으면_대기를_취소할_수_없다() {
         // given
-        var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
+        var member = memberDbFixture.한스_leehyeonsu48888_지메일_어드민();
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
         var request = new WaitingCreateRequest(예약날짜_오늘.date(), reservationTime.getId(), theme.getId());
         var response = sut.createWaiting(request, member.getId());
-        var 다른_유저 = memberDbFixture.leehyeonsu4888_지메일_gustn111느낌표두개();
+        var 다른_유저 = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
         var sessionMember = new SessionMember(다른_유저.getId(), 다른_유저.getName(), 다른_유저.getRole());
 
         // when // then
