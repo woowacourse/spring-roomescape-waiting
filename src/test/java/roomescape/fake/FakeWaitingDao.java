@@ -1,13 +1,12 @@
 package roomescape.fake;
 
-import roomescape.reservation.waiting.domain.Waiting;
-import roomescape.reservation.waiting.domain.WaitingWithRank;
-import roomescape.reservation.waiting.repository.WaitingRepository;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import roomescape.reservation.waiting.domain.Waiting;
+import roomescape.reservation.waiting.domain.WaitingWithRank;
+import roomescape.reservation.waiting.repository.WaitingRepository;
 
 public class FakeWaitingDao implements WaitingRepository {
 
@@ -40,6 +39,12 @@ public class FakeWaitingDao implements WaitingRepository {
     }
 
     @Override
+    public void deleteById(Long id) {
+        Waiting waiting = findById(id).orElseThrow();
+        waitings.remove(waiting);
+    }
+
+    @Override
     public <S extends Waiting> Iterable<S> saveAll(Iterable<S> entities) {
         throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
@@ -56,11 +61,6 @@ public class FakeWaitingDao implements WaitingRepository {
 
     @Override
     public long count() {
-        throw new IllegalStateException("사용하지 않는 메서드입니다.");
-    }
-
-    @Override
-    public void deleteById(Long aLong) {
         throw new IllegalStateException("사용하지 않는 메서드입니다.");
     }
 

@@ -1,26 +1,29 @@
 package roomescape.reservation.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
-import roomescape.fake.*;
-import roomescape.global.auth.LoginMember;
-import roomescape.global.exception.custom.BadRequestException;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.dto.CreateReservationRequest;
-import roomescape.reservation.dto.MyReservationResponse;
-import roomescape.reservation.dto.ReservationResponse;
-
-import java.time.LocalDate;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static roomescape.fixture.MemberFixture.MEMBER;
 import static roomescape.fixture.ThemeFixture.THEME;
 import static roomescape.fixture.TimeFixture.TIME;
+
+import java.time.LocalDate;
+import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import roomescape.fake.FakeMemberDao;
+import roomescape.fake.FakeReservationDao;
+import roomescape.fake.FakeReservationTimeDao;
+import roomescape.fake.FakeThemeDao;
+import roomescape.fake.FakeWaitingDao;
+import roomescape.global.auth.LoginMember;
+import roomescape.global.exception.custom.BadRequestException;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.CreateReservationRequest;
+import roomescape.reservation.dto.MyReservationResponse;
+import roomescape.reservation.dto.ReservationResponse;
 
 class ReservationServiceTest {
 
@@ -31,7 +34,8 @@ class ReservationServiceTest {
     private final FakeThemeDao fakeThemeDao = new FakeThemeDao();
     private final FakeMemberDao fakeMemberDao = new FakeMemberDao();
     private final FakeWaitingDao fakeWaitingDao = new FakeWaitingDao();
-    private final ReservationService reservationService = new ReservationService(fakeReservationDao, fakeReservationTimeDao,
+    private final ReservationService reservationService = new ReservationService(fakeReservationDao,
+            fakeReservationTimeDao,
             fakeThemeDao, fakeMemberDao, fakeWaitingDao);
 
     @BeforeEach
@@ -88,38 +92,21 @@ class ReservationServiceTest {
                 TOMORROW.plusDays(2),
                 TIME.getId(),
                 THEME.getId(),
-                MEMBER.getId());
+                MEMBER.getId()
+        );
 
 
         @DisplayName("예약을 생성할 수 있다.")
         @Test
         void testCreate() {
             // when
-            ReservationResponse result = reservationService.createReservation(REQUEST);
+            ReservationResponse response = reservationService.createReservation(REQUEST);
             // then
-            Reservation savedReservation = fakeReservationDao.findById(3L).orElseThrow();
-            assertAll(
-                    () -> assertThat(result.id()).isEqualTo(3L),
-                    () -> assertThat(result.member().name()).isEqualTo(MEMBER.getName().getValue()),
-                    () -> assertThat(result.date()).isEqualTo(REQUEST.date()),
-                    () -> assertThat(result.time().startAt()).isEqualTo(TIME.getStartAt()),
-                    () -> assertThat(result.time().id()).isEqualTo(REQUEST.timeId()),
-
-                    () -> assertThat(result.theme().id()).isEqualTo(THEME.getId()),
-                    () -> assertThat(result.theme().name()).isEqualTo(THEME.getName().getValue()),
-                    () -> assertThat(result.theme().description()).isEqualTo(THEME.getDescription().getValue()),
-                    () -> assertThat(result.theme().thumbnail()).isEqualTo(THEME.getThumbnail().getValue()),
-
-                    () -> assertThat(savedReservation.getDate()).isEqualTo(REQUEST.date()),
-                    () -> assertThat(savedReservation.getTime().getStartAt()).isEqualTo(TIME.getStartAt()),
-                    () -> assertThat(savedReservation.getTime().getId()).isEqualTo(REQUEST.timeId()),
-
-                    () -> assertThat(savedReservation.getTheme().getId()).isEqualTo(THEME.getId()),
-                    () -> assertThat(savedReservation.getTheme().getName().getValue()).isEqualTo(
-                            THEME.getName().getValue()),
-                    () -> assertThat(savedReservation.getTheme().getDescription()).isEqualTo(THEME.getDescription()),
-                    () -> assertThat(savedReservation.getTheme().getThumbnail()).isEqualTo(THEME.getThumbnail())
-            );
+            Reservation savedReservation = fakeReservationDao.findById(response.id()).orElseThrow();
+            assertThat(response.id()).isEqualTo(3L);
+            assertMember(response, savedReservation);
+            assertDateAndTime(response, savedReservation);
+            assertTheme(response, savedReservation);
         }
 
         @DisplayName("중복 예약일 경우 예외가 발생한다.")
@@ -172,6 +159,50 @@ class ReservationServiceTest {
             assertThatThrownBy(() -> reservationService.createReservation(request))
                     .isInstanceOf(BadRequestException.class)
                     .hasMessage("지나간 날짜와 시간은 예약 불가합니다.");
+        }
+
+        private void assertMember(ReservationResponse response, Reservation savedReservation) {
+            assertAll("Member 정보 일치",
+                    () -> assertThat(response.member().id()).isEqualTo(CreateReservationTest.REQUEST.memberId()),
+                    () -> assertThat(response.member().name()).isEqualTo(MEMBER.getName().getValue()),
+                    () -> assertThat(response.member().email()).isEqualTo(MEMBER.getEmail().getValue()),
+
+                    () -> assertThat(savedReservation.getMember().getId()).isEqualTo(
+                            CreateReservationTest.REQUEST.memberId()),
+                    () -> assertThat(savedReservation.getMember().getName().getValue()).isEqualTo(
+                            MEMBER.getName().getValue()),
+                    () -> assertThat(savedReservation.getMember().getEmail().getValue()).isEqualTo(
+                            MEMBER.getEmail().getValue())
+            );
+        }
+
+        private void assertDateAndTime(ReservationResponse response, Reservation savedReservation) {
+            assertAll("날짜와 시간 정보 일치",
+                    () -> assertThat(response.date()).isEqualTo(CreateReservationTest.REQUEST.date()),
+                    () -> assertThat(response.time().id()).isEqualTo(CreateReservationTest.REQUEST.timeId()),
+                    () -> assertThat(response.time().startAt()).isEqualTo(TIME.getStartAt()),
+
+                    () -> assertThat(savedReservation.getDate()).isEqualTo(CreateReservationTest.REQUEST.date()),
+                    () -> assertThat(savedReservation.getTime().getId()).isEqualTo(
+                            CreateReservationTest.REQUEST.timeId()),
+                    () -> assertThat(savedReservation.getTime().getStartAt()).isEqualTo(TIME.getStartAt())
+            );
+        }
+
+        private void assertTheme(ReservationResponse response, Reservation savedReservation) {
+            assertAll("테마 정보 일치",
+                    () -> assertThat(response.theme().id()).isEqualTo(CreateReservationTest.REQUEST.themeId()),
+                    () -> assertThat(response.theme().name()).isEqualTo(THEME.getName().getValue()),
+                    () -> assertThat(response.theme().description()).isEqualTo(THEME.getDescription().getValue()),
+                    () -> assertThat(response.theme().thumbnail()).isEqualTo(THEME.getThumbnail().getValue()),
+
+                    () -> assertThat(savedReservation.getTheme().getId()).isEqualTo(
+                            CreateReservationTest.REQUEST.themeId()),
+                    () -> assertThat(savedReservation.getTheme().getName().getValue()).isEqualTo(
+                            THEME.getName().getValue()),
+                    () -> assertThat(savedReservation.getTheme().getDescription()).isEqualTo(THEME.getDescription()),
+                    () -> assertThat(savedReservation.getTheme().getThumbnail()).isEqualTo(THEME.getThumbnail())
+            );
         }
     }
 }

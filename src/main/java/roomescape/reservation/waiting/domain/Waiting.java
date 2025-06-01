@@ -1,13 +1,18 @@
 package roomescape.reservation.waiting.domain;
 
-import jakarta.persistence.*;
-import roomescape.member.domain.Member;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
-
+import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.member.domain.Member;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
 
 @Entity
 public class Waiting {
@@ -45,7 +50,8 @@ public class Waiting {
     protected Waiting() {
     }
 
-    public static Waiting register(final Member member, final LocalDate date, final Theme theme, final ReservationTime time) {
+    public static Waiting register(final Member member, final LocalDate date, final Theme theme,
+                                   final ReservationTime time) {
         return new Waiting(null, LocalDateTime.now(), member, date, theme, time);
     }
 
