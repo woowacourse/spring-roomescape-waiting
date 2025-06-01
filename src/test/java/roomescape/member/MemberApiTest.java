@@ -6,15 +6,17 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class MemberApiTest {
 
@@ -25,6 +27,14 @@ public class MemberApiTest {
         private final Map<String, String> validRequest = new HashMap<>(Map.of("name", "노랑",
                 "email", "aaa@gmail.com",
                 "password", "1234"));
+
+        @LocalServerPort
+        int port;
+
+        @BeforeEach
+        void setUp() {
+            RestAssured.port = port;
+        }
 
         @DisplayName("회원가입을 성공할 경우 201을 반환한다.")
         @Test
