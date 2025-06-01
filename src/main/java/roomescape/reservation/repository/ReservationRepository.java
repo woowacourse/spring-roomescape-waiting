@@ -14,11 +14,11 @@ public interface ReservationRepository extends CrudRepository<Reservation, Long>
 
     List<Reservation> findByDateBetween(LocalDate from, LocalDate to);
 
+    List<Reservation> findAllByMemberIdOrderByDateDesc(long id);
+
     boolean existsByTimeId(long id);
 
     boolean existsByThemeId(long id);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
-
-    List<Reservation> findAllByMemberIdOrderByDateDesc(long id);
 }
