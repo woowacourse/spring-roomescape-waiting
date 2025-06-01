@@ -129,7 +129,7 @@ class WaitingServiceTest extends ServiceTestBase {
         var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
-        var waiting = waitingDbFixture.대기_25_4_22(reservationTime, theme, member);
+        var waiting = waitingDbFixture.대기_2025년_4월_22일(reservationTime, theme, member);
 
         // whenR
         sut.approveWaitingById(waiting.getId());
@@ -203,7 +203,7 @@ class WaitingServiceTest extends ServiceTestBase {
         var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
-        var waiting = waitingDbFixture.대기_25_4_22(reservationTime, theme, member);
+        var waiting = waitingDbFixture.대기_2025년_4월_22일(reservationTime, theme, member);
 
         // when
         var all = sut.findAllMyWaiting(member.getId());

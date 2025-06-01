@@ -36,7 +36,7 @@ class WaitingRestTest extends RestAssuredTestBase {
         var theme = themeDbFixture.공포();
         timeId = time.getId();
         themeId = theme.getId();
-        var waiting = waitingDbFixture.대기_25_4_22(time, theme, member);
+        var waiting = waitingDbFixture.대기_2025년_4월_22일(time, theme, member);
         waitingId = waiting.getId();
     }
 

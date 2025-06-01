@@ -197,7 +197,7 @@ class ReservationServiceTest extends ServiceTestBase {
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
         var date1 = 예약날짜_오늘;
-        var date2 = roomescape.integration.fixture.ReservationDateFixture.예약날짜_25_4_22;
+        var date2 = roomescape.integration.fixture.ReservationDateFixture.예약날짜_2025년_4월_22일;
         reservationDbFixture.예약_생성(date1, reservationTime, theme, member);
         reservationDbFixture.예약_생성(date2, reservationTime, theme, member);
 
@@ -231,7 +231,7 @@ class ReservationServiceTest extends ServiceTestBase {
         var member = memberDbFixture.한스_leehyeonsu4888_지메일_일반_멤버();
         var reservationTime = reservationTimeDbFixture.예약시간_10시();
         var theme = themeDbFixture.공포();
-        var reservation = reservationDbFixture.예약_25_4_22(reservationTime, theme, member);
+        var reservation = reservationDbFixture.예약_2025년_4월_22일(reservationTime, theme, member);
 
         // when
         var all = sut.findAllMyReservation(member.getId());

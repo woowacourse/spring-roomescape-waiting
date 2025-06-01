@@ -21,8 +21,8 @@ public class WaitingDbFixture {
         this.waitingRepository = waitingRepository;
     }
 
-    public Waiting 대기_25_4_22(final ReservationTime time, final Theme theme, final Member member) {
-        ReservationDate date = ReservationDateFixture.예약날짜_25_4_22;
+    public Waiting 대기_2025년_4월_22일(final ReservationTime time, final Theme theme, final Member member) {
+        ReservationDate date = ReservationDateFixture.예약날짜_2025년_4월_22일;
         return createWaiting(date, time, theme, member, LocalDateTime.now(FIXED_CLOCK));
     }
 

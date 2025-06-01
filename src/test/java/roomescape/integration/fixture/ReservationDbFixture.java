@@ -18,8 +18,8 @@ public class ReservationDbFixture {
         this.reservationRepository = reservationRepository;
     }
 
-    public Reservation 예약_25_4_22(final ReservationTime time, final Theme theme, final Member member) {
-        ReservationDate date = ReservationDateFixture.예약날짜_25_4_22;
+    public Reservation 예약_2025년_4월_22일(final ReservationTime time, final Theme theme, final Member member) {
+        ReservationDate date = ReservationDateFixture.예약날짜_2025년_4월_22일;
         return createReservation(date, time, theme, member);
     }
 
