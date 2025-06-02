@@ -1,0 +1,97 @@
+package roomescape.application.reservation;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.application.reservation.dto.CreateWaitingParam;
+import roomescape.application.reservation.dto.WaitingResult;
+import roomescape.application.reservation.dto.WaitingWitStatusResult;
+import roomescape.application.support.exception.NotFoundEntityException;
+import roomescape.domain.BusinessRuleViolationException;
+import roomescape.domain.member.Member;
+import roomescape.domain.member.MemberRepository;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.WaitingRank;
+import roomescape.domain.reservation.WaitingRepository;
+
+@Service
+public class WaitingService {
+
+    private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
+    private final MemberRepository memberRepository;
+    private final ReservationSlotAssembler reservationSlotAssembler;
+    private final Clock clock;
+
+    public WaitingService(WaitingRepository waitingRepository,
+                          ReservationRepository reservationRepository,
+                          MemberRepository memberRepository,
+                          ReservationSlotAssembler reservationSlotAssembler,
+                          Clock clock) {
+        this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
+        this.memberRepository = memberRepository;
+        this.reservationSlotAssembler = reservationSlotAssembler;
+        this.clock = clock;
+    }
+
+    @Transactional
+    public void create(CreateWaitingParam waitingParam) {
+        Member member = getMemberById(waitingParam.memberId());
+        ReservationSlot reservationSlot = reservationSlotAssembler.assemble(
+                waitingParam.date(),
+                waitingParam.timeId(),
+                waitingParam.themeId()
+        );
+        validateCreateWaiting(reservationSlot, member);
+        Waiting waiting = Waiting.create(
+                LocalDateTime.now(clock),
+                reservationSlot,
+                member
+        );
+        waitingRepository.save(waiting);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingWitStatusResult> findWaitingRanks(Long memberId) {
+        Member member = getMemberById(memberId);
+        List<WaitingRank> waitingRanks = waitingRepository.findWaitingRankByMember(member);
+        return waitingRanks.stream()
+                .map(WaitingWitStatusResult::from)
+                .toList();
+    }
+
+    @Transactional
+    public void delete(Long waitingId) {
+        waitingRepository.deleteById(waitingId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<WaitingResult> findAllWaitings() {
+        List<Waiting> waitings = waitingRepository.findAllWithMemberAndThemeAndTime();
+        return waitings.stream()
+                .map(WaitingResult::from)
+                .toList();
+    }
+
+    private void validateCreateWaiting(ReservationSlot reservationSlot, Member member) {
+        if (!reservationRepository.existsByReservationSlot(reservationSlot)) {
+            throw new BusinessRuleViolationException("예약이 바로 가능해 예약 대기를 할 수 없습니다.");
+        }
+        if (reservationRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
+            throw new BusinessRuleViolationException("이미 예약중입니다.");
+        }
+        if (waitingRepository.existsByReservationSlotAndMember(reservationSlot, member)) {
+            throw new BusinessRuleViolationException("이미 예약 대기 중입니다.");
+        }
+    }
+
+    private Member getMemberById(Long memberId) {
+        return memberRepository.findById(memberId)
+                .orElseThrow(() -> new NotFoundEntityException(memberId + "에 해당하는 member 튜플이 없습니다."));
+    }
+}

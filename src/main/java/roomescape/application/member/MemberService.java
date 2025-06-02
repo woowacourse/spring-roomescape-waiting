@@ -20,6 +20,7 @@ public class MemberService {
         this.memberRepository = memberRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<MemberResult> findAll() {
         List<Member> members = memberRepository.findAll();
         return members.stream()

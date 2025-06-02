@@ -39,16 +39,13 @@ public class ReservationTimeService {
         return reservationTime.getId();
     }
 
+    @Transactional(readOnly = true)
     public ReservationTimeResult findById(Long reservationTimeId) {
         ReservationTime reservationTime = getReservationTimeById(reservationTimeId);
         return toReservationResult(reservationTime);
     }
 
-    private ReservationTime getReservationTimeById(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
-    }
-
+    @Transactional(readOnly = true)
     public List<ReservationTimeResult> findAll() {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
@@ -56,10 +53,11 @@ public class ReservationTimeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableReservationTimeResult> findAvailableTimesByThemeIdAndDate(Long themeId,
                                                                                    LocalDate reservationDate) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
-        List<Reservation> reservations = reservationRepository.findByThemeIdAndDate(
+        List<Reservation> reservations = reservationRepository.findByReservationSlotThemeIdAndReservationSlotDate(
                 themeId,
                 reservationDate
         );
@@ -82,10 +80,15 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long reservationTimeId) {
-        if (reservationRepository.existsByTimeId(reservationTimeId)) {
+        if (reservationRepository.existsByReservationSlotTimeId(reservationTimeId)) {
             throw new BusinessRuleViolationException("해당 예약 시간에 예약이 존재합니다.");
         }
         reservationTimeRepository.deleteById(reservationTimeId);
+    }
+
+    private ReservationTime getReservationTimeById(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
+                .orElseThrow(() -> new NotFoundEntityException(timeId + "에 해당하는 reservation_time 튜플이 없습니다."));
     }
 
     private ReservationTimeResult toReservationResult(ReservationTime reservationTime) {

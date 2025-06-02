@@ -2,9 +2,7 @@ package roomescape.application.member;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import jakarta.persistence.EntityManager;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.application.AbstractServiceIntegrationTest;
@@ -19,15 +17,8 @@ class MemberServiceTest extends AbstractServiceIntegrationTest {
     @Autowired
     private MemberRepository memberRepository;
 
-    private MemberService memberService;
-
     @Autowired
-    EntityManager entityManager;
-
-    @BeforeEach
-    void setUp() {
-        memberService = new MemberService(memberRepository);
-    }
+    private MemberService memberService;
 
     @Test
     void 모든_회원_조회() {

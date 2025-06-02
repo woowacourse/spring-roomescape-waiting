@@ -2,36 +2,44 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
+import roomescape.domain.member.Member;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
-    boolean existsByTimeId(@Param("timeId") Long reservationTimeId);
+    boolean existsByReservationSlotTimeId(@Param("timeId") Long reservationTimeId);
 
-    boolean existsByDateAndTimeIdAndThemeId(@Param("date") LocalDate reservationDate,
-                                            @Param("timeId") Long timeId,
-                                            @Param("themeId") Long themeId);
+    boolean existsByReservationSlot(@Param("reservationSlot") ReservationSlot reservationSlot);
 
-    boolean existsByThemeId(@Param("themeId") Long themeId);
+    boolean existsByReservationSlotThemeId(@Param("themeId") Long themeId);
 
-    List<Reservation> findByThemeIdAndDate(@Param("themeId") Long themeId, @Param("date") LocalDate reservationDate);
+    List<Reservation> findByReservationSlotThemeIdAndReservationSlotDate(@Param("themeId") Long themeId,
+                                                                         @Param("date") LocalDate reservationDate);
 
-    List<Reservation> findByThemeIdAndMemberIdAndDateBetween(@Param("themeId") Long themeId,
-                                                             @Param("memberId") Long memberId,
-                                                             @Param("from") LocalDate from,
-                                                             @Param("to") LocalDate to);
+    List<Reservation> findByReservationSlotThemeIdAndMemberIdAndReservationSlotDateBetween(
+            @Param("themeId") Long themeId,
+            @Param("memberId") Long memberId,
+            @Param("from") LocalDate from,
+            @Param("to") LocalDate to);
 
-    @EntityGraph(attributePaths = {"time", "theme"})
+    @EntityGraph(attributePaths = {"member", "reservationSlot.time"})
     List<Reservation> findAllByMemberId(@Param("memberId") Long memberId);
 
     @Query("""
             SELECT r FROM Reservation r
                 JOIN FETCH r.member m
-                JOIN FETCH r.time t
-                JOIN FETCH r.theme th
+                JOIN FETCH r.reservationSlot.time t
+                JOIN FETCH r.reservationSlot.theme th
             """)
     List<Reservation> findAllWithMemberAndTimeAndTheme();
+
+    boolean existsByReservationSlotAndMember(@Param("reservationSlot") ReservationSlot reservationSlot,
+                                             @Param("member") Member member);
+
+    @Query("SELECT r.reservationSlot FROM Reservation r WHERE r.id = :reservationId")
+    Optional<ReservationSlot> findReservationSlotById(@Param("reservationId") Long reservationId);
 }

@@ -28,6 +28,7 @@ public class ThemeService {
         this.clock = clock;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResult> findAll() {
         List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -49,24 +50,21 @@ public class ThemeService {
         return theme.getId();
     }
 
+    @Transactional(readOnly = true)
     public ThemeResult findById(Long id) {
         Theme theme = getThemeById(id);
         return ThemeResult.from(theme);
     }
 
-    private Theme getThemeById(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
-    }
-
     @Transactional
-    public void deleteById(final Long themeId) {
-        if (reservationRepository.existsByThemeId(themeId)) {
+    public void deleteById(Long themeId) {
+        if (reservationRepository.existsByReservationSlotThemeId(themeId)) {
             throw new BusinessRuleViolationException("해당 테마에 예약이 존재합니다.");
         }
         themeRepository.deleteById(themeId);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResult> findRankBetweenDate() {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDate = today.minusDays(7);
@@ -75,5 +73,10 @@ public class ThemeService {
         return rankForWeek.stream()
                 .map(ThemeResult::from)
                 .toList();
+    }
+
+    private Theme getThemeById(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new NotFoundEntityException(themeId + "에 해당하는 theme 튜플이 없습니다."));
     }
 }
