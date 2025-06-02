@@ -22,26 +22,15 @@ public class Theme {
     @Column(name = "thumbnail", nullable = false)
     private String thumbnail;
 
-    public Theme(final Long id, final String name, final String description, final String thumbnail) {
+    public Theme(final String name, final String description, final String thumbnail) {
         validateName(name);
         validateDescription(description);
         validateThumbnail(thumbnail);
 
-        this.id = id;
+        this.id = null;
         this.name = name;
         this.description = description;
         this.thumbnail = thumbnail;
-    }
-
-    public Theme(final String name, final String description, final String thumbnail) {
-        this(null, name, description, thumbnail);
-    }
-
-    public Theme(final Long id) {
-        this.id = id;
-        this.name = null;
-        this.description = null;
-        this.thumbnail = null;
     }
 
     protected Theme() {

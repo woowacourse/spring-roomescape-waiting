@@ -20,30 +20,36 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.business.domain.Member;
-import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
+import roomescape.business.service.ReservationService;
 import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.LoginRequest;
 import roomescape.presentation.dto.ReservationRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationControllerIntegrationTest {
+class ReservationsControllerIntegrationTest {
 
     @LocalServerPort
     private int port;
     @Autowired
-    private ReservationTimeRepository reservationTimeRepository;
+    private ReservationService reservationService;
     @Autowired
-    private ThemeRepository themeRepository;
+    private ReservationRepository reservationRepository;
+    @Autowired
+    private ReservationTimeRepository reservationTimeRepository;
     @Autowired
     private MemberRepository memberRepository;
     @Autowired
-    private ReservationRepository reservationRepository;
+    private ThemeRepository themeRepository;
+    @Autowired
+    private WaitInfoRepository waitInfoRepository;
+
 
     @BeforeEach
     void setUp() {
@@ -51,7 +57,7 @@ class ReservationControllerIntegrationTest {
     }
 
     @Test
-    @DisplayName("로그인한 회원이 올바른 예약 정보로 요청하면 예약이 성공적으로 생성된다")
+    @DisplayName("로그인한 회원이 올바른 예약 정보로 예약하면 예약이 성공적으로 생성된다")
     void createByLoginMember_WithValidRequest_ReturnsCreatedReservation() {
         // given
         final ReservationTime reservationTime = new ReservationTime(LocalTime.of(14, 0));
@@ -60,10 +66,10 @@ class ReservationControllerIntegrationTest {
         final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("멤버", "USER", "member@test.com", "pass");
         memberRepository.save(member);
 
-        final LoginRequest loginRequest = new LoginRequest("이메일", "비밀번호");
+        final LoginRequest loginRequest = new LoginRequest("member@test.com", "pass");
         final String token = given()
                 .contentType(MediaType.APPLICATION_JSON_VALUE)
                 .body(loginRequest)
@@ -82,9 +88,10 @@ class ReservationControllerIntegrationTest {
                 .post("/reservations")
                 .then()
                 .statusCode(HttpStatus.CREATED.value())
-                .body("theme.name", equalTo("테마1"))
-                .body("date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("time.startAt", equalTo("14:00:00"));
+                .body("memberName", equalTo("멤버"))
+                .body("themeName", equalTo("테마1"))
+                .body("date", equalTo(futureDate.toString()))
+                .body("startAt", equalTo("14:00:00"));
     }
 
     @Test
@@ -109,30 +116,33 @@ class ReservationControllerIntegrationTest {
         final Theme theme = new Theme("테마1", "설명1", "썸네일1");
         themeRepository.save(theme);
 
-        final Member member = new Member("이름", "USER", "이메일", "비밀번호");
+        final Member member = new Member("어드민", "ADMIN", "admin@test.com", "pass");
         memberRepository.save(member);
 
-        final Reservation reservation1 = new Reservation(LocalDate.now().plusDays(1), member, reservationTime, theme);
-        reservationRepository.save(reservation1);
-        final Reservation reservation2 = new Reservation(LocalDate.now().plusDays(2), member, reservationTime, theme);
-        reservationRepository.save(reservation2);
-        final Reservation reservation3 = new Reservation(LocalDate.now().plusDays(3), member, reservationTime, theme);
-        reservationRepository.save(reservation3);
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.now().plusDays(1), reservationTime.getId());
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.now().plusDays(2), reservationTime.getId());
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.now().plusDays(3), reservationTime.getId());
 
-        final Long memberId = 1L;
-        final Long themeId = 1L;
         final String formattedDateFrom = LocalDate.now().toString();
         final String formattedDateTo = LocalDate.now().plusDays(2).toString();
 
+        final LoginRequest loginRequest = new LoginRequest("admin@test.com", "pass");
+        final String token = given()
+                .contentType(MediaType.APPLICATION_JSON_VALUE)
+                .body(loginRequest)
+                .post("/login")
+                .getCookie("token");
+
         // when & then
         given()
+                .cookie("token", token)
                 .accept(MediaType.APPLICATION_JSON_VALUE)
-                .queryParam("memberId", memberId)
-                .queryParam("themeId", themeId)
+                .queryParam("memberId", member.getId())
+                .queryParam("themeId", theme.getId())
                 .queryParam("dateFrom", formattedDateFrom)
                 .queryParam("dateTo", formattedDateTo)
                 .when()
-                .get("/reservations/filter")
+                .get("admin/reservations/filter")
                 .then()
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2));
@@ -197,8 +207,7 @@ class ReservationControllerIntegrationTest {
         memberRepository.save(member);
 
         final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final Reservation reservation14_00 = new Reservation(futureDate, member, reservationTime14_00, theme);
-        reservationRepository.save(reservation14_00);
+        reservationService.insert(member.getId(), theme.getId(), futureDate, reservationTime14_00.getId());
 
         final String formattedFutureDate = LocalDate.now().plusDays(1).toString();
         final Long themeId = 1L;
@@ -214,51 +223,6 @@ class ReservationControllerIntegrationTest {
                 .statusCode(HttpStatus.OK.value())
                 .body("", hasSize(2))
                 .body("alreadyBooked", hasItems(true, false));
-    }
-
-    @Test
-    @DisplayName("로그인한 회원의 예약 목록을 조회하면 200 상태코드와 함께 예약 목록이 반환된다")
-    void readMine_ReturnsMyReservations() {
-        // given
-        final ReservationTime reservationTime14_00 = new ReservationTime(LocalTime.of(14, 0));
-        reservationTimeRepository.save(reservationTime14_00);
-
-        final ReservationTime reservationTime16_00 = new ReservationTime(LocalTime.of(16, 0));
-        reservationTimeRepository.save(reservationTime16_00);
-
-        final Theme theme = new Theme("테마1", "설명1", "썸네일1");
-        themeRepository.save(theme);
-
-        final Member member1 = new Member("이름1", "USER", "이메일1", "비밀번호1");
-        memberRepository.save(member1);
-        final Member member2 = new Member("이름2", "USER", "이메일2", "비밀번호2");
-        memberRepository.save(member2);
-
-        final LocalDate futureDate = LocalDate.now().plusDays(1);
-        final Reservation reservation14_00 = new Reservation(futureDate, member1, reservationTime14_00, theme);
-        reservationRepository.save(reservation14_00);
-        final Reservation reservation16_00 = new Reservation(futureDate, member2, reservationTime16_00, theme);
-        reservationRepository.save(reservation16_00);
-
-        final LoginRequest loginRequest = new LoginRequest("이메일1", "비밀번호1");
-        final String token = given()
-                .contentType(MediaType.APPLICATION_JSON_VALUE)
-                .body(loginRequest)
-                .post("/login")
-                .getCookie("token");
-
-        // when & then
-        given()
-                .accept(MediaType.APPLICATION_JSON_VALUE)
-                .cookie("token", token)
-                .when()
-                .get("/reservations-mine")
-                .then()
-                .log().all()
-                .statusCode(HttpStatus.OK.value())
-                .body("", hasSize(1))
-                .body("[0].date", equalTo(LocalDate.now().plusDays(1).toString()))
-                .body("[0].time", equalTo("14:00:00"));
     }
 
     @Test

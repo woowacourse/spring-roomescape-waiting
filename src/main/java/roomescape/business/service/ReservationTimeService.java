@@ -3,33 +3,35 @@ package roomescape.business.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.stream.Collectors;
 import org.springframework.stereotype.Service;
 import roomescape.business.domain.Reservation;
 import roomescape.business.domain.ReservationTime;
+import roomescape.business.domain.WaitInfo;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
-import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.PlayTimeRequest;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
 @Service
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final WaitInfoRepository waitInfoRepository;
 
-    public ReservationTimeService(final ReservationTimeRepository reservationTimeRepository,
-                                  final ReservationRepository reservationRepository) {
+    public ReservationTimeService(
+            final ReservationTimeRepository reservationTimeRepository,
+            final WaitInfoRepository waitInfoRepository
+    ) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.reservationRepository = reservationRepository;
+        this.waitInfoRepository = waitInfoRepository;
     }
 
-    public ReservationTimeResponse insert(final PlayTimeRequest playTimeRequest) {
-        validateStartAtIsNotDuplicate(playTimeRequest.startAt());
-        final ReservationTime reservationTime = playTimeRequest.toDomain();
+    public ReservationTimeResponse insert(final ReservationTimeRequest reservationTimeRequest) {
+        validateStartAtIsNotDuplicate(reservationTimeRequest.startAt());
+        final ReservationTime reservationTime = reservationTimeRequest.toDomain();
         final ReservationTime insertReservationTime = reservationTimeRepository.save(reservationTime);
         return ReservationTimeResponse.from(insertReservationTime);
     }
@@ -61,17 +63,27 @@ public class ReservationTimeService {
     }
 
     public List<ReservationAvailableTimeResponse> findAvailableTimes(final LocalDate date, final Long themeId) {
-        final List<Reservation> reservations = reservationRepository.findByDateAndThemeId(date, themeId);
+        final List<WaitInfo> waitInfos = waitInfoRepository.findByRank(1L);
+        final List<Reservation> alreadyBookedReservations = waitInfos.stream()
+                .map(WaitInfo::getReservation)
+                .filter(reservation -> reservation.getDate().equals(date)
+                        && reservation.getTheme().getId().equals(themeId))
+                .toList();
+
         final List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
-                .map(playTime -> {
-                    boolean isAlreadyBooked = containPlayTime(reservations, playTime);
-                    return new ReservationAvailableTimeResponse(playTime, isAlreadyBooked);
+                .map(reservationTime -> {
+                    boolean isAlreadyBooked =
+                            isAlreadyBookedReservationTime(reservationTime, alreadyBookedReservations);
+                    return new ReservationAvailableTimeResponse(reservationTime, isAlreadyBooked);
                 })
-                .collect(Collectors.toList());
+                .toList();
     }
 
-    private boolean containPlayTime(final List<Reservation> reservations, final ReservationTime reservationTime) {
+    private boolean isAlreadyBookedReservationTime(
+            final ReservationTime reservationTime,
+            final List<Reservation> reservations
+    ) {
         return reservations.stream()
                 .anyMatch(reservation -> reservation.isSameReservationTime(reservationTime));
     }

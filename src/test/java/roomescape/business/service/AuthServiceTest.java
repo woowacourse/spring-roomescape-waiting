@@ -7,28 +7,32 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.business.domain.Member;
 import roomescape.exception.UnauthorizedException;
 import roomescape.persistence.repository.MemberRepository;
 
 @DataJpaTest
-@Sql("classpath:data-authService.sql")
 class AuthServiceTest {
 
     private final AuthService authService;
+    private final MemberRepository memberRepository;
 
     @Autowired
     public AuthServiceTest(final MemberRepository memberRepository) {
         this.authService = new AuthService(memberRepository);
+        this.memberRepository = memberRepository;
     }
 
     @Test
     @DisplayName("email, password 통해 인증에 성공하면 AccessToken 반환한다")
     void login() {
         // given
-        // data-authService.sql
+        final String memberName = "후유";
+        final String role = "ADMIN";
         final String email = "email@test.com";
         final String password = "pass";
+        final Member member = new Member(memberName, role, email, password);
+        memberRepository.save(member);
 
         // when
         final String accessToken = authService.login(email, password);

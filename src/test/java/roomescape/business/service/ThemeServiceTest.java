@@ -5,42 +5,47 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.business.domain.Member;
+import roomescape.business.domain.Reservation;
+import roomescape.business.domain.ReservationTime;
 import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
+import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
+import roomescape.persistence.repository.ReservationTimeRepository;
 import roomescape.persistence.repository.ThemeRepository;
 import roomescape.presentation.dto.ThemeRequest;
 import roomescape.presentation.dto.ThemeResponse;
-import roomescape.util.CurrentUtil;
 
 @DataJpaTest
-@Sql("classpath:data-themeService.sql")
 class ThemeServiceTest {
 
     private ThemeService themeService;
-    private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final ReservationTimeRepository reservationTimeRepository;
+    private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
 
     @Autowired
-    public ThemeServiceTest(final ThemeRepository themeRepository, final ReservationRepository reservationRepository) {
-        this.themeRepository = themeRepository;
+    public ThemeServiceTest(
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final MemberRepository memberRepository,
+            final ThemeRepository themeRepository
+    ) {
+        themeService = new ThemeService(themeRepository, reservationRepository, () -> LocalDate.of(2025, 5, 10));
         this.reservationRepository = reservationRepository;
-    }
-
-    @BeforeEach
-    void setUp() {
-        final CurrentUtil currentUtil = () -> LocalDate.of(2025, 5, 10);
-        themeService = new ThemeService(themeRepository, reservationRepository, currentUtil);
+        this.reservationTimeRepository = reservationTimeRepository;
+        this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
     }
 
     @Test
@@ -76,17 +81,20 @@ class ThemeServiceTest {
     @DisplayName("모든 테마를 조회한다")
     void findAll() {
         // given
-        // data-themeService.sql
+        final Theme theme1 = new Theme("테마1", "소개1", "썸네일1");
+        themeRepository.save(theme1);
+        final Theme theme2 = new Theme("테마2", "소개2", "썸네일2");
+        themeRepository.save(theme2);
 
         // when
         final List<ThemeResponse> themeResponses = themeService.findAll();
 
         // then
-        assertThat(themeResponses).hasSize(4);
+        assertThat(themeResponses).hasSize(2);
     }
 
     @Test
-    @DisplayName("id를 통해 방탈출 예약 시간을 조회한다")
+    @DisplayName("id를 통해 테마를 조회한다")
     void findByIdById() {
         // given
         final ThemeRequest themeRequest = new ThemeRequest("테마", "소개", "썸네일");
@@ -128,7 +136,7 @@ class ThemeServiceTest {
         themeService.deleteById(id);
 
         // then
-        Optional<Theme> findTheme = themeRepository.findById(id);
+        final Optional<Theme> findTheme = themeRepository.findById(id);
         assertThat(findTheme).isEmpty();
     }
 
@@ -144,11 +152,63 @@ class ThemeServiceTest {
     }
 
     @Test
+    @DisplayName("인기 테마를 조회할 때 결과는 최대 10개를 반환한다")
+    void findPopularThemesWhenResultSizeExceedsLimit() {
+        // given
+        themeRepository.saveAll(List.of(
+                new Theme("테마1", "소개1", "썸네일1"),
+                new Theme("테마2", "소개2", "썸네일2"),
+                new Theme("테마3", "소개3", "썸네일3"),
+                new Theme("테마4", "소개4", "썸네일4"),
+                new Theme("테마5", "소개5", "썸네일5"),
+                new Theme("테마6", "소개6", "썸네일6"),
+                new Theme("테마7", "소개7", "썸네일7"),
+                new Theme("테마8", "소개8", "썸네일8"),
+                new Theme("테마9", "소개9", "썸네일9"),
+                new Theme("테마10", "소개10", "썸네일10"),
+                new Theme("테마11", "소개11", "썸네일11"),
+                new Theme("테마12", "소개12", "썸네일12")
+        ));
+
+        // when
+        final List<ThemeResponse> themeResponses = themeService.findPopularThemes();
+
+        // then
+        assertThat(themeResponses).hasSize(10);
+    }
+
+    @Test
     @DisplayName("인기 테마를 조회한다")
     void findPopularThemes() {
         // given
-        // data-themeService.sql
-        // 총 4개의 테마가 있고, `강추`, `추천`, `평범`, `미예약` 이름 순으로 인기가 많다.
+        final ReservationTime time = new ReservationTime(LocalTime.of(14, 0));
+        reservationTimeRepository.save(time);
+
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+
+        final Theme theme1 = new Theme("미예약", "미예약 테마입니다.", "미예약 썸네일");
+        themeRepository.save(theme1);
+        final Theme theme2 = new Theme("평범", "평범한 테마입니다.", "평범 썸네일");
+        themeRepository.save(theme2);
+        final Theme theme3 = new Theme("추천", "추천하는 테마입니다.", "추천 썸네일");
+        themeRepository.save(theme3);
+        final Theme theme4 = new Theme("강추", "강력 추천하는 테마입니다.", "강추 썸네일");
+        themeRepository.save(theme4);
+
+        reservationRepository.saveAll(List.of(
+                // 평범
+                new Reservation(LocalDate.of(2025, 5, 10), time, theme2),
+                new Reservation(LocalDate.of(2025, 5, 2), time, theme2),   // 대상 X
+                new Reservation(LocalDate.of(2025, 5, 1), time, theme2),   // 대상 X
+                // 추천
+                new Reservation(LocalDate.of(2025, 5, 10), time, theme3),
+                new Reservation(LocalDate.of(2025, 5, 9), time, theme3),
+                // 강추
+                new Reservation(LocalDate.of(2025, 5, 10), time, theme4),
+                new Reservation(LocalDate.of(2025, 5, 9), time, theme4),
+                new Reservation(LocalDate.of(2025, 5, 8), time, theme4)
+        ));
 
         // when
         final List<ThemeResponse> themeResponses = themeService.findPopularThemes();

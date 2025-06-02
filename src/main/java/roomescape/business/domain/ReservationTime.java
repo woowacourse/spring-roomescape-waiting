@@ -17,19 +17,10 @@ public class ReservationTime {
     @Column(name = "start_at", nullable = false)
     private LocalTime startAt;
 
-    public ReservationTime(final Long id, final LocalTime startAt) {
-        validateStartAt(startAt);
-        this.id = id;
-        this.startAt = startAt;
-    }
-
     public ReservationTime(final LocalTime startAt) {
-        this(null, startAt);
-    }
+        validateStartAt(startAt);
 
-    public ReservationTime(final Long id) {
-        this.id = id;
-        this.startAt = null;
+        this.startAt = startAt;
     }
 
     protected ReservationTime() {

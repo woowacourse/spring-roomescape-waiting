@@ -12,28 +12,48 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.test.context.jdbc.Sql;
+import roomescape.business.domain.Member;
 import roomescape.business.domain.ReservationTime;
+import roomescape.business.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.NotFoundException;
+import roomescape.persistence.repository.MemberRepository;
 import roomescape.persistence.repository.ReservationRepository;
 import roomescape.persistence.repository.ReservationTimeRepository;
-import roomescape.presentation.dto.PlayTimeRequest;
+import roomescape.persistence.repository.ThemeRepository;
+import roomescape.persistence.repository.WaitInfoRepository;
 import roomescape.presentation.dto.ReservationAvailableTimeResponse;
+import roomescape.presentation.dto.ReservationTimeRequest;
 import roomescape.presentation.dto.ReservationTimeResponse;
 
 @DataJpaTest
-@Sql("classpath:data-playTimeService.sql")
 class ReservationTimeServiceTest {
 
     private final ReservationTimeService reservationTimeService;
+    private final ReservationService reservationService;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final MemberRepository memberRepository;
+    private final ThemeRepository themeRepository;
 
     @Autowired
-    public ReservationTimeServiceTest(final ReservationTimeRepository reservationTimeRepository,
-                                      final ReservationRepository reservationRepository) {
-        this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, reservationRepository);
+    public ReservationTimeServiceTest(
+            final ReservationRepository reservationRepository,
+            final ReservationTimeRepository reservationTimeRepository,
+            final MemberRepository memberRepository,
+            final ThemeRepository themeRepository,
+            final WaitInfoRepository waitInfoRepository
+    ) {
         this.reservationTimeRepository = reservationTimeRepository;
+        this.memberRepository = memberRepository;
+        this.themeRepository = themeRepository;
+        this.reservationTimeService = new ReservationTimeService(reservationTimeRepository, waitInfoRepository);
+        this.reservationService = new ReservationService(
+                reservationRepository,
+                memberRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitInfoRepository
+        );
     }
 
     @Test
@@ -41,10 +61,10 @@ class ReservationTimeServiceTest {
     void insert() {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
 
         // when
-        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
 
         // then
         assertThat(reservationTimeResponse.startAt()).isEqualTo(startAt);
@@ -55,11 +75,11 @@ class ReservationTimeServiceTest {
     void insertWhenStartAtIsDuplicate() {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
+        reservationTimeService.insert(reservationTimeRequest);
 
         // when & then
-        assertThatThrownBy(() -> reservationTimeService.insert(playTimeRequest))
+        assertThatThrownBy(() -> reservationTimeService.insert(reservationTimeRequest))
                 .isInstanceOf(DuplicateException.class);
     }
 
@@ -67,23 +87,25 @@ class ReservationTimeServiceTest {
     @DisplayName("모든 방탈출 예약 시간을 조회한다")
     void findAll() {
         // given
-        // data-playTimeService.sql
-        // 2개의 방탈출 예약 시간이 주어진다.
+        reservationTimeRepository.saveAll(List.of(
+                new ReservationTime(LocalTime.of(10, 0)),
+                new ReservationTime(LocalTime.of(12, 0))
+        ));
 
         // when
-        final List<ReservationTimeResponse> reservationTimeRespons = reservationTimeService.findAll();
+        final List<ReservationTimeResponse> reservationTimeResponses = reservationTimeService.findAll();
 
         // then
-        assertThat(reservationTimeRespons).hasSize(2);
+        assertThat(reservationTimeResponses).hasSize(2);
     }
 
     @Test
     @DisplayName("id를 통해 방탈출 예약 시간을 조회한다")
-    void findByIdById() {
+    void findById() {
         // given
         final LocalTime startAt = LocalTime.of(10, 10);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
         final Long id = reservationTimeResponse.id();
 
         // when
@@ -112,16 +134,16 @@ class ReservationTimeServiceTest {
     void deleteById() {
         // given
         final LocalTime startAt = LocalTime.of(14, 0);
-        final PlayTimeRequest playTimeRequest = new PlayTimeRequest(startAt);
-        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(playTimeRequest);
+        final ReservationTimeRequest reservationTimeRequest = new ReservationTimeRequest(startAt);
+        final ReservationTimeResponse reservationTimeResponse = reservationTimeService.insert(reservationTimeRequest);
         final Long id = reservationTimeResponse.id();
 
         // when
         reservationTimeService.deleteById(id);
 
         // then
-        final Optional<ReservationTime> findPlayTime = reservationTimeRepository.findById(id);
-        assertThat(findPlayTime).isEmpty();
+        final Optional<ReservationTime> findTime = reservationTimeRepository.findById(id);
+        assertThat(findTime).isEmpty();
     }
 
     @Test
@@ -139,26 +161,35 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 가능 시간 목록을 조회한다")
     void findAvailableTimes() {
         // given
-        // data-playTimeService.sql
         // 2개의 방탈출 예약 시간, 1개의 테마, 1개의 예약이 주어진다.
+        final Theme theme = new Theme("테마", "소개", "썸네일");
+        themeRepository.save(theme);
+
+        final Member member = new Member("후유", "ADMIN", "fuyu@test.com", "pass");
+        memberRepository.save(member);
+
+        final ReservationTime time1 = new ReservationTime(LocalTime.of(10, 0));
+        reservationTimeRepository.save(time1);
+        final ReservationTime time2 = new ReservationTime(LocalTime.of(12, 0));
+        reservationTimeRepository.save(time2);
+
+        reservationService.insert(member.getId(), theme.getId(), LocalDate.MAX, time1.getId());
 
         // when
-        final List<ReservationAvailableTimeResponse> availableTimeResponses = reservationTimeService.findAvailableTimes(
-                LocalDate.parse("2025-05-10"),
-                100L
-        );
+        final List<ReservationAvailableTimeResponse> availableTimeResponses
+                = reservationTimeService.findAvailableTimes(LocalDate.MAX, theme.getId());
 
         // then
-        final ReservationAvailableTimeResponse notAvailableTimeResponse = availableTimeResponses.stream()
-                .filter(response -> response.reservationTime().getId() == 100L)
+        final ReservationAvailableTimeResponse alreadyBookedResponse = availableTimeResponses.stream()
+                .filter(response -> response.reservationTime().getId().equals(time1.getId()))
                 .findFirst().get();
-        final ReservationAvailableTimeResponse availableTimeResponse = availableTimeResponses.stream()
-                .filter(response -> response.reservationTime().getId() == 101L)
+        final ReservationAvailableTimeResponse notAlreadyBookedResponse = availableTimeResponses.stream()
+                .filter(response -> response.reservationTime().getId().equals(time2.getId()))
                 .findFirst().get();
         assertAll(
                 () -> assertThat(availableTimeResponses).hasSize(2),
-                () -> assertThat(notAvailableTimeResponse.alreadyBooked()).isTrue(),
-                () -> assertThat(availableTimeResponse.alreadyBooked()).isFalse()
+                () -> assertThat(alreadyBookedResponse.alreadyBooked()).isTrue(),
+                () -> assertThat(notAlreadyBookedResponse.alreadyBooked()).isFalse()
         );
     }
 }
