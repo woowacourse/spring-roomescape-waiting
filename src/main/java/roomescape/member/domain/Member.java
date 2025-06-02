@@ -52,6 +52,10 @@ public class Member {
         this(null, new MemberName(name), new Email(email), new Password(password), Role.MEMBER);
     }
 
+    public boolean isSameMember(Long memberId) {
+        return this.id.equals(memberId);
+    }
+
     public Long getId() {
         return id;
     }

@@ -10,7 +10,6 @@ import roomescape.member.domain.Member;
 import roomescape.member.domain.Role;
 import roomescape.theme.domain.Theme;
 
-
 class ReservationTest {
 
     @Test
@@ -23,17 +22,20 @@ class ReservationTest {
         final ReservationTime twelve = new ReservationTime(5L, LocalTime.of(12, 0));
 
         final Theme theme = new Theme(1L, "인터스텔라", "설명1", "썸네일1");
-        final Reservation reservation = new Reservation(1L, LocalDate.of(2025, 1, 1), ten, theme,
-                new Member("엠제이", "", "", Role.MEMBER), Status.CONFIRMATION);
+
+        final ReservationSchedule reservationSchedule = new ReservationSchedule(
+            LocalDate.of(2025, 1, 1), theme, ten);
+        final Reservation reservation = new Reservation(reservationSchedule,
+            new Member("엠제이", "", "", Role.MEMBER));
 
         // 현재 테마 이용시간은 2시간으로 고정됨
         // 10시로 예약을 했으니, 8시 초과 12시 미만일 때는 예약을 할 수 없음
         // when & then
         assertAll(
-                () -> assertThat(reservation.hasConflictWith(eight, theme)).isFalse(),
-                () -> assertThat(reservation.hasConflictWith(nine, theme)).isTrue(),
-                () -> assertThat(reservation.hasConflictWith(eleven, theme)).isTrue(),
-                () -> assertThat(reservation.hasConflictWith(twelve, theme)).isFalse()
+            () -> assertThat(reservation.hasConflictWith(eight, theme)).isFalse(),
+            () -> assertThat(reservation.hasConflictWith(nine, theme)).isTrue(),
+            () -> assertThat(reservation.hasConflictWith(eleven, theme)).isTrue(),
+            () -> assertThat(reservation.hasConflictWith(twelve, theme)).isFalse()
         );
 
     }
