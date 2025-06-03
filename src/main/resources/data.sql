@@ -74,3 +74,15 @@ INSERT INTO reservation(date, member_id, time_id, theme_id)
 VALUES (DATEADD('DAY', -8, CURRENT_DATE), 3, 4, 10);
 INSERT INTO reservation(date, member_id, time_id, theme_id)
 VALUES (DATEADD('DAY', -8, CURRENT_DATE), 1, 5, 10);
+
+INSERT INTO reservation(date, member_id, time_id, theme_id)
+VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 1);
+INSERT INTO reservation(date, member_id, time_id, theme_id)
+VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 2, 1);
+INSERT INTO reservation(date, member_id, time_id, theme_id)
+VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 3, 1);
+
+INSERT INTO waiting(date, member_id, time_id, theme_id, created_at)
+VALUES (DATEADD('DAY', 1, CURRENT_DATE), 1, 1, 1, DATEADD('DAY', -1, CURRENT_DATE));
+INSERT INTO waiting(date, member_id, time_id, theme_id, created_at)
+VALUES (DATEADD('DAY', 1, CURRENT_DATE), 2, 1, 1, CURRENT_DATE);

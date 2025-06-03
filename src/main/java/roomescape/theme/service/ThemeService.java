@@ -1,16 +1,18 @@
 package roomescape.theme.service;
 
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.dto.CreateThemeRequest;
 import roomescape.theme.dto.ThemeResponse;
 import roomescape.theme.repository.ThemeRepository;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class ThemeService {
@@ -23,6 +25,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public ThemeResponse createTheme(final CreateThemeRequest createThemeRequest) {
         Theme theme = createThemeRequest.convertToTheme();
         if (themeRepository.existsByName(theme.getName())) {
@@ -32,6 +35,7 @@ public class ThemeService {
         return new ThemeResponse(savedTheme);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findAll() {
         final List<Theme> themes = themeRepository.findAll();
         return themes.stream()
@@ -39,6 +43,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteThemeById(final Long id) {
         if (reservationRepository.existsByThemeId(id)) {
             throw new IllegalArgumentException("예약이 존재하는 테마는 삭제할 수 없습니다.");
@@ -46,6 +51,7 @@ public class ThemeService {
         themeRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> findPopularThemes() {
         final int POPULAR_THEME_LIMIT = 10;
         final LocalDate SEVEN_DAYS_AGO = LocalDate.now().minusDays(7);

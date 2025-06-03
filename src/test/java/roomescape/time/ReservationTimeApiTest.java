@@ -2,18 +2,28 @@ package roomescape.time;
 
 import io.restassured.RestAssured;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_CLASS)
 @Sql("/test-time-data.sql")
 public class ReservationTimeApiTest {
+
+    @LocalServerPort
+    int port;
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+    }
 
     @DisplayName("시간 조회를 성공할 경우 200을 반환한다.")
     @Test

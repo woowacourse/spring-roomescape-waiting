@@ -1,15 +1,19 @@
 package roomescape.reservation.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.auth.LoginMember;
 import roomescape.global.exception.custom.BadRequestException;
 import roomescape.member.domain.Member;
 import roomescape.member.repository.MemberRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.CreateReservationRequest;
 import roomescape.reservation.dto.MyReservationResponse;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.waiting.domain.WaitingWithRank;
+import roomescape.reservation.waiting.repository.WaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -17,6 +21,7 @@ import roomescape.time.repository.ReservationTimeRepository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 
 @Service
 public class ReservationService {
@@ -25,33 +30,39 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final MemberRepository memberRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeRepository reservationTimeRepository,
             final ThemeRepository themeRepository,
-            final MemberRepository memberRepository
+            final MemberRepository memberRepository,
+            final WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.memberRepository = memberRepository;
+        this.waitingRepository = waitingRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(final CreateReservationRequest request) {
         final Reservation reservation = convertToReservation(request);
         final Reservation savedReservation = reservationRepository.save(reservation);
         return new ReservationResponse(savedReservation);
     }
 
-    public List<ReservationResponse> getReservations() {
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getAllReservations() {
         final List<Reservation> reservations = reservationRepository.findAll();
         return reservations.stream()
                 .map(ReservationResponse::new)
                 .toList();
     }
 
-    public List<ReservationResponse> getReservations(
+    @Transactional(readOnly = true)
+    public List<ReservationResponse> getFilteredReservations(
             final Long memberId,
             final Long themeId,
             final LocalDate dateFrom,
@@ -67,13 +78,23 @@ public class ReservationService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMyReservations(final LoginMember loginMember) {
         final List<Reservation> reservations = reservationRepository.findAllByMemberIdOrderByDateDesc(loginMember.id());
-        return reservations.stream()
-                .map(MyReservationResponse::new)
-                .toList();
+        final List<WaitingWithRank> waitings = waitingRepository.findWaitingsWithRankByMemberId(loginMember.id());
+
+        return Stream.concat(
+                reservations.stream()
+                        .map(reservation -> new MyReservationResponse(reservation, ReservationStatus.RESERVED.getDescription())),
+                waitings.stream()
+                        .map(waitingWithRank -> new MyReservationResponse(
+                                waitingWithRank.getWaiting(),
+                                waitingWithRank.getDescription(ReservationStatus.WAITING))
+                        )
+        ).toList();
     }
 
+    @Transactional
     public void cancelReservationById(final long id) {
         reservationRepository.deleteById(id);
     }

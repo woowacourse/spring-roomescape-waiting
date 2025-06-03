@@ -1,12 +1,13 @@
 package roomescape.fake;
 
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.ReservationRepository;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.ReservationRepository;
 
 public class FakeReservationDao implements ReservationRepository {
 
@@ -15,8 +16,8 @@ public class FakeReservationDao implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        Reservation newReservation = new Reservation(index++, reservation.getMember(), reservation.getDate(),
-                reservation.getTime(), reservation.getTheme());
+        Reservation newReservation = new Reservation(index++, reservation.getMember(), reservation.getDate(), reservation.getTheme(),
+                reservation.getTime());
         reservations.add(newReservation);
         return newReservation;
     }
@@ -29,7 +30,7 @@ public class FakeReservationDao implements ReservationRepository {
     @Override
     public Optional<Reservation> findById(final Long id) {
         return reservations.stream()
-                .filter(reservation -> reservation.getId() == id)
+                .filter(reservation -> reservation.getId().equals(id))
                 .findFirst();
     }
 

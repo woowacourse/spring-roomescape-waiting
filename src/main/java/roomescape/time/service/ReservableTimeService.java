@@ -1,6 +1,7 @@
 package roomescape.time.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservableTime;
@@ -22,6 +23,7 @@ public class ReservableTimeService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ReservableTimeResponse> findReservableTimes(final LocalDate date, final long themeId) {
         final Theme theme = themeRepository.findById(themeId)
                 .orElseThrow(() -> new IllegalArgumentException("테마가 존재하지 않습니다."));

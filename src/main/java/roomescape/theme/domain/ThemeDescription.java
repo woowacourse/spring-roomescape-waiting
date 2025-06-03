@@ -3,12 +3,15 @@ package roomescape.theme.domain;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
-public final class ThemeDescription {
+public class ThemeDescription {
+
+    public static final int DESCRIPTION_MIN_LENGTH = 5;
+    public static final int DESCRIPTION_MAX_LENGTH = 200;
 
     private String description;
 
     public ThemeDescription(final String description) {
-        if (description == null || description.isBlank() || description.length() < 5 || description.length() > 200) {
+        if (description == null || description.isBlank() || description.length() < DESCRIPTION_MIN_LENGTH || description.length() > DESCRIPTION_MAX_LENGTH) {
             throw new IllegalArgumentException("테마 소개는 최소 5글자, 최대 200글자여야합니다.");
         }
         this.description = description;

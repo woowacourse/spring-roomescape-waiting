@@ -6,18 +6,28 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.hamcrest.Matchers;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
+import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.theme.dto.ThemeResponse;
 
-@SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ThemeApiTest {
+
+    @LocalServerPort
+    int port;
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+    }
 
     @DisplayName("인기테마 조회를 성공할 경우 200을 반환한다.")
     @Test
@@ -25,7 +35,7 @@ public class ThemeApiTest {
     void testFindPopularThemes() {
         ThemeResponse[] responses = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .when().get("/popular-themes")
+                .when().get("/themes/popular")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", Matchers.is(3))
