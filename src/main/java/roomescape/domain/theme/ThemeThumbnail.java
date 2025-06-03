@@ -11,6 +11,7 @@ public record ThemeThumbnail(
         @Size(max = ThemeThumbnail.MAX_THUMBNAIL_LENGTH)
         String thumbnail
 ) {
+
     private static final int MAX_THUMBNAIL_LENGTH = 50;
 
     public ThemeThumbnail(final String thumbnail) {

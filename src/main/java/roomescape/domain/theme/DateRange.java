@@ -18,7 +18,7 @@ public class DateRange {
 
     public static DateRange createLastWeekRange(final Clock clock) {
         validateClock(clock);
-        LocalDate now = LocalDate.now(clock);
+        final LocalDate now = LocalDate.now(clock);
         return new DateRange(now.minusDays(DAYS_BEFORE_A_WEEK), now.minusDays(DAYS_BEFORE_YESTERDAY));
     }
 

@@ -3,6 +3,7 @@ package roomescape.controller.rest;
 import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.global.dto.SessionMember;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 import roomescape.service.request.ReservationCreateRequest;
 import roomescape.service.response.MyReservationResponse;
 import roomescape.service.response.ReservationResponse;
@@ -24,9 +26,11 @@ import roomescape.service.response.ReservationResponse;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(final ReservationService reservationService) {
+    public ReservationController(final ReservationService reservationService, final WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -34,7 +38,7 @@ public class ReservationController {
             @RequestBody @Valid final ReservationCreateRequest request,
             final SessionMember sessionMember
     ) {
-        ReservationResponse response = reservationService.createReservation(request, sessionMember.id());
+        final ReservationResponse response = reservationService.createReservation(request, sessionMember.id());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -50,8 +54,15 @@ public class ReservationController {
     public ResponseEntity<List<MyReservationResponse>> findMyReservation(
             final SessionMember sessionMember
     ) {
-        final List<MyReservationResponse> response = reservationService.findAllMyReservation(sessionMember.id());
+        final List<MyReservationResponse> response = findAllMyReservationAndWaiting(sessionMember.id());
         return ResponseEntity.ok(response);
+    }
+
+    private List<MyReservationResponse> findAllMyReservationAndWaiting(final Long memberId) {
+        return Stream.concat(
+                reservationService.findAllMyReservation(memberId).stream(),
+                waitingService.findAllMyWaiting(memberId).stream()
+        ).toList();
     }
 
     @GetMapping

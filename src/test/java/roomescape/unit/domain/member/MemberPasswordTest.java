@@ -1,6 +1,7 @@
 package roomescape.unit.domain.member;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -11,7 +12,7 @@ class MemberPasswordTest {
 
     @Test
     void 비밀번호는_null일_수_없다() {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberPassword(null))
                 .isInstanceOf(NullPointerException.class);
     }
@@ -22,7 +23,7 @@ class MemberPasswordTest {
             "12345678901234567890123456789023",
     })
     void 비밀번호가_30자를_초과하면_예외가_발생한다(String password) {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberPassword(password))
                 .isInstanceOf(IllegalStateException.class);
     }
@@ -34,7 +35,7 @@ class MemberPasswordTest {
             "gus33!" // 영문자가 5자 이상 포함되지 않은 경우
     })
     void 올바르지_않은_형식의_비밀번호는_예외를_발생한다(String password) {
-        // when & then
+        // when // then
         assertThatThrownBy(() -> new MemberPassword(password))
                 .isInstanceOf(IllegalStateException.class);
     }
@@ -45,7 +46,7 @@ class MemberPasswordTest {
             "gustn33333@#@#@"
     })
     void 비밀번호를_올바르게_생성한다(String password) {
-        // when & then
+        // when // then
         assertThatCode(() -> new MemberPassword(password))
                 .doesNotThrowAnyException();
     }

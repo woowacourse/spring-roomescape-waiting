@@ -10,7 +10,7 @@ import roomescape.repository.ThemeRepository;
 @Component
 public class ThemeDbFixture {
 
-    private ThemeRepository themeRepository;
+    private final ThemeRepository themeRepository;
 
     public ThemeDbFixture(final ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;

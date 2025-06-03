@@ -12,6 +12,7 @@ public record MemberPassword(
         @Size(max = MemberPassword.MAXIMUM_PASSWORD_LENGTH)
         String password
 ) {
+
     private static final Pattern DIGIT_PATTERN = Pattern.compile("\\d");
     private static final Pattern SPECIAL_CHAR_PATTERN = Pattern.compile("[!@#$%^&*(),.?\":{}|<>]");
     private static final Pattern LETTER_PATTERN = Pattern.compile("[A-Za-z]");

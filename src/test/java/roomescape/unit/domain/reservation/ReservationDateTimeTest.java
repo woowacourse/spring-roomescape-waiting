@@ -1,6 +1,7 @@
 package roomescape.unit.domain.reservation;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.common.Constant.FIXED_CLOCK;
 
 import java.time.LocalDateTime;
@@ -13,20 +14,24 @@ class ReservationDateTimeTest {
 
     @Test
     void 현재_이전_시간에는_예약할_수_없다() {
-        LocalDateTime now = LocalDateTime.now(FIXED_CLOCK);
-        ReservationDate today = new ReservationDate(now.toLocalDate());
-        ReservationTime pastTime = new ReservationTime(1L, now.toLocalTime().minusHours(1));
+        // given
+        var now = LocalDateTime.now(FIXED_CLOCK);
+        var today = new ReservationDate(now.toLocalDate());
+        var pastTime = new ReservationTime(1L, now.toLocalTime().minusHours(1));
 
+        // when // then
         assertThatThrownBy(() -> new ReservationDateTime(today, pastTime, FIXED_CLOCK))
                 .isInstanceOf(IllegalStateException.class);
     }
 
     @Test
     void 현재_이후_시간에는_예약이_성공한다() {
-        LocalDateTime now = LocalDateTime.now(FIXED_CLOCK);
-        ReservationDate today = new ReservationDate(now.toLocalDate());
-        ReservationTime futureTime = new ReservationTime(1L, now.toLocalTime().plusHours(1));
+        // given
+        var now = LocalDateTime.now(FIXED_CLOCK);
+        var today = new ReservationDate(now.toLocalDate());
+        var futureTime = new ReservationTime(1L, now.toLocalTime().plusHours(1));
 
+        // when // then
         assertThatCode(() -> new ReservationDateTime(today, futureTime, FIXED_CLOCK))
                 .doesNotThrowAnyException();
     }

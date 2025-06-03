@@ -10,18 +10,12 @@ import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import roomescape.common.RestAssuredTestBase;
-import roomescape.domain.member.MemberEmail;
-import roomescape.domain.member.MemberEncodedPassword;
-import roomescape.domain.member.MemberName;
-import roomescape.domain.member.MemberRole;
 import roomescape.integration.api.RestLoginMember;
 
 class TimeRestTest extends RestAssuredTestBase {
 
-    private Map<String, String> reservationTime = Map.of("startAt", "10:00");
+    private final Map<String, String> reservationTime = Map.of("startAt", "10:00");
     private RestLoginMember restLoginMember;
 
     @BeforeEach

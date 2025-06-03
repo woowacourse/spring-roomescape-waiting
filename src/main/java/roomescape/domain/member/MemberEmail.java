@@ -12,6 +12,7 @@ public record MemberEmail(
         @Size(max = MemberEmail.MAXIMUM_EMAIL_LENGTH)
         String email
 ) {
+
     private static final Pattern EMAIL_PATTERN = Pattern.compile(
             "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$"
     );

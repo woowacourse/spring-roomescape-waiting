@@ -8,6 +8,7 @@ import roomescape.service.response.MemberResponse;
 
 @Service
 public class MemberService {
+
     private final MemberRepository memberRepository;
 
     public MemberService(final MemberRepository memberRepository) {
@@ -15,7 +16,7 @@ public class MemberService {
     }
 
     public List<MemberResponse> findAllMembers() {
-        List<Member> members = memberRepository.findAll();
+        final List<Member> members = memberRepository.findAll();
         return MemberResponse.from(members);
     }
 }

@@ -6,4 +6,5 @@ import java.time.LocalTime;
 public record CreateReservationTimeRequest(
         @NotNull LocalTime startAt
 ) {
+
 }

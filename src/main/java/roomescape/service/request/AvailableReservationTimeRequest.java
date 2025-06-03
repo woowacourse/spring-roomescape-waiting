@@ -7,4 +7,5 @@ public record AvailableReservationTimeRequest(
         @NotNull LocalDate date,
         @NotNull Long themeId
 ) {
+
 }

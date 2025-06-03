@@ -20,12 +20,12 @@ public class ReservationTime {
     @Column(nullable = false)
     private LocalTime startAt;
 
+    protected ReservationTime() {
+    }
+
     public ReservationTime(final Long id, final LocalTime time) {
         this.id = id;
         this.startAt = Objects.requireNonNull(time, "startAt은 null일 수 없습니다.");
-    }
-
-    public ReservationTime() {
     }
 
     public Long getId() {

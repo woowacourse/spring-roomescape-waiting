@@ -7,4 +7,5 @@ public record CreateThemeRequest(
         @NotBlank String description,
         @NotBlank String thumbnail
 ) {
+
 }
