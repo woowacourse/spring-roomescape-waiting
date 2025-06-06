@@ -92,7 +92,7 @@ public class ReservationServiceTest {
 
         Reservation reservation1 = Reservation.of(1L, member, reservationSchedule1, RESERVED);
         Reservation reservation2 = Reservation.of(2L, member, reservationSchedule2, RESERVED);
-        Waiting waiting = Waiting.of(1L, member, waitingSchedule, WAITING);
+        Waiting waiting = Waiting.of(3L, member, waitingSchedule, WAITING);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
