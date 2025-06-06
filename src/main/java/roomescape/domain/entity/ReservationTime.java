@@ -24,6 +24,10 @@ public class ReservationTime {
     }
 
     public static ReservationTime of(Long id, LocalTime startAt) {
+        if (id == null) {
+            throw new IllegalArgumentException("id를 입력해주세요.");
+        }
+
         return new ReservationTime(id, startAt);
     }
 

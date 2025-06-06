@@ -27,6 +27,10 @@ public class Theme {
     }
 
     public static Theme of(Long id, String name, String description, String thumbnail) {
+        if (id == null) {
+            throw new IllegalArgumentException("id를 입력해주세요.");
+        }
+
         return new Theme(id, name, description, thumbnail);
     }
 

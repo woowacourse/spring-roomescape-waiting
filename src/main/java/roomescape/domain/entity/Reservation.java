@@ -49,6 +49,10 @@ public class Reservation {
             GameSchedule gameSchedule,
             ReservationStatus status
     ) {
+        if (id == null) {
+            throw new IllegalArgumentException("id를 입력해주세요.");
+        }
+
         return new Reservation(id, member, gameSchedule, status);
     }
 

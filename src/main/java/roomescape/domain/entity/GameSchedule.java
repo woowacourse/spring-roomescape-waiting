@@ -38,6 +38,10 @@ public class GameSchedule {
     }
 
     public static GameSchedule of(Long id, LocalDate date, ReservationTime time, Theme theme) {
+        if (id == null) {
+            throw new IllegalArgumentException("id를 입력해주세요.");
+        }
+
         return new GameSchedule(id, date, time, theme);
     }
 

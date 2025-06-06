@@ -39,6 +39,10 @@ public class Waiting {
     }
 
     public static Waiting of(Long id, Member member, GameSchedule gameSchedule, ReservationStatus status) {
+        if (id == null) {
+            throw new IllegalArgumentException("id를 입력해주세요.");
+        }
+
         return new Waiting(id, member, gameSchedule, status);
     }
 
