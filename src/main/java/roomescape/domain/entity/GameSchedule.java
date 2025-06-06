@@ -29,9 +29,9 @@ public class GameSchedule {
 
     private GameSchedule(Long id, LocalDate date, ReservationTime time, Theme theme) {
         this.id = id;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.date = Objects.requireNonNull(date, "날짜가 필요합니다.");
+        this.time = Objects.requireNonNull(time, "예약 시간이 필요합니다.");
+        this.theme = Objects.requireNonNull(theme, "방탈출 테마가 필요합니다.");
     }
 
     protected GameSchedule() {

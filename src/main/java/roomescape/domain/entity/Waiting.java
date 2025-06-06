@@ -9,6 +9,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import java.util.Objects;
 import roomescape.domain.ReservationStatus;
 
 @Entity
@@ -32,10 +33,12 @@ public class Waiting {
     }
 
     private Waiting(Long id, Member member, GameSchedule gameSchedule, ReservationStatus status) {
+        validateNotReserved(status);
+
         this.id = id;
-        this.member = member;
-        this.gameSchedule = gameSchedule;
-        this.status = status;
+        this.member = Objects.requireNonNull(member, "예약대기 신청자가 필요합니다.");
+        this.gameSchedule = Objects.requireNonNull(gameSchedule, "예약대기 스케줄이 필요합니다.");
+        this.status = Objects.requireNonNull(status, "예약대기 상태가 필요합니다.");
     }
 
     public static Waiting withId(Long id, Member member, GameSchedule gameSchedule, ReservationStatus status) {
@@ -48,6 +51,12 @@ public class Waiting {
 
     public static Waiting withoutId(Member member, GameSchedule gameSchedule, ReservationStatus status) {
         return new Waiting(null, member, gameSchedule, status);
+    }
+
+    private void validateNotReserved(final ReservationStatus status) {
+        if (status == ReservationStatus.RESERVED) {
+            throw new IllegalStateException("예약대기는 예약 상태일 수 없습니다.");
+        }
     }
 
     public Long getId() {

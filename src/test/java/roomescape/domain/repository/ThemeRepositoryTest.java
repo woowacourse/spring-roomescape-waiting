@@ -58,7 +58,7 @@ class ThemeRepositoryTest {
         time = ReservationTime.withoutId(LocalTime.of(10, 0));
         entityManager.persist(time);
 
-        member = Member.withoutId("member@email.com", "password", "member", USER);
+        member = Member.withoutId("브라운", "brown@email.com", "brown", USER);
         entityManager.persist(member);
 
         startDate = LocalDate.now().minusDays(7);

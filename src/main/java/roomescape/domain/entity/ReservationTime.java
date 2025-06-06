@@ -17,7 +17,7 @@ public class ReservationTime {
 
     private ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
-        this.startAt = startAt;
+        this.startAt = Objects.requireNonNull(startAt, "시간이 필요합니다.");
     }
 
     protected ReservationTime() {

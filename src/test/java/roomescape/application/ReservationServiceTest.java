@@ -136,6 +136,8 @@ public class ReservationServiceTest {
         );
 
         Member member = Member.withId(1L, "브라운", "brown@email.com", "brown", USER);
+        Mockito.doReturn(member).when(memberService).getMemberEntityById(member.getId());
+
         Reservation reservation = Reservation.withId(1L, member, gameSchedule, RESERVED);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
