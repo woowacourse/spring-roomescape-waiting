@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import org.springframework.context.MessageSource;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -11,6 +12,7 @@ import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationStatusServiceResponse;
 import roomescape.application.dto.WaitingServiceResponse;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.WaitingOrder;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Waiting;
@@ -24,15 +26,18 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final GameScheduleService gameScheduleService;
     private final MemberService memberService;
+    private final MessageSource messageSource;
 
     public WaitingService(
             WaitingRepository waitingRepository,
             GameScheduleService gameScheduleService,
-            MemberService memberService
+            MemberService memberService,
+            MessageSource messageSource
     ) {
         this.waitingRepository = waitingRepository;
         this.gameScheduleService = gameScheduleService;
         this.memberService = memberService;
+        this.messageSource = messageSource;
     }
 
     @Transactional
@@ -83,15 +88,12 @@ public class WaitingService {
     }
 
     private ReservationStatusServiceResponse createReservationStatusDto(Waiting waiting) {
-        GameSchedule gameSchedule = waiting.getGameSchedule();
-        Long order = calculateOrder(waiting);
-        return new ReservationStatusServiceResponse(
-                waiting.getId(),
-                gameSchedule.getTheme().getName(),
-                gameSchedule.getDate(),
-                gameSchedule.getTime().getStartAt(),
-                order + waiting.getStatus().status()
-        );
+        WaitingOrder order = createWaitingOrder(waiting);
+        return ReservationStatusServiceResponse.of(waiting, order, messageSource);
+    }
+
+    private WaitingOrder createWaitingOrder(Waiting waiting) {
+        return new WaitingOrder(calculateOrder(waiting));
     }
 
     private Long calculateOrder(Waiting waiting) {

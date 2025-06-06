@@ -10,6 +10,8 @@ import roomescape.domain.entity.Reservation;
 
 public interface ReservationRepository extends JpaRepository<Reservation, Long> {
 
+    List<Reservation> findByMemberId(Long id);
+
     @Query("""
             SELECT DISTINCT r
             FROM Reservation r

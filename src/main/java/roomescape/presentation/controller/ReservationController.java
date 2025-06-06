@@ -37,10 +37,8 @@ public class ReservationController {
 
     @GetMapping("/mine")
     public List<ReservationStatusResponse> getMemberReservations(@AuthenticatedMemberId MemberIdDto memberIdDto) {
-        List<ReservationStatusServiceResponse> reservationsWithStatus = service.getReservationsByMember(memberIdDto.id());
-        return reservationsWithStatus.stream()
-                .map(ReservationStatusResponse::from)
-                .toList();
+        List<ReservationStatusServiceResponse> reservationsWithStatus = service.getMyReservationsByMember(memberIdDto.id());
+        return ReservationStatusResponse.sortedByDateTime(reservationsWithStatus);
     }
 
     @PostMapping

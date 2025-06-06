@@ -3,6 +3,8 @@ package roomescape.presentation.controller.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Comparator;
+import java.util.List;
 import roomescape.application.dto.ReservationStatusServiceResponse;
 
 public record ReservationStatusResponse(
@@ -22,5 +24,13 @@ public record ReservationStatusResponse(
                 reservationStatus.time(),
                 reservationStatus.status()
         );
+    }
+
+    public static List<ReservationStatusResponse> sortedByDateTime(List<ReservationStatusServiceResponse> responses) {
+        return responses.stream()
+                .sorted(Comparator.comparing(ReservationStatusServiceResponse::date)
+                        .thenComparing(ReservationStatusServiceResponse::time)
+                ).map(ReservationStatusResponse::from)
+                .toList();
     }
 }

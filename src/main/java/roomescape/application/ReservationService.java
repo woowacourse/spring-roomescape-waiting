@@ -1,10 +1,10 @@
 package roomescape.application;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
+import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
@@ -26,17 +26,20 @@ public class ReservationService {
     private final GameScheduleService gameScheduleService;
     private final MemberService memberService;
     private final WaitingService waitingService;
+    private final MessageSource messageSource;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             GameScheduleService gameScheduleService,
             MemberService memberService,
-            WaitingService waitingService
+            WaitingService waitingService,
+            MessageSource messageSource
     ) {
         this.reservationRepository = reservationRepository;
         this.gameScheduleService = gameScheduleService;
         this.memberService = memberService;
         this.waitingService = waitingService;
+        this.messageSource = messageSource;
     }
 
     @Transactional
@@ -71,33 +74,19 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("해당하는 예약 id가 존재하지 않습니다. id: " + id));
     }
 
-    public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
-        Member member = memberService.getMemberEntityById(memberId);
-        List<Reservation> memberReservations = reservationRepository.findByMember(member);
+    public List<ReservationStatusServiceResponse> getMyReservationsByMember(Long memberId) {
+        List<ReservationStatusServiceResponse> reservations = getReservationsByMember(memberId);
         List<ReservationStatusServiceResponse> waitings = waitingService.getWaitingsByMember(memberId);
-        List<ReservationStatusServiceResponse> reservations = memberReservations.stream()
-                .map(ReservationService::createReservationStatusDto)
-                .toList();
 
-        List<ReservationStatusServiceResponse> total = new ArrayList<>();
-        total.addAll(reservations);
-        total.addAll(waitings);
-        total.sort(Comparator
-                .comparing(ReservationStatusServiceResponse::date)
-                .thenComparing(ReservationStatusServiceResponse::time)
-        );
-        return total;
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .toList();
     }
 
-    private static ReservationStatusServiceResponse createReservationStatusDto(Reservation reservation) {
-        GameSchedule gameSchedule = reservation.getGameSchedule();
-        return new ReservationStatusServiceResponse(
-                reservation.getId(),
-                gameSchedule.getTheme().getName(),
-                gameSchedule.getDate(),
-                gameSchedule.getTime().getStartAt(),
-                ReservationStatus.name(reservation.getStatus())
-        );
+    public List<ReservationStatusServiceResponse> getReservationsByMember(Long memberId) {
+        List<Reservation> memberReservations = reservationRepository.findByMemberId(memberId);
+        return memberReservations.stream()
+                .map(reservation -> ReservationStatusServiceResponse.of(reservation, messageSource))
+                .toList();
     }
 
     public List<ReservationServiceResponse> searchReservationsWith(

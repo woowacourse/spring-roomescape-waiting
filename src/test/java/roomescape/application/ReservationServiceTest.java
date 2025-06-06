@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.context.MessageSource;
 import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
@@ -41,13 +42,15 @@ public class ReservationServiceTest {
     private MemberService memberService;
     @Mock
     private WaitingService waitingService;
+    @Mock
+    private MessageSource messageSource;
 
     @DisplayName("사용자 예약 목록 조회 성공")
     @Test
-    void getReservationsByMember() {
+    void getMyReservationsByMember() {
         //given
         Long memberId = 2L;
-        Member member = stubMember(memberId);
+        Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
         ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.of(10, 0));
@@ -60,7 +63,7 @@ public class ReservationServiceTest {
         reservations.add(reservation1);
         reservations.add(reservation2);
 
-        Mockito.doReturn(reservations).when(reservationRepository).findByMember(Mockito.any(Member.class));
+        Mockito.doReturn(reservations).when(reservationRepository).findByMemberId(memberId);
 
         //when
         List<ReservationStatusServiceResponse> dtos = reservationService.getReservationsByMember(memberId);
@@ -78,7 +81,7 @@ public class ReservationServiceTest {
     void getReservationsAndWaitingsByMember() {
         //given
         Long memberId = 2L;
-        Member member = stubMember(memberId);
+        Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
 
         Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
         ReservationTime time1 = ReservationTime.of(1L, LocalTime.of(10, 0));
@@ -94,7 +97,7 @@ public class ReservationServiceTest {
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
         reservations.add(reservation2);
-        Mockito.doReturn(reservations).when(reservationRepository).findByMember(Mockito.any(Member.class));
+        Mockito.doReturn(reservations).when(reservationRepository).findByMemberId(memberId);
 
         ReservationStatusServiceResponse waitingDto = new ReservationStatusServiceResponse(
                 waiting.getId(),
@@ -106,14 +109,14 @@ public class ReservationServiceTest {
         Mockito.doReturn(List.of(waitingDto)).when(waitingService).getWaitingsByMember(memberId);
 
         //when
-        List<ReservationStatusServiceResponse> dtos = reservationService.getReservationsByMember(memberId);
+        List<ReservationStatusServiceResponse> dtos = reservationService.getMyReservationsByMember(memberId);
 
         //then
         assertAll(
                 () -> Assertions.assertThat(dtos).hasSize(3),
                 () -> Assertions.assertThat(dtos.get(0).reservationId()).isEqualTo(reservation1.getId()),
-                () -> Assertions.assertThat(dtos.get(1).reservationId()).isEqualTo(waiting.getId()),
-                () -> Assertions.assertThat(dtos.get(2).reservationId()).isEqualTo(reservation2.getId())
+                () -> Assertions.assertThat(dtos.get(1).reservationId()).isEqualTo(reservation2.getId()),
+                () -> Assertions.assertThat(dtos.get(2).reservationId()).isEqualTo(waiting.getId())
         );
     }
 
@@ -132,7 +135,7 @@ public class ReservationServiceTest {
                 theme.getId()
         );
 
-        Member member = stubMember(1L);
+        Member member = Member.of(1L, "브라운", "brown@email.com", "brown", USER);
         Reservation reservation = Reservation.of(1L, member, gameSchedule, RESERVED);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
@@ -143,11 +146,5 @@ public class ReservationServiceTest {
 
         //then
         Assertions.assertThat(reservationServiceResponse).isEqualTo(ReservationServiceResponse.from(reservation));
-    }
-
-    private Member stubMember(long memberId) {
-        Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
-        Mockito.doReturn(member).when(memberService).getMemberEntityById(memberId);
-        return member;
     }
 }
