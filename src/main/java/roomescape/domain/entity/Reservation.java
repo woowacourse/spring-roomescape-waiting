@@ -43,7 +43,7 @@ public class Reservation {
     protected Reservation() {
     }
 
-    public static Reservation of(
+    public static Reservation withId(
             Long id,
             Member member,
             GameSchedule gameSchedule,

@@ -31,16 +31,12 @@ public class Member {
     protected Member() {
     }
 
-    public static Member of(Long id, String name, String email, String password, Role role) {
+    public static Member withId(Long id, String name, String email, String password, Role role) {
         if (id == null) {
             throw new IllegalArgumentException("id를 입력해주세요.");
         }
 
         return new Member(id, name, email, password, role);
-    }
-
-    public static Member ofUser(Long id, String name, String email, String password) {
-        return new Member(id, name, email, password, Role.USER);
     }
 
     public static Member withoutId(String name, String email, String password, Role role) {

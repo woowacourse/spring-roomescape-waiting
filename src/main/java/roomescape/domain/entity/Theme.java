@@ -26,7 +26,7 @@ public class Theme {
         this.thumbnail = thumbnail;
     }
 
-    public static Theme of(Long id, String name, String description, String thumbnail) {
+    public static Theme withId(Long id, String name, String description, String thumbnail) {
         if (id == null) {
             throw new IllegalArgumentException("id를 입력해주세요.");
         }

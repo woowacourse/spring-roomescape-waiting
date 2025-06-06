@@ -17,28 +17,26 @@ import roomescape.presentation.controller.dto.UserReservationCreateRequest;
 
 public class Fixture {
 
-    public static final Member MEMBER1_ADMIN = Member.of(1L, "어드민", "admin@email.com", "password", Role.ADMIN);
-    public static final Member MEMBER2_USER = Member.of(2L, "브라운", "brown@email.com", "brown", Role.USER);
+    public static final Member MEMBER1_ADMIN = Member.withId(1L, "어드민", "admin@email.com", "password", Role.ADMIN);
+    public static final Member MEMBER2_USER = Member.withId(2L, "브라운", "brown@email.com", "brown", Role.USER);
 
-    public static final Theme THEME_1 = Theme.of(1L, "테마1", "테마 1입니다.", "썸네일1");
-    public static final Theme THEME_2 = Theme.of(2L, "테마2", "테마 2입니다.", "썸네일2");
+    public static final Theme THEME_1 = Theme.withId(1L, "테마1", "테마 1입니다.", "썸네일1");
+    public static final Theme THEME_2 = Theme.withId(2L, "테마2", "테마 2입니다.", "썸네일2");
 
-    public static final ReservationTime RESERVATION_TIME_1 = ReservationTime.of(1L, LocalTime.of(10, 0));
-    public static final ReservationTime RESERVATION_TIME_2 = ReservationTime.of(2L, LocalTime.of(11, 0));
-    public static final ReservationTime RESERVATION_TIME_3 = ReservationTime.of(3L, LocalTime.of(12, 0));
+    public static final ReservationTime RESERVATION_TIME_1 = ReservationTime.withId(1L, LocalTime.of(10, 0));
+    public static final ReservationTime RESERVATION_TIME_2 = ReservationTime.withId(2L, LocalTime.of(11, 0));
+    public static final ReservationTime RESERVATION_TIME_3 = ReservationTime.withId(3L, LocalTime.of(12, 0));
 
-    public static final GameSchedule GAME_SCHEDULE_1 = GameSchedule.of(
+    public static final GameSchedule GAME_SCHEDULE_1 = GameSchedule.withId(
             1L,
             LocalDate.of(2025, 3, 1),
             RESERVATION_TIME_1,
             THEME_1
     );
-    public static final Reservation RESERVATION_1 = Reservation.of(1L, MEMBER1_ADMIN, GAME_SCHEDULE_1,
+    public static final Reservation RESERVATION_1 = Reservation.withId(1L, MEMBER1_ADMIN, GAME_SCHEDULE_1,
             ReservationStatus.RESERVED);
-    public static final Reservation RESERVATION_2 = Reservation.of(2L, MEMBER2_USER, GAME_SCHEDULE_1,
+    public static final Reservation RESERVATION_2 = Reservation.withId(2L, MEMBER2_USER, GAME_SCHEDULE_1,
             ReservationStatus.RESERVED);
-
-
 
     public static final UserReservationCreateRequest RESERVATION_BODY = createUserReservationBody();
 

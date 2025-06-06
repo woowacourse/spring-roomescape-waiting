@@ -23,7 +23,7 @@ public class ReservationTime {
     protected ReservationTime() {
     }
 
-    public static ReservationTime of(Long id, LocalTime startAt) {
+    public static ReservationTime withId(Long id, LocalTime startAt) {
         if (id == null) {
             throw new IllegalArgumentException("id를 입력해주세요.");
         }

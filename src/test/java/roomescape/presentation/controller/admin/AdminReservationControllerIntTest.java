@@ -58,7 +58,7 @@ public class AdminReservationControllerIntTest {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
         JdbcHelper.insertMember(jdbcTemplate, MEMBER2_USER);
         JdbcHelper.insertTheme(jdbcTemplate, Theme.withoutId("테마1", "테마 1입니다.", "썸네일입니다."));
-        JdbcHelper.insertReservationTime(jdbcTemplate, ReservationTime.of(1L, LocalTime.of(10, 0)));
+        JdbcHelper.insertReservationTime(jdbcTemplate, ReservationTime.withId(1L, LocalTime.of(10, 0)));
 
         int repositorySize = reservationRepository.findAll().size();
         int expectedSize = repositorySize + 1;

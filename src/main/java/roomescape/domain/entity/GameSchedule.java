@@ -37,7 +37,7 @@ public class GameSchedule {
     protected GameSchedule() {
     }
 
-    public static GameSchedule of(Long id, LocalDate date, ReservationTime time, Theme theme) {
+    public static GameSchedule withId(Long id, LocalDate date, ReservationTime time, Theme theme) {
         if (id == null) {
             throw new IllegalArgumentException("id를 입력해주세요.");
         }

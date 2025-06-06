@@ -26,7 +26,7 @@ public class TimeServiceTest {
     public void getTimeById() {
         // given
         Long id = 1L;
-        ReservationTime expectedTime = ReservationTime.of(id, LocalTime.of(10, 0));
+        ReservationTime expectedTime = ReservationTime.withId(id, LocalTime.of(10, 0));
 
         Mockito.doReturn(Optional.of(expectedTime)).when(timeRepository).findById(id);
 

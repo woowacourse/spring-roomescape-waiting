@@ -50,14 +50,14 @@ public class ReservationServiceTest {
     void getMyReservationsByMember() {
         //given
         Long memberId = 2L;
-        Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
+        Member member = Member.withId(memberId, "브라운", "brown@email.com", "brown", USER);
 
-        Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
-        ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.of(10, 0));
-        GameSchedule reservationSchedule = GameSchedule.of(1L, LocalDate.now().plusDays(1), reservationTime, theme);
+        Theme theme = Theme.withId(1L, "테마1", "테마1입니다.", "썸네일1");
+        ReservationTime reservationTime = ReservationTime.withId(1L, LocalTime.of(10, 0));
+        GameSchedule reservationSchedule = GameSchedule.withId(1L, LocalDate.now().plusDays(1), reservationTime, theme);
 
-        Reservation reservation1 = Reservation.of(1L, member, reservationSchedule, RESERVED);
-        Reservation reservation2 = Reservation.of(2L, member, reservationSchedule, RESERVED);
+        Reservation reservation1 = Reservation.withId(1L, member, reservationSchedule, RESERVED);
+        Reservation reservation2 = Reservation.withId(2L, member, reservationSchedule, RESERVED);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
@@ -81,18 +81,18 @@ public class ReservationServiceTest {
     void getReservationsAndWaitingsByMember() {
         //given
         Long memberId = 2L;
-        Member member = Member.of(memberId, "브라운", "brown@email.com", "brown", USER);
+        Member member = Member.withId(memberId, "브라운", "brown@email.com", "brown", USER);
 
-        Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
-        ReservationTime time1 = ReservationTime.of(1L, LocalTime.of(10, 0));
-        ReservationTime time2 = ReservationTime.of(2L, LocalTime.of(11, 0));
-        GameSchedule reservationSchedule1 = GameSchedule.of(1L, LocalDate.now().plusDays(1), time1, theme);
-        GameSchedule reservationSchedule2 = GameSchedule.of(2L, LocalDate.now().plusDays(2), time1, theme);
-        GameSchedule waitingSchedule = GameSchedule.of(3L, LocalDate.now().plusDays(1), time2, theme);
+        Theme theme = Theme.withId(1L, "테마1", "테마1입니다.", "썸네일1");
+        ReservationTime time1 = ReservationTime.withId(1L, LocalTime.of(10, 0));
+        ReservationTime time2 = ReservationTime.withId(2L, LocalTime.of(11, 0));
+        GameSchedule reservationSchedule1 = GameSchedule.withId(1L, LocalDate.now().plusDays(1), time1, theme);
+        GameSchedule reservationSchedule2 = GameSchedule.withId(2L, LocalDate.now().plusDays(2), time1, theme);
+        GameSchedule waitingSchedule = GameSchedule.withId(3L, LocalDate.now().plusDays(1), time2, theme);
 
-        Reservation reservation1 = Reservation.of(1L, member, reservationSchedule1, RESERVED);
-        Reservation reservation2 = Reservation.of(2L, member, reservationSchedule2, RESERVED);
-        Waiting waiting = Waiting.of(3L, member, waitingSchedule, WAITING);
+        Reservation reservation1 = Reservation.withId(1L, member, reservationSchedule1, RESERVED);
+        Reservation reservation2 = Reservation.withId(2L, member, reservationSchedule2, RESERVED);
+        Waiting waiting = Waiting.withId(3L, member, waitingSchedule, WAITING);
 
         List<Reservation> reservations = new ArrayList<>();
         reservations.add(reservation1);
@@ -125,18 +125,18 @@ public class ReservationServiceTest {
     void registerReservation() {
         //given
         LocalDate date = LocalDate.now().plusDays(1);
-        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        Theme theme = Theme.of(1L, "테마1", "테마1입니다.", "썸네일1");
+        ReservationTime time = ReservationTime.withId(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.withId(1L, "테마1", "테마1입니다.", "썸네일1");
 
-        GameSchedule gameSchedule = GameSchedule.of(1L, date, time, theme);
+        GameSchedule gameSchedule = GameSchedule.withId(1L, date, time, theme);
         Mockito.doReturn(gameSchedule).when(gameScheduleService).getGameScheduleForReservation(
                 date,
                 time.getId(),
                 theme.getId()
         );
 
-        Member member = Member.of(1L, "브라운", "brown@email.com", "brown", USER);
-        Reservation reservation = Reservation.of(1L, member, gameSchedule, RESERVED);
+        Member member = Member.withId(1L, "브라운", "brown@email.com", "brown", USER);
+        Reservation reservation = Reservation.withId(1L, member, gameSchedule, RESERVED);
         Mockito.doReturn(reservation).when(reservationRepository).save(Mockito.any(Reservation.class));
 
         //when
