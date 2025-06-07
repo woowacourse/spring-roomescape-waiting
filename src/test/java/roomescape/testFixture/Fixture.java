@@ -1,18 +1,21 @@
 package roomescape.testFixture;
 
+import static roomescape.domain.ReservationStatus.RESERVED;
+import static roomescape.domain.ReservationStatus.WAITING;
+
 import java.sql.Connection;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.application.dto.ReservationCreateServiceRequest;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
+import roomescape.domain.entity.Waiting;
 import roomescape.presentation.controller.dto.UserReservationCreateRequest;
 
 public class Fixture {
@@ -33,10 +36,10 @@ public class Fixture {
     public static final GameSchedule GAME_SCHEDULE_3 = GameSchedule.withId(3L, TOMORROW, RESERVATION_TIME_2, THEME_2);
     public static final GameSchedule GAME_SCHEDULE_4 = GameSchedule.withId(4L, TOMORROW, RESERVATION_TIME_2, THEME_1);
 
-    public static final Reservation RESERVATION_1 = Reservation.withId(1L, MEMBER1_ADMIN, GAME_SCHEDULE_1,
-            ReservationStatus.RESERVED);
-    public static final Reservation RESERVATION_2 = Reservation.withId(2L, MEMBER2_USER, GAME_SCHEDULE_2,
-            ReservationStatus.RESERVED);
+    public static final Reservation RESERVATION_1 = Reservation.withId(1L, MEMBER1_ADMIN, GAME_SCHEDULE_1, RESERVED);
+    public static final Reservation RESERVATION_2 = Reservation.withId(2L, MEMBER2_USER, GAME_SCHEDULE_2, RESERVED);
+
+    public static final Waiting WAITING_1 = Waiting.withId(1L, MEMBER1_ADMIN, GAME_SCHEDULE_2, WAITING);
 
     public static final UserReservationCreateRequest RESERVATION_BODY = createUserReservationBody();
 

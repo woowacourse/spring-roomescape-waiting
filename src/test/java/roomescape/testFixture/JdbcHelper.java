@@ -7,6 +7,7 @@ import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
 import roomescape.domain.entity.ReservationTime;
 import roomescape.domain.entity.Theme;
+import roomescape.domain.entity.Waiting;
 
 public class JdbcHelper {
 
@@ -49,6 +50,14 @@ public class JdbcHelper {
                 reservation.getMember().getId(),
                 reservation.getGameSchedule().getId(),
                 reservation.getStatus().name()
+        );
+    }
+
+    public static void insertWaiting(JdbcTemplate template, Waiting waiting) {
+        template.update("INSERT INTO waiting (member_id, game_schedule_id, status) VALUES (?, ?, ?)",
+                waiting.getMember().getId(),
+                waiting.getGameSchedule().getId(),
+                waiting.getStatus().name()
         );
     }
 }
