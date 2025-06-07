@@ -7,10 +7,19 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
+import jakarta.persistence.UniqueConstraint;
 import java.time.LocalDate;
 import java.util.Objects;
 
 @Entity
+@Table(
+        name = "game_schedule",
+        uniqueConstraints = @UniqueConstraint(
+                name = "uk_game_schedule_date_time_theme",
+                columnNames = {"date", "time_id", "theme_id"}
+        )
+)
 public class GameSchedule {
 
     @Id

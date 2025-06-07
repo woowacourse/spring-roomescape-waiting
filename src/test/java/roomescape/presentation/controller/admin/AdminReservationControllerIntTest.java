@@ -119,7 +119,7 @@ public class AdminReservationControllerIntTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(11));
+                .body("size()", is(10));
     }
 
     @DisplayName("어드민에서 조회 조건 없이 예약 목록을 조회해도 조회 성공")
