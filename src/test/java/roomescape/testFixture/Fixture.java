@@ -29,9 +29,9 @@ public class Fixture {
 
     public static final LocalDate TOMORROW = LocalDate.now().plusDays(1);
     public static final GameSchedule GAME_SCHEDULE_1 = GameSchedule.withId(1L, TOMORROW, RESERVATION_TIME_1, THEME_1);
-    public static final GameSchedule GAME_SCHEDULE_2 = GameSchedule.withId(1L, TOMORROW, RESERVATION_TIME_1, THEME_2);
-    public static final GameSchedule GAME_SCHEDULE_3 = GameSchedule.withId(1L, TOMORROW, RESERVATION_TIME_2, THEME_2);
-    public static final GameSchedule GAME_SCHEDULE_4 = GameSchedule.withId(1L, TOMORROW, RESERVATION_TIME_2, THEME_1);
+    public static final GameSchedule GAME_SCHEDULE_2 = GameSchedule.withId(2L, TOMORROW, RESERVATION_TIME_1, THEME_2);
+    public static final GameSchedule GAME_SCHEDULE_3 = GameSchedule.withId(3L, TOMORROW, RESERVATION_TIME_2, THEME_2);
+    public static final GameSchedule GAME_SCHEDULE_4 = GameSchedule.withId(4L, TOMORROW, RESERVATION_TIME_2, THEME_1);
 
     public static final Reservation RESERVATION_1 = Reservation.withId(1L, MEMBER1_ADMIN, GAME_SCHEDULE_1,
             ReservationStatus.RESERVED);
