@@ -4,7 +4,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import java.util.Objects;
 
 @Entity
 public class Theme {
@@ -91,24 +90,5 @@ public class Theme {
 
     public String getThumbnail() {
         return thumbnail;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof Theme that)) {
-            return false;
-        }
-        if (this.id == null || that.id == null) {
-            return false;
-        }
-        return Objects.equals(id, that.id);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(id);
     }
 }

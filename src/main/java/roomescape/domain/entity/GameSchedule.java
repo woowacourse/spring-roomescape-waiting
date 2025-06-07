@@ -73,23 +73,4 @@ public class GameSchedule {
     public Theme getTheme() {
         return theme;
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) {
-            return true;
-        }
-        if (!(o instanceof GameSchedule that)) {
-            return false;
-        }
-        if (this.id == null || that.id == null) {
-            return false;
-        }
-        return Objects.equals(date, that.date) && Objects.equals(time, that.time) && Objects.equals(theme, that.theme);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(date, time, theme);
-    }
 }
