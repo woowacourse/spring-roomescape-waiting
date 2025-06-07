@@ -34,11 +34,11 @@ public class AdminReservationController {
 
     @GetMapping
     public List<ReservationServiceResponse> getReservationsMatching(
-            @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) Long memberId,
+            @RequestParam(required = false) Long themeId,
             @RequestParam(required = false) LocalDate dateFrom,
             @RequestParam(required = false) LocalDate dateTo
     ) {
-        return service.searchReservationsWith(themeId, memberId, dateFrom, dateTo);
+        return service.searchReservationsWith(memberId, themeId, dateFrom, dateTo);
     }
 }

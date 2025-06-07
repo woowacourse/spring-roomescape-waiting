@@ -58,7 +58,7 @@ public class AdminReservationControllerIntTest {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
         JdbcHelper.insertMember(jdbcTemplate, MEMBER2_USER);
         JdbcHelper.insertTheme(jdbcTemplate, Theme.withoutId("테마1", "테마 1입니다.", "썸네일입니다."));
-        JdbcHelper.insertReservationTime(jdbcTemplate, ReservationTime.of(1L, LocalTime.of(10, 0)));
+        JdbcHelper.insertReservationTime(jdbcTemplate, ReservationTime.withId(1L, LocalTime.of(10, 0)));
 
         int repositorySize = reservationRepository.findAll().size();
         int expectedSize = repositorySize + 1;
@@ -96,8 +96,8 @@ public class AdminReservationControllerIntTest {
     @Sql("/test-admin-get-reservations-data.sql")
     public void request_getReservationsUsingFilter() {
         RestAssured.given().log().all()
-                .param("themeId", 1)
                 .param("memberId", 3)
+                .param("themeId", 1)
                 .param("dateFrom", "2025-04-25")
                 .param("dateTo", "2025-04-26")
                 .cookie("token", tokenForAdmin)
@@ -119,7 +119,7 @@ public class AdminReservationControllerIntTest {
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(11));
+                .body("size()", is(10));
     }
 
     @DisplayName("어드민에서 조회 조건 없이 예약 목록을 조회해도 조회 성공")

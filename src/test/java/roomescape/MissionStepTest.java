@@ -2,8 +2,12 @@ package roomescape;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static roomescape.testFixture.Fixture.GAME_SCHEDULE_1;
 import static roomescape.testFixture.Fixture.MEMBER1_ADMIN;
+import static roomescape.testFixture.Fixture.RESERVATION_1;
 import static roomescape.testFixture.Fixture.RESERVATION_BODY;
+import static roomescape.testFixture.Fixture.RESERVATION_TIME_1;
+import static roomescape.testFixture.Fixture.THEME_1;
 import static roomescape.testFixture.Fixture.resetH2TableIds;
 
 import io.restassured.RestAssured;
@@ -139,13 +143,11 @@ public class MissionStepTest {
     @Test
     void requestDeleteReservation() {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES ('테마1', '테마 1입니다.', '썸네일입니다.')");
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)",
-                1L, "10:00");
+        JdbcHelper.insertTheme(jdbcTemplate, THEME_1);
+        JdbcHelper.insertReservationTime(jdbcTemplate, RESERVATION_TIME_1);
+        JdbcHelper.insertGameSchedule(jdbcTemplate, GAME_SCHEDULE_1);
+        JdbcHelper.insertReservation(jdbcTemplate, RESERVATION_1);
 
-        jdbcTemplate.update("INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                1L, "2023-08-05", 1L, 1L
-        );
         RestAssured.given().log().all()
                 .when().delete("/reservations/1")
                 .then().log().all()
@@ -168,13 +170,10 @@ public class MissionStepTest {
     @Test
     void postAndGetReservation() {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
-        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail) VALUES ('테마1', '테마 1입니다.', '썸네일입니다.')");
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (?, ?)",
-                1L, "10:00");
-
-        jdbcTemplate.update("INSERT INTO reservation (member_id, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                1L, "2023-08-05", 1L, 1L
-        );
+        JdbcHelper.insertTheme(jdbcTemplate, THEME_1);
+        JdbcHelper.insertReservationTime(jdbcTemplate, RESERVATION_TIME_1);
+        JdbcHelper.insertGameSchedule(jdbcTemplate, GAME_SCHEDULE_1);
+        JdbcHelper.insertReservation(jdbcTemplate, RESERVATION_1);
 
         List<ReservationServiceResponse> reservations = RestAssured.given().log().all()
                 .when().get("/reservations")
@@ -287,10 +286,10 @@ public class MissionStepTest {
     @Test
     void cannotDeleteTime_when_hasReservation() {
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
-        jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail) VALUES (1, '테마1', '테마1입니다.', '썸네일')");
-        jdbcTemplate.update(
-                "INSERT INTO reservation (id, member_id, date, time_id, theme_id) VALUES (1, 1, '2025-06-01', 1, 1)");
+        JdbcHelper.insertTheme(jdbcTemplate, THEME_1);
+        JdbcHelper.insertReservationTime(jdbcTemplate, RESERVATION_TIME_1);
+        JdbcHelper.insertGameSchedule(jdbcTemplate, GAME_SCHEDULE_1);
+        JdbcHelper.insertReservation(jdbcTemplate, RESERVATION_1);
 
         RestAssured.given().log().all()
                 .when().delete("/times/1")
@@ -327,11 +326,10 @@ public class MissionStepTest {
         LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 1L;
         JdbcHelper.insertMember(jdbcTemplate, MEMBER1_ADMIN);
-        jdbcTemplate.update("INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00')");
-        jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail) VALUES (1, '테마1', '테마1입니다.', '썸네일')");
-        jdbcTemplate.update(
-                "INSERT INTO reservation (id, member_id, date, time_id, theme_id) VALUES (1, 1, ?, ?, 1)",
-                date, timeId);
+        JdbcHelper.insertTheme(jdbcTemplate, THEME_1);
+        JdbcHelper.insertReservationTime(jdbcTemplate, RESERVATION_TIME_1);
+        JdbcHelper.insertGameSchedule(jdbcTemplate, GAME_SCHEDULE_1);
+        JdbcHelper.insertReservation(jdbcTemplate, RESERVATION_1);
 
         // when
         Map<String, Object> reservation = new HashMap<>();

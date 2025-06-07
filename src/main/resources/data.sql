@@ -21,17 +21,40 @@ VALUES ('어드민', 'admin@email.com', 'password', 'ADMIN'),
        ('브리', 'brie@email.com', 'brie', 'USER'),
        ('솔라', 'solar@email.com', 'solar', 'USER');
 
-INSERT INTO reservation (member_id, theme_id, date, time_id, status)
-VALUES (2, 1, '2025-05-07', 1, 'RESERVED'),
-       (4, 1, '2025-05-08', 2, 'RESERVED'),
-       (3, 1, '2025-05-09', 1, 'RESERVED'),
-       (3, 1, '2025-05-11', 1, 'RESERVED'),
-       (3, 2, '2025-05-11', 1, 'RESERVED'),
-       (3, 2, '2025-05-12', 1, 'RESERVED'),
-       (3, 2, '2025-05-12', 1, 'RESERVED'),
-       (3, 8, '2025-05-12', 1, 'RESERVED'),
-       (3, 8, '2025-05-12', 1, 'RESERVED'),
-       (3, 8, '2025-05-12', 1, 'RESERVED'),
-       (3, 9, '2025-05-12', 1, 'RESERVED'),
-       (3, 11, '2025-05-12', 1, 'RESERVED'),
-       (1, 11, '2025-05-12', 1, 'RESERVED');
+INSERT INTO game_schedule (date, time_id, theme_id)
+VALUES ('2025-05-07', 1, 1),
+       ('2025-05-08', 2, 1),
+       ('2025-05-09', 1, 1),
+       ('2025-05-11', 1, 1),
+       ('2025-05-11', 1, 2),
+       ('2025-05-12', 1, 2),
+       ('2025-05-12', 2, 2),
+       ('2025-05-12', 1, 8),
+       ('2025-05-12', 2, 8),
+       ('2025-05-12', 1, 3),
+       ('2025-05-12', 1, 9),
+       ('2025-05-12', 1, 11),
+       ('2025-05-12', 2, 11);
+
+INSERT INTO reservation (member_id, game_schedule_id, status)
+VALUES (2, 1, 'RESERVED'),
+       (4, 2, 'RESERVED'),
+       (3, 3, 'RESERVED'),
+       (3, 4, 'RESERVED'),
+       (3, 5, 'RESERVED'),
+       (3, 6, 'RESERVED'),
+       (3, 7, 'RESERVED'),
+       (3, 8, 'RESERVED'),
+       (3, 9, 'RESERVED'),
+       (3, 10, 'RESERVED'),
+       (3, 11, 'RESERVED'),
+       (3, 12, 'RESERVED'),
+       (1, 13, 'RESERVED');
+
+INSERT INTO waiting (member_id, game_schedule_id, status)
+VALUES (3, 1, 'WAITING'),
+       (2, 2, 'WAITING'),
+       (4, 1, 'WAITING'),
+       (4, 4, 'WAITING'),
+       (2, 4, 'WAITING'),
+       (4, 6, 'WAITING');

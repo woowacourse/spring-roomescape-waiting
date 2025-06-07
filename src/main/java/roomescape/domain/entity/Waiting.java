@@ -13,7 +13,7 @@ import java.util.Objects;
 import roomescape.domain.ReservationStatus;
 
 @Entity
-public class Reservation {
+public class Waiting {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -29,43 +29,33 @@ public class Reservation {
     @Enumerated(EnumType.STRING)
     private ReservationStatus status;
 
-    private Reservation(
-            Long id,
-            Member member,
-            GameSchedule gameSchedule,
-            ReservationStatus status
-    ) {
-        validateNotWaiting(status);
+    protected Waiting() {
+    }
+
+    private Waiting(Long id, Member member, GameSchedule gameSchedule, ReservationStatus status) {
+        validateNotReserved(status);
 
         this.id = id;
-        this.member = Objects.requireNonNull(member, "예약 신청자가 필요합니다.");
-        this.gameSchedule = Objects.requireNonNull(gameSchedule, "예약 스케줄이 필요합니다.");
-        this.status = Objects.requireNonNull(status, "예약 상태가 필요합니다.");
+        this.member = Objects.requireNonNull(member, "예약대기 신청자가 필요합니다.");
+        this.gameSchedule = Objects.requireNonNull(gameSchedule, "예약대기 스케줄이 필요합니다.");
+        this.status = Objects.requireNonNull(status, "예약대기 상태가 필요합니다.");
     }
 
-    protected Reservation() {
-    }
-
-    public static Reservation withId(
-            Long id,
-            Member member,
-            GameSchedule gameSchedule,
-            ReservationStatus status
-    ) {
+    public static Waiting withId(Long id, Member member, GameSchedule gameSchedule, ReservationStatus status) {
         if (id == null) {
             throw new IllegalArgumentException("id를 입력해주세요.");
         }
 
-        return new Reservation(id, member, gameSchedule, status);
+        return new Waiting(id, member, gameSchedule, status);
     }
 
-    public static Reservation withoutId(Member member, GameSchedule gameSchedule) {
-        return new Reservation(null, member, gameSchedule, ReservationStatus.RESERVED);
+    public static Waiting withoutId(Member member, GameSchedule gameSchedule) {
+        return new Waiting(null, member, gameSchedule, ReservationStatus.WAITING);
     }
 
-    private void validateNotWaiting(ReservationStatus status) {
-        if (status == ReservationStatus.WAITING) {
-            throw new IllegalStateException("예약은 예약대기 상태일 수 없습니다.");
+    private void validateNotReserved(final ReservationStatus status) {
+        if (status == ReservationStatus.RESERVED) {
+            throw new IllegalStateException("예약대기는 예약 상태일 수 없습니다.");
         }
     }
 

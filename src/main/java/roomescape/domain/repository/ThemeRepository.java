@@ -12,7 +12,8 @@ public interface ThemeRepository extends JpaRepository<Theme, Long> {
     @Query("""
             SELECT th, count(r)
             FROM Theme as th
-            LEFT JOIN Reservation as r on th = r.theme AND r.date BETWEEN :startDate and :endDate
+            LEFT JOIN GameSchedule as gs on th = gs.theme
+            LEFT JOIN Reservation as r on gs = r.gameSchedule AND gs.date BETWEEN :startDate and :endDate
             GROUP BY th
             ORDER BY COUNT(r) desc
             LIMIT :count

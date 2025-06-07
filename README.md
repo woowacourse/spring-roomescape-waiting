@@ -32,15 +32,23 @@
 
 ### 예약
 
-| 기능         | Method | URL                             | 파라미터 / Path Variable                        | Body                                    |
-|------------|--------|---------------------------------|---------------------------------------------|-----------------------------------------|
-| 예약 전체 조회   | GET    | `/reservations`                 | -                                           | -                                       |
-| 예약 상세 조회   | GET    | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
-| 사용자의 예약 조회 | GET    | `/reservations/mine`            | -                                           | -                                       |
-| 예약 생성      | POST   | `/reservations`                 | -                                           | `themeId`, `timeId`, `date`             |
-| 예약 삭제      | DELETE | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
-| 조건부 예약 조회  | GET    | `/admin/reservations`           | `themeId`, `memberId`, `dateFrom`, `dateTo` | -                                       |
+| 기능          | Method | URL                             | 파라미터 / Path Variable                        | Body                                    |
+|-------------|--------|---------------------------------|---------------------------------------------|-----------------------------------------|
+| 예약 전체 조회    | GET    | `/reservations`                 | -                                           | -                                       |
+| 예약 상세 조회    | GET    | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
+| 사용자의 예약 조회  | GET    | `/reservations/mine`            | -                                           | -                                       |
+| 예약 생성       | POST   | `/reservations`                 | -                                           | `themeId`, `timeId`, `date`             |
+| 예약 삭제       | DELETE | `/reservations/{reservationId}` | `reservationId`                             | -                                       |
+| 조건부 예약 조회   | GET    | `/admin/reservations`           | `themeId`, `memberId`, `dateFrom`, `dateTo` | -                                       |
 | 예약 생성 (관리자) | POST   | `/admin/reservations`           | -                                           | `themeId`, `memberId`, `date`, `timeId` |
+
+### 예약 대기
+
+| 기능                | Method | URL                             | 파라미터 / Path Variable | Body                                               |
+|-------------------|--------|---------------------------------|----------------------|----------------------------------------------------|
+| 예약 대기 생성          | POST   | `/waiting`                      | -                    | `themeId`, `date`, `timeId`            |
+| 예약 대기 삭제 / 거절     | DELETE | `/waiting/{waitingId}`          | `waitingId`          | -                                                  |
+| 예약 대기 전체 조회 (관리자) | GET    | `/admin/waitings`               | -                    | `id`, `memberName`, `themeName`, `date`, `startAt` |
 
 ### 예약 시간
 
@@ -71,9 +79,20 @@
     - [x] 연관관계 매핑
     - [x] 레포지토리 교체
 
-2. 사용자의 예약 목록 조회 기능 구현
+2. 사용자의 예약 목록 조회 기능
     - [x] 예약 대기 테이블 설계
     - [x] 예약 상태를 포함한 예약 조회 기능 구현
         - [x] 화면 응답
         - [x] 조회 API 구현
+        - [x] 예약 대기 목록도 포함하여 조회
+            - [x] 예약 대기 상태에 몇 번째 대기인지 표시
 
+3. 예약 대기 기능
+    - [x] 예약 대기 요청 API 구현
+    - [x] 사용자의 예약 목록에서 예약 대기 취소 API 구현
+
+4. 어드민 예약 대기 관리 기능
+    - [x] 화면 응답
+    - [X] 예약 대기 목록 조회 API 구현
+    - [x] 예약 대기 취소 API 구현
+    - [x] 예약 취소 시 예약 대기 자동 승인 기능 구현

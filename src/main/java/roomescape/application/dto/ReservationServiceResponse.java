@@ -16,9 +16,9 @@ public record ReservationServiceResponse(
         return new ReservationServiceResponse(
                 reservation.getId(),
                 MemberServiceResponse.from(reservation.getMember()),
-                ThemeServiceResponse.from(reservation.getTheme()),
-                reservation.getDate(),
-                TimeServiceResponse.from(reservation.getTime())
+                ThemeServiceResponse.from(reservation.getGameSchedule().getTheme()),
+                reservation.getGameSchedule().getDate(),
+                TimeServiceResponse.from(reservation.getGameSchedule().getTime())
         );
     }
 
