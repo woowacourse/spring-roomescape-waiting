@@ -13,7 +13,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
@@ -116,7 +115,7 @@ class ThemeRepositoryTest {
     private void createReservation(Theme theme, LocalDate date) {
         GameSchedule gameSchedule = GameSchedule.withoutId(date, time, theme);
         entityManager.persist(gameSchedule);
-        Reservation reservation = Reservation.withoutId(member, gameSchedule, ReservationStatus.RESERVED);
+        Reservation reservation = Reservation.withoutId(member, gameSchedule);
         entityManager.persist(reservation);
     }
 }

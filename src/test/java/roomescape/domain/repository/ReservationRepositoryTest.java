@@ -11,7 +11,6 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.Role;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
@@ -58,9 +57,9 @@ class ReservationRepositoryTest {
         entityManager.persist(gameSchedule2);
         entityManager.persist(gameSchedule3);
 
-        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1, ReservationStatus.RESERVED);
-        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2, ReservationStatus.RESERVED);
-        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3, ReservationStatus.RESERVED);
+        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1);
+        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2);
+        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
         entityManager.persist(reservation3);
@@ -103,9 +102,9 @@ class ReservationRepositoryTest {
         entityManager.persist(gameSchedule2);
         entityManager.persist(gameSchedule3);
 
-        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1, ReservationStatus.RESERVED);
-        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2, ReservationStatus.RESERVED);
-        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3, ReservationStatus.RESERVED);
+        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1);
+        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2);
+        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
         entityManager.persist(reservation3);
@@ -157,9 +156,9 @@ class ReservationRepositoryTest {
         entityManager.persist(gameSchedule2);
         entityManager.persist(gameSchedule3);
 
-        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1, ReservationStatus.RESERVED);
-        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2, ReservationStatus.RESERVED);
-        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3, ReservationStatus.RESERVED);
+        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1);
+        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2);
+        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
         entityManager.persist(reservation3);
@@ -208,9 +207,9 @@ class ReservationRepositoryTest {
         entityManager.persist(gameSchedule2);
         entityManager.persist(gameSchedule3);
 
-        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1, ReservationStatus.RESERVED);
-        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2, ReservationStatus.RESERVED);
-        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3, ReservationStatus.RESERVED);
+        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1);
+        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2);
+        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
         entityManager.persist(reservation3);
@@ -258,9 +257,9 @@ class ReservationRepositoryTest {
         entityManager.persist(gameSchedule2);
         entityManager.persist(gameSchedule3);
 
-        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1, ReservationStatus.RESERVED);
-        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2, ReservationStatus.RESERVED);
-        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3, ReservationStatus.RESERVED);
+        Reservation reservation1 = Reservation.withoutId(member1, gameSchedule1);
+        Reservation reservation2 = Reservation.withoutId(member2, gameSchedule2);
+        Reservation reservation3 = Reservation.withoutId(member1, gameSchedule3);
         entityManager.persist(reservation1);
         entityManager.persist(reservation2);
         entityManager.persist(reservation3);

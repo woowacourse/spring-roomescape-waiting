@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationStatusServiceResponse;
 import roomescape.application.dto.WaitingServiceResponse;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.WaitingOrder;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
@@ -46,7 +45,7 @@ public class WaitingService {
         Member member = memberService.getMemberEntityById(request.memberId());
         validateNotDuplicate(gameSchedule, member);
 
-        Waiting waitingWithoutId = Waiting.withoutId(member, gameSchedule, ReservationStatus.WAITING);
+        Waiting waitingWithoutId = Waiting.withoutId(member, gameSchedule);
         Waiting waiting = waitingRepository.save(waitingWithoutId);
         return WaitingServiceResponse.from(waiting);
     }

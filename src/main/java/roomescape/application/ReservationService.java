@@ -10,7 +10,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.application.dto.ReservationCreateServiceRequest;
 import roomescape.application.dto.ReservationServiceResponse;
 import roomescape.application.dto.ReservationStatusServiceResponse;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.entity.GameSchedule;
 import roomescape.domain.entity.Member;
 import roomescape.domain.entity.Reservation;
@@ -52,7 +51,7 @@ public class ReservationService {
         validateNotDuplicate(gameSchedule.getId());
         Member member = memberService.getMemberEntityById(request.memberId());
 
-        Reservation reservationWithoutId = Reservation.withoutId(member, gameSchedule, ReservationStatus.RESERVED);
+        Reservation reservationWithoutId = Reservation.withoutId(member, gameSchedule);
         Reservation reservation = reservationRepository.save(reservationWithoutId);
         return ReservationServiceResponse.from(reservation);
     }
@@ -114,11 +113,7 @@ public class ReservationService {
     }
 
     private void approveWaiting(Waiting waiting) {
-        Reservation reservationWithoutId = Reservation.withoutId(
-                waiting.getMember(),
-                waiting.getGameSchedule(),
-                ReservationStatus.RESERVED
-        );
+        Reservation reservationWithoutId = Reservation.withoutId(waiting.getMember(), waiting.getGameSchedule());
         reservationRepository.save(reservationWithoutId);
         waitingService.deleteWaiting(waiting.getId());
     }

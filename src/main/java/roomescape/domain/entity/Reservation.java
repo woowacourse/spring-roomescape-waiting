@@ -59,12 +59,8 @@ public class Reservation {
         return new Reservation(id, member, gameSchedule, status);
     }
 
-    public static Reservation withoutId(
-            Member member,
-            GameSchedule gameSchedule,
-            ReservationStatus status
-    ) {
-        return new Reservation(null, member, gameSchedule, status);
+    public static Reservation withoutId(Member member, GameSchedule gameSchedule) {
+        return new Reservation(null, member, gameSchedule, ReservationStatus.RESERVED);
     }
 
     private void validateNotWaiting(ReservationStatus status) {

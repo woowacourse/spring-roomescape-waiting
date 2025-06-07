@@ -49,8 +49,8 @@ public class Waiting {
         return new Waiting(id, member, gameSchedule, status);
     }
 
-    public static Waiting withoutId(Member member, GameSchedule gameSchedule, ReservationStatus status) {
-        return new Waiting(null, member, gameSchedule, status);
+    public static Waiting withoutId(Member member, GameSchedule gameSchedule) {
+        return new Waiting(null, member, gameSchedule, ReservationStatus.WAITING);
     }
 
     private void validateNotReserved(final ReservationStatus status) {
