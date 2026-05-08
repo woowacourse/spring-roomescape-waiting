@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: #f5f5f5;
+            color: #333;
+        }
+
+        header {
+            background: #2c3e50;
+            color: white;
+            padding: 16px 24px;
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .tab-bar {
+            display: flex;
+            background: #34495e;
+            padding: 0 24px;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 0.95rem;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: #3498db;
+        }
+
+        .container {
+            max-width: 860px;
+            margin: 40px auto;
+            padding: 0 16px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .card {
+            background: white;
+            border-radius: 8px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #2c3e50;
+        }
+
+        label {
+            display: block;
+            font-size: 0.85rem;
+            color: #666;
+            margin-bottom: 4px;
+        }
+
+        input[type="date"], input[type="text"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            font-size: 1rem;
+            margin-bottom: 16px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: #2c3e50;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #3d5166;
+        }
+
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #219a52;
+        }
+
+        /* 테마 카드 */
+        .theme-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .theme-card {
+            border: 2px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: border-color 0.15s;
+        }
+
+        .theme-card:hover {
+            border-color: #2c3e50;
+        }
+
+        .theme-card.selected {
+            border-color: #2c3e50;
+            box-shadow: 0 0 0 2px #2c3e50;
+        }
+
+        .theme-card img {
+            width: 100%;
+            height: 110px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .theme-card-body {
+            padding: 8px 10px;
+        }
+
+        .theme-card-body .name {
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .theme-card-body .desc {
+            font-size: 0.78rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        /* 인기 테마 */
+        .popular-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .popular-card {
+            border: 1px solid #eee;
+            border-radius: 8px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .popular-card img {
+            width: 100%;
+            height: 130px;
+            object-fit: cover;
+            display: block;
+        }
+
+        .popular-card-body {
+            padding: 10px 12px;
+        }
+
+        .popular-card-body .name {
+            font-size: 0.95rem;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+
+        .popular-card-body .desc {
+            font-size: 0.8rem;
+            color: #888;
+            line-height: 1.4;
+        }
+
+        .rank-badge {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: #2c3e50;
+            color: white;
+            font-size: 0.8rem;
+            font-weight: bold;
+            padding: 3px 8px;
+            border-radius: 12px;
+        }
+
+        /* 시간 선택 */
+        .time-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+
+        .time-btn {
+            padding: 10px 18px;
+            border-radius: 6px;
+            border: 2px solid #ddd;
+            background: white;
+            cursor: pointer;
+            font-size: 0.95rem;
+        }
+
+        .time-btn:hover {
+            border-color: #2c3e50;
+            color: #2c3e50;
+        }
+
+        .time-btn.selected {
+            border-color: #2c3e50;
+            background: #2c3e50;
+            color: white;
+        }
+
+        .alert {
+            padding: 12px 16px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            font-size: 0.9rem;
+        }
+
+        .alert-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+
+<header>방탈출 예약</header>
+
+<div class="tab-bar">
+    <div class="tab active" onclick="showTab('reservation')">예약하기</div>
+    <div class="tab" onclick="showTab('popular')">인기 테마</div>
+</div>
+
+<div class="container">
+
+    <!-- 예약하기 -->
+    <div class="section active" id="section-reservation">
+        <div class="card">
+            <h2>1. 날짜와 테마를 선택하세요</h2>
+
+            <label for="date">예약 날짜</label>
+            <input type="date" id="date">
+
+            <label>테마</label>
+            <div class="theme-grid" id="themeGrid"></div>
+
+            <button class="btn-primary" onclick="loadAvailableTimes()">예약 가능한 시간 조회</button>
+        </div>
+
+        <div class="card hidden" id="step2">
+            <h2>2. 시간을 선택하고 이름을 입력하세요</h2>
+
+            <label>예약 가능한 시간</label>
+            <div class="time-list" id="timeList"></div>
+
+            <label for="name" style="margin-top: 8px;">예약자 이름</label>
+            <input type="text" id="name" placeholder="이름을 입력하세요">
+
+            <div id="alertBox"></div>
+
+            <button class="btn-success" onclick="submitReservation()">예약하기</button>
+        </div>
+    </div>
+
+    <!-- 인기 테마 -->
+    <div class="section" id="section-popular">
+        <div class="card">
+            <h2>최근 1주 인기 테마 TOP 10</h2>
+            <div class="popular-grid" id="popularGrid"></div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let selectedTimeId = null;
+    let selectedThemeId = null;
+
+    function showTab(name) {
+        document.querySelectorAll('.tab').forEach((t, i) => {
+            t.classList.toggle('active', ['reservation', 'popular'][i] === name);
+        });
+        document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+        document.getElementById('section-' + name).classList.add('active');
+
+        if (name === 'popular') loadPopularThemes();
+    }
+
+    async function loadThemes() {
+        const res = await fetch('/themes');
+        const themes = await res.json();
+        const grid = document.getElementById('themeGrid');
+        grid.innerHTML = themes.map(t => `
+            <div class="theme-card" data-id="${t.id}" onclick="selectTheme(this, ${t.id})">
+                <img src="${t.thumbnailUrl}" alt="${t.name}">
+                <div class="theme-card-body">
+                    <div class="name">${t.name}</div>
+                    <div class="desc">${t.description}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function selectTheme(el, themeId) {
+        document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+        el.classList.add('selected');
+        selectedThemeId = themeId;
+    }
+
+    async function loadAvailableTimes() {
+        const date = document.getElementById('date').value;
+
+        if (!date || !selectedThemeId) {
+            alert('날짜와 테마를 모두 선택해주세요.');
+            return;
+        }
+
+        const res = await fetch(`/times?date=${date}&themeId=${selectedThemeId}`);
+        const times = await res.json();
+
+        const list = document.getElementById('timeList');
+        list.innerHTML = '';
+        selectedTimeId = null;
+
+        if (times.length === 0) {
+            list.innerHTML = '<p style="color:#aaa;">예약 가능한 시간이 없습니다.</p>';
+        } else {
+            times.forEach(t => {
+                const btn = document.createElement('button');
+                btn.className = 'time-btn';
+                btn.textContent = t.startAt;
+                btn.onclick = () => selectTime(btn, t.id);
+                list.appendChild(btn);
+            });
+        }
+
+        document.getElementById('step2').classList.remove('hidden');
+        clearAlert();
+    }
+
+    function selectTime(btn, timeId) {
+        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+        btn.classList.add('selected');
+        selectedTimeId = timeId;
+    }
+
+    async function submitReservation() {
+        const name = document.getElementById('name').value.trim();
+        const date = document.getElementById('date').value;
+
+        if (!selectedTimeId) {
+            showAlert('시간을 선택해주세요.', 'error');
+            return;
+        }
+        if (!name) {
+            showAlert('이름을 입력해주세요.', 'error');
+            return;
+        }
+
+        const res = await fetch('/reservations', {
+            method: 'POST',
+            headers: {'Content-Type': 'application/json'},
+            body: JSON.stringify({name, date, timeId: selectedTimeId, themeId: Number(selectedThemeId)})
+        });
+
+        if (res.ok) {
+            showAlert('예약이 완료되었습니다!', 'success');
+            loadAvailableTimes();
+            document.getElementById('name').value = '';
+        } else {
+            showAlert('예약에 실패했습니다.', 'error');
+        }
+    }
+
+    async function loadPopularThemes() {
+        const res = await fetch(`/themes/popular?limit=10`);
+        const themes = await res.json();
+        const grid = document.getElementById('popularGrid');
+        grid.innerHTML = themes.map((t, i) => `
+            <div class="popular-card">
+                <img src="${t.thumbnailUrl}" alt="${t.name}">
+                <span class="rank-badge">${i + 1}위</span>
+                <div class="popular-card-body">
+                    <div class="name">${t.name}</div>
+                    <div class="desc">${t.description}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function showAlert(msg, type) {
+        document.getElementById('alertBox').innerHTML = `<div class="alert alert-${type}">${msg}</div>`;
+    }
+
+    function clearAlert() {
+        document.getElementById('alertBox').innerHTML = '';
+    }
+
+    loadThemes();
+</script>
+</body>
+</html>
