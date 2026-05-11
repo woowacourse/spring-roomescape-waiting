@@ -1,0 +1,80 @@
+package roomescape.service;
+
+import org.springframework.stereotype.Service;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRequest;
+import roomescape.domain.reservation.ReservationResponse;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
+import roomescape.exception.ReservationAlreadyExistException;
+import roomescape.exception.ReservationNotFoundException;
+import roomescape.exception.ReservationTimeNotFoundException;
+import roomescape.exception.ThemeNotFoundException;
+import roomescape.repository.ReservationQueryingDao;
+import roomescape.repository.ReservationTimeQueryingDao;
+import roomescape.repository.ReservationUpdatingDao;
+import roomescape.repository.ThemeQueryingDao;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
+@Service
+public class ReservationService {
+
+    private final ReservationQueryingDao reservationQueryingDao;
+    private final ReservationUpdatingDao reservationUpdatingDao;
+    private final ReservationTimeQueryingDao reservationTimeQueryingDao;
+    private final ThemeQueryingDao themeQueryingDao;
+
+    public ReservationService(ReservationQueryingDao reservationQueryingDao, ReservationUpdatingDao reservationUpdatingDao, ReservationTimeQueryingDao reservationTimeQueryingDao, ThemeQueryingDao themeQueryingDao) {
+        this.reservationQueryingDao = reservationQueryingDao;
+        this.reservationUpdatingDao = reservationUpdatingDao;
+        this.reservationTimeQueryingDao = reservationTimeQueryingDao;
+        this.themeQueryingDao = themeQueryingDao;
+    }
+
+    public ReservationResponse read(Long id) {
+        Reservation reservationById = reservationQueryingDao.findReservationById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        return ReservationResponse.from(reservationById);
+    }
+
+    public List<ReservationResponse> readAll() {
+        List<Reservation> reservations = reservationQueryingDao.findAllReservations();
+         return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> readByName(String name) {
+        return reservationQueryingDao.findAllByName(name)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public ReservationResponse create(ReservationRequest reservationReq) {
+        ReservationTime reservationTimeById = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
+                .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
+        Theme themeById = themeQueryingDao.findThemeById(reservationReq.themeId())
+                .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
+
+        if (reservationReq.date().isBefore(LocalDate.now())) {
+            throw new IllegalArgumentException("현재보다 이전의 날짜는 예약할 수 없습니다.");
+        }
+
+        Optional<Reservation> savedReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(themeById.getId(), reservationReq.date(), reservationTimeById.getId());
+        if (savedReservation.isPresent()) {
+            throw new ReservationAlreadyExistException();
+        }
+
+        Reservation reservation = new Reservation(reservationReq.name(), reservationReq.date(), reservationTimeById, themeById);
+        Long generatedId = reservationUpdatingDao.insert(reservation);
+        return ReservationResponse.from(reservation.reservationWithId(generatedId));
+    }
+
+    public void delete(Long id) {
+        reservationUpdatingDao.delete(id);
+    }
+}
