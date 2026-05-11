@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>방탈출 예약 관리자</title>
+  <link rel="stylesheet" href="/css/roomescape.css" />
+</head>
+<body data-page="admin">
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand">
+          <div class="brand-mark">R</div>
+          <div class="brand-text">
+            <div class="brand-title">방탈출 예약</div>
+            <div class="brand-subtitle">테마, 시간, 예약을 운영 관리</div>
+          </div>
+        </div>
+        <div class="topbar-actions">
+          <nav class="view-toggle" aria-label="화면 전환">
+            <a id="userTab" class="view-button" href="/">사용자</a>
+            <a id="adminTab" class="view-button active" href="/admin">관리자</a>
+          </nav>
+          <div id="sourceStatus" class="status-pill">
+            <span class="status-dot"></span>
+            <span>데이터 불러오는 중</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="view-section" aria-label="관리자 화면">
+        <div class="admin-header">
+          <div class="admin-title-group">
+            <p class="section-kicker">관리자</p>
+            <h1 class="admin-title">예약 운영 관리</h1>
+            <p class="admin-note">테마와 예약 시간을 등록하고, 현재 예약 목록을 확인해 삭제할 수 있습니다.</p>
+          </div>
+          <div class="admin-metrics" aria-label="운영 현황">
+            <div class="metric">
+              <span id="themeMetric" class="metric-value">0</span>
+              <span class="metric-label">테마</span>
+            </div>
+            <div class="metric">
+              <span id="timeMetric" class="metric-value">0</span>
+              <span class="metric-label">시간</span>
+            </div>
+            <div class="metric">
+              <span id="reservationMetric" class="metric-value">0</span>
+              <span class="metric-label">예약</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="admin-layout">
+          <div class="admin-stack">
+            <section class="admin-panel" aria-labelledby="adminReservationFormTitle">
+              <div class="admin-panel-head">
+                <h2 id="adminReservationFormTitle" class="admin-panel-title">예약 등록</h2>
+                <span class="admin-count">POST /reservations</span>
+              </div>
+              <form id="adminReservationForm" class="admin-form">
+                <label class="field">
+                  <span class="label">예약자 이름</span>
+                  <input id="adminReserveName" class="name-input" type="text" placeholder="이름" autocomplete="off" />
+                </label>
+                <div class="admin-reserve-grid">
+                  <label class="field">
+                    <span class="label">예약 날짜</span>
+                    <input id="adminReserveDate" class="date-input" type="date" />
+                  </label>
+                  <label class="field">
+                    <span class="label">테마</span>
+                    <select id="adminReserveTheme" class="select-input"></select>
+                  </label>
+                </div>
+                <div class="field">
+                  <span class="label">예약 가능한 시간</span>
+                  <div id="adminReserveTimeGrid" class="admin-time-grid" aria-label="관리자 예약 시간 목록"></div>
+                </div>
+                <div id="adminReserveSummary" class="admin-reserve-summary"></div>
+                <button id="adminReserveButton" class="primary-button" type="submit" disabled>예약 추가</button>
+                <p id="adminReserveMessage" class="admin-message"></p>
+              </form>
+            </section>
+
+            <section class="admin-panel" aria-labelledby="themeFormTitle">
+              <div class="admin-panel-head">
+                <h2 id="themeFormTitle" class="admin-panel-title">테마 등록</h2>
+                <span class="admin-count">POST /admin/themes</span>
+              </div>
+              <form id="themeForm" class="admin-form">
+                <label class="field">
+                  <span class="label">이름</span>
+                  <input id="adminThemeName" class="name-input" type="text" placeholder="신규 테마" />
+                </label>
+                <label class="field">
+                  <span class="label">설명</span>
+                  <textarea id="adminThemeDescription" class="textarea-input" placeholder="테마 설명"></textarea>
+                </label>
+                <label class="field">
+                  <span class="label">썸네일 URL</span>
+                  <input id="adminThemeThumbnail" class="name-input" type="url" placeholder="https://example.com/theme.png" />
+                </label>
+                <button class="primary-button" type="submit">테마 추가</button>
+              </form>
+            </section>
+
+            <section class="admin-panel" aria-labelledby="timeFormTitle">
+              <div class="admin-panel-head">
+                <h2 id="timeFormTitle" class="admin-panel-title">예약 시간 등록</h2>
+                <span class="admin-count">POST /admin/times</span>
+              </div>
+              <form id="timeForm" class="admin-form">
+                <label class="field">
+                  <span class="label">시작 시간</span>
+                  <input id="adminTimeStartAt" class="date-input" type="time" value="21:00" />
+                </label>
+                <button class="primary-button" type="submit">시간 추가</button>
+              </form>
+              <p id="adminMessage" class="admin-message"></p>
+            </section>
+          </div>
+
+          <div class="admin-stack">
+            <section class="admin-panel" aria-labelledby="reservationListTitle">
+              <div class="admin-panel-head">
+                <h2 id="reservationListTitle" class="admin-panel-title">예약 목록</h2>
+                <span id="reservationCount" class="admin-count">0건</span>
+              </div>
+              <div id="adminReservationList" class="admin-list" aria-label="예약 목록"></div>
+            </section>
+
+            <section class="admin-panel" aria-labelledby="themeListTitle">
+              <div class="admin-panel-head">
+                <h2 id="themeListTitle" class="admin-panel-title">테마 목록</h2>
+                <span id="adminThemeCount" class="admin-count">0개</span>
+              </div>
+              <div id="adminThemeList" class="admin-list" aria-label="관리자 테마 목록"></div>
+            </section>
+
+            <section class="admin-panel" aria-labelledby="timeListTitle">
+              <div class="admin-panel-head">
+                <h2 id="timeListTitle" class="admin-panel-title">시간 목록</h2>
+                <span id="adminTimeCount" class="admin-count">0개</span>
+              </div>
+              <div id="adminTimeList" class="admin-list" aria-label="관리자 시간 목록"></div>
+            </section>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/js/roomescape.js" defer></script>
+</body>
+</html>
