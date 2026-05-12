@@ -314,7 +314,9 @@
                     document.getElementById('themeForm').reset();
                     loadThemes();
                 } else {
-                    alert('테마 추가에 실패했습니다.');
+                    response.json().then(error => {
+                        alert(error.message || '테마 추가에 실패했습니다.');
+                    });
                 }
             })
             .catch(error => {
@@ -336,7 +338,9 @@
                     alert('테마가 삭제되었습니다.');
                     loadThemes();
                 } else {
-                    alert('테마 삭제에 실패했습니다.');
+                    response.json().then(error => {
+                        alert(error.message || '테마 삭제에 실패했습니다.');
+                    });
                 }
             })
             .catch(error => {

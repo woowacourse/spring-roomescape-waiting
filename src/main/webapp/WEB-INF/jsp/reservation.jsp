@@ -353,7 +353,19 @@
 
             fetch(`/times/available?date=${date}&themeId=${themeId}`)
                 .then(response => response.json())
-                .then(times => renderTimeSlots(times))
+                .then(times => {
+                    const today = new Date().toISOString().split('T')[0];
+                    if (date === today) {
+                        const now = new Date();
+                        times = times.filter(time => {
+                            const [hour, minute] = time.startAt.split(':');
+                            const slotTime = new Date();
+                            slotTime.setHours(parseInt(hour), parseInt(minute), 0);
+                            return slotTime > now;
+                        });
+                    }
+                    renderTimeSlots(times);
+                })
                 .catch(error => {
                     console.error('시간 목록 불러오기 실패:', error);
                     document.getElementById('timeSlots').innerHTML =
@@ -445,7 +457,7 @@
                     });
                 } else {
                     return response.json().then(error => {
-                        alert('예약 실패: ' + (error.message || '알 수 없는 오류'));
+                        alert(error.message || '예약에 실패했습니다.');
                     });
                 }
             })

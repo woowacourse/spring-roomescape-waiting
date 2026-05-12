@@ -316,7 +316,9 @@
                     alert('예약이 취소되었습니다.');
                     loadReservations();
                 } else {
-                    alert('예약 취소에 실패했습니다.');
+                    response.json().then(error => {
+                        alert(error.message || '예약 취소에 실패했습니다.');
+                    });
                 }
             })
             .catch(error => {
