@@ -8,6 +8,7 @@ import roomescape.domain.reservation.ReservationRequest;
 import roomescape.domain.reservation.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTimeRequest;
 import roomescape.domain.theme.ThemeRequest;
+import roomescape.exception.InvalidReservationException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
@@ -60,8 +61,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().minusDays(1), timeId, themeId);
 
         assertThatThrownBy(() -> reservationService.create(request))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("현재보다 이전의 날짜는 예약할 수 없습니다.");
+                .isInstanceOf(InvalidReservationException.class);
     }
 
     @Test

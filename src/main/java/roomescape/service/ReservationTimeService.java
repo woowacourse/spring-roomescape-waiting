@@ -1,7 +1,9 @@
 package roomescape.service;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.exception.ReferencedDataException;
 import roomescape.domain.reservationtime.ReservationTimeRequest;
 import roomescape.domain.reservationtime.ReservationTimeResponse;
 import roomescape.repository.ReservationTimeQueryingDao;
@@ -45,6 +47,10 @@ public class ReservationTimeService {
     }
 
     public void delete(Long id) {
-        reservationTimeUpdatingDao.delete(id);
+        try {
+            reservationTimeUpdatingDao.delete(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReferencedDataException();
+        }
     }
 }
