@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>테마 관리 · 방탈출 어드민</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<header class="topbar">
+    <a class="brand" th:href="@{/admin}">방탈출 어드민</a>
+    <nav class="nav">
+        <a th:href="@{/}">사용자 페이지</a>
+        <a class="active" th:href="@{/admin/theme}">테마</a>
+        <a th:href="@{/admin/time}">시간</a>
+    </nav>
+</header>
+
+<main class="container">
+    <div class="page-header">
+        <div>
+            <h1>테마 관리</h1>
+            <p class="subtitle">등록된 방탈출 테마를 확인하고 추가/삭제할 수 있습니다.</p>
+        </div>
+        <button id="add-button" class="btn btn-primary" type="button">+ 테마 추가</button>
+    </div>
+
+    <section class="card">
+        <table class="data">
+            <thead>
+            <tr>
+                <th style="width: 60px;">#</th>
+                <th>썸네일</th>
+                <th>이름</th>
+                <th>설명</th>
+                <th>이미지 URL</th>
+                <th class="actions"></th>
+            </tr>
+            </thead>
+            <tbody id="table-body"></tbody>
+        </table>
+    </section>
+</main>
+
+<script th:src="@{/js/common.js}"></script>
+<script th:src="@{/js/theme.js}"></script>
+</body>
+</html>
