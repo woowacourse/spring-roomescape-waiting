@@ -10,6 +10,7 @@ import roomescape.domain.reservationtime.ReservationTimeRequest;
 import roomescape.domain.theme.ThemeRequest;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.ReservationAlreadyExistException;
+import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
@@ -104,5 +105,59 @@ class ReservationServiceTest {
         List<ReservationResponse> result = reservationService.readAll();
 
         assertThat(result).hasSize(2);
+    }
+
+    @Test
+    void 예약_날짜_및_시간_변경() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().plusDays(2), newTimeId, themeId);
+        ReservationResponse updated = reservationService.update(created.getId(), newReservationReq);
+
+        assertThat(updated.getDate()).isEqualTo(LocalDate.now().plusDays(2));
+    }
+
+    @Test
+    void 과거_날짜로_변경시_예외가_발생한다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now(), timeId, themeId));
+
+        Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().minusDays(1), newTimeId, themeId);
+
+
+        assertThatThrownBy(() -> reservationService.update(created.getId(), newReservationReq))
+                .isInstanceOf(InvalidReservationException.class);
+    }
+
+    @Test
+    void 이미_예약된_시간으로_변경시_예외가_발생한다() {
+        //두 개의 시간 생성
+        Long timeId1 = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long timeId2 = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
+
+        //두 개의 예약 생성
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId1, themeId));
+        reservationService.create(new ReservationRequest("네오", LocalDate.now().plusDays(1), timeId2, themeId));
+
+        //중복 예약 시도시 예외 발생해야함
+        ReservationRequest updated = new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId2, themeId);
+        assertThatThrownBy(() -> reservationService.update(created.getId(), updated))
+                .isInstanceOf(ReservationAlreadyExistException.class);
+    }
+
+    @Test
+    void 존재하지_않는_예약_변경시_예외가_발생한다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
+        ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId);
+
+        assertThatThrownBy(() -> reservationService.update(999L, request))
+                .isInstanceOf(ReservationNotFoundException.class);
     }
 }
