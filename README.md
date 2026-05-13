@@ -64,7 +64,7 @@
 
 ```json
 {
-  "status": 409,
+  "status": "INVALID_DATE",
   "message": "이미 예약된 시간입니다."
 }
 ```

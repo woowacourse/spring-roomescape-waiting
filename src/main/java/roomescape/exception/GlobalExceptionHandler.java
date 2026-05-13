@@ -11,42 +11,42 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(ReservationAlreadyExistException.class)
     public ResponseEntity<ErrorResponse> handle(ReservationAlreadyExistException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
-                .body(new ErrorResponse(409, e.getMessage()));
+                .body(new ErrorResponse("DUPLICATE_RESERVATION", e.getMessage()));
     }
 
     @ExceptionHandler(ReservationNotFoundException.class)
     public ResponseEntity<ErrorResponse> handle(ReservationNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(404, e.getMessage()));
+                .body(new ErrorResponse("RESERVATION_NOT_FOUND", e.getMessage()));
     }
 
     @ExceptionHandler(ReservationTimeNotFoundException.class)
     public ResponseEntity<ErrorResponse> handle(ReservationTimeNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(404, e.getMessage()));
+                .body(new ErrorResponse("TIME_NOT_FOUND", e.getMessage()));
     }
 
     @ExceptionHandler(ThemeNotFoundException.class)
     public ResponseEntity<ErrorResponse> handle(ThemeNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                .body(new ErrorResponse(404, e.getMessage()));
+                .body(new ErrorResponse("THEME_NOT_FOUND", e.getMessage()));
     }
 
     @ExceptionHandler(InvalidReservationException.class)
     public ResponseEntity<ErrorResponse> handle(InvalidReservationException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(400, e.getMessage()));
+                .body(new ErrorResponse("INVALID_DATE", e.getMessage()));
     }
 
     @ExceptionHandler(ReferencedDataException.class)
     public ResponseEntity<ErrorResponse> handle(ReferencedDataException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(400, e.getMessage()));
+                .body(new ErrorResponse("DIFFERENCE_DATA_EXISTS", e.getMessage()));
     }
 
     @ExceptionHandler(InvalidInputException.class)
     public ResponseEntity<ErrorResponse> handle(InvalidInputException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(400, e.getMessage()));
+                .body(new ErrorResponse("INVALID_INPUT", e.getMessage()));
     }
 }
