@@ -8,6 +8,7 @@ import org.springframework.test.annotation.DirtiesContext;
 
 import java.util.HashMap;
 import java.util.Map;
+
 import static org.hamcrest.Matchers.is;
 
 
@@ -111,5 +112,66 @@ public class UserReservationTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @Test
+    void 예약_날짜_시간_변경() {
+        Map<String, String> theme = new HashMap<>();
+        theme.put("name", "무서운 이야기");
+        theme.put("description", "공포");
+        theme.put("url", "http://example.com");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(theme)
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, String> time1 = new HashMap<>();
+        time1.put("startAt", "10:00");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(time1)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, String> time2 = new HashMap<>();
+        time2.put("startAt", "11:00");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(time2)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", "2026-08-05");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, Object> update = new HashMap<>();
+        update.put("name", "브라운");
+        update.put("date", "2026-08-06");
+        update.put("timeId", 2);
+        update.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(update)
+                .when().patch("/reservations/1")
+                .then().log().all()
+                .statusCode(200);
     }
 }
