@@ -3,6 +3,7 @@ package roomescape.controller;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -45,6 +46,12 @@ public class ReservationRestController {
         ReservationResponse newReservation = reservationService.create(reservationReq);
         URI uri = URI.create("/reservations/" + newReservation.getId());
         return ResponseEntity.created(uri).body(newReservation);
+    }
+
+    @PatchMapping("/reservations/{id}")
+    public ResponseEntity<ReservationResponse> update(@PathVariable Long id, @RequestBody ReservationRequest reservationReq) {
+        ReservationResponse updatedReservation = reservationService.update(id, reservationReq);
+        return ResponseEntity.ok(updatedReservation);
     }
 
     @DeleteMapping("/reservations/{id}")
