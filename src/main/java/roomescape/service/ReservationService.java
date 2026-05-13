@@ -75,6 +75,25 @@ public class ReservationService {
         return ReservationResponse.from(reservation.reservationWithId(generatedId));
     }
 
+    public ReservationResponse update(Long id, ReservationRequest reservationReq) {
+        Reservation existedReservation = reservationQueryingDao.findReservationById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+        ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
+                .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
+
+        if (reservationReq.date().isBefore(LocalDate.now())) {
+            throw new InvalidReservationException();
+        }
+
+        Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
+        if (duplicateReservation.isPresent()) {
+            throw new ReservationAlreadyExistException();
+        }
+        Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationReq.date(), newTime);
+        reservationUpdatingDao.update(id,  updatedReservation);
+        return ReservationResponse.from(updatedReservation);
+    }
+
     public void delete(Long id) {
         reservationUpdatingDao.delete(id);
     }
