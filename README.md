@@ -30,12 +30,13 @@
 
 ### 예약
 
-| 메서드 | URL | 설명 | 성공 응답 |
-|---|---|---|---|
-| GET | /reservations | 전체 예약 목록 조회 | 200 |
-| GET | /reservations/mine?name={name} | 이름으로 내 예약 조회 | 200 |
-| POST | /reservations | 예약 생성 | 201 |
-| DELETE | /reservations/{id} | 예약 취소 | 204 |
+| 메서드 | URL | 설명            | 성공 응답 |
+|---|---|---------------|---|
+| GET | /reservations | 전체 예약 목록 조회   | 200 |
+| GET | /reservations/mine?name={name} | 이름으로 내 예약 조회  | 200 |
+| POST | /reservations | 예약 생성         | 201 |
+| DELETE | /reservations/{id} | 예약 취소         | 204 |
+| PATCH | /reservations/{id} | 예약 날짜 및 시간 변경 | 200 |
 
 ### 테마
 
