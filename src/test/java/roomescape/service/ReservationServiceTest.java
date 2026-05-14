@@ -66,6 +66,16 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 과거_시간으로_예약시_예외가_발생한다() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("명탐점의 부재", "탐험", "http://example.com"));
+        ReservationRequest reservationReq = new ReservationRequest("브라운", LocalDate.now(), timeId, themeId);
+
+        assertThatThrownBy(() -> reservationService.create(reservationReq))
+                .isInstanceOf(InvalidReservationException.class);
+    }
+
+    @Test
     void 중복된_테마_날짜_시간으로_예약하면_예외가_발생한다() {
         Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
         Long themeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
@@ -124,7 +134,7 @@ class ReservationServiceTest {
     void 과거_날짜로_변경시_예외가_발생한다() {
         Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
         Long themeId = themeUpdatingDao.insert(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
-        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now(), timeId, themeId));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
 
         Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
         ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().minusDays(1), newTimeId, themeId);
