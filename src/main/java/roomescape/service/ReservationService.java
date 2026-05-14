@@ -6,6 +6,7 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.InvalidInputException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationNotFoundException;
@@ -17,6 +18,7 @@ import roomescape.repository.ReservationUpdatingDao;
 import roomescape.repository.ThemeQueryingDao;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -62,6 +64,10 @@ public class ReservationService {
                 .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
 
         if (reservationReq.date().isBefore(LocalDate.now())) {
+            throw new InvalidReservationException();
+        }
+
+        if (reservationReq.date().isEqual(LocalDate.now()) && reservationTimeById.getStartAt().isBefore(LocalTime.now())) {
             throw new InvalidReservationException();
         }
 
