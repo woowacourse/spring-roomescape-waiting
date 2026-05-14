@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.dto.reservation;
 
 import roomescape.exception.InvalidInputException;
 

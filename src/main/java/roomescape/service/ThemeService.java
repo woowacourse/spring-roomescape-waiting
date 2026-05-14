@@ -2,12 +2,10 @@ package roomescape.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.theme.Theme;
-import roomescape.domain.theme.ThemeRequest;
-import roomescape.domain.theme.ThemeResponse;
+import roomescape.dto.theme.ThemeRequest;
+import roomescape.dto.theme.ThemeResponse;
 import roomescape.exception.ReferencedDataException;
-import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
 

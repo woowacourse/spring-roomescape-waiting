@@ -4,10 +4,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import roomescape.domain.theme.ThemeRequest;
+import roomescape.dto.theme.ThemeRequest;
 import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
-import roomescape.domain.theme.ThemeResponse;
+import roomescape.dto.theme.ThemeResponse;
 
 import java.util.List;
 

@@ -4,8 +4,8 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.exception.ReferencedDataException;
-import roomescape.domain.reservationtime.ReservationTimeRequest;
-import roomescape.domain.reservationtime.ReservationTimeResponse;
+import roomescape.dto.reservationtime.ReservationTimeRequest;
+import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.repository.ReservationTimeQueryingDao;
 import roomescape.repository.ReservationTimeUpdatingDao;
 

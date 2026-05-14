@@ -3,7 +3,7 @@ package roomescape.repository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservationtime.ReservationTimeRequest;
+import roomescape.dto.reservationtime.ReservationTimeRequest;
 
 import java.sql.PreparedStatement;
 
