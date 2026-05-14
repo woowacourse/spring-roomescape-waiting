@@ -101,6 +101,16 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
+        Reservation reservation = reservationQueryingDao.findReservationById(id)
+                .orElseThrow(() -> new ReservationNotFoundException(id));
+
+        if (reservation.getDate().isBefore(LocalDate.now())) {
+            throw new InvalidReservationException();
+        }
+        if (reservation.getDate().isEqual(LocalDate.now()) && reservation.getTime().getStartAt().isBefore(LocalTime.now())) {
+            throw new InvalidReservationException();
+        }
+
         reservationUpdatingDao.delete(id);
     }
 }
