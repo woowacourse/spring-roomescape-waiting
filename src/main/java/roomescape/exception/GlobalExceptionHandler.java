@@ -35,7 +35,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidReservationException.class)
     public ResponseEntity<ErrorResponse> handle(InvalidReservationException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_DATE", e.getMessage()));
+                .body(new ErrorResponse("INVALID_DATE_OR_TIME", e.getMessage()));
     }
 
     @ExceptionHandler(ReferencedDataException.class)
