@@ -1,17 +1,23 @@
 package roomescape.dto.reservationtime;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import roomescape.exception.InvalidInputException;
 
 import java.time.LocalTime;
 
-public record ReservationTimeRequest(@JsonFormat(pattern = "HH:mm") LocalTime startAt) {
+public record ReservationTimeRequest(LocalTime startAt) {
 
-    public ReservationTimeRequest(LocalTime startAt) {
-        this.startAt = startAt;
+    public ReservationTimeRequest {
+        validateStartAt(startAt);
     }
 
     @Override
     public LocalTime startAt() {
         return startAt;
+    }
+
+    private static void validateStartAt(LocalTime startAt) {
+        if (startAt == null) {
+            throw new InvalidInputException("생성 시간은 필수입니다.");
+        }
     }
 }
