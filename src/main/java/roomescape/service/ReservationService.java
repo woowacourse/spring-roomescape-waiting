@@ -91,6 +91,10 @@ public class ReservationService {
             throw new InvalidReservationException();
         }
 
+        if (reservationReq.date().isEqual(LocalDate.now()) && newTime.getStartAt().isBefore(LocalTime.now())) {
+            throw new InvalidReservationException();
+        }
+
         Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
         if (duplicateReservation.isPresent()) {
             throw new ReservationAlreadyExistException();
