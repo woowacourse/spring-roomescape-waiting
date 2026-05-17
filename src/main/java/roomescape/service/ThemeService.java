@@ -43,7 +43,7 @@ public class ThemeService {
         try {
             themeUpdatingDao.delete(id);
         } catch (DataIntegrityViolationException e) {
-            throw new ReferencedDataException();
+            throw new ReferencedDataException("해당 테마에 예약이 존재하여 삭제할 수 없습니다.");
         }
     }
 }
