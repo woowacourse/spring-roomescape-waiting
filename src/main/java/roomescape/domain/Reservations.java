@@ -1,7 +1,5 @@
 package roomescape.domain;
 
-import roomescape.domain.ReservationTime;
-
 import java.util.List;
 
 public class Reservations {
@@ -15,5 +13,11 @@ public class Reservations {
     public boolean isOccupied(ReservationTime time) {
         return reservations.stream()
                 .anyMatch(r -> r.getTime().equals(time));
+    }
+
+    public Reservations excluding(Long reservationId) {
+        return new Reservations(reservations.stream()
+                .filter(r -> !reservationId.equals(r.getId()))
+                .toList());
     }
 }

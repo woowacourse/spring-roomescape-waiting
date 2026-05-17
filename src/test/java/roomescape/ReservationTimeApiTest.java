@@ -1,17 +1,18 @@
 package roomescape;
 
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.annotation.DirtiesContext;
+
+import java.util.HashMap;
+import java.util.Map;
+
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.hasItems;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;
-
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
-import java.util.HashMap;
-import java.util.Map;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -90,6 +91,18 @@ class ReservationTimeApiTest {
     void 잘못된_시간_형식으로_추가하면_400() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "25:00");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
+    void startAt이_누락된_요청으로_시간_추가하면_400() {
+        Map<String, String> params = new HashMap<>();
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

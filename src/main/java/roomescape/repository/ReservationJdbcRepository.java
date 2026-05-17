@@ -101,6 +101,18 @@ public class ReservationJdbcRepository implements ReservationRepository {
         );
     }
 
+    public Reservation update(Reservation reservation) {
+        String sql = "UPDATE reservation SET date = ?, time_id = ?, theme_id = ? WHERE id = ?";
+        jdbcTemplate.update(
+                sql,
+                Date.valueOf(reservation.getDate()),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId(),
+                reservation.getId()
+        );
+        return reservation;
+    }
+
     public void deleteById(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }
@@ -114,5 +126,10 @@ public class ReservationJdbcRepository implements ReservationRepository {
     public Reservations findByDateAndThemeId(LocalDate date, Long themeId) {
         String sql = SELECT_BASE + " WHERE r.date = ? AND r.theme_id = ?";
         return new Reservations(jdbcTemplate.query(sql, reservationRowMapper, date, themeId));
+    }
+
+    public List<Reservation> findByName(String name) {
+        String sql = SELECT_BASE + " WHERE r.name = ? ORDER BY r.date DESC, time_value ASC";
+        return jdbcTemplate.query(sql, reservationRowMapper, name);
     }
 }
