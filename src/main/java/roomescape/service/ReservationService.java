@@ -6,7 +6,6 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.InvalidInputException;
 import roomescape.exception.InvalidReservationException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationNotFoundException;
@@ -78,7 +77,7 @@ public class ReservationService {
 
         Reservation reservation = new Reservation(reservationReq.name(), reservationReq.date(), reservationTimeById, themeById);
         Long generatedId = reservationUpdatingDao.insert(reservation);
-        return ReservationResponse.from(reservation.reservationWithId(generatedId));
+        return ReservationResponse.from(reservation.withReservationId(generatedId));
     }
 
     public ReservationResponse update(Long id, ReservationRequest reservationReq) {
