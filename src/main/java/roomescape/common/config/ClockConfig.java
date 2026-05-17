@@ -10,7 +10,7 @@ import java.time.ZoneId;
 public class ClockConfig {
 
     @Bean
-    public Clock clock () {
+    public Clock clock() {
         return Clock.system(ZoneId.of("Asia/Seoul"));
     }
 }

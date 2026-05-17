@@ -11,9 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.dto.ReservationCreateRequest;
-import roomescape.controller.dto.ReservationTimeCreateRequest;
-import roomescape.controller.dto.ThemeCreateRequest;
+import roomescape.reservation.controller.dto.ReservationCreateRequest;
+import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
+import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -54,7 +54,7 @@ public class ReservationTimeAcceptanceTest {
     }
 
     @Test
-    @DisplayName("중복된 예약 시간을 생성하면 400 에러가 발생한다")
+    @DisplayName("중복된 예약 시간을 생성하면 에러가 발생한다")
     public void scenario2() throws JsonProcessingException {
         LocalTime startAt = LocalTime.of(10, 30);
         ReservationTimeCreateRequest request = new ReservationTimeCreateRequest(startAt);
@@ -70,11 +70,11 @@ public class ReservationTimeAcceptanceTest {
                 .post("/admin/times")
         .then()
                 .log().all()
-                .statusCode(400);
+                .statusCode(409);
     }
 
     @Test
-    @DisplayName("예약된 시간은 예약 가능 시간 목록에서 unavailable로 내려온다")
+    @DisplayName("특정 날짜와 테마의 예약 가능한 시간을 조회한다")
     public void scenario3() throws JsonProcessingException {
         LocalDate date = LocalDate.of(2026, 10, 14);
         ReservationTimeCreateRequest timeRequest = new ReservationTimeCreateRequest(LocalTime.of(21, 30));
@@ -143,7 +143,7 @@ public class ReservationTimeAcceptanceTest {
                 .post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("name", equalTo(request.name()))
+                .body("guestName", equalTo(request.guestName()))
                 .body("date", equalTo(request.date().toString()))
                 .body("time.id", equalTo(reservationTimeId))
                 .body("theme.id", equalTo(themeId))

@@ -39,20 +39,6 @@
             <h1 class="admin-title">예약 운영 관리</h1>
             <p class="admin-note">테마와 예약 시간을 등록하고, 현재 예약 목록을 확인해 삭제할 수 있습니다.</p>
           </div>
-          <div class="admin-metrics" aria-label="운영 현황">
-            <div class="metric">
-              <span id="themeMetric" class="metric-value">0</span>
-              <span class="metric-label">테마</span>
-            </div>
-            <div class="metric">
-              <span id="timeMetric" class="metric-value">0</span>
-              <span class="metric-label">시간</span>
-            </div>
-            <div class="metric">
-              <span id="reservationMetric" class="metric-value">0</span>
-              <span class="metric-label">예약</span>
-            </div>
-          </div>
         </div>
 
         <div class="admin-layout">
@@ -132,6 +118,21 @@
                 <span id="reservationCount" class="admin-count">0건</span>
               </div>
               <div id="adminReservationList" class="admin-list" aria-label="예약 목록"></div>
+              <div class="admin-pagination" aria-label="예약 목록 페이지 이동">
+                <label class="page-size-control">
+                  <span class="label">표시 개수</span>
+                  <select id="adminReservationPageSize" class="select-input">
+                    <option value="5">5</option>
+                    <option value="10">10</option>
+                    <option value="20" selected>20</option>
+                  </select>
+                </label>
+                <div class="page-controls">
+                  <button id="adminReservationPrevPage" class="secondary-button icon-button" type="button" aria-label="이전 페이지" title="이전 페이지">‹</button>
+                  <span id="adminReservationPageLabel" class="page-label">1 페이지</span>
+                  <button id="adminReservationNextPage" class="secondary-button icon-button" type="button" aria-label="다음 페이지" title="다음 페이지">›</button>
+                </div>
+              </div>
             </section>
 
             <section class="admin-panel" aria-labelledby="themeListTitle">
@@ -156,6 +157,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/js/roomescape.js" defer></script>
+  <script src="/js/roomescape.js?v=admin-paging-1" defer></script>
 </body>
 </html>

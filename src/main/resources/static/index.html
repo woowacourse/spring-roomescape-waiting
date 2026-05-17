@@ -97,10 +97,53 @@
           <p id="formMessage" class="message"></p>
         </aside>
       </section>
+
+      <section class="lookup-panel" aria-labelledby="lookupTitle">
+        <div class="lookup-head">
+          <div class="lookup-title-group">
+            <h2 id="lookupTitle" class="area-title">내 예약 조회</h2>
+            <span id="lookupCount" class="area-subtitle">예약자 이름으로 조회</span>
+          </div>
+          <form id="lookupForm" class="lookup-form">
+            <label class="field">
+              <span class="label">예약자 이름</span>
+              <input id="lookupGuestName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+            </label>
+            <button id="lookupButton" class="secondary-button" type="submit">조회</button>
+          </form>
+        </div>
+        <p id="lookupMessage" class="message"></p>
+        <div id="lookupList" class="lookup-list" aria-label="예약 조회 결과"></div>
+        <form id="editReservationForm" class="reservation-edit-form" hidden>
+          <div class="edit-head">
+            <div class="lookup-title-group">
+              <h2 id="editReservationTitle" class="area-title">예약 수정</h2>
+              <span id="editReservationMeta" class="area-subtitle"></span>
+            </div>
+            <button id="editCancelButton" class="secondary-button" type="button">취소</button>
+          </div>
+          <div class="edit-grid">
+            <label class="field">
+              <span class="label">수정자 이름</span>
+              <input id="editAuthorizationName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+            </label>
+            <label class="field">
+              <span class="label">예약 날짜</span>
+              <input id="editReservationDate" class="date-input" type="date" />
+            </label>
+            <label class="field">
+              <span class="label">예약 가능한 시간</span>
+              <select id="editReservationTime" class="select-input"></select>
+            </label>
+          </div>
+          <button id="editReservationButton" class="primary-button" type="submit" disabled>수정하기</button>
+          <p id="editReservationMessage" class="message"></p>
+        </form>
+      </section>
     </main>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/js/roomescape.js" defer></script>
+  <script src="/js/roomescape.js?v=admin-paging-1" defer></script>
 </body>
 </html>

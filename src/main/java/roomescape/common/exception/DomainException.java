@@ -5,11 +5,11 @@ import lombok.Getter;
 @Getter
 public class DomainException extends RuntimeException {
 
-    private final ErrorCode errorCode;
+    private final ErrorPolicy errorPolicy;
 
-    public DomainException(ErrorCode errorCode) {
-        super(errorCode.message());
-        this.errorCode = errorCode;
+    public DomainException(ErrorPolicy errorPolicy) {
+        super(errorPolicy.message());
+        this.errorPolicy = errorPolicy;
     }
 
 }

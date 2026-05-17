@@ -10,10 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.annotation.DirtiesContext;
-import roomescape.controller.dto.ReservationCreateRequest;
-import roomescape.controller.dto.ReservationTimeCreateRequest;
-import roomescape.controller.dto.ThemeCreateRequest;
+import roomescape.reservation.controller.dto.ReservationCreateRequest;
+import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
+import roomescape.test_config.MutableClock;
+import roomescape.test_config.TestClockConfig;
+import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -25,6 +28,7 @@ import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Import(TestClockConfig.class)
 public class ThemeAcceptanceTest {
 
     @LocalServerPort
@@ -37,6 +41,9 @@ public class ThemeAcceptanceTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @Autowired
+    private MutableClock mutableClock;
 
     @Test
     @DisplayName("테마 생성 후 목록에서 조회된다.")
@@ -81,8 +88,11 @@ public class ThemeAcceptanceTest {
     @Test
     @DisplayName("인기 테마는 기간 내 예약 수가 많은 순서대로 조회된다.")
     public void scenario3() throws JsonProcessingException {
-        LocalDate date = LocalDate.now().minusDays(1);
-        LocalDate outOfRangeDate = LocalDate.now().minusDays(20);
+        LocalDate baseDate = LocalDate.of(2026, 5, 11);
+        LocalDate date = baseDate.minusDays(1);
+        LocalDate outOfRangeDate = baseDate.plusDays(1);
+
+        mutableClock.setFixed(LocalDate.of(2026, 4, 1));
 
         Integer themeId = createTheme(new ThemeCreateRequest("인기 테마1", "설명", "섬네일"));
         Integer themeId2 = createTheme(new ThemeCreateRequest("인기 테마2", "설명", "섬네일"));
@@ -98,6 +108,8 @@ public class ThemeAcceptanceTest {
         createReservations("pobi", date, reservationTimeIds, themeId2, 12);
         createReservations("joy", date, reservationTimeIds, themeId3, 11);
         createReservation("outOfRange", outOfRangeDate, reservationTimeIds.get(0), outOfRangeThemeId);
+
+        mutableClock.setFixed(baseDate);
 
         given().log().all()
                 .queryParam("days", 7)
@@ -163,7 +175,7 @@ public class ThemeAcceptanceTest {
                 .post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("name", equalTo(request.name()))
+                .body("guestName", equalTo(request.guestName()))
                 .body("date", equalTo(request.date().toString()))
                 .body("time.id", equalTo(reservationTimeId))
                 .body("theme.id", equalTo(themeId))
