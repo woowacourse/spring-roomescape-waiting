@@ -3,37 +3,32 @@ package roomescape.dto.reservation;
 import roomescape.exception.InvalidInputException;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 public record ReservationRequest(String name, LocalDate date, Long timeId, Long themeId) {
 
     public ReservationRequest {
-        validateName(name);
-        validateDate(date);
-        validateTimeId(timeId);
-        validateThemeId(themeId);
-    }
+        List<String> emptyFields = new ArrayList<>();
 
-    private static void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidInputException("이름은 필수입니다.");
+            emptyFields.add("name");
         }
-    }
 
-    private static void validateDate(LocalDate date) {
         if (date == null) {
-            throw new InvalidInputException("날짜는 필수입니다.");
+            emptyFields.add("date");
         }
-    }
 
-    private static void validateTimeId(Long timeId) {
         if (timeId == null) {
-            throw new InvalidInputException("시간은 필수입니다.");
+            emptyFields.add("timeId");
         }
-    }
 
-    private static void validateThemeId(Long themeId) {
         if (themeId == null) {
-            throw new InvalidInputException("테마는 필수입니다.");
+            emptyFields.add("themeId");
+        }
+
+        if (!emptyFields.isEmpty()) {
+            throw new InvalidInputException("%s 필드가 비어있습니다.".formatted(emptyFields));
         }
     }
 }
