@@ -478,6 +478,87 @@
       min-width: 0;
     }
 
+    .lookup-panel {
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--surface);
+      padding: 16px;
+      box-shadow: 0 12px 24px rgba(43, 35, 24, 0.07);
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .lookup-head {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(280px, 420px);
+      gap: 16px;
+      align-items: end;
+      border-bottom: 1px solid var(--line);
+      padding-bottom: 12px;
+    }
+
+    .lookup-title-group {
+      display: grid;
+      gap: 6px;
+      min-width: 0;
+    }
+
+    .lookup-form {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 86px;
+      gap: 10px;
+      align-items: end;
+      min-width: 0;
+    }
+
+    .lookup-list {
+      display: grid;
+      gap: 8px;
+      max-height: 320px;
+      overflow-y: auto;
+      padding-right: 3px;
+      scrollbar-width: thin;
+    }
+
+    .reservation-edit-form {
+      border-top: 1px solid var(--line);
+      padding-top: 14px;
+      display: grid;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .reservation-edit-form[hidden] {
+      display: none;
+    }
+
+    .edit-head {
+      display: flex;
+      align-items: start;
+      justify-content: space-between;
+      gap: 12px;
+      min-width: 0;
+    }
+
+    .edit-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) minmax(150px, 180px) minmax(150px, 180px);
+      gap: 10px;
+      align-items: end;
+    }
+
+    .compact-button {
+      min-width: 72px;
+    }
+
+    .row-actions {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
     .summary-head {
       display: flex;
       justify-content: space-between;
@@ -587,34 +668,6 @@
       color: var(--muted);
       font-size: 13px;
       line-height: 1.45;
-    }
-
-    .admin-metrics {
-      display: grid;
-      grid-template-columns: repeat(3, minmax(88px, 1fr));
-      gap: 8px;
-      min-width: 320px;
-    }
-
-    .metric {
-      border: 1px solid var(--line);
-      border-radius: 8px;
-      background: var(--surface);
-      padding: 10px;
-      display: grid;
-      gap: 4px;
-    }
-
-    .metric-value {
-      font-size: 22px;
-      font-weight: 900;
-      line-height: 1;
-    }
-
-    .metric-label {
-      color: var(--muted);
-      font-size: 12px;
-      font-weight: 750;
     }
 
     .admin-layout {
@@ -728,6 +781,57 @@
       overflow-y: auto;
       padding-right: 3px;
       scrollbar-width: thin;
+    }
+
+    .admin-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      border-top: 1px solid var(--line);
+      padding-top: 12px;
+    }
+
+    .page-size-control {
+      display: grid;
+      grid-template-columns: auto 78px;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+    }
+
+    .page-size-control .label {
+      margin: 0;
+      white-space: nowrap;
+    }
+
+    .page-controls {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .icon-button {
+      width: 40px;
+      min-width: 40px;
+      padding: 0;
+      font-size: 22px;
+      line-height: 1;
+    }
+
+    .secondary-button:disabled {
+      color: #a8b3af;
+      background: #f4f2ec;
+      cursor: not-allowed;
+    }
+
+    .page-label {
+      min-width: 72px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      white-space: nowrap;
     }
 
     .list-row {
@@ -859,6 +963,7 @@
       .popular-band,
       .reservation-layout,
       .control-strip,
+      .lookup-head,
       .admin-layout,
       .admin-header {
         grid-template-columns: 1fr;
@@ -881,9 +986,6 @@
         align-items: start;
       }
 
-      .admin-metrics {
-        min-width: 0;
-      }
     }
 
     @media (max-width: 620px) {
@@ -959,8 +1061,13 @@
         font-size: 24px;
       }
 
-      .admin-metrics {
-        grid-template-columns: 1fr;
+      .admin-pagination {
+        display: grid;
+        align-items: start;
+      }
+
+      .page-controls {
+        justify-content: space-between;
       }
 
       .theme-list-row,
@@ -968,9 +1075,24 @@
         grid-template-columns: 1fr;
       }
 
+      .edit-head {
+        display: grid;
+      }
+
       .admin-reserve-grid,
-      .admin-time-grid {
+      .admin-time-grid,
+      .lookup-form,
+      .edit-grid,
+      .edit-head {
         grid-template-columns: 1fr;
+      }
+
+      .row-actions {
+        width: 100%;
+      }
+
+      .row-actions > button {
+        flex: 1;
       }
 
       .admin-thumb {
