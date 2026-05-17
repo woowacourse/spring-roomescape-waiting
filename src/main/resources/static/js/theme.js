@@ -98,7 +98,7 @@ async function saveRow(name, description, thumbnailImageUrl) {
         refresh();
     } catch (error) {
         console.error('테마 추가 실패:', error);
-        alert('테마 추가에 실패했습니다.');
+        alert(getErrorMessage(error, '테마 추가에 실패했습니다.'));
     }
 }
 
@@ -109,6 +109,6 @@ async function deleteRow(id) {
         refresh();
     } catch (error) {
         console.error('테마 삭제 실패:', error);
-        alert('삭제에 실패했습니다.');
+        alert(getErrorMessage(error, '테마 삭제에 실패했습니다.'));
     }
 }

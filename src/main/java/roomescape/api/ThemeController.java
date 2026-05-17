@@ -1,5 +1,6 @@
 package roomescape.api;
 
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -37,7 +38,7 @@ public class ThemeController {
     }
 
     @PostMapping
-    public ResponseEntity<ThemeResponse> add(@RequestBody ThemeRequest request) {
+    public ResponseEntity<ThemeResponse> add(@RequestBody @Valid ThemeRequest request) {
         Theme theme = new Theme(null, request.name(), request.description(), request.thumbnailImageUrl());
         ThemeResponse response = ThemeResponse.from(themeService.addTheme(theme));
 
@@ -55,7 +56,8 @@ public class ThemeController {
     public ResponseEntity<ThemeResponses> searchPopular(
             @RequestParam(required = false) LocalDate now,
             @RequestParam(defaultValue = "7") Integer days,
-            @RequestParam(defaultValue = "10") Integer limit) {
+            @RequestParam(defaultValue = "10") Integer limit
+    ) {
         LocalDate baseDate = (now != null) ? now : LocalDate.now();
         return ResponseEntity.ok().body(ThemeResponses.from(themeService.getPopularThemes(baseDate, days, limit)));
     }

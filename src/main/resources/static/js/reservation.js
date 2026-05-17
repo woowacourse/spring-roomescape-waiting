@@ -202,7 +202,7 @@ async function saveRow(name, date, themeId, timeId, timeSelect) {
         refresh();
     } catch (error) {
         console.error('예약 추가 실패:', error);
-        alert('예약 추가에 실패했습니다.');
+        alert(getErrorMessage(error, '예약 추가에 실패했습니다.'));
     }
 }
 
@@ -214,7 +214,7 @@ async function deleteRow(id) {
         refresh();
     } catch (error) {
         console.error('예약 삭제 실패:', error);
-        alert('삭제에 실패했습니다.');
+        alert(getErrorMessage(error, '예약 삭제에 실패했습니다.'));
     }
 }
 

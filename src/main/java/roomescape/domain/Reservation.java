@@ -1,9 +1,7 @@
 package roomescape.domain;
 
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
-
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Reservation {
@@ -54,6 +52,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
     @Override

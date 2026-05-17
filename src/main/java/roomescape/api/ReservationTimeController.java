@@ -1,6 +1,6 @@
 package roomescape.api;
 
-import java.time.LocalDate;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -18,6 +18,8 @@ import roomescape.dto.ReservationTimeResponses;
 import roomescape.dto.TimeWithStatusResponses;
 import roomescape.facade.ReservationFacade;
 import roomescape.service.ReservationTimeService;
+
+import java.time.LocalDate;
 
 @RestController
 @RequestMapping("/times")
@@ -45,7 +47,7 @@ public class ReservationTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationTimeResponse> add(@RequestBody ReservationTimeRequest request) {
+    public ResponseEntity<ReservationTimeResponse> add(@RequestBody @Valid ReservationTimeRequest request) {
         ReservationTime time = new ReservationTime(null, request.startAt());
         ReservationTimeResponse response = ReservationTimeResponse.from(reservationTimeService.addTime(time));
 

@@ -5,14 +5,22 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Reservations;
 import roomescape.dto.ReservationResponses;
+import roomescape.exception.BusinessRuleViolationException;
+import roomescape.exception.NotFoundException;
+import roomescape.exception.UnauthorizedException;
 import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
 @Transactional(readOnly = true)
 public class ReservationService {
+
+    private static final String RESERVATION_NOT_FOUND_FORMAT = "ID %d번 예약을 찾을 수 없습니다.";
+    private static final String PAST_RESERVATION_CANCEL_REJECTED = "이미 지난 예약은 취소할 수 없습니다.";
+    private static final String NOT_OWNER = "본인의 예약이 아닙니다.";
 
     private final ReservationRepository reservationRepository;
 
@@ -26,8 +34,22 @@ public class ReservationService {
         return ReservationResponses.from(reservations, totalCount, page, size);
     }
 
+    public ReservationResponses getMyReservations(String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        return ReservationResponses.from(reservations, reservations.size(), 0, reservations.size());
+    }
+
     public boolean hasReservationsByTimeId(Long timeId) {
         return reservationRepository.existsByTimeId(timeId);
+    }
+
+    public Reservation findMyReservation(Long id, String name) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(RESERVATION_NOT_FOUND_FORMAT.formatted(id)));
+        if (!reservation.getName().equals(name)) {
+            throw new UnauthorizedException(NOT_OWNER);
+        }
+        return reservation;
     }
 
     @Transactional
@@ -36,7 +58,23 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation updateReservation(Reservation reservation) {
+        return reservationRepository.update(reservation);
+    }
+
+    @Transactional
     public void deleteReservation(Long id) {
+        reservationRepository.deleteById(id);
+    }
+
+    @Transactional
+    public void cancelMyReservation(Long id, String name) {
+        Reservation reservation = findMyReservation(id, name);
+
+        if (reservation.isPast(LocalDateTime.now())) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_CANCEL_REJECTED);
+        }
+
         reservationRepository.deleteById(id);
     }
 

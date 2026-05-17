@@ -76,7 +76,7 @@ async function saveRow(startAt) {
         refresh();
     } catch (error) {
         console.error('시간 추가 실패:', error);
-        alert('시간 추가에 실패했습니다.');
+        alert(getErrorMessage(error, '시간 추가에 실패했습니다.'));
     }
 }
 
@@ -87,6 +87,6 @@ async function deleteRow(id) {
         refresh();
     } catch (error) {
         console.error('시간 삭제 실패:', error);
-        alert('삭제에 실패했습니다. 해당 시간을 사용 중인 예약이 있을 수 있습니다.');
+        alert(getErrorMessage(error, '시간 삭제에 실패했습니다.'));
     }
 }
