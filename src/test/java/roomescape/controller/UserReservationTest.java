@@ -187,7 +187,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
-                .then().log().all().statusCode(409);
+                .then().log().all()
+                .statusCode(409)
+                .body("errorCode", is("DUPLICATE_RESERVATION"))
+                .body("message", is("이미 예약된 시간입니다."));
     }
 
     @Test
@@ -208,7 +211,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
                 .when().patch("/reservations/1")
-                .then().log().all().statusCode(409);
+                .then().log().all()
+                .statusCode(409)
+                .body("errorCode", is("DUPLICATE_RESERVATION"))
+                .body("message", is("이미 예약된 시간입니다."));
     }
 
     @Test
@@ -220,7 +226,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
                 .when().patch("/reservations/999")
-                .then().log().all().statusCode(404);
+                .then().log().all()
+                .statusCode(404)
+                .body("errorCode", is("RESERVATION_NOT_FOUND"))
+                .body("message", is("999번 예약을 찾을 수 없습니다."));
     }
 
     @Test
@@ -231,7 +240,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
-                .then().log().all().statusCode(404);
+                .then().log().all()
+                .statusCode(404)
+                .body("errorCode", is("TIME_NOT_FOUND"))
+                .body("message", is("999번 예약 시간을 찾을 수 없습니다."));
     }
 
     @Test
@@ -242,7 +254,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
-                .then().log().all().statusCode(404);
+                .then().log().all()
+                .statusCode(404)
+                .body("errorCode", is("THEME_NOT_FOUND"))
+                .body("message", is("999번 테마를 찾을 수 없습니다."));
     }
 
     @Test
@@ -254,7 +269,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
-                .then().log().all().statusCode(400);
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("INVALID_DATE_OR_TIME"))
+                .body("message", is("이미 지난 날짜이거나 시간입니다."));
     }
 
     @Test
@@ -270,7 +288,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(update)
                 .when().patch("/reservations/1")
-                .then().log().all().statusCode(400);
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("INVALID_DATE_OR_TIME"))
+                .body("message", is("이미 지난 날짜이거나 시간입니다."));
     }
 
     @Test
@@ -282,7 +303,10 @@ public class UserReservationTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON).body(reservation)
                 .when().post("/reservations")
-                .then().log().all().statusCode(400);
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("INVALID_INPUT"))
+                .body("message", is("[name] 필드가 비어있습니다."));
     }
 
     private void createTheme() {
