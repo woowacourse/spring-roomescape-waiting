@@ -13,36 +13,28 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ThemeTest {
+public class ReservationTimeTest {
 
     @Test
-    void 테마_관리_API() {
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "무서운 이야기");
-        params.put("description", "공포");
-        params.put("url", "http://example.com");
+    void 시간_생성_및_삭제() {
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", "10:00");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/themes")
+                .body(time)
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
-
-        RestAssured.given().log().all()
-                .when().delete("/admin/themes/1")
+                .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(204);
     }
 
     @Test
-    void 예약이_존재하는_테마_삭제시_400을_반환한다() {
+    void 예약이_존재하는_시간_삭제시_400을_반환한다() {
         Map<String, String> theme = new HashMap<>();
         theme.put("name", "무서운 이야기");
         theme.put("description", "공포");
@@ -67,11 +59,25 @@ public class ThemeTest {
                 .when().post("/reservations").then().statusCode(201);
 
         RestAssured.given().log().all()
-                .when().delete("/admin/themes/1")
+                .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(400)
                 .body("errorCode", is("DIFFERENCE_DATA_EXISTS"))
-                .body("message", is("해당 테마에 예약이 존재하여 삭제할 수 없습니다."));
+                .body("message", is("해당 시간에 예약이 존재하여 삭제할 수 없습니다."));
     }
 
+    @Test
+    void 빈_시작_시간으로_생성시_400을_반환한다() {
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", null);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(time)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorCode", is("INVALID_INPUT"))
+                .body("message", is("생성 시간은 필수입니다."));
+    }
 }
