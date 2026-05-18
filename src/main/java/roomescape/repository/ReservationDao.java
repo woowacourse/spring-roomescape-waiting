@@ -9,11 +9,11 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Repository
 public class ReservationDao {
@@ -86,7 +86,7 @@ public class ReservationDao {
         int affected = jdbcTemplate.update(sql, reservationId);
 
         if (affected == 0) {
-            throw new NoSuchElementException("[ERROR] 삭제할 id에 해당하는 예약이 존재하지 않습니다.");
+            throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
         }
     }
 
@@ -112,6 +112,55 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, rowMapper);
     }
 
+    public Reservation findById(long reservationId) {
+        String sql = """
+                SELECT
+                    reservation.id as reservation_id,
+                    reservation.name,
+                    reservation.date,
+                    time.id as time_id,
+                    time.start_at as time_value,
+                    theme.id as theme_id,
+                    theme.name as theme_name,
+                    theme.thumbnail_url as thumbnail_url,
+                    theme.description as theme_description
+                FROM reservation as reservation
+                INNER JOIN reservation_time as time ON reservation.time_id = time.id
+                INNER JOIN theme as theme ON reservation.theme_id = theme.id
+                WHERE reservation.id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper, reservationId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
+    }
+
+    public List<Reservation> findByName(String name) {
+        String sql = """
+                SELECT
+                    reservation.id as reservation_id,
+                    reservation.name,
+                    reservation.date,
+                    time.id as time_id,
+                    time.start_at as time_value,
+                    theme.id as theme_id,
+                    theme.name as theme_name,
+                    theme.thumbnail_url as thumbnail_url,
+                    theme.description as theme_description
+                FROM reservation as reservation
+                INNER JOIN reservation_time as time ON reservation.time_id = time.id
+                INNER JOIN theme as theme ON reservation.theme_id = theme.id
+                WHERE reservation.name = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper, name);
+    }
+
+    public Reservation updateDateAndTime(long reservationId, LocalDate date, long timeId) {
+        String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
+        jdbcTemplate.update(sql, date, timeId, reservationId);
+        return findById(reservationId);
+    }
+
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = """
         SELECT EXISTS (
@@ -121,6 +170,18 @@ public class ReservationDao {
         """;
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId)
+        );
+    }
+
+    public boolean existsByDateAndTimeIdAndThemeIdExcluding(LocalDate date, long timeId, long themeId, long excludeId) {
+        String sql = """
+        SELECT EXISTS (
+            SELECT 1 FROM reservation
+            WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?
+        )
+        """;
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, excludeId)
         );
     }
 }

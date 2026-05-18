@@ -7,18 +7,13 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
-
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.ZoneId;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Sql(scripts = "/testData.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import(FixedClockConfig.class)
 public class ThemeProvideTest {
 
     @LocalServerPort
@@ -29,20 +24,8 @@ public class ThemeProvideTest {
         RestAssured.port = port;
     }
 
-    @TestConfiguration
-    static class FixedClockConfig {
-        @Bean
-        @Primary
-        public Clock testClock() {
-            return Clock.fixed(
-                    LocalDate.of(2026, 5, 5).atStartOfDay(ZoneId.systemDefault()).toInstant(),
-                    ZoneId.systemDefault()
-            );
-        }
-    }
-
     @Test
-    @DisplayName("개수 테스트")
+    @DisplayName("가장 인기있는 테마 개수 10개를 들고오는지에 대한 테스트")
     void readAvailableTime() {
         RestAssured.given().log().all()
                     .queryParam("limit", 10)
@@ -53,7 +36,7 @@ public class ThemeProvideTest {
     }
 
     @Test
-    @DisplayName("오름차순 테스트")
+    @DisplayName("테마의 순위를 오름차순으로 들고오는지에 대한 테스트")
     void sortThemes() {
         RestAssured.given().log().all()
                 .queryParam("limit", 10)

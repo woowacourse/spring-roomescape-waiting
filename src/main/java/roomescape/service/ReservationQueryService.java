@@ -18,4 +18,8 @@ public class ReservationQueryService {
                 .stream()
                 .toList();
     }
+
+    public List<Reservation> getByName(String name) {
+        return reservationDao.findByName(name);
+    }
 }

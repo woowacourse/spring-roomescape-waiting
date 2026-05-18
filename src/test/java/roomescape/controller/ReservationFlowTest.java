@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.HashMap;
@@ -14,6 +15,7 @@ import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @Sql(scripts = "/testReservationData.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Import(FixedClockConfig.class)
 class ReservationFlowTest {
 
     @Test
@@ -25,11 +27,11 @@ class ReservationFlowTest {
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(3));
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "user_b");
-        params.put("date", "2026-04-28");
+        params.put("date", "2026-06-28");
         params.put("timeId", 1L);
         params.put("themeId", 2L);
 
@@ -41,11 +43,11 @@ class ReservationFlowTest {
                 .statusCode(201);
 
         RestAssured.given().log().all()
-                .queryParam("date", "2026-04-28")
+                .queryParam("date", "2026-06-28")
                 .queryParam("themeId", 2L)
                 .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2));
     }
 }

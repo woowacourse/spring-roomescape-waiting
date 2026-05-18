@@ -13,9 +13,4 @@ class RoomescapeApplicationTest {
         void contextLoads() {
         }
 
-        @Bean
-        public Clock clock() {
-                return Clock.systemDefaultZone();
-        }
-
 }

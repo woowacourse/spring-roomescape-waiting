@@ -5,6 +5,7 @@ import io.restassured.http.ContentType;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
 
 import java.util.HashMap;
@@ -13,6 +14,7 @@ import java.util.Map;
 import static org.hamcrest.Matchers.is;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@Import(FixedClockConfig.class)
 @Sql(scripts = "/testReservationData.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class AdminTimeTest {
     @Test
@@ -37,7 +39,7 @@ class AdminTimeTest {
                 .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(2));
+                .body("size()", is(3));
     }
 
 
@@ -45,7 +47,7 @@ class AdminTimeTest {
     @DisplayName("예약 없는 시간 삭제 성공")
     void deleteThemeWithoutReservation() {
         RestAssured.given().log().all()
-                .when().delete("/admin/times/2")
+                .when().delete("/admin/times/3")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -58,7 +60,4 @@ class AdminTimeTest {
                 .then().log().all()
                 .statusCode(400);
     }
-
 }
-
-

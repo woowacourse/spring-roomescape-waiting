@@ -152,10 +152,26 @@
             font-size: 0.9rem;
             padding: 16px 0;
         }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #e74c3c;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+            display: none;
+            z-index: 1000;
+        }
     </style>
 </head>
 <body>
 
+<div class="toast" id="toast"></div>
 <header>방탈출 관리자</header>
 
 <div class="tab-bar">
@@ -251,6 +267,18 @@
 </div>
 
 <script>
+    function showToast(msg) {
+        const el = document.getElementById('toast');
+        el.textContent = msg;
+        el.style.display = 'block';
+        setTimeout(() => el.style.display = 'none', 3000);
+    }
+
+    async function handleError(res) {
+        const err = await res.json().catch(() => ({message: '요청에 실패했습니다.'}));
+        showToast(err.message);
+    }
+
     function showTab(name) {
         document.querySelectorAll('.tab').forEach((t, i) => {
             const names = ['theme', 'time', 'reservation'];
@@ -286,11 +314,12 @@
         const thumbnailUrl = document.getElementById('theme-thumb').value.trim();
         const description = document.getElementById('theme-desc').value.trim();
         if (!name) return;
-        await fetch('/admin/themes', {
+        const res = await fetch('/admin/themes', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({name, thumbnailUrl, description})
         });
+        if (!res.ok) { await handleError(res); return; }
         document.getElementById('theme-name').value = '';
         document.getElementById('theme-thumb').value = '';
         document.getElementById('theme-desc').value = '';
@@ -298,7 +327,8 @@
     }
 
     async function deleteTheme(id) {
-        await fetch(`/admin/themes/${id}`, {method: 'DELETE'});
+        const res = await fetch(`/admin/themes/${id}`, {method: 'DELETE'});
+        if (!res.ok) { await handleError(res); return; }
         loadThemes();
     }
 
@@ -324,16 +354,18 @@
     async function createTime() {
         const startAt = document.getElementById('time-start').value;
         if (!startAt) return;
-        await fetch('/admin/times', {
+        const res = await fetch('/admin/times', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({startAt})
         });
+        if (!res.ok) { await handleError(res); return; }
         loadTimes();
     }
 
     async function deleteTime(id) {
-        await fetch(`/admin/times/${id}`, {method: 'DELETE'});
+        const res = await fetch(`/admin/times/${id}`, {method: 'DELETE'});
+        if (!res.ok) { await handleError(res); return; }
         loadTimes();
     }
 
@@ -361,16 +393,18 @@
         const timeId = Number(document.getElementById('res-time').value);
         const themeId = Number(document.getElementById('res-theme').value);
         if (!name || !date) return;
-        await fetch('/admin/reservations', {
+        const res = await fetch('/admin/reservations', {
             method: 'POST',
             headers: {'Content-Type': 'application/json'},
             body: JSON.stringify({name, date, timeId, themeId})
         });
+        if (!res.ok) { await handleError(res); return; }
         loadReservations();
     }
 
     async function deleteReservation(id) {
-        await fetch(`/admin/reservations/${id}`, {method: 'DELETE'});
+        const res = await fetch(`/admin/reservations/${id}`, {method: 'DELETE'});
+        if (!res.ok) { await handleError(res); return; }
         loadReservations();
     }
 

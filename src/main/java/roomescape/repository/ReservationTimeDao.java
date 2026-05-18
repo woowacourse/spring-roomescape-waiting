@@ -7,11 +7,11 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Repository
 public class ReservationTimeDao {
@@ -49,8 +49,16 @@ public class ReservationTimeDao {
         int affected = jdbcTemplate.update(sql, timeId);
 
         if(affected == 0) {
-            throw new NoSuchElementException("[ERROR] 삭제할 id에 해당하는 시간이 존재하지 않습니다.");
+            throw new ResourceNotFoundException("요청한 시간을 찾을 수 없습니다.");
         }
+    }
+
+    public ReservationTime findById(long timeId) {
+        String sql = "SELECT id, start_at FROM reservation_time WHERE id = ?";
+        return jdbcTemplate.query(sql, rowMapper, timeId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 시간을 찾을 수 없습니다."));
     }
 
     public List<ReservationTime> findAllReservationTimes() {

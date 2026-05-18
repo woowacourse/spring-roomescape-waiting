@@ -9,9 +9,9 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
+import roomescape.exception.ResourceNotFoundException;
 
 import java.util.List;
-import java.util.NoSuchElementException;
 
 @Repository
 public class ThemeDao {
@@ -48,12 +48,24 @@ public class ThemeDao {
     }
 
     public void delete(long themeId) {
-        String sql = "DELETE FROM theme WHERE id = ?";
+        String sql = """
+                DELETE FROM theme WHERE id = ?
+                """;
         int affected = jdbcTemplate.update(sql, themeId);
 
         if(affected == 0) {
-            throw new NoSuchElementException("[ERROR] 삭제할 id에 해당하는 테마가 존재하지 않습니다.");
+            throw new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다.");
         }
+    }
+
+    public Theme findById(long themeId) {
+        String sql = """
+                SELECT * FROM theme WHERE id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper, themeId)
+                .stream()
+                .findFirst()
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다."));
     }
 
     public List<Theme> findAllThemes() {
