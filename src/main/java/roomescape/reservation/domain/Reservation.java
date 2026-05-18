@@ -40,15 +40,6 @@ public class Reservation {
         this(null, guestName, date, time, theme);
     }
 
-    public Reservation withId(Long id) {
-        validateId(id);
-        if (this.id != null) {
-            throw new DomainException(RESERVATION_ALREADY_HAS_ID);
-        }
-
-        return new Reservation(id, guestName, date, time, theme, deletedAt);
-    }
-
     private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
         validateGuestName(guestName);
         validateDate(date);
@@ -105,5 +96,21 @@ public class Reservation {
 
     public boolean isSameGuest(String guestName) {
         return Objects.equals(this.guestName, guestName);
+    }
+
+    public Reservation withId(Long id) {
+        validateId(id);
+        if (this.id != null) {
+            throw new DomainException(RESERVATION_ALREADY_HAS_ID);
+        }
+
+        return new Reservation(id, guestName, date, time, theme, deletedAt);
+    }
+
+    public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime) {
+
+        return new Reservation(
+                id, guestName, changedDate, changedTime, theme
+        );
     }
 }
