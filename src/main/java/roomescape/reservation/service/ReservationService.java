@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.common.exception.DomainException;
@@ -11,9 +12,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 import static roomescape.reservation.exception.ReservationErrorCode.*;
@@ -27,7 +26,7 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
 
-    private final Clock clock;
+    private final ReservationValidator reservationValidator;
 
     @Transactional
     public Reservation create(String guestName, LocalDate date, Long timeId, Long themeId) {
@@ -36,8 +35,7 @@ public class ReservationService {
 
         Reservation reservation = new Reservation(guestName, date, time, theme);
 
-        validateNotDuplicated(reservation);
-        validateNotPast(reservation);
+        reservationValidator.validateCreate(reservation);
 
         return reservationRepository.save(reservation);
     }
@@ -55,17 +53,14 @@ public class ReservationService {
     @Transactional
     public Reservation editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
         Reservation reservation = getReservation(reservationId);
-        validateIsMyReservation(guestName, reservation);
-        validateAlreadyStarted(reservation);
+        ReservationTime changedTime = getReservationTime(timeId);
+        Reservation changedReservation = reservation.changeDateAndTime(date, changedTime);
 
-        ReservationTime editedTime = getReservationTime(timeId);
-        Reservation editedReservation = createEditedReservation(reservation, date, editedTime);
-        validateNotDuplicatedExceptMine(editedReservation);
-        validateNotPast(editedReservation);
+        reservationValidator.validateEdit(reservation, changedReservation, guestName);
 
-        updateReservation(editedReservation);
+        updateReservation(changedReservation);
 
-        return editedReservation;
+        return changedReservation;
     }
 
     @Transactional
@@ -76,10 +71,7 @@ public class ReservationService {
     @Transactional
     public void deleteMine(Long id, String guestName) {
         Reservation reservation = getReservation(id);
-
-        validateIsMyReservation(guestName, reservation);
-        validateAlreadyStarted(reservation);
-
+        reservationValidator.validateDelete(reservation, guestName);
         cancelReservation(id);
     }
 
@@ -104,20 +96,6 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
     }
 
-    private Reservation createEditedReservation(
-            Reservation reservation,
-            LocalDate date,
-            ReservationTime reservationTime
-    ) {
-        return new Reservation(
-                reservation.getId(),
-                reservation.getGuestName(),
-                date,
-                reservationTime,
-                reservation.getTheme()
-        );
-    }
-
     private void updateReservation(Reservation reservation) {
         if (!reservationRepository.updateDateAndTime(
                 reservation.getId(),
@@ -128,42 +106,4 @@ public class ReservationService {
         }
     }
 
-    private void validateAlreadyStarted(Reservation reservation) {
-        if (reservation.isPassed(LocalDateTime.now(clock))) {
-            throw new DomainException(CANNOT_EDIT_ALREADY_STARTED_RESERVATION);
-        }
-    }
-
-    private static void validateIsMyReservation(String guestName, Reservation reservation) {
-        if(!reservation.isSameGuest(guestName)) {
-            throw new DomainException(CANNOT_EDIT_OTHER_GUEST_RESERVATION);
-        }
-    }
-
-    private void validateNotPast(Reservation reservation) {
-        if (reservation.isPassed(LocalDateTime.now(clock))) {
-            throw new DomainException(PAST_RESERVATION_NOT_ALLOWED);
-        }
-    }
-
-    private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId()
-        )) {
-            throw new DomainException(RESERVATION_ALREADY_EXISTS);
-        }
-    }
-
-    private void validateNotDuplicatedExceptMine(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getId()
-        )) {
-            throw new DomainException(RESERVATION_ALREADY_EXISTS);
-        }
-    }
 }

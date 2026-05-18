@@ -13,6 +13,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.repository.JdbcThemeRepository;
@@ -36,7 +37,8 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
         ReservationService.class,
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class
+        JdbcThemeRepository.class,
+        ReservationValidator.class
 })
 class ReservationServiceTest {
 
@@ -54,9 +56,10 @@ class ReservationServiceTest {
     @DisplayName("이미 같은 날짜, 시간, 테마의 예약이 존재하면 예외가 발생한다.")
     public void create_fail1() {
         // given
+        clock.setFixed(LocalDateTime.of(2026, 10, 10, 10, 0));
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        LocalDate date = LocalDate.of(2023, 8, 5);
+        LocalDate date = LocalDate.of(2026, 10, 11);
         insertReservation("브라운", date, time, theme);
 
         // when, then
