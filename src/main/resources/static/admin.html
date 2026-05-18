@@ -500,6 +500,37 @@
     setTimeout(() => { t.className = 'toast'; }, 3000);
   }
 
+  async function readErrorMessage(res, fallback) {
+    try {
+      const data = await res.json();
+      return {
+        message: data.message || data.errors?.[0]?.defaultMessage || data.error || fallback,
+        code: data.code,
+        status: data.status
+      };
+    } catch (e) {
+      return { message: fallback };
+    }
+  }
+
+  async function fetchJson(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      const error = await readErrorMessage(res, fallback);
+      throw Object.assign(new Error(error.message), error);
+    }
+    const text = await res.text();
+    return text ? JSON.parse(text) : null;
+  }
+
+  async function fetchEmpty(url, options = {}, fallback = '요청을 처리할 수 없습니다.') {
+    const res = await fetch(url, options);
+    if (!res.ok) {
+      const error = await readErrorMessage(res, fallback);
+      throw Object.assign(new Error(error.message), error);
+    }
+  }
+
   function switchTab(name) {
     document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -519,8 +550,7 @@
     document.getElementById('res-empty').style.display = 'none';
 
     try {
-      const res = await fetch(`${API}/admin/reservations`);
-      const list = await res.json();
+      const list = await fetchJson(`${API}/admin/reservations`, {}, '예약 목록을 불러올 수 없습니다.');
 
       document.getElementById('res-loading').style.display = 'none';
 
@@ -544,15 +574,14 @@
       document.getElementById('res-table-wrap').style.display = 'block';
     } catch (e) {
       document.getElementById('res-loading').style.display = 'none';
-      showToast('예약 목록을 불러올 수 없습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
   async function deleteReservation(id) {
     if (!confirm('이 예약을 삭제하시겠습니까?')) return;
     try {
-      const res = await fetch(`${API}/reservations/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await fetchEmpty(`${API}/reservations/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
       document.getElementById(`admin-res-${id}`)?.remove();
       showToast('예약이 삭제되었습니다.');
 
@@ -562,7 +591,7 @@
         document.getElementById('res-empty').style.display = 'block';
       }
     } catch (e) {
-      showToast('삭제에 실패했습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
@@ -574,8 +603,7 @@
     document.getElementById('themes-empty').style.display = 'none';
 
     try {
-      const res = await fetch(`${API}/themes`);
-      const themes = await res.json();
+      const themes = await fetchJson(`${API}/themes`, {}, '테마 목록을 불러올 수 없습니다.');
 
       document.getElementById('themes-loading').style.display = 'none';
 
@@ -599,7 +627,7 @@
       grid.style.display = 'grid';
     } catch (e) {
       document.getElementById('themes-loading').style.display = 'none';
-      showToast('테마 목록을 불러올 수 없습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
@@ -608,19 +636,12 @@
     const desc = document.getElementById('theme-desc').value.trim();
     const thumb = document.getElementById('theme-thumb').value.trim();
 
-    if (!name || !desc || !thumb) {
-      showToast('모든 필드를 입력해주세요.', 'error');
-      return;
-    }
-
     try {
-      const res = await fetch(`${API}/admin/themes`, {
+      await fetchEmpty(`${API}/admin/themes`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, description: desc, thumbnail_url: thumb })
-      });
-
-      if (!res.ok) throw new Error();
+        body: JSON.stringify({ name, description: desc, thumbnailUrl: thumb })
+      }, '테마 추가에 실패했습니다.');
 
       document.getElementById('theme-name').value = '';
       document.getElementById('theme-desc').value = '';
@@ -630,15 +651,14 @@
       await ensureStandardTimes();
       loadThemes();
     } catch (e) {
-      showToast('테마 추가에 실패했습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
   async function deleteTheme(id) {
     if (!confirm('이 테마를 삭제하시겠습니까?\n관련 예약이 있는 경우 삭제되지 않을 수 있습니다.')) return;
     try {
-      const res = await fetch(`${API}/admin/themes/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await fetchEmpty(`${API}/admin/themes/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
       document.getElementById(`theme-card-${id}`)?.remove();
       showToast('테마가 삭제되었습니다.');
 
@@ -648,7 +668,7 @@
         document.getElementById('themes-empty').style.display = 'block';
       }
     } catch (e) {
-      showToast('삭제에 실패했습니다. 해당 테마에 예약이 존재할 수 있습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
@@ -660,8 +680,7 @@
     document.getElementById('times-empty').style.display = 'none';
 
     try {
-      const res = await fetch(`${API}/times`);
-      const times = await res.json();
+      const times = await fetchJson(`${API}/admin/times`, {}, '시간 목록을 불러올 수 없습니다.');
 
       document.getElementById('times-loading').style.display = 'none';
 
@@ -681,37 +700,31 @@
       pills.style.display = 'flex';
     } catch (e) {
       document.getElementById('times-loading').style.display = 'none';
-      showToast('시간 목록을 불러올 수 없습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
   async function createTime() {
     const val = document.getElementById('new-time').value;
-    if (!val) {
-      showToast('시간을 선택해주세요.', 'error');
-      return;
-    }
 
     try {
-      const res = await fetch(`${API}/times`, {
+      await fetchJson(`${API}/admin/times`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ startAt: val })
-      });
+        body: JSON.stringify({ startAt: val || null })
+      }, '시간 추가에 실패했습니다.');
 
-      if (!res.ok) throw new Error();
       showToast(`${val} 시간이 추가되었습니다.`);
       loadTimes();
     } catch (e) {
-      showToast('이미 존재하는 시간이거나 추가에 실패했습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
   async function deleteTime(id, startAt) {
     if (!confirm(`${startAt} 시간을 삭제하시겠습니까?\n해당 시간에 예약이 있는 경우 삭제되지 않을 수 있습니다.`)) return;
     try {
-      const res = await fetch(`${API}/times/${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error();
+      await fetchEmpty(`${API}/admin/times/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
       document.getElementById(`time-pill-${id}`)?.remove();
       showToast(`${startAt} 시간이 삭제되었습니다.`);
 
@@ -721,14 +734,14 @@
         document.getElementById('times-empty').style.display = 'block';
       }
     } catch (e) {
-      showToast('삭제에 실패했습니다. 해당 시간에 예약이 존재할 수 있습니다.', 'error');
+      showToast(e.message, 'error');
     }
   }
 
   // Auto-ensure standard times (10:00~22:00) exist after theme creation
   async function ensureStandardTimes() {
     try {
-      const res = await fetch(`${API}/times`);
+      const res = await fetch(`${API}/admin/times`);
       const existing = await res.json();
       const existingTimes = new Set(existing.map(t => t.startAt));
 
@@ -736,7 +749,7 @@
       const missing = standard.filter(t => !existingTimes.has(t));
 
       await Promise.all(missing.map(t =>
-        fetch(`${API}/times`, {
+        fetch(`${API}/admin/times`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ startAt: t })

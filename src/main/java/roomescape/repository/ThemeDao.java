@@ -4,12 +4,14 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+
 import roomescape.domain.Theme;
-import roomescape.dto.AvailableReservationTimeResponse;
+import roomescape.dto.AvailableTimeResponse;
 
 @Repository
 public class ThemeDao {
@@ -23,8 +25,8 @@ public class ThemeDao {
             rs.getString("thumbnail_url")
     );
 
-    private final RowMapper<AvailableReservationTimeResponse> availableReservationTimeRowMapper =
-            (rs, rowNum) -> new AvailableReservationTimeResponse(
+    private final RowMapper<AvailableTimeResponse> availableReservationTimeRowMapper =
+            (rs, rowNum) -> new AvailableTimeResponse(
                     rs.getLong("id"),
                     rs.getObject("start_at", LocalTime.class),
                     rs.getBoolean("available")
@@ -46,44 +48,44 @@ public class ThemeDao {
     }
 
     public List<Theme> findPopularThemes(int size, LocalDate from, LocalDate to) {
-            final String sql = """
-                            SELECT
-                                th.id,
-                                th.name,
-                                th.description,
-                                th.thumbnail_url
-                            FROM reservation AS r
-                            INNER JOIN theme AS th ON r.theme_id = th.id
-                            WHERE r.date BETWEEN ? AND ?
-                            GROUP BY
-                                th.id,
-                                th.name,
-                                th.description,
-                                th.thumbnail_url
-                            ORDER BY COUNT(r.id) DESC
-                            LIMIT ?
-                            """;
-            return jdbcTemplate.query(sql, themeRowMapper, from, to, size);
+        final String sql = """
+                SELECT
+                    th.id,
+                    th.name,
+                    th.description,
+                    th.thumbnail_url
+                FROM reservation AS r
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.date BETWEEN ? AND ?
+                GROUP BY
+                    th.id,
+                    th.name,
+                    th.description,
+                    th.thumbnail_url
+                ORDER BY COUNT(r.id) DESC
+                LIMIT ?
+                """;
+        return jdbcTemplate.query(sql, themeRowMapper, from, to, size);
     }
 
 
-    public List<AvailableReservationTimeResponse> findAvailableTimeById(long themeId, String date) {
-            final String sql = """
-                    SELECT                                                                                                                                                                                                         \s
-                          rt.id,                                                                                                                                                                                                     \s
-                          rt.start_at,                                                                                                                                                                                               \s
-                          CASE WHEN r.id IS NULL THEN TRUE ELSE FALSE END AS available                                                                                                                                               \s
-                      FROM reservation_time rt                                                                                                                                                                                       \s
-                      LEFT JOIN reservation r                                                                                                                                                                                      \s
-                          ON rt.id = r.time_id
-                           AND r.theme_id = ?
-                           AND r.date = ?
-                    """;
-            return jdbcTemplate.query(sql, availableReservationTimeRowMapper, themeId, date);
+    public List<AvailableTimeResponse> findAvailableTimeById(long themeId, String date) {
+        final String sql = """
+                SELECT                                                                                                                                                                                                         \s
+                      rt.id,                                                                                                                                                                                                     \s
+                      rt.start_at,                                                                                                                                                                                               \s
+                      CASE WHEN r.id IS NULL THEN TRUE ELSE FALSE END AS available                                                                                                                                               \s
+                  FROM reservation_time rt                                                                                                                                                                                       \s
+                  LEFT JOIN reservation r                                                                                                                                                                                      \s
+                      ON rt.id = r.time_id
+                       AND r.theme_id = ?
+                       AND r.date = ?
+                """;
+        return jdbcTemplate.query(sql, availableReservationTimeRowMapper, themeId, date);
     }
 
     public List<Theme> findAll() {
-        return jdbcTemplate.query( "SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
+        return jdbcTemplate.query("SELECT id, name, description, thumbnail_url FROM theme", themeRowMapper);
     }
 
 

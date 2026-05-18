@@ -6,6 +6,7 @@ import static org.hamcrest.Matchers.is;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -30,7 +31,7 @@ public class MissionStepTest {
         final String location = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/times")
+                .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(201)
                 .extract()
@@ -38,23 +39,25 @@ public class MissionStepTest {
         final long id = Long.parseLong(location.split("/")[2]);
 
         RestAssured.given().log().all()
-                .when().get("/times")
+                .when().get("/admin/times")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(14));
 
         RestAssured.given().log().all()
                 .pathParam("id", id)
-                .when().delete("/times/{id}")
+                .when().delete("/admin/times/{id}")
                 .then().log().all()
                 .statusCode(204);
     }
 
     @Test
     void 예약과_시간_연결() {
+        LocalDate now = LocalDate.now();
+
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", "브라운");
-        reservation.put("date", "2023-08-05");
+        reservation.put("date", now.plusDays(1));
         reservation.put("timeId", 1);
         reservation.put("themeId", 1);
 
@@ -87,7 +90,6 @@ public class MissionStepTest {
                 break;
             }
         }
-
         assertThat(isJdbcTemplateInjected).isFalse();
     }
 

@@ -8,7 +8,7 @@ CREATE TABLE IF NOT EXISTS reservation_time
 CREATE TABLE IF NOT EXISTS theme
 (
     id            BIGINT       NOT NULL AUTO_INCREMENT,
-    name          VARCHAR(255) NOT NULL,
+    name          VARCHAR(255) NOT NULL UNIQUE,
     description   VARCHAR(255) NOT NULL,
     thumbnail_url TEXT NOT NULL,
     PRIMARY KEY (id)
@@ -22,6 +22,10 @@ CREATE TABLE IF NOT EXISTS reservation
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
+
+    CONSTRAINT unique_reservation
+    UNIQUE(date, time_id, theme_id),
+
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

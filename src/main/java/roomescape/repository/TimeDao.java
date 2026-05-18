@@ -3,23 +3,26 @@ package roomescape.repository;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
+
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.ReservationTime;
+
+import roomescape.domain.Time;
 
 @Repository
-public class ReservationTimeDao {
+public class TimeDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
-    private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
+    private final RowMapper<Time> timeRowMapper = (rs, rowNum) -> new Time(
             rs.getLong("id"),
             rs.getTime("start_at").toLocalTime()
     );
 
-    public ReservationTimeDao(JdbcTemplate jdbcTemplate) {
+
+    public TimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_time")
@@ -30,11 +33,11 @@ public class ReservationTimeDao {
         return jdbcInsert.executeAndReturnKey(Map.of("start_at", startAt)).longValue();
     }
 
-    public ReservationTime findById(long id) {
+    public Time findById(long id) {
         return jdbcTemplate.queryForObject("select id, start_at from reservation_time where id = ?", timeRowMapper, id);
     }
 
-    public List<ReservationTime> findAll() {
+    public List<Time> findAll() {
         return jdbcTemplate.query("SELECT id, start_at FROM reservation_time", timeRowMapper);
     }
 

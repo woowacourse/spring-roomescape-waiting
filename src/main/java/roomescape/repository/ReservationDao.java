@@ -10,7 +10,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
+import roomescape.domain.Time;
 import roomescape.domain.Theme;
 
 @Repository
@@ -22,7 +22,7 @@ public class ReservationDao {
             rs.getLong("id"),
             rs.getString("name"),
             rs.getDate("date").toLocalDate(),
-            new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
+            new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
             new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
     );
 
@@ -96,6 +96,10 @@ public class ReservationDao {
                 WHERE r.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, username);
+    }
+
+    public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
+        jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
     }
 
 

@@ -36,7 +36,6 @@ class ThemeControllerTest {
     @DisplayName("Top 10 테마 조회 API")
     void Top_10_테마_조회_API() {
         Map<String,Object> params = new HashMap<>();
-        params.put("condition", "popular");
         params.put("size", "10");
 
         RestAssured.given().log().all()
@@ -67,5 +66,31 @@ class ThemeControllerTest {
                 .body("[0].isAvailable", is(true))
                 .body("[2].startAt", is("12:00"))
                 .body("[2].isAvailable", is(false));
+    }
+
+    @Test
+    @DisplayName("특정 id의 테마 시간 조회_API - 이상값 예외 테스트")
+    void 특정_id의_테마_시간_조회_API_예외_테스트() {
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("id", "ㅇㄴ")
+                .queryParam("date", "2026-04-29")
+                .when().get("/themes/{id}/available-times")
+                .then().log().all()
+                .statusCode(400);
+    }
+
+    @Test
+    @DisplayName("특정 id의 테마 시간 조회_API - 정상 테스트")
+    void 특정_id의_테마_시간_조회_API_정상_테스트() {
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("id", 1)
+                .queryParam("date", "2026-04-29")
+                .when().get("/themes/{id}/available-times")
+                .then().log().all()
+                .statusCode(200);
     }
 }

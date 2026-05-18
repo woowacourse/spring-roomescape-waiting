@@ -3,7 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.dto.AvailableReservationTimeResponse;
+import roomescape.dto.AvailableTimeResponse;
 import roomescape.dto.ThemeResponse;
 import roomescape.repository.ThemeDao;
 
@@ -30,7 +30,7 @@ public class ThemeService {
                 .toList();
     }
 
-    public List<AvailableReservationTimeResponse> getAvailableTimeResponses(Long themId, String date) {
+    public List<AvailableTimeResponse> getAvailableTimeResponses(Long themId, String date) {
         return themeDao.findAvailableTimeById(themId, date);
     }
 }
