@@ -1,5 +1,6 @@
 package roomescape.time;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 
 public class ReservationTime {
@@ -21,5 +22,12 @@ public class ReservationTime {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    public boolean isBeforeDateTime(LocalDate date, ReservationTime time) {
+        if (date.isBefore(LocalDate.now())) {
+            return true;
+        }
+        return date.equals(LocalDate.now()) && time.getStartAt().isBefore(LocalTime.now());
     }
 }

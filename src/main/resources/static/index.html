@@ -19,26 +19,15 @@
 </header>
 
 <main>
-    <section class="hero">
-        <div class="hero-copy">
-            <p class="eyebrow">Premium Escape Rooms</p>
-            <h1>오늘의 몰입을 예약하세요</h1>
-            <p class="hero-description">원하는 테마와 날짜를 선택하면 예약 가능한 시간만 바로 확인할 수 있습니다.</p>
-        </div>
-        <div class="hero-visual" aria-hidden="true">
-            <div class="door-scene">
-                <span></span>
-            </div>
-        </div>
+    <section class="reservation-title">
+        <h1>테마 예약하기</h1>
     </section>
 
     <section class="shell">
         <div class="section-heading">
             <div>
-                <p class="eyebrow">Reservation</p>
-                <h2>예약하기</h2>
+                <h2>예약날짜선택</h2>
             </div>
-            <p id="status" class="status" role="status"></p>
         </div>
 
         <section class="layout-grid">
@@ -68,14 +57,15 @@
                 </div>
                 <input id="time-id" name="timeId" type="hidden" required>
                 <button class="primary-button" type="submit">예약하기</button>
+                <p id="form-status" class="status local-status" role="status"></p>
             </form>
 
             <section class="panel">
                 <div class="panel-heading">
-                    <h3>인기 테마</h3>
+                    <h3>테마 목록</h3>
                     <div class="inline-controls">
                         <input id="trend-limit" type="number" min="1" max="20" value="6" aria-label="인기 테마 개수">
-                        <button id="reload-trending" class="ghost-button" type="button">조회</button>
+                        <button id="reload-trending" class="ghost-button" type="button">인기순</button>
                     </div>
                 </div>
                 <div id="theme-grid" class="theme-grid"></div>
@@ -84,8 +74,14 @@
 
         <section class="panel table-panel">
             <div class="panel-heading">
-                <h3>예약 목록</h3>
-                <button id="reload-reservations" class="ghost-button" type="button">새로고침</button>
+                <div>
+                    <h3>내 예약</h3>
+                    <p id="reservation-status" class="status local-status" role="status"></p>
+                </div>
+                <form id="my-reservation-form" class="inline-form">
+                    <input id="my-reservation-name" name="name" type="text" placeholder="예약자 이름" required>
+                    <button class="ghost-button" type="submit">조회</button>
+                </form>
             </div>
             <div class="table-wrap">
                 <table>
@@ -106,7 +102,8 @@
 </main>
 
 <script>
-    const statusEl = document.querySelector('#status');
+    const formStatusEl = document.querySelector('#form-status');
+    const reservationStatusEl = document.querySelector('#reservation-status');
     const form = document.querySelector('#reservation-form');
     const nameInput = document.querySelector('#name');
     const dateInput = document.querySelector('#date');
@@ -116,17 +113,20 @@
     const themeGrid = document.querySelector('#theme-grid');
     const reservationRows = document.querySelector('#reservation-rows');
     const trendLimitInput = document.querySelector('#trend-limit');
+    const myReservationForm = document.querySelector('#my-reservation-form');
+    const myReservationNameInput = document.querySelector('#my-reservation-name');
 
     let themes = [];
     let times = [];
+    let currentReservationName = '';
 
     const today = new Date().toISOString().slice(0, 10);
     dateInput.value = today;
     dateInput.min = today;
 
-    function setStatus(message, isError = false) {
-        statusEl.textContent = message;
-        statusEl.classList.toggle('error', isError);
+    function setStatus(element, message, isError = false) {
+        element.textContent = message;
+        element.classList.toggle('error', isError);
     }
 
     async function requestJson(url, options = {}) {
@@ -136,8 +136,19 @@
         });
 
         if (!response.ok) {
-            const message = await response.text();
-            throw new Error(message || `요청 실패: ${response.status}`);
+            const errorBody = await response.text();
+            try {
+                const error = JSON.parse(errorBody);
+                if (error.message) {
+                    throw new Error(error.message);
+                }
+            } catch (parseError) {
+                if (parseError instanceof SyntaxError) {
+                    throw new Error(errorBody || `요청 실패: ${response.status}`);
+                }
+                throw parseError;
+            }
+            throw new Error(`요청 실패: ${response.status}`);
         }
 
         if (response.status === 204) {
@@ -186,9 +197,15 @@
         body.className = 'theme-body';
         const title = document.createElement('h3');
         title.textContent = theme.name;
-        const description = document.createElement('p');
-        description.textContent = theme.description || '새로운 단서를 따라 제한 시간 안에 탈출하세요.';
-        body.append(title, description);
+        const actions = document.createElement('div');
+        actions.className = 'theme-actions';
+        const button = document.createElement('button');
+        button.className = 'ghost-button';
+        button.type = 'button';
+        button.dataset.selectThemeId = theme.id;
+        button.textContent = '테마 선택';
+        actions.append(button);
+        body.append(title, actions);
         article.append(body);
         return article;
     }
@@ -235,21 +252,48 @@
 
         reservations.forEach((reservation) => {
             const row = document.createElement('tr');
-            [reservation.name, themeNameById(reservation.themeId), reservation.date, reservation.time.startAt]
-                .forEach((value) => {
-                    const cell = document.createElement('td');
-                    cell.textContent = value;
-                    row.append(cell);
-                });
+            const nameCell = document.createElement('td');
+            nameCell.textContent = reservation.name;
+            const themeCell = document.createElement('td');
+            themeCell.textContent = themeNameById(reservation.themeId);
+
+            const dateCell = document.createElement('td');
+            const dateInput = document.createElement('input');
+            dateInput.type = 'date';
+            dateInput.min = today;
+            dateInput.value = reservation.date;
+            dateInput.dataset.dateInput = reservation.id;
+            dateCell.append(dateInput);
+
+            const timeCell = document.createElement('td');
+            const timeSelect = document.createElement('select');
+            timeSelect.dataset.timeSelect = reservation.id;
+            times.forEach((time) => {
+                const option = document.createElement('option');
+                option.value = time.id;
+                option.textContent = time.startAt;
+                option.selected = time.id === reservation.time.id;
+                timeSelect.append(option);
+            });
+            timeCell.append(timeSelect);
 
             const actionCell = document.createElement('td');
-            const button = document.createElement('button');
-            button.className = 'danger-button';
-            button.type = 'button';
-            button.dataset.id = reservation.id;
-            button.textContent = '취소';
-            actionCell.append(button);
-            row.append(actionCell);
+            const actions = document.createElement('div');
+            actions.className = 'table-actions';
+            const changeButton = document.createElement('button');
+            changeButton.className = 'ghost-button';
+            changeButton.type = 'button';
+            changeButton.dataset.changeId = reservation.id;
+            changeButton.dataset.themeId = reservation.themeId;
+            changeButton.textContent = '변경';
+            const cancelButton = document.createElement('button');
+            cancelButton.className = 'danger-button';
+            cancelButton.type = 'button';
+            cancelButton.dataset.cancelId = reservation.id;
+            cancelButton.textContent = '취소';
+            actions.append(changeButton, cancelButton);
+            actionCell.append(actions);
+            row.append(nameCell, themeCell, dateCell, timeCell, actionCell);
             reservationRows.append(row);
         });
     }
@@ -289,58 +333,109 @@
         renderAvailableTimes(availableTimes);
     }
 
-    async function loadReservations() {
-        const reservations = await requestJson('/reservations');
+    async function loadReservations(name = currentReservationName) {
+        if (!name) {
+            reservationRows.innerHTML = '<tr><td class="empty" colspan="5">이름으로 내 예약을 조회하세요.</td></tr>';
+            return;
+        }
+
+        const reservations = await requestJson(`/reservations/list?name=${encodeURIComponent(name)}`);
         renderReservations(reservations);
     }
 
     form.addEventListener('submit', async (event) => {
         event.preventDefault();
         if (!timeIdInput.value) {
-            setStatus('예약 시간을 선택하세요.', true);
+            setStatus(formStatusEl, '예약 시간을 선택하세요.', true);
             return;
         }
 
         try {
+            const reservationName = nameInput.value.trim();
             await requestJson('/reservations', {
                 method: 'POST',
                 body: JSON.stringify({
-                    name: nameInput.value.trim(),
+                    name: reservationName,
                     date: dateInput.value,
                     timeId: Number(timeIdInput.value),
                     themeId: Number(themeSelect.value),
                 }),
             });
-            setStatus('예약이 완료되었습니다.');
+            setStatus(formStatusEl, '예약이 완료되었습니다.');
             form.reset();
             dateInput.value = today;
             dateInput.min = today;
+            currentReservationName = reservationName;
+            myReservationNameInput.value = currentReservationName;
             await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);
         } catch (error) {
-            setStatus(error.message, true);
+            setStatus(formStatusEl, error.message, true);
         }
     });
 
     reservationRows.addEventListener('click', async (event) => {
-        const button = event.target.closest('button[data-id]');
+        const button = event.target.closest('button[data-change-id], button[data-cancel-id]');
         if (!button) {
+            return;
+        }
+        if (!currentReservationName) {
+            setStatus(reservationStatusEl, '예약자 이름으로 내 예약을 먼저 조회하세요.', true);
             return;
         }
 
         button.disabled = true;
         try {
-            await requestJson(`/reservations/${button.dataset.id}`, {method: 'DELETE'});
-            setStatus('예약을 취소했습니다.');
+            if (button.dataset.changeId) {
+                const id = button.dataset.changeId;
+                await requestJson(`/reservations/${id}`, {
+                    method: 'PATCH',
+                    body: JSON.stringify({
+                        name: currentReservationName,
+                        themeId: Number(button.dataset.themeId),
+                        date: document.querySelector(`[data-date-input="${id}"]`).value,
+                        timeId: Number(document.querySelector(`[data-time-select="${id}"]`).value),
+                    }),
+                });
+                setStatus(reservationStatusEl, '예약을 변경했습니다.');
+            }
+
+            if (button.dataset.cancelId) {
+                await requestJson(`/reservations/my/${button.dataset.cancelId}?name=${encodeURIComponent(currentReservationName)}`, {
+                    method: 'DELETE',
+                });
+                setStatus(reservationStatusEl, '예약을 취소했습니다.');
+            }
             await Promise.all([loadAvailableTimes(), loadReservations(), loadTrendingThemes()]);
         } catch (error) {
             button.disabled = false;
-            setStatus(error.message, true);
+            setStatus(reservationStatusEl, error.message, true);
         }
+    });
+
+    myReservationForm.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        currentReservationName = myReservationNameInput.value.trim();
+        try {
+            await loadReservations();
+            setStatus(reservationStatusEl, '내 예약을 조회했습니다.');
+        } catch (error) {
+            setStatus(reservationStatusEl, error.message, true);
+        }
+    });
+
+    themeGrid.addEventListener('click', async (event) => {
+        const button = event.target.closest('button[data-select-theme-id]');
+        if (!button) {
+            return;
+        }
+
+        themeSelect.value = button.dataset.selectThemeId;
+        await loadAvailableTimes();
+        document.querySelector('#reservation-form').scrollIntoView({behavior: 'smooth', block: 'start'});
     });
 
     dateInput.addEventListener('change', loadAvailableTimes);
     themeSelect.addEventListener('change', loadAvailableTimes);
-    document.querySelector('#reload-reservations').addEventListener('click', loadReservations);
     document.querySelector('#reload-trending').addEventListener('click', loadTrendingThemes);
 
     (async function init() {
@@ -348,7 +443,7 @@
             await Promise.all([loadThemes(), loadTimes()]);
             await Promise.all([loadTrendingThemes(), loadAvailableTimes(), loadReservations()]);
         } catch (error) {
-            setStatus(error.message, true);
+            setStatus(formStatusEl, error.message, true);
         }
     })();
 </script>

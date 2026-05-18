@@ -34,7 +34,7 @@ public class ReservationDaoTest {
     private ReservationDao reservationDao;
 
     @Test
-    void 예약_생성_테스트() {
+    void 예약_생성_성공() {
         Reservation reservation = new Reservation("초록", 1L, LocalDate.parse("2026-05-05"),
                 new ReservationTime(6L, LocalTime.parse("15:00")));
         Reservation expected = reservationDao.insert(reservation);
@@ -57,12 +57,32 @@ public class ReservationDaoTest {
 
     @Test
     void 예약_시간_조회_성공() {
-
         Long themeId = 2L;
         LocalDate date = LocalDate.parse("2026-05-05");
-        List<Long> times = reservationDao.findTimeIdByThemeIdAndDate(themeId, date);
+        List<Long> times = reservationDao.selectTimeIdByThemeIdAndDate(themeId, date);
 
         assertThat(times.size()).isEqualTo(3);
     }
 
+    @Test
+    void 이름으로_예약_조회_성공() {
+        List<Reservation> reservations = reservationDao.selectByName("로치");
+
+        assertThat(reservations.size()).isEqualTo(13);
+    }
+
+    @Test
+    void 예약의_날짜와_시간_수정_성공() {
+        Long reservationId = 1L;
+        LocalDate changedDate = LocalDate.of(2026, 5, 20);
+        Long changedTimeId = 2L;
+
+        reservationDao.updateDateTimeById(reservationId, changedDate, changedTimeId);
+
+        Reservation reservation = reservationDao.selectById(reservationId)
+                .orElseThrow();
+
+        assertThat(reservation.getDate()).isEqualTo(changedDate);
+        assertThat(reservation.getTime().getId()).isEqualTo(changedTimeId);
+    }
 }

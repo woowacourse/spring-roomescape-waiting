@@ -1,6 +1,8 @@
 package roomescape.reservation;
 
 import java.time.LocalDate;
+import roomescape.global.exception.ErrorCode;
+import roomescape.global.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
 
 public class Reservation {
@@ -43,5 +45,11 @@ public class Reservation {
 
     public Long getThemeId() {
         return themeId;
+    }
+
+    public void validateSameName(String name, ErrorCode errorCode) {
+        if (!this.name.equals(name)) {
+            throw new RoomescapeException(errorCode);
+        }
     }
 }

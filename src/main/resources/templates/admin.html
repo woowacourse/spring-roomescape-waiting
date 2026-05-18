@@ -1,36 +1,36 @@
 <!doctype html>
-<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<html lang="ko">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Room Escape Admin</title>
-    <link rel="stylesheet" th:href="@{/styles.css}">
+    <link rel="stylesheet" href="/styles.css">
 </head>
 <body>
 <header class="app-header">
-    <a class="brand" th:href="@{/}">
-        <span class="brand-mark">R</span>
+    <a class="brand" href="/">
+        <span class="brand-mark">RE</span>
         <span>Room Escape</span>
     </a>
     <nav class="nav-links" aria-label="주요 메뉴">
-        <a th:href="@{/}">예약</a>
-        <a class="active" th:href="@{/admin}">관리자</a>
+        <a href="/">예약</a>
+        <a class="active" href="/admin.html">관리자</a>
     </nav>
 </header>
 
 <main class="shell">
-    <section class="page-title">
+    <div class="section-heading">
         <div>
-            <p class="eyebrow">Admin API</p>
+            <p class="eyebrow">Admin</p>
             <h1>테마와 시간 관리</h1>
         </div>
         <p id="status" class="status" role="status"></p>
-    </section>
+    </div>
 
     <section class="layout-grid admin-layout">
-        <form id="theme-form" class="panel reservation-form">
+        <form id="theme-form" class="panel form-panel">
             <div class="panel-heading">
-                <h2>테마 등록</h2>
+                <h3>테마 등록</h3>
             </div>
             <label>
                 <span>이름</span>
@@ -49,7 +49,7 @@
 
         <section class="panel">
             <div class="panel-heading">
-                <h2>등록된 테마</h2>
+                <h3>등록된 테마</h3>
                 <button id="reload-themes" class="ghost-button" type="button">새로고침</button>
             </div>
             <div id="theme-grid" class="theme-grid admin-theme-grid"></div>
@@ -58,7 +58,7 @@
 
     <section class="panel table-panel">
         <div class="panel-heading">
-            <h2>예약 시간 관리</h2>
+            <h3>예약 시간 관리</h3>
             <form id="time-form" class="inline-form">
                 <input id="start-at" name="startAt" type="time" required>
                 <button class="primary-button compact-button" type="submit">추가</button>
@@ -135,7 +135,7 @@
         const title = document.createElement('h3');
         title.textContent = theme.name;
         const description = document.createElement('p');
-        description.textContent = theme.description ?? '';
+        description.textContent = theme.description || '설명이 없습니다.';
         const actions = document.createElement('div');
         actions.className = 'theme-actions';
         const button = document.createElement('button');
@@ -184,11 +184,11 @@
     }
 
     async function loadThemes() {
-        renderThemes(await requestJson('/admin/themes'));
+        renderThemes(await requestJson('/themes'));
     }
 
     async function loadTimes() {
-        renderTimes(await requestJson('/user/times'));
+        renderTimes(await requestJson('/times/reservation-time'));
     }
 
     themeForm.addEventListener('submit', async (event) => {
@@ -197,9 +197,9 @@
             await requestJson('/admin/themes', {
                 method: 'POST',
                 body: JSON.stringify({
-                    name: document.querySelector('#theme-name').value,
-                    description: document.querySelector('#theme-description').value,
-                    image: document.querySelector('#theme-image').value,
+                    name: document.querySelector('#theme-name').value.trim(),
+                    description: document.querySelector('#theme-description').value.trim(),
+                    image: document.querySelector('#theme-image').value.trim(),
                 }),
             });
             themeForm.reset();
@@ -228,7 +228,7 @@
     timeForm.addEventListener('submit', async (event) => {
         event.preventDefault();
         try {
-            await requestJson('/user/times', {
+            await requestJson('/admin/times', {
                 method: 'POST',
                 body: JSON.stringify({startAt: document.querySelector('#start-at').value}),
             });
@@ -247,7 +247,7 @@
         }
 
         try {
-            await requestJson(`/user/times/${button.dataset.timeId}`, {method: 'DELETE'});
+            await requestJson(`/admin/times/${button.dataset.timeId}`, {method: 'DELETE'});
             setStatus('예약 시간을 삭제했습니다.');
             await loadTimes();
         } catch (error) {

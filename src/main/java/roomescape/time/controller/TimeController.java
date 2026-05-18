@@ -4,13 +4,15 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.time.service.TimeService;
 import roomescape.time.dto.AvailableTimeResponse;
 import roomescape.time.dto.TimeResponse;
+import roomescape.time.service.TimeService;
 
+@Validated
 @RestController
 public class TimeController {
 

@@ -1,12 +1,12 @@
 package roomescape.time.dao;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.time.AvailableTime;
 import roomescape.time.ReservationTime;
 
 @Repository
@@ -14,12 +14,6 @@ public class TimeDao {
     private static final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) ->
             new ReservationTime(rs.getLong("id")
                     , rs.getTime("start_at").toLocalTime());
-
-    private static final RowMapper<AvailableTime> availableTimeRowMapper = (rs, rowNum) ->
-            new AvailableTime(
-                    rs.getTime("start_at").toLocalTime(),
-                    rs.getBoolean("is_available")
-            );
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -36,9 +30,10 @@ public class TimeDao {
         return jdbcTemplate.query(sql, timeRowMapper);
     }
 
-    public ReservationTime selectById(Long id) {
+    public Optional<ReservationTime> selectById(Long id) {
         String sql = "select id, start_at from reservation_time where id = ?";
-        return jdbcTemplate.queryForObject(sql, timeRowMapper, id);
+        List<ReservationTime> times = jdbcTemplate.query(sql, timeRowMapper, id);
+        return times.stream().findFirst();
     }
 
     public ReservationTime insert(ReservationTime time) {
@@ -49,7 +44,7 @@ public class TimeDao {
         return new ReservationTime(id, time.getStartAt());
     }
 
-    public void delete(Long id) {
+    public void deleteById(Long id) {
         String sql = "delete from reservation_time where id = ?";
         jdbcTemplate.update(sql, id);
     }

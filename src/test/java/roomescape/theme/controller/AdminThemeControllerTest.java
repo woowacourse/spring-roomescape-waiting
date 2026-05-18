@@ -33,8 +33,16 @@ public class AdminThemeControllerTest {
     @Test
     void 테마_삭제_성공() {
         RestAssured.given().log().all()
-                .when().delete("/admin/themes/1")
+                .when().delete("/admin/themes/2")
                 .then().log().all()
                 .statusCode(204);
+    }
+
+    @Test
+    void 예약이_존재하는_테마_삭제_실패() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/themes/1")
+                .then().log().all()
+                .statusCode(409);
     }
 }

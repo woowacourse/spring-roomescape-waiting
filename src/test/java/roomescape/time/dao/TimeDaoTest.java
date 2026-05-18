@@ -25,7 +25,7 @@ public class TimeDaoTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void 시간_생성_테스트() {
+    void 시간_생성_성공() {
         ReservationTime time = new ReservationTime(LocalTime.parse("21:00"));
         ReservationTime expected = timeDao.insert(time);
 
