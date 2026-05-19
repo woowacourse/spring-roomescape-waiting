@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>ENIGMA ROOMS - 관리자</title>
+    <link rel="stylesheet" th:href="@{/css/admin.css}">
+</head>
+<body>
+<header class="header">
+    <a class="logo" href="/admin-page">ENIGMA ROOMS</a>
+
+    <nav class="nav">
+        <a href="/">예약하기</a>
+        <a href="/reservation-lookup">예약 조회</a>
+        <a href="/admin-page">관리자</a>
+    </nav>
+</header>
+
+<main class="container">
+    <section class="page-heading">
+        <h1>관리자 대시보드</h1>
+        <p>운영 데이터를 관리합니다.</p>
+    </section>
+
+    <section class="popular-admin-section">
+        <div class="popular-admin-header">
+            <div>
+                <p>POPULAR THEMES</p>
+                <h2>인기 테마 TOP 10</h2>
+            </div>
+
+            <button class="refresh-button" type="button" onclick="loadPopularThemes()">
+                새로고침
+            </button>
+        </div>
+
+        <div id="popular-theme-list" class="popular-admin-list"></div>
+    </section>
+
+    <section class="tab-box">
+        <button class="tab-button active" data-panel="date-panel">날짜 관리</button>
+        <button class="tab-button" data-panel="time-panel">시간 관리</button>
+        <button class="tab-button" data-panel="theme-panel">테마 관리</button>
+        <button class="tab-button" data-panel="reservation-panel">예약 조회</button>
+    </section>
+
+    <!-- 날짜 관리 -->
+    <section id="date-panel" class="panel active">
+        <div class="content-grid">
+            <article class="card form-card">
+                <h2>새 날짜 추가</h2>
+
+                <button id="date-picker-button" class="date-picker-button" type="button">
+                    <span class="date-icon">▣</span>
+                    <span id="selected-date-text">날짜를 선택하세요</span>
+                </button>
+
+                <input id="date-input" class="hidden-date-input" type="date">
+
+                <button class="submit-button" type="button" onclick="createDate()">추가하기</button>
+            </article>
+
+            <article class="card table-card">
+                <h2>등록된 날짜</h2>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>날짜</th>
+                        <th>상태</th>>
+                        <th class="align-right">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="date-table-body"></tbody>
+                </table>
+            </article>
+        </div>
+    </section>
+
+    <!-- 시간 관리 -->
+    <section id="time-panel" class="panel">
+        <div class="content-grid">
+            <article class="card form-card">
+                <h2>새 시간 추가</h2>
+
+                <div class="time-select-row">
+                    <select id="hour-select" class="select-box"></select>
+                    <select id="minute-select" class="select-box"></select>
+                </div>
+
+                <button class="submit-button" type="button" onclick="createTime()">추가하기</button>
+            </article>
+
+            <article class="card table-card">
+                <h2>등록된 시간</h2>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>시간</th>
+                        <th>상태</th>
+                        <th class="align-right">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="time-table-body"></tbody>
+                </table>
+            </article>
+        </div>
+    </section>
+
+    <!-- 테마 관리 -->
+    <section id="theme-panel" class="panel">
+        <div class="content-grid">
+            <article class="card form-card">
+                <h2>새 테마 추가</h2>
+
+                <input id="theme-name-input" class="text-input" type="text" placeholder="테마 이름">
+                <input id="theme-description-input" class="text-input" type="text" placeholder="테마 설명">
+                <input id="theme-thumbnail-input" class="text-input" type="text" placeholder="썸네일 URL">
+
+                <button class="submit-button" type="button" onclick="createTheme()">추가하기</button>
+            </article>
+
+            <article class="card table-card">
+                <h2>등록된 테마</h2>
+
+                <table>
+                    <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>테마명</th>
+                        <th>상태</th>
+                        <th class="align-right">관리</th>
+                    </tr>
+                    </thead>
+                    <tbody id="theme-table-body"></tbody>
+                </table>
+            </article>
+        </div>
+    </section>
+
+    <!-- 예약 조회 -->
+    <section id="reservation-panel" class="panel">
+        <article class="card table-card full-card">
+            <h2>예약 목록</h2>
+
+            <table>
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>예약자</th>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>테마</th>
+                    <th>상태</th>
+                    <th class="align-right">관리</th>
+                </tr>
+                </thead>
+                <tbody id="reservation-table-body"></tbody>
+            </table>
+        </article>
+    </section>
+
+    <!-- 예약 변경 모달 -->
+    <div id="reschedule-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>예약 변경</h2>
+                <button type="button" class="close-button" onclick="closeRescheduleModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <section class="step-section">
+                    <h2 style="font-size: 18px; margin-bottom: 16px;"><span style="color: #d2b44c; margin-right: 8px;">01.</span> 날짜 선택</h2>
+                    <div id="reschedule-date-list" class="date-list" style="display: flex; gap: 8px; flex-wrap: wrap;"></div>
+                </section>
+
+                <section class="form-group" style="margin-top: 32px;">
+                    <h2 style="font-size: 18px; margin-bottom: 16px;"><span style="color: #d2b44c; margin-right: 8px;">02.</span> 시간 선택</h2>
+                    <div id="reschedule-time-list" class="time-list" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px;"></div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="secondary-button" onclick="closeRescheduleModal()">취소</button>
+                <button type="button" class="submit-button" style="width: auto; padding: 0 24px;" onclick="submitReschedule()">변경 확정</button>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script th:src="@{/js/admin.js}"></script>
+</body>
+</html>

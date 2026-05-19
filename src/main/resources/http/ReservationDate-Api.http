@@ -1,0 +1,23 @@
+### [Admin] 1. 예약 날짜 목록 조회
+GET http://localhost:8080/admin/dates
+Accept: application/json
+
+### [Admin] 2. 예약 날짜 생성
+POST http://localhost:8080/admin/dates
+Content-Type: application/json
+
+{
+  "date": "2099-01-01"
+}
+
+### [Admin] 3. 예약 날짜 활성화 상태 수정
+PATCH http://localhost:8080/admin/dates/1/status
+Content-Type: application/json
+
+{
+  "isActive": true
+}
+
+### [Member] 4. 예약 가능한 날짜 목록 조회 (오늘 이후)
+GET http://localhost:8080/member/dates
+Accept: application/json
