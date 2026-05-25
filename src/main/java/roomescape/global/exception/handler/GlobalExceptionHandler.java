@@ -11,7 +11,8 @@ import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.InvalidRequestValueException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.response.ErrorResponse;
-import roomescape.reservation.exception.ForbiddenException;
+import roomescape.reservation.exception.AuthorizationException;
+import roomescape.reservation.exception.MissingAuthorizationHeaderException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -45,7 +46,10 @@ public class GlobalExceptionHandler {
         if (e instanceof NotFoundException) {
             status = HttpStatus.NOT_FOUND;
         }
-        if (e instanceof ForbiddenException) {
+        if (e instanceof MissingAuthorizationHeaderException) {
+            status = HttpStatus.UNAUTHORIZED;
+        }
+        if (e instanceof AuthorizationException) {
             status = HttpStatus.FORBIDDEN;
         }
 

@@ -44,16 +44,16 @@ public class ExceptionTest {
                 "테마", "설명", "thumbnailUrl"
         );
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", "2026-04-30");
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-04-30");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(body)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(422)
@@ -74,16 +74,16 @@ public class ExceptionTest {
                 "테마", "설명", "thumbnailUrl"
         );
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", "2026-05-01");
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-05-01");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(body)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(422)
@@ -104,15 +104,15 @@ public class ExceptionTest {
                 "테마", "설명", "thumbnailUrl"
         );
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", "2026-05-01");
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-05-01");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(body)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -120,7 +120,7 @@ public class ExceptionTest {
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(body)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
@@ -141,15 +141,15 @@ public class ExceptionTest {
                 "테마", "설명", "thumbnailUrl"
         );
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", "2026-05-01");
-        params.put("timeId", 1L);
-        params.put("themeId", 1L);
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-05-01");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(body)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -157,7 +157,7 @@ public class ExceptionTest {
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(body)
                 .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(409)
@@ -175,39 +175,39 @@ public class ExceptionTest {
                 "themeId", 1L
         );
 
-        Map<String, Object> paramsWithNull = new HashMap<>(valid);
-        paramsWithNull.put("name", null);
+        Map<String, Object> WithNull = new HashMap<>(valid);
+        WithNull.put("name", null);
 
-        Map<String, Object> paramsWithEmpty = new HashMap<>(valid);
-        paramsWithEmpty.put("name", "");
+        Map<String, Object> WithEmpty = new HashMap<>(valid);
+        WithEmpty.put("name", "");
 
-        Map<String, Object> paramsWithWhiteSpace = new HashMap<>(valid);
-        paramsWithWhiteSpace.put("name", " ");
+        Map<String, Object> WithWhiteSpace = new HashMap<>(valid);
+        WithWhiteSpace.put("name", " ");
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithNull)
+                .body(WithNull)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithEmpty)
+                .body(WithEmpty)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithWhiteSpace)
+                .body(WithWhiteSpace)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
     }
 
     @DisplayName("예약 시, date에 null이나 날짜 형식 아닌 값이 들어오면 예외가 발생한다.")
@@ -221,24 +221,24 @@ public class ExceptionTest {
                 "themeId", 1L
         );
 
-        Map<String, Object> paramsWithoutDate = new HashMap<>(valid);
-        paramsWithoutDate.put("date", null);
+        Map<String, Object> withoutDate = new HashMap<>(valid);
+        withoutDate.put("date", null);
 
-        Map<String, Object> paramsWithIllegalDateForm = new HashMap<>(valid);
-        paramsWithIllegalDateForm.put("date", "illegal_form");
+        Map<String, Object> withIllegalDateForm = new HashMap<>(valid);
+        withIllegalDateForm.put("date", "illegal_form");
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutDate)
+                .body(withoutDate)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithIllegalDateForm)
+                .body(withIllegalDateForm)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
@@ -256,52 +256,52 @@ public class ExceptionTest {
                 "themeId", 1L
         );
 
-        Map<String, Object> paramsWithoutTimeId = new HashMap<>(valid);
-        paramsWithoutTimeId.put("timeId", null);
+        Map<String, Object> withoutTimeId = new HashMap<>(valid);
+        withoutTimeId.put("timeId", null);
 
-        Map<String, Object> paramsWithoutThemeId = new HashMap<>(valid);
-        paramsWithoutThemeId.put("themeId", null);
+        Map<String, Object> withoutThemeId = new HashMap<>(valid);
+        withoutThemeId.put("themeId", null);
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutTimeId)
+                .body(withoutTimeId)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutThemeId)
+                .body(withoutThemeId)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
     }
 
     @DisplayName("시간 등록 시, startAt에 null이나 시간 형식 아닌 값이 들어오면 예외가 발생한다.")
     @Test
     void createTimes_invalid_time_form() {
         //given
-        Map<String, Object> paramsWithoutStartAt = new HashMap<>();
-        paramsWithoutStartAt.put("startAt", null);
+        Map<String, Object> withoutStartAt = new HashMap<>();
+        withoutStartAt.put("startAt", null);
 
-        Map<String, Object> paramsWithIllegalStartAt = new HashMap<>();
-        paramsWithIllegalStartAt.put("startAt", "illegal_format");
+        Map<String, Object> withIllegalStartAt = new HashMap<>();
+        withIllegalStartAt.put("startAt", "illegal_format");
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutStartAt)
+                .body(withoutStartAt)
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("예약 시간 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithIllegalStartAt)
+                .body(withIllegalStartAt)
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400)
@@ -318,30 +318,29 @@ public class ExceptionTest {
                 "thumbnailUrl", "thumbnailUrl"
         );
 
-        Map<String, Object> paramsWithoutName = new HashMap<>(valid);
-        paramsWithoutName.put("name", null);
+        Map<String, Object> withoutName = new HashMap<>(valid);
+        withoutName.put("name", null);
 
-        Map<String, Object> paramsWithEmptyName = new HashMap<>(valid);
-        paramsWithEmptyName.put("name", "");
+        Map<String, Object> withEmptyName = new HashMap<>(valid);
+        withEmptyName.put("name", "");
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutName)
+                .body(withoutName)
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithEmptyName)
+                .body(withEmptyName)
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
     }
-
 
     @DisplayName("테마 등록 시, description, thumbnailUrl 중 하나라도 null이면 예외가 발생한다.")
     @Test
@@ -353,28 +352,28 @@ public class ExceptionTest {
                 "thumbnailUrl", "thumbnailUrl"
         );
 
-        Map<String, Object> paramsWithoutDescription = new HashMap<>(valid);
-        paramsWithoutDescription.put("description", null);
+        Map<String, Object> withoutDescription = new HashMap<>(valid);
+        withoutDescription.put("description", null);
 
 
-        Map<String, Object> paramsWithoutThumbnailUrl = new HashMap<>(valid);
-        paramsWithoutThumbnailUrl.put("thumbnailUrl", null);
+        Map<String, Object> withoutThumbnailUrl = new HashMap<>(valid);
+        withoutThumbnailUrl.put("thumbnailUrl", null);
 
         //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutDescription)
+                .body(withoutDescription)
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(paramsWithoutThumbnailUrl)
+                .body(withoutThumbnailUrl)
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
     }
 }

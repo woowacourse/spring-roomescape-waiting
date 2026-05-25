@@ -69,7 +69,7 @@ class JdbcThemeRepositoryTest {
         );
 
         themeRepository.save(
-                new Theme(null, "테마", "테마 설명", "썸네일_url")
+                Theme.of("테마", "테마 설명", "썸네일_url")
         );
 
         Long themeId = jdbcTemplate.queryForObject(
@@ -95,7 +95,7 @@ class JdbcThemeRepositoryTest {
     void existByName() {
         //given
         themeRepository.save(
-                new Theme(null, "테마", "테마 설명", "썸네일_url")
+                Theme.of("테마", "테마 설명", "썸네일_url")
         );
 
         //when & then

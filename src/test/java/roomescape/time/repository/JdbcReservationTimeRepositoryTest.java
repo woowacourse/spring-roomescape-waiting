@@ -32,7 +32,7 @@ class JdbcReservationTimeRepositoryTest {
     void saveTest() {
         // given
         LocalTime startTime = LocalTime.of(10, 0);
-        ReservationTime time = new ReservationTime(null, startTime);
+        ReservationTime time = ReservationTime.of(startTime);
 
         // when
         ReservationTime savedTime = reservationTimeRepository.save(time);
@@ -47,7 +47,7 @@ class JdbcReservationTimeRepositoryTest {
     void saveTest_duplicate() {
         // given
         LocalTime startTime = LocalTime.of(10, 0);
-        ReservationTime time = new ReservationTime(null, startTime);
+        ReservationTime time = ReservationTime.of(startTime);
 
         reservationTimeRepository.save(time);
 
@@ -155,7 +155,7 @@ class JdbcReservationTimeRepositoryTest {
 
     private ReservationTime createTime(LocalTime time) {
         return reservationTimeRepository.save(
-                new ReservationTime(null, time)
+                ReservationTime.of(time)
         );
     }
 

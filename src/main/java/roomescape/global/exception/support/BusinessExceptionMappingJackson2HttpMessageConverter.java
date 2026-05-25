@@ -7,6 +7,7 @@ import org.springframework.http.HttpInputMessage;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.lang.Nullable;
+import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.InvalidRequestFormatException;
 
 public class BusinessExceptionMappingJackson2HttpMessageConverter extends MappingJackson2HttpMessageConverter {
@@ -21,8 +22,26 @@ public class BusinessExceptionMappingJackson2HttpMessageConverter extends Mappin
         try {
             return super.readInternal(clazz, inputMessage);
         } catch (HttpMessageNotReadableException e) {
+            RuntimeException customException = findCustomException(e);
+
+            if (customException != null) {
+                throw customException;
+            }
+
             throw new InvalidRequestFormatException();
         }
+    }
+
+    private RuntimeException findCustomException(Throwable throwable) {
+        while (throwable != null) {
+            if (throwable instanceof BusinessException businessException) {
+                return businessException;
+            }
+
+            throwable = throwable.getCause();
+        }
+
+        return null;
     }
 
     @Override
@@ -31,6 +50,12 @@ public class BusinessExceptionMappingJackson2HttpMessageConverter extends Mappin
         try {
             return super.read(type, contextClass, inputMessage);
         } catch (HttpMessageNotReadableException e) {
+            RuntimeException customException = findCustomException(e);
+
+            if (customException != null) {
+                throw customException;
+            }
+
             throw new InvalidRequestFormatException();
         }
     }

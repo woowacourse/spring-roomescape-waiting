@@ -2,7 +2,6 @@ package roomescape.reservation.domain;
 
 import java.time.LocalDate;
 import java.util.Objects;
-import roomescape.reservation.exception.InvalidReservationRequestValueException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -15,8 +14,6 @@ public class Reservation {
     private final Theme theme;
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validateName(name);
-
         this.id = id;
         this.name = name;
         this.date = date;
@@ -26,12 +23,6 @@ public class Reservation {
 
     public static Reservation of(String name, LocalDate date, ReservationTime time, Theme theme) {
         return new Reservation(null, name, date, time, theme);
-    }
-
-    private void validateName(String name) {
-        if (name.isBlank()) {
-            throw new InvalidReservationRequestValueException();
-        }
     }
 
     public Reservation updateDate(LocalDate date) {

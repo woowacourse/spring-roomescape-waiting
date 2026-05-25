@@ -13,7 +13,7 @@ import roomescape.theme.domain.Theme;
 @Repository
 public class JdbcThemeRepository implements ThemeRepository {
 
-    private static final RowMapper<Theme> ThemeMapper = (resultSet, rowNum) ->
+    private static final RowMapper<Theme> THEME_ROW_MAPPER = (resultSet, rowNum) ->
             new Theme(
                     resultSet.getLong("id"),
                     resultSet.getString("name"),
@@ -62,7 +62,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                WHERE id = ?
                """;
 
-        return jdbcTemplate.query(sql, ThemeMapper, id)
+        return jdbcTemplate.query(sql, THEME_ROW_MAPPER, id)
                 .stream().findFirst();
     }
 
@@ -87,7 +87,7 @@ public class JdbcThemeRepository implements ThemeRepository {
                 FROM theme
                 """;
 
-        return jdbcTemplate.query(sql, ThemeMapper);
+        return jdbcTemplate.query(sql, THEME_ROW_MAPPER);
     }
 
     @Override

@@ -269,7 +269,7 @@ public class ReservationOwnerTest {
                 .body(params)
                 .when().patch("/reservations/1")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(401);
     }
 
     @DisplayName("예약 변경 시, 변경 대상이 이미 지난 예약이면 예외가 발생한다.")

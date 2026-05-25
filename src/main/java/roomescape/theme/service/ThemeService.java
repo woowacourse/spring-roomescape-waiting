@@ -26,7 +26,6 @@ public class ThemeService {
             throw new DuplicateThemeException();
         }
 
-
         try {
             return themeRepository.save(
                     Theme.of(
@@ -38,7 +37,6 @@ public class ThemeService {
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateThemeException();
         }
-
     }
 
     public List<Theme> findAllThemes() {

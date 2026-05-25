@@ -80,6 +80,70 @@ class ConcurrencyTest {
         assertThat(result.get(2)).isEqualTo(0);
     }
 
+    private void createReservationTime(String startAt) {
+        Map<String, Object> reservationTime = new HashMap<>();
+        reservationTime.put("startAt", startAt);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationTime)
+                .when().post("/admin/times")
+                .then().statusCode(201);
+    }
+
+    private void createTheme(String name, String description, String thumbnailUrl) {
+        Map<String, Object> theme = new HashMap<>();
+        theme.put("name", name);
+        theme.put("description", description);
+        theme.put("thumbnailUrl", thumbnailUrl);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(theme)
+                .when().post("/admin/themes")
+                .then().statusCode(201);
+    }
+
+    private List<Integer> runConcurrentlyAndCountResults(
+            Runnable runnable,
+            int numberOfThread,
+            Class<? extends BusinessException> expectedExceptionType
+    ) throws InterruptedException {
+        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThread);
+
+        CountDownLatch latch = new CountDownLatch(numberOfThread);
+
+        AtomicInteger successCount = new AtomicInteger();
+        AtomicInteger duplicateCount = new AtomicInteger();
+        AtomicInteger unexpectedErrorCount = new AtomicInteger();
+
+        for (int i = 0; i < numberOfThread; i++) {
+            executorService.submit(() -> {
+                try {
+                    runnable.run();
+                    successCount.incrementAndGet();
+                } catch (Throwable throwable) {
+                    if (expectedExceptionType.isInstance(throwable)) {
+                        duplicateCount.incrementAndGet();
+                    } else {
+                        unexpectedErrorCount.incrementAndGet();
+                    }
+                } finally {
+                    latch.countDown();
+                }
+            });
+        }
+
+        latch.await();
+        executorService.shutdown();
+
+        return List.of(
+                successCount.get(),
+                duplicateCount.get(),
+                unexpectedErrorCount.get()
+        );
+    }
+
     @DisplayName("동일한 예약 시간을 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
     void registerTime() throws InterruptedException {
@@ -237,30 +301,6 @@ class ConcurrencyTest {
         assertThat(unexpectedErrorCount.get()).isEqualTo(0);
     }
 
-    private void createReservationTime(String startAt) {
-        Map<String, Object> reservationTime = new HashMap<>();
-        reservationTime.put("startAt", startAt);
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservationTime)
-                .when().post("/admin/times")
-                .then().statusCode(201);
-    }
-
-    private void createTheme(String name, String description, String thumbnailUrl) {
-        Map<String, Object> theme = new HashMap<>();
-        theme.put("name", name);
-        theme.put("description", description);
-        theme.put("thumbnailUrl", thumbnailUrl);
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(theme)
-                .when().post("/admin/themes")
-                .then().statusCode(201);
-    }
-
     private Long createReservation(String name, LocalDate date, Long timeId, Long themeId) {
         Map<String, Object> reservation = new HashMap<>();
         reservation.put("name", name);
@@ -276,45 +316,5 @@ class ConcurrencyTest {
                 .extract()
                 .jsonPath()
                 .getLong("id");
-    }
-
-    private List<Integer> runConcurrentlyAndCountResults(
-            Runnable runnable,
-            int numberOfThread,
-            Class<? extends BusinessException> expectedExceptionType
-    ) throws InterruptedException {
-        ExecutorService executorService = Executors.newFixedThreadPool(numberOfThread);
-
-        CountDownLatch latch = new CountDownLatch(numberOfThread);
-
-        AtomicInteger successCount = new AtomicInteger();
-        AtomicInteger duplicateCount = new AtomicInteger();
-        AtomicInteger unexpectedErrorCount = new AtomicInteger();
-
-        for (int i = 0; i < numberOfThread; i++) {
-            executorService.submit(() -> {
-                try {
-                    runnable.run();
-                    successCount.incrementAndGet();
-                } catch (Throwable throwable) {
-                    if (expectedExceptionType.isInstance(throwable)) {
-                        duplicateCount.incrementAndGet();
-                    } else {
-                        unexpectedErrorCount.incrementAndGet();
-                    }
-                } finally {
-                    latch.countDown();
-                }
-            });
-        }
-
-        latch.await();
-        executorService.shutdown();
-
-        return List.of(
-                successCount.get(),
-                duplicateCount.get(),
-                unexpectedErrorCount.get()
-        );
     }
 }

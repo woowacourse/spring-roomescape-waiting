@@ -56,7 +56,6 @@ public class ReservationService {
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(ThemeNotFoundException::new);
 
-
         try {
             return reservationRepository.save(
                     Reservation.of(

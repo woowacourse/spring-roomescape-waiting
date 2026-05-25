@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.reservation.exception.InvalidReservationRequestValueException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -30,17 +29,6 @@ class ReservationTest {
         assertThat(reservation.getName()).isEqualTo(name);
         assertThat(reservation.getDate()).isEqualTo(date);
         assertThat(reservation.getTime()).isEqualTo(reservationTime);
-    }
-
-    @Test
-    @DisplayName("이름이 비어있거나 공백이면 예외가 발생한다.")
-    void validateNameTest() {
-        // given
-        Theme theme = Theme.of("우테코", "우테코 전용 테마", "https://example.com");
-
-        // when & then
-        assertThatThrownBy(() -> Reservation.of("", LocalDate.of(2024, 5, 1), reservationTime, theme))
-                .isInstanceOf(InvalidReservationRequestValueException.class);
     }
 
     @Test

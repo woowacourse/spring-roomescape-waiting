@@ -16,7 +16,7 @@ import roomescape.time.domain.ReservationTime;
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
-    private static final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->
+    private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (resultSet, rowNum) ->
             new ReservationTime(
                 resultSet.getLong("id"),
                 resultSet.getTime("start_at").toLocalTime()
@@ -58,7 +58,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         return jdbcTemplate.query(
                 sql,
-                reservationTimeRowMapper,
+                RESERVATION_TIME_ROW_MAPPER,
                 id
         ).stream().findFirst();
     }
@@ -84,7 +84,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 FROM reservation_time
                 """;
 
-        return jdbcTemplate.query(sql, reservationTimeRowMapper);
+        return jdbcTemplate.query(sql, RESERVATION_TIME_ROW_MAPPER);
     }
 
     @Override
@@ -99,13 +99,13 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                WHERE r.id IS NULL
                """;
 
-        RowMapper<AvailableTimeQueryResult> reservationTimeMapper = (rs, rowNum) ->
+        RowMapper<AvailableTimeQueryResult> availableTimeRowMapper = (rs, rowNum) ->
                 new AvailableTimeQueryResult(
                         rs.getLong("id"),
                         rs.getTime("start_at").toLocalTime()
                 );
 
-        return jdbcTemplate.query(sql, reservationTimeMapper, themeId, date);
+        return jdbcTemplate.query(sql, availableTimeRowMapper, themeId, date);
     }
 
     @Override
