@@ -2,7 +2,6 @@ package roomescape.acceptance_test.step;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
@@ -14,11 +13,13 @@ import roomescape.theme.controller.dto.ThemeCreateRequest;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Map;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
+import static roomescape.acceptance_test.util.RequestUtil.delete;
+import static roomescape.acceptance_test.util.RequestUtil.get;
+import static roomescape.acceptance_test.util.RequestUtil.patch;
+import static roomescape.acceptance_test.util.RequestUtil.post;
 import static roomescape.common.auth.UserArgumentResolver.GUEST_NAME_HEADER;
 
 public final class ReservationAcceptanceSteps {
@@ -32,32 +33,24 @@ public final class ReservationAcceptanceSteps {
             ObjectMapper objectMapper,
             ThemeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .body("name", equalTo(request.name()))
-                .body("description", equalTo(request.description()))
-                .body("thumbnail", equalTo(request.thumbnail()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/admin/themes", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("name")).isEqualTo(request.name());
+        assertThat(response.jsonPath().getString("description")).isEqualTo(request.description());
+        assertThat(response.jsonPath().getString("thumbnail")).isEqualTo(request.thumbnail());
+        return response.path("id");
     }
 
     public static Integer 예약_시간_생성을_요청하고(
             ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .body("startAt", equalTo(request.startAt().toString()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/admin/times", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("startAt")).isEqualTo(request.startAt().toString());
+        return response.path("id");
     }
 
     public static Integer 변경할_예약_시간_생성을_요청하고(
@@ -97,19 +90,15 @@ public final class ReservationAcceptanceSteps {
             ObjectMapper objectMapper,
             ReservationCreateRequest request
     ) throws JsonProcessingException {
-        Integer reservationId = given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("id", notNullValue())
-                .body("guestName", equalTo(request.guestName()))
-                .body("date", equalTo(request.date().toString()))
-                .body("time.id", equalTo(request.timeId().intValue()))
-                .body("theme.id", equalTo(request.themeId().intValue()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/reservations", request);
+        Integer reservationId = response.path("id");
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(reservationId).isNotNull();
+        assertThat(response.jsonPath().getString("guestName")).isEqualTo(request.guestName());
+        assertThat(response.jsonPath().getString("date")).isEqualTo(request.date().toString());
+        assertThat(response.jsonPath().getInt("time.id")).isEqualTo(request.timeId().intValue());
+        assertThat(response.jsonPath().getInt("theme.id")).isEqualTo(request.themeId().intValue());
 
         return new ReservationInfo(reservationId, request);
     }
@@ -162,11 +151,7 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 관리자_예약_목록_조회를_요청하면() {
-        return given().log().all()
-                .when()
-                .get("/admin/reservations")
-                .then().log().all()
-                .extract();
+        return get("/admin/reservations");
     }
 
     public static void 생성한_예약이_포함된_관리자_예약_목록을_응답받는다(
@@ -186,12 +171,7 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 생성한_예약_삭제를_요청하면(Integer reservationId) {
-        return given().log().all()
-                .pathParam("id", reservationId)
-                .when()
-                .delete("/admin/reservations/{id}")
-                .then().log().all()
-                .extract();
+        return delete("/admin/reservations/{id}", Map.of("id", reservationId));
     }
 
     public static void 생성한_예약_삭제가_성공한다(ExtractableResponse<Response> response) {
@@ -207,12 +187,7 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 내_예약_목록_조회를_요청하면(String guestName) {
-        return given().log().all()
-                .header(GUEST_NAME_HEADER, guestName)
-                .when()
-                .get("/reservations/me")
-                .then().log().all()
-                .extract();
+        return get("/reservations/me", Map.of(), Map.of(GUEST_NAME_HEADER, guestName));
     }
 
     public static void 특정_사용자의_예약이_포함된_예약_목록을_응답받는다(
@@ -229,15 +204,12 @@ public final class ReservationAcceptanceSteps {
             ReservationInfo reservation,
             ReservationEditRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .pathParam("id", reservation.id())
-                .header(GUEST_NAME_HEADER, reservation.guestName())
-                .when()
-                .patch("/reservations/{id}")
-                .then().log().all()
-                .extract();
+        return patch(
+                objectMapper,
+                "/reservations/{id}",
+                request,
+                Map.of("id", reservation.id()),
+                Map.of(GUEST_NAME_HEADER, reservation.guestName()));
     }
 
     public static void 예약_수정이_성공한다(
@@ -302,15 +274,12 @@ public final class ReservationAcceptanceSteps {
                 otherReservation.timeId()
         );
 
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .pathParam("id", myReservation.id())
-                .header(GUEST_NAME_HEADER, otherReservation.guestName())
-                .when()
-                .patch("/reservations/{id}")
-                .then().log().all()
-                .extract();
+        return patch(
+                objectMapper,
+                "/reservations/{id}",
+                request,
+                Map.of("id", myReservation.id()),
+                Map.of(GUEST_NAME_HEADER, otherReservation.guestName()));
     }
 
     public static void 예약_수정_실패_응답을_받는다(ExtractableResponse<Response> response, int statusCode) {
@@ -318,13 +287,10 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 내_예약_삭제를_요청하면(ReservationInfo reservation) {
-        return given().log().all()
-                .pathParam("id", reservation.id())
-                .header(GUEST_NAME_HEADER, reservation.guestName())
-                .when()
-                .delete("/reservations/{id}")
-                .then().log().all()
-                .extract();
+        return delete(
+                "/reservations/{id}",
+                Map.of("id", reservation.id()),
+                Map.of(GUEST_NAME_HEADER, reservation.guestName()));
     }
 
     public static void 내_예약_삭제가_성공한다(ExtractableResponse<Response> response) {

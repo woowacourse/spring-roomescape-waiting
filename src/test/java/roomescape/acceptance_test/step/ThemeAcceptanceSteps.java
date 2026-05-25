@@ -2,7 +2,6 @@ package roomescape.acceptance_test.step;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
@@ -13,10 +12,12 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
-import static io.restassured.RestAssured.given;
+import static roomescape.acceptance_test.util.RequestUtil.delete;
+import static roomescape.acceptance_test.util.RequestUtil.get;
+import static roomescape.acceptance_test.util.RequestUtil.post;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
 
 public final class ThemeAcceptanceSteps {
 
@@ -27,25 +28,17 @@ public final class ThemeAcceptanceSteps {
             ObjectMapper objectMapper,
             ThemeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .body("name", equalTo(request.name()))
-                .body("description", equalTo(request.description()))
-                .body("thumbnail", equalTo(request.thumbnail()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/admin/themes", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("name")).isEqualTo(request.name());
+        assertThat(response.jsonPath().getString("description")).isEqualTo(request.description());
+        assertThat(response.jsonPath().getString("thumbnail")).isEqualTo(request.thumbnail());
+        return response.path("id");
     }
 
     public static ExtractableResponse<Response> 테마_목록_조회를_요청하면() {
-        return given().log().all()
-                .when()
-                .get("/themes")
-                .then().log().all()
-                .extract();
+        return get("/themes");
     }
 
     public static void 생성한_테마가_포함된_테마_목록을_응답받는다(
@@ -61,12 +54,7 @@ public final class ThemeAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 생성한_테마_삭제를_요청하면(Integer themeId) {
-        return given().log().all()
-                .pathParam("id", themeId)
-                .when()
-                .delete("/admin/themes/{id}")
-                .then().log().all()
-                .extract();
+        return delete("/admin/themes/{id}", Map.of("id", themeId));
     }
 
     public static void 테마_삭제가_성공한다(ExtractableResponse<Response> response) {
@@ -132,13 +120,7 @@ public final class ThemeAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 인기_테마_목록_조회를_요청하면() {
-        return given().log().all()
-                .queryParam("days", 7)
-                .queryParam("size", 3)
-                .when()
-                .get("/themes/popularity")
-                .then().log().all()
-                .extract();
+        return get("/themes/popularity", Map.of("days", 7, "size", 3));
     }
 
     public static void 기간_내_예약_수가_많은_순서대로_인기_테마_목록을_응답받는다(
@@ -162,15 +144,11 @@ public final class ThemeAcceptanceSteps {
             ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .body("startAt", equalTo(request.startAt().toString()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/admin/times", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("startAt")).isEqualTo(request.startAt().toString());
+        return response.path("id");
     }
 
     private static void 예약_생성을_요청한다(
@@ -199,18 +177,14 @@ public final class ThemeAcceptanceSteps {
                 reservationTimeId.longValue(),
                 themeId.longValue());
 
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("guestName", equalTo(request.guestName()))
-                .body("date", equalTo(request.date().toString()))
-                .body("time.id", equalTo(reservationTimeId))
-                .body("theme.id", equalTo(themeId))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/reservations", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("guestName")).isEqualTo(request.guestName());
+        assertThat(response.jsonPath().getString("date")).isEqualTo(request.date().toString());
+        assertThat(response.jsonPath().getInt("time.id")).isEqualTo(reservationTimeId);
+        assertThat(response.jsonPath().getInt("theme.id")).isEqualTo(themeId);
+        return response.path("id");
     }
 
     public record PopularThemeIds(

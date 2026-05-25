@@ -2,7 +2,6 @@ package roomescape.acceptance_test.step;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
@@ -10,10 +9,11 @@ import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 import java.time.LocalDate;
+import java.util.Map;
 
-import static io.restassured.RestAssured.given;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.equalTo;
+import static roomescape.acceptance_test.util.RequestUtil.get;
+import static roomescape.acceptance_test.util.RequestUtil.post;
 
 public final class ReservationTimeAcceptanceSteps {
 
@@ -24,23 +24,15 @@ public final class ReservationTimeAcceptanceSteps {
             ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/times")
-                .then().log().all()
-                .statusCode(201)
-                .body("startAt", equalTo(request.startAt().toString()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/admin/times", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("startAt")).isEqualTo(request.startAt().toString());
+        return response.path("id");
     }
 
     public static ExtractableResponse<Response> 예약_시간_목록_조회를_요청하면() {
-        return given().log().all()
-                .when()
-                .get("/times")
-                .then().log().all()
-                .extract();
+        return get("/times");
     }
 
     public static void 생성한_예약_시간이_포함된_예약_시간_목록을_응답받는다(
@@ -57,13 +49,7 @@ public final class ReservationTimeAcceptanceSteps {
             ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/times")
-                .then().log().all()
-                .extract();
+        return post(objectMapper, "/admin/times", request);
     }
 
     public static void 중복_예약_시간_생성은_실패한다(ExtractableResponse<Response> response) {
@@ -74,17 +60,13 @@ public final class ReservationTimeAcceptanceSteps {
             ObjectMapper objectMapper,
             ThemeCreateRequest request
     ) throws JsonProcessingException {
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/admin/themes")
-                .then().log().all()
-                .statusCode(201)
-                .body("name", equalTo(request.name()))
-                .body("description", equalTo(request.description()))
-                .body("thumbnail", equalTo(request.thumbnail()))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/admin/themes", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("name")).isEqualTo(request.name());
+        assertThat(response.jsonPath().getString("description")).isEqualTo(request.description());
+        assertThat(response.jsonPath().getString("thumbnail")).isEqualTo(request.thumbnail());
+        return response.path("id");
     }
 
     public static Integer 새로운_예약_시간_생성을_요청하고(
@@ -106,31 +88,21 @@ public final class ReservationTimeAcceptanceSteps {
                 reservationTimeId.longValue(),
                 themeId.longValue());
 
-        return given().log().all()
-                .contentType(ContentType.JSON)
-                .body(objectMapper.writeValueAsString(request))
-                .when()
-                .post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("guestName", equalTo(request.guestName()))
-                .body("date", equalTo(request.date().toString()))
-                .body("time.id", equalTo(reservationTimeId))
-                .body("theme.id", equalTo(themeId))
-                .extract().path("id");
+        ExtractableResponse<Response> response = post(objectMapper, "/reservations", request);
+
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("guestName")).isEqualTo(request.guestName());
+        assertThat(response.jsonPath().getString("date")).isEqualTo(request.date().toString());
+        assertThat(response.jsonPath().getInt("time.id")).isEqualTo(reservationTimeId);
+        assertThat(response.jsonPath().getInt("theme.id")).isEqualTo(themeId);
+        return response.path("id");
     }
 
     public static ExtractableResponse<Response> 특정_날짜와_테마의_예약_가능_시간_조회를_요청하면(
             LocalDate date,
             Integer themeId
     ) {
-        return given().log().all()
-                .queryParam("date", date.toString())
-                .queryParam("themeId", themeId)
-                .when()
-                .get("/times/availability")
-                .then().log().all()
-                .extract();
+        return get("/times/availability", Map.of("date", date.toString(), "themeId", themeId));
     }
 
     public static void 예약된_시간은_예약_불가로_응답받는다(
