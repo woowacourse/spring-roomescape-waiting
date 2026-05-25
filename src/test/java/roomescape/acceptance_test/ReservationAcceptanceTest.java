@@ -1,6 +1,5 @@
 package roomescape.acceptance_test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
@@ -23,16 +22,15 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("관리자 예약 목록 조회")
-    public void scenario1() throws JsonProcessingException {
+    public void scenario1() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        Integer themeId = 테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30))
         );
-        ReservationInfo reservation = 예약_생성을_요청하고(objectMapper, "brown", 예약일, reservationTimeId, themeId);
+        ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
 
         // when
         ExtractableResponse<Response> response = 관리자_예약_목록_조회를_요청하면();
@@ -43,11 +41,11 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("관리자 예약 삭제")
-    public void scenario2() throws JsonProcessingException {
+    public void scenario2() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        ReservationInfo reservation = 예약_생성을_요청하고(objectMapper, "brown", 예약일, LocalTime.of(10, 30));
+        ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, LocalTime.of(10, 30));
 
         // when
         ExtractableResponse<Response> deleteResponse = 생성한_예약_삭제를_요청하면(reservation.id());
@@ -59,11 +57,11 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("내 예약 목록 조회")
-    public void scenario3() throws JsonProcessingException {
+    public void scenario3() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        ReservationInfo reservation = 특정_사용자_이름으로_예약_생성을_요청하고(objectMapper, "brown");
+        ReservationInfo reservation = 특정_사용자_이름으로_예약_생성을_요청하고("brown");
 
         // when
         ExtractableResponse<Response> response = 내_예약_목록_조회를_요청하면(reservation.guestName());
@@ -74,24 +72,18 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("예약 수정")
-    public void scenario4() throws JsonProcessingException {
+    public void scenario4() {
         mutableClock.setFixed(현재_날짜);
-
         // given
-        Integer themeId = 테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("테마1", "설명", "섬네일"));
-        Integer reservationTimeId = 예약_시간_생성을_요청하고(
-                objectMapper,
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30))
-        );
-        Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
-                objectMapper,
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30))
-        );
-        ReservationInfo reservation = 예약_생성을_요청하고(objectMapper, "brown", 예약일, reservationTimeId, themeId);
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+        Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+        ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
+
         ReservationEditRequest editRequest = new ReservationEditRequest(변경_예약일, editedReservationTimeId.longValue());
 
         // when
-        ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(objectMapper, reservation, editRequest);
+        ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(reservation, editRequest);
 
         // then
         예약_수정이_성공한다(response, reservation);
@@ -101,28 +93,24 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("같은 테마의 중복 예약으로 예약 수정 실패")
-    public void scenario5() throws JsonProcessingException {
+    public void scenario5() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        Integer themeId = 테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30))
         );
         Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30))
         );
         ReservationInfo reservation = 같은_테마로_예약_생성을_요청하고(
-                objectMapper,
                 "brown",
                 예약일,
                 reservationTimeId,
                 themeId
         );
         ReservationInfo targetReservation = 같은_테마로_새로운_예약_생성을_요청하고(
-                objectMapper,
                 "pobi",
                 변경_예약일,
                 editedReservationTimeId,
@@ -131,7 +119,6 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
         // when
         ExtractableResponse<Response> response = 새로운_예약을_기존_예약의_날짜와_시간으로_수정_요청하면(
-                objectMapper,
                 targetReservation,
                 reservation
         );
@@ -142,20 +129,19 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("이미 시작된 예약 수정 실패")
-    public void scenario6() throws JsonProcessingException {
+    public void scenario6() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        ReservationInfo reservation = 예약_생성을_요청하고(objectMapper, "brown", 예약일, LocalTime.of(10, 30));
+        ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, LocalTime.of(10, 30));
         Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30))
         );
         현재_시간이_예약_시작_이후가_되고(mutableClock);
         ReservationEditRequest editRequest = new ReservationEditRequest(변경_예약일, editedReservationTimeId.longValue());
 
         // when
-        ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(objectMapper, reservation, editRequest);
+        ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(reservation, editRequest);
 
         // then
         예약_수정_실패_응답을_받는다(response, 422);
@@ -163,13 +149,12 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("지난 날짜와 시간으로 예약 수정 실패")
-    public void scenario7() throws JsonProcessingException {
+    public void scenario7() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        ReservationInfo reservation = 예약_생성을_요청하고(objectMapper, "brown", 예약일, LocalTime.of(10, 30));
+        ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, LocalTime.of(10, 30));
         Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30))
         );
         현재_시간이_변경하려는_예약_날짜와_시간_이후가_되고(mutableClock);
@@ -180,7 +165,6 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
         // when
         ExtractableResponse<Response> response = 지난_날짜와_시간으로_예약_수정을_요청하면(
-                objectMapper,
                 reservation,
                 editRequest
         );
@@ -191,28 +175,24 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("다른 사용자의 예약 수정 실패")
-    public void scenario8() throws JsonProcessingException {
+    public void scenario8() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        Integer themeId = 테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30))
         );
         Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
-                objectMapper,
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30))
         );
         ReservationInfo otherReservation = 특정_사용자_이름으로_예약_생성을_요청하고(
-                objectMapper,
                 "brown",
                 예약일,
                 reservationTimeId,
                 themeId
         );
         ReservationInfo myReservation = 다른_사용자_이름으로_새로운_예약_생성을_요청하고(
-                objectMapper,
                 "pobi",
                 변경_예약일,
                 editedReservationTimeId,
@@ -221,7 +201,6 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
         // when
         ExtractableResponse<Response> response = 다른_사용자의_이름으로_예약_수정을_요청하면(
-                objectMapper,
                 myReservation,
                 otherReservation
         );
@@ -232,11 +211,11 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("내 예약 삭제")
-    public void scenario9() throws JsonProcessingException {
+    public void scenario9() {
         mutableClock.setFixed(현재_날짜);
 
         // given
-        ReservationInfo reservation = 특정_사용자_이름으로_예약_생성을_요청하고(objectMapper, "brown");
+        ReservationInfo reservation = 특정_사용자_이름으로_예약_생성을_요청하고("brown");
 
         // when
         ExtractableResponse<Response> deleteResponse = 내_예약_삭제를_요청하면(reservation);

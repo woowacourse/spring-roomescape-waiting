@@ -1,6 +1,5 @@
 package roomescape.acceptance_test;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import org.junit.jupiter.api.DisplayName;
@@ -21,10 +20,10 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("테마 목록 조회")
-    public void scenario1() throws JsonProcessingException {
+    public void scenario1() {
         // given
         ThemeCreateRequest request = new ThemeCreateRequest("brown", "설명", "섬네일");
-        Integer themeId = 테마_생성을_요청하고(objectMapper, request);
+        Integer themeId = 테마_생성을_요청하고(request);
 
         // when
         ExtractableResponse<Response> response = 테마_목록_조회를_요청하면();
@@ -35,10 +34,10 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("테마 삭제")
-    public void scenario2() throws JsonProcessingException {
+    public void scenario2() {
         // given
         ThemeCreateRequest request = new ThemeCreateRequest("테마1", "설명", "섬네일");
-        Integer themeId = 테마_생성을_요청하고(objectMapper, request);
+        Integer themeId = 테마_생성을_요청하고(request);
 
         // when
         ExtractableResponse<Response> deleteResponse = 생성한_테마_삭제를_요청하면(themeId);
@@ -51,14 +50,14 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("인기 테마 목록 조회")
-    public void scenario3() throws JsonProcessingException {
+    public void scenario3() {
         // given
         mutableClock.setFixed(LocalDate.of(2026, 4, 1));
 
-        PopularThemeIds themeIds = 여러_테마_생성을_요청하고(objectMapper);
-        List<Integer> reservationTimeIds = 예약_시간_생성을_요청하고(objectMapper);
-        기간_내_테마별_예약_수가_다르게_예약_생성을_요청하고(objectMapper, themeIds, reservationTimeIds, 기간_내_예약일);
-        기간_밖_예약_생성을_요청하고(objectMapper, themeIds, reservationTimeIds, 기간_밖_예약일);
+        PopularThemeIds themeIds = 여러_테마_생성을_요청하고();
+        List<Integer> reservationTimeIds = 예약_시간_생성을_요청하고();
+        기간_내_테마별_예약_수가_다르게_예약_생성을_요청하고(themeIds, reservationTimeIds, 기간_내_예약일);
+        기간_밖_예약_생성을_요청하고(themeIds, reservationTimeIds, 기간_밖_예약일);
 
         mutableClock.setFixed(인기_테마_조회_기준일);
 

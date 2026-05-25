@@ -1,7 +1,7 @@
 package roomescape.acceptance_test.step;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
@@ -24,16 +24,18 @@ import static roomescape.common.auth.UserArgumentResolver.GUEST_NAME_HEADER;
 
 public final class ReservationAcceptanceSteps {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
     private static final LocalDate 예약일 = LocalDate.of(2026, 10, 14);
 
     private ReservationAcceptanceSteps() {
     }
 
     public static Integer 테마_생성을_요청하고(
-            ObjectMapper objectMapper,
             ThemeCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/admin/themes", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/admin/themes", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("name")).isEqualTo(request.name());
@@ -43,10 +45,9 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static Integer 예약_시간_생성을_요청하고(
-            ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/admin/times", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/admin/times", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("startAt")).isEqualTo(request.startAt().toString());
@@ -54,31 +55,28 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static Integer 변경할_예약_시간_생성을_요청하고(
-            ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
-    ) throws JsonProcessingException {
-        return 예약_시간_생성을_요청하고(objectMapper, request);
+    ) {
+        return 예약_시간_생성을_요청하고(request);
     }
 
     public static ReservationInfo 예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName,
             LocalDate date,
             LocalTime startAt
-    ) throws JsonProcessingException {
-        Integer reservationTimeId = 예약_시간_생성을_요청하고(objectMapper, new ReservationTimeCreateRequest(startAt));
-        Integer themeId = 테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("테마1", "설명", "섬네일"));
-        return 예약_생성을_요청하고(objectMapper, guestName, date, reservationTimeId, themeId);
+    ) {
+        Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(startAt));
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
     }
 
     public static ReservationInfo 예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
-        return 예약_생성을_요청하고(objectMapper, new ReservationCreateRequest(
+    ) {
+        return 예약_생성을_요청하고(new ReservationCreateRequest(
                 guestName,
                 date,
                 reservationTimeId.longValue(),
@@ -87,10 +85,9 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ReservationInfo 예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             ReservationCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/reservations", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/reservations", request);
         Integer reservationId = response.path("id");
 
         assertThat(response.statusCode()).isEqualTo(201);
@@ -104,50 +101,45 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ReservationInfo 특정_사용자_이름으로_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName
-    ) throws JsonProcessingException {
-        return 예약_생성을_요청하고(objectMapper, guestName, 예약일, LocalTime.of(10, 30));
+    ) {
+        return 예약_생성을_요청하고(guestName, 예약일, LocalTime.of(10, 30));
     }
 
     public static ReservationInfo 특정_사용자_이름으로_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
-        return 예약_생성을_요청하고(objectMapper, guestName, date, reservationTimeId, themeId);
+    ) {
+        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
     }
 
     public static ReservationInfo 같은_테마로_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
-        return 예약_생성을_요청하고(objectMapper, guestName, date, reservationTimeId, themeId);
+    ) {
+        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
     }
 
     public static ReservationInfo 같은_테마로_새로운_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
-        return 예약_생성을_요청하고(objectMapper, guestName, date, reservationTimeId, themeId);
+    ) {
+        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
     }
 
     public static ReservationInfo 다른_사용자_이름으로_새로운_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             String guestName,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
-        return 예약_생성을_요청하고(objectMapper, guestName, date, reservationTimeId, themeId);
+    ) {
+        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
     }
 
     public static ExtractableResponse<Response> 관리자_예약_목록_조회를_요청하면() {
@@ -200,12 +192,11 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 예약_날짜와_시간_수정을_요청하면(
-            ObjectMapper objectMapper,
             ReservationInfo reservation,
             ReservationEditRequest request
-    ) throws JsonProcessingException {
+    ) {
         return patch(
-                objectMapper,
+                OBJECT_MAPPER,
                 "/reservations/{id}",
                 request,
                 Map.of("id", reservation.id()),
@@ -237,15 +228,14 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 새로운_예약을_기존_예약의_날짜와_시간으로_수정_요청하면(
-            ObjectMapper objectMapper,
             ReservationInfo targetReservation,
             ReservationInfo reservation
-    ) throws JsonProcessingException {
+    ) {
         ReservationEditRequest request = new ReservationEditRequest(
                 reservation.date(),
                 reservation.timeId()
         );
-        return 예약_날짜와_시간_수정을_요청하면(objectMapper, targetReservation, request);
+        return 예약_날짜와_시간_수정을_요청하면(targetReservation, request);
     }
 
     public static void 현재_시간이_예약_시작_이후가_되고(MutableClock mutableClock) {
@@ -257,25 +247,23 @@ public final class ReservationAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 지난_날짜와_시간으로_예약_수정을_요청하면(
-            ObjectMapper objectMapper,
             ReservationInfo reservation,
             ReservationEditRequest request
-    ) throws JsonProcessingException {
-        return 예약_날짜와_시간_수정을_요청하면(objectMapper, reservation, request);
+    ) {
+        return 예약_날짜와_시간_수정을_요청하면(reservation, request);
     }
 
     public static ExtractableResponse<Response> 다른_사용자의_이름으로_예약_수정을_요청하면(
-            ObjectMapper objectMapper,
             ReservationInfo myReservation,
             ReservationInfo otherReservation
-    ) throws JsonProcessingException {
+    ) {
         ReservationEditRequest request = new ReservationEditRequest(
                 otherReservation.date(),
                 otherReservation.timeId()
         );
 
         return patch(
-                objectMapper,
+                OBJECT_MAPPER,
                 "/reservations/{id}",
                 request,
                 Map.of("id", myReservation.id()),

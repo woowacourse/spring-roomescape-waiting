@@ -1,7 +1,7 @@
 package roomescape.acceptance_test.step;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
@@ -17,14 +17,17 @@ import static roomescape.acceptance_test.util.RequestUtil.post;
 
 public final class ReservationTimeAcceptanceSteps {
 
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+
     private ReservationTimeAcceptanceSteps() {
     }
 
     public static Integer 예약_시간_생성을_요청하고(
-            ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/admin/times", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/admin/times", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("startAt")).isEqualTo(request.startAt().toString());
@@ -46,10 +49,9 @@ public final class ReservationTimeAcceptanceSteps {
     }
 
     public static ExtractableResponse<Response> 같은_예약_시간_생성을_다시_요청하면(
-            ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
-    ) throws JsonProcessingException {
-        return post(objectMapper, "/admin/times", request);
+    ) {
+        return post(OBJECT_MAPPER, "/admin/times", request);
     }
 
     public static void 중복_예약_시간_생성은_실패한다(ExtractableResponse<Response> response) {
@@ -57,10 +59,9 @@ public final class ReservationTimeAcceptanceSteps {
     }
 
     public static Integer 테마_생성을_요청하고(
-            ObjectMapper objectMapper,
             ThemeCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/admin/themes", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/admin/themes", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("name")).isEqualTo(request.name());
@@ -70,25 +71,23 @@ public final class ReservationTimeAcceptanceSteps {
     }
 
     public static Integer 새로운_예약_시간_생성을_요청하고(
-            ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
-    ) throws JsonProcessingException {
-        return 예약_시간_생성을_요청하고(objectMapper, request);
+    ) {
+        return 예약_시간_생성을_요청하고(request);
     }
 
     public static Integer 특정_날짜와_테마에_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
+    ) {
         ReservationCreateRequest request = new ReservationCreateRequest(
                 "brown",
                 date,
                 reservationTimeId.longValue(),
                 themeId.longValue());
 
-        ExtractableResponse<Response> response = post(objectMapper, "/reservations", request);
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/reservations", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("guestName")).isEqualTo(request.guestName());

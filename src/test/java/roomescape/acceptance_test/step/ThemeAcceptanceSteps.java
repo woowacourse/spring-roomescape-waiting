@@ -1,7 +1,7 @@
 package roomescape.acceptance_test.step;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
@@ -14,21 +14,24 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance_test.util.RequestUtil.delete;
 import static roomescape.acceptance_test.util.RequestUtil.get;
 import static roomescape.acceptance_test.util.RequestUtil.post;
-import static org.assertj.core.api.Assertions.assertThat;
 
 public final class ThemeAcceptanceSteps {
+
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper()
+            .findAndRegisterModules()
+            .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
 
     private ThemeAcceptanceSteps() {
     }
 
     public static Integer 테마_생성을_요청하고(
-            ObjectMapper objectMapper,
             ThemeCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/admin/themes", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/admin/themes", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("name")).isEqualTo(request.name());
@@ -69,49 +72,39 @@ public final class ThemeAcceptanceSteps {
         assertThat(response.jsonPath().getList("themes.id", Integer.class)).doesNotContain(themeId);
     }
 
-    public static PopularThemeIds 여러_테마_생성을_요청하고(
-            ObjectMapper objectMapper
-    ) throws JsonProcessingException {
+    public static PopularThemeIds 여러_테마_생성을_요청하고() {
         return new PopularThemeIds(
-                테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("인기 테마1", "설명", "섬네일")),
-                테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("인기 테마2", "설명", "섬네일")),
-                테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("인기 테마3", "설명", "섬네일")),
-                테마_생성을_요청하고(objectMapper, new ThemeCreateRequest("기간 밖 테마", "설명", "섬네일"))
+                테마_생성을_요청하고(new ThemeCreateRequest("인기 테마1", "설명", "섬네일")),
+                테마_생성을_요청하고(new ThemeCreateRequest("인기 테마2", "설명", "섬네일")),
+                테마_생성을_요청하고(new ThemeCreateRequest("인기 테마3", "설명", "섬네일")),
+                테마_생성을_요청하고(new ThemeCreateRequest("기간 밖 테마", "설명", "섬네일"))
         );
     }
 
-    public static List<Integer> 예약_시간_생성을_요청하고(
-            ObjectMapper objectMapper
-    ) throws JsonProcessingException {
+    public static List<Integer> 예약_시간_생성을_요청하고() {
         List<Integer> reservationTimeIds = new ArrayList<>();
         for (int i = 0; i < 13; i++) {
-            reservationTimeIds.add(예약_시간_생성_요청(
-                    objectMapper,
-                    new ReservationTimeCreateRequest(LocalTime.of(i, 30))
-            ));
+            reservationTimeIds.add(예약_시간_생성_요청(new ReservationTimeCreateRequest(LocalTime.of(i, 30))));
         }
         return reservationTimeIds;
     }
 
     public static void 기간_내_테마별_예약_수가_다르게_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             PopularThemeIds themeIds,
             List<Integer> reservationTimeIds,
             LocalDate date
-    ) throws JsonProcessingException {
-        예약_생성을_요청한다(objectMapper, "brown", date, reservationTimeIds, themeIds.firstThemeId(), 13);
-        예약_생성을_요청한다(objectMapper, "pobi", date, reservationTimeIds, themeIds.secondThemeId(), 12);
-        예약_생성을_요청한다(objectMapper, "joy", date, reservationTimeIds, themeIds.thirdThemeId(), 11);
+    ) {
+        예약_생성을_요청한다("brown", date, reservationTimeIds, themeIds.firstThemeId(), 13);
+        예약_생성을_요청한다("pobi", date, reservationTimeIds, themeIds.secondThemeId(), 12);
+        예약_생성을_요청한다("joy", date, reservationTimeIds, themeIds.thirdThemeId(), 11);
     }
 
     public static void 기간_밖_예약_생성을_요청하고(
-            ObjectMapper objectMapper,
             PopularThemeIds themeIds,
             List<Integer> reservationTimeIds,
             LocalDate outOfRangeDate
-    ) throws JsonProcessingException {
+    ) {
         예약_생성_요청(
-                objectMapper,
                 "outOfRange",
                 outOfRangeDate,
                 reservationTimeIds.get(0),
@@ -141,10 +134,9 @@ public final class ThemeAcceptanceSteps {
     }
 
     private static Integer 예약_시간_생성_요청(
-            ObjectMapper objectMapper,
             ReservationTimeCreateRequest request
-    ) throws JsonProcessingException {
-        ExtractableResponse<Response> response = post(objectMapper, "/admin/times", request);
+    ) {
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/admin/times", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("startAt")).isEqualTo(request.startAt().toString());
@@ -152,32 +144,30 @@ public final class ThemeAcceptanceSteps {
     }
 
     private static void 예약_생성을_요청한다(
-            ObjectMapper objectMapper,
             String name,
             LocalDate date,
             List<Integer> reservationTimeIds,
             Integer themeId,
             int count
-    ) throws JsonProcessingException {
+    ) {
         for (int i = 0; i < count; i++) {
-            예약_생성_요청(objectMapper, name + i, date, reservationTimeIds.get(i), themeId);
+            예약_생성_요청(name + i, date, reservationTimeIds.get(i), themeId);
         }
     }
 
     private static Integer 예약_생성_요청(
-            ObjectMapper objectMapper,
             String name,
             LocalDate date,
             Integer reservationTimeId,
             Integer themeId
-    ) throws JsonProcessingException {
+    ) {
         ReservationCreateRequest request = new ReservationCreateRequest(
                 name,
                 date,
                 reservationTimeId.longValue(),
                 themeId.longValue());
 
-        ExtractableResponse<Response> response = post(objectMapper, "/reservations", request);
+        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/reservations", request);
 
         assertThat(response.statusCode()).isEqualTo(201);
         assertThat(response.jsonPath().getString("guestName")).isEqualTo(request.guestName());

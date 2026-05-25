@@ -44,7 +44,7 @@ public final class RequestUtil {
             ObjectMapper objectMapper,
             String path,
             Object body
-    ) throws JsonProcessingException {
+    ) {
         return post(objectMapper, path, body, Map.of(), Map.of());
     }
 
@@ -54,12 +54,12 @@ public final class RequestUtil {
             Object body,
             Map<String, ?> pathParams,
             Map<String, ?> headers
-    ) throws JsonProcessingException {
+    ) {
         return given().log().all()
                 .contentType(ContentType.JSON)
                 .headers(headers)
                 .pathParams(pathParams)
-                .body(objectMapper.writeValueAsString(body))
+                .body(writeValueAsString(objectMapper, body))
                 .when()
                 .post(path)
                 .then().log().all()
@@ -72,12 +72,12 @@ public final class RequestUtil {
             Object body,
             Map<String, ?> pathParams,
             Map<String, ?> headers
-    ) throws JsonProcessingException {
+    ) {
         return given().log().all()
                 .contentType(ContentType.JSON)
                 .headers(headers)
                 .pathParams(pathParams)
-                .body(objectMapper.writeValueAsString(body))
+                .body(writeValueAsString(objectMapper, body))
                 .when()
                 .patch(path)
                 .then().log().all()
@@ -103,5 +103,13 @@ public final class RequestUtil {
                 .delete(path)
                 .then().log().all()
                 .extract();
+    }
+
+    private static String writeValueAsString(ObjectMapper objectMapper, Object body) {
+        try {
+            return objectMapper.writeValueAsString(body);
+        } catch (JsonProcessingException e) {
+            throw new IllegalStateException("요청 본문을 JSON으로 변환하지 못했습니다.", e);
+        }
     }
 }
