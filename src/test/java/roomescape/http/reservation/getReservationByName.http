@@ -1,0 +1,2 @@
+GET localhost:8080/reservations?name=과거게스트 HTTP/1.1
+Content-Type: application/json
