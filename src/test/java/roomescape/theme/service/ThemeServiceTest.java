@@ -5,19 +5,18 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 import roomescape.reservation.repository.JdbcReservationRepository;
+import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.test_config.TestClockConfig;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.time.LocalTime;
 
@@ -29,6 +28,7 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
         TestClockConfig.class,
         ThemeService.class,
         JdbcReservationRepository.class,
+        JdbcReservationTimeRepository.class,
         JdbcThemeRepository.class
 })
 class ThemeServiceTest {
@@ -37,7 +37,13 @@ class ThemeServiceTest {
     ThemeService themeService;
 
     @Autowired
-    JdbcTemplate jdbcTemplate;
+    ReservationRepository reservationRepository;
+
+    @Autowired
+    ReservationTimeRepository reservationTimeRepository;
+
+    @Autowired
+    ThemeRepository themeRepository;
 
     @Test
     @DisplayName("이미 예약 정보가 존재하는 테마는 삭제할 수 없다.")
@@ -66,57 +72,14 @@ class ThemeServiceTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
-                    VALUES (?, ?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setDate(2, Date.valueOf(date));
-            preparedStatement.setLong(3, time.getId());
-            preparedStatement.setLong(4, theme.getId());
-            return preparedStatement;
-        }, keyHolder);
-
-        return new Reservation(getGeneratedId(keyHolder), name, date, time, theme);
+        return reservationRepository.save(new Reservation(name, date, time, theme));
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at)
-                    VALUES (?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            return preparedStatement;
-        }, keyHolder);
-
-        return new ReservationTime(getGeneratedId(keyHolder), startAt);
+        return reservationTimeRepository.save(new ReservationTime(startAt));
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, thumbnail);
-            return preparedStatement;
-        }, keyHolder);
-
-        return new Theme(getGeneratedId(keyHolder), name, description, thumbnail);
+        return themeRepository.save(new Theme(name, description, thumbnail));
     }
-
-    private Long getGeneratedId(KeyHolder keyHolder) {
-        return keyHolder.getKey().longValue();
-    }
-  
 }
