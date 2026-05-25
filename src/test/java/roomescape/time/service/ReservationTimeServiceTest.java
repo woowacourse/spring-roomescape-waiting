@@ -20,6 +20,7 @@ import roomescape.time.exception.DuplicateTimeException;
 import roomescape.time.exception.TimeInUseException;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.service.dto.ReservationTimeCommand;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationTimeServiceTest {

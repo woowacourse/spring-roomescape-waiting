@@ -13,6 +13,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 @JdbcTest
 class JdbcReservationTimeRepositoryTest {

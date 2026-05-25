@@ -13,20 +13,20 @@ import roomescape.reservation.auth.ReservationOwnerInterceptor;
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final ObjectMapper objectMapper;
-    private final ReservationOwnerInterceptor interceptor;
+    private final ReservationOwnerInterceptor reservationOwnerInterceptor;
 
     public WebMvcConfig(ObjectMapper objectMapper, ReservationOwnerInterceptor interceptor) {
         this.objectMapper = objectMapper;
-        this.interceptor = interceptor;
+        this.reservationOwnerInterceptor = interceptor;
     }
 
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        converters.addFirst( new BusinessExceptionMappingJackson2HttpMessageConverter(objectMapper));
+        converters.addFirst(new BusinessExceptionMappingJackson2HttpMessageConverter(objectMapper));
     }
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(interceptor);
+        registry.addInterceptor(reservationOwnerInterceptor);
     }
 }

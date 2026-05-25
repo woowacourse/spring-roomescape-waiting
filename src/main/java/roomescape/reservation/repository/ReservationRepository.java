@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 
 public interface ReservationRepository {
 

@@ -2,7 +2,7 @@ package roomescape.time.controller.dto;
 
 import java.time.LocalTime;
 import roomescape.time.exception.InvalidTimeRequestFormatException;
-import roomescape.time.service.ReservationTimeCommand;
+import roomescape.time.service.dto.ReservationTimeCommand;
 
 public record ReservationTimeRequest(LocalTime startAt) {
 

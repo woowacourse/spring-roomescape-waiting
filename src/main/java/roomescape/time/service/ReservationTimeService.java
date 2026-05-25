@@ -15,6 +15,7 @@ import roomescape.time.exception.DuplicateTimeException;
 import roomescape.time.exception.TimeInUseException;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.service.dto.ReservationTimeCommand;
 
 @Service
 public class ReservationTimeService {

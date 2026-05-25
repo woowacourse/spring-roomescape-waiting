@@ -5,6 +5,7 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.dto.AvailableTimeQueryResult;
 
 public interface ReservationTimeRepository {
 

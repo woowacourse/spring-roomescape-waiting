@@ -31,7 +31,7 @@ import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.time.exception.DuplicateTimeException;
 import roomescape.time.exception.TimeNotFoundException;
-import roomescape.time.service.ReservationTimeCommand;
+import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.ReservationTimeService;
 
 @SpringWebTest

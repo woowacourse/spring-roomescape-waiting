@@ -18,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 

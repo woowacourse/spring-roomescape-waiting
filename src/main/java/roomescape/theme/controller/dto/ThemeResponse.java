@@ -1,6 +1,6 @@
 package roomescape.theme.controller.dto;
 
-import roomescape.reservation.repository.PopularThemeQueryResult;
+import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.theme.domain.Theme;
 
 public record ThemeResponse(Long id, String name, String description, String thumbnailUrl) {

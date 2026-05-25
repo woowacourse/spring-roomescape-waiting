@@ -18,6 +18,7 @@ import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.InvalidReservationRequestFormatException;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -44,7 +45,7 @@ public class ReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservationsByName(@RequestParam("name") String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidRequestFormatException();
+            throw new InvalidReservationRequestFormatException();
         }
 
         List<ReservationResponse> responses = reservationService.findReservationsByName(name)
@@ -53,26 +54,5 @@ public class ReservationController {
                 .toList();
 
         return ResponseEntity.ok(responses);
-    }
-
-    @Authorized
-    @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateMyReservation(
-            @PathVariable Long id,
-            @RequestBody ReservationUpdateRequest request
-    ) {
-        reservationService.updateReservation(request.toCommand(), id);
-        return ResponseEntity.noContent().build();
-    }
-
-    @Authorized
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMyReservation(
-            @PathVariable Long id
-    ) {
-        reservationService.validateReservationNotExpired(id);
-        reservationService.deleteReservationById(id);
-
-        return ResponseEntity.noContent().build();
     }
 }

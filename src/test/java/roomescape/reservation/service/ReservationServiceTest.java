@@ -22,7 +22,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.PopularThemeQueryResult;
+import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
