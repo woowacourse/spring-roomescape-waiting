@@ -24,6 +24,10 @@ public class MutableClock extends Clock {
         );
     }
 
+    public void reset() {
+        this.delegate = Clock.system(getZone());
+    }
+
     @Override
     public ZoneId getZone() {
         return delegate.getZone();
