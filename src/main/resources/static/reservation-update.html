@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>내 예약 변경 - Roomescape</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet" />
+</head>
+<body>
+<main class="page">
+  <header class="hero">
+    <p class="eyebrow">ROOMESCAPE</p>
+    <h1>내 예약 변경</h1>
+    <p>인증용 이름, 변경할 날짜와 시간을 입력해 예약을 변경해 주세요.</p>
+    <p><a class="admin-link" href="/index.html">사용자 예약 페이지로 돌아가기</a></p>
+  </header>
+
+  <section class="panel">
+    <h2>예약 변경</h2>
+    <p id="reservationInfo">변경할 예약 정보를 확인 중입니다.</p>
+    <form class="grid-form" id="updateForm">
+      <input id="authName" maxlength="10" name="authName" placeholder="인증용 이름" required />
+      <input id="updateDate" name="updateDate" required type="date" />
+      <button id="loadTimes" type="button">변경 가능 시간 조회</button>
+    </form>
+    <div class="chips" id="availableTimes"></div>
+    <button class="danger" id="submitUpdate" type="button">최종 변경</button>
+  </section>
+
+  <p class="message" id="message"></p>
+</main>
+<script src="/reservation-update.js"></script>
+</body>
+</html>

@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <title>Roomescape Reservation</title>
+  <link href="https://fonts.googleapis.com" rel="preconnect">
+  <link crossorigin href="https://fonts.gstatic.com" rel="preconnect">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
+  <link href="/styles.css" rel="stylesheet" />
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <p class="eyebrow">ROOMESCAPE</p>
+      <h1>사용자 예약 페이지</h1>
+      <p>날짜와 테마를 선택해 예약하고, 최근 1주 인기 테마를 확인하세요.</p>
+      <p><a class="admin-link" href="/admin/index.html">관리자 페이지로 이동</a></p>
+    </header>
+
+    <section class="panel">
+      <h2>1) 예약 생성</h2>
+      <form class="grid-form" id="reservationCreateForm">
+        <input id="createName" maxlength="10" name="createName" placeholder="예약자 이름" required />
+        <input id="createDate" name="createDate" required type="date" />
+        <select id="createThemeId" name="createThemeId" required>
+          <option value="">테마 선택</option>
+        </select>
+        <button id="loadTimes" type="button">예약 가능 시간 조회</button>
+      </form>
+      <div class="chips" id="availableTimes"></div>
+      <div class="success-box" id="reservationSuccess"></div>
+    </section>
+
+    <section class="panel">
+      <h2>2) 내 예약 조회</h2>
+      <form class="grid-form" id="reservationLookupForm">
+        <input id="lookupName" maxlength="10" name="lookupName" placeholder="예약자 이름" required />
+        <button id="loadReservations" type="button">내 예약 조회</button>
+      </form>
+      <div class="list" id="reservations"></div>
+    </section>
+
+    <section class="panel">
+      <h2>3) 최근 1주 인기 테마 Top 10</h2>
+      <button class="ghost" id="loadPopular">인기 테마 새로고침</button>
+      <ol class="rank-list" id="popularThemes"></ol>
+    </section>
+
+    <p class="message" id="message"></p>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>
