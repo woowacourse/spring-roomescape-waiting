@@ -1,23 +1,12 @@
 package roomescape.acceptance_test;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
-import org.springframework.context.annotation.Import;
-import org.springframework.test.annotation.DirtiesContext;
-import roomescape.common.auth.UserArgumentResolver;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 import java.time.LocalDate;
@@ -28,29 +17,13 @@ import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.*;
 import static roomescape.common.auth.UserArgumentResolver.GUEST_NAME_HEADER;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-@Import(TestClockConfig.class)
-public class ReservationAcceptanceTest {
 
-    @LocalServerPort
-    private int port;
-
-    @BeforeEach
-    void setUp() {
-        RestAssured.port = port;
-        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
-    }
-
-    @Autowired
-    private ObjectMapper objectMapper;
-
-    @Autowired
-    private MutableClock mutableClock;
+public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("예약 생성 후 관리자 페이지에서 예약 목록을 조회한다.")
     public void scenario1() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         ReservationCreateRequest reservationRequest = createScenario1Fixture();
         Integer reservationId = createReservation(reservationRequest);
 
@@ -81,6 +54,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("예약 삭제 후 관리자 예약 목록에서 사라진다.")
     public void scenario2() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         Integer reservationId = createScenario2Fixture();
 
         given().log().all()
@@ -112,13 +86,13 @@ public class ReservationAcceptanceTest {
                 reservationTimeId.longValue(),
                 themeId.longValue());
 
-        Integer reservationId = createReservation(reservationRequest);
-        return reservationId;
+        return createReservation(reservationRequest);
     }
 
     @Test
     @DisplayName("특정 사용자의 이름을 입력해 예약을 조회한다.")
     public void scenario3() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         String guestName = "brown";
         createScenario3Fixture(guestName);
 
@@ -151,6 +125,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("예약의 날짜와 시간을 수정한다.")
     public void scenario4() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         LocalDate originalDate = LocalDate.of(2026, 10, 14);
         LocalDate editedDate = LocalDate.of(2026, 10, 15);
 
@@ -191,6 +166,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("수정하려는 날짜와 시간에 같은 테마의 예약이 존재하면 에러가 발생한다.")
     public void scenario5() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
@@ -230,6 +206,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("이미 시작된 예약은 수정할 수 없다.")
     public void scenario6() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         LocalDate reservationDate = LocalDate.of(2026, 10, 14);
 
         Integer reservationTimeId = createReservationTime(
@@ -266,6 +243,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("이미 지난 날짜와 시간으로 예약을 수정할 수 없다.")
     public void scenario7() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
@@ -300,6 +278,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("본인의 예약이 아니면 수정할 수 없다.")
     public void scenario8() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         Integer editedReservationTimeId = createReservationTime(
@@ -339,6 +318,7 @@ public class ReservationAcceptanceTest {
     @Test
     @DisplayName("본인의 예약을 삭제한다.")
     public void scenario9() throws JsonProcessingException {
+        mutableClock.setFixed(LocalDate.of(2026, 5, 12));
         String guestName = "brown";
         Integer reservationTimeId = createReservationTime(
                 new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
