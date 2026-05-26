@@ -6,6 +6,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -111,5 +112,26 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.addReservation(pendingCommand))
                 .isInstanceOf(DuplicatedReservationException.class)
                 .hasMessageContaining("이미 예약 대기 중입니다.");
+    }
+
+    @Test
+    @DisplayName("Active인 예약을 취소하면 Pending 상태인 예약중 첫번째 예약이 Active로 바뀐다.")
+    void updatePendingReservationToActive() {
+        ReservationCreateCommand activeCommand = new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        ReservationInfo reservationInfo = reservationService.addReservation(activeCommand);
+        ReservationCreateCommand pendingFirstCommand = new ReservationCreateCommand(
+                "리사", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(pendingFirstCommand);
+        ReservationCreateCommand pendingSecondCommand = new ReservationCreateCommand(
+                "브리", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(pendingSecondCommand);
+        reservationService.cancelReservation(reservationInfo.id(), reservationInfo.name());
+
+        Assertions.assertThat(reservationService.getReservationsByName(pendingFirstCommand.name()).getFirst().status())
+                .isEqualTo(Status.ACTIVE);
     }
 }
