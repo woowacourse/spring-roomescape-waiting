@@ -139,4 +139,20 @@ class ReservationControllerTest {
                 .statusCode(400);
     }
 
+    @DisplayName("사용자 예약 대기 - 정상 테스트")
+    @Test
+    void 사용자_예약_대기_정상_테스트() {
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "김철수");
+        params.put("reservationId", 2);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(201);
+    }
+
 }
