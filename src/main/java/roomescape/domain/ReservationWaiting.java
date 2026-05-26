@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 public class ReservationWaiting {
 
@@ -41,6 +42,15 @@ public class ReservationWaiting {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public boolean isOwnedBy(String name) {
+        return this.name.equals(name);
+    }
+
+    public boolean isPast() {
+        return LocalDateTime.of(date, time.getStartAt())
+                .isBefore(LocalDateTime.now());
     }
 
     private void validateName(String name) {

@@ -90,6 +90,12 @@ public class ReservationWaitingRepository {
         return keyHolder.getKey().longValue();
     }
 
+    public boolean existsByNameWith(String name, LocalDate date, Long timeId, Long themeId) {
+        String sql = "SELECT count(*) FROM reservation_waiting WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
     public Optional<ReservationWaiting> findById(Long id) {
         String sql = """
                 SELECT

@@ -153,6 +153,12 @@ public class ReservationRepository {
         return count != null && count > 0;
     }
 
+    public boolean existsByNameWith(String name, LocalDate date, Long timeId, Long themeId) {
+        String sql = "SELECT count(*) FROM reservation WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
     public boolean existsByThemeId(Long themeId) {
         String sql = "SELECT count(*) FROM reservation WHERE theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
