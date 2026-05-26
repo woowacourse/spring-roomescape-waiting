@@ -51,15 +51,16 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status) "
-                + "VALUES(:name, :date, :timeId, :themeId, :status)";
+        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status, created_at) "
+                + "VALUES(:name, :date, :timeId, :themeId, :status, :createdAt)";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
                 .addValue("date", reservation.getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("themeId", reservation.getTheme().getId())
-                .addValue("status", reservation.getStatus().name());
+                .addValue("status", reservation.getStatus().name())
+                .addValue("createdAt", reservation.getCreatedAt());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
