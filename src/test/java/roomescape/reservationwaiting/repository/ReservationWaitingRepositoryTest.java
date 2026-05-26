@@ -15,10 +15,11 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
+import roomescape.reservationwaiting.service.ReservationWaitingService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class JdbcReservationWaitingRepositoryTest {
+public class ReservationWaitingRepositoryTest {
 
     @Autowired
     private JdbcReservationWaitingRepository jdbcReservationWaitingRepository;
@@ -28,9 +29,11 @@ public class JdbcReservationWaitingRepositoryTest {
 
     @Autowired
     private ReservationWaitingFactory reservationWaitingFactory;
+    @Autowired
+    private ReservationWaitingService reservationWaitingService;
 
     @Test
-    @DisplayName("예약 대기 성공")
+    @DisplayName("예약 대기 신청에 성공한다.")
     void 예약_대기_성공() {
         Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));
@@ -50,7 +53,7 @@ public class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약 대기 삭제")
+    @DisplayName("예약 대기 삭제한다.")
     void 예약_대기_삭제() {
         Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));

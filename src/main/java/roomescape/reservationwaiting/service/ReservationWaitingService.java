@@ -33,6 +33,8 @@ public class ReservationWaitingService {
     public ReservationWaitingResponse createWaiting(ReservationWaitingRequest request) {
         Reservation reservation = reservationRepository.findById(request.reservationId()).orElseThrow(() ->new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));
+        if (jdbcReservationWaitingRepository.existsByNameAndReservationId(request.name(), reservation.getId()))
+            throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
         ReservationWaiting reservationWaiting = jdbcReservationWaitingRepository.save(reservationWaitingFactory.create(request.name(), reservation));
         return ReservationWaitingResponse.from(reservationWaiting);
     }

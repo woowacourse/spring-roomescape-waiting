@@ -18,6 +18,7 @@ public enum ErrorCode {
 
     // 409 - CONFLICT
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 예약된 시간입니다."),
+    DUPLICATE_WAITING(HttpStatus.CONFLICT, "같은 슬롯에 중복 대기할 수 없습니다."),
     TIME_HAS_RESERVATION(HttpStatus.CONFLICT, "예약이 존재하는 시간은 삭제할 수 없습니다."),
     THEME_HAS_RESERVATION(HttpStatus.CONFLICT, "예약이 존재하는 테마는 삭제할 수 없습니다."),
     ;

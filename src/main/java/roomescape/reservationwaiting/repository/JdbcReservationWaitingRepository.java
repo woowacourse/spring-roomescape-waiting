@@ -14,7 +14,7 @@ import roomescape.theme.domain.Theme;
 import java.util.List;
 
 @Repository
-public class JdbcReservationWaitingRepository {
+public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -47,6 +47,7 @@ public class JdbcReservationWaitingRepository {
                 .usingGeneratedKeyColumns("id");
     }
 
+    @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("name", reservationWaiting.getName())
@@ -55,11 +56,13 @@ public class JdbcReservationWaitingRepository {
         return ReservationWaiting.restore(id, reservationWaiting.getName(), reservationWaiting.getReservation());
     }
 
+    @Override
     public void deleteById(Long id) {
         String query = "delete from reservation_waiting where id = ?";
         jdbcTemplate.update(query, id);
     }
 
+    @Override
     public List<ReservationWaiting> findByName(String name) {
         String query = """
                 SELECT rw.id as reservation_waiting_id, rw.name,
@@ -74,5 +77,11 @@ public class JdbcReservationWaitingRepository {
                 ORDER BY r.date DESC, rt.start_at DESC
                 """;
         return jdbcTemplate.query(query, rowMapper, name);
+    }
+
+    @Override
+    public boolean existsByNameAndReservationId(String name, Long reservationId) {
+        String query = "select count(*) from reservation_waiting where name = ? and reservation_id = ?";
+        return jdbcTemplate.queryForObject(query, Integer.class, name, reservationId) >= 1;
     }
 }
