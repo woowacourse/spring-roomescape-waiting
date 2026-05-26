@@ -39,7 +39,7 @@ public class ReservationService {
         Reservation reservation = Reservation.reserve(new ReservationName(request.getName()),
                 new ReservationDate(request.getDate()), reservationTime, theme, now);
 
-        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate());
+        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
 
         return reservationRepository.save(reservation);
     }
@@ -63,7 +63,7 @@ public class ReservationService {
         ReservationDate reservationDate = new ReservationDate(request.getDate());
         ReservationTime reservationTime = findReservationTimeByTimeId(request.getTimeId());
 
-        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate());
+        validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
 
         Reservation target = Reservation.reserve(reservation.getName(), reservationDate, reservationTime,
                 reservation.getTheme(), now);
@@ -90,8 +90,8 @@ public class ReservationService {
                 () -> new RoomEscapeException(ErrorCode.THEME_NOT_FOUND));
     }
 
-    private void validateIsDuplicateReservation(long timeId, long themeId, LocalDate date) {
-        if (reservationRepository.existsByTimeAndThemeAndDate(timeId, themeId, date)) {
+    private void validateIsDuplicateReservation(long timeId, long themeId, LocalDate date, String name) {
+        if (reservationRepository.existsByTimeAndThemeAndDateAndName(timeId, themeId, date, name)) {
             throw new RoomEscapeException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
