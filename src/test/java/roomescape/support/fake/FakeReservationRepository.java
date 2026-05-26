@@ -98,6 +98,11 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsReservation(Long timeId, Long dateId, Long themeId) {
+        return existsBySchedule(timeId, dateId, themeId);
+    }
+
+    @Override
+    public boolean existsBySchedule(Long timeId, Long dateId, Long themeId) {
         for (Reservation reservation : storage.values()) {
             if (timeId.equals(reservation.getTime().getId())
                 && dateId.equals(reservation.getDate().getId())
@@ -122,12 +127,17 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findBySchedule(Long timeId, Long dateId, Long themeId) {
+        return storage.values().stream()
+            .filter(reservation -> timeId.equals(reservation.getTime().getId()))
+            .filter(reservation -> dateId.equals(reservation.getDate().getId()))
+            .filter(reservation -> themeId.equals(reservation.getTheme().getId()))
+            .findFirst();
+    }
+
+    @Override
     public List<Reservation> findByName(String name) {
-        List<Reservation> reservations = new ArrayList<>(storage.values().stream()
-            .filter(reservation -> name.equals(reservation.getName()))
-            .toList());
-        reservations.sort(latestReservationFirst());
-        return reservations;
+        return List.of();
     }
 
     @Override

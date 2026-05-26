@@ -8,7 +8,6 @@ import roomescape.domain.theme.Theme;
 
 public record CreateReservationResponse(
     Long id,
-    String name,
     LocalDate date,
     @JsonFormat(pattern = "HH:mm")
     LocalTime time,
@@ -18,7 +17,6 @@ public record CreateReservationResponse(
     public static CreateReservationResponse from(Reservation reservation) {
         return new CreateReservationResponse(
             reservation.getId(),
-            reservation.getName(),
             reservation.getDate().getDate(), // TODO: 네이밍 변경!!!
             reservation.getTime().getStartAt(),
             ThemePayload.from(reservation.getTheme())

@@ -32,10 +32,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String COLUMN_CONTENT = "content";
     private static final String COLUMN_URL = "url";
 
-    private static final String INSERT_SQL = "insert into reservation(name, date_id, time_id, theme_id) values (?, ?, ?, ?)";
+    private static final String INSERT_SQL = "insert into reservation(date_id, time_id, theme_id) values (?, ?, ?)";
     private static final String FIND_ALL_SQL =
         """
-            select r.id, r.name,
+            select r.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
@@ -72,12 +72,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.name,
                 th.content,
                 th.url
-            from reservation r
+            from user_reservation ur
+            join reservation r on ur.reservation_id = r.id
             join reservation_date rd on r.date_id = rd.id
             join theme th on r.theme_id = th.id
             where rd.date between ? and ?
+              and ur.status = 'CONFIRMED'
             group by th.id, th.name, th.content, th.url
-            order by count(r.id) desc, th.id asc
+            order by count(ur.id) desc, th.id asc
             limit ?
             """;
     private static final String COUNT_BY_THEME_ID_SQL =
@@ -102,9 +104,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 where r.id <> ? and time_id = ? and date_id = ? and theme_id = ?
             )
             """;
-    private static final String FIND_BY_NAME_SQL =
+    private static final String FIND_BY_SCHEDULE_SQL =
         """
-            select r.id, r.name,
+            select r.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
@@ -112,12 +114,27 @@ public class JdbcReservationRepository implements ReservationRepository {
             join reservation_date rd on r.date_id = rd.id
             join reservation_time rt on r.time_id = rt.id
             join theme th on r.theme_id = th.id
-            where r.name = ?
-            order by rd.date desc, rt.start_at desc, r.id desc
+            where r.time_id = ? and r.date_id = ? and r.theme_id = ?
+            """;
+    private static final String FIND_BY_USER_NAME_SQL =
+        """
+            select r.id,
+                   rd.id as date_id, rd.date,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from user_reservation ur
+            join users u on ur.user_id = u.id
+            join reservation r on ur.reservation_id = r.id
+            join reservation_date rd on r.date_id = rd.id
+            join reservation_time rt on r.time_id = rt.id
+            join theme th on r.theme_id = th.id
+            where u.name = ?
+              and ur.status <> 'CANCELED'
+            order by rd.date desc, rt.start_at desc, ur.id desc
             """;
     private static final String FIND_BY_ID_SQL =
         """
-            select r.id, r.name,
+            select r.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
@@ -130,7 +147,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private static final String UPDATE_SQL =
         """
             update reservation
-            set name = ?, date_id = ?, time_id = ?, theme_id = ?
+            set date_id = ?, time_id = ?, theme_id = ?
             where id = ?
             """;
 
@@ -141,10 +158,9 @@ public class JdbcReservationRepository implements ReservationRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
-            ps.setString(1, reservation.getName());
-            ps.setLong(2, reservation.getDate().getId());
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
+            ps.setLong(1, reservation.getDate().getId());
+            ps.setLong(2, reservation.getTime().getId());
+            ps.setLong(3, reservation.getTheme().getId());
             return ps;
         }, keyHolder);
         long id = extractId(keyHolder);
@@ -200,6 +216,11 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsReservation(Long timeId, Long dateId, Long themeId) {
+        return existsBySchedule(timeId, dateId, themeId);
+    }
+
+    @Override
+    public boolean existsBySchedule(Long timeId, Long dateId, Long themeId) {
         Boolean exists = jdbcTemplate.queryForObject(
             EXISTS_RESERVATION_BY_TIME_AND_DATE_AND_THEME_SQL,
             Boolean.class,
@@ -224,8 +245,20 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findBySchedule(Long timeId, Long dateId, Long themeId) {
+        List<Reservation> result = jdbcTemplate.query(
+            FIND_BY_SCHEDULE_SQL,
+            reservationRowMapper(),
+            timeId,
+            dateId,
+            themeId
+        );
+        return result.stream().findFirst();
+    }
+
+    @Override
     public List<Reservation> findByName(String name) {
-        return jdbcTemplate.query(FIND_BY_NAME_SQL, reservationRowMapper(), name);
+        return jdbcTemplate.query(FIND_BY_USER_NAME_SQL, reservationRowMapper(), name);
     }
 
     @Override
@@ -238,7 +271,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Optional<Reservation> update(Long id, Reservation withoutId) {
         int updatedCount = jdbcTemplate.update(
             UPDATE_SQL,
-            withoutId.getName(),
             withoutId.getDate().getId(),
             withoutId.getTime().getId(),
             withoutId.getTheme().getId(),
@@ -253,7 +285,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     private RowMapper<Reservation> reservationRowMapper() {
         return (rs, rowNum) -> Reservation.of(
             rs.getLong(COLUMN_ID),
-            rs.getString(COLUMN_NAME),
             ReservationDate.of(
                 rs.getLong(COLUMN_DATE_ID),
                 rs.getDate(COLUMN_DATE).toLocalDate()

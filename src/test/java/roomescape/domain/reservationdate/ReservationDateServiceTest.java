@@ -83,9 +83,7 @@ class ReservationDateServiceTest {
         ReservationDate reservationDate = reservationDateRepository.save(
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 4)));
         reservationRepository.save(
-            Reservation.createWithoutId(
-                "보예",
-                reservationDate,
+            Reservation.createWithoutId(reservationDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "공포", "무서운 테마", "theme-url")
             )

@@ -48,7 +48,6 @@ class AdminReservationControllerTest {
         // given
         ReservationResponse response = new ReservationResponse(
             1L,
-            "보예",
             LocalDate.of(2026, 5, 10),
             ReservationTimePayload.from(ReservationTime.of(2L, LocalTime.of(10, 10))),
             ThemePayload.from(Theme.of(3L, "공포", "으악 무서워!", "theme-url"))
@@ -63,7 +62,6 @@ class AdminReservationControllerTest {
                 .header("X-ADMIN-TOKEN", "token"))
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(1))
-            .andExpect(jsonPath("$[0].name").value("보예"))
             .andExpect(jsonPath("$[0].date").value("2026-05-10"))
             .andExpect(jsonPath("$[0].time.id").value(2))
             .andExpect(jsonPath("$[0].time.startAt").value("10:10"))

@@ -7,6 +7,7 @@ import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
@@ -18,6 +19,11 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.user.User;
+import roomescape.domain.user.UserRepository;
+import roomescape.domain.userreservation.UserReservation;
+import roomescape.domain.userreservation.UserReservationRepository;
+import roomescape.domain.userreservation.WaitingStatus;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
@@ -32,10 +38,16 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationDateRepository reservationDateRepository;
+    private final UserReservationRepository userReservationRepository;
     private final ThemeRepository themeRepository;
+    private final UserRepository userRepository;
+
     private final Clock clock;
 
+    @Transactional
     public CreateReservationResponse createReservation(CreateReservationRequest request) {
+        User user = getOrCreateUser(request);
+
         ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
             .orElseThrow(() -> new NotFoundException(ReservationTimeErrors.RESERVATION_TIME_NOT_EXIST));
         ReservationDate reservationDate = reservationDateRepository.findById(request.dateId())
@@ -43,10 +55,51 @@ public class ReservationService {
         validateReservationScheduleToCreate(reservationDate, reservationTime);
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
-        validateDuplicated(reservationTime, reservationDate, theme);
-        Reservation savedReservation = reservationRepository.save(
-            request.toEntity(reservationDate, reservationTime, theme));
-        return CreateReservationResponse.from(savedReservation);
+
+        Reservation reservation = getOrCreateReservation(reservationDate, reservationTime, theme);
+        validateUserReservationNotDuplicated(user, reservation);
+        Long reservationCount = userReservationRepository.countByReservationId(reservation.getId());
+        WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
+        UserReservation userReservation = UserReservation.createWithoutId(
+            reservation.getId(),
+            user.getId(),
+            reservationCount,
+            waitingStatus
+        );
+        userReservationRepository.save(userReservation);
+
+        return CreateReservationResponse.from(reservation);
+    }
+
+    private void validateUserReservationNotDuplicated(User user, Reservation reservation) {
+        if (userReservationRepository.existsActiveByUserIdAndReservationId(user.getId(), reservation.getId())) {
+            throw new BadRequestException(ReservationErrors.DUPLICATED_RESERVATION);
+        }
+    }
+
+    private WaitingStatus decideWaitingStatus(Long reservationCount) {
+        WaitingStatus waitingStatus = WaitingStatus.WAITING;
+        if (reservationCount == 0) {
+            waitingStatus = WaitingStatus.CONFIRMED;
+        }
+        return waitingStatus;
+    }
+
+    private User getOrCreateUser(CreateReservationRequest request) {
+        return userRepository.findByName(request.name())
+            .orElseGet(() -> userRepository.save(User.createWithoutId(request.name())));
+    }
+
+    private Reservation getOrCreateReservation(
+        ReservationDate reservationDate,
+        ReservationTime reservationTime,
+        Theme theme
+    ) {
+        if (!reservationRepository.existsReservation(reservationTime.getId(), reservationDate.getId(), theme.getId())) {
+            return reservationRepository.save(Reservation.createWithoutId(reservationDate, reservationTime, theme));
+        }
+        return reservationRepository.findBySchedule(reservationTime.getId(), reservationDate.getId(), theme.getId())
+            .orElseThrow(() -> new NotFoundException(ReservationErrors.RESERVATION_NOT_FOUND));
     }
 
     public List<ReservationResponse> getAllReservations() {
@@ -56,7 +109,12 @@ public class ReservationService {
     }
 
     public UserReservationResponse getUserReservations(String name) {
-        List<Reservation> reservations = reservationRepository.findByName(name);
+        User user = userRepository.findByName(name)
+            .orElseThrow(() -> new NotFoundException(ReservationErrors.RESERVATION_NOT_FOUND));
+        List<Reservation> reservations = userReservationRepository.findByUserId(user.getId()).stream()
+            .map(userReservation -> reservationRepository.findById(userReservation.getReservationId())
+                .orElseThrow(() -> new NotFoundException(ReservationErrors.RESERVATION_NOT_FOUND)))
+            .toList();
         return UserReservationResponse.of(name, reservations);
     }
 
@@ -81,7 +139,6 @@ public class ReservationService {
         validateReservationScheduleToCreate(reservationDate, reservationTime);
         validateDuplicatedWithOther(id, reservationTime, reservationDate, reservation.getTheme());
         Reservation updatedReservation = Reservation.createWithoutId(
-            reservation.getName(),
             reservationDate,
             reservationTime,
             reservation.getTheme()
@@ -103,16 +160,6 @@ public class ReservationService {
         if (isPastTimeToday(reservationDate, reservationTime, today, currentTime)) {
             throw new BadRequestException(ReservationTimeErrors.RESERVATION_TIME_SHOULD_BE_NOW_OR_LATER, currentTime);
         }
-    }
-
-    private void validateDuplicated(ReservationTime reservationTime, ReservationDate reservationDate, Theme theme) {
-        if (isExistReservation(reservationTime, reservationDate, theme)) {
-            throw new BadRequestException(ReservationErrors.DUPLICATED_RESERVATION);
-        }
-    }
-
-    private boolean isExistReservation(ReservationTime reservationTime, ReservationDate reservationDate, Theme theme) {
-        return reservationRepository.existsReservation(reservationTime.getId(), reservationDate.getId(), theme.getId());
     }
 
     private void validateDuplicatedWithOther(

@@ -23,7 +23,6 @@ public record CreateReservationRequest(
 
     public Reservation toEntity(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
         return Reservation.createWithoutId(
-            name,
             reservationDate,
             reservationTime,
             theme

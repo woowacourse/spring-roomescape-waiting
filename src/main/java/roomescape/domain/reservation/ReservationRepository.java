@@ -25,7 +25,11 @@ public interface ReservationRepository {
 
     boolean existsReservation(Long timeId, Long dateId, Long themeId);
 
+    boolean existsBySchedule(Long timeId, Long dateId, Long themeId);
+
     boolean existsOtherReservation(Long id, Long timeId, Long dateId, Long themeId);
+
+    Optional<Reservation> findBySchedule(Long timeId, Long dateId, Long themeId);
 
     List<Reservation> findByName(String name);
 

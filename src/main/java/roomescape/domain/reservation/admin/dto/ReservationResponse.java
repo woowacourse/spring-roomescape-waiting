@@ -9,7 +9,6 @@ import roomescape.domain.theme.Theme;
 
 public record ReservationResponse(
     Long id,
-    String name,
     LocalDate date,
     ReservationTimePayload time,
     ThemePayload theme
@@ -18,7 +17,6 @@ public record ReservationResponse(
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
             reservation.getId(),
-            reservation.getName(),
             reservation.getDate().getDate(),
             ReservationTimePayload.from(reservation.getTime()),
             ThemePayload.from(reservation.getTheme())

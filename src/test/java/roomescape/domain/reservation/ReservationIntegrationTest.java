@@ -27,7 +27,9 @@ class ReservationIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        jdbcTemplate.update("DELETE FROM user_reservation");
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM users");
         jdbcTemplate.update("DELETE FROM reservation_date");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
@@ -55,7 +57,6 @@ class ReservationIntegrationTest {
             .when().post("/reservations")
             .then().log().all()
             .statusCode(201)
-            .body("name", is("보예"))
             .body("date", is("2026-06-01"))
             .body("time", is("10:00"))
             .body("theme.name", is("공포"))
@@ -182,19 +183,34 @@ class ReservationIntegrationTest {
         Long dateId = saveDate(date);
         Long timeId = saveTime(time);
 
+        jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", name);
+        Long userId = jdbcTemplate.queryForObject(
+            "SELECT id FROM users WHERE name = ?",
+            Long.class,
+            name
+        );
         jdbcTemplate.update(
-            "INSERT INTO reservation(name, date_id, time_id, theme_id) VALUES (?, ?, ?, ?)",
-            name,
+            "INSERT INTO reservation(date_id, time_id, theme_id) VALUES (?, ?, ?)",
             dateId,
             timeId,
             themeId
         );
-
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation WHERE name = ?",
+        Long reservationId = jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation WHERE date_id = ? AND time_id = ? AND theme_id = ?",
             Long.class,
-            name
+            dateId,
+            timeId,
+            themeId
         );
+        jdbcTemplate.update(
+            "INSERT INTO user_reservation(user_id, reservation_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            userId,
+            reservationId,
+            null,
+            "CONFIRMED"
+        );
+
+        return reservationId;
     }
 
     private Long saveTheme(String themeName) {

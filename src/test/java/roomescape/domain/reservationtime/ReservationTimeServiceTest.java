@@ -91,9 +91,7 @@ class ReservationTimeServiceTest {
             ReservationTime.createWithoutId(LocalTime.of(10, 0))
         );
         reservationRepository.save(
-            Reservation.createWithoutId(
-                "보예",
-                ReservationDate.of(1L, LocalDate.of(2026, 5, 12)),
+            Reservation.createWithoutId(ReservationDate.of(1L, LocalDate.of(2026, 5, 12)),
                 reservationTime,
                 Theme.of(1L, "공포", "무서운 테마", "theme-url")
             )
@@ -137,7 +135,7 @@ class ReservationTimeServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         reservationRepository.save(
-            Reservation.createWithoutId("보예", reservationDate, firstReservationTime, theme)
+            Reservation.createWithoutId(reservationDate, firstReservationTime, theme)
         );
         ReservationTimeService reservationTimeService = createReservationTimeService();
 

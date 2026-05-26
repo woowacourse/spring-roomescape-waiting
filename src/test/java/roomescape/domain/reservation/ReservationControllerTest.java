@@ -57,7 +57,6 @@ class ReservationControllerTest {
         );
         CreateReservationResponse response = new CreateReservationResponse(
             10L,
-            "보예",
             LocalDate.of(2026, 5, 20),
             LocalTime.of(10, 0),
             ThemePayload.from(Theme.of(1L, "공포", "무섭다", "theme-url"))
@@ -71,7 +70,6 @@ class ReservationControllerTest {
                 .content(objectMapper.writeValueAsString(request)))
             .andExpect(status().isCreated())
             .andExpect(jsonPath("$.id").value(10))
-            .andExpect(jsonPath("$.name").value("보예"))
             .andExpect(jsonPath("$.date").value("2026-05-20"))
             .andExpect(jsonPath("$.time").value("10:00"))
             .andExpect(jsonPath("$.theme.name").value("공포"))
@@ -105,8 +103,7 @@ class ReservationControllerTest {
         // given
         String name = "보예";
         UserReservationResponse response = UserReservationResponse.of("보예",
-            List.of(Reservation.of(1L, "보예",
-                    ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
+            List.of(Reservation.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
                     ReservationTime.of(1L, LocalTime.of(10, 10)),
                     Theme.of(1L, "공포", "아무서워", "theme-url")
                 )

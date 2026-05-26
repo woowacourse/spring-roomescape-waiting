@@ -30,7 +30,9 @@ class AdminReservationIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+        jdbcTemplate.update("DELETE FROM user_reservation");
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM users");
         jdbcTemplate.update("DELETE FROM reservation_date");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
@@ -47,7 +49,6 @@ class AdminReservationIntegrationTest {
             .when().get("/admin/reservations")
             .then().log().all()
             .statusCode(200)
-            .body("[0].name", is("보예"))
             .body("[0].date", is("2026-06-01"))
             .body("[0].time.startAt", is("10:00"))
             .body("[0].theme.name", is("공포"));
@@ -117,17 +118,19 @@ class AdminReservationIntegrationTest {
         );
 
         jdbcTemplate.update(
-            "INSERT INTO reservation(name, date_id, time_id, theme_id) VALUES (?, ?, ?, ?)",
-            name,
+            "INSERT INTO reservation(date_id, time_id, theme_id) VALUES (?, ?, ?)",
+            dateId,
+            timeId,
+            themeId
+        );
+        Long reservationId = jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation WHERE date_id = ? AND time_id = ? AND theme_id = ?",
+            Long.class,
             dateId,
             timeId,
             themeId
         );
 
-        return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation WHERE name = ?",
-            Long.class,
-            name
-        );
+        return reservationId;
     }
 }
