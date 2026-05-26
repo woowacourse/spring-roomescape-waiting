@@ -4,6 +4,7 @@ import java.util.*;
 
 import ch.qos.logback.core.spi.PreSerializationTransformer;
 import roomescape.domain.Reservation;
+import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -122,5 +123,14 @@ public class FakeReservationDao implements ReservationRepository {
                 .anyMatch(reservation ->
                         reservation.getName().equals(name) && Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
                 );
+    }
+
+    @Override
+    public Optional<Reservation> findRecentReservationByThemeSlot(Long themeSlotId) {
+        return storage.values().stream()
+                .filter(reservation -> reservation.getThemeSlot().getId().equals(themeSlotId) && reservation.getReservationStatus().equals(
+                        PendingStatus.getInstance()))
+                .sorted()
+                .findFirst();
     }
 }

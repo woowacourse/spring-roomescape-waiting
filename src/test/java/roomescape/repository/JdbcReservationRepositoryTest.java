@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -18,6 +19,7 @@ import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
+import roomescape.global.exception.CustomException;
 
 @JdbcTest
 @Sql({"/schema.sql", "/test-data.sql"})
@@ -125,5 +127,21 @@ class JdbcReservationRepositoryTest {
         assertThat(pendingReservations.get(0).getReservationStatus()).isEqualTo(PendingStatus.getInstance());
         assertThat(pendingReservations.get(1).getReservationStatus()).isEqualTo(PendingStatus.getInstance());
         assertThat(pendingReservations.get(2).getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+    }
+
+    @Test
+    @DisplayName("같은 테마 슬롯 조건의 PENDING 예약을 ID순으로 가장 먼저 조회한다.")
+    void findFirstPendingReservationByThemeSlotOrderByIdAsc() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+
+        Optional<Reservation> reservation = jdbcReservationRepository.findRecentReservationByThemeSlot(
+                themeSlot.getId());
+        assertThat(reservation).isNotEmpty();
+        assertThat(reservation.get().getName()).isEqualTo("브라운1");
+
     }
 }

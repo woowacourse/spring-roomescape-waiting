@@ -114,4 +114,16 @@ class ReservationServiceTest {
             reservationService.saveReservation("김대기", savedThemeSlot.getId());
         }).isInstanceOf(CustomException.class).hasMessage("이미 같은 시간에 예약 또는 대기를 신청했습니다.");
     }
+
+    @Test
+    @DisplayName("취소 대상 상태가 PENDING인 경우, 대상 reservation의 status가 CANCEL된다.")
+    void reservationStatusCancelWhenReservationIsPending(){
+
+    }
+
+    @Test
+    @DisplayName("취소 대상 예약이 PENDING이면 해당 ThemeSlot은 변경되지 않는다.")
+    void ThemeSlotNotChangeWhenCancelStatusIsPending() {
+
+    }
 }
