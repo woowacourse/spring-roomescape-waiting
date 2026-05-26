@@ -15,5 +15,13 @@ public interface UserReservationRepository {
 
     Long countByReservationId(Long reservationId);
 
+    List<UserReservation> findAllByReservationIdOrder(Long reservationId);
+
+    Optional<UserReservation> update(Long id, UserReservation userReservation);
+
+    void updateStatus(Long id, WaitingStatus status);
+
     boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId);
+
+    void updateWaitingNumbers(List<UserReservation> userReservations);
 }

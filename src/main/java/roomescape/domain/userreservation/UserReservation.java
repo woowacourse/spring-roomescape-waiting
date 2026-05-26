@@ -1,6 +1,9 @@
 package roomescape.domain.userreservation;
 
+import java.time.LocalDateTime;
 import lombok.Getter;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.user.User;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.errors.ReservationErrors;
 
@@ -8,57 +11,76 @@ import roomescape.support.exception.errors.ReservationErrors;
 public class UserReservation {
 
     private final Long id;
-    private final Long reservationId;
-    private final Long userId;
+    private final Reservation reservation;
+    private final User user;
     private final Long waitingNumber;
     private final WaitingStatus status;
+    private final LocalDateTime createdAt;
+    private final LocalDateTime updatedAt;
 
     private UserReservation(
         Long id,
-        Long reservationId,
-        Long userId,
+        Reservation reservation,
+        User user,
         Long waitingNumber,
-        WaitingStatus status
+        WaitingStatus status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
-        validate(reservationId, userId, waitingNumber, status);
+        validate(reservation, user, waitingNumber, status, createdAt, updatedAt);
         this.id = id;
-        this.reservationId = reservationId;
-        this.userId = userId;
+        this.reservation = reservation;
+        this.user = user;
         this.waitingNumber = waitingNumber;
         this.status = status;
+        this.createdAt = createdAt;
+        this.updatedAt = updatedAt;
     }
 
     public static UserReservation createWithoutId(
-        Long reservationId,
-        Long userId,
+        Reservation reservation,
+        User user,
         Long waitingNumber,
-        WaitingStatus status
+        WaitingStatus status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
-        return new UserReservation(null, reservationId, userId, waitingNumber, status);
+        return new UserReservation(null, reservation, user, waitingNumber, status, createdAt, updatedAt);
     }
 
     public static UserReservation createWithId(long id, UserReservation userReservation) {
         return of(
             id,
-            userReservation.getReservationId(),
-            userReservation.getUserId(),
+            userReservation.getReservation(),
+            userReservation.getUser(),
             userReservation.getWaitingNumber(),
-            userReservation.getStatus()
+            userReservation.getStatus(),
+            userReservation.getCreatedAt(),
+            userReservation.getUpdatedAt()
         );
     }
 
     public static UserReservation of(
         long id,
-        Long reservationId,
-        Long userId,
+        Reservation reservation,
+        User user,
         Long waitingNumber,
-        WaitingStatus status
+        WaitingStatus status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
     ) {
-        return new UserReservation(id, reservationId, userId, waitingNumber, status);
+        return new UserReservation(id, reservation, user, waitingNumber, status, createdAt, updatedAt);
     }
 
-    private static void validate(Long reservationId, Long userId, Long waitingNumber, WaitingStatus status) {
-        if (reservationId == null || userId == null || status == null) {
+    private static void validate(
+        Reservation reservation,
+        User user,
+        Long waitingNumber,
+        WaitingStatus status,
+        LocalDateTime createdAt,
+        LocalDateTime updatedAt
+    ) {
+        if (reservation == null || user == null || status == null || createdAt == null || updatedAt == null) {
             throw new BadRequestException(ReservationErrors.INVALID_USER_RESERVATION);
         }
         if (status == WaitingStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {

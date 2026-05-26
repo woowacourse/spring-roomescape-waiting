@@ -216,16 +216,20 @@ class ReservationServiceTest {
             )
         );
         userReservationRepository.save(UserReservation.createWithoutId(
-            secondReservation.getId(),
-            user.getId(),
+            secondReservation,
+            user,
             null,
-            WaitingStatus.CONFIRMED
+            WaitingStatus.CONFIRMED,
+            LocalDateTime.of(2026, 5, 12, 13, 0),
+            LocalDateTime.of(2026, 5, 12, 13, 0)
         ));
         userReservationRepository.save(UserReservation.createWithoutId(
-            firstReservation.getId(),
-            user.getId(),
+            firstReservation,
+            user,
             null,
-            WaitingStatus.CONFIRMED
+            WaitingStatus.CONFIRMED,
+            LocalDateTime.of(2026, 5, 12, 13, 0),
+            LocalDateTime.of(2026, 5, 12, 13, 0)
         ));
         ReservationService reservationService = new ReservationService(
             reservationRepository,
