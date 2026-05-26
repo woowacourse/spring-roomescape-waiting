@@ -3,23 +3,24 @@ package roomescape.reservationtime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assumptions.assumeTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.Reservation;
-import roomescape.repository.reservation.MemoryReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
-import roomescape.domain.theme.Theme;
-import roomescape.repository.theme.ThemeRepository;
 import roomescape.service.theme.ThemeService;
 
 class ReservationTimeServiceTest {
@@ -27,29 +28,37 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약 시간을 저장한다")
     void save() {
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
-                new TestReservationTimeRepository(),
+                reservationTimeRepository,
                 reservationRepository,
-                createThemeService(reservationRepository)
+                themeService
         );
+        ReservationTime savedTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
+
+        when(reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"))).thenReturn(false);
+        when(reservationTimeRepository.save(any(ReservationTime.class))).thenReturn(savedTime);
 
         ReservationTime saved = reservationTimeService.save(LocalTime.parse("10:00"));
 
-        assertThat(saved.getId()).isEqualTo(1L);
-        assertThat(saved.getStartAt()).isEqualTo(LocalTime.parse("10:00"));
+        assertThat(saved).isEqualTo(savedTime);
     }
 
     @Test
     @DisplayName("중복된 예약 시간은 저장할 수 없다")
     void saveDuplicateTime() {
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
-                new TestReservationTimeRepository(),
+                reservationTimeRepository,
                 reservationRepository,
-                createThemeService(reservationRepository)
+                themeService
         );
-        reservationTimeService.save(LocalTime.parse("10:00"));
+
+        when(reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"))).thenReturn(true);
 
         assertThrows(ConflictException.class, () -> reservationTimeService.save(LocalTime.parse("10:00")));
     }
@@ -57,25 +66,23 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("특정 날짜와 테마에 이미 예약된 시간을 제외한 예약 가능 시간을 조회한다")
     void findAvailableTimes() {
-        ReservationTimeRepository reservationTimeRepository = new TestReservationTimeRepository();
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
-        ThemeService themeService = createThemeService(reservationRepository);
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
-
-        Theme firstTheme = themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        Theme secondTheme = themeService.save("심해 연구소", "SF 테마", "https://example.com/theme2.png");
-        ReservationTime ten = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        ReservationTime eleven = reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        ReservationTime eleven = ReservationTime.of(2L, LocalTime.parse("11:00"));
         LocalDate date = LocalDate.parse("2026-08-06");
 
-        reservationRepository.save(Reservation.createNew("쿠다", date, firstTheme, ten));
-        reservationRepository.save(Reservation.createNew("포비", date, secondTheme, ten));
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationRepository.findReservedTimeIdsByDateAndThemeId(date, 1L)).thenReturn(List.of(1L));
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(ten, eleven));
 
-        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(date, firstTheme.getId());
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(date, 1L);
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -85,23 +92,24 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("지난 날짜에 대해서는 예약 가능 시간이 조회되지 않는다")
     void findAvailableTimesInPastDate() {
-        ReservationTimeRepository reservationTimeRepository = new TestReservationTimeRepository();
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
-        ThemeService themeService = createThemeService(reservationRepository);
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
-        Theme theme = themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        LocalDate pastDate = LocalDate.now().minusDays(1);
 
-        reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("10:00")));
-        reservationTimeRepository.save(ReservationTime.createNew(LocalTime.parse("11:00")));
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationRepository.findReservedTimeIdsByDateAndThemeId(pastDate, 1L)).thenReturn(List.of());
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(
+                ReservationTime.of(1L, LocalTime.parse("10:00")),
+                ReservationTime.of(2L, LocalTime.parse("11:00"))
+        ));
 
-        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(
-                LocalDate.now().minusDays(1),
-                theme.getId()
-        );
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(pastDate, 1L);
 
         assertThat(availableTimes).isEmpty();
     }
@@ -111,27 +119,25 @@ class ReservationTimeServiceTest {
     void findAvailableTimesTodayExcludesPastTimes() {
         assumeTrue(LocalTime.now().isBefore(LocalTime.of(23, 59)));
 
-        ReservationTimeRepository reservationTimeRepository = new TestReservationTimeRepository();
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
-        ThemeService themeService = createThemeService(reservationRepository);
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
-        Theme theme = themeService.save("미술관의 밤", "추리 테마", "https://example.com/theme.png");
-
         LocalTime now = LocalTime.now().withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         LocalTime futureTime = now.plusMinutes(1);
+        ReservationTime past = ReservationTime.of(1L, pastTime);
+        ReservationTime future = ReservationTime.of(2L, futureTime);
 
-        ReservationTime past = reservationTimeRepository.save(ReservationTime.createNew(pastTime));
-        ReservationTime future = reservationTimeRepository.save(ReservationTime.createNew(futureTime));
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationRepository.findReservedTimeIdsByDateAndThemeId(LocalDate.now(), 1L)).thenReturn(List.of());
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(past, future));
 
-        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(
-                LocalDate.now(),
-                theme.getId()
-        );
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(LocalDate.now(), 1L);
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -142,128 +148,73 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약이 존재하는 예약 시간은 삭제할 수 없다")
     void deleteById() {
-        ReservationTimeRepository reservationTimeRepository = new TestReservationTimeRepository();
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
-        ThemeService themeService = createThemeService(reservationRepository);
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
                 themeService
         );
 
-        ReservationTime savedTime = reservationTimeService.save(LocalTime.parse("10:00"));
-        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        reservationRepository.save(Reservation.createNew("쿠다", LocalDate.parse("2026-08-06"), theme, savedTime));
+        when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
 
-        assertThrows(ConflictException.class, () -> reservationTimeService.deleteById(savedTime.getId()));
+        assertThrows(ConflictException.class, () -> reservationTimeService.deleteById(1L));
+    }
+
+    @Test
+    @DisplayName("예약이 없는 예약 시간을 삭제한다")
+    void deleteByIdWithoutReservation() {
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
+
+        when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
+
+        reservationTimeService.deleteById(1L);
+
+        verify(reservationTimeRepository).deleteById(1L);
     }
 
     @Test
     @DisplayName("ID로 예약 시간을 조회한다")
     void getById() {
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
-                new TestReservationTimeRepository(),
+                reservationTimeRepository,
                 reservationRepository,
-                createThemeService(reservationRepository)
+                themeService
         );
-        ReservationTime saved = reservationTimeService.save(LocalTime.parse("10:00"));
+        ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
-        ReservationTime found = reservationTimeService.getById(saved.getId());
+        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(reservationTime));
 
-        assertThat(found).isEqualTo(saved);
+        ReservationTime found = reservationTimeService.getById(1L);
+
+        assertThat(found).isEqualTo(reservationTime);
     }
 
     @Test
     @DisplayName("존재하지 않는 ID로 예약 시간을 조회할 수 없다")
     void getByIdNotFound() {
-        MemoryReservationRepository reservationRepository = new MemoryReservationRepository();
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
-                new TestReservationTimeRepository(),
+                reservationTimeRepository,
                 reservationRepository,
-                createThemeService(reservationRepository)
+                themeService
         );
 
+        when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());
+
         assertThrows(ResourceNotFoundException.class, () -> reservationTimeService.getById(1L));
-    }
-
-    private static class TestReservationTimeRepository implements ReservationTimeRepository {
-
-        private final List<ReservationTime> reservationTimes = new ArrayList<>();
-        private long nextId = 1L;
-
-        @Override
-        public List<ReservationTime> findAll() {
-            return List.copyOf(reservationTimes);
-        }
-
-        @Override
-        public Optional<ReservationTime> findById(final long timeId) {
-            return reservationTimes.stream()
-                    .filter(reservationTime -> reservationTime.getId() == timeId)
-                    .findFirst();
-        }
-
-        @Override
-        public void deleteById(final long timeId) {
-            reservationTimes.removeIf(reservationTime -> reservationTime.getId() == timeId);
-        }
-
-        @Override
-        public ReservationTime save(final ReservationTime reservationTime) {
-            ReservationTime saved = reservationTime.withId(nextId++);
-            reservationTimes.add(saved);
-            return saved;
-        }
-
-        @Override
-        public boolean existsByStartAt(final LocalTime startAt) {
-            return reservationTimes.stream()
-                    .anyMatch(reservationTime -> reservationTime.getStartAt().equals(startAt));
-        }
-    }
-
-    private ThemeService createThemeService(final MemoryReservationRepository reservationRepository) {
-        return new ThemeService(new TestThemeRepository(), reservationRepository);
-    }
-
-    private static class TestThemeRepository implements ThemeRepository {
-
-        private final List<Theme> themes = new ArrayList<>();
-        private long nextId = 1L;
-
-        @Override
-        public List<Theme> findAll() {
-            return List.copyOf(themes);
-        }
-
-        @Override
-        public Optional<Theme> findById(final long id) {
-            return themes.stream()
-                    .filter(theme -> theme.getId() == id)
-                    .findFirst();
-        }
-
-        @Override
-        public void deleteById(final long id) {
-            themes.removeIf(theme -> theme.getId() == id);
-        }
-
-        @Override
-        public Theme save(final Theme theme) {
-            Theme saved = theme.withId(nextId++);
-            themes.add(saved);
-            return saved;
-        }
-
-        @Override
-        public boolean existsByName(final String name) {
-            return themes.stream().anyMatch(theme -> theme.getName().equals(name));
-        }
-
-        @Override
-        public List<Theme> findPopularThemes(final int period, final int limit) {
-            throw new UnsupportedOperationException();
-        }
     }
 }
