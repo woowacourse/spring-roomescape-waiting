@@ -22,7 +22,10 @@ VALUES ('2026-05-05', 1, 1), -- id=1
 
 INSERT INTO member (name, password, role)
 VALUES ('a', 'test1', 'USER'),
-       ('testAdmin', 'test2', 'MANAGER');
+       ('testAdmin', 'test2', 'MANAGER'),
+       ('b', 'test2', 'USER'),
+       ('c', 'test3', 'USER');
+
 
 INSERT
 INTO reservation (member_id, schedule_id)
