@@ -17,7 +17,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.service.TimeService;
 

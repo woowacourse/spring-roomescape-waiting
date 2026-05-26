@@ -6,7 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.exception.ReservationTimeConflictException;
 import roomescape.time.exception.TimeNotFoundException;

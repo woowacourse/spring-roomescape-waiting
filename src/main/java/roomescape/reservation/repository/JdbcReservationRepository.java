@@ -1,6 +1,5 @@
 package roomescape.reservation.repository;
 
-import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
@@ -15,7 +14,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Repository
@@ -83,7 +82,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         Number id = reservationInsert.executeAndReturnKey(new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
                 .addValue("time_id", reservation.getTime().getId())
-                .addValue("theme_id", reservation.getThemeId()));
+                .addValue("theme_id", reservation.getTheme().getId()));
         return reservation.withId(id.longValue());
     }
 
@@ -154,8 +153,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
             return new Reservation(
                     rs.getString("name"),
-                    time,
-                    rs.getLong("theme_id")
+                    time
             ).withId(rs.getLong("id")).withTheme(theme);
         }
     }

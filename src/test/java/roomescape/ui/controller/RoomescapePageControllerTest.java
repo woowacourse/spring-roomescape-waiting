@@ -22,7 +22,7 @@ import roomescape.holiday.domain.Holiday;
 import roomescape.holiday.exception.HolidayNotFoundException;
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationSaveServiceDto;
@@ -53,7 +53,7 @@ class RoomescapePageControllerTest {
     private void stubDashboardData() {
         ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2026, 5, 6, 10, 0), LocalDateTime.of(2026, 5, 6, 11, 0));
         Mockito.when(reservationService.getAll()).thenReturn(List.of(
-                new Reservation("브라운", time, 1L)
+                new Reservation("브라운", time)
                         .withId(1L)
                         .withTheme(new Theme("미궁의 유산", "고대 미궁", "https://example.com/theme.png").withId(1L))
         ));

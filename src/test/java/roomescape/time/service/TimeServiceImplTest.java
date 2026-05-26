@@ -16,7 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.exception.ReservationTimeConflictException;
 import roomescape.time.exception.TimeNotFoundException;

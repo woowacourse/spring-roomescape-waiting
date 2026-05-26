@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 
 @Repository
 public class JdbcTimeRepository implements TimeRepository {

@@ -7,11 +7,12 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.ReservationSaveServiceDto;
+import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.service.TimeService;
@@ -49,9 +50,9 @@ public class ReservationServiceImpl implements ReservationService {
         validateThemeId(themeId);
         validateNotHoliday(time);
         validateDuplicatedReservation(themeId, time);
-        Reservation newReservation = new Reservation(reservation.name(), time, themeId);
-        Reservation saved = reservationRepository.save(newReservation);
-        return saved.withTheme(themeRepository.findById(themeId));
+        Theme theme = themeRepository.findById(themeId);
+        Reservation newReservation = new Reservation(reservation.name(), time).withTheme(theme);
+        return reservationRepository.save(newReservation);
     }
 
     private void validateThemeId(Long themeId) {
@@ -111,7 +112,7 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.getTime().validateUpdatableReservation();
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
-        validateDuplicatedReservation(reservation.getThemeId(), newTime);
+        validateDuplicatedReservation(reservation.getTheme().getId(), newTime);
         boolean updated = reservationRepository.update(id, timeId);
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);

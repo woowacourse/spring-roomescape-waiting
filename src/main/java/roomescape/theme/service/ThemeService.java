@@ -3,7 +3,7 @@ package roomescape.theme.service;
 import java.time.LocalDate;
 import java.util.List;
 
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.dto.ThemeSaveServiceDto;
 

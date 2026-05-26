@@ -19,7 +19,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
+import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -40,7 +40,7 @@ class ReservationControllerTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0), LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation reservation = new Reservation("라이", time, 1L)
+        Reservation reservation = new Reservation("라이", time)
                 .withId(1L)
                 .withTheme(theme);
         Mockito.when(reservationService.getByName("라이")).thenReturn(List.of(reservation));
@@ -93,7 +93,7 @@ class ReservationControllerTest {
         // given
         ReservationTime newTime = new ReservationTime(2L, LocalDateTime.of(2030, 6, 1, 14, 0), LocalDateTime.of(2030, 6, 1, 16, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation updated = new Reservation("라이", newTime, 1L)
+        Reservation updated = new Reservation("라이", newTime)
                 .withId(1L)
                 .withTheme(theme);
         Mockito.when(reservationService.update(1L, 2L)).thenReturn(updated);
