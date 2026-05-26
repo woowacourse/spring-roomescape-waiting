@@ -32,4 +32,9 @@ public class ReservationWaitingUpdatingDao {
 
         return keyHolder.getKey().longValue();
     }
+
+    public void delete(Long id) {
+        String sql = "delete from waiting where id = ?";
+        jdbcTemplate.update(sql, id);
+    }
 }
