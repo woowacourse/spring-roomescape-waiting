@@ -16,7 +16,7 @@ public class ReservationName {
         validateLength(striped);
         this.value = striped;
     }
-    
+
     public void validateLength(String value) {
         if (value.length() < MIN_NAME_LENGTH || value.length() > MAX_NAME_LENGTH) {
             throw new RoomEscapeException(ErrorCode.INVALID_NAME_LENGTH);
@@ -25,6 +25,10 @@ public class ReservationName {
 
     public String getValue() {
         return value;
+    }
+
+    public boolean isSame(String other) {
+        return value.equals(other);
     }
 
     @Override

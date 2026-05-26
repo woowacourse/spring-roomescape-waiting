@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
 
@@ -15,6 +16,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.domain.reservation.Reservation;
@@ -31,6 +33,7 @@ import roomescape.repository.ThemeRepository;
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
     private static final String URL = "https://zeze.com/thumb.jpg";
+    private static final String NAME = "제제";
     private static final Reservation DUMMY = Reservation.load(
             1L,
             new ReservationName("anyone"),
@@ -38,6 +41,9 @@ class ReservationServiceTest {
             ReservationTime.of(1L, LocalTime.of(10, 0)),
             Theme.load(1L, new ThemeName("any"), "any", new ThumbnailUrl(URL))
     );
+    private static final LocalDateTime TODAY = LocalDateTime.of(2026, 5, 10, 10, 0, 0);
+    private static final long NOT_EXISTS_ID = Long.MAX_VALUE;
+    private static final long EXISTS_ID = 1L;
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -51,11 +57,12 @@ class ReservationServiceTest {
     @InjectMocks
     private ReservationService reservationService;
 
+
     @Test
     void 예약_취소_성공() {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
 
-        reservationService.cancel(1L, LocalDateTime.MIN);
+        reservationService.cancel(1L, NAME, LocalDateTime.MIN);
 
         verify(reservationRepository).deleteById(1L);
     }
@@ -64,7 +71,7 @@ class ReservationServiceTest {
     void 존재하지_않는_예약_취소시_예외_발생() {
         given(reservationRepository.findById(999L)).willReturn(Optional.empty());
 
-        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, LocalDateTime.MIN))
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(999L, NAME, LocalDateTime.MIN))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -174,10 +181,40 @@ class ReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(DUMMY));
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(reservationRepository.existsByTimeAndThemeAndDateAndName(request.getTimeId(), request.getThemeId(),
-                request.getDate(),request.getName())).willReturn(true);
+                request.getDate(), request.getName())).willReturn(true);
 
         Assertions.assertThatThrownBy(() -> reservationService.update(request, 1L, LocalDateTime.MIN))
                 .isInstanceOf(RoomEscapeException.class).hasMessage(
                         ErrorCode.DUPLICATE_RESERVATION.getMessage());
+    }
+
+    @Test
+    void 예약_삭제_시_ID가_존재하지_않으면_예외가_발생한다() {
+        // given
+        given(reservationRepository.findById(NOT_EXISTS_ID)).willThrow(RoomEscapeException.class);
+
+        Assertions.assertThatThrownBy(() -> reservationRepository.findById(NOT_EXISTS_ID))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 예약_삭제_시_이름이_다르면_예외가_발생한다() {
+        // given
+        Reservation reservation = RoomEscapeFixture.reservation();
+        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
+        // when
+        Assertions.assertThatThrownBy(() -> reservationService.cancel(EXISTS_ID, "diff", TODAY))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 예약_삭제_시_문제가_없으면_삭제되어야_한다() {
+        // given
+        Reservation reservation = RoomEscapeFixture.reservation();
+        given(reservationRepository.findById(EXISTS_ID)).willReturn(Optional.of(reservation));
+
+        assertThatCode(() -> reservationService.cancel(EXISTS_ID, reservation.getName().getValue(),
+                TODAY)).doesNotThrowAnyException();
+
     }
 }

@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.ReservationDeleteDto;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
@@ -55,8 +56,8 @@ public class ReservationController {
 
     @DeleteMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public void delete(@PathVariable Long id) {
-        reservationService.cancel(id, LocalDateTime.now());
+    public void delete(@PathVariable Long id, @Valid @RequestBody ReservationDeleteDto request) {
+        reservationService.cancel(id, request.getName(), LocalDateTime.now());
     }
 
     @PutMapping("/reservations/{id}")
