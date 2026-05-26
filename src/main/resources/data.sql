@@ -26,7 +26,7 @@ INSERT INTO reservation (
     date,
     time_id,
     theme_id,
-    state
+    status
 ) VALUES
       (1, 'guest-1', '2026-05-13', 1, 1, 'RESERVED'),
       (2, 'guest-2', '2026-05-13', 2, 1, 'RESERVED'),
