@@ -63,7 +63,7 @@ public class ScheduleService {
         }
     }
 
-    public void validateSchedule(LocalDate date, Long timeId, Long themeId,  Long storeId) {
+    public void validateSchedule(LocalDate date, Long timeId, Long themeId, Long storeId) {
         validateNotPastDate(date);
         ReservationTime reservationTime = getReservationTimeOrThrow(timeId);
         validateNotPastTime(date, reservationTime.startAt());
