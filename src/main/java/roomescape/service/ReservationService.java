@@ -52,7 +52,10 @@ public class ReservationService {
         validateDateTime(date, time);
 
         Reservation reservation = reservationRepository.save(new Reservation(name, date, time, theme));
+
+        // TODO: 예약 대기 신청 후 관리자가 확정처리 한 후에 themeSlot 예약되어있다고 표시
         themeSlotRepository.update(new ThemeSlot(theme, date, time, true));
+
         return reservation;
     }
 
