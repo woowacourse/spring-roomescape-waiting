@@ -11,7 +11,7 @@ import java.util.Set;
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
 
-    List<ReservationDetailProjection> findAllDetailsByStoreId(long storeId);
+    List<ReservationDetailProjection> findAll();
 
     Set<Long> findTimeIdByDateAndThemeId(LocalDate date, long themeId);
 

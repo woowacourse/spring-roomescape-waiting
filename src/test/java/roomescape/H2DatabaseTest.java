@@ -32,7 +32,6 @@ public class H2DatabaseTest {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "testAdmin");
         loginRequest.put("password", "test2");
-        loginRequest.put("storeId", 1L);
 
         return RestAssured.given().log().all()
                 .body(loginRequest)
@@ -61,8 +60,7 @@ public class H2DatabaseTest {
 
         List<Reservation> reservations = RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .pathParam("storeId", 1L)
-                .when().get("/api/manager/stores/{storeId}/reservations")
+                .when().get("/api/manager/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
                 .jsonPath().getList("data");

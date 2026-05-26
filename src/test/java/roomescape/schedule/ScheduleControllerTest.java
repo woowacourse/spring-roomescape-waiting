@@ -25,7 +25,6 @@ public class ScheduleControllerTest {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "testAdmin");
         loginRequest.put("password", "test2");
-        loginRequest.put("storeId", 1L);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)

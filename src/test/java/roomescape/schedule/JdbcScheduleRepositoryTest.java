@@ -65,7 +65,7 @@ class JdbcScheduleRepositoryTest {
     @Test
     @DisplayName("날짜, 시간id, 테마id을 가진 스케줄id를 찾을 수 있다.")
     void findScheduleIdByDateAndTimeIdAndThemeId_레포지토리_테스트() {
-        long scheduleId = repository.findScheduleIdByDateAndTimeIdAndThemeId(LocalDate.of(2026, 5, 5), 1L, 1L, 1L)
+        long scheduleId = repository.findScheduleIdByDateAndTimeIdAndThemeId(LocalDate.of(2026, 5, 5), 1L, 1L)
                 .orElseThrow();
 
         assertThat(repository.findById(scheduleId)).isPresent();

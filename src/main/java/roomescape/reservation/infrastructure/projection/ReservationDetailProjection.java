@@ -17,8 +17,7 @@ public record ReservationDetailProjection(
         String themeDescription,
         String thumbnailUrl,
         Long timeId,
-        LocalTime startAt,
-        Long storeId
+        LocalTime startAt
 ) {
     public long getTimeId() {
         return timeId();
@@ -30,9 +29,5 @@ public record ReservationDetailProjection(
 
     public LocalTime getTime() {
         return startAt();
-    }
-
-    public Long storeId() {
-        return storeId;
     }
 }

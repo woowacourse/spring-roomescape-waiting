@@ -24,7 +24,6 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 class JdbcReservationRepositoryTest {
 
     private static final long MEMBER_ID = 1L;
-    private static final long STORE_ID = 1L;
 
     @Autowired
     private JdbcReservationRepository reservationRepository;
@@ -48,7 +47,7 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = new Reservation(null, MEMBER_ID, 4L);
         Reservation savedReservation = reservationRepository.save(reservation);
 
-        List<ReservationDetailProjection> reservations = reservationRepository.findAllDetailsByStoreId(STORE_ID);
+        List<ReservationDetailProjection> reservations = reservationRepository.findAll();
 
         assertThat(reservations).hasSize(5);
         assertThat(reservations).extracting(ReservationDetailProjection::id)
@@ -62,7 +61,7 @@ class JdbcReservationRepositoryTest {
 
         reservationRepository.deleteByIdAndMemberId(savedReservation.getId(), MEMBER_ID);
 
-        List<ReservationDetailProjection> reservations = reservationRepository.findAllDetailsByStoreId(STORE_ID);
+        List<ReservationDetailProjection> reservations = reservationRepository.findAll();
         assertThat(reservations).hasSize(4);
         assertThat(reservations).extracting(ReservationDetailProjection::id)
                 .doesNotContain(savedReservation.getId());
@@ -91,7 +90,7 @@ class JdbcReservationRepositoryTest {
     void deleteByIdAndMemberId_테스트() {
         reservationRepository.deleteByIdAndMemberId(1L, MEMBER_ID);
 
-        assertThat(reservationRepository.findAllDetailsByStoreId(STORE_ID))
+        assertThat(reservationRepository.findAll())
                 .extracting(ReservationDetailProjection::id)
                 .doesNotContain(1L);
     }
@@ -101,7 +100,7 @@ class JdbcReservationRepositoryTest {
     void deleteByIdAndMemberId_회원불일치_테스트() {
         reservationRepository.deleteByIdAndMemberId(1L, 999L);
 
-        assertThat(reservationRepository.findAllDetailsByStoreId(STORE_ID))
+        assertThat(reservationRepository.findAll())
                 .extracting(ReservationDetailProjection::id)
                 .contains(1L);
     }

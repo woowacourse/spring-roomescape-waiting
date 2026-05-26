@@ -9,8 +9,7 @@ import java.time.LocalDate;
 public record ReservationSaveRequest(
         @JsonFormat(pattern = "yyyy-MM-dd") @NotNull LocalDate date,
         @NotNull Long timeId,
-        @NotNull Long themeId,
-        @NotNull Long storeId
+        @NotNull Long themeId
 ) {
     public Reservation toDomain(long memberId, long scheduleId) {
         return new Reservation(

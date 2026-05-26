@@ -14,8 +14,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.common.api.ApiResponse;
-import roomescape.member.AuthenticatedMember;
-import roomescape.member.LoginMember;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationDetailFindResponse;
@@ -31,33 +29,26 @@ public class ManagerReservationController {
 
     private final ReservationService reservationService;
 
-    @GetMapping("/stores/{storeId}/reservations")
-    public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findStoreReservationDetails(
-            @PathVariable @Positive long storeId,
-            @LoginMember AuthenticatedMember member
-    ) {
-        List<ReservationDetailFindResponse> responses = reservationService.findStoreReservationDetails(member.id(), storeId);
+    @GetMapping("/reservations")
+    public ResponseEntity<ApiResponse<List<ReservationDetailFindResponse>>> findReservationDetails() {
+        List<ReservationDetailFindResponse> responses = reservationService.findAllReservationDetails();
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(responses));
     }
 
-    @DeleteMapping("/stores/{storeId}/reservations/{reservationId}")
+    @DeleteMapping("/reservations/{reservationId}")
     public ResponseEntity<ApiResponse<Void>> deleteByManager(
-            @PathVariable @Positive long reservationId,
-            @PathVariable @Positive long storeId,
-            @LoginMember AuthenticatedMember member
+            @PathVariable @Positive long reservationId
     ) {
-        reservationService.deleteById(reservationId, member.id(), storeId);
+        reservationService.deleteById(reservationId);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
     }
 
-    @PatchMapping("/stores/{storeId}/reservations/{reservationId}")
+    @PatchMapping("/reservations/{reservationId}")
     public ResponseEntity<ApiResponse<ReservationSaveResponse>> update(
             @RequestBody @Valid ReservationUpdateRequest request,
-            @PathVariable @Positive long reservationId,
-            @PathVariable @Positive long storeId,
-            @LoginMember AuthenticatedMember member
+            @PathVariable @Positive long reservationId
     ) {
-        ReservationSaveResponse response = reservationService.update(request, reservationId, member.id(), storeId);
+        ReservationSaveResponse response = reservationService.update(request, reservationId);
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 }

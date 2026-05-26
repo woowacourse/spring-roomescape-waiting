@@ -25,7 +25,6 @@ public class ReservationControllerTest {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "testAdmin");
         loginRequest.put("password", "test2");
-        loginRequest.put("storeId", 1L);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -41,7 +40,6 @@ public class ReservationControllerTest {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "a");
         loginRequest.put("password", "test1");
-        loginRequest.put("storeId", 1L);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -59,7 +57,6 @@ public class ReservationControllerTest {
         reservation.put("date", "2026-05-05");
         reservation.put("timeId", 4);
         reservation.put("themeId", 4);
-        reservation.put("storeId", 1L);
         return reservation;
     }
 
@@ -86,8 +83,7 @@ public class ReservationControllerTest {
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .pathParam("storeId", 1L)
-                .when().get("/api/manager/stores/{storeId}/reservations")
+                .when().get("/api/manager/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))

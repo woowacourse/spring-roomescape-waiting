@@ -14,7 +14,6 @@ import roomescape.schedule.dto.request.ScheduleSaveRequest;
 import roomescape.schedule.dto.response.ScheduleFindResponse;
 import roomescape.schedule.dto.response.ScheduleSaveResponse;
 import roomescape.schedule.infrastructure.ScheduleRepository;
-import roomescape.store.infrastructure.StoreRepository;
 import roomescape.theme.Theme;
 import roomescape.theme.infrastructure.ThemeRepository;
 
@@ -41,8 +40,6 @@ class ScheduleServiceTest {
     private ThemeRepository themeRepository;
     @Mock
     private ReservationTimeRepository reservationTimeRepository;
-    @Mock
-    private StoreRepository storeRepository;
     @Mock
     private Clock clock;
 
@@ -103,7 +100,7 @@ class ScheduleServiceTest {
         Long testThemeId = 1L;
 
         // when, then
-        assertThatThrownBy(() -> scheduleService.validateSchedule(beforeDate, testTimeId, testThemeId, 1L))
+        assertThatThrownBy(() -> scheduleService.validateSchedule(beforeDate, testTimeId, testThemeId))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
@@ -122,7 +119,7 @@ class ScheduleServiceTest {
         Long testThemeId = 1L;
 
         // when, then
-        assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId, 1L))
+        assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
@@ -144,7 +141,7 @@ class ScheduleServiceTest {
         when(themeRepository.findById(testThemeId)).thenReturn(Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId, 1L))
+        assertThatThrownBy(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
                 .isInstanceOf(EscapeRoomException.class);
     }
 
@@ -164,10 +161,8 @@ class ScheduleServiceTest {
 
         when(reservationTimeRepository.findById(testTimeId)).thenReturn(Optional.of(new ReservationTime(testTimeId, LocalTime.of(10, 0))));
         when(themeRepository.findById(testThemeId)).thenReturn(Optional.of(new Theme(testThemeId, "test", "testDescription", "testUrl")));
-        when(storeRepository.existsStoreById(1L)).thenReturn(true);
-
         // when, then
-        assertThatCode(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId, 1L))
+        assertThatCode(() -> scheduleService.validateSchedule(date, testTimeId, testThemeId))
                 .doesNotThrowAnyException();
         verify(reservationTimeRepository, times(1)).findById(testTimeId);
         verify(themeRepository, times(1)).findById(testThemeId);

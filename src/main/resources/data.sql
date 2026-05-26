@@ -20,9 +20,6 @@ VALUES ('세기의 도둑', '보안을 뚫고 보석을 훔쳐라', './images/th
        ('잠든 박물관', '야간 경비를 피해 전시실의 비밀을 밝혀라', './images/museum.jpeg'),
        ('붉은 파도', '폭풍우 치는 선박 위에서 사건의 진실을 추적하라', './images/red-wave.jpeg');
 
-INSERT INTO store (name, spot)
-VALUES ('강남 방탈출', '강남');
-
 INSERT INTO schedule (date, time_id, theme_id)
 VALUES ('2026-05-05', 1, 1),  -- 5월 5일 10시 세기의 도둑 / 1
        ('2026-05-05', 2, 1),  -- 5월 5일 11시 세기의 도둑 / 2
@@ -91,9 +88,6 @@ VALUES ('kim', 'kimpass', 'USER'),
        ('lee', 'leepass', 'USER'),
        ('park', 'parkpass', 'USER'),
        ('oh', 'ohpass', 'MANAGER');
-
-INSERT INTO manager (member_id, store_id)
-VALUES (4, 1);
 
 INSERT INTO reservation (member_id, schedule_id)
 VALUES (1, 1),  -- 5월 5일 10시 세기의 도둑 예약

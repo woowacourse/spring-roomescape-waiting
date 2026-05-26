@@ -35,8 +35,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("theme_description"),
                     resultSet.getString("theme_thumbnail_url"),
                     resultSet.getLong("time_id"),
-                    resultSet.getTime("start_at").toLocalTime(),
-                    resultSet.getLong("store_id")
+                    resultSet.getTime("start_at").toLocalTime()
             );
 
     @Override
@@ -63,7 +62,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationDetailProjection> findAllDetailsByStoreId(long storeId) {
+    public List<ReservationDetailProjection> findAll() {
         String sql = """
                  SELECT
                     r.id AS reservation_id,
@@ -77,21 +76,16 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.description AS theme_description,
                     t.thumbnail_url AS theme_thumbnail_url,
                     rt.id AS time_id,
-                    rt.start_at,
-                    s.store_id AS store_id
+                    rt.start_at
                 FROM reservation r
                 JOIN schedule s ON r.schedule_id = s.id
                 JOIN theme t ON s.theme_id = t.id
                 JOIN reservation_time rt ON s.time_id = rt.id
                 JOIN member m ON r.member_id = m.id
-                WHERE store_id = :storeId
                 ORDER BY r.id
                 """;
 
-                MapSqlParameterSource params = new MapSqlParameterSource()
-                        .addValue("storeId", storeId);
-
-        return template.query(sql, params, reservationDetailFindRowMapper);
+        return template.query(sql, reservationDetailFindRowMapper);
     }
 
     @Override
@@ -129,8 +123,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.description AS theme_description,
                     t.thumbnail_url AS theme_thumbnail_url,
                     rt.id AS time_id,
-                    rt.start_at,
-                    s.store_id AS store_id
+                    rt.start_at
                 FROM reservation r
                 JOIN schedule s ON r.schedule_id = s.id
                 JOIN theme t ON s.theme_id = t.id
@@ -177,8 +170,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     t.description AS theme_description,
                     t.thumbnail_url AS theme_thumbnail_url,
                     rt.id AS time_id,
-                    rt.start_at,
-                    s.store_id AS store_id
+                    rt.start_at
                 FROM reservation r
                 JOIN schedule s ON r.schedule_id = s.id
                 JOIN theme t ON s.theme_id = t.id
@@ -189,39 +181,6 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", reservationId);
-
-        return template.query(sql, params, reservationDetailFindRowMapper)
-                .stream()
-                .findFirst();
-    }
-
-    public Optional<ReservationDetailProjection> findDetailByIdAndStoreId(long reservationId, long storeId) {
-        String sql = """
-                SELECT
-                    r.id AS reservation_id,
-                    m.id AS member_id,
-                    m.name AS member_name,
-                    m.password AS member_password,
-                    m.role AS member_role,
-                    s.date,
-                    t.id AS theme_id,
-                    t.name AS theme_name,
-                    t.description AS theme_description,
-                    t.thumbnail_url AS theme_thumbnail_url,
-                    rt.id AS time_id,
-                    rt.start_at,
-                    s.store_id AS store_id
-                FROM reservation r
-                JOIN schedule s ON r.schedule_id = s.id
-                JOIN theme t ON s.theme_id = t.id
-                JOIN reservation_time rt ON s.time_id = rt.id
-                JOIN member m ON r.member_id = m.id
-                WHERE r.id = :id AND s.store_id = :storeId
-                """;
-
-        MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", reservationId)
-                .addValue("storeId", storeId);
 
         return template.query(sql, params, reservationDetailFindRowMapper)
                 .stream()

@@ -7,8 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
-import roomescape.manager.Manager;
-import roomescape.manager.infrastructure.ManagerRepository;
 import roomescape.member.Role;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
@@ -37,8 +35,6 @@ class ReservationServiceTest {
 
     private static final long MEMBER_ID = 1L;
     private static final long OTHER_MEMBER_ID = 2L;
-    private static final long STORE_ID = 1L;
-    private static final long OTHER_STORE_ID = 2L;
 
     @Mock
     private ReservationRepository reservationRepository;
@@ -46,16 +42,12 @@ class ReservationServiceTest {
     @Mock
     private ScheduleService scheduleService;
 
-    @Mock
-    private ManagerRepository managerRepository;
-
     @InjectMocks
     private ReservationService reservationService;
 
     private ReservationDetailProjection reservationDetail(
             Long reservationId,
             Long memberId,
-            Long storeId,
             LocalDate date,
             Long themeId,
             Long timeId,
@@ -73,41 +65,23 @@ class ReservationServiceTest {
                 "description",
                 "thumbnail",
                 timeId,
-                startAt,
-                storeId
+                startAt
         );
     }
 
     @Test
-    @DisplayName("매니저는 본인 매장 예약 삭제에 성공한다.")
+    @DisplayName("매니저는 예약 삭제에 성공한다.")
     void deleteById_manager_success() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
 
-        when(managerRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(new Manager(1L, MEMBER_ID, STORE_ID)));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
-        assertThatCode(() -> reservationService.deleteById(reservationId, MEMBER_ID, STORE_ID))
+        assertThatCode(() -> reservationService.deleteById(reservationId))
                 .doesNotThrowAnyException();
         verify(reservationRepository).deleteById(reservationId);
-    }
-
-    @Test
-    @DisplayName("매니저는 타 매장 예약 삭제를 할 수 없다.")
-    void deleteById_manager_other_store_forbidden() {
-        long reservationId = 1L;
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, OTHER_STORE_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
-        );
-
-        when(managerRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(new Manager(1L, MEMBER_ID, STORE_ID)));
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-
-        assertThatThrownBy(() -> reservationService.deleteById(reservationId, MEMBER_ID, STORE_ID))
-                .isInstanceOf(EscapeRoomException.class);
-        verify(reservationRepository, never()).deleteById(anyLong());
     }
 
     @Test
@@ -115,7 +89,7 @@ class ReservationServiceTest {
     void deleteById_user_success() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
@@ -129,7 +103,7 @@ class ReservationServiceTest {
     void deleteById_user_other_member_forbidden() {
         long reservationId = 1L;
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, OTHER_MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+                reservationId, OTHER_MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
         );
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
 
@@ -139,44 +113,26 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("매니저는 본인 매장 예약 수정에 성공한다.")
+    @DisplayName("매니저는 예약 수정에 성공한다.")
     void update_manager_success() {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
         Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
 
-        when(managerRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(new Manager(1L, MEMBER_ID, STORE_ID)));
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeIdAndStoreId(request.date(), request.timeId(), 3L, STORE_ID))
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
-        ReservationSaveResponse response = reservationService.update(request, reservationId, MEMBER_ID, STORE_ID);
+        ReservationSaveResponse response = reservationService.update(request, reservationId);
 
         assertThat(response.id()).isEqualTo(reservationId);
         verify(reservationRepository).updateScheduleById(reservationId, 99L);
-    }
-
-    @Test
-    @DisplayName("매니저는 타 매장 예약 수정을 할 수 없다.")
-    void update_manager_other_store_forbidden() {
-        long reservationId = 4L;
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, OTHER_STORE_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
-        );
-
-        when(managerRepository.findByMemberId(MEMBER_ID)).thenReturn(Optional.of(new Manager(1L, MEMBER_ID, STORE_ID)));
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-
-        assertThatThrownBy(() -> reservationService.update(request, reservationId, MEMBER_ID, STORE_ID))
-                .isInstanceOf(EscapeRoomException.class);
-        verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
     }
 
     @Test
@@ -185,12 +141,12 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
         Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeIdAndStoreId(request.date(), request.timeId(), 3L, STORE_ID))
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
                 .thenReturn(99L);
         when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
         when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
@@ -208,7 +164,7 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, OTHER_MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, OTHER_MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
@@ -224,7 +180,7 @@ class ReservationServiceTest {
         long reservationId = 4L;
         ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
         ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, STORE_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
         );
 
         when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));

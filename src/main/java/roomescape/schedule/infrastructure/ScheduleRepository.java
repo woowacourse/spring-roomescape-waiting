@@ -9,7 +9,7 @@ import java.util.Optional;
 public interface ScheduleRepository {
     Schedule save(Schedule schedule);
 
-    Optional<Long> findScheduleIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId, long storeId);
+    Optional<Long> findScheduleIdByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId);
 
     Optional<Schedule> findById(long id);
 

@@ -19,7 +19,7 @@ abstract class AuthApiTestSupport {
     protected String loginToken(String name, String password) {
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", name, "password", password, "storeId", 1L))
+                .body(Map.of("name", name, "password", password))
                 .when().post("/api/login")
                 .then().log().all()
                 .statusCode(200)

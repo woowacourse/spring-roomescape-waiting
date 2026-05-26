@@ -25,7 +25,6 @@ public class ReservationTimeControllerTest {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "testAdmin");
         loginRequest.put("password", "test2");
-        loginRequest.put("storeId", 1L);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -41,7 +40,6 @@ public class ReservationTimeControllerTest {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "a");
         loginRequest.put("password", "test1");
-        loginRequest.put("storeId", 1L);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -129,7 +127,6 @@ public class ReservationTimeControllerTest {
         reservation.put("date", "2026-05-05");
         reservation.put("timeId", 4);
         reservation.put("themeId", 4);
-        reservation.put("storeId", 1L);
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + userToken)
