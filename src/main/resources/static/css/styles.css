@@ -334,6 +334,15 @@ img { max-width: 100%; display: block; }
   color: var(--text);
 }
 
+.my-table-section {
+  margin-top: 12px;
+  margin-bottom: 28px;
+}
+
+.waiting-title {
+  margin-top: 28px;
+}
+
 .section-sub {
   font-size: 0.9rem;
   color: var(--text-muted);

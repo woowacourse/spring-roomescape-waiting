@@ -29,7 +29,7 @@
 
 <main class="container">
   <h1 class="page-title"><i class="fas fa-list-alt" style="color:var(--accent);margin-right:10px;"></i>내 예약 관리</h1>
-  <p class="page-subtitle">예약자 이름으로 검색하여 내 예약을 조회·수정·삭제할 수 있습니다.</p>
+  <p class="page-subtitle">예약자 이름으로 확정 예약과 예약 대기를 조회·수정·삭제할 수 있습니다.</p>
 
   <div class="filter-card" style="margin-bottom:20px;">
     <div class="filter-row" style="grid-template-columns: 1fr auto;">
@@ -43,7 +43,8 @@
     </div>
   </div>
 
-  <div class="table-container">
+  <h2 class="section-title">확정 예약</h2>
+  <div class="table-container my-table-section">
     <table class="table">
       <thead>
         <tr>
@@ -58,6 +59,24 @@
     </table>
   </div>
   <div id="reservation-empty" class="empty d-none">조회된 예약이 없습니다.</div>
+
+  <h2 class="section-title waiting-title">예약 대기</h2>
+  <div class="table-container my-table-section">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width:80px;">번호</th>
+          <th>테마</th>
+          <th style="width:140px;">날짜</th>
+          <th style="width:100px;">시간</th>
+          <th style="width:100px;">대기 순번</th>
+          <th style="width:120px;text-align:right;">관리</th>
+        </tr>
+      </thead>
+      <tbody id="waiting-table-body"></tbody>
+    </table>
+  </div>
+  <div id="waiting-empty" class="empty d-none">조회된 예약 대기가 없습니다.</div>
   <div id="reservation-hint" class="empty">이름을 입력 후 검색 버튼을 눌러주세요.</div>
 </main>
 

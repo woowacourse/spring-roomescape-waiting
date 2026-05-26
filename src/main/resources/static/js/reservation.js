@@ -1,5 +1,7 @@
 const RESERVATION_API = '/reservations';
+const WAITING_API = '/reservations/waiting';
 const THEME_API = '/themes';
+const TIMES_API = '/times';
 
 const state = {
   date: null,
@@ -7,6 +9,7 @@ const state = {
   themeName: null,
   timeId: null,
   timeText: null,
+  isWaiting: false,
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -98,8 +101,11 @@ function refreshTimes() {
     return;
   }
 
-  apiFetch(`${RESERVATION_API}?date=${state.date}&themeId=${state.themeId}`)
-    .then(renderTimes)
+  Promise.all([
+    apiFetch(TIMES_API),
+    apiFetch(`${RESERVATION_API}?date=${state.date}&themeId=${state.themeId}`)
+  ])
+    .then(([allTimes, availableTimes]) => renderTimes(allTimes, availableTimes))
     .catch(err => {
       hint.classList.remove('d-none');
       hint.textContent = '시간을 불러오지 못했습니다.';
@@ -107,12 +113,14 @@ function refreshTimes() {
     });
 }
 
-function renderTimes(times) {
+function renderTimes(allTimes, availableTimes) {
   const list = document.getElementById('time-list');
   const hint = document.getElementById('time-hint');
   list.innerHTML = '';
 
-  if (!times || times.length === 0) {
+  const selectableTimes = filterSelectableTimes(allTimes || []);
+
+  if (selectableTimes.length === 0) {
     list.classList.add('d-none');
     hint.classList.remove('d-none');
     hint.textContent = '예약 가능한 시간이 없습니다.';
@@ -122,15 +130,36 @@ function renderTimes(times) {
   hint.classList.add('d-none');
   list.classList.remove('d-none');
 
-  times.forEach(time => {
+  const availableIds = new Set((availableTimes || []).map(time => time.id));
+  selectableTimes.forEach(time => {
+    const isAvailable = availableIds.has(time.id);
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'time-btn';
+    btn.className = `time-btn ${isAvailable ? 'available' : 'waiting'}`;
     btn.dataset.timeId = time.id;
     btn.dataset.timeText = time.startAt;
-    btn.textContent = formatTime(time.startAt);
-    btn.addEventListener('click', () => selectTime(btn));
+    btn.dataset.isWaiting = String(!isAvailable);
+    btn.innerHTML = `<span>${formatTime(time.startAt)}</span><small>${isAvailable ? '예약 가능' : '대기 가능'}</small>`;
+    btn.addEventListener('click', () => selectTime(btn, !isAvailable));
     list.appendChild(btn);
+  });
+}
+
+function filterSelectableTimes(times) {
+  const today = new Date();
+  const todayText = [
+    today.getFullYear(),
+    String(today.getMonth() + 1).padStart(2, '0'),
+    String(today.getDate()).padStart(2, '0')
+  ].join('-');
+
+  if (state.date !== todayText) {
+    return times;
+  }
+
+  return times.filter(time => {
+    const [hour, minute] = time.startAt.split(':').map(Number);
+    return hour > today.getHours() || (hour === today.getHours() && minute > today.getMinutes());
   });
 }
 
@@ -140,18 +169,21 @@ function formatTime(value) {
   return `${h}:${m}`;
 }
 
-function selectTime(btn) {
+function selectTime(btn, isWaiting) {
   document.querySelectorAll('#time-list .time-btn').forEach(el => el.classList.remove('active'));
   btn.classList.add('active');
   state.timeId = parseInt(btn.dataset.timeId);
   state.timeText = btn.dataset.timeText;
+  state.isWaiting = isWaiting;
   showBookingBar();
 }
 
 function showBookingBar() {
   const bar = document.getElementById('booking-bar');
   document.getElementById('booking-summary-text').textContent =
-    `${state.date} · ${state.themeName} · ${formatTime(state.timeText)}`;
+    `${state.date} · ${state.themeName} · ${formatTime(state.timeText)} · ${state.isWaiting ? '예약 대기' : '예약 확정'}`;
+  document.getElementById('confirm-booking').innerHTML =
+    state.isWaiting ? '<i class="fas fa-hourglass-half"></i> 예약 대기' : '<i class="fas fa-check"></i> 예약 확정';
   bar.classList.remove('d-none');
   document.getElementById('booking-name').focus();
 }
@@ -162,6 +194,7 @@ function clearBookingBar() {
   document.getElementById('booking-name').value = '';
   state.timeId = null;
   state.timeText = null;
+  state.isWaiting = false;
   document.querySelectorAll('#time-list .time-btn').forEach(el => el.classList.remove('active'));
 }
 
@@ -176,7 +209,8 @@ function confirmBooking() {
     return;
   }
 
-  apiFetch(RESERVATION_API, {
+  const endpoint = state.isWaiting ? WAITING_API : RESERVATION_API;
+  apiFetch(endpoint, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
     body: JSON.stringify({
@@ -187,7 +221,7 @@ function confirmBooking() {
     })
   })
     .then(() => {
-      alert('예약이 완료되었습니다.');
+      alert(state.isWaiting ? '예약 대기가 완료되었습니다.' : '예약이 완료되었습니다.');
       refreshTimes();
     })
     .catch(showError);

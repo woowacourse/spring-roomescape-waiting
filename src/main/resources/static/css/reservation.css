@@ -215,6 +215,27 @@
   letter-spacing: -0.01em;
 }
 
+.time-btn span,
+.time-btn small {
+  display: block;
+}
+
+.time-btn small {
+  margin-top: 4px;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+
+.time-btn.waiting {
+  border-style: dashed;
+  background: #fffaf7;
+}
+
+.time-btn.waiting small {
+  color: var(--accent);
+}
+
 .time-btn:hover:not(:disabled) {
   border-color: var(--accent);
   color: var(--accent);
@@ -226,6 +247,10 @@
   border-color: var(--accent);
   color: #fff;
   box-shadow: 0 4px 14px rgba(255, 90, 54, 0.32);
+}
+
+.time-btn.active small {
+  color: #fff;
 }
 
 .time-btn:disabled {
