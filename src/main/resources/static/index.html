@@ -1131,7 +1131,7 @@
             popularEmpty.classList.add("hidden");
             popularRow.innerHTML = popular.map(p => `
                 <button type="button" class="popular-card" data-theme-id="${p.id}">
-                    <span class="popular-rank">${p.themeRank}위</span>
+                    <span class="popular-rank">${p.rank}위</span>
                     <div class="popular-name">${p.name}</div>
                     <div class="popular-count">${p.reservationCount}건 예약</div>
                 </button>
@@ -1163,7 +1163,7 @@
         }
 
         try {
-            const data = await getJson(`/api/v1/reservations/times/availability?date=${date}&themeId=${themeId}`);
+            const data = await getJson(`/api/v1/reservation-times/availability?date=${date}&themeId=${themeId}`);
             state.userAvailableTimes = data;
             if (!data.length) {
                 userTimeHint.textContent = "표시할 시간이 없습니다.";
@@ -1345,7 +1345,7 @@
     // ─── Shared: load times list (for modal) ──
     async function loadAllTimes() {
         try {
-            state.allTimes = await getJson("/api/v1/reservations/times");
+            state.allTimes = await getJson("/api/v1/reservation-times");
         } catch { /* manager modal will show empty */ }
     }
 
