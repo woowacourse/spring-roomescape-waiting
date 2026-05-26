@@ -1,8 +1,10 @@
 package roomescape.service;
 
+import java.util.ArrayList;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
 import roomescape.global.exception.CustomException;
@@ -124,5 +126,15 @@ public class ReservationService {
         if (themeSlot.getDate().equals(java.time.LocalDate.now()) && themeSlot.getTime().isBefore(LocalTime.now())) {
             throw new CustomException(ErrorCode.RESERVATION_TIME_OUT);
         }
+    }
+
+    public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long id) {
+        List<WaitingReservationResponse> list = new ArrayList<>();
+         List<Reservation> reservations= reservationRepository.findByThemeSlotAndPending(id);
+         for (int i = 1 ; i <= reservations.size(); i++) {
+             WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i-1));
+             list.add(response);
+         }
+        return list;
     }
 }
