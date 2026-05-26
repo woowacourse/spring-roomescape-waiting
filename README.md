@@ -35,6 +35,25 @@ Java 21
 
 ![img.png](erd.png)
 
+---
+
+# 구현할 기능 목록
+
+## 1단계 - 예약 대기 신청/취소
+
+- [ ] 이미 다른 사용자에 의해 예약된 슬롯(날짜+시간+테마)에 대기를 신청할 수 있다
+- [ ] 같은 슬롯에 대한 대기는 신청 순서대로 순번이 부여된다
+- [ ] 같은 사용자가 같은 슬롯에 중복 대기할 수 없다
+- [ ] 사용자는 본인의 대기를 취소할 수 있다
+  - [ ] 지난 날짜/시간의 대기는 취소할 수 없다
+
+## 2단계 - 내 예약 목록 조회 (상태 구분)
+
+- [ ] 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다
+- [ ] 대기에는 본인의 대기 순번도 함께 보여준다
+
+---
+
 # Roomescape API 명세서
 
 > Base URL: `http://localhost:8080`  
@@ -466,6 +485,78 @@ DELETE /themes/1
 | 필수 값 누락 | `400 Bad Request` | 검증 메시지 |
 | 테마가 없음 | `404 Not Found` | `존재하지 않는 테마입니다.` |
 | 해당 테마에 예약이 있음 | `409 Conflict` | `해당 테마에 예약이 존재하여 삭제할 수 없습니다.` |
+
+</details>
+
+## 대기 API
+
+| Method | URL | Request | Success | 설명 |
+|--------|-----|---------|---------|------|
+| `GET` | `/waitings?costumer-name={costumer-name}` | Query | `200 OK` | 예약자 이름으로 대기 목록 조회 |
+| `POST` | `/waitings` | Body | `201 Created` | 대기 신청 |
+| `DELETE` | `/waitings/{id}` | Path | `204 No Content` | 대기 취소 |
+
+<details>
+<summary>예약자 이름으로 대기 목록 조회 (<code>GET /waitings?costumer-name={costumer-name}</code>)</summary>
+
+```http
+GET /waitings?costumer-name=홍길동
+```
+
+```json
+[
+  {
+    "id": 1,
+    "customerName": "홍길동",
+    "date": "2026-08-05",
+    "time": {
+      "startAt": "10:00:00"
+    },
+    "theme": {
+      "name": "링",
+      "description": "공포 테마",
+      "thumbnailUrl": "http:~"
+    },
+    "rank": 2
+  }
+]
+```
+
+</details>
+
+<details>
+<summary>대기 신청 (<code>POST /waitings</code>)</summary>
+
+```http
+POST /waitings
+Content-Type: application/json
+
+{
+  "customerName": "홍길동",
+  "date": "2026-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+```json
+{
+  "id": 1
+}
+```
+
+</details>
+
+<details>
+<summary>대기 취소 (<code>DELETE /waitings/{id}</code>)</summary>
+
+```http
+DELETE /waitings/1
+```
+
+```http
+204 No Content
+```
 
 </details>
 
