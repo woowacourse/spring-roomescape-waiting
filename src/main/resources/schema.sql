@@ -28,3 +28,16 @@ CREATE TABLE reservation (
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE CASCADE,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE CASCADE
 );
+
+CREATE TABLE reservation_waiting (
+    id      BIGINT       NOT NULL AUTO_INCREMENT,
+    name    VARCHAR(255) NOT NULL,
+    theme_id BIGINT NOT NULL,
+    date    DATE NOT NULL,
+    time_id BIGINT NOT NULL,
+    waiting BIGINT NOT NULL,
+
+    PRIMARY KEY (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE CASCADE,
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE CASCADE
+);
