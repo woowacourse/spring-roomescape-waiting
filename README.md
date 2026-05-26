@@ -22,20 +22,13 @@
 
 ### Reservation
 
-| 기능 | Http/url | 요청 | 응답 |
-| --- | --- | --- | --- |
-| 예약 생성 | `POST /reservations` | `{name, date, themeId, timeId}` | `{id, name, date, theme, time}` |
-| 예약 삭제 | `DELETE /reservations/{reservationId}` | - | - |
-| 예약 조회 | `GET /reservations` | - | `[{id, name, date, theme, time}, ...]` |
+| 기능          | Http/url | 요청 | 응답                              |
+|-------------| --- | --- |---------------------------------|
+| 예약 생성       | `POST /reservations` | `{name, date, themeId, timeId}` | `{id, name, date, theme, time}` |
+| 예약 삭제       | `DELETE /reservations/{reservationId}` | - | - |
+| 예약 조회       | `GET /reservations` | - | `[{id, name, date, theme, time}, ...]` |
 | 예약 가능 시간 조회 | `GET /themes/{themeId}/times/available?date={yyyy-MM-dd}` | - | `[{id, startAt, reservable, waitable}, ...]` |
 
-### Waiting
-
-| 기능 | Http/url | 요청 | 응답 |
-| --- | --- | --- | --- |
-| 예약 대기 신청 | `POST /reservations/{reservationId}/waitings` | `{name}` | `{id, reservationId, name, sequence, requestedAt}` |
-| 내 대기 순번 조회 | `GET /reservations/{reservationId}/waitings?name={name}` | - | `{id, reservationId, name, sequence, requestedAt}` |
-| 내 대기 취소 | `DELETE /reservations/{reservationId}/waitings/{waitingId}?name={name}` | - | - |
 
 ### Theme
 
@@ -53,6 +46,14 @@
 | 관리자 시간 생성 | `POST /admin/reservation-times` | `{startAt}` | `{id, startAt}` |
 | 관리자 시간 삭제 | `DELETE /admin/reservation-times/{timeId}` | - | - |
 | 관리자 시간 조회 | `GET /admin/reservation-times` | - | `[{id, startAt}, ...]` |
+
+
+### ReservationWaiting
+
+| 기능      | Http/url                                    | 요청                                | 응답               |
+|---------|---------------------------------------------|-----------------------------------|------------------|
+| 예약 대기 생성 | `POST /waitings`                            | `{name, theme_id, date, time_id}` | `201 Creadted`   |
+| 예약 대기 삭제 | `DELETE /waitings/{waiting_id}?name={name}` | -                                 | `204 No Content` |
 
 ### User Page
 
