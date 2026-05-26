@@ -38,10 +38,16 @@ CREATE TABLE reservation (
     active_theme_id BIGINT GENERATED ALWAYS AS (
         CASE WHEN status = 'ACTIVE' THEN theme_id ELSE NULL END
     ),
+    active_waiting BOOLEAN GENERATED ALWAYS AS (
+        CASE WHEN status = 'WAITING' THEN true ELSE NULL END
+    ),
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
+
+CREATE UNIQUE INDEX uq_waiting_reservation
+ON reservation (active_waiting, name, date, time_id, theme_id)
 
 CREATE UNIQUE INDEX uq_active_reservation
 ON reservation (active_date, active_time_id, active_theme_id);
