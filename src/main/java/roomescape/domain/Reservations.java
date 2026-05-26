@@ -1,8 +1,11 @@
 package roomescape.domain;
 
 import java.util.List;
+import roomescape.exception.BusinessRuleViolationException;
 
 public class Reservations {
+
+    private static final String NOT_RESERVED_SLOT = "예약된 슬롯에만 대기를 신청할 수 있습니다.";
 
     private final List<Reservation> reservations;
 
@@ -13,6 +16,13 @@ public class Reservations {
     public boolean isOccupied(ReservationTime time) {
         return reservations.stream()
                 .anyMatch(r -> r.getTime().equals(time));
+    }
+
+    public Reservation findByTime(ReservationTime time) {
+        return reservations.stream()
+                .filter(r -> r.getTime().equals(time))
+                .findFirst()
+                .orElseThrow(() -> new BusinessRuleViolationException(NOT_RESERVED_SLOT));
     }
 
     public Reservations excluding(Long reservationId) {

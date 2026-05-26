@@ -34,6 +34,15 @@ public class Reservation {
         this(null, name, date, time, theme);
     }
 
+    public boolean isOwnedBy(String name) {
+        return name.equals(this.name);
+    }
+
+    public boolean isPast(LocalDateTime now) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
+    }
+
+
     public Long getId() {
         return id;
     }
@@ -54,14 +63,14 @@ public class Reservation {
         return theme;
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
-    }
-
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Reservation that = (Reservation) o;
         return id != null && Objects.equals(id, that.id);
     }
