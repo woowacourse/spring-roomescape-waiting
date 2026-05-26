@@ -105,7 +105,7 @@ public class ThemeJdbcDao implements ThemeDao {
     }
 
     @Override
-    public int delete(Long id) {
+    public boolean delete(Long id) {
         String sql = """
                 DELETE FROM themes
                 WHERE id = :id
@@ -114,7 +114,7 @@ public class ThemeJdbcDao implements ThemeDao {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
 
-        return jdbcTemplate.update(sql, params);
+        return jdbcTemplate.update(sql, params) > 0;
     }
 
     @Override

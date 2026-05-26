@@ -154,9 +154,9 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
-    public int delete(Long id) {
+    public boolean delete(Long id) {
         String sql = "DELETE FROM reservations WHERE id = :id";
-        return jdbcTemplate.update(sql, new MapSqlParameterSource("id", id));
+        return jdbcTemplate.update(sql, new MapSqlParameterSource("id", id)) > 0;
     }
 
     @Override

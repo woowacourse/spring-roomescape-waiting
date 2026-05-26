@@ -55,15 +55,14 @@ public class ThemeService {
 
     @Transactional
     public void delete(Long id) {
-        if (!themeDao.existsById(id)) {
-            throw new EntityNotFoundException("존재하지 않는 테마입니다.");
-        }
         if (reservationDao.existsByThemeId(id)) {
             throw new BusinessRuleViolationException("예약이 존재하여 테마를 삭제할 수 없습니다.");
         }
 
         try {
-            themeDao.delete(id);
+            if (!themeDao.delete(id)) {
+                throw new EntityNotFoundException("존재하지 않는 테마입니다.");
+            }
         } catch (DataIntegrityViolationException e) {
             throw new BusinessRuleViolationException("예약이 존재하여 테마를 삭제할 수 없습니다.");
         }

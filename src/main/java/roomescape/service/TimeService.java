@@ -43,13 +43,11 @@ public class TimeService {
 
     @Transactional
     public void delete(Long id) {
-        if (!timeDao.existsById(id)) {
-            throw new EntityNotFoundException("존재하지 않는 시간입니다.");
-        }
         if (reservationDao.existsByTimeId(id)) {
             throw new BusinessRuleViolationException("예약이 존재하여 시간을 삭제할 수 없습니다.");
         }
-
-        timeDao.delete(id);
+        if (!timeDao.delete(id)) {
+            throw new EntityNotFoundException("존재하지 않는 시간입니다.");
+        }
     }
 }

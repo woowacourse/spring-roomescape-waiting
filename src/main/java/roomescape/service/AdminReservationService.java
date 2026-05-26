@@ -81,10 +81,9 @@ public class AdminReservationService {
 
     @Transactional
     public void delete(Long id) {
-        if (!reservationDao.existsById(id)) {
+        if (!reservationDao.delete(id)) {
             throw new EntityNotFoundException("존재하지 않는 예약입니다.");
         }
-        reservationDao.delete(id);
     }
 
     private Reservation buildReservation(Member member, AdminReservationRequestDto request) {

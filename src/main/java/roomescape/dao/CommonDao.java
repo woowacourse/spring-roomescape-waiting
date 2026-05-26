@@ -13,7 +13,7 @@ public interface CommonDao<T> {
 
     T update(T t);
 
-    int delete(Long id);
+    boolean delete(Long id);
 
     boolean existsById(Long id);
 }

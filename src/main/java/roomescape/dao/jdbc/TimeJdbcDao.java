@@ -79,7 +79,7 @@ public class TimeJdbcDao implements TimeDao {
     }
 
     @Override
-    public int delete(Long id) {
+    public boolean delete(Long id) {
         String sql = """
                 DELETE FROM times
                 WHERE id = :id
@@ -87,7 +87,7 @@ public class TimeJdbcDao implements TimeDao {
 
         SqlParameterSource params = new MapSqlParameterSource("id", id);
 
-        return jdbcTemplate.update(sql, params);
+        return jdbcTemplate.update(sql, params) > 0;
     }
 
     @Override
