@@ -89,7 +89,7 @@ public class ReservationService {
         return ReservationInfo.from(changedReservation);
     }
 
-    public ReservationInfo changeReservationWaitingStatus(final Long id, final ReservationChangeCommand command) {
+    public ReservationInfo changeReservationPendingStatus(final Long id, final ReservationChangeCommand command) {
         Reservation reservation = reservationRepository.getById(id);
         ReservationTime time = timeRepository.getById(command.timeId());
         Theme theme = themeRepository.getById(command.themeId());

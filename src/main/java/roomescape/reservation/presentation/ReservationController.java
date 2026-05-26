@@ -55,7 +55,7 @@ public class ReservationController {
 
     @PatchMapping("/{id}/pending")
     public ResponseEntity<ReservationResponse> pendingReservation(@PathVariable final Long id, @Valid @RequestBody final ReservationChangeRequest request){
-        ReservationResponse response = ReservationResponse.from(reservationService.changeReservationWaitingStatus(id, request.toCommand()));
+        ReservationResponse response = ReservationResponse.from(reservationService.changeReservationPendingStatus(id, request.toCommand()));
         return ResponseEntity.ok(response);
     }
 }
