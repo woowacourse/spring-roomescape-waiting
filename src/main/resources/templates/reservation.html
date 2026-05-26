@@ -80,7 +80,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
 }
 .slot.avail{border-color:var(--acc);color:var(--acc)}
 .slot.avail:hover{background:var(--acc);color:var(--white);box-shadow:0 0 20px var(--glow)}
-.slot.booked{border-color:var(--border);color:var(--muted);cursor:not-allowed}
+.slot.booked{border-color:#5a4a52;color:#c89aa4;cursor:pointer}
+.slot.booked:hover{background:#5a4a52;color:var(--white)}
 .slot.past{border-color:var(--border);color:var(--muted);cursor:not-allowed;opacity:.45}
 .slot-hint{font-size:.75rem;display:block;margin-top:.25rem;opacity:.7;letter-spacing:.05em}
 
@@ -168,19 +169,20 @@ input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
     <p class="step-num">Step 02</p>
     <h2 class="step-title">시간을 선택하세요</h2>
     <div class="time-grid" id="time-grid"></div>
-    <p class="note">회색은 이미 예약된 시간입니다</p>
+    <p class="note">붉은빛은 예약 가능, 분홍빛은 이미 예약된 시간(대기 신청 가능)입니다</p>
   </div>
 </div>
 
-<!-- 예약 모달 -->
+<!-- 예약 / 대기 모달 -->
 <div class="overlay" id="overlay">
   <div class="modal">
-    <p class="m-eye">예약 확정</p>
+    <p class="m-eye" id="m-eye">예약 확정</p>
     <h2 class="m-title" id="m-theme">—</h2>
     <p class="m-info" id="m-info">—</p>
+    <p class="m-info" id="m-wait-note" style="display:none;color:var(--acc-h);margin-top:-1.25rem">이미 예약된 시간입니다. 대기 신청하시겠어요?</p>
     <div class="m-actions">
       <button class="btn-g" onclick="closeModal()">취소</button>
-      <button class="btn-s" id="confirm-btn" onclick="doReserve()">예약 확정</button>
+      <button class="btn-s" id="confirm-btn" onclick="doConfirm()">예약 확정</button>
     </div>
   </div>
 </div>
@@ -195,9 +197,22 @@ async function logout() {
 
 const params = new URLSearchParams(location.search);
 const themeId = params.get('themeId');
-let selTimeId = null, selDate = null, theme = null;
+const DEFAULT_STORE_ID = 1;
+let selTimeId = null, selDate = null, theme = null, me = null, mode = 'reserve';
 
 if (!themeId) { location.href = '/'; }
+
+async function loadMe() {
+  try {
+    const r = await fetch('/members/me');
+    if (r.status === 401) {
+      location.href = `/login?redirect=${encodeURIComponent(location.href)}`;
+      return null;
+    }
+    if (!r.ok) return null;
+    return await r.json();
+  } catch { return null; }
+}
 
 const today = new Date().toISOString().split('T')[0];
 const dateInput = document.getElementById('date-input');
@@ -211,6 +226,8 @@ function fmt(t) {
 }
 
 async function init() {
+  me = await loadMe();
+  if (!me) return;
   try {
     const r = await fetch(`/themes/${themeId}`);
     if (!r.ok) { location.href = '/'; return; }
@@ -256,19 +273,21 @@ async function onDate(date) {
       const isPast = isToday && slotTime <= now;
 
       let stateClass, stateText;
-      if (t.alreadyBooked) {
-        stateClass = 'booked'; stateText = '예약됨';
-      } else if (isPast) {
+      if (isPast) {
         stateClass = 'past'; stateText = '지난 시간';
+      } else if (t.alreadyBooked) {
+        stateClass = 'booked'; stateText = '대기 신청';
       } else {
         stateClass = 'avail'; stateText = '예약 가능';
       }
 
       const btn = document.createElement('button');
       btn.className = `slot ${stateClass}`;
-      btn.disabled = t.alreadyBooked || isPast;
+      btn.disabled = isPast;
       btn.innerHTML = `${fmt(t.time?.startAt)}<span class="slot-hint">${stateText}</span>`;
-      if (!t.alreadyBooked && !isPast) btn.onclick = () => openModal(t.time?.id, fmt(t.time?.startAt));
+      if (!isPast) {
+        btn.onclick = () => openModal(t.time?.id, fmt(t.time?.startAt), !!t.alreadyBooked);
+      }
       grid.appendChild(btn);
     });
   } catch {
@@ -276,20 +295,33 @@ async function onDate(date) {
   }
 }
 
-function openModal(timeId, timeStr) {
+function openModal(timeId, timeStr, isWait) {
   selTimeId = timeId;
+  mode = isWait ? 'wait' : 'reserve';
   document.getElementById('m-theme').textContent = theme?.name || '';
   document.getElementById('m-info').textContent = `${selDate}  ·  ${timeStr}`;
+  document.getElementById('m-eye').textContent = isWait ? '대기 신청' : '예약 확정';
+  document.getElementById('m-wait-note').style.display = isWait ? 'block' : 'none';
+  document.getElementById('confirm-btn').textContent = isWait ? '대기 신청' : '예약 확정';
   document.getElementById('overlay').classList.add('open');
 }
 
 function closeModal() {
   document.getElementById('overlay').classList.remove('open');
   selTimeId = null;
+  mode = 'reserve';
+}
+
+async function doConfirm() {
+  if (!selTimeId) return;
+  if (mode === 'wait') {
+    await doWait();
+  } else {
+    await doReserve();
+  }
 }
 
 async function doReserve() {
-  if (!selTimeId) return;
   const btn = document.getElementById('confirm-btn');
   btn.disabled = true;
   try {
@@ -317,6 +349,40 @@ async function doReserve() {
   }
 }
 
+async function doWait() {
+  if (!me) { me = await loadMe(); if (!me) return; }
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/waitings', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        memberId: me.id,
+        date: selDate,
+        timeId: selTimeId,
+        themeId: Number(themeId),
+        storeId: me.storeId || DEFAULT_STORE_ID
+      })
+    });
+    if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
+    if (!r.ok) {
+      let msg = '대기 신청에 실패했습니다';
+      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      closeModal();
+      toast('err', msg);
+      return;
+    }
+    closeModal();
+    toast('ok', '대기 신청이 완료되었습니다');
+  } catch {
+    closeModal();
+    toast('err', '네트워크 오류가 발생했습니다');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
 function toast(type, msg) {
   const el = document.getElementById('toast');
   el.textContent = msg;
@@ -329,7 +395,7 @@ document.getElementById('overlay').addEventListener('click', e => {
 });
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeModal();
-  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) doReserve();
+  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) doConfirm();
 });
 
 init();
