@@ -5,6 +5,7 @@ import roomescape.domain.theme.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.exception.InvalidInputException;
 
 public class Reservation {
 
@@ -65,6 +66,12 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void validateDuplicatedReservationByName(String name) {
+        if(this.name.equals(name)) {
+            throw new InvalidInputException("이미 등록된 예약이 있습니다.");
+        }
     }
 
 }
