@@ -1,6 +1,5 @@
 package roomescape.reservationwaiting.repository;
 
-import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,6 +11,8 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.theme.domain.Theme;
+
+import java.util.List;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -66,6 +67,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     @Override
     public List<ReservationWaitingTurnResponse> findByName(String name) {
         String query = """
+                SELECT * FROM (
                 SELECT rw.id as reservation_waiting_id, rw.name,
                        r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
@@ -74,11 +76,11 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 FROM reservation_waiting rw
                 JOIN reservation r ON rw.reservation_id = r.id
                 JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id
-                WHERE rw.name = ?
-                ORDER BY rw.id;
+                JOIN theme t ON r.theme_id = t.id) sub
+                WHERE sub.name = ? 
+                ORDER BY reservation_waiting_id
+                ;
                 """;
-
         return jdbcTemplate.query(query, rowMapper, name);
     }
 
