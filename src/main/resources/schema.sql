@@ -25,7 +25,7 @@ CREATE TABLE waiting
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
-)
+);
 
 CREATE TABLE reservation
 (

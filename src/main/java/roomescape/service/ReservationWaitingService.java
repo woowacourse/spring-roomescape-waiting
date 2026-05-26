@@ -3,6 +3,7 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.springframework.stereotype.Service;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -21,6 +22,7 @@ import roomescape.repository.ReservationWaitingQueryingDao;
 import roomescape.repository.ReservationWaitingUpdatingDao;
 import roomescape.repository.ThemeQueryingDao;
 
+@Service
 public class ReservationWaitingService {
 
     private final ReservationWaitingUpdatingDao reservationWaitingUpdatingDao;
