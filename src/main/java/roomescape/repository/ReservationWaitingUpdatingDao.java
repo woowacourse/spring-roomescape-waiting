@@ -4,8 +4,10 @@ import java.sql.PreparedStatement;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 
+@Repository
 public class ReservationWaitingUpdatingDao {
 
     private final JdbcTemplate jdbcTemplate;
