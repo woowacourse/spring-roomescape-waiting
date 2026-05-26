@@ -6,10 +6,15 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -19,6 +24,7 @@ import java.time.ZoneId;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
+@Sql("/clear.sql")
 class JdbcWaitingRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
@@ -59,6 +65,20 @@ class JdbcWaitingRepositoryTest {
         assertThat(savedWaitingId).isNotNull();
     }
 
+    @Test
+    void id로_대기를_삭제할_수_있다() {
+        //given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
+
+        //when
+        final boolean deleted = jdbcWaitingRepository.deleteById(savedId);
+
+        //then
+        assertThat(deleted).isTrue();
+    }
+
 
     private ReservationTime insertReservationTime(final String startAt) {
         jdbcTemplate.update(
@@ -77,5 +97,33 @@ class JdbcWaitingRepositoryTest {
         );
 
         return Theme.of(1L, name, description, thumbnailUrl);
+    }
+
+    private long insertWaiting(
+            final String name,
+            final LocalDate reservationDate,
+            final long timeId,
+            final long themeId
+    ) {
+        final String sql = """
+                INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, name);
+            ps.setDate(2, Date.valueOf(reservationDate));
+            ps.setLong(3, timeId);
+            ps.setLong(4, themeId);
+            return ps;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("대기 생성에 실패했습니다.");
+        }
+        return key.longValue();
     }
 }

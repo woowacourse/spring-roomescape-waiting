@@ -40,4 +40,15 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return key.longValue();
     }
 
+    @Override
+    public boolean deleteById(final long waitingId) {
+        final String sql = """
+                DELETE FROM waiting
+                WHERE id = ?
+                """;
+
+        final int updateCount = jdbcTemplate.update(sql, waitingId);
+        return updateCount > 0;
+    }
+
 }
