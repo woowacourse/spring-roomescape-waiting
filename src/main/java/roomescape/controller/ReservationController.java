@@ -53,7 +53,7 @@ public class ReservationController {
     public ReservationResponse getReservation(
             @PathVariable long id
     ) {
-        return reservationService.findById(id);
+        return waitingService.findById(id);
     }
 
     @ResponseStatus(HttpStatus.OK)

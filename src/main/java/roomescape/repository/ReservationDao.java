@@ -12,6 +12,8 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.Time;
 import roomescape.domain.Theme;
+import roomescape.dto.ReservationResponse;
+import roomescape.dto.WaitingResponse;
 
 @Repository
 public class ReservationDao {
@@ -24,6 +26,15 @@ public class ReservationDao {
             new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
             new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
     );
+
+    private final RowMapper<ReservationResponse> reservationResponseRowMapper = (rs, rowNum) -> ReservationResponse.from(
+            new Reservation(
+            rs.getLong("id"),
+            rs.getDate("date").toLocalDate(),
+            new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
+            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))),
+            new WaitingResponse(rs.getLong("waiting_id"), rs.getString("waiting_name"), rs.getInt("waiting_order"))
+            );
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -75,7 +86,7 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    public List<Reservation> findByUserName(String username) {
+    public List<ReservationResponse> findByUserName(String username) {
         String sql = """
                 SELECT r.id, 
                        r.date,
@@ -84,19 +95,28 @@ public class ReservationDao {
                        th.id AS theme_id, 
                        th.name AS theme_name, 
                        th.description AS theme_description, 
-                       th.thumbnail_url AS theme_thumbnail
+                       th.thumbnail_url AS theme_thumbnail,
+                      w.id AS waiting_id,
+                      w.name AS waiting_name,
+                      (
+                          SELECT COUNT(*)
+                          FROM waiting w2
+                          WHERE w2.reservation_id = w.reservation_id
+                            AND w2.id <= w.id
+                      ) AS waiting_order
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                WHERE r.name = ?
+                INNER JOIN waiting AS w ON r.id = w.reservation_id
+                WHERE w.name = ?
                 """;
-        return jdbcTemplate.query(sql, reservationRowMapper, username);
+        return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
     }
 
     public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
         jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
     }
-    
+
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }

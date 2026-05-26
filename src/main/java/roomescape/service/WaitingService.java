@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.Waiting;
+import roomescape.dto.ReservationResponse;
 import roomescape.dto.WaitingRequest;
 import roomescape.dto.WaitingResponse;
 import roomescape.exception.CustomException;
@@ -43,6 +44,12 @@ public class WaitingService {
         waitingDao.delete(id);
     }
 
+    public ReservationResponse findById(long id) {
+        Waiting waiting = waitingDao.findById(id);
+        Reservation reservation = reservationDao.findById(waiting.getReservationId());
+        return ReservationResponse.from(reservation, WaitingResponse.from(waiting, waitingDao.findOrderByReservationId(id, reservation.getId())));
+    }
+    
     private void validateDateAndTimeNotPast(LocalDateTime now, LocalDateTime reservationTime) {
         if (now.isAfter(reservationTime)) {
             throw new CustomException(ErrorCode.PAST_DATE_RESERVATION);

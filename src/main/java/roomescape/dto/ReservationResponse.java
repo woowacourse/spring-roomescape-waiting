@@ -16,8 +16,9 @@ public record ReservationResponse(
         String themeDescription,
         String themeThumbnailUrl,
         @JsonFormat(pattern = "HH:mm")
-        LocalTime time) {
-    public static ReservationResponse from(Reservation reservation) {
+        LocalTime time,
+        WaitingResponse waitingResponse) {
+    public static ReservationResponse from(Reservation reservation, WaitingResponse waitingResponse) {
         Theme theme = reservation.getTheme();
         Time time = reservation.getTime();
         return new ReservationResponse(
@@ -26,7 +27,8 @@ public record ReservationResponse(
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailUrl(),
-                time.getStartAt()
+                time.getStartAt(),
+                waitingResponse
         );
     }
 }
