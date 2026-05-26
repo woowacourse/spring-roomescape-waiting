@@ -13,7 +13,7 @@ class ThemeTest {
     @Test
     void 테마_이름이_null이면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new Theme(null, "설명", "https://example.com/theme.png"),
+                () -> Theme.create(null, "설명", "https://example.com/theme.png"),
                 INVALID_THEME_NAME
         );
     }
@@ -21,7 +21,7 @@ class ThemeTest {
     @Test
     void 테마_이름이_비어있으면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new Theme(" ", "설명", "https://example.com/theme.png"),
+                () -> Theme.create(" ", "설명", "https://example.com/theme.png"),
                 INVALID_THEME_NAME
         );
     }
@@ -29,7 +29,7 @@ class ThemeTest {
     @Test
     void 테마_설명이_null이면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new Theme("테마", null, "https://example.com/theme.png"),
+                () -> Theme.create("테마", null, "https://example.com/theme.png"),
                 INVALID_THEME_DESCRIPTION
         );
     }
@@ -37,7 +37,7 @@ class ThemeTest {
     @Test
     void 테마_설명이_비어있으면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new Theme("테마", " ", "https://example.com/theme.png"),
+                () -> Theme.create("테마", " ", "https://example.com/theme.png"),
                 INVALID_THEME_DESCRIPTION
         );
     }
@@ -45,7 +45,7 @@ class ThemeTest {
     @Test
     void 테마_썸네일이_null이면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new Theme("테마", "설명", null),
+                () -> Theme.create("테마", "설명", null),
                 INVALID_THEME_THUMBNAIL
         );
     }
@@ -53,24 +53,14 @@ class ThemeTest {
     @Test
     void 테마_썸네일이_비어있으면_도메인_예외가_발생한다() {
         assertDomainException(
-                () -> new Theme("테마", "설명", " "),
+                () -> Theme.create("테마", "설명", " "),
                 INVALID_THEME_THUMBNAIL
         );
     }
 
     @Test
-    void 테마_id가_null이면_도메인_예외가_발생한다() {
-        Theme theme = new Theme("테마", "설명", "https://example.com/theme.png");
-
-        assertDomainException(
-                () -> theme.withId(null),
-                INVALID_THEME_ID
-        );
-    }
-
-    @Test
     void 이미_id가_있는_테마에_id를_부여하면_도메인_예외가_발생한다() {
-        Theme theme = new Theme(1L, "테마", "설명", "https://example.com/theme.png");
+        Theme theme = Theme.of(1L, "테마", "설명", "https://example.com/theme.png");
 
         assertDomainException(
                 () -> theme.withId(2L),

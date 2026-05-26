@@ -43,9 +43,9 @@ class ThemeControllerTest {
     void getThemeList() throws Exception {
         // given
         List<Theme> themes = List.of(
-                new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
-                new Theme(2L, "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
-                new Theme(3L, "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
+                Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
+                Theme.of(2L, "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
+                Theme.of(3L, "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
         );
         given(themeService.findAllThemes()).willReturn(themes);
 
@@ -84,9 +84,9 @@ class ThemeControllerTest {
     public void popularThemes() throws Exception {
         // given
         List<Theme> themes = List.of(
-                new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
-                new Theme(2L, "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
-                new Theme(3L, "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
+                Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png"),
+                Theme.of(2L, "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme-2.png"),
+                Theme.of(3L, "레벨4 탈출", "우테코 레벨4를 탈출하는 내용입니다.", "https://example.com/theme-3.png")
         );
         given(themeService.findPopularThemes(anyInt(), anyInt()))
                 .willReturn(themes);

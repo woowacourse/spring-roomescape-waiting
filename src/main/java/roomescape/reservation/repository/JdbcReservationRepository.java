@@ -204,7 +204,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
         );
 
-        Theme theme = new Theme(
+        Theme theme = Theme.of(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),

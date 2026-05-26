@@ -260,7 +260,7 @@ class JdbcReservationTimeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return new Theme(getGeneratedId(keyHolder), name, description, thumbnail);
+        return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
     }
 
     private void insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {

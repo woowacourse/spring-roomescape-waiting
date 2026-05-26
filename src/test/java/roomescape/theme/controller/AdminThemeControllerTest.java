@@ -41,7 +41,7 @@ class AdminThemeControllerTest {
     @DisplayName("테마를 생성하는 요청을 하면 생성된 테마 정보가 응답으로 반환된다.")
     public void create_success() throws Exception {
         // given
-        Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+        Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
 
         given(themeService.create(anyString(), anyString(), anyString()))
                 .willReturn(theme);

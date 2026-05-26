@@ -99,7 +99,7 @@ class ReservationTimeServiceTest {
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
-        return themeRepository.save(new Theme(name, description, thumbnail));
+        return themeRepository.save(Theme.create(name, description, thumbnail));
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
