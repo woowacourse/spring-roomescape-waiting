@@ -33,7 +33,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
     @Bean
     public FilterRegistrationBean<AuthFilter> authFilterRegistration() {
         FilterRegistrationBean<AuthFilter> registration = new FilterRegistrationBean<>(authFilter);
-        registration.addUrlPatterns("/reservations", "/reservations/*");
+        registration.addUrlPatterns(
+                "/reservations", "/reservations/*",
+                "/waitings", "/waitings/*",
+                "/members/me"
+        );
         return registration;
     }
 
