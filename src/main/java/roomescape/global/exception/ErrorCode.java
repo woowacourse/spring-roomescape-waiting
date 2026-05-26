@@ -16,7 +16,7 @@ public enum ErrorCode {
     RESERVATION_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 예약이 존재합니다."),
     CANNOT_DELETE_RESERVED_TIME(HttpStatus.CONFLICT, "이미 예약이 존재하는 시간대이므로 삭제할 수 없습니다."),
     CANNOT_DELETE_RESERVED_THEME(HttpStatus.CONFLICT, "이미 예약이 존재하는 테마이므로 삭제할 수 없습니다."),
-    ;
+    DUPLICATED_RESERVATION_WAITING(HttpStatus.CONFLICT, "이미 해당 예약의 대기가 존재합니다.");
 
     private final HttpStatus status;
     private final String message;
