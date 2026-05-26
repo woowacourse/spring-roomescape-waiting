@@ -1,0 +1,124 @@
+package roomescape.reservation;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.config.TestTimeConfig;
+
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+
+@Import(TestTimeConfig.class)
+@ActiveProfiles("test")
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+public class ReservationControllerTest {
+
+    private String loginManager() {
+        Map<String, Object> loginRequest = new HashMap<>();
+        loginRequest.put("name", "testAdmin");
+        loginRequest.put("password", "test2");
+        loginRequest.put("storeId", 1L);
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/api/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("data.accessToken");
+    }
+
+    private String loginUser() {
+        Map<String, Object> loginRequest = new HashMap<>();
+        loginRequest.put("name", "a");
+        loginRequest.put("password", "test1");
+        loginRequest.put("storeId", 1L);
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/api/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("data.accessToken");
+    }
+
+    private Map<String, Object> reservationRequest() {
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("memberId", 1);
+        reservation.put("date", "2026-05-05");
+        reservation.put("timeId", 4);
+        reservation.put("themeId", 4);
+        reservation.put("storeId", 1L);
+        return reservation;
+    }
+
+    @Test
+    void 예약_생성() {
+        String accessToken = loginUser();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(reservationRequest())
+                .when().post("/api/user/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.id", is(5))
+                .body("data.memberId", is(1))
+                .body("data.scheduleId", is(4));
+    }
+
+    @Test
+    void 예약_조회() {
+        String accessToken = loginManager();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .pathParam("storeId", 1L)
+                .when().get("/api/manager/stores/{storeId}/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(4));
+    }
+
+    @Test
+    void 나의_특정_예약_삭제_및_나의_예약_목록_조회() {
+        String accessToken = loginUser();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(4));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .pathParam("id", 1)
+                .when().delete("/api/user/reservations/{id}")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(3));
+    }
+}

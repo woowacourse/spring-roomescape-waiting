@@ -1,0 +1,184 @@
+package roomescape.reservation.application;
+
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.EscapeRoomException;
+import roomescape.manager.Manager;
+import roomescape.manager.infrastructure.ManagerRepository;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.dto.request.ReservationSaveRequest;
+import roomescape.reservation.dto.request.ReservationUpdateRequest;
+import roomescape.reservation.dto.response.ReservationDetailFindResponse;
+import roomescape.reservation.dto.response.ReservationSaveResponse;
+import roomescape.reservation.infrastructure.ReservationRepository;
+import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
+import roomescape.schedule.application.ScheduleService;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Objects;
+import java.util.function.Consumer;
+
+@Service
+@RequiredArgsConstructor
+public class ReservationService {
+    private final ReservationRepository reservationRepository;
+    private final ScheduleService scheduleService;
+    private final ManagerRepository managerRepository;
+
+    public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
+        scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId(), body.storeId());
+        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeIdAndStoreId(body.date(), body.timeId(), body.themeId(), body.storeId());
+        validateReservationAlreadyExistsNot(scheduleId);
+        Reservation reservation = reservationRepository.save(body.toDomain(memberId, scheduleId));
+
+        return ReservationSaveResponse.from(reservation);
+    }
+
+    public List<ReservationDetailFindResponse> findStoreReservationDetails(long memberId, long storeId) {
+        validateStoreManager(memberId, storeId);
+        return ReservationDetailFindResponse.from(reservationRepository.findAllDetailsByStoreId(storeId));
+    }
+
+    public void deleteById(long reservationId, long memberId, long storeId) {
+        validateStoreManager(memberId, storeId);
+        deleteInternal(
+                reservationId,
+                oldReservation -> validateReservationInManagerStore(reservationId, oldReservation, storeId)
+        );
+    }
+
+    public void deleteByIdForUser(long reservationId, long memberId) {
+        deleteInternal(
+                reservationId,
+                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
+        );
+    }
+
+    public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
+        List<ReservationDetailProjection> reservationDetailProjection = reservationRepository.findAllReservationDetailsByMemberId(memberId);
+
+        return ReservationDetailFindResponse.from(reservationDetailProjection);
+    }
+
+    public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId, long memberId, long storeId) {
+        validateStoreManager(memberId, storeId);
+        return updateInternal(
+                body,
+                reservationId,
+                oldReservation -> validateReservationInManagerStore(reservationId, oldReservation, storeId)
+        );
+    }
+
+    public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {
+        return updateInternal(
+                body,
+                reservationId,
+                oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
+        );
+    }
+
+    private static void validateReservationInManagerStore(
+            long reservationId,
+            ReservationDetailProjection reservationDetail,
+            long storeId
+    ) {
+        if (!Objects.equals(reservationDetail.storeId(), storeId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_IN_MANAGER_STORE, reservationId);
+        }
+    }
+
+    private static void validateReservationOwner(
+            long reservationId,
+            ReservationDetailProjection reservationDetail,
+            long memberId
+    ) {
+        if (!Objects.equals(reservationDetail.memberId(), memberId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
+        }
+    }
+
+    private static void validateReservationUpdated(int affectedRow) {
+        if (affectedRow != 1) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_FAILED);
+        }
+    }
+
+    private static void validateNotEmptyUpdateRequest(ReservationUpdateRequest body) {
+        if (body.date() == null && body.timeId() == null) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_UPDATE_EMPTY);
+        }
+    }
+
+    private void deleteInternal(
+            long reservationId,
+            Consumer<ReservationDetailProjection> accessValidator
+    ) {
+        ReservationDetailProjection reservationDetail = reservationRepository.findDetailById(reservationId)
+                .orElse(null);
+        if (reservationDetail == null) {
+            return;
+        }
+        accessValidator.accept(reservationDetail);
+        validateNotPast(reservationDetail);
+        reservationRepository.deleteById(reservationId);
+    }
+
+    private ReservationSaveResponse updateInternal(
+            ReservationUpdateRequest body,
+            long reservationId,
+            Consumer<ReservationDetailProjection> accessValidator
+    ) {
+        ReservationDetailProjection oldReservation = getOldReservationDetailOrThrow(reservationId);
+        accessValidator.accept(oldReservation);
+        validateNotPast(oldReservation);
+        validateNotEmptyUpdateRequest(body);
+
+        LocalDate newDate = Objects.requireNonNullElse(body.date(), oldReservation.date());
+        long newTimeId = Objects.requireNonNullElse(body.timeId(), oldReservation.getTimeId());
+        long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeIdAndStoreId(newDate, newTimeId, oldReservation.getThemeId(), oldReservation.storeId());
+        scheduleService.validateSchedule(newDate, newTimeId, oldReservation.getThemeId(), oldReservation.storeId());
+        validateDuplicatedReservationNot(reservationId, scheduleId);
+
+        int affectedRow = reservationRepository.updateScheduleById(oldReservation.id(), scheduleId);
+        validateReservationUpdated(affectedRow);
+
+        return ReservationSaveResponse.from(getNewReservationOrThrow(reservationId));
+    }
+
+    private void validateStoreManager(long memberId, long storeId) {
+        Manager manager = managerRepository.findByMemberId(memberId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.FORBIDDEN));
+        if (!manager.isAccessible(storeId)) {
+            throw new EscapeRoomException(ErrorCode.FORBIDDEN);
+        }
+    }
+
+    private Reservation getNewReservationOrThrow(long reservationId) {
+        return reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND_AFTER_UPDATE, reservationId));
+    }
+
+    private ReservationDetailProjection getOldReservationDetailOrThrow(long reservationId) {
+        return reservationRepository.findDetailById(reservationId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
+    }
+
+    private void validateDuplicatedReservationNot(long reservationId, long scheduleId) {
+        if (reservationRepository.existsByScheduleIdAndIdNot(scheduleId, reservationId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+        }
+    }
+
+    private void validateReservationAlreadyExistsNot(long scheduleId) {
+        if (reservationRepository.existsByScheduleId(scheduleId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST, scheduleId);
+        }
+    }
+
+    private void validateNotPast(ReservationDetailProjection reservationDetail) {
+        scheduleService.validateNotPastDate(reservationDetail.date());
+        scheduleService.validateNotPastTime(reservationDetail.date(), reservationDetail.getTime());
+    }
+}
