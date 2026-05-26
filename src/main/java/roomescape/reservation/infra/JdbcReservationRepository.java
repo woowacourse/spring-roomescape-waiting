@@ -184,7 +184,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsActiveReservationByThemeAndTime(Long timeId, Long themeId, LocalDate date) {
+    public boolean existsActiveReservationByThemeAndTime(final Long timeId, final Long themeId, final LocalDate date) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND time_id=:timeId AND date=:date AND status='ACTIVE')";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("themeId", themeId, "timeId", timeId, "date", date),
@@ -192,7 +192,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsPendingReservationByName(Long timeId, Long themeId, LocalDate date, String name) {
+    public boolean existsPendingReservationByName(final Long timeId, final Long themeId, final LocalDate date, final String name) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND time_id=:timeId AND date=:date AND status='PENDING' AND name=:name)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql,
