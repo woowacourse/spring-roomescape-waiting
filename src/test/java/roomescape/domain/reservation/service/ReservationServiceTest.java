@@ -527,7 +527,7 @@ class ReservationServiceTest {
                 // when & then
                 assertThatThrownBy(() -> reservationService.saveWaitingReservation(request))
                     .isInstanceOf(GeneralException.class)
-                    .hasMessage("이미 대기 중인 날짜, 시간, 테마입니다.");
+                    .hasMessage("이미 대기 중인 이름, 날짜, 시간, 테마입니다.");
             }
 
             @Test

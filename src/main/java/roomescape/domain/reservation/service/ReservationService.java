@@ -236,7 +236,7 @@ public class ReservationService {
         try {
             return ReservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
         } catch (DuplicateKeyException e) {
-            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
+            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
         }
     }
 }
