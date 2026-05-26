@@ -9,13 +9,13 @@ import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-public record ReservationResponse(
+public record UserReservationResponse(
     String name,
     List<ReservationSlotPayload> reservation
 ) {
 
-    public static ReservationResponse of(String name, List<ReservationSlot> reservation) {
-        return new ReservationResponse(
+    public static UserReservationResponse of(String name, List<ReservationSlot> reservation) {
+        return new UserReservationResponse(
             name,
             reservation.stream()
                 .map(ReservationSlotPayload::from)

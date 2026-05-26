@@ -1,4 +1,4 @@
-package roomescape.domain.reservationslot;
+package roomescape.domain.reservation;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -8,16 +8,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.WaitingStatus;
-import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.reservation.dto.UserReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
-import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservationslot.dto.UpdateReservationRequest;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlotRepository;
+import roomescape.domain.reservation.admin.dto.ReservationResponse;
+import roomescape.domain.reservation.dto.CreateReservationRequest;
+import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -34,7 +33,7 @@ import roomescape.support.exception.errors.ThemeErrors;
 
 @Service
 @RequiredArgsConstructor
-public class ReservationSlotService {
+public class ReservationService {
 
     private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationTimeRepository reservationTimeRepository;
@@ -46,7 +45,7 @@ public class ReservationSlotService {
     private final Clock clock;
 
     @Transactional
-    public CreateReservationSlotResponse createReservation(CreateReservationSlotRequest request) {
+    public CreateReservationResponse createReservation(CreateReservationRequest request) {
         User user = getOrCreateUser(request);
 
         ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
@@ -72,22 +71,22 @@ public class ReservationSlotService {
         );
         reservationRepository.save(userReservation);
 
-        return CreateReservationSlotResponse.from(reservation);
+        return CreateReservationResponse.from(reservation);
     }
 
-    public List<ReservationSlotResponse> getAllReservations() {
+    public List<ReservationResponse> getAllReservations() {
         return reservationSlotRepository.findAll().stream()
-            .map(ReservationSlotResponse::from)
+            .map(ReservationResponse::from)
             .toList();
     }
 
-    public ReservationResponse getUserReservations(String name) {
+    public UserReservationResponse getUserReservations(String name) {
         User user = userRepository.findByName(name)
             .orElseThrow(() -> new NotFoundException(ReservationSlotErrors.RESERVATION_NOT_FOUND));
         List<ReservationSlot> reservations = reservationRepository.findByUserId(user.getId()).stream()
             .map(Reservation::getReservationSlot)
             .toList();
-        return ReservationResponse.of(name, reservations);
+        return UserReservationResponse.of(name, reservations);
     }
 
     @Transactional
@@ -224,7 +223,7 @@ public class ReservationSlotService {
         return waitingStatus;
     }
 
-    private User getOrCreateUser(CreateReservationSlotRequest request) {
+    private User getOrCreateUser(CreateReservationRequest request) {
         return userRepository.findByName(request.name())
             .orElseGet(() -> userRepository.save(User.createWithoutId(request.name())));
     }

@@ -1,4 +1,4 @@
-package roomescape.domain.reservationslot;
+package roomescape.domain.reservation;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -14,33 +14,33 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservationslot.dto.UpdateReservationRequest;
-import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.reservation.dto.CreateReservationRequest;
+import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.UpdateReservationRequest;
+import roomescape.domain.reservation.dto.UserReservationResponse;
 
 @Validated
 @RestController
 @RequiredArgsConstructor
-public class ReservationSlotController {
+public class ReservationController {
 
-    private final ReservationSlotService reservationService;
+    private final ReservationService reservationService;
 
     @PostMapping("/reservations")
-    public ResponseEntity<CreateReservationSlotResponse> createReservation(
-        @Valid @RequestBody CreateReservationSlotRequest request
+    public ResponseEntity<CreateReservationResponse> createReservation(
+        @Valid @RequestBody CreateReservationRequest request
     ) {
-        CreateReservationSlotResponse response = reservationService.createReservation(request);
+        CreateReservationResponse response = reservationService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<ReservationResponse> getUserReservations(
+    public ResponseEntity<UserReservationResponse> getUserReservations(
         @RequestParam
         @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
         String name
     ) {
-        ReservationResponse response = reservationService.getUserReservations(name);
+        UserReservationResponse response = reservationService.getUserReservations(name);
         return ResponseEntity.ok(response);
     }
 

@@ -1,4 +1,4 @@
-package roomescape.domain.reservationslot.dto;
+package roomescape.domain.reservation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -7,7 +7,7 @@ import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-public record CreateReservationSlotRequest(
+public record CreateReservationRequest(
     @NotBlank(message = "이름은 비어있을 수 없습니다.")
     String name,
 

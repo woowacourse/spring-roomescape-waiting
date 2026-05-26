@@ -1,4 +1,4 @@
-package roomescape.domain.reservationslot.admin.dto;
+package roomescape.domain.reservation.admin.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
@@ -7,15 +7,15 @@ import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-public record ReservationSlotResponse(
+public record ReservationResponse(
     Long id,
     LocalDate date,
     ReservationTimePayload time,
     ThemePayload theme
 ) {
 
-    public static ReservationSlotResponse from(ReservationSlot reservation) {
-        return new ReservationSlotResponse(
+    public static ReservationResponse from(ReservationSlot reservation) {
+        return new ReservationResponse(
             reservation.getId(),
             reservation.getDate().getDate(),
             ReservationTimePayload.from(reservation.getTime()),

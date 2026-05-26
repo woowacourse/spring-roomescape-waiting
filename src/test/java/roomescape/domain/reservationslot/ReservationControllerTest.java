@@ -22,19 +22,21 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse.ThemePayload;
-import roomescape.domain.reservationslot.dto.UpdateReservationRequest;
-import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.reservation.ReservationService;
+import roomescape.domain.reservation.ReservationController;
+import roomescape.domain.reservation.dto.CreateReservationRequest;
+import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.CreateReservationResponse.ThemePayload;
+import roomescape.domain.reservation.dto.UpdateReservationRequest;
+import roomescape.domain.reservation.dto.UserReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationSlotErrors;
 
-@WebMvcTest(ReservationSlotController.class)
-class ReservationSlotControllerTest {
+@WebMvcTest(ReservationController.class)
+class ReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,25 +45,25 @@ class ReservationSlotControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private ReservationSlotService reservationService;
+    private ReservationService reservationService;
 
     @Test
     @DisplayName("예약 생성 요청과 응답을 확인한다.")
     void createReservation() throws Exception {
         // given
-        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "보예",
             1L,
             2L,
             3L
         );
-        CreateReservationSlotResponse response = new CreateReservationSlotResponse(
+        CreateReservationResponse response = new CreateReservationResponse(
             10L,
             LocalDate.of(2026, 5, 20),
             LocalTime.of(10, 0),
             ThemePayload.from(Theme.of(1L, "공포", "무섭다", "theme-url"))
         );
-        given(reservationService.createReservation(any(CreateReservationSlotRequest.class)))
+        given(reservationService.createReservation(any(CreateReservationRequest.class)))
             .willReturn(response);
 
         // when & then
@@ -81,7 +83,7 @@ class ReservationSlotControllerTest {
     @DisplayName("필수 파라미터가 누락되었을 때 예외가 발생한다.")
     void createWrongParameterReservation() throws Exception {
         // given
-        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
+        CreateReservationRequest request = new CreateReservationRequest(
             "보예",
             1L,
             null,
@@ -102,7 +104,7 @@ class ReservationSlotControllerTest {
     void getUserReservations() throws Exception {
         // given
         String name = "보예";
-        ReservationResponse response = ReservationResponse.of("보예",
+        UserReservationResponse response = UserReservationResponse.of("보예",
             List.of(ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
                     ReservationTime.of(1L, LocalTime.of(10, 10)),
                     Theme.of(1L, "공포", "아무서워", "theme-url")
