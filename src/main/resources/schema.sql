@@ -23,5 +23,20 @@ CREATE TABLE reservation
     theme_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    UNIQUE (date, time_id, theme_id)
 );
+
+CREATE TABLE waitlist
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(255) NOT NULL,
+    date           DATE         NOT NULL,
+    created_at     DATETIME     NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    time_id        BIGINT       NOT NULL,
+    theme_id       BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    UNIQUE (name, date, time_id, theme_id)
+)
