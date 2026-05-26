@@ -39,6 +39,14 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findReservations(String username) {
+        return storage.values().stream()
+            .filter(userReservation -> username.equals(userReservation.getUser().getName()))
+            .sorted(Comparator.comparing(Reservation::getId).reversed())
+            .toList();
+    }
+
+    @Override
     public List<Reservation> findByUserId(Long userId) {
         return storage.values().stream()
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))

@@ -69,8 +69,8 @@ class ReservationSlotIntegrationTest {
             .when().get("/reservations")
             .then()
             .statusCode(200)
-            .body("name", is("보예"))
-            .body("reservation", hasSize(1));
+            .body("username", is("보예"))
+            .body("reservations", hasSize(1));
     }
 
     @Test
@@ -108,10 +108,11 @@ class ReservationSlotIntegrationTest {
             .when().get("/reservations")
             .then().log().all()
             .statusCode(200)
-            .body("name", is("보예"))
-            .body("reservation[0].date.startWhen", is("2026-06-01"))
-            .body("reservation[0].time.startAt", is("10:00"))
-            .body("reservation[0].theme.name", is("공포"));
+            .body("username", is("보예"))
+            .body("reservations[0].reservationSlot.date.startWhen", is("2026-06-01"))
+            .body("reservations[0].reservationSlot.time.startAt", is("10:00"))
+            .body("reservations[0].reservationSlot.theme.name", is("공포"))
+            .body("reservations[0].status", is("CONFIRMED"));
     }
 
     @Test
@@ -143,8 +144,8 @@ class ReservationSlotIntegrationTest {
             .when().get("/reservations")
             .then()
             .statusCode(200)
-            .body("name", is("보예"))
-            .body("reservation", hasSize(0));
+            .body("username", is("보예"))
+            .body("reservations", hasSize(0));
     }
 
     @Test
@@ -174,8 +175,8 @@ class ReservationSlotIntegrationTest {
             .when().get("/reservations")
             .then()
             .statusCode(200)
-            .body("reservation[0].date.startWhen", is("2026-06-02"))
-            .body("reservation[0].time.startAt", is("11:00"));
+            .body("reservations[0].reservationSlot.date.startWhen", is("2026-06-02"))
+            .body("reservations[0].reservationSlot.time.startAt", is("11:00"));
     }
 
     private Long saveReservation(String name, String date, String time, String themeName) {
@@ -210,7 +211,12 @@ class ReservationSlotIntegrationTest {
             "CONFIRMED"
         );
 
-        return reservationId;
+        return jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation WHERE user_id = ? AND reservation_slot_id = ?",
+            Long.class,
+            userId,
+            reservationId
+        );
     }
 
     private Long saveTheme(String themeName) {

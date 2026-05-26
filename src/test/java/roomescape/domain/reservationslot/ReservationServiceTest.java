@@ -19,7 +19,7 @@ import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -221,16 +221,14 @@ class ReservationServiceTest {
             user,
             null,
             WaitingStatus.CONFIRMED,
-            LocalDateTime.of(2026, 5, 12, 13, 0),
-            LocalDateTime.of(2026, 5, 12, 13, 0)
+            now
         ));
         userReservationRepository.save(Reservation.createWithoutId(
             firstReservation,
             user,
             null,
             WaitingStatus.CONFIRMED,
-            LocalDateTime.of(2026, 5, 12, 13, 0),
-            LocalDateTime.of(2026, 5, 12, 13, 0)
+            now
         ));
         ReservationService reservationService = new ReservationService(
             reservationRepository,
@@ -243,21 +241,23 @@ class ReservationServiceTest {
         );
 
         // when
-        UserReservationResponse userReservations = reservationService.getUserReservations(name);
+        UserReservationsResponse userReservations = reservationService.getUserReservations(name);
 
         // then
         assertSoftly(softly -> {
-            assertThat(userReservations.reservation().size()).isEqualTo(2);
-            assertThat(userReservations.name()).isEqualTo("보예짱");
-            assertThat(userReservations.reservation())
+            assertThat(userReservations.reservations()).hasSize(2);
+            assertThat(userReservations.username()).isEqualTo("보예짱");
+            assertThat(userReservations.reservations())
                 .extracting(
-                    reservationPayload -> reservationPayload.date().startWhen(),
-                    reservationPayload -> reservationPayload.time().startAt(),
-                    reservationPayload -> reservationPayload.theme().name()
+                    "reservationSlot.date.startWhen",
+                    "reservationSlot.time.startAt",
+                    "reservationSlot.theme.name",
+                    "status",
+                    "waitingNumber"
                 )
                 .containsExactly(
-                    tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포"),
-                    tuple(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0), "공포")
+                    tuple(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0), "공포", "CONFIRMED", null),
+                    tuple(LocalDate.of(2026, 5, 14), LocalTime.of(10, 0), "공포", "CONFIRMED", null)
                 );
         });
     }
@@ -869,14 +869,12 @@ class ReservationServiceTest {
     }
 
     private Reservation saveConfirmedReservation(ReservationSlot reservationSlot, User user, Clock clock) {
-        LocalDateTime now = LocalDateTime.now(clock);
         return userReservationRepository.save(Reservation.createWithoutId(
             reservationSlot,
             user,
             null,
             WaitingStatus.CONFIRMED,
-            now,
-            now
+            clock
         ));
     }
 

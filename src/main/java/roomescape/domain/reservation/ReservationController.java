@@ -18,6 +18,7 @@ import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservation.dto.UserReservationsResponse;
 
 @Validated
 @RestController
@@ -35,12 +36,12 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<UserReservationResponse> getUserReservations(
+    public ResponseEntity<UserReservationsResponse> getUserReservations(
         @RequestParam
         @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
         String name
     ) {
-        UserReservationResponse response = reservationService.getUserReservations(name);
+        UserReservationsResponse response = reservationService.getUserReservations(name);
         return ResponseEntity.ok(response);
     }
 

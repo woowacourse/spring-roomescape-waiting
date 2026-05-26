@@ -22,16 +22,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationService;
 import roomescape.domain.reservation.ReservationController;
+import roomescape.domain.reservation.WaitingStatus;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationResponse.ThemePayload;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.user.User;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationSlotErrors;
 
@@ -104,12 +107,19 @@ class ReservationControllerTest {
     void getUserReservations() throws Exception {
         // given
         String name = "보예";
-        UserReservationResponse response = UserReservationResponse.of("보예",
-            List.of(ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
+        UserReservationsResponse response = UserReservationsResponse.of("보예",
+            List.of(Reservation.of(
+                1L,
+                ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
                     ReservationTime.of(1L, LocalTime.of(10, 10)),
                     Theme.of(1L, "공포", "아무서워", "theme-url")
-                )
-            )
+                ),
+                User.of(1L, "보예"),
+                null,
+                WaitingStatus.CONFIRMED,
+                LocalDate.of(2026, 5, 16).atStartOfDay(),
+                LocalDate.of(2026, 5, 16).atStartOfDay()
+            ))
         );
         given(reservationService.getUserReservations(name)).willReturn(response);
 
@@ -118,13 +128,15 @@ class ReservationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .param("name", name))
             .andExpect(status().isOk())
-            .andExpect(jsonPath("$.name").value("보예"))
-            .andExpect(jsonPath("$.reservation[0].reservationId").value(1L))
-            .andExpect(jsonPath("$.reservation[0].date.startWhen").value("2026-05-17"))
-            .andExpect(jsonPath("$.reservation[0].time.startAt").value("10:10"))
-            .andExpect(jsonPath("$.reservation[0].theme.name").value("공포"))
-            .andExpect(jsonPath("$.reservation[0].theme.content").value("아무서워"))
-            .andExpect(jsonPath("$.reservation[0].theme.url").value("theme-url"));
+            .andExpect(jsonPath("$.username").value("보예"))
+            .andExpect(jsonPath("$.reservations[0].reservationSlot.id").value(1L))
+            .andExpect(jsonPath("$.reservations[0].reservationSlot.date.startWhen").value("2026-05-17"))
+            .andExpect(jsonPath("$.reservations[0].reservationSlot.time.startAt").value("10:10"))
+            .andExpect(jsonPath("$.reservations[0].reservationSlot.theme.name").value("공포"))
+            .andExpect(jsonPath("$.reservations[0].reservationSlot.theme.content").value("아무서워"))
+            .andExpect(jsonPath("$.reservations[0].reservationSlot.theme.url").value("theme-url"))
+            .andExpect(jsonPath("$.reservations[0].status").value("CONFIRMED"))
+            .andExpect(jsonPath("$.reservations[0].waitingNumber").doesNotExist());
     }
 
     @Test

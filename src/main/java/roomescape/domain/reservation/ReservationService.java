@@ -12,7 +12,7 @@ import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.UpdateReservationRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservation.dto.UserReservationsResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -79,13 +79,9 @@ public class ReservationService {
             .toList();
     }
 
-    public UserReservationResponse getUserReservations(String name) {
-        User user = userRepository.findByName(name)
-            .orElseThrow(() -> new NotFoundException(ReservationSlotErrors.RESERVATION_NOT_FOUND));
-        List<ReservationSlot> reservations = reservationRepository.findByUserId(user.getId()).stream()
-            .map(Reservation::getReservationSlot)
-            .toList();
-        return UserReservationResponse.of(name, reservations);
+    public UserReservationsResponse getUserReservations(String username) {
+        List<Reservation> reservations = reservationRepository.findReservations(username);
+        return UserReservationsResponse.of(username, reservations);
     }
 
     @Transactional

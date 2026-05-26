@@ -1,6 +1,7 @@
 package roomescape.domain.reservationslot.admin;
 
 import static io.restassured.RestAssured.given;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
 import static org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 
@@ -76,13 +77,12 @@ class AdminReservationSlotIntegrationTest {
             .then().log().all()
             .statusCode(204);
 
-        given()
-            .contentType(ContentType.JSON)
-            .header("X-ADMIN-TOKEN", adminToken)
-            .when().get("/admin/reservations")
-            .then()
-            .statusCode(200)
-            .body("size()", is(0));
+        Long reservationCount = jdbcTemplate.queryForObject(
+            "SELECT COUNT(*) FROM reservation WHERE id = ?",
+            Long.class,
+            reservationId
+        );
+        assertThat(reservationCount).isZero();
     }
 
     private Long saveThemeDateTimeAndReservation(String name) {
@@ -101,6 +101,7 @@ class AdminReservationSlotIntegrationTest {
             "10:00"
         );
 
+
         Long themeId = jdbcTemplate.queryForObject(
             "SELECT id FROM theme WHERE name = ?",
             Long.class,
@@ -118,10 +119,10 @@ class AdminReservationSlotIntegrationTest {
         );
 
         jdbcTemplate.update(
-            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
-            dateId,
-            timeId,
-            themeId
+                "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
+                dateId,
+                timeId,
+                themeId
         );
         Long reservationId = jdbcTemplate.queryForObject(
             "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
@@ -131,6 +132,27 @@ class AdminReservationSlotIntegrationTest {
             themeId
         );
 
-        return reservationId;
+        jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", name);
+
+        Long userId = jdbcTemplate.queryForObject(
+            "SELECT id FROM users WHERE name = ?",
+            Long.class,
+            name
+        );
+
+        jdbcTemplate.update(
+            "INSERT INTO reservation(user_id, reservation_slot_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            userId,
+            reservationId,
+            null,
+            "CONFIRMED"
+        );
+
+        return jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation WHERE user_id = ? AND reservation_slot_id = ?",
+            Long.class,
+            userId,
+            reservationId
+        );
     }
 }
