@@ -31,6 +31,7 @@ const editReservationThemeEl = document.getElementById("edit-reservation-theme")
 const editAvailableTimesEl = document.getElementById("edit-available-times");
 const editReservationCancelEl = document.getElementById("edit-reservation-cancel");
 const AUTH_TOKEN_KEY = "roomescapeAccessToken";
+const DEMO_DATE = "2026-05-05";
 let selectedThemeId = null;
 let selectedTimeId = null;
 let selectedTimeLabel = null;
@@ -654,8 +655,7 @@ document.addEventListener("click", (e) => {
 });
 
 function setTodayDefault() {
-  const today = new Date().toISOString().slice(0, 10);
-  document.getElementById("theme-date").value = today;
+  document.getElementById("theme-date").value = DEMO_DATE;
 }
 
 loginFormEl.addEventListener("submit", async (e) => {

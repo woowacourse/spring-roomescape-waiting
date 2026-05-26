@@ -38,3 +38,9 @@ dependencies {
 test {
     useJUnitPlatform()
 }
+
+tasks.named('processResources') {
+    from('client') {
+        into 'static'
+    }
+}
