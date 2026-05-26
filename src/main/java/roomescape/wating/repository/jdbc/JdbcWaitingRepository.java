@@ -1,15 +1,16 @@
 package roomescape.wating.repository.jdbc;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
 import roomescape.wating.domain.Waiting;
 import roomescape.wating.repository.WaitingRepository;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-
+@Repository
 @RequiredArgsConstructor
 public class JdbcWaitingRepository implements WaitingRepository {
 
