@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Roomescape - 내 예약</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+    </style>
+</head>
+<body>
+
+<!-- 예약 변경 모달 -->
+<div class="modal fade" id="updateModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">예약 날짜·시간 변경</h5>
+                <button class="btn-close" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label">날짜</label>
+                    <input class="form-control" id="update-date" type="date">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">시간</label>
+                    <select class="form-select" id="update-time">
+                        <option disabled selected value="">날짜를 먼저 선택하세요</option>
+                    </select>
+                </div>
+                <div id="update-error" class="text-danger small d-none"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">취소</button>
+                <button class="btn btn-primary" id="confirm-update">변경하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Roomescape</a>
+        <div class="navbar-nav">
+            <a class="nav-link" href="/">홈</a>
+            <a class="nav-link" href="/reservation.html">예약하기</a>
+            <a class="nav-link active" href="/my-reservations.html">내 예약</a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">관리자</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/admin-theme.html">테마 관리</a></li>
+                    <li><a class="dropdown-item" href="/admin-time.html">시간 관리</a></li>
+                    <li><a class="dropdown-item" href="/admin-reservation.html">예약 관리</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="container my-5" style="max-width: 800px;">
+    <h2 class="mb-4">내 예약 조회</h2>
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <div class="row g-2 align-items-end">
+                <div class="col">
+                    <label class="form-label">예약자 이름</label>
+                    <input class="form-control" id="search-name" placeholder="이름을 입력하세요" type="text">
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" id="search-btn">조회하기</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="result-section" class="d-none">
+        <h5 id="result-title" class="mb-3"></h5>
+        <div id="empty-message" class="d-none text-muted">예약 내역이 없습니다.</div>
+        <table class="table table-hover" id="reservation-table">
+            <thead class="table-dark">
+            <tr>
+                <th>ID</th>
+                <th>테마</th>
+                <th>날짜</th>
+                <th>시간</th>
+                <th>변경</th>
+                <th>취소</th>
+            </tr>
+            </thead>
+            <tbody id="reservation-tbody"></tbody>
+        </table>
+    </div>
+
+    <div id="error-message" class="alert alert-danger d-none"></div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let currentReservationId = null;
+    let currentThemeId = null;
+    let updateModal = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+        updateModal = new bootstrap.Modal(document.getElementById('updateModal'));
+
+        document.getElementById('search-btn').addEventListener('click', searchReservations);
+        document.getElementById('search-name').addEventListener('keyup', e => {
+            if (e.key === 'Enter') searchReservations();
+        });
+
+        document.getElementById('update-date').addEventListener('change', fetchAvailableTimes);
+        document.getElementById('confirm-update').addEventListener('click', confirmUpdate);
+    });
+
+    function searchReservations() {
+        const name = document.getElementById('search-name').value.trim();
+        if (!name) {
+            alert('이름을 입력해주세요.');
+            return;
+        }
+
+        fetch(`/reservations?name=${encodeURIComponent(name)}`)
+            .then(response => {
+                if (!response.ok) return response.json().then(err => { throw new Error(err.message); });
+                return response.json();
+            })
+            .then(reservations => {
+                document.getElementById('result-section').classList.remove('d-none');
+                document.getElementById('error-message').classList.add('d-none');
+                document.getElementById('result-title').textContent = `"${name}" 님의 예약 목록`;
+
+                const tbody = document.getElementById('reservation-tbody');
+                const emptyMsg = document.getElementById('empty-message');
+                const table = document.getElementById('reservation-table');
+
+                if (reservations.length === 0) {
+                    emptyMsg.classList.remove('d-none');
+                    table.classList.add('d-none');
+                    return;
+                }
+
+                emptyMsg.classList.add('d-none');
+                table.classList.remove('d-none');
+
+                tbody.innerHTML = reservations.map(res => `
+                    <tr>
+                        <td>${res.id}</td>
+                        <td>${res.theme.name}</td>
+                        <td>${res.date}</td>
+                        <td>${res.time.startAt}</td>
+                        <td>
+                            <button class="btn btn-outline-primary btn-sm"
+                                onclick="openUpdateModal(${res.id}, ${res.theme.id})">
+                                변경
+                            </button>
+                        </td>
+                        <td>
+                            <button class="btn btn-outline-danger btn-sm"
+                                onclick="cancelReservation(${res.id})">
+                                취소
+                            </button>
+                        </td>
+                    </tr>
+                `).join('');
+            })
+            .catch(error => {
+                const errEl = document.getElementById('error-message');
+                errEl.textContent = error.message || '조회 중 오류가 발생했습니다.';
+                errEl.classList.remove('d-none');
+                document.getElementById('result-section').classList.add('d-none');
+            });
+    }
+
+    function cancelReservation(id) {
+        if (!confirm('정말 취소하시겠습니까?')) return;
+
+        fetch(`/reservations/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.ok) {
+                    alert('예약이 취소되었습니다.');
+                    searchReservations();
+                } else {
+                    return response.json().then(err => { throw new Error(err.message); });
+                }
+            })
+            .catch(error => alert(error.message || '예약 취소에 실패했습니다.'));
+    }
+
+    function openUpdateModal(reservationId, themeId) {
+        currentReservationId = reservationId;
+        currentThemeId = themeId;
+
+        document.getElementById('update-date').value = '';
+        document.getElementById('update-time').innerHTML = '<option disabled selected value="">날짜를 먼저 선택하세요</option>';
+        document.getElementById('update-error').classList.add('d-none');
+
+        const dateInput = document.getElementById('update-date');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+
+        updateModal.show();
+    }
+
+    function fetchAvailableTimes() {
+        const date = document.getElementById('update-date').value;
+        if (!date || !currentThemeId) return;
+
+        fetch(`/times?themeId=${currentThemeId}&date=${date}`)
+            .then(response => response.json())
+            .then(times => {
+                const select = document.getElementById('update-time');
+                const available = times.filter(t => t.isNotReserved);
+
+                if (available.length === 0) {
+                    select.innerHTML = '<option disabled selected value="">예약 가능한 시간이 없습니다</option>';
+                    return;
+                }
+
+                select.innerHTML = '<option disabled selected value="">시간 선택</option>' +
+                    available.map(t => `<option value="${t.id}">${t.startAt}</option>`).join('');
+            });
+    }
+
+    function confirmUpdate() {
+        const date = document.getElementById('update-date').value;
+        const timeId = document.getElementById('update-time').value;
+        const errorEl = document.getElementById('update-error');
+
+        if (!date || !timeId) {
+            errorEl.textContent = '날짜와 시간을 모두 선택해주세요.';
+            errorEl.classList.remove('d-none');
+            return;
+        }
+
+        fetch(`/reservations/${currentReservationId}`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ date, timeId: parseInt(timeId) })
+        })
+        .then(response => {
+            if (response.ok) {
+                updateModal.hide();
+                alert('예약이 변경되었습니다.');
+                searchReservations();
+            } else {
+                return response.json().then(err => { throw new Error(err.message); });
+            }
+        })
+        .catch(error => {
+            errorEl.textContent = error.message || '예약 변경에 실패했습니다.';
+            errorEl.classList.remove('d-none');
+        });
+    }
+</script>
+</body>
+</html>

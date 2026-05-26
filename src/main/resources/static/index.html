@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Roomescape</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body { background-color: #f8f9fa; }
+        .hero { padding: 4rem 2rem; background-color: #343a40; color: white; text-align: center; }
+        .card { transition: transform 0.2s; }
+        .card:hover { transform: translateY(-5px); }
+    </style>
+</head>
+<body>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Roomescape</a>
+        <div class="navbar-nav">
+            <a class="nav-link active" href="/">홈</a>
+            <a class="nav-link" href="/reservation.html">예약하기</a>
+            <a class="nav-link" href="/my-reservations.html">내 예약</a>
+            <div class="nav-item dropdown">
+                <a class="nav-link dropdown-toggle" data-bs-toggle="dropdown" href="#" role="button">관리자</a>
+                <ul class="dropdown-menu">
+                    <li><a class="dropdown-item" href="/admin-theme.html">테마 관리</a></li>
+                    <li><a class="dropdown-item" href="/admin-time.html">시간 관리</a></li>
+                    <li><a class="dropdown-item" href="/admin-reservation.html">예약 관리</a></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<div class="hero">
+    <div class="container">
+        <h1 class="display-4">신비로운 방탈출의 세계로 초대합니다</h1>
+        <p class="lead">지금 바로 최고의 테마를 예약하고 모험을 시작하세요!</p>
+        <a class="btn btn-primary btn-lg mt-3" href="/reservation.html">예약하러 가기</a>
+    </div>
+</div>
+
+<div class="container my-5">
+    <h2 class="mb-4">인기 테마</h2>
+    <div class="row g-4" id="popular-themes">
+        <!-- 인기 테마 목록이 여기에 렌더링됩니다 -->
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        fetch(`/themes/popular`)
+            .then(response => response.json())
+            .then(themes => {
+                const popularThemesContainer = document.getElementById('popular-themes');
+                themes.forEach(theme => {
+                    const themeCard = `
+                        <div class="col-md-4">
+                            <div class="card h-100 shadow-sm">
+                                <img src="${theme.thumbnail}" class="card-img-top" alt="${theme.name}" onerror="this.src='https://via.placeholder.com/300x200?text=No+Image'">
+                                <div class="card-body">
+                                    <h5 class="card-title">${theme.name}</h5>
+                                    <p class="card-text text-truncate">${theme.description}</p>
+                                    <a href="/reservation.html" class="btn btn-outline-primary">예약하기</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    popularThemesContainer.innerHTML += themeCard;
+                });
+            })
+            .catch(error => console.error('Error fetching popular themes:', error));
+    });
+</script>
+</body>
+</html>
