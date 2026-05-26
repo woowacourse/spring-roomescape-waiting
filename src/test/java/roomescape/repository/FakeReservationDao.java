@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.util.*;
 
+import ch.qos.logback.core.spi.PreSerializationTransformer;
 import roomescape.domain.Reservation;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
@@ -103,7 +104,7 @@ public class FakeReservationDao implements ReservationRepository {
     public boolean existsByThemeId(long themeId) {
         return storage.values().stream()
                 .anyMatch(reservation ->
-                            Objects.equals(reservation.getTheme().getId(), themeId)
+                        Objects.equals(reservation.getTheme().getId(), themeId)
                 );
     }
 
@@ -112,6 +113,14 @@ public class FakeReservationDao implements ReservationRepository {
         return storage.values().stream()
                 .anyMatch(reservation ->
                         Objects.equals(reservation.getTime().getId(), timeId)
+                );
+    }
+
+    @Override
+    public boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId) {
+        return storage.values().stream()
+                .anyMatch(reservation ->
+                        reservation.getName().equals(name) && Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
                 );
     }
 }

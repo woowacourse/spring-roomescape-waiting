@@ -15,6 +15,8 @@ import roomescape.repository.ThemeSlotRepository;
 import java.time.LocalTime;
 import java.util.List;
 
+import static roomescape.global.exception.ErrorCode.RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT;
+
 @Service
 public class ReservationService {
 
@@ -37,7 +39,7 @@ public class ReservationService {
     public Reservation saveReservation(String name, Long themeSlotId) {
         ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
         validateBeforeDate(themeSlot);
-//        validateIsExistBy(themeSlotId);
+        validateDuplicatedReservation(name, themeSlotId);
         validateDateTime(themeSlot);
         Reservation reservation = new Reservation(name, themeSlot);
 
@@ -98,6 +100,16 @@ public class ReservationService {
         return updateReservation;
     }
 
+    public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long id) {
+        List<WaitingReservationResponse> list = new ArrayList<>();
+        List<Reservation> reservations= reservationRepository.findByThemeSlotAndPending(id);
+        for (int i = 1 ; i <= reservations.size(); i++) {
+            WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i-1));
+            list.add(response);
+        }
+        return list;
+    }
+
     @NonNull
     private ThemeSlot getThemeSlotOrElseThrow(Long themeSlotId) {
         return themeSlotRepository.findById(themeSlotId)
@@ -128,13 +140,9 @@ public class ReservationService {
         }
     }
 
-    public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long id) {
-        List<WaitingReservationResponse> list = new ArrayList<>();
-         List<Reservation> reservations= reservationRepository.findByThemeSlotAndPending(id);
-         for (int i = 1 ; i <= reservations.size(); i++) {
-             WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i-1));
-             list.add(response);
-         }
-        return list;
+    private void validateDuplicatedReservation(String name, Long themeSlotId) {
+        if (reservationRepository.existsByThemeSlotIdAndMemberName(name, themeSlotId)) {
+            throw new CustomException(RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT);
+        }
     }
 }

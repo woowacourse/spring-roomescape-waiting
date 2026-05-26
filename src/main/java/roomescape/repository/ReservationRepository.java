@@ -30,4 +30,6 @@ public interface ReservationRepository {
     boolean existsByThemeId(long themeId);
 
     boolean existsByTimeId(long timeId);
+
+    boolean existsByThemeSlotIdAndMemberName(String name, Long themeSlotId);
 }

@@ -1,10 +1,12 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -15,6 +17,7 @@ import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
+import roomescape.global.exception.CustomException;
 import roomescape.repository.FakeReservationDao;
 import roomescape.repository.FakeThemeDao;
 import roomescape.repository.FakeThemeSlotDao;
@@ -101,11 +104,14 @@ class ReservationServiceTest {
         List<WaitingReservationResponse> responses = reservationService.findWaitingReservationWithOrder(savedThemeSlot.getId());
         assertThat(responses).extracting(WaitingReservationResponse::waitingOrder)
                 .containsExactly(1, 2, 3);
-
-
-
-
-
     }
 
+    @Test
+    @DisplayName("같은 사용자가 같은 예약 슬롯에 중복 대기 예약을 한다면 예외를 발생한다.")
+    void throwsExceptionWhenSameUserDuplicatesWaitingReservation() {
+        reservationService.saveReservation("김대기", savedThemeSlot.getId());
+        assertThatThrownBy(() -> {
+            reservationService.saveReservation("김대기", savedThemeSlot.getId());
+        }).isInstanceOf(CustomException.class).hasMessage("이미 같은 시간에 예약 또는 대기를 신청했습니다.");
+    }
 }
