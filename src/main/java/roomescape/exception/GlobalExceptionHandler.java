@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NameNotFoundException.class)
-    public ResponseEntity<GlobalErrorResponse> handleNameNotFoundException(IdNotFoundException e) {
+    public ResponseEntity<GlobalErrorResponse> handleNameNotFoundException(NameNotFoundException e) {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(new GlobalErrorResponse(e.getMessage()));

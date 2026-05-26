@@ -41,7 +41,7 @@ public class ReservationServiceTest {
         when(reservationTimeDao.findTimeById(invalidTimeId)).thenReturn(null);
         assertThatThrownBy(() -> reservationService.save(request))
                 .isInstanceOf(IdNotFoundException.class)
-                .hasMessageContaining("요청하신 시간 ID가 존재하지 않습니다.");
+                .hasMessageContaining("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요.");
     }
 
     @Test
@@ -56,7 +56,7 @@ public class ReservationServiceTest {
         when(themeDao.findThemeById(invalidThemeId)).thenReturn(null);
         assertThatThrownBy(() -> reservationService.save(request))
                 .isInstanceOf(IdNotFoundException.class)
-                .hasMessageContaining("요청하신 테마 ID가 존재하지 않습니다.");
+                .hasMessageContaining("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요.");
     }
 
     @Test
