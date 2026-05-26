@@ -1,6 +1,8 @@
 package roomescape.domain.reservatinWaiting;
 
+import java.sql.Date;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -12,14 +14,24 @@ public class ReservationWaiting {
     private ReservationTime time;
     private Theme theme;
     private Long sequence;
+    private LocalDateTime createdAt;
 
-    public ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence) {
+    public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+        this.name = name;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
+        this.createdAt = createdAt;
+    }
+
+    public ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.sequence = sequence;
+        this.createdAt = createdAt;
     }
 
     public Long getId() {
@@ -44,5 +56,9 @@ public class ReservationWaiting {
 
     public Long getSequence() {
         return sequence;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 }
