@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +16,7 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.waiting.dto.MyWaitingResult;
 
 @JdbcTest
 @Import(WaitingRepository.class)
@@ -143,6 +145,39 @@ class WaitingRepositoryTest {
             waitingRepository.deleteById(saved.getId());
 
             assertThat(waitingRepository.existsById(saved.getId())).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("이름으로 대기 조회")
+    class FindByName {
+
+        @Test
+        void 이름에_해당하는_대기와_대기_순번을_반환한다() {
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+            waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+
+            List<MyWaitingResult> result = waitingRepository.findByName("유저1");
+
+            assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(MyWaitingResult::name)
+                    .containsExactly("유저1", "유저1"),
+                () -> assertThat(result).extracting(MyWaitingResult::themeName)
+                    .containsExactly("테마1", "테마1"),
+                () -> assertThat(result).extracting(MyWaitingResult::waitingNumber)
+                    .containsExactly(1, 3)
+            );
+        }
+
+        @Test
+        void 이름에_해당하는_대기가_없으면_빈_리스트를_반환한다() {
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+
+            List<MyWaitingResult> result = waitingRepository.findByName("없는유저");
+
+            assertThat(result).isEmpty();
         }
     }
 }
