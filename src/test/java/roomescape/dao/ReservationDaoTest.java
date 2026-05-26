@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -14,7 +15,9 @@ import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
 import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.service.exception.ReservationConflictException;
 
 class ReservationDaoTest {
 
@@ -72,6 +75,17 @@ class ReservationDaoTest {
     }
 
     @Test
+    void save_예약_저장_중복_예외() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+
+        reservationDao.save(reservation);
+        assertThatThrownBy(() -> reservationDao.save(reservation))
+                .isInstanceOf(ReservationConflictException.class);
+    }
+
+    @Test
     void delete_예약_삭제() {
         int beforeSize = reservationDao.findAll(0, 100).size();
         reservationDao.delete(1L);
@@ -107,5 +121,55 @@ class ReservationDaoTest {
     @Test
     void existsByDateAndTimeIdAndThemeId_없으면_false() {
         assertThat(reservationDao.existsByDateAndTimeIdAndThemeId(LocalDate.of(2026, 12, 31), 3L, 1L)).isFalse();
+    }
+
+    @Test
+    void saveWaiting_예약_대기_저장() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation reservation = new Reservation("브리", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+
+        Reservation reservationWaiting = reservationDao.saveWaiting(reservation);
+
+        assertThat(reservationWaiting.getId()).isNotNull();
+        assertThat(reservationWaiting.getName()).isEqualTo("브리");
+    }
+
+    @Test
+    void saveWaiting_예약_대기_저장_중복_예외() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation reservation = new Reservation("브리", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+
+        reservationDao.saveWaiting(reservation);
+
+        assertThatThrownBy(() -> reservationDao.saveWaiting(reservation))
+                .isInstanceOf(ReservationConflictException.class);
+    }
+
+    @Test
+    void findByWaitingId_ID로_예약_조회() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation reservation = new Reservation("브리", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+        reservationDao.saveWaiting(reservation);
+        long reservationId = 1L;
+
+        Reservation actual = reservationDao.findByWaitingId(reservationId).orElse(null);
+        assertThat(actual).isNotNull();
+        assertThat(actual.getId()).isEqualTo(reservationId);
+    }
+
+    @Test
+    void findAllWaitingByName_이름으로_예약_대기__조회() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation reservation = new Reservation("브리", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+        Reservation reservationWaiting = reservationDao.saveWaiting(reservation);
+
+        List<ReservationWaiting> reservationWaitings = reservationDao.findAllWaitingByName(reservationWaiting.getName());
+        assertThat(reservationWaitings.size()).isEqualTo(1);
+        assertThat(reservationWaitings.getFirst().reservation().getName()).isEqualTo(reservation.getName());
+        assertThat(reservationWaitings.getFirst().waitingNumber()).isEqualTo(1);
     }
 }

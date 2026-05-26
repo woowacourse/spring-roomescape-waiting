@@ -166,7 +166,7 @@ public class ReservationDao {
 
     public Optional<Reservation> findByWaitingId(long id) {
         String sql = """
-                SELECT r.id AS reservation_waiting_id, r.name, r.date, r.created_at,
+                SELECT r.id AS reservation_id, r.name, r.date, r.created_at,
                        t.id AS time_id, t.start_at AS time_value,
                        th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
                 FROM reservation_waiting AS r
