@@ -31,7 +31,7 @@ Content-Type: application/json
 
 ---
 
-### 생성 요청
+### 생성, 대기 요청
 POST /reservations HTTP/1.1
 Content-Type: application/json
 
@@ -42,11 +42,10 @@ Content-Type: application/json
    "themeId": 1
 }
 
-### 생성 응답
+### 생성, 대기 응답
 HTTP/1.1 201 Created
 Content-Type: application/json
 
-[
 {
    "id": 1,
    "name": "브라운",
@@ -62,8 +61,10 @@ Content-Type: application/json
       "description": "설명",
       "thumbnailImageUrl": "썸네일이미지url"
    }
+   "status": "RESERVED", // 대기일 시 "WAITING"
+   "waitingOrder": null, // 대기일 시 2
+   "createdAt": "2026-05-26T12:30:00"
 }
-]
 
 ---
 
