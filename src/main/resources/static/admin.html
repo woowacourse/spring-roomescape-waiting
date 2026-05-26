@@ -1,0 +1,139 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>방탈출 관리자</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="page">
+    <header class="header">
+      <div>
+        <p class="eyebrow">Admin</p>
+        <h1>방탈출 관리자</h1>
+      </div>
+      <div class="header-side">
+        <a class="admin-link" href="/">예약 화면</a>
+        <p class="header-description">예약, 테마, 시간을 관리하는 화면입니다.</p>
+      </div>
+    </header>
+
+    <section class="section">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Overview</p>
+          <h2>관리 현황</h2>
+        </div>
+      </div>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <span>전체 예약</span>
+          <strong id="reservation-count">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>테마</span>
+          <strong id="theme-count">0</strong>
+        </div>
+        <div class="summary-item">
+          <span>예약 시간</span>
+          <strong id="time-count">0</strong>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" aria-labelledby="reservation-management-title">
+      <div class="section-header">
+        <div>
+          <p class="eyebrow">Reservations</p>
+          <h2 id="reservation-management-title">예약 관리</h2>
+        </div>
+      </div>
+
+      <form id="reservation-filter-form" class="filter-form">
+        <div class="field">
+          <label for="reservation-filter-name">이름</label>
+          <input id="reservation-filter-name" type="text" placeholder="예약자 이름">
+        </div>
+        <div class="field">
+          <label for="reservation-filter-date">날짜</label>
+          <input id="reservation-filter-date" type="date">
+        </div>
+        <div class="field">
+          <label for="reservation-filter-theme">테마</label>
+          <select id="reservation-filter-theme">
+            <option value="">전체</option>
+          </select>
+        </div>
+        <button class="secondary-button" type="button" id="reservation-filter-reset">초기화</button>
+      </form>
+
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>예약자</th>
+              <th>날짜</th>
+              <th>시간</th>
+              <th>테마</th>
+              <th>관리</th>
+            </tr>
+          </thead>
+          <tbody id="reservation-table-body"></tbody>
+        </table>
+      </div>
+      <div id="reservation-pagination" class="pagination"></div>
+    </section>
+
+    <section class="management-grid">
+      <article class="section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Themes</p>
+            <h2>테마 관리</h2>
+          </div>
+        </div>
+
+        <form id="theme-form" class="admin-form">
+          <div class="field">
+            <label for="theme-name">이름</label>
+            <input id="theme-name" type="text" required>
+          </div>
+          <div class="field">
+            <label for="theme-description">설명</label>
+            <textarea id="theme-description" required></textarea>
+          </div>
+          <div class="field">
+            <label for="theme-thumbnail">썸네일 URL</label>
+            <input id="theme-thumbnail" type="url" required>
+          </div>
+          <button class="primary-button" type="submit">테마 추가</button>
+        </form>
+
+        <div id="theme-admin-list" class="admin-list"></div>
+      </article>
+
+      <article class="section">
+        <div class="section-header">
+          <div>
+            <p class="eyebrow">Times</p>
+            <h2>예약 시간 관리</h2>
+          </div>
+        </div>
+
+        <form id="time-form" class="admin-form compact-form">
+          <div class="field">
+            <label for="time-start-at">시작 시간</label>
+            <input id="time-start-at" type="time" required>
+          </div>
+          <button class="primary-button" type="submit">시간 추가</button>
+        </form>
+
+        <div id="time-admin-list" class="admin-list"></div>
+      </article>
+    </section>
+  </main>
+  <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
+  <script src="/admin.js" defer></script>
+</body>
+</html>
