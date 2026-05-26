@@ -42,7 +42,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("Theme를 저장하고 조회한다.")
     public void saveAndFindById() {
-        Theme theme = jdbcThemeRepository.save(new Theme("kim", "desc1", "thumb1"));
+        Theme theme = jdbcThemeRepository.save(Theme.create("kim", "desc1", "thumb1"));
 
         Optional<Theme> found = jdbcThemeRepository.findById(theme.getId());
 
@@ -83,7 +83,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement2;
         }, keyHolder2);
 
-        new Theme(getGeneratedId(keyHolder2), "kim", "desc1", "thumb1");
+        Theme.of(getGeneratedId(keyHolder2), "kim", "desc1", "thumb1");
         KeyHolder keyHolder1 = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection1 -> {
@@ -97,7 +97,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement1;
         }, keyHolder1);
 
-        new Theme(getGeneratedId(keyHolder1), "lee", "desc2", "thumb2");
+        Theme.of(getGeneratedId(keyHolder1), "lee", "desc2", "thumb2");
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -111,7 +111,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        new Theme(getGeneratedId(keyHolder), "park", "desc3", "thumb3");
+        Theme.of(getGeneratedId(keyHolder), "park", "desc3", "thumb3");
 
         List<Theme> themes = jdbcThemeRepository.findAll();
 
@@ -145,7 +145,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme activeTheme = new Theme(getGeneratedId(keyHolder), "lee", "desc2", "thumb2");
+        Theme activeTheme = Theme.of(getGeneratedId(keyHolder), "lee", "desc2", "thumb2");
 
         // when
         List<Theme> themes = jdbcThemeRepository.findAll();
@@ -172,7 +172,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme theme = new Theme(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
+        Theme theme = Theme.of(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
 
         boolean exists = jdbcThemeRepository.existsById(theme.getId());
         boolean notExists = jdbcThemeRepository.existsById(theme.getId() + 1);
@@ -230,7 +230,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement1;
         }, keyHolder1);
 
-        Theme activeTheme = new Theme(getGeneratedId(keyHolder1), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme activeTheme = Theme.of(getGeneratedId(keyHolder1), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -244,7 +244,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme deletedTheme = new Theme(getGeneratedId(keyHolder), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme deletedTheme = Theme.of(getGeneratedId(keyHolder), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
         Long otherTimeId = insertReservationTime(LocalTime.of(12, 0));
         LocalDate targetDate = LocalDate.of(2026, 5, 1);
@@ -283,7 +283,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme activeTheme = new Theme(getGeneratedId(keyHolder), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme activeTheme = Theme.of(getGeneratedId(keyHolder), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Theme deletedTheme = insertDeletedTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
         Long otherTimeId = insertReservationTime(LocalTime.of(12, 0));
@@ -322,7 +322,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme theme = new Theme(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
+        Theme theme = Theme.of(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
         clock.setFixed(now);
 
@@ -363,7 +363,7 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return new Theme(getGeneratedId(keyHolder), name, description, thumbnail);
+        return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
     }
 
     private Long insertReservationTime(LocalTime startAt) {

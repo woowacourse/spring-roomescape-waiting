@@ -20,7 +20,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class JdbcThemeRepository implements ThemeRepository {
     private final RowMapper<Theme> themeRowMapper = (resultSet, rowNum) ->
-            new Theme(
+            Theme.of(
                     resultSet.getLong("id"),
                     resultSet.getString("name"),
                     resultSet.getString("description"),

@@ -7,7 +7,6 @@ import java.util.Objects;
 
 import static roomescape.common.domain.DomainPreconditions.require;
 import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
-import static roomescape.common.domain.DomainPreconditions.requireNonNull;
 import static roomescape.theme.exception.ThemeErrorCode.*;
 
 public class Theme {
@@ -17,15 +16,13 @@ public class Theme {
     private final String thumbnail;
     private final LocalDateTime deletedAt;
 
-    public Theme(String name, String description, String thumbnail) {
-        this(null, name, description, thumbnail);
-    }
-
-    public Theme(Long id, String name, String description, String thumbnail) {
-        this(id, name, description, thumbnail, null);
-    }
-
-    public Theme(Long id, String name, String description, String thumbnail, LocalDateTime deletedAt) {
+    private Theme(
+            Long id,
+            String name,
+            String description,
+            String thumbnail,
+            LocalDateTime deletedAt
+    ) {
         validateTheme(name, description, thumbnail);
         this.id = id;
         this.name = name;
@@ -34,11 +31,27 @@ public class Theme {
         this.deletedAt = deletedAt;
     }
 
-    public Theme withId(Long id) {
-        requireNonNull(id, new DomainException(INVALID_THEME_ID));
-        require(this.id == null, new DomainException(THEME_ALREADY_HAS_ID));
+    public static Theme create(String name, String description, String thumbnail) {
+        return new Theme(null, name, description, thumbnail, null);
+    }
 
+    public static Theme of(long id, String name, String description, String thumbnail) {
+        return of(id, name, description, thumbnail, null);
+    }
+
+    public static Theme of(
+            long id,
+            String name,
+            String description,
+            String thumbnail,
+            LocalDateTime deletedAt
+    ) {
         return new Theme(id, name, description, thumbnail, deletedAt);
+    }
+
+    public Theme withId(long id) {
+        require(this.id == null, new DomainException(THEME_ALREADY_HAS_ID));
+        return of(id, name, description, thumbnail, deletedAt);
     }
 
     private void validateTheme(String name, String description, String thumbnail) {
