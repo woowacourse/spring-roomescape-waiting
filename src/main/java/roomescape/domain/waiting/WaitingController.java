@@ -36,7 +36,7 @@ public class WaitingController {
         return ResponseEntity.created(location).body(response);
     }
 
-    @GetMapping("/reservations/wating/mine?name={name}")
+    @GetMapping("/reservations/waiting/mine")
     public ResponseEntity<MyWaitingsResponse> getMyWaitings(
         @RequestParam @NotBlank @Size(max = 100) String name
     ) {
