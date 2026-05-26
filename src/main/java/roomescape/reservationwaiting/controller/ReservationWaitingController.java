@@ -3,6 +3,8 @@ package roomescape.reservationwaiting.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
+import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
 
 import java.net.URI;
@@ -23,14 +25,14 @@ public class ReservationWaitingController {
        return ResponseEntity.created(URI.create("/waiting/" + response.id())).body(response);
    }
 
-    @GetMapping
-    public ResponseEntity<List<ReservationWaitingResponse>> getWaitingByName(@RequestParam String name) {
-        return ResponseEntity.ok(reservationWaitingService.getWaitingByName(name));
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-        reservationWaitingService.deleteWaiting(id);
-        return ResponseEntity.noContent().build();
-    }
+//    @GetMapping
+//    public ResponseEntity<List<ReservationWaitingResponse>> getWaitingByName(@RequestParam String name) {
+//        return ResponseEntity.ok(reservationWaitingService.getWaitingByName(name));
+//    }
+//
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
+//        reservationWaitingService.deleteWaiting(id);
+//        return ResponseEntity.noContent().build();
+//    }
 }

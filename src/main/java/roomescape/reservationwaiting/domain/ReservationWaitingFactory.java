@@ -1,9 +1,11 @@
 package roomescape.reservationwaiting.domain;
 
+import org.springframework.stereotype.Component;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservation.domain.Reservation;
 
+@Component
 public class ReservationWaitingFactory {
     public ReservationWaiting create(String name, Reservation reservation) {
         validate(name, reservation);
