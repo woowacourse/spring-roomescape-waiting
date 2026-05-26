@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.RoomEscapeException;
@@ -78,6 +79,14 @@ public class Waiting {
     private static void validateWaitingNumber(Long waitingNumber) {
         if (waitingNumber == null) {
             throw new RoomEscapeException(WaitingErrorCode.INVALID_WAITING_NUMBER);
+        }
+    }
+
+    public void validateNotPastTime(LocalDateTime now) {
+        LocalDateTime waitingDateTime = LocalDateTime.of(date, time.getStartAt());
+
+        if (waitingDateTime.isBefore(now)) {
+            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
         }
     }
 
