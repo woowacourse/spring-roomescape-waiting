@@ -19,12 +19,10 @@ import roomescape.repository.TimeDao;
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final TimeDao timeDao;
-//    private final WaitingDao waitingDao;
 
     public ReservationService(ReservationDao reservationDao, TimeDao timeDao) {
         this.reservationDao = reservationDao;
         this.timeDao = timeDao;
-//        this.waitingDao = waitingDao;
     }
 
 
@@ -35,7 +33,6 @@ public class ReservationService {
 
         try{
             Long reservationId = reservationDao.save(request.date(), request.timeId(), request.themeId());
-//            Long waitingId = waitingDao.save(request.name(), reservationId);
             Reservation reservation = reservationDao.findById(reservationId);
             return ReservationResponse.from(reservation);
         } catch (DuplicateKeyException e){

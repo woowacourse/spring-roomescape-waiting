@@ -22,7 +22,7 @@ INSERT INTO theme (name, description, thumbnail_url) VALUES ('탐정 사무소',
 -- Reservations for popular theme ranking
 -- 공포의 저택 (theme 1) - 5 bookings
 INSERT INTO reservation (date, time_id, theme_id) VALUES ('2026-04-29', 3, 1);
-INSERT INTO reservation (date, time_id, theme_id) VALUES ('2026-04-30', 5, 1);
+INSERT INTO reservation (date, time_id, theme_id) VALUES ('2026-06-30', 5, 1);
 INSERT INTO reservation (date, time_id, theme_id) VALUES ('2026-05-01', 7, 1);
 INSERT INTO reservation (date, time_id, theme_id) VALUES ('2026-05-02', 4, 1);
 INSERT INTO reservation (date, time_id, theme_id) VALUES ('2026-05-03', 8, 1);

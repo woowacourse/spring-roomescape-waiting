@@ -12,7 +12,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.Time;
 import roomescape.domain.Theme;
-import roomescape.domain.Waiting;
 
 @Repository
 public class ReservationDao {
@@ -50,7 +49,7 @@ public class ReservationDao {
                        th.id AS theme_id, 
                        th.name AS theme_name, 
                        th.description AS theme_description, 
-                       th.thumbnail_url AS theme_thumbnail,
+                       th.thumbnail_url AS theme_thumbnail
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
@@ -97,8 +96,7 @@ public class ReservationDao {
     public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
         jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
     }
-
-
+    
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM reservation WHERE id = ?", id);
     }

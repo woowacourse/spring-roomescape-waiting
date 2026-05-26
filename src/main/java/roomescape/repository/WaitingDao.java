@@ -39,7 +39,7 @@ public class WaitingDao {
         String sql = """
                 SELECT  w.id AS wait_id,
                         w.name AS name,
-                        w.reservationId AS reservation_id
+                        w.reservation_id AS reservation_id
                 FROM waiting AS w
                 where w.id = ?
                 """;
@@ -59,5 +59,9 @@ public class WaitingDao {
                 reservationId,
                 id
         );
+    }
+
+    public void delete(Long id) {
+        jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
     }
 }

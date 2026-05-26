@@ -79,6 +79,13 @@ public class ReservationController {
         reservationService.delete(now, id);
     }
 
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/waitings/{id}")
+    public void deleteWaiting(@PathVariable Long id) {
+        LocalDateTime now = LocalDateTime.now();
+        waitingService.delete(now, id);
+    }
+
     @PostMapping("/waitings")
     public ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request) {
         LocalDateTime now = LocalDateTime.now();

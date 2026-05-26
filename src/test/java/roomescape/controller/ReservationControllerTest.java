@@ -142,7 +142,6 @@ class ReservationControllerTest {
     @DisplayName("사용자 예약 대기 - 정상 테스트")
     @Test
     void 사용자_예약_대기_정상_테스트() {
-
         Map<String, Object> params = new HashMap<>();
         params.put("name", "김철수");
         params.put("reservationId", 2);
@@ -155,4 +154,28 @@ class ReservationControllerTest {
                 .statusCode(201);
     }
 
+    @DisplayName("사용자 예약 대기 삭제 API")
+    @Test
+    void 사용자_예약_대기_삭제_API() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "김철수");
+        params.put("reservationId", 2);
+
+        final long id = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .jsonPath()
+                .getLong("id");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("id", id)
+                .when().delete("/reservations/waitings/{id}")
+                .then().log().all()
+                .statusCode(204);
+    }
 }
