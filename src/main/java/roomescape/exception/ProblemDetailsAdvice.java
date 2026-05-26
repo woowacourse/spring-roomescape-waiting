@@ -34,6 +34,7 @@ public class ProblemDetailsAdvice {
         exceptionHttpStatusMap.put(ThemeNotFoundException.class, HttpStatus.NOT_FOUND);
         exceptionHttpStatusMap.put(TimeSlotNotFoundException.class, HttpStatus.NOT_FOUND);
         exceptionHttpStatusMap.put(UnauthorizedException.class, HttpStatus.UNAUTHORIZED);
+        exceptionHttpStatusMap.put(WaitingNotFoundException.class, HttpStatus.NOT_FOUND);
     }
 
     @ExceptionHandler(RoomescapeException.class)
