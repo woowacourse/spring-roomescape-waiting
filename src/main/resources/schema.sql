@@ -26,10 +26,11 @@ CREATE TABLE reservation
     name     VARCHAR(255) NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
+    status   VARCHAR(20)  NOT NULL,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIME,
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id),
-    CONSTRAINT uq_reservation UNIQUE (time_id, theme_id)
 );
 
 CREATE TABLE holiday
