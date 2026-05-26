@@ -103,8 +103,8 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
         }
 
-        if (existingReservation.getStatus() == Status.CANCELED) {
-            throw new GeneralException(ReservationErrorType.ALREADY_CANCELED);
+        if (existingReservation.getStatus() != Status.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
         if (existingReservation.getDate().isBefore(LocalDate.now(clock))) {
