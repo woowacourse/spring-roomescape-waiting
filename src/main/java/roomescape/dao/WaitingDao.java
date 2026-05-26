@@ -68,5 +68,25 @@ public class WaitingDao {
         );
     }
 
+    public boolean existsBy(Waiting waiting) {
+        String sql = """
+                SELECT EXISTS(
+                            SELECT 1
+                            FROM waiting
+                            WHERE name = ? AND date = ? AND
+                                  time_id = ? AND theme_id = ?
+                )
+                """;
 
+        Boolean result = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTime().getId(),
+                waiting.getTheme().getId()
+        );
+
+        return Boolean.TRUE.equals(result);
+    }
 }

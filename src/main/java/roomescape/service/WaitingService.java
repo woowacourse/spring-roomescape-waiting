@@ -52,6 +52,10 @@ public class WaitingService {
                 command.createAt()
         );
 
+        if (waitingDao.existsBy(waiting)) {
+            throw new UnprocessableEntityException("예약 대기는 중복으로 생성할 수 없습니다.");
+        }
+
         Waiting saved = waitingDao.save(waiting);
 
         return WaitingResult.from(saved);
