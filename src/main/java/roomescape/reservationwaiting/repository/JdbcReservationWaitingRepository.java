@@ -11,8 +11,10 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
 
+import java.util.List;
+
 @Repository
-public class ReservationWaitingRepository {
+public class JdbcReservationWaitingRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -38,7 +40,7 @@ public class ReservationWaitingRepository {
             )
     );
 
-    public ReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
@@ -51,5 +53,26 @@ public class ReservationWaitingRepository {
                 .addValue("reservation_id", reservationWaiting.getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return ReservationWaiting.restore(id, reservationWaiting.getName(), reservationWaiting.getReservation());
+    }
+
+    public void deleteById(Long id) {
+        String query = "delete from reservation_waiting where id = ?";
+        jdbcTemplate.update(query, id);
+    }
+
+    public List<ReservationWaiting> findByName(String name) {
+        String query = """
+                SELECT rw.id as reservation_waiting_id, rw.name,
+                       r.id as reservation_id, r.name, r.date,
+                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                FROM reservation_waiting rw
+                JOIN reservation r ON rw.reservation_id = r.id
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                WHERE rw.name = ?
+                ORDER BY r.date DESC, rt.start_at DESC
+                """;
+        return jdbcTemplate.query(query, rowMapper, name);
     }
 }

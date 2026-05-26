@@ -18,10 +18,10 @@ import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class ReservationWaitingRepositoryTest {
+public class JdbcReservationWaitingRepositoryTest {
 
     @Autowired
-    private ReservationWaitingRepository reservationWaitingRepository;
+    private JdbcReservationWaitingRepository jdbcReservationWaitingRepository;
 
     @Autowired
     private ReservationRepository reservationRepository;
@@ -34,7 +34,7 @@ public class ReservationWaitingRepositoryTest {
     void 예약_대기_성공() {
         Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));
-        ReservationWaiting saved = reservationWaitingRepository.save(
+        ReservationWaiting saved = jdbcReservationWaitingRepository.save(
                 reservationWaitingFactory.create("현미밥",reservation)
         );
         assertThat(saved.getId()).isNotNull();
@@ -47,5 +47,18 @@ public class ReservationWaitingRepositoryTest {
                 ErrorCode.RESERVATION_NOT_FOUND));
         assertThatThrownBy(() -> reservationWaitingFactory.create("현미밥", reservation))
                 .isInstanceOf(BusinessException.class);
+    }
+
+    @Test
+    @DisplayName("예약 대기 삭제")
+    void 예약_대기_삭제() {
+        Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
+                ErrorCode.RESERVATION_NOT_FOUND));
+        ReservationWaiting saved = jdbcReservationWaitingRepository.save(
+                reservationWaitingFactory.create("현미밥",reservation)
+        );
+        Long id = saved.getId();
+        jdbcReservationWaitingRepository.deleteById(id);
+        assertThat(jdbcReservationWaitingRepository.findByName("현미밥")).hasSize(0);
     }
 }

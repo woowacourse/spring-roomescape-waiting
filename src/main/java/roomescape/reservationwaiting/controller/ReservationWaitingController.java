@@ -25,14 +25,14 @@ public class ReservationWaitingController {
        return ResponseEntity.created(URI.create("/waiting/" + response.id())).body(response);
    }
 
-//    @GetMapping
-//    public ResponseEntity<List<ReservationWaitingResponse>> getWaitingByName(@RequestParam String name) {
-//        return ResponseEntity.ok(reservationWaitingService.getWaitingByName(name));
-//    }
-//
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-//        reservationWaitingService.deleteWaiting(id);
-//        return ResponseEntity.noContent().build();
-//    }
+    @GetMapping
+    public ResponseEntity<List<ReservationWaitingResponse>> getWaitingByName(@RequestParam String name) {
+        return ResponseEntity.ok(reservationWaitingService.getWaitingByName(name));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
+       reservationWaitingService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
+    }
 }
