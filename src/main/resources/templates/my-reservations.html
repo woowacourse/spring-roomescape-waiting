@@ -36,6 +36,7 @@ nav{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;align-items:cen
 .res-status{font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;padding:.3rem .8rem;border:1px solid;white-space:nowrap}
 .res-status.booked{color:#74c69d;border-color:#2d6a4f}
 .res-status.canceled{color:var(--muted);border-color:var(--border)}
+.res-status.waiting{color:#e5b34a;border-color:#7a5c1a}
 .res-actions{display:flex;gap:.75rem;align-items:center}
 .msg{padding:3rem 0;text-align:center;color:var(--muted);font-size:.85rem;letter-spacing:.15em}
 .overlay{position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;display:none;align-items:center;justify-content:center;padding:2rem}
@@ -113,44 +114,93 @@ async function loadReservations() {
   const area = document.getElementById('list-area');
   area.innerHTML = '<p class="msg">불러오는 중...</p>';
   try {
-    const r = await fetch('/reservations');
-    if (r.status === 401) { location.href = '/login?redirect=/my-reservations'; return; }
-    if (!r.ok) throw new Error();
-    const data = await r.json();
-    if (!data.length) { area.innerHTML = '<p class="msg">예약 내역이 없습니다</p>'; return; }
+    const [resR, waitR] = await Promise.all([
+      fetch('/reservations'),
+      fetch('/waitings')
+    ]);
+    if (resR.status === 401 || waitR.status === 401) {
+      location.href = '/login?redirect=/my-reservations';
+      return;
+    }
+    if (!resR.ok || !waitR.ok) throw new Error();
+    const reservations = await resR.json();
+    const waitings = await waitR.json();
+
+    const items = [
+      ...reservations.map(r => ({ kind: 'reservation', ...r })),
+      ...waitings.map(w => ({ kind: 'waiting', ...w }))
+    ];
+    items.sort((a, b) => {
+      const da = `${a.date} ${a.time?.startAt || ''}`;
+      const db = `${b.date} ${b.time?.startAt || ''}`;
+      return da.localeCompare(db);
+    });
+
+    if (!items.length) { area.innerHTML = '<p class="msg">예약 내역이 없습니다</p>'; return; }
     area.innerHTML = '';
     const list = document.createElement('div');
     list.className = 'reservation-list';
-    data.forEach(res => list.appendChild(mkItem(res)));
+    items.forEach(it => list.appendChild(mkItem(it)));
     area.appendChild(list);
 
     const sub = document.getElementById('member-name');
-    if (sub && !sub.textContent && data[0]?.name) sub.textContent = data[0].name;
+    if (sub && !sub.textContent && items[0]?.name) sub.textContent = items[0].name;
   } catch {
     area.innerHTML = '<p class="msg">예약 정보를 불러올 수 없습니다</p>';
   }
 }
 
-function mkItem(res) {
+function mkItem(it) {
   const el = document.createElement('div');
   el.className = 'res-item';
-  const isBooked = res.status === 'BOOKED';
-  const actionsHtml = isBooked ? `
-    <div class="res-actions">
-      <button class="btn-cancel" onclick="doCancel(${res.id})">취소</button>
-      <button class="btn-s" onclick="openModal(${res.id},'${(res.theme?.name||'').replace(/'/g,"\\'")}',${res.theme?.id})">수정</button>
-    </div>` : '';
+  let statusClass, statusText, actionsHtml = '';
+  if (it.kind === 'waiting') {
+    statusClass = 'waiting';
+    statusText = it.rank != null ? `대기 ${it.rank}번` : '대기';
+    actionsHtml = `
+      <div class="res-actions">
+        <button class="btn-cancel" onclick="doCancelWaiting(${it.id})">대기 취소</button>
+      </div>`;
+  } else if (it.status === 'BOOKED') {
+    statusClass = 'booked';
+    statusText = '예약됨';
+    actionsHtml = `
+      <div class="res-actions">
+        <button class="btn-cancel" onclick="doCancel(${it.id})">취소</button>
+        <button class="btn-s" onclick="openModal(${it.id},'${(it.theme?.name||'').replace(/'/g,"\\'")}',${it.theme?.id})">수정</button>
+      </div>`;
+  } else {
+    statusClass = 'canceled';
+    statusText = '취소됨';
+  }
   el.innerHTML = `
     <div>
-      <p class="res-theme">${res.theme?.name || '—'}</p>
-      <p class="res-detail">${res.date} · ${fmt(res.time?.startAt)}</p>
+      <p class="res-theme">${it.theme?.name || '—'}</p>
+      <p class="res-detail">${it.date} · ${fmt(it.time?.startAt)}</p>
     </div>
     <div style="display:flex;align-items:center;gap:1rem">
-      <span class="res-status ${isBooked ? 'booked' : 'canceled'}">${isBooked ? '예약됨' : '취소됨'}</span>
+      <span class="res-status ${statusClass}">${statusText}</span>
       ${actionsHtml}
     </div>
   `;
   return el;
+}
+
+async function doCancelWaiting(id) {
+  if (!confirm('대기 신청을 취소하시겠습니까?')) return;
+  try {
+    const r = await fetch(`/waitings/${id}`, { method: 'DELETE' });
+    if (!r.ok) {
+      let msg = '대기 취소에 실패했습니다';
+      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      toast('err', msg);
+      return;
+    }
+    toast('ok', '대기가 취소되었습니다');
+    await loadReservations();
+  } catch {
+    toast('err', '네트워크 오류가 발생했습니다');
+  }
 }
 
 async function doCancel(id) {
