@@ -15,6 +15,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Password;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Store;
@@ -25,7 +26,7 @@ import roomescape.domain.User;
 public class ReservationJdbcRepository implements ReservationRepository {
 
     private static final String SELECT_BASE = """
-            select r.id, r.date,
+            select r.id, r.date, r.status,
                    u.id as u_id, u.username as u_username, u.password as u_password,
                    u.name as u_name, u.role as u_role,
                    t.id as time_id, t.start_at,
@@ -71,7 +72,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 theme,
                 resultSet.getDate("date").toLocalDate(),
                 time,
-                store
+                store,
+                ReservationStatus.valueOf(resultSet.getString("status"))
         );
     };
 
@@ -130,7 +132,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public Long save(Reservation reservation) {
-        String sql = "insert into reservation(user_id, theme_id, date, time_id, store_id) values(?, ?, ?, ?, ?)";
+        String sql = "insert into reservation(user_id, theme_id, date, time_id, store_id, status) values(?, ?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -140,6 +142,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
             ps.setDate(3, Date.valueOf(reservation.getDate()));
             ps.setLong(4, reservation.getTime().getId());
             ps.setLong(5, reservation.getStore().getId());
+            ps.setString(6, reservation.getStatus().name());
             return ps;
         }, keyHolder);
 
@@ -184,5 +187,22 @@ public class ReservationJdbcRepository implements ReservationRepository {
     public boolean existsByReservationTimeId(Long timeId) {
         String sql = "select exists(select 1 from reservation where time_id = ?)";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
+    }
+
+    @Override
+    public boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long store_id,
+                                                              Long userId) {
+        String sql = "select exists(select 1 from reservation where date = ? and time_id = ? and theme_id = ? and store_id = ? and user_id = ?)";
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, store_id, userId));
+    }
+
+    @Override
+    public boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId,
+                                                                Long storeId,
+                                                                ReservationStatus reservationStatus) {
+        String sql = "select exists(select 1 from reservation where date = ? and time_id = ? and theme_id = ? and store_id = ? and status = ?)";
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId, reservationStatus.name()));
     }
 }

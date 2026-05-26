@@ -27,17 +27,19 @@ class AdminReservationAcceptanceTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    private long managedStoreId;
+
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
         long managerId = DbFixtures.insertManager(jdbcTemplate, MANAGER_NAME);
-        long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
-        DbFixtures.assignManager(jdbcTemplate, storeId, managerId);
+        managedStoreId = DbFixtures.insertStore(jdbcTemplate, "기본매장");
+        DbFixtures.assignManager(jdbcTemplate, managedStoreId, managerId);
     }
 
     @Test
     void GET_admin_reservations_목록을_조회한다() {
-        Scenario.reservation(jdbcTemplate).member("브라운").save();
+        Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -50,9 +52,9 @@ class AdminReservationAcceptanceTest {
 
     @Test
     void GET_admin_reservations_name으로_필터링한다() {
-        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-01").save();
-        Scenario.reservation(jdbcTemplate).member("다른사람").date("2026-05-02").save();
-        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-03").save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-01").onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("다른사람").date("2026-05-02").onStore(managedStoreId).save();
+        Scenario.reservation(jdbcTemplate).member("브라운").date("2026-05-03").onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -94,7 +96,7 @@ class AdminReservationAcceptanceTest {
 
     @Test
     void DELETE_admin_reservations_id_예약을_삭제한다() {
-        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").save();
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
 
         RestAssured.given().log().all()
                 .header(AUTHORIZATION, managerBearer())
@@ -105,7 +107,7 @@ class AdminReservationAcceptanceTest {
 
     @Test
     void GET_admin_reservations_담당하는_매장의_예약만_반환한다() {
-        Scenario.reservation(jdbcTemplate).member("브라운").save();
+        Scenario.reservation(jdbcTemplate).member("브라운").onStore(managedStoreId).save();
         insertReservationInOtherStore("2026-05-09");
 
         RestAssured.given().log().all()

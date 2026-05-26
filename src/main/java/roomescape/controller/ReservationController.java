@@ -53,6 +53,19 @@ public class ReservationController {
         return ResponseEntity.created(location).build();
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<Void> createWaitingReservation(
+            @LoginUserId Long userId,
+            @Valid @RequestBody CreateReservationRequest request
+    ) {
+        Reservation createdReservationWaiting = reservationService.createWaitingReservation(
+                CreateReservationCommand.of(userId, request));
+
+        URI location = URI.create("/reservations/" + createdReservationWaiting.getId());
+        return ResponseEntity.created(location).build();
+    }
+
+
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable Long id,

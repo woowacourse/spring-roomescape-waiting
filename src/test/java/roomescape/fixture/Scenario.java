@@ -5,9 +5,8 @@ import roomescape.acceptance.AuthTestSupport;
 import roomescape.domain.Role;
 
 /**
- * 의존 그래프(user·theme·time·reservation)를 소유하는 의미 기반 픽스처.
- * 테스트는 "예약 하나가 존재한다", "사용 중인 시간" 같은 의도만 표현하고,
- * 도메인 구조가 바뀌면 이 클래스만 수정한다.
+ * 의존 그래프(user·theme·time·reservation)를 소유하는 의미 기반 픽스처. 테스트는 "예약 하나가 존재한다", "사용 중인 시간" 같은 의도만 표현하고, 도메인 구조가 바뀌면 이 클래스만
+ * 수정한다.
  */
 public final class Scenario {
 
@@ -16,6 +15,10 @@ public final class Scenario {
 
     public static ReservationBuilder reservation(JdbcTemplate jdbc) {
         return new ReservationBuilder(jdbc);
+    }
+
+    public static ReservationBuilder waitingReservation(JdbcTemplate jdbc) {
+        return new ReservationBuilder(jdbc).status("WAITING");
     }
 
     public static BookableSlot bookableSlot(JdbcTemplate jdbc) {
@@ -51,10 +54,16 @@ public final class Scenario {
         return AuthTestSupport.bearer(userId, member + "@test.com", Role.MEMBER);
     }
 
+    public static long member(JdbcTemplate jdbc) {
+        return DbFixtures.insertMember(jdbc, "샤를");
+    }
+
     public record BookableSlot(long themeId, long timeId, long storeId, String member, String bearer) {
     }
 
-    public record ExistingReservation(long reservationId, long themeId, long timeId, long userId,
+    public record ExistingReservation(long reservationId, String date, long themeId, long timeId, long userId,
+                                      long storeId,
+                                      String status,
                                       String member, String bearer) {
     }
 
@@ -65,6 +74,9 @@ public final class Scenario {
         private String themeName = "테마";
         private String startAt = "10:00";
         private String date = "2026-05-08";
+        private String storeName = "매장";
+        private String status = "RESERVED";
+        private Long existingStoreId;
         private Long existingThemeId;
         private Long existingTimeId;
 
@@ -102,12 +114,29 @@ public final class Scenario {
             return this;
         }
 
+        public ReservationBuilder store(String storeName) {
+            this.storeName = storeName;
+            return this;
+        }
+
+        public ReservationBuilder onStore(long storeId) {
+            this.existingStoreId = storeId;
+            return this;
+        }
+
+        public ReservationBuilder status(String status) {
+            this.status = status;
+            return this;
+        }
+
         public ExistingReservation save() {
             long themeId = (existingThemeId != null) ? existingThemeId : DbFixtures.insertTheme(jdbc, themeName);
             long timeId = (existingTimeId != null) ? existingTimeId : DbFixtures.insertTime(jdbc, startAt);
+            long storeId = (existingStoreId != null) ? existingStoreId : DbFixtures.insertStore(jdbc, storeName);
             long userId = DbFixtures.insertMember(jdbc, member);
-            long reservationId = DbFixtures.insertReservation(jdbc, userId, themeId, date, timeId);
-            return new ExistingReservation(reservationId, themeId, timeId, userId, member, bearer(userId, member));
+            long reservationId = DbFixtures.insertReservation(jdbc, userId, themeId, date, timeId, storeId, status);
+            return new ExistingReservation(reservationId, date, themeId, timeId, userId, storeId, status, member,
+                    bearer(userId, member));
         }
     }
 }

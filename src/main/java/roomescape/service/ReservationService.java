@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
@@ -13,8 +14,11 @@ import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.ReservationResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
+import roomescape.exception.ReservationNotFoundForWaitingException;
+import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.StoreManagementForbiddenException;
@@ -80,15 +84,7 @@ public class ReservationService {
 
     @Transactional
     public Reservation createReservation(CreateReservationCommand command) {
-        User user = userRepository.findById(command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
-        Theme theme = themeRepository.findById(command.themeId())
-                .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(command.timeId())
-                .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
-        Store store = storeRepository.findById(command.storeId())
-                .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
-        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store);
+        Reservation newReservation = buildReservation(command, ReservationStatus.RESERVED);
 
         validateNotPastDateTime(newReservation);
         validateNotDuplicated(newReservation);
@@ -98,18 +94,33 @@ public class ReservationService {
     }
 
     @Transactional
+    public Reservation createWaitingReservation(CreateReservationCommand command) {
+        validateReservationIsFullyBooked(command);
+
+        Reservation newWaitingReservation = buildReservation(command, ReservationStatus.WAITING);
+
+        validateNotPastDateTime(newWaitingReservation);
+
+        validateNotDuplicatedWaiting(newWaitingReservation);
+
+        Long newReservationId = reservationRepository.save(newWaitingReservation);
+        return newWaitingReservation.withId(newReservationId);
+    }
+
+    @Transactional
     public Reservation updateOwnReservation(UpdateReservationCommand command) {
         Reservation existing = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
         validateReservationOwner(command.userId(), existing);
         validateExistingNotInPast(existing);
+        validateIsReserved(existing);
 
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
         Reservation updated = new Reservation(command.reservationId(), existing.getUser(), theme, command.date(), time,
-                existing.getStore());
+                existing.getStore(), existing.getStatus());
 
         validateNotPastDateTime(updated);
         validateNotDuplicatedForUpdate(existing, updated);
@@ -126,12 +137,6 @@ public class ReservationService {
         reservationRepository.deleteById(reservationId);
     }
 
-    private void validateManagesStore(Long managerId, Long storeId) {
-        if (!storeRepository.existsByStoreIdAndUserId(storeId, managerId)) {
-            throw new StoreManagementForbiddenException();
-        }
-    }
-
     @Transactional
     public void cancelOwnReservation(CancelReservationCommand command) {
         Reservation reservation = reservationRepository.findById(command.reservationId())
@@ -142,11 +147,47 @@ public class ReservationService {
         reservationRepository.deleteById(command.reservationId());
     }
 
+    private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
+        Theme theme = themeRepository.findById(command.themeId())
+                .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
+        ReservationTime reservationTime = reservationTimeRepository.findById(command.timeId())
+                .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
+        Store store = storeRepository.findById(command.storeId())
+                .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
+        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store,
+                status);
+        return newReservation;
+    }
+
+    private void validateIsReserved(Reservation existing) {
+        if (!existing.isReserved()) {
+            throw new ReservationNotReservedException(existing.getStatus().toString());
+        }
+    }
+
+    private void validateReservationIsFullyBooked(CreateReservationCommand command) {
+        Boolean isReservedExist = reservationRepository.existsByDateAndTimeAndThemeAndStoreAndStatus(
+                command.date(), command.timeId(), command.themeId(), command.storeId(), ReservationStatus.RESERVED
+        );
+
+        if (!isReservedExist) {
+            throw new ReservationNotFoundForWaitingException();
+        }
+    }
+
     private void validateNotDuplicatedForUpdate(Reservation existing, Reservation updated) {
         if (existing.hasSameSlot(updated)) {
             return;
         }
         validateNotDuplicated(updated);
+    }
+
+    private void validateManagesStore(Long managerId, Long storeId) {
+        if (!storeRepository.existsByStoreIdAndUserId(storeId, managerId)) {
+            throw new StoreManagementForbiddenException();
+        }
     }
 
     private static void validateReservationOwner(Long userId, Reservation reservation) {
@@ -171,6 +212,15 @@ public class ReservationService {
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())) {
             throw new DuplicateReservationException();
+        }
+    }
+
+    private void validateNotDuplicatedWaiting(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeAndThemeAndStoreAndUser(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
+                reservation.getStore().getId(),
+                reservation.getUser().getId())) {
+            throw new DuplicateWaitingReservationException();
         }
     }
 }

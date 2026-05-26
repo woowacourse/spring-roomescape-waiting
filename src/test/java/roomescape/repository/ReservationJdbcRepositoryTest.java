@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Date;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 
@@ -200,4 +202,55 @@ class ReservationJdbcRepositoryTest {
         assertThat(repository.existsByReservationTimeId(targetTimeId)).isFalse();
     }
 
+
+    @Test
+    void existsByDateAndTimeAndThemeAndStoreAndUser_해당_방탈출_슬롯에_사용자가_이미_예약_혹은_대기를_건_경우_true() {
+        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long storeId = DbFixtures.insertStore(jdbcTemplate, "매장");
+        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-06", timeId,
+                storeId);
+
+        assertThat(repository.existsByDateAndTimeAndThemeAndStoreAndUser(date, timeId, themeId,
+                storeId, userId)).isTrue();
+    }
+
+    @Test
+    void existsByDateAndTimeAndThemeAndStoreAndUser_해당_방탈출_슬롯에_사용자가_아직_예약_혹은_대기를_걸지_않은_경우_false() {
+        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long storeId = DbFixtures.insertStore(jdbcTemplate, "매장");
+
+        assertThat(repository.existsByDateAndTimeAndThemeAndStoreAndUser(date, timeId, themeId,
+                storeId, userId)).isFalse();
+    }
+
+
+    @Test
+    void existsByDateAndTimeAndThemeAndStoreAndStatus_해당_방탈출_슬롯에_예약_확정자가_존재하는_경우_true() {
+        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long storeId = DbFixtures.insertStore(jdbcTemplate, "매장");
+        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, date.toString(), timeId, storeId);
+
+        assertThat(repository.existsByDateAndTimeAndThemeAndStoreAndStatus(date, timeId, themeId, storeId,
+                ReservationStatus.RESERVED)).isTrue();
+    }
+
+    @Test
+    void existsByDateAndTimeAndThemeAndStoreAndStatus_해당_방탈출_슬롯에_예약_확정자가_존재하지_않는_경우_false() {
+        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
+        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
+        LocalDate date = LocalDate.of(2026, 5, 6);
+        Long storeId = DbFixtures.insertStore(jdbcTemplate, "매장");
+
+        assertThat(repository.existsByDateAndTimeAndThemeAndStoreAndStatus(date, timeId, themeId, storeId,
+                ReservationStatus.RESERVED)).isFalse();
+    }
 }

@@ -15,8 +15,10 @@ import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.reservation.ReservationResponses;
 import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
+import roomescape.exception.ReservationNotFoundForWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.StoreManagementForbiddenException;
@@ -396,6 +398,68 @@ class ReservationServiceTest {
                 .isInstanceOf(ResourceNotFoundException.class);
     }
 
+    /*
+     * ReservationNotFoundForWaitingException
+     * PastDateTimeReservationException
+     * DuplicateWaitingReservationException
+     */
+    @Test
+    void createWaitingReservation_예약_대기를_생성한다() {
+        User brown = buildUser("브라운");
+        User charles = buildUser("샤를");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
+
+        Reservation waitingReservation = service.createWaitingReservation(
+                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId));
+
+        assertThat(waitingReservation.getDate()).isEqualTo(LocalDate.of(2026, 6, 1));
+        assertThat(waitingReservation.getTheme().getId()).isEqualTo(themeId);
+        assertThat(waitingReservation.getTime().getId()).isEqualTo(timeId);
+        assertThat(waitingReservation.getUser().getId()).isEqualTo(charles.getId());
+        assertThat(waitingReservation.getUser().getId()).isEqualTo(charles.getId());
+        assertThat(waitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    void createWaitingReservation_해당_슬롯에_아직_예약_확정이_없는_경우_ReservationNotFoundForWaitingException를_반환한다() {
+        User charles = buildUser("샤를");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+
+        assertThatThrownBy(() -> service.createWaitingReservation(
+                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId)))
+                .isInstanceOf(ReservationNotFoundForWaitingException.class);
+    }
+
+    @Test
+    void createWaitingReservation_과거_날짜로_예약_대기를_거는_경우_PastDateTimeReservationException를_반환한다() {
+        User brown = buildUser("브라운");
+        User charles = buildUser("샤를");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(1, 5, 1)));
+
+        assertThatThrownBy(() -> service.createWaitingReservation(
+                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(1, 5, 1), timeId)))
+                .isInstanceOf(PastDateTimeReservationException.class);
+    }
+
+    @Test
+    void createWaitingReservation_이미_본인_예약_대기가_존재하면_예외() {
+        User brown = buildUser("브라운");
+        User charles = buildUser("샤를");
+        Long themeId = themeRepository.save(new Theme(null, "공포", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+        reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 6, 1)));
+        reservationRepository.save(buildWaitingReservation(charles, themeId, timeId, LocalDate.of(2026, 6, 1)));
+
+        assertThatThrownBy(() -> service.createWaitingReservation(
+                Fixtures.createCommand(charles.getId(), themeId, LocalDate.of(2026, 6, 1), timeId)))
+                .isInstanceOf(DuplicateWaitingReservationException.class);
+    }
+
     private User buildUser(String name) {
         Long id = userRepository.save(Fixtures.member(name));
         return userRepository.findById(id).orElseThrow();
@@ -407,9 +471,16 @@ class ReservationServiceTest {
         return Fixtures.reservation(user, theme, date, time);
     }
 
+    private Reservation buildWaitingReservation(User user, Long themeId, Long timeId, LocalDate date) {
+        Theme theme = themeRepository.findById(themeId).orElseThrow();
+        ReservationTime time = reservationTimeRepository.findById(timeId).orElseThrow();
+        return Fixtures.reservation(user, theme, date, time, ReservationStatus.WAITING);
+    }
+
     private Reservation buildReservationInStore(User user, Long themeId, Long timeId, LocalDate date, long storeId) {
         Theme theme = themeRepository.findById(themeId).orElseThrow();
         ReservationTime time = reservationTimeRepository.findById(timeId).orElseThrow();
-        return new Reservation(null, user, theme, date, time, Fixtures.storeWithId(storeId, "다른매장"), ReservationStatus.RESERVED);
+        return new Reservation(null, user, theme, date, time, Fixtures.storeWithId(storeId, "다른매장"),
+                ReservationStatus.RESERVED);
     }
 }

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 
 public interface ReservationRepository {
 
@@ -25,5 +26,11 @@ public interface ReservationRepository {
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
+    boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
+                                                       Long userId);
+
     boolean existsByReservationTimeId(Long timeId);
+
+    boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long aLong, Long aLong1, Long aLong2,
+                                                         ReservationStatus reservationStatus);
 }
