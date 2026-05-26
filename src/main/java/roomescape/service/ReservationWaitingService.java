@@ -11,6 +11,7 @@ import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
+import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
@@ -60,6 +61,21 @@ public class ReservationWaitingService {
         Long id = reservationWaitingUpdatingDao.create(reservationWaiting);
 
         return ReservationWaitingResponse.from(reservationWaiting.withReservationWaitingId(id));
+    }
+
+    public void delete(Long id) {
+        ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
+
+        if (reservationWaiting.getDate().isBefore(LocalDate.now())) {
+            throw new ExpiredDateTimeException();
+        }
+
+        if (reservationWaiting.getDate().isEqual(LocalDate.now()) && reservationWaiting.getTime().getStartAt().isBefore(LocalTime.now())) {
+            throw new ExpiredDateTimeException();
+        }
+
+        reservationWaitingUpdatingDao.delete(id);
     }
 
     private Reservation getReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
