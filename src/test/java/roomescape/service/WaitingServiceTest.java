@@ -15,6 +15,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.WaitingDao;
@@ -38,10 +39,10 @@ class WaitingServiceTest {
     private final Long timeId = 1L;
     private final ReservationTime time = new ReservationTime(timeId, LocalTime.parse("10:00"));
 
-    private final Long themeId = 1L;
-    private final ThemeName themeName = ThemeName.parse("공포");
-    private final Description description = Description.parse("너무무서워");
-    private final ThumbnailUrl url = ThumbnailUrl.parse("/images/horror");
+    private final Long themeId = 11L;
+    private final ThemeName themeName = ThemeName.parse("저주받은 저택");
+    private final Description description = Description.parse("100년 전 사라진 가문의 비밀을 파헤쳐라");
+    private final ThumbnailUrl url = ThumbnailUrl.parse("/images/cursed-mansion");
     private final Theme theme = new Theme(themeId, themeName, description, url);
 
     private final LocalDateTime createAt = LocalDateTime.parse(TODAY + "T" + NOW_TIME);
@@ -49,6 +50,9 @@ class WaitingServiceTest {
     private final Long waitingId = 1L;
 
     private WaitingService waitingService;
+
+    @Mock
+    private ReservationDao reservationDao;
 
     @Mock
     private WaitingDao waitingDao;
@@ -59,7 +63,7 @@ class WaitingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        waitingService = new WaitingService(this.waitingDao, this.reservationTimeDao, this.themeDao);
+        waitingService = new WaitingService(this.reservationDao, this.waitingDao, this.reservationTimeDao, this.themeDao);
     }
 
     @Test
@@ -83,6 +87,7 @@ class WaitingServiceTest {
         given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(waitingDao.save(any())).willReturn(saved);
+        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
 
         WaitingResult result = waitingService.save(command);
         assertThat(result.id()).isEqualTo(saved.getId());
