@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
-import static roomescape.reservation.exception.ReservaitonErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;

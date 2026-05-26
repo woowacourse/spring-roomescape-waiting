@@ -12,7 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 
-import static roomescape.reservation.exception.ReservaitonErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.*;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -126,6 +126,10 @@ public class Reservation {
         }
     }
 
+    public boolean isOwner(String requesterName) {
+        return this.name.equals(requesterName);
+    }
+
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
@@ -142,10 +146,6 @@ public class Reservation {
         if (isPast(date, time)) {
             throw new ReservationException(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED);
         }
-    }
-
-    private boolean isOwner(String requesterName) {
-        return this.name.equals(requesterName);
     }
 
     private static boolean isPast(LocalDate date, LocalTime time) {

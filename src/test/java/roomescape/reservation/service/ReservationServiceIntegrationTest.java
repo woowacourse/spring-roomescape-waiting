@@ -1,6 +1,9 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
 import org.assertj.core.api.Assertions;
+import org.assertj.core.api.ErrorCollector;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,9 +14,12 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
+import roomescape.reservation.exception.ReservationErrorInformation;
+import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
+import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
 import roomescape.theme.repository.JdbcThemeRepository;
@@ -95,6 +101,26 @@ class ReservationServiceIntegrationTest {
         // then
         Assertions.assertThat(actual.getFirst().waitingTurn())
                 .isNull();
+    }
+
+    @Test
+    @DisplayName("이미 슬롯에 내 예약이 있으면 예약할 수 없다.")
+    void reserve_duplicated() {
+        // given
+        String themeName = "테마1";
+        String name1 = "사람1";
+
+        ReservationTime time = saveTime();
+        ReservationDate date = saveDate();
+        Theme theme = saveTheme(themeName);
+
+        reservationRepository.save(ReservationFixture.reservation(name1, date, time, theme));
+        ReservationSaveCommand command = new ReservationSaveCommand(date.getId(), time.getId(), theme.getId());
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.reserve(name1, command))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_BOOKED.getMessage());
     }
 
     private ReservationTime saveTime() {

@@ -2,7 +2,7 @@ package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
-import static roomescape.reservation.exception.ReservaitonErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationApiFixture.*;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;

@@ -7,7 +7,7 @@ import roomescape.common.exception.ErrorInformation;
 
 @Getter
 @AllArgsConstructor
-public enum ReservaitonErrorInformation implements ErrorInformation {
+public enum ReservationErrorInformation implements ErrorInformation {
 
     RESERVATION_ID_IS_NULL(HttpStatus.BAD_REQUEST, "RES_001", "예약 ID가 누락되었습니다."),
     RESERVATION_NAME_IS_NULL(HttpStatus.BAD_REQUEST, "RES_002", "예약자 이름이 누락되었습니다."),

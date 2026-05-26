@@ -24,7 +24,8 @@ import java.util.List;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
-import static roomescape.reservation.exception.ReservaitonErrorInformation.RESERVATION_NOT_FOUND;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
 
@@ -59,6 +60,7 @@ public class ReservationService {
 
         LocalDateTime now = LocalDateTime.now();
 
+        validateAlreadyBookedByMyself(name, reservationDate.getId(), reservationTime.getId(), theme.getId());
         boolean isAlreadyBooked = checkAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
         if (isAlreadyBooked) {
             return reservationRepository.save(Reservation.wait(name, reservationDate, reservationTime, theme, now));
@@ -136,6 +138,15 @@ public class ReservationService {
 
     private boolean checkAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
         return reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId);
+    }
+
+    private void validateAlreadyBookedByMyself(String name, Long dateId, Long timeId, Long themeId) {
+        boolean isAlreadyBooked = reservationRepository.findByDateTimeAndThemeId(dateId, timeId, themeId)
+            .stream()
+            .anyMatch(reservation -> reservation.isOwner(name));
+        if (isAlreadyBooked) {
+            throw new ReservationException(RESERVATION_ALREADY_BOOKED);
+        }
     }
 
 }

@@ -4,7 +4,7 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.date.exception.ReservationDateErrorInformation.INACTIVE_DATE_NOT_ALLOWED;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
 import static roomescape.date.fixture.ReservationDateApiFixture.updateDateStatus;
-import static roomescape.reservation.exception.ReservaitonErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationApiFixture.cancelReservationWithToken;
 import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
 import static roomescape.theme.exception.ThemeErrorInformation.INACTIVE_THEME_NOT_ALLOWED;

@@ -1,5 +1,6 @@
 package roomescape.reservation.repository;
 
+import java.util.Map;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -116,6 +117,44 @@ public class JdbcReservationRepository implements ReservationRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+        String sql = """
+            SELECT
+                r.id AS reservation_id,
+                r.name,
+                r.status,
+                r.reserved_at,
+                d.id AS date_id,
+                d.date,
+                d.is_active as date_is_active,
+                t.id AS time_id,
+                t.start_at,
+                t.is_active as time_is_active,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.description,
+                th.thumbnail_url,
+                th.is_active
+            FROM reservation r
+            INNER JOIN reservation_date d ON r.date_id = d.id
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
+            WHERE r.date_id = :dateId
+            AND r.time_id = :timeId
+            AND r.theme_id = :themeId
+            AND r.status in ('RESERVED','WAITING')
+            ORDER BY d.date DESC , t.start_at ASC
+            """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+            .addValue("dateId", dateId)
+            .addValue("timeId", timeId)
+            .addValue("themeId", themeId);
+
+        return jdbcTemplate.query(sql, params, reservationRowMapper);
     }
 
     @Override

@@ -2,7 +2,7 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.reservation.exception.ReservaitonErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.*;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.toCommand;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;

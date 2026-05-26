@@ -31,6 +31,11 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+        return List.of();
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         Long id = idGenerator.getAndIncrement();
         Reservation saved = Reservation.load(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
