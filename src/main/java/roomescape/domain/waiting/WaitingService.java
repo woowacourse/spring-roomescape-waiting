@@ -28,13 +28,15 @@ public class WaitingService {
     }
 
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
-        validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
-                waitingRequest.name());
 
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+
+        validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
+                waitingRequest.name());
+        reservationTime.validateIfTimePast(waitingRequest.date());
 
         Waiting waiting = Waiting.of(
                 waitingRequest.name(),
