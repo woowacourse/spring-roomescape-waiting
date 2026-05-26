@@ -76,6 +76,20 @@ public class Reservation {
         }
     }
 
+    @Override
+    public boolean equals(Object o){
+        if(!(o instanceof Reservation)) {
+            return false;
+        }
+        Reservation r = (Reservation) o;
+        return Objects.equals(id, r.getId());
+    }
+
+    @Override
+    public int hashCode(){
+        return Objects.hash(id);
+    }
+
     public Long getId() {
         return this.id;
     }
@@ -98,19 +112,5 @@ public class Reservation {
 
     private LocalDateTime getReservationDateTime() {
         return LocalDateTime.of(date, time.getStartAt());
-    }
-
-    @Override
-    public boolean equals(Object o){
-        if(!(o instanceof Reservation)) {
-            return false;
-        }
-        Reservation r = (Reservation) o;
-        return Objects.equals(id, r.getId());
-    }
-
-    @Override
-    public int hashCode(){
-        return Objects.hash(id);
     }
 }
