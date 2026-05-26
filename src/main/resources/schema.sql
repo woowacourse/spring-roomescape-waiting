@@ -28,7 +28,7 @@ CREATE TABLE users
     PRIMARY KEY (id)
 );
 
-CREATE TABLE reservation
+CREATE TABLE reservation_slot
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     date_id  BIGINT,
@@ -41,16 +41,16 @@ CREATE TABLE reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 
-CREATE TABLE user_reservation
+CREATE TABLE reservation
 (
-    id             BIGINT       NOT NULL AUTO_INCREMENT,
-    user_id        BIGINT       NOT NULL,
-    reservation_id BIGINT       NOT NULL,
-    waiting_number BIGINT,
-    status         VARCHAR(30)  NOT NULL,
-    created_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at     TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    id                  BIGINT      NOT NULL AUTO_INCREMENT,
+    user_id             BIGINT      NOT NULL,
+    reservation_slot_id BIGINT      NOT NULL,
+    waiting_number      BIGINT,
+    status              VARCHAR(30) NOT NULL,
+    created_at          TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id) ON DELETE CASCADE
+    FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id) ON DELETE CASCADE
 );

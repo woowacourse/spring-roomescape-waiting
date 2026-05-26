@@ -48,15 +48,14 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Long countByReservationId(Long reservationId) {
         return storage.values().stream()
-            .filter(userReservation -> reservationId.equals(userReservation.getReservation().getId()))
+            .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
             .count();
     }
 
     @Override
     public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
         return storage.values().stream()
-            .filter(userReservation -> reservationId.equals(userReservation.getReservation().getId()))
-            .filter(userReservation -> userReservation.getStatus() == WaitingStatus.WAITING)
+            .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
             .sorted(Comparator.comparing(Reservation::getUpdatedAt)
                 .thenComparing(Reservation::getId))
             .toList();
@@ -80,7 +79,7 @@ public class FakeReservationRepository implements ReservationRepository {
         }
         Reservation updatedUserReservation = Reservation.of(
             userReservation.getId(),
-            userReservation.getReservation(),
+            userReservation.getReservationSlot(),
             userReservation.getUser(),
             userReservation.getWaitingNumber(),
             status,
@@ -94,7 +93,7 @@ public class FakeReservationRepository implements ReservationRepository {
     public boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
-            .filter(userReservation -> reservationId.equals(userReservation.getReservation().getId()))
+            .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
             .anyMatch(userReservation -> userReservation.getStatus() != WaitingStatus.CANCELED);
     }
 
@@ -102,17 +101,37 @@ public class FakeReservationRepository implements ReservationRepository {
     public void updateWaitingNumbers(List<Reservation> userReservations) {
         for (int index = 0; index < userReservations.size(); index++) {
             Reservation userReservation = userReservations.get(index);
-            WaitingStatus status = index == 0 ? WaitingStatus.CONFIRMED : WaitingStatus.WAITING;
             Reservation rerankedUserReservation = Reservation.of(
                 userReservation.getId(),
-                userReservation.getReservation(),
+                userReservation.getReservationSlot(),
                 userReservation.getUser(),
                 (long) index,
-                status,
+                userReservation.getStatus(),
                 userReservation.getCreatedAt(),
                 userReservation.getUpdatedAt()
             );
             storage.put(userReservation.getId(), rerankedUserReservation);
         }
+    }
+
+    @Override
+    public void updateAllStatus(List<Reservation> userReservations) {
+        for (Reservation userReservation : userReservations) {
+            Reservation waitingReservation = Reservation.of(
+                userReservation.getId(),
+                userReservation.getReservationSlot(),
+                userReservation.getUser(),
+                userReservation.getWaitingNumber(),
+                WaitingStatus.WAITING,
+                userReservation.getCreatedAt(),
+                userReservation.getUpdatedAt()
+            );
+            storage.put(userReservation.getId(), waitingReservation);
+        }
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        storage.remove(id);
     }
 }

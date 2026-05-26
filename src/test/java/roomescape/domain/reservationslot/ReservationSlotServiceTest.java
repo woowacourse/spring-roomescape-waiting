@@ -17,7 +17,7 @@ import org.junit.jupiter.api.Test;
 import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -465,6 +465,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -476,10 +477,10 @@ class ReservationSlotServiceTest {
         );
 
         // when
-        reservationService.cancelUserReservation(savedReservation.getId());
+        reservationService.cancelUserReservation(savedUserReservation.getId());
 
         // then
-        assertThat(reservationRepository.findById(savedReservation.getId())).isEmpty();
+        assertThat(userReservationRepository.findById(savedUserReservation.getId())).isEmpty();
     }
 
     @Test
@@ -497,6 +498,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -508,7 +510,7 @@ class ReservationSlotServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelUserReservation(savedReservation.getId()))
+        assertThatThrownBy(() -> reservationService.cancelUserReservation(savedUserReservation.getId()))
             .isInstanceOf(BadRequestException.class)
             .hasMessage("현재보다 이전 시간 예약을 삭제할 수 없습니다. 현재 시각:" + LocalTime.of(13, 0));
     }
@@ -528,6 +530,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -539,7 +542,7 @@ class ReservationSlotServiceTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelUserReservation(savedReservation.getId()))
+        assertThatThrownBy(() -> reservationService.cancelUserReservation(savedUserReservation.getId()))
             .isInstanceOf(BadRequestException.class)
             .hasMessage("예전 예약은 삭제할 수 없습니다. 오늘 날짜:" + LocalDate.of(2026, 5, 12));
     }
@@ -562,7 +565,7 @@ class ReservationSlotServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.cancelUserReservation(1L))
             .isInstanceOf(RoomescapeException.class)
-            .hasMessage("존재하지 않는 예약건 입니다");
+            .hasMessage("예약이 존재하지 않습니다.");
     }
 
     @Test
@@ -586,6 +589,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(beforeReservationDate, beforeReservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -595,16 +599,18 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(
+        UpdateReservationRequest request = new UpdateReservationRequest(
             afterReservationDate.getDate(),
             afterReservationTime.getStartAt()
         );
 
         // when
-        reservationService.updateReservation(savedReservation.getId(), request);
+        reservationService.updateReservation(savedUserReservation.getId(), request);
 
         // then
-        ReservationSlot updatedReservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+        ReservationSlot updatedReservation = userReservationRepository.findById(savedUserReservation.getId())
+            .orElseThrow()
+            .getReservationSlot();
         assertSoftly(softly -> {
             assertThat(updatedReservation.getDate().getDate()).isEqualTo(LocalDate.of(2026, 5, 14));
             assertThat(updatedReservation.getTime().getStartAt()).isEqualTo(LocalTime.of(15, 0));
@@ -630,6 +636,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, beforeReservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -639,11 +646,13 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, afterReservationTime.getStartAt());
+        UpdateReservationRequest request = new UpdateReservationRequest(null, afterReservationTime.getStartAt());
 
         // when
-        reservationService.updateReservation(savedReservation.getId(), request);
-        ReservationSlot updatedReservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+        reservationService.updateReservation(savedUserReservation.getId(), request);
+        ReservationSlot updatedReservation = userReservationRepository.findById(savedUserReservation.getId())
+            .orElseThrow()
+            .getReservationSlot();
 
         // then
         assertSoftly(softly -> {
@@ -666,12 +675,12 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0));
+        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0));
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(1L, request))
             .isInstanceOf(RoomescapeException.class)
-            .hasMessage("존재하지 않는 예약건 입니다");
+            .hasMessage("사용자 예약 신청이 존재하지 않습니다.");
     }
 
     @Test
@@ -689,6 +698,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -698,10 +708,10 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(LocalDate.of(2026, 5, 14), null);
+        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.of(2026, 5, 14), null);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
+        assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("존재하지 않는 날짜 입니다.");
     }
@@ -721,6 +731,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -730,10 +741,10 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, LocalTime.of(15, 0));
+        UpdateReservationRequest request = new UpdateReservationRequest(null, LocalTime.of(15, 0));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
+        assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("존재하지 않는 예약 시간대 입니다.");
     }
@@ -756,6 +767,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -765,10 +777,10 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(beforeToday.getDate(), null);
+        UpdateReservationRequest request = new UpdateReservationRequest(beforeToday.getDate(), null);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
+        assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
             .isInstanceOf(BadRequestException.class)
             .hasMessage("예약 날짜는 오늘 이후여야 합니다. 오늘 날짜:" + LocalDate.of(2026, 5, 12));
     }
@@ -791,6 +803,7 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -800,10 +813,10 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, beforeNow.getStartAt());
+        UpdateReservationRequest request = new UpdateReservationRequest(null, beforeNow.getStartAt());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
+        assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
             .isInstanceOf(BadRequestException.class)
             .hasMessage("예약 시간은 현재 이후여야 합니다. 현재 시각:" + LocalTime.of(13, 0));
     }
@@ -826,9 +839,12 @@ class ReservationSlotServiceTest {
         ReservationSlot savedReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        reservationRepository.save(
+        ReservationSlot otherReservation = reservationRepository.save(
             ReservationSlot.createWithoutId(reservationDate, otherReservationTime, theme)
         );
+        User user = userRepository.save(User.createWithoutId("보예"));
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, user, now);
+        saveConfirmedReservation(otherReservation, user, now);
         ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
@@ -838,12 +854,29 @@ class ReservationSlotServiceTest {
             userRepository,
             now
         );
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, otherReservationTime.getStartAt());
+        UpdateReservationRequest request = new UpdateReservationRequest(null, otherReservationTime.getStartAt());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
+        assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
             .isInstanceOf(BadRequestException.class)
             .hasMessage("중복 예약입니다. 예약 정보를 다시 확인해주세요.");
+    }
+
+    private Reservation saveConfirmedReservation(ReservationSlot reservationSlot, Clock clock) {
+        User user = userRepository.save(User.createWithoutId("보예"));
+        return saveConfirmedReservation(reservationSlot, user, clock);
+    }
+
+    private Reservation saveConfirmedReservation(ReservationSlot reservationSlot, User user, Clock clock) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        return userReservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            null,
+            WaitingStatus.CONFIRMED,
+            now,
+            now
+        ));
     }
 
     private Clock fixedClockAt(LocalDateTime dateTime) {

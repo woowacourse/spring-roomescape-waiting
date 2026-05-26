@@ -62,7 +62,7 @@ VALUES ('보예'),
        ('쿠다'),
        ('고래');
 
-INSERT INTO reservation (date_id, time_id, theme_id)
+INSERT INTO reservation_slot (date_id, time_id, theme_id)
 VALUES (1, 1, 1),
        (9, 1, 1),
        (1, 2, 1),
@@ -93,7 +93,7 @@ VALUES (1, 1, 1),
        (7, 3, 6),
        (7, 4, 10);
 
-INSERT INTO user_reservation (user_id, reservation_id, waiting_number, status)
+INSERT INTO reservation (user_id, reservation_slot_id, waiting_number, status)
 VALUES (1, 1, NULL, 'CONFIRMED'),
        (1, 2, NULL, 'CONFIRMED'),
        (2, 3, NULL, 'CONFIRMED'),

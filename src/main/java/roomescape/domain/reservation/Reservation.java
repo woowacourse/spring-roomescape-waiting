@@ -11,7 +11,7 @@ import roomescape.support.exception.errors.ReservationSlotErrors;
 public class Reservation {
 
     private final Long id;
-    private final ReservationSlot reservation;
+    private final ReservationSlot reservationSlot;
     private final User user;
     private final Long waitingNumber;
     private final WaitingStatus status;
@@ -20,16 +20,16 @@ public class Reservation {
 
     private Reservation(
         Long id,
-        ReservationSlot reservation,
+        ReservationSlot reservationSlot,
         User user,
         Long waitingNumber,
         WaitingStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
-        validate(reservation, user, waitingNumber, status, createdAt, updatedAt);
+        validate(reservationSlot, user, waitingNumber, status, createdAt, updatedAt);
         this.id = id;
-        this.reservation = reservation;
+        this.reservationSlot = reservationSlot;
         this.user = user;
         this.waitingNumber = waitingNumber;
         this.status = status;
@@ -51,7 +51,7 @@ public class Reservation {
     public static Reservation createWithId(long id, Reservation userReservation) {
         return of(
             id,
-            userReservation.getReservation(),
+            userReservation.getReservationSlot(),
             userReservation.getUser(),
             userReservation.getWaitingNumber(),
             userReservation.getStatus(),

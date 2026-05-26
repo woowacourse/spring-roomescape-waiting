@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 
 @Validated
@@ -55,7 +55,7 @@ public class ReservationSlotController {
     @PatchMapping("/reservations/{id}")
     public ResponseEntity<Void> updateReservation(
         @PathVariable Long id,
-        @RequestBody UpdateReservationSlotRequest request
+        @RequestBody UpdateReservationRequest request
     ) {
         reservationService.updateReservation(id, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

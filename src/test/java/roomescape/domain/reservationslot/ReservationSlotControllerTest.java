@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
 import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse.ThemePayload;
-import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -154,7 +154,7 @@ class ReservationSlotControllerTest {
     void updateReservation() throws Exception {
         // given
         Long id = 1L;
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(
+        UpdateReservationRequest request = new UpdateReservationRequest(
             LocalDate.of(2026, 5, 18),
             LocalTime.of(14, 30)
         );
@@ -193,7 +193,7 @@ class ReservationSlotControllerTest {
     void updateReservationWhenReservationNotFound() throws Exception {
         // given
         Long id = 999L;
-        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(
+        UpdateReservationRequest request = new UpdateReservationRequest(
             LocalDate.of(2026, 5, 18),
             LocalTime.of(14, 30)
         );

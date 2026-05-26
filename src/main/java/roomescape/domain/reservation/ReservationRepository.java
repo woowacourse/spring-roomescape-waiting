@@ -24,4 +24,8 @@ public interface ReservationRepository {
     boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId);
 
     void updateWaitingNumbers(List<Reservation> userReservations);
+
+    void updateAllStatus(List<Reservation> userReservations);
+
+    void deleteById(Long id);
 }

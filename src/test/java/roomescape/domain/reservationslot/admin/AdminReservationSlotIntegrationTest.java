@@ -30,8 +30,8 @@ class AdminReservationSlotIntegrationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
-        jdbcTemplate.update("DELETE FROM user_reservation");
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM reservation_slot");
         jdbcTemplate.update("DELETE FROM users");
         jdbcTemplate.update("DELETE FROM reservation_date");
         jdbcTemplate.update("DELETE FROM reservation_time");
@@ -118,13 +118,13 @@ class AdminReservationSlotIntegrationTest {
         );
 
         jdbcTemplate.update(
-            "INSERT INTO reservation(date_id, time_id, theme_id) VALUES (?, ?, ?)",
+            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
             dateId,
             timeId,
             themeId
         );
         Long reservationId = jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation WHERE date_id = ? AND time_id = ? AND theme_id = ?",
+            "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
             Long.class,
             dateId,
             timeId,

@@ -32,14 +32,14 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String COLUMN_CONTENT = "content";
     private static final String COLUMN_URL = "url";
 
-    private static final String INSERT_SQL = "insert into reservation(date_id, time_id, theme_id) values (?, ?, ?)";
+    private static final String INSERT_SQL = "insert into reservation_slot(date_id, time_id, theme_id) values (?, ?, ?)";
     private static final String FIND_ALL_SQL =
         """
             select r.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation r
+            from reservation_slot r
             join reservation_date rd on r.date_id = rd.id
             join reservation_time rt on r.time_id = rt.id
             join theme th on r.theme_id = th.id
@@ -48,20 +48,20 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String COUNT_BY_TIME_ID_SQL =
         """
             select count(*)
-            from reservation
+            from reservation_slot
             where time_id = ?
             """;
     private static final String COUNT_BY_RESERVATION_DATE_ID_SQL =
         """
             select count(*)
-            from reservation
+            from reservation_slot
             where date_id = ?
             """;
-    private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
+    private static final String DELETE_BY_ID_SQL = "delete from reservation_slot where id = ?";
     private static final String FIND_BY_THEME_AND_DATE_SQL =
         """
             select time_id
-            from reservation
+            from reservation_slot
             where theme_id = ? and date_id = ?
             """;
 
@@ -72,27 +72,27 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 th.name,
                 th.content,
                 th.url
-            from user_reservation ur
-            join reservation r on ur.reservation_id = r.id
-            join reservation_date rd on r.date_id = rd.id
-            join theme th on r.theme_id = th.id
+            from reservation r
+            join reservation_slot rs on r.reservation_slot_id = r.id
+            join reservation_date rd on rs.date_id = rd.id
+            join theme th on rs.theme_id = th.id
             where rd.date between ? and ?
-              and ur.status = 'CONFIRMED'
+              and r.status = 'CONFIRMED'
             group by th.id, th.name, th.content, th.url
-            order by count(ur.id) desc, th.id asc
+            order by count(r.id) desc, th.id asc
             limit ?
             """;
     private static final String COUNT_BY_THEME_ID_SQL =
         """
             select count(*)
-            from reservation
+            from reservation_slot
             where theme_id = ?
             """;
     private static final String EXISTS_RESERVATION_BY_TIME_AND_DATE_AND_THEME_SQL =
         """
             select exists(
                 select 1
-                from reservation r
+                from reservation_slot r
                 where time_id = ? and date_id = ? and theme_id = ?
             )
             """;
@@ -100,7 +100,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
         """
             select exists(
                 select 1
-                from reservation r
+                from reservation_slot r
                 where r.id <> ? and time_id = ? and date_id = ? and theme_id = ?
             )
             """;
@@ -110,7 +110,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation r
+            from reservation_slot r
             join reservation_date rd on r.date_id = rd.id
             join reservation_time rt on r.time_id = rt.id
             join theme th on r.theme_id = th.id
@@ -118,19 +118,19 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             """;
     private static final String FIND_BY_USER_NAME_SQL =
         """
-            select r.id,
+            select rs.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from user_reservation ur
-            join users u on ur.user_id = u.id
-            join reservation r on ur.reservation_id = r.id
-            join reservation_date rd on r.date_id = rd.id
-            join reservation_time rt on r.time_id = rt.id
-            join theme th on r.theme_id = th.id
+            from reservation r
+            join users u on r.user_id = u.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
+            join reservation_date rd on rs.date_id = rd.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
             where u.name = ?
-              and ur.status <> 'CANCELED'
-            order by rd.date desc, rt.start_at desc, ur.id desc
+              and r.status <> 'CANCELED'
+            order by rd.date desc, rt.start_at desc, r.id desc
             """;
     private static final String FIND_BY_ID_SQL =
         """
@@ -138,7 +138,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation r
+            from reservation_slot r
             join reservation_date rd on r.date_id = rd.id
             join reservation_time rt on r.time_id = rt.id
             join theme th on r.theme_id = th.id
@@ -146,7 +146,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             """;
     private static final String UPDATE_SQL =
         """
-            update reservation
+            update reservation_slot
             set date_id = ?, time_id = ?, theme_id = ?
             where id = ?
             """;
