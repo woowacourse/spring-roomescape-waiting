@@ -18,12 +18,16 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.WaitingDao;
+import roomescape.dao.jdbc.MemberJdbcDao;
+import roomescape.dao.jdbc.ThemeJdbcDao;
+import roomescape.dao.jdbc.TimeJdbcDao;
 import roomescape.dao.jdbc.WaitingJdbcDao;
 import roomescape.domain.Waiting;
 import roomescape.dto.request.WaitingRequestDto;
 
 @JdbcTest
-@Import({WaitingService.class, WaitingJdbcDao.class})
+@Import({WaitingService.class, WaitingJdbcDao.class,
+        MemberJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class})
 @ActiveProfiles("test")
 class WaitingServiceTest {
 
@@ -85,10 +89,10 @@ class WaitingServiceTest {
             Waiting saved = waitingService.create(dto);
 
             assertThat(saved.getId()).isNotNull();
-            assertThat(saved.getMemberId()).isEqualTo(memberId);
+            assertThat(saved.getMember().getId()).isEqualTo(memberId);
             assertThat(saved.getDate()).isEqualTo(date);
-            assertThat(saved.getTimeId()).isEqualTo(timeId);
-            assertThat(saved.getThemeId()).isEqualTo(themeId);
+            assertThat(saved.getTime().getId()).isEqualTo(timeId);
+            assertThat(saved.getTheme().getId()).isEqualTo(themeId);
             assertThat(saved.getStoreId()).isEqualTo(storeId);
         }
 

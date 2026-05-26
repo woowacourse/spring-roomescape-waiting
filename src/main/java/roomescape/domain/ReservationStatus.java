@@ -2,5 +2,6 @@ package roomescape.domain;
 
 public enum ReservationStatus {
     BOOKED,
-    CANCELED
+    CANCELED,
+    WAITING
 }
