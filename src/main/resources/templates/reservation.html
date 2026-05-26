@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>방탈출 예약</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body>
+
+<header>
+    <a href="/" class="escape-logo">ESC<span>A</span>PE</a>
+    <a href="/reservation/me" class="header-link">내 예약 조회</a>
+</header>
+
+<main>
+
+    <!-- 스텝 인디케이터 -->
+    <div class="steps" id="step-indicator">
+        <div class="step active" id="step-1">
+            <div class="step-dot">1</div>
+            <span class="step-label">테마</span>
+        </div>
+        <div class="step" id="step-2">
+            <div class="step-dot">2</div>
+            <span class="step-label">날짜</span>
+        </div>
+        <div class="step" id="step-3">
+            <div class="step-dot">3</div>
+            <span class="step-label">시간</span>
+        </div>
+        <div class="step" id="step-4">
+            <div class="step-dot">4</div>
+            <span class="step-label">확정</span>
+        </div>
+    </div>
+
+    <!-- 1. 테마 선택 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-num">1</div>
+            <span class="section-title">테마 선택</span>
+        </div>
+        <div class="theme-grid" id="theme-grid">
+            <div class="loading-dots">
+                <span></span><span></span><span></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 2. 날짜 선택 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-num">2</div>
+            <span class="section-title">날짜 선택</span>
+        </div>
+        <input type="date" id="date-select">
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 3. 예약 가능 시간 -->
+    <div class="section">
+        <div class="section-header">
+            <div class="section-num">3</div>
+            <span class="section-title">예약 가능 시간</span>
+        </div>
+        <div id="time-container">
+            <div class="placeholder-msg">테마와 날짜를 선택하면 예약 가능한 시간이 표시됩니다</div>
+        </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <!-- 4. 예약 확정 -->
+    <div class="section" id="booking-section" style="display: none;">
+        <div class="section-header">
+            <div class="section-num">4</div>
+            <span class="section-title">예약 확정</span>
+        </div>
+        <div class="booking-form">
+            <div class="booking-summary" id="booking-summary"></div>
+            <input type="text" id="user-name" placeholder="예약자 성함을 입력하세요">
+            <button class="btn-reserve" onclick="makeReservation()" id="btn-reserve">예약하기</button>
+        </div>
+    </div>
+
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let allThemes = [];
+    let selectedThemeId = null;
+    let selectedTimeId = null;
+    let selectedTimeLabel = null;
+
+    const themeGrid = document.getElementById('theme-grid');
+    const dateSelect = document.getElementById('date-select');
+    const timeContainer = document.getElementById('time-container');
+    const bookingSection = document.getElementById('booking-section');
+
+    // 오늘 날짜를 min으로 설정
+    const today = getTodayString();
+    dateSelect.min = today;
+    dateSelect.value = today;
+
+    // 페이지 로드 시 테마 목록 불러오기
+    window.onload = function () {
+        fetch('/themes')
+            .then(handleResponse)
+            .then(themes => {
+                allThemes = themes;
+                renderThemes(themes);
+
+                const urlParams = new URLSearchParams(window.location.search);
+                const themeIdFromUrl = urlParams.get('themeId');
+                if (themeIdFromUrl) {
+                    selectTheme(parseInt(themeIdFromUrl));
+                }
+            })
+            .catch(error => {
+                themeGrid.innerHTML = `<div class="placeholder-msg">테마 목록을 불러오지 못했습니다</div>`;
+                showToast(error.message, 'error');
+            });
+    };
+
+    function renderThemes(themes) {
+        themeGrid.innerHTML = '';
+        if (themes.length === 0) {
+            themeGrid.innerHTML = `<div class="placeholder-msg">예약 가능한 테마가 없습니다</div>`;
+            return;
+        }
+        const emojis = ['👻', '🚀', '🧙', '🔍', '🏴‍☠️', '🎭'];
+        themes.forEach((t, i) => {
+            const card = document.createElement('div');
+            card.className = 'theme-card';
+            card.dataset.id = t.id;
+            card.innerHTML = `
+                ${t.thumbnail
+                ? `<img class="theme-card-img" src="${escapeHtml(t.thumbnail)}" alt="${escapeHtml(t.name)}" onerror="this.parentElement.querySelector('.theme-card-img-placeholder').style.display='flex'; this.style.display='none';">`
+                : ''}
+                <div class="theme-card-img-placeholder" style="display:${t.thumbnail ? 'none' : 'flex'}">${emojis[i % emojis.length]}</div>
+                <div class="theme-card-body">
+                    <div class="theme-card-name">${escapeHtml(t.name)}</div>
+                    <div class="theme-card-desc">${escapeHtml(t.description || '')}</div>
+                </div>
+            `;
+            card.onclick = () => selectTheme(t.id);
+            themeGrid.appendChild(card);
+        });
+    }
+
+    function selectTheme(themeId) {
+        selectedThemeId = themeId;
+        document.querySelectorAll('.theme-card').forEach(c => {
+            c.classList.toggle('selected', parseInt(c.dataset.id) === themeId);
+        });
+        updateStepIndicator();
+        fetchAvailableTimes();
+    }
+
+    dateSelect.onchange = function () {
+        updateStepIndicator();
+        fetchAvailableTimes();
+    };
+
+    function fetchAvailableTimes() {
+        const date = dateSelect.value;
+        if (!selectedThemeId || !date) return;
+
+        timeContainer.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
+        selectedTimeId = null;
+        bookingSection.style.display = 'none';
+        updateStepIndicator();
+
+        fetch(`/themes/${selectedThemeId}/times?date=${date}`)
+            .then(handleResponse)
+            .then(times => renderTimes(times))
+            .catch(error => {
+                timeContainer.innerHTML = '<div class="placeholder-msg">예약 가능 시간을 불러오지 못했습니다</div>';
+                showToast(error.message, 'error');
+            });
+    }
+
+    function renderTimes(times) {
+        timeContainer.innerHTML = '';
+        if (times.length === 0) {
+            timeContainer.innerHTML = '<div class="placeholder-msg">선택하신 날짜에 예약 가능한 시간이 없습니다</div>';
+            return;
+        }
+        const grid = document.createElement('div');
+        grid.className = 'time-grid';
+        times.forEach(item => {
+            // AvailableTimeDto: { time: { id, startAt }, available }
+            // flat 구조: { id, startAt } 둘 다 대응
+            const id = item.time ? item.time.id : item.id;
+            const rawStartAt = item.time ? item.time.startAt : item.startAt;
+            const startAt = rawStartAt ? rawStartAt.slice(0, 5) : rawStartAt;
+            const available = item.available !== undefined ? item.available : true;
+
+            const slot = document.createElement('div');
+            slot.className = 'time-slot' + (available ? '' : ' unavailable');
+            slot.textContent = startAt;
+
+            if (available) {
+                slot.onclick = () => selectTime(id, startAt, slot);
+            } else {
+                slot.title = '이미 예약된 시간입니다';
+            }
+            grid.appendChild(slot);
+        });
+        timeContainer.appendChild(grid);
+        updateStepIndicator();
+    }
+
+    function selectTime(timeId, timeLabel, element) {
+        selectedTimeId = timeId;
+        selectedTimeLabel = timeLabel;
+        document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+        element.classList.add('selected');
+        showBookingSection();
+        updateStepIndicator();
+    }
+
+    function showBookingSection() {
+        const theme = allThemes.find(t => t.id == selectedThemeId);
+        const summary = document.getElementById('booking-summary');
+        summary.innerHTML = `
+            <div class="summary-row">
+                <span class="summary-label">테마</span>
+                <span class="summary-value">${theme ? theme.name : ''}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">날짜</span>
+                <span class="summary-value">${dateSelect.value}</span>
+            </div>
+            <div class="summary-row">
+                <span class="summary-label">시간</span>
+                <span class="summary-value accent">${selectedTimeLabel}</span>
+            </div>
+        `;
+        bookingSection.style.display = 'block';
+        bookingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        setTimeout(() => document.getElementById('user-name').focus(), 300);
+    }
+
+    function makeReservation() {
+        const name = document.getElementById('user-name').value.trim();
+        if (!name) {
+            showToast('성함을 입력해주세요', 'error');
+            return;
+        }
+
+        const btn = document.getElementById('btn-reserve');
+        btn.disabled = true;
+        btn.textContent = '예약 중...';
+
+        const body = {
+            themeId: parseInt(selectedThemeId),
+            date: dateSelect.value,
+            timeId: selectedTimeId,
+            name: name
+        };
+
+        fetch('/reservations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+            .then(res => {
+                if (res.ok) {
+                    showToast('예약이 완료되었습니다', 'success');
+                    setTimeout(() => window.location.href = `/reservation/me?name=${encodeURIComponent(name)}`, 1500);
+                    return;
+                }
+                return res.json()
+                    .then(error => {
+                        throw new Error(error.detail || '예약 중 오류가 발생했습니다');
+                    });
+            })
+            .catch(error => {
+                showToast(error.message || '예약 중 오류가 발생했습니다', 'error');
+                btn.disabled = false;
+                btn.textContent = '예약하기';
+            });
+    }
+
+    function updateStepIndicator() {
+        const steps = ['step-1', 'step-2', 'step-3', 'step-4'];
+        const done = [
+            !!selectedThemeId,
+            !!dateSelect.value,
+            !!selectedTimeId,
+            false
+        ];
+
+        let activeIndex = 0;
+        for (let i = 0; i < done.length; i++) {
+            if (done[i]) activeIndex = i + 1;
+        }
+
+        steps.forEach((id, i) => {
+            const el = document.getElementById(id);
+            el.classList.remove('active', 'done');
+            if (i < activeIndex) el.classList.add('done');
+            else if (i === activeIndex) el.classList.add('active');
+        });
+    }
+
+    function showToast(msg, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = msg;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2800);
+    }
+
+    function handleResponse(response) {
+        if (response.ok) {
+            return response.json();
+        }
+        return response.json()
+            .then(error => {
+                throw new Error(error.detail || '요청을 처리하지 못했습니다');
+            })
+            .catch(error => {
+                throw new Error(error.message || '요청을 처리하지 못했습니다');
+            });
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function getTodayString() {
+        const now = new Date();
+        const year = now.getFullYear();
+        const month = String(now.getMonth() + 1).padStart(2, '0');
+        const date = String(now.getDate()).padStart(2, '0');
+        return `${year}-${month}-${date}`;
+    }
+</script>
+</body>
+</html>

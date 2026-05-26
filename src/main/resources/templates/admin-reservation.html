@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>예약 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="admin-page">
+<header>
+    <a href="/admin" class="brand">
+        <div class="header-title">예약 관리</div>
+        <div class="header-sub">Admin</div>
+    </a>
+    <nav class="admin-nav">
+        <a href="/admin/reservation" class="active">예약</a>
+        <a href="/admin/time">시간</a>
+        <a href="/admin/theme">테마</a>
+    </nav>
+</header>
+
+<main>
+    <div class="section-header">
+        <div class="section-title">예약 추가</div>
+    </div>
+    <div class="form-grid reservation-form">
+        <input type="text" id="name-input" placeholder="예약자 이름">
+        <input type="date" id="date-input">
+        <select id="theme-select"></select>
+        <select id="time-select"></select>
+        <button onclick="createReservation()">예약 추가</button>
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">예약 목록</div>
+    </div>
+    <div class="toolbar">
+        <input type="search" id="search-input" placeholder="이름, 날짜, 시간, 테마 검색">
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th data-sort="id">ID<span class="sort-indicator"></span></th>
+                <th data-sort="name">이름<span class="sort-indicator"></span></th>
+                <th data-sort="date">날짜<span class="sort-indicator"></span></th>
+                <th data-sort="time">시간<span class="sort-indicator"></span></th>
+                <th data-sort="theme">테마<span class="sort-indicator"></span></th>
+                <th class="right">관리</th>
+            </tr>
+            </thead>
+            <tbody id="reservation-body"></tbody>
+        </table>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let reservations = [];
+    let themes = [];
+    let times = [];
+    let sortCriteria = [];
+
+    window.onload = () => {
+        document.getElementById('date-input').value = new Date().toISOString().split('T')[0];
+        document.getElementById('search-input').addEventListener('input', renderReservations);
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                toggleSort(th.dataset.sort);
+                renderReservations();
+            });
+        });
+        Promise.all([loadThemes(), loadTimes()]).then(loadReservations);
+    };
+
+    function loadReservations() {
+        return fetch('/admin/reservations')
+            .then(handleResponse)
+            .then(data => {
+                reservations = data;
+                renderReservations();
+            })
+            .catch(showError);
+    }
+
+    function loadThemes() {
+        return fetch('/admin/themes')
+            .then(handleResponse)
+            .then(data => {
+                themes = data;
+                const select = document.getElementById('theme-select');
+                select.innerHTML = themes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
+            });
+    }
+
+    function loadTimes() {
+        return fetch('/admin/times')
+            .then(handleResponse)
+            .then(data => {
+                times = data;
+                times.sort((a, b) => a.startAt.localeCompare(b.startAt));
+                const select = document.getElementById('time-select');
+                select.innerHTML = times.map(time => `<option value="${time.id}">${formatTime(time.startAt)}</option>`).join('');
+            });
+    }
+
+    function renderReservations() {
+        const query = document.getElementById('search-input').value.trim().toLowerCase();
+        const body = document.getElementById('reservation-body');
+        updateSortIndicators();
+        const rows = reservations
+            .filter(reservation => {
+                const haystack = [
+                    reservation.name,
+                    reservation.date,
+                    reservation.time?.startAt,
+                    reservation.theme?.name
+                ].join(' ').toLowerCase();
+                return haystack.includes(query);
+            })
+            .sort(compareReservation);
+
+        if (rows.length === 0) {
+            body.innerHTML = `<tr><td colspan="6" class="empty">예약이 없습니다</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = rows.map(reservation => `
+            <tr>
+                <td class="muted">${reservation.id}</td>
+                <td>${escapeHtml(reservation.name)}</td>
+                <td>${reservation.date}</td>
+                <td class="accent">${formatTime(reservation.time?.startAt)}</td>
+                <td>${escapeHtml(reservation.theme?.name || '')}</td>
+                <td class="right"><button class="btn-danger" onclick="deleteReservation(${reservation.id})">삭제</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function compareReservation(a, b) {
+        for (const criterion of sortCriteria) {
+            const result = String(getSortValue(a, criterion.key)).localeCompare(
+                String(getSortValue(b, criterion.key)),
+                'ko',
+                { numeric: true }
+            );
+            if (result !== 0) {
+                return criterion.direction === 'asc' ? result : -result;
+            }
+        }
+        return String(a.id).localeCompare(String(b.id), 'ko', { numeric: true });
+    }
+
+    function getSortValue(reservation, key) {
+        return {
+            id: reservation.id,
+            name: reservation.name,
+            date: reservation.date,
+            time: reservation.time?.startAt,
+            theme: reservation.theme?.name
+        }[key] || '';
+    }
+
+    function toggleSort(key) {
+        const index = sortCriteria.findIndex(criterion => criterion.key === key);
+        if (index === -1) {
+            sortCriteria.push({ key, direction: 'asc' });
+            return;
+        }
+        if (sortCriteria[index].direction === 'asc') {
+            sortCriteria[index].direction = 'desc';
+            return;
+        }
+        sortCriteria.splice(index, 1);
+    }
+
+    function updateSortIndicators() {
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            const indicator = th.querySelector('.sort-indicator');
+            const index = sortCriteria.findIndex(criterion => criterion.key === th.dataset.sort);
+            if (index === -1) {
+                indicator.textContent = '';
+                return;
+            }
+            const arrow = sortCriteria[index].direction === 'asc' ? '↑' : '↓';
+            indicator.textContent = `${arrow}${index + 1}`;
+        });
+    }
+
+    function createReservation() {
+        const body = {
+            name: document.getElementById('name-input').value.trim(),
+            date: document.getElementById('date-input').value,
+            themeId: Number(document.getElementById('theme-select').value),
+            timeId: Number(document.getElementById('time-select').value)
+        };
+
+        fetch('/admin/reservations', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        })
+            .then(handleResponse)
+            .then(() => {
+                document.getElementById('name-input').value = '';
+                showToast('예약이 추가되었습니다', 'success');
+                loadReservations();
+            })
+            .catch(showError);
+    }
+
+    function deleteReservation(id) {
+        fetch(`/admin/reservations/${id}`, { method: 'DELETE' })
+            .then(handleResponse)
+            .then(() => {
+                showToast('예약이 삭제되었습니다', 'success');
+                loadReservations();
+            })
+            .catch(showError);
+    }
+
+    function formatTime(value) {
+        return value ? value.slice(0, 5) : '';
+    }
+
+    function escapeHtml(value) {
+        return String(value)
+            .replaceAll('&', '&amp;')
+            .replaceAll('<', '&lt;')
+            .replaceAll('>', '&gt;')
+            .replaceAll('"', '&quot;')
+            .replaceAll("'", '&#039;');
+    }
+
+    function handleResponse(response) {
+        if (response.ok) {
+            if (response.status === 204) return null;
+            return response.json();
+        }
+        return response.json()
+            .then(error => {
+                throw new Error(error.detail || '요청을 처리하지 못했습니다');
+            })
+            .catch(error => {
+                throw new Error(error.message || '요청을 처리하지 못했습니다');
+            });
+    }
+
+    function showError(error) {
+        showToast(error.message, 'error');
+    }
+
+    function showToast(message, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2600);
+    }
+</script>
+</body>
+</html>

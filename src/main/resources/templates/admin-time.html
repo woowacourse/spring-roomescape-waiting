@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간 관리</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/app.css">
+</head>
+<body class="admin-page">
+<header>
+    <a href="/admin" class="brand">
+        <div class="header-title">시간 관리</div>
+        <div class="header-sub">Admin</div>
+    </a>
+    <nav class="admin-nav">
+        <a href="/admin/reservation">예약</a>
+        <a href="/admin/time" class="active">시간</a>
+        <a href="/admin/theme">테마</a>
+    </nav>
+</header>
+
+<main>
+    <div class="section-header">
+        <div class="section-title">시간 추가</div>
+    </div>
+    <div class="form-grid time-form">
+        <select id="hour-select"></select>
+        <select id="minute-select"></select>
+        <button onclick="createTime()">시간 추가</button>
+    </div>
+
+    <div class="section-header">
+        <div class="section-title">시간 목록</div>
+    </div>
+    <div class="toolbar">
+        <input type="search" id="search-input" placeholder="시간 검색">
+    </div>
+    <div class="table-wrap">
+        <table>
+            <thead>
+            <tr>
+                <th data-sort="id">ID<span class="sort-indicator"></span></th>
+                <th data-sort="startAt">시간<span class="sort-indicator"></span></th>
+                <th class="right">관리</th>
+            </tr>
+            </thead>
+            <tbody id="time-body"></tbody>
+        </table>
+    </div>
+</main>
+
+<div class="toast" id="toast"></div>
+
+<script>
+    let times = [];
+    let sortCriteria = [];
+
+    window.onload = () => {
+        initializeTimeSelects();
+        document.getElementById('search-input').addEventListener('input', renderTimes);
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            th.addEventListener('click', () => {
+                toggleSort(th.dataset.sort);
+                renderTimes();
+            });
+        });
+        loadTimes();
+    };
+
+    function initializeTimeSelects() {
+        const hourSelect = document.getElementById('hour-select');
+        const minuteSelect = document.getElementById('minute-select');
+        hourSelect.innerHTML = Array.from({ length: 24 }, (_, index) => {
+            const hour = String(index).padStart(2, '0');
+            return `<option value="${hour}">${hour}시</option>`;
+        }).join('');
+        minuteSelect.innerHTML = Array.from({ length: 60 }, (_, index) => {
+            const minute = String(index).padStart(2, '0');
+            return `<option value="${minute}">${minute}분</option>`;
+        }).join('');
+    }
+
+    function loadTimes() {
+        return fetch('/admin/times')
+            .then(handleResponse)
+            .then(data => {
+                times = data;
+                renderTimes();
+            })
+            .catch(showError);
+    }
+
+    function renderTimes() {
+        const query = document.getElementById('search-input').value.trim();
+        const body = document.getElementById('time-body');
+        updateSortIndicators();
+        const rows = times
+            .filter(time => formatTime(time.startAt).includes(query))
+            .sort(compareTime);
+
+        if (rows.length === 0) {
+            body.innerHTML = `<tr><td colspan="3" class="empty">시간이 없습니다</td></tr>`;
+            return;
+        }
+
+        body.innerHTML = rows.map(time => `
+            <tr>
+                <td class="muted">${time.id}</td>
+                <td class="accent">${formatTime(time.startAt)}</td>
+                <td class="right"><button class="btn-danger" onclick="deleteTime(${time.id})">삭제</button></td>
+            </tr>
+        `).join('');
+    }
+
+    function createTime() {
+        const startAt = `${document.getElementById('hour-select').value}:${document.getElementById('minute-select').value}`;
+        fetch('/admin/times', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ startAt })
+        })
+            .then(handleResponse)
+            .then(() => {
+                showToast('시간이 추가되었습니다', 'success');
+                loadTimes();
+            })
+            .catch(showError);
+    }
+
+    function deleteTime(id) {
+        fetch(`/admin/times/${id}`, { method: 'DELETE' })
+            .then(handleResponse)
+            .then(() => {
+                showToast('시간이 삭제되었습니다', 'success');
+                loadTimes();
+            })
+            .catch(showError);
+    }
+
+    function formatTime(value) {
+        return value ? value.slice(0, 5) : '';
+    }
+
+    function compareTime(a, b) {
+        for (const criterion of sortCriteria) {
+            const result = String(a[criterion.key] || '').localeCompare(
+                String(b[criterion.key] || ''),
+                'ko',
+                { numeric: true }
+            );
+            if (result !== 0) {
+                return criterion.direction === 'asc' ? result : -result;
+            }
+        }
+        return String(a.id).localeCompare(String(b.id), 'ko', { numeric: true });
+    }
+
+    function toggleSort(key) {
+        const index = sortCriteria.findIndex(criterion => criterion.key === key);
+        if (index === -1) {
+            sortCriteria.push({ key, direction: 'asc' });
+            return;
+        }
+        if (sortCriteria[index].direction === 'asc') {
+            sortCriteria[index].direction = 'desc';
+            return;
+        }
+        sortCriteria.splice(index, 1);
+    }
+
+    function updateSortIndicators() {
+        document.querySelectorAll('th[data-sort]').forEach(th => {
+            const indicator = th.querySelector('.sort-indicator');
+            const index = sortCriteria.findIndex(criterion => criterion.key === th.dataset.sort);
+            if (index === -1) {
+                indicator.textContent = '';
+                return;
+            }
+            const arrow = sortCriteria[index].direction === 'asc' ? '↑' : '↓';
+            indicator.textContent = `${arrow}${index + 1}`;
+        });
+    }
+
+    function handleResponse(response) {
+        if (response.ok) {
+            if (response.status === 204) return null;
+            return response.json();
+        }
+        return response.json()
+            .then(error => {
+                throw new Error(error.detail || '요청을 처리하지 못했습니다');
+            })
+            .catch(error => {
+                throw new Error(error.message || '요청을 처리하지 못했습니다');
+            });
+    }
+
+    function showError(error) {
+        showToast(error.message, 'error');
+    }
+
+    function showToast(message, type = '') {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.className = `toast ${type} show`;
+        setTimeout(() => toast.className = 'toast', 2600);
+    }
+</script>
+</body>
+</html>
