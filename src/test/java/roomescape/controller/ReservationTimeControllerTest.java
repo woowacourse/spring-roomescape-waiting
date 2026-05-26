@@ -10,8 +10,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ClearDbTest;
-import roomescape.service.dto.command.ReservationTimeCreateCommand;
-import roomescape.service.dto.result.ReservationTimeResult;
+import roomescape.dto.ReservationTimeCreateCommand;
+import roomescape.dto.ReservationTimeResult;
 
 @ClearDbTest
 class ReservationTimeControllerTest {

@@ -1,4 +1,4 @@
-package roomescape.service.dto.command;
+package roomescape.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;

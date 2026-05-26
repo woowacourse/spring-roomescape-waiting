@@ -6,8 +6,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.service.ThemeService;
-import roomescape.service.dto.command.ThemeCreateCommand;
-import roomescape.service.dto.result.ThemeResult;
+import roomescape.dto.ThemeCreateCommand;
+import roomescape.dto.ThemeResult;
 
 import java.util.List;
 

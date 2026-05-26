@@ -24,11 +24,11 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.ReservationTimesWithStatus;
-import roomescape.service.dto.command.ReservationCreateCommand;
-import roomescape.service.dto.command.ReservationModifyCommand;
-import roomescape.service.dto.result.ReservationResult;
-import roomescape.service.dto.result.ReservationTimeStatusResult;
+import roomescape.dto.ReservationTimesWithStatus;
+import roomescape.dto.ReservationCreateCommand;
+import roomescape.dto.ReservationModifyCommand;
+import roomescape.dto.ReservationResult;
+import roomescape.dto.ReservationTimeStatusResult;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {

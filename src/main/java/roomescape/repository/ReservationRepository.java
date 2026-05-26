@@ -12,7 +12,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.KeyGenerationException;
-import roomescape.repository.dto.ReservationTimesWithStatus;
+import roomescape.dto.ReservationTimesWithStatus;
 
 import java.sql.*;
 import java.time.LocalDate;

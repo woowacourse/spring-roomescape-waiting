@@ -19,8 +19,8 @@ import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.command.ThemeCreateCommand;
-import roomescape.service.dto.result.ThemeResult;
+import roomescape.dto.ThemeCreateCommand;
+import roomescape.dto.ThemeResult;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {

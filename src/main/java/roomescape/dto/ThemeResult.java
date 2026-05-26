@@ -1,4 +1,4 @@
-package roomescape.service.dto.result;
+package roomescape.dto;
 
 public record ThemeResult(
         Long id,

@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.ClearDbTest;
-import roomescape.service.dto.result.ReservationResult;
+import roomescape.dto.ReservationResult;
 
 @ClearDbTest
 class AdminReservationControllerTest {
