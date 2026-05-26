@@ -61,5 +61,18 @@ CREATE TABLE reservations
     UNIQUE (theme_id, date, time_id, deleted_at)
 );
 
-
+CREATE TABLE waitings
+(
+    id         BIGINT    NOT NULL AUTO_INCREMENT,
+    member_id  BIGINT    NOT NULL,
+    date       DATE      NOT NULL,
+    time_id    BIGINT    NOT NULL,
+    theme_id   BIGINT    NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES members (id),
+    FOREIGN KEY (time_id) REFERENCES times (id),
+    FOREIGN KEY (theme_id) REFERENCES themes (id),
+    UNIQUE (member_id, date, time_id, theme_id)
+);
 
