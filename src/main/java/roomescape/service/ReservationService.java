@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
-import jakarta.annotation.Nonnull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
@@ -13,6 +12,7 @@ import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.service.dto.Page;
 import roomescape.service.exception.ReservationConflictException;
@@ -104,5 +104,9 @@ public class ReservationService {
             reservation.validateCancellable(LocalDateTime.now(clock));
             reservationDao.deleteWaiting(id);
         });
+    }
+
+    public List<ReservationWaiting> findAllWaitingByName(String username) {
+        return reservationDao.findAllWaitingByName(username);
     }
 }

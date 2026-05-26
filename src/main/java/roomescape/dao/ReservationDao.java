@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 
 @Repository
@@ -27,6 +28,18 @@ public class ReservationDao {
             new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
             new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"),
                     rs.getString("theme_thumbnail"))
+    );
+
+    private final RowMapper<ReservationWaiting> reservationWaitingRowMapper = (rs, rowNum) -> new ReservationWaiting(
+            new Reservation(
+                    rs.getLong("reservation_id"),
+                    rs.getString("name"),
+                    rs.getDate("date").toLocalDate(),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
+                    new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"),
+                            rs.getString("theme_thumbnail"))
+            ), rs.getLong("waiting_number")
     );
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
@@ -149,5 +162,29 @@ public class ReservationDao {
 
     public void deleteWaiting(long id) {
         jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
+    }
+
+    public List<ReservationWaiting> findAllWaitingByName(String username) {
+        String sql = """
+                SELECT
+                    sub.reservation_id, sub.name, sub.date, sub.created_at,
+                    sub.time_id, sub.time_value,
+                    sub.theme_id, sub.theme_name, sub.theme_description, sub.theme_thumbnail,
+                    sub.waiting_order
+                FROM (
+                    SELECT r.id AS reservation_id, r.name, r.date, r.created_at,
+                           t.id AS time_id, t.start_at AS time_value,
+                           th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY r.date, r.theme_id, r.time_id
+                               ORDER BY r.created_at ASC
+                           ) AS waiting_order
+                    FROM reservation_waiting AS r
+                    INNER JOIN reservation_time AS t ON r.time_id = t.id
+                    INNER JOIN theme AS th ON r.theme_id = th.id
+                ) AS sub
+                WHERE sub.name = ?;
+                """;
+        return jdbcTemplate.query(sql, reservationWaitingRowMapper, username);
     }
 }
