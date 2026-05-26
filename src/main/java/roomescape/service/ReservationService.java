@@ -16,9 +16,7 @@ import roomescape.dto.ReservationCreateCommand;
 import roomescape.dto.ReservationModifyCommand;
 import roomescape.dto.AvailableDateResult;
 import roomescape.dto.ReservationResult;
-import roomescape.dto.ReservationTimeResult;
 import roomescape.dto.ReservationTimeStatusResult;
-import roomescape.dto.ThemeResult;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -36,7 +34,7 @@ public class ReservationService {
     public List<ReservationResult> getReservations() {
         return reservationRepository.findAll()
                 .stream()
-                .map(ReservationService::mapDomainToDto)
+                .map(ReservationResult::from)
                 .toList();
     }
 
@@ -65,7 +63,7 @@ public class ReservationService {
         final Reservation newReservation = Reservation.create(data.name(), date, reservationTime, theme);
 
         final Reservation savedReservation = reservationRepository.save(newReservation);
-        return mapDomainToDto(savedReservation);
+        return ReservationResult.from(savedReservation);
     }
 
     public void delete(final Long reservationId) {
@@ -96,7 +94,7 @@ public class ReservationService {
     public List<ReservationResult> getReservationsByName(final String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         return reservations.stream()
-                .map(ReservationService::mapDomainToDto)
+                .map(ReservationResult::from)
                 .toList();
     }
 
@@ -127,29 +125,7 @@ public class ReservationService {
         validateAvailable(date, timeId, modifiedReservation.getTheme().getId());
 
         reservationRepository.updateDateAndTime(modifiedReservation);
-        return mapDomainToDto(modifiedReservation);
-    }
-
-    private static ReservationResult mapDomainToDto(final Reservation reservation) {
-        final ReservationTime reservationTime = reservation.getTime();
-        final Theme theme = reservation.getTheme();
-
-        return new ReservationResult(
-                reservation.getId(),
-                reservation.getName(),
-                reservation.getDate(),
-                new ReservationTimeResult(
-                        reservationTime.getId(),
-                        reservationTime.getStartAt(),
-                        reservationTime.getEndAt()
-                ),
-                new ThemeResult(
-                        theme.getId(),
-                        theme.getName(),
-                        theme.getDescription(),
-                        theme.getThumbnailUrl()
-                )
-        );
+        return ReservationResult.from(modifiedReservation);
     }
 
     private Reservation getReservation(final Long reservationId) {

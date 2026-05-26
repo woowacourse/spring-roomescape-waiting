@@ -22,7 +22,7 @@ public class ReservationTimeService {
     public List<ReservationTimeResult> getTimes() {
         return reservationTimeRepository.findAll()
                 .stream()
-                .map(ReservationTimeService::mapDomainToDto)
+                .map(ReservationTimeResult::from)
                 .toList();
     }
 
@@ -34,7 +34,7 @@ public class ReservationTimeService {
 
         final ReservationTime savedTime = reservationTimeRepository.save(reservationTime);
 
-        return mapDomainToDto(savedTime);
+        return ReservationTimeResult.from(savedTime);
     }
 
     public void delete(final Long timeId) {
@@ -48,13 +48,5 @@ public class ReservationTimeService {
         if (!deleted) {
             throw new BusinessException(ErrorCode.TIME_NOT_FOUND);
         }
-    }
-
-    private static ReservationTimeResult mapDomainToDto(ReservationTime reservationTime) {
-        return new ReservationTimeResult(
-                reservationTime.getId(),
-                reservationTime.getStartAt(),
-                reservationTime.getEndAt()
-        );
     }
 }

@@ -1,5 +1,9 @@
 package roomescape.dto;
 
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+
 import java.time.LocalDate;
 
 public record ReservationResult(
@@ -9,4 +13,17 @@ public record ReservationResult(
         ReservationTimeResult time,
         ThemeResult theme
 ) {
+
+    public static ReservationResult from(final Reservation reservation) {
+        final ReservationTime reservationTime = reservation.getTime();
+        final Theme theme = reservation.getTheme();
+
+        return new ReservationResult(
+                reservation.getId(),
+                reservation.getName(),
+                reservation.getDate(),
+                ReservationTimeResult.from(reservationTime),
+                ThemeResult.from(theme)
+        );
+    }
 }

@@ -31,7 +31,7 @@ public class ThemeService {
 
         Theme theme = themeRepository.save(themeWithoutId);
 
-        return mapDomainToDto(theme);
+        return ThemeResult.from(theme);
     }
 
     public void delete(final Long themeId) {
@@ -53,23 +53,14 @@ public class ThemeService {
 
         return themeRepository.findPopularThemes(startDate, today)
                 .stream()
-                .map(ThemeService::mapDomainToDto)
+                .map(ThemeResult::from)
                 .toList();
     }
 
     public List<ThemeResult> getThemes() {
         return themeRepository.findAll()
                 .stream()
-                .map(ThemeService::mapDomainToDto)
+                .map(ThemeResult::from)
                 .toList();
-    }
-
-    private static ThemeResult mapDomainToDto(Theme theme) {
-        return new ThemeResult(
-                theme.getId(),
-                theme.getName(),
-                theme.getDescription(),
-                theme.getThumbnailUrl()
-        );
     }
 }
