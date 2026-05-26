@@ -75,4 +75,11 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(GlobalErrorResponse.from(e.getMessage()));
     }
+
+    @ExceptionHandler(NullPointerException.class)
+    public ResponseEntity<GlobalErrorResponse> handleNullPointerException(NullPointerException e) {
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(GlobalErrorResponse.from(e.getMessage()));
+    }
 }
