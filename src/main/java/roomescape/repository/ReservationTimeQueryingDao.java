@@ -4,6 +4,7 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservationtime.AvailableReservationTime;
 import roomescape.domain.reservationtime.ReservationTime;
 
 import java.time.LocalDate;
@@ -28,6 +29,13 @@ public class ReservationTimeQueryingDao {
         return reservationTime;
     };
 
+    private final RowMapper<AvailableReservationTime> availableReservationTimeRowMapper =(resultSet, rowNum) ->
+        new AvailableReservationTime(
+            resultSet.getLong("id"),
+            resultSet.getObject("start_at", LocalTime.class),
+            resultSet.getBoolean("available")
+        );
+
     public Optional<ReservationTime> findReservationTimeById(long id) {
         String sql = "select id, start_at from reservation_time where id = ?";
         try {
@@ -43,14 +51,20 @@ public class ReservationTimeQueryingDao {
         return jdbcTemplate.query(sql, reservationTimeRowMapper);
     }
 
-    public List<ReservationTime> findAvailableReservationTime(LocalDate date, Long themeId) {
+    public List<AvailableReservationTime> findAvailableReservationTime(LocalDate date, Long themeId) {
         String sql = """
-                select t.id, t.start_at from reservation_time as t
-                left join reservation as r on t.id = r.time_id
-                                        and r.date = ?
-                                        and r.theme_id = ?
-                where r.id is null
-                """;
-        return jdbcTemplate.query(sql, reservationTimeRowMapper, date, themeId);
+            SELECT t.id AS id, t.start_at AS start_at,
+            CASE
+            WHEN r.time_id IS NULL THEN true
+            ELSE false
+            END AS available
+            FROM reservation_time t
+            LEFT JOIN (
+            SELECT r.time_id
+            FROM reservation r
+            WHERE r.date = ? AND r.theme_id = ?
+            ) AS r ON r.time_id = t.id
+            """;
+        return jdbcTemplate.query(sql, availableReservationTimeRowMapper, date, themeId);
     }
 }
