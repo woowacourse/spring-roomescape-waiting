@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS reservation_waiting;
 DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS theme;
 DROP TABLE IF EXISTS reservation_time;
@@ -37,5 +38,5 @@ CREATE TABLE reservation_waiting
     name     VARCHAR(255) NOT NULL,
     reservation_id  BIGINT,
     PRIMARY KEY (id),
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );
