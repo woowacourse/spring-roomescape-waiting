@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public class FakeThemeSlotDao implements ThemeSlotRepository {
 
@@ -36,6 +37,11 @@ public class FakeThemeSlotDao implements ThemeSlotRepository {
         return storage.values().stream()
                 .filter(ts -> ts.getTheme().getId() == themeId && ts.getDate().equals(date))
                 .toList();
+    }
+
+    @Override
+    public Optional<ThemeSlot> findById(long id) {
+        return Optional.ofNullable(storage.get(id));
     }
 
     @Override

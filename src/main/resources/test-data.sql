@@ -15,7 +15,7 @@ INSERT INTO theme (id, name, description, thumbnail_url) VALUES
 --    - id=1: 10:00 (기본)
 --    - id=2: 14:00 (다른 시간대 테스트용)
 --    - id=3: 18:00 (시간대별 조회/중복 검증용)
--- INSERT INTO time (id, start_at) VALUES
---                                     (1, '10:00:00'),
---                                     (2, '14:00:00'),
---                                     (3, '18:00:00');
+INSERT INTO time (id, start_at) VALUES
+                                    (1, '10:00:00'),
+                                    (2, '14:00:00'),
+                                    (3, '18:00:00');

@@ -37,9 +37,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest reservationRequest) {
         Reservation reservation = reservationService.saveReservation(
                 reservationRequest.name(),
-                reservationRequest.date(),
-                reservationRequest.timeId(),
-                reservationRequest.themeId()
+                reservationRequest.themeSlotId()
         );
         ReservationResponse reservationResponse = toResponse(reservation);
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationResponse);
@@ -56,7 +54,7 @@ public class ReservationController {
             @PathVariable Long reservationId,
             @Valid @RequestBody ReservationModifyRequest request
     ) {
-        Reservation reservation = reservationService.modifyReservation(reservationId, request.date(), request.timeId(), request.themeId());
+        Reservation reservation = reservationService.modifyReservation(reservationId, request.themeSlotId());
         return ResponseEntity.ok().body(toResponse(reservation));
     }
 

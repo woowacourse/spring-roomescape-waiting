@@ -19,6 +19,7 @@ import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Repository
 public class JdbcThemeSlotRepository implements ThemeSlotRepository {
@@ -114,6 +115,28 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
                 AND ts.date = ?
                 """;
         return jdbcTemplate.query(sql, rowMapper(), themeId, date);
+    }
+
+    @Override
+    public Optional<ThemeSlot> findById(long id) {
+        String sql = """
+                SELECT 
+                    ts.id AS id,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    ts.date AS date,
+                    t.id AS time_id, 
+                    t.start_at AS start_at,
+                    ts.is_reserved AS is_reserved
+                FROM 
+                    theme_slot ts
+                        INNER JOIN time t ON ts.time_id = t.id 
+                        INNER JOIN theme th ON ts.theme_id = th.id
+                WHERE ts.id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper(), id).stream().findFirst();
     }
 
     private Map<String, Object> createParams(ThemeSlot themeSlot) {

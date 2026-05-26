@@ -14,8 +14,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
+import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
-import roomescape.repository.JdbcReservationRepository;
 
 @JdbcTest
 @Sql({"/schema.sql", "/test-data.sql"})
@@ -40,7 +40,8 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("예약을 저장하고 영속화된 객체를 반환한다.")
     void save() {
-        Reservation reservation = new Reservation("브라운", LocalDate.now(), TIME_10, THEME_1);
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        Reservation reservation = new Reservation("브라운", themeSlot);
         Reservation savedReservation = jdbcReservationRepository.save(reservation);
         assertThat(savedReservation.getId()).isPositive();
     }
@@ -48,7 +49,8 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("식별자로 예약 객체를 조회한다.")
     void findById() {
-        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", LocalDate.now(), TIME_14, THEME_2));
+        ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_14, false);
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
         Reservation foundReservation = jdbcReservationRepository.findById(savedReservation.getId()).get();
         assertThat(foundReservation.getName()).isEqualTo("브라운");
     }
@@ -56,7 +58,8 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("모든 예약 객체 목록을 조회한다.")
     void findAll() {
-        jdbcReservationRepository.save(new Reservation("브라운", LocalDate.now(), TIME_18, THEME_1));
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_18, false);
+        jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
         List<Reservation> reservations = jdbcReservationRepository.findAll();
         assertThat(reservations).hasSize(1);
     }
@@ -64,8 +67,27 @@ class JdbcReservationRepositoryTest {
     @Test
     @DisplayName("식별자로 예약을 삭제한다.")
     void deleteById() {
-        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", LocalDate.now(), TIME_10, THEME_2));
+        ThemeSlot themeSlot = saveThemeSlot(THEME_2, LocalDate.now(), TIME_10, false);
+        Reservation savedReservation = jdbcReservationRepository.save(new Reservation("브라운", themeSlot));
         jdbcReservationRepository.deleteById(savedReservation.getId());
         assertThat(jdbcReservationRepository.findAll()).isEmpty();
+    }
+
+    private ThemeSlot saveThemeSlot(Theme theme, LocalDate date, Time time, boolean isReserved) {
+        jdbcTemplate.update(
+                "INSERT INTO theme_slot (theme_id, date, time_id, is_reserved) VALUES (?, ?, ?, ?)",
+                theme.getId(),
+                date,
+                time.getId(),
+                isReserved
+        );
+        Long id = jdbcTemplate.queryForObject(
+                "SELECT id FROM theme_slot WHERE theme_id = ? AND date = ? AND time_id = ?",
+                Long.class,
+                theme.getId(),
+                date,
+                time.getId()
+        );
+        return new ThemeSlot(id, theme, date, time, isReserved);
     }
 }

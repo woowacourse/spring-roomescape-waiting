@@ -4,17 +4,12 @@ import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
-import roomescape.domain.Time;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.repository.ThemeSlotRepository;
-import roomescape.repository.TimeRepository;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -22,19 +17,13 @@ import java.util.List;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final TimeRepository timeRepository;
-    private final ThemeRepository themeRepository;
     private final ThemeSlotRepository themeSlotRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
-            TimeRepository timeRepository,
-            ThemeRepository themeRepository,
             ThemeSlotRepository themeSlotRepository
     ) {
         this.reservationRepository = reservationRepository;
-        this.timeRepository = timeRepository;
-        this.themeRepository = themeRepository;
         this.themeSlotRepository = themeSlotRepository;
     }
 
@@ -43,18 +32,17 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation saveReservation(String name, LocalDate date, Long reservationTimeId, Long themeId) {
-        validateBeforeDate(date);
-        validateIsExistBy(date, reservationTimeId, themeId);
+    public Reservation saveReservation(String name, Long themeSlotId) {
+        ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
 
-        Theme theme = getThemeOrElseThrow(themeId);
-        Time time = getTimeOrElseThrow(reservationTimeId);
-        validateDateTime(date, time);
+        validateBeforeDate(themeSlot);
+        validateIsExistBy(themeSlotId);
+        validateDateTime(themeSlot);
 
-        Reservation reservation = reservationRepository.save(new Reservation(name, date, time, theme));
+        Reservation reservation = reservationRepository.save(new Reservation(name, themeSlot));
 
         // TODO: 예약 대기 신청 후 관리자가 확정처리 한 후에 themeSlot 예약되어있다고 표시
-        themeSlotRepository.update(new ThemeSlot(theme, date, time, true));
+        themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
 
         return reservation;
     }
@@ -83,36 +71,32 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation modifyReservation(Long reservationId, LocalDate date, Long timeId, Long themeId) {
-        Time time = getTimeOrElseThrow(timeId);
-        Theme theme = getThemeOrElseThrow(themeId);
+    public Reservation modifyReservation(Long reservationId, Long themeSlotId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
+        ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
 
-        validateIsExistBy(date, timeId, themeId);
-        validateDateTime(date, time);
+        validateBeforeDate(themeSlot);
+        validateDateTime(themeSlot);
+        if (!reservation.getThemeSlot().getId().equals(themeSlotId)) {
+            validateIsExistBy(themeSlotId);
+            themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+            themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
+        }
 
         Reservation updateReservation = new Reservation(
                 reservationId,
                 reservation.getName(),
-                date,
-                time,
-                theme,
+                themeSlot,
                 reservation.getReservationStatus()
         );
-        reservationRepository.updateDateAndTimeAndTheme(updateReservation);
+        reservationRepository.updateThemeSlot(updateReservation);
         return updateReservation;
     }
 
     @NonNull
-    private Theme getThemeOrElseThrow(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.THEME_NOT_FOUND));
-    }
-
-    @NonNull
-    private Time getTimeOrElseThrow(Long reservationTimeId) {
-        return timeRepository.findById(reservationTimeId)
-                .orElseThrow(() -> new CustomException(ErrorCode.TIME_NOT_FOUND));
+    private ThemeSlot getThemeSlotOrElseThrow(Long themeSlotId) {
+        return themeSlotRepository.findById(themeSlotId)
+                .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
     }
 
     @NonNull
@@ -121,20 +105,20 @@ public class ReservationService {
                 .orElseThrow(() -> new CustomException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
-    private void validateBeforeDate(LocalDate date) {
-        if (date.isBefore(LocalDate.now())) {
+    private void validateBeforeDate(ThemeSlot themeSlot) {
+        if (themeSlot.getDate().isBefore(java.time.LocalDate.now())) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_ALLOWED_DATE);
         }
     }
 
-    private void validateIsExistBy(LocalDate date, Long reservationTimeId, Long themeId) {
-        if (reservationRepository.isExistBy(themeId, date, reservationTimeId)) {
+    private void validateIsExistBy(Long themeSlotId) {
+        if (reservationRepository.existsByThemeSlotId(themeSlotId)) {
             throw new CustomException(ErrorCode.RESERVATION_ALREADY_EXIST);
         }
     }
 
-    private void validateDateTime(LocalDate date, Time time) {
-        if (date.equals(LocalDate.now()) && time.isBefore(LocalTime.now())) {
+    private void validateDateTime(ThemeSlot themeSlot) {
+        if (themeSlot.getDate().equals(java.time.LocalDate.now()) && themeSlot.getTime().isBefore(LocalTime.now())) {
             throw new CustomException(ErrorCode.RESERVATION_TIME_OUT);
         }
     }

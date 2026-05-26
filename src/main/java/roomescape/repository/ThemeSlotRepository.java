@@ -4,6 +4,7 @@ import roomescape.domain.ThemeSlot;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 public interface ThemeSlotRepository {
 
@@ -12,6 +13,8 @@ public interface ThemeSlotRepository {
     List<ThemeSlot> saveAll(List<ThemeSlot> themeSlots);
 
     List<ThemeSlot> findByThemeIdAndDate(long themeId, LocalDate date);
+
+    Optional<ThemeSlot> findById(long id);
 
     void deleteById(long id);
 

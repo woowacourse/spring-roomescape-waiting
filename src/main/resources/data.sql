@@ -26,9 +26,20 @@ INSERT INTO time (start_at) VALUES
                                 ('09:00:00'), ('10:00:00'), ('11:00:00'), ('12:00:00'), ('13:00:00'), ('14:00:00'), ('15:00:00'),
                                 ('16:00:00'), ('17:00:00'), ('18:00:00'), ('19:00:00'), ('20:00:00'), ('21:00:00'), ('22:00:00');
 
--- 3. 예약(Reservation) 삽입 (status: 'CONFIRMED' 사용)
+-- 3. 예약 seed 삽입 (theme_slot 생성 후 reservation.theme_slot_id로 연결)
+CREATE TABLE reservation_seed
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    name     VARCHAR(255) NOT NULL,
+    date     DATE         NOT NULL,
+    status   VARCHAR(255) NOT NULL,
+    time_id  BIGINT       NOT NULL,
+    theme_id BIGINT       NOT NULL,
+    PRIMARY KEY (id)
+);
+
 -- [Theme 1: 폐병원 탈출]
-INSERT INTO reservation (name, date, status, time_id, theme_id) VALUES
+INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
                                                                     ('게스트', '2026-05-07', 'CONFIRMED', 1, 1), ('게스트', '2026-05-07', 'CONFIRMED', 4, 1), ('게스트', '2026-05-07', 'CONFIRMED', 8, 1), ('게스트', '2026-05-08', 'CONFIRMED', 2, 1), ('게스트', '2026-05-08', 'CONFIRMED', 6, 1), ('게스트', '2026-05-08', 'CONFIRMED', 10, 1),
                                                                     ('게스트', '2026-05-09', 'CONFIRMED', 1, 1), ('게스트', '2026-05-09', 'CONFIRMED', 3, 1), ('게스트', '2026-05-09', 'CONFIRMED', 5, 1), ('게스트', '2026-05-10', 'CONFIRMED', 7, 1), ('게스트', '2026-05-10', 'CONFIRMED', 9, 1), ('게스트', '2026-05-10', 'CONFIRMED', 12, 1),
                                                                     ('게스트', '2026-05-12', 'CONFIRMED', 2, 1), ('게스트', '2026-05-12', 'CONFIRMED', 6, 1), ('게스트', '2026-05-12', 'CONFIRMED', 11, 1), ('게스트', '2026-05-14', 'CONFIRMED', 1, 1), ('게스트', '2026-05-14', 'CONFIRMED', 4, 1), ('게스트', '2026-05-14', 'CONFIRMED', 8, 1),
@@ -38,7 +49,7 @@ INSERT INTO reservation (name, date, status, time_id, theme_id) VALUES
                                                                     ('게스트', '2026-05-29', 'CONFIRMED', 1, 1), ('게스트', '2026-05-29', 'CONFIRMED', 6, 1), ('게스트', '2026-05-31', 'CONFIRMED', 4, 1), ('게스트', '2026-05-31', 'CONFIRMED', 12, 1);
 
 -- [Theme 2: 비밀요원 Z]
-INSERT INTO reservation (name, date, status, time_id, theme_id) VALUES
+INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
                                                                     ('게스트', '2026-05-07', 'CONFIRMED', 2, 2), ('게스트', '2026-05-07', 'CONFIRMED', 5, 2), ('게스트', '2026-05-08', 'CONFIRMED', 1, 2), ('게스트', '2026-05-08', 'CONFIRMED', 7, 2), ('게스트', '2026-05-09', 'CONFIRMED', 2, 2), ('게스트', '2026-05-09', 'CONFIRMED', 8, 2),
                                                                     ('게스트', '2026-05-11', 'CONFIRMED', 3, 2), ('게스트', '2026-05-11', 'CONFIRMED', 6, 2), ('게스트', '2026-05-13', 'CONFIRMED', 4, 2), ('게스트', '2026-05-13', 'CONFIRMED', 9, 2), ('게스트', '2026-05-14', 'CONFIRMED', 2, 2), ('게스트', '2026-05-14', 'CONFIRMED', 10, 2),
                                                                     ('게스트', '2026-05-15', 'CONFIRMED', 5, 2), ('게스트', '2026-05-15', 'CONFIRMED', 11, 2), ('게스트', '2026-05-17', 'CONFIRMED', 1, 2), ('게스트', '2026-05-17', 'CONFIRMED', 6, 2), ('게스트', '2026-05-19', 'CONFIRMED', 3, 2), ('게스트', '2026-05-19', 'CONFIRMED', 8, 2),
@@ -47,11 +58,33 @@ INSERT INTO reservation (name, date, status, time_id, theme_id) VALUES
                                                                     ('게스트', '2026-05-30', 'CONFIRMED', 9, 2), ('게스트', '2026-05-30', 'CONFIRMED', 13, 2), ('게스트', '2026-05-31', 'CONFIRMED', 2, 2), ('게스트', '2026-05-31', 'CONFIRMED', 6, 2), ('게스트', '2026-05-31', 'CONFIRMED', 10, 2);
 
 -- [과거 데이터]
-INSERT INTO reservation (name, date, status, time_id, theme_id) VALUES
+INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
                                                                     ('과거게스트', '2026-04-26', 'COMPLETED', 1, 1), ('과거게스트', '2026-04-26', 'COMPLETED', 4, 1), ('과거게스트', '2026-04-26', 'CANCELLED', 7, 2);
 
--- 4. 테마 슬롯(Theme_Slot) 동기화
--- 취소된 예약을 제외하고 활성화된 예약들을 슬롯에 반영합니다.
-MERGE INTO theme_slot (theme_id, date, time_id, is_reserved)
-    KEY(theme_id, date, time_id)
-SELECT theme_id, date, time_id, TRUE FROM reservation WHERE status != 'CANCELLED';
+-- 4. 테마 슬롯(Theme_Slot) 생성 후 예약 연결
+INSERT INTO theme_slot (theme_id, date, time_id, is_reserved)
+SELECT
+    theme_id,
+    date,
+    time_id,
+    CASE
+        WHEN SUM(CASE WHEN status != 'CANCELLED' THEN 1 ELSE 0 END) > 0 THEN TRUE
+        ELSE FALSE
+    END
+FROM reservation_seed
+GROUP BY theme_id, date, time_id
+ORDER BY MIN(id);
+
+INSERT INTO reservation (name, status, theme_slot_id)
+SELECT
+    rs.name,
+    rs.status,
+    ts.id
+FROM reservation_seed rs
+         INNER JOIN theme_slot ts
+                    ON ts.theme_id = rs.theme_id
+                        AND ts.date = rs.date
+                        AND ts.time_id = rs.time_id
+ORDER BY rs.id;
+
+DROP TABLE reservation_seed;

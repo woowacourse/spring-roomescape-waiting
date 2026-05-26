@@ -2,7 +2,6 @@ package roomescape.repository;
 
 import roomescape.domain.Reservation;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -16,7 +15,7 @@ public interface ReservationRepository {
 
     void deleteById(long id);
 
-    boolean isExistBy(Long themeId, LocalDate date, Long reservationTimeId);
+    boolean existsByThemeSlotId(long themeSlotId);
 
     boolean isExistBy(Long reservationId);
 
@@ -24,7 +23,7 @@ public interface ReservationRepository {
 
     void updateStatus(Reservation reservation);
 
-    void updateDateAndTimeAndTheme(Reservation reservation);
+    void updateThemeSlot(Reservation reservation);
 
     boolean existsByThemeId(long themeId);
 

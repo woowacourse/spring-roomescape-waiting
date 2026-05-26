@@ -13,7 +13,7 @@ public record TimeResponse(long id, LocalTime startAt, boolean isAvailable) {
     }
 
     public static TimeResponse from(ThemeSlot themeSlot) {
-        return new TimeResponse(themeSlot.getTime().getId(), themeSlot.getTime().getStartAt(), !themeSlot.isReserved());
+        return new TimeResponse(themeSlot.getId(), themeSlot.getTime().getStartAt(), !themeSlot.isReserved());
     }
 
     public static List<TimeResponse> availableOf(List<Time> allTimes, List<Long> reservedTimeId) {

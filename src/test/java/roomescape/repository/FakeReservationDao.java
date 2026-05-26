@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.util.*;
 
 import roomescape.domain.Reservation;
@@ -29,9 +28,7 @@ public class FakeReservationDao implements ReservationRepository {
         Reservation savedReservation = new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
+                reservation.getThemeSlot(),
                 reservation.getReservationStatus()
         );
         storage.put(id, savedReservation);
@@ -44,12 +41,11 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public boolean isExistBy(Long themeId, LocalDate date, Long reservationTimeId) {
+    public boolean existsByThemeSlotId(long themeSlotId) {
         return storage.values().stream()
                 .anyMatch(reservation ->
-                        Objects.equals(reservation.getTime().getId(), reservationTimeId) &&
-                                Objects.equals(reservation.getTheme().getId(), themeId) &&
-                                reservation.getDate().equals(date)
+                        Objects.equals(reservation.getThemeSlot().getId(), themeSlotId)
+                                && !"CANCELLED".equals(reservation.getReservationStatusName())
                 );
     }
 
@@ -77,7 +73,7 @@ public class FakeReservationDao implements ReservationRepository {
     }
 
     @Override
-    public void updateDateAndTimeAndTheme(Reservation reservation) {
+    public void updateThemeSlot(Reservation reservation) {
         Long id = reservation.getId();
         if (!storage.containsKey(id)) {
             throw new CustomException(ErrorCode.RESERVATION_NOT_FOUND);
@@ -87,9 +83,7 @@ public class FakeReservationDao implements ReservationRepository {
         Reservation newReservation = new Reservation(
                 getReservation.getId(),
                 getReservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
+                reservation.getThemeSlot(),
                 getReservation.getReservationStatus()
         );
         storage.remove(id);

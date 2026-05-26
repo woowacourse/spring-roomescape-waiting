@@ -10,28 +10,22 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final Time time;
-    private final Theme theme;
+    private final ThemeSlot themeSlot;
     private ReservationStatus reservationStatus;
 
-    public Reservation(String name, LocalDate date, Time time, Theme theme) {
-        validate(name, date, time, theme);
+    public Reservation(String name, ThemeSlot themeSlot) {
+        validate(name, themeSlot);
         this.id = null;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.themeSlot = themeSlot;
         this.reservationStatus = PendingStatus.getInstance();
     }
 
-    public Reservation(Long id, String name, LocalDate date, Time time, Theme theme, ReservationStatus reservationStatus) {
-        validate(name, date, time, theme);
+    public Reservation(Long id, String name, ThemeSlot themeSlot, ReservationStatus reservationStatus) {
+        validate(name, themeSlot);
         this.id = id;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this.themeSlot = themeSlot;
         this.reservationStatus = reservationStatus;
     }
 
@@ -39,24 +33,22 @@ public class Reservation {
         return new Reservation(
                 id,
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme(),
+                reservation.getThemeSlot(),
                 reservation.getReservationStatus()
         );
     }
 
-    private void validate(String name, LocalDate date, Time time, Theme theme) {
+    private void validate(String name, ThemeSlot themeSlot) {
         if (name == null || name.isBlank()) {
             throw new IllegalArgumentException("예약자 이름은 필수이며 비어있을 수 없습니다.");
         }
-        if (date == null) {
+        if (themeSlot == null || themeSlot.getDate() == null) {
             throw new IllegalArgumentException("예약 날짜는 필수입니다.");
         }
-        if (time == null) {
+        if (themeSlot.getTime() == null) {
             throw new IllegalArgumentException("유효하지 않은 예약 시간대입니다.");
         }
-        if (theme == null) {
+        if (themeSlot.getTheme() == null) {
             throw new IllegalArgumentException("유효하지 않은 테마입니다.");
         }
     }
@@ -70,15 +62,19 @@ public class Reservation {
     }
 
     public LocalDate getDate() {
-        return date;
+        return themeSlot.getDate();
     }
 
     public Time getTime() {
-        return time;
+        return themeSlot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return themeSlot.getTheme();
+    }
+
+    public ThemeSlot getThemeSlot() {
+        return themeSlot;
     }
 
     public ReservationStatus getReservationStatus() {

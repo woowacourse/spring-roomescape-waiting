@@ -63,9 +63,10 @@ public class JdbcThemeRepository implements ThemeRepository {
                     t.thumbnail_url,
                     count(*) as reservation_count
                 FROM (
-                    SELECT *
-                    FROM reservation
-                    WHERE date BETWEEN ? AND ?
+                    SELECT ts.theme_id
+                    FROM reservation r
+                        INNER JOIN theme_slot ts ON r.theme_slot_id = ts.id
+                    WHERE ts.date BETWEEN ? AND ?
                 ) as r
                 
                 INNER JOIN theme t
