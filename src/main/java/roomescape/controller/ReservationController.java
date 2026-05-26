@@ -23,17 +23,7 @@ public class ReservationController {
         this.reservationService = reservationService;
     }
 
-    @GetMapping(params = "!name")
-    public ResponseEntity<ReservationResponses> findReservations(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
-    ) {
-        List<Reservation> reservations = reservationService.findReservations(page, size);
-        ReservationResponses response = ReservationResponses.from(reservations);
-        return ResponseEntity.status(HttpStatus.OK).body(response);
-    }
-
-    @GetMapping(params = "name")
+    @GetMapping
     public ResponseEntity<ReservationResponses> findUserReservations(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,

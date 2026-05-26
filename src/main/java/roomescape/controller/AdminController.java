@@ -6,24 +6,42 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.request.ReservationTimeRequest;
 import roomescape.controller.dto.request.ThemeRequest;
+import roomescape.controller.dto.response.ReservationResponses;
 import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/admin")
 public class AdminController {
 
+    private final ReservationService reservationService;
     private final ThemeService themeService;
     private final ReservationTimeService reservationTimeService;
 
-    public AdminController(ThemeService themeService, ReservationTimeService reservationTimeService) {
+    public AdminController(ReservationService reservationService, ThemeService themeService, ReservationTimeService reservationTimeService) {
+        this.reservationService = reservationService;
         this.themeService = themeService;
         this.reservationTimeService = reservationTimeService;
     }
+
+    @GetMapping("/reservations")
+    public ResponseEntity<ReservationResponses> findReservations(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        List<Reservation> reservations = reservationService.findReservations(page, size);
+        ReservationResponses response = ReservationResponses.from(reservations);
+        return ResponseEntity.status(HttpStatus.OK).body(response);
+    }
+
 
     @PostMapping("/themes")
     public ResponseEntity<ThemeResponse> createTheme(@Valid @RequestBody ThemeRequest requestTheme) {
