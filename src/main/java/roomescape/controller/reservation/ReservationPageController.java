@@ -95,6 +95,14 @@ public class ReservationPageController {
                     name,
                     exception.getCode()
             );
+        } catch (IllegalArgumentException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    name,
+                    ErrorCode.INVALID_INPUT.getCode()
+            );
         } catch (Exception exception) {
             return redirectReservationPageWithError(
                     redirectAttributes,
@@ -123,6 +131,14 @@ public class ReservationPageController {
                     null,
                     reservationName,
                     exception.getCode()
+            );
+        } catch (IllegalArgumentException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    null,
+                    null,
+                    reservationName,
+                    ErrorCode.INVALID_INPUT.getCode()
             );
         } catch (Exception exception) {
             return redirectReservationPageWithError(
@@ -160,6 +176,14 @@ public class ReservationPageController {
                     null,
                     reservationName,
                     exception.getCode()
+            );
+        } catch (IllegalArgumentException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    null,
+                    null,
+                    reservationName,
+                    ErrorCode.INVALID_INPUT.getCode()
             );
         } catch (Exception exception) {
             return redirectReservationPageWithError(

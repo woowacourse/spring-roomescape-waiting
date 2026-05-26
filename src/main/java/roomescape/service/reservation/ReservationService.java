@@ -37,13 +37,12 @@ public class ReservationService {
     }
 
     public List<Reservation> getAllByName(final String name) {
-        reservationValidator.validateReservationName(name);
+        reservationValidator.validateLookupName(name);
         return reservationRepository.findAllByName(name);
     }
 
     public Reservation save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
-        reservationValidator.validateReservationName(name);
-        reservationValidator.validateCreateRequest(date, themeId, timeId);
+        reservationValidator.validateCreateReferenceIds(themeId, timeId);
 
         Theme theme = themeService.getById(themeId);
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
@@ -62,7 +61,7 @@ public class ReservationService {
     }
 
     public void deleteByIdAndName(final long id, final String name) {
-        reservationValidator.validateReservationName(name);
+        reservationValidator.validateLookupName(name);
 
         Reservation reservation = reservationRepository.findByIdAndName(id, name)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -81,8 +80,8 @@ public class ReservationService {
             final LocalDate date,
             final Long timeId
     ) {
-        reservationValidator.validateReservationName(name);
-        reservationValidator.validateUpdateRequest(date, timeId);
+        reservationValidator.validateLookupName(name);
+        reservationValidator.validateUpdateReferenceIds(timeId);
 
         Reservation reservation = reservationRepository.findByIdAndName(id, name)
                 .orElseThrow(() -> new ResourceNotFoundException(

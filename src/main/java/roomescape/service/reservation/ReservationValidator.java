@@ -10,7 +10,7 @@ import roomescape.exception.InvalidInputException;
 @Component
 public class ReservationValidator {
 
-    public void validateReservationName(final String name) {
+    public void validateLookupName(final String name) {
         if (name == null || name.isBlank()) {
             throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 필수입니다.");
         }
@@ -20,7 +20,7 @@ public class ReservationValidator {
         }
     }
 
-    public void validateCreateRequest(final java.time.LocalDate date, final Long themeId, final Long timeId) {
+    public void validateCreateReferenceIds(final Long themeId, final Long timeId) {
         if (themeId == null) {
             throw new InvalidInputException(ErrorCode.INVALID_INPUT, "themeId는 필수입니다.");
         }
@@ -28,19 +28,11 @@ public class ReservationValidator {
         if (timeId == null) {
             throw new InvalidInputException(ErrorCode.INVALID_INPUT, "timeId는 필수입니다.");
         }
-
-        if (date == null) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "날짜는 필수입니다.");
-        }
     }
 
-    public void validateUpdateRequest(final java.time.LocalDate date, final Long timeId) {
+    public void validateUpdateReferenceIds(final Long timeId) {
         if (timeId == null) {
             throw new InvalidInputException(ErrorCode.INVALID_INPUT, "timeId는 필수입니다.");
-        }
-
-        if (date == null) {
-            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "날짜는 필수입니다.");
         }
     }
 

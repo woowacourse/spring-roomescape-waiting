@@ -91,6 +91,11 @@ public class GlobalExceptionHandler {
         );
     }
 
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleIllegalArgument(final IllegalArgumentException exception) {
+        return badRequest(ErrorCode.INVALID_INPUT.getCode(), exception.getMessage());
+    }
+
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleException(final Exception exception) {
         log.error("예상하지 못한 예외가 발생했습니다.", exception);
