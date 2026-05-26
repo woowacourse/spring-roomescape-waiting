@@ -67,6 +67,7 @@ function setCommonAuthState(authenticated) {
       el.disabled = !authenticated;
     });
   });
+  reservationSubmitEl.disabled = !authenticated || !selectedTimeId;
 
   if (!authenticated) {
     selectedThemeId = null;
@@ -79,6 +80,7 @@ function setCommonAuthState(authenticated) {
     myReservationCardsEl.innerHTML = "";
     myReservationSectionEl.classList.add("hidden");
     reservationSubmitEl.disabled = true;
+    renderAvailableTimes([]);
   }
 }
 
@@ -213,25 +215,77 @@ function renderAvailableTimes(items) {
 
   items.forEach((item) => {
     const button = document.createElement("button");
+    const timeId = item.timeInformation.id;
+    const timeLabel = item.timeInformation.time;
     button.type = "button";
-    button.className = `chip${item.isAvailable ? "" : " disabled"}`;
-    button.textContent = `${item.timeInformation.time} ${item.isAvailable ? "(가능)" : "(불가)"}`;
+    button.className = `chip${item.isAvailable ? "" : " waitable"}`;
+    button.textContent = `${timeLabel} ${item.isAvailable ? "(예약)" : "(대기)"}`;
     if (!item.isAvailable) {
-      button.disabled = true;
+      button.addEventListener("click", async () => {
+        await requestWaiting(timeId, timeLabel);
+      });
       wrapper.appendChild(button);
       return;
     }
     button.addEventListener("click", () => {
       document.querySelectorAll("#available-times .chip").forEach((chip) => chip.classList.remove("selected"));
       button.classList.add("selected");
-      selectedTimeId = item.timeInformation.id;
-      selectedTimeLabel = item.timeInformation.time;
+      selectedTimeId = timeId;
+      selectedTimeLabel = timeLabel;
       selectedTimeLabelEl.textContent = `시간: ${selectedTimeLabel}`;
       reservationSubmitEl.disabled = false;
       setStatus(`시간 ${selectedTimeLabel} 선택됨`);
     });
     wrapper.appendChild(button);
   });
+}
+
+async function refreshAvailableTimesForCurrentSelection() {
+  const date = document.getElementById("theme-date").value;
+  if (!date || !selectedThemeId) return;
+  const items = await api(`/user/times/availability?date=${date}&themeId=${selectedThemeId}`);
+  renderAvailableTimes(items);
+}
+
+async function requestWaiting(timeId, timeLabel) {
+  try {
+    if (!selectedThemeId) {
+      throw new Error("테마를 먼저 선택하세요.");
+    }
+    if (!currentLoginName) {
+      throw new Error("로그인 후 대기 신청할 수 있습니다.");
+    }
+
+    const date = document.getElementById("theme-date").value;
+    const confirmed = await confirmAction({
+      title: "대기 신청 확인",
+      message: `예약자 ${currentLoginName}\n날짜 ${date}\n테마 ${selectedThemeName}\n시간 ${timeLabel}\n\n이미 예약된 시간에 대기를 신청하시겠습니까?`,
+      okLabel: "대기 신청",
+    });
+    if (!confirmed) {
+      setStatus("대기 신청이 취소되었습니다.");
+      return;
+    }
+
+    const waiting = await api("/user/waitings", {
+      method: "POST",
+      body: JSON.stringify({
+        date,
+        timeId,
+        themeId: selectedThemeId,
+      }),
+    });
+
+    myReservationSectionEl.classList.remove("hidden");
+    await loadMyReservations();
+    setStatus(`대기 신청 완료: ${timeLabel} / ${waiting.waitingOrder}번째`);
+    await showResultModal({
+      title: "대기 신청 성공",
+      message: `${currentLoginName}님의 대기가 신청되었습니다.\n대기 순번: ${waiting.waitingOrder}`,
+    });
+  } catch (error) {
+    await showErrorModal("대기 신청 실패", error);
+  }
 }
 
 function renderPopular(themes) {
@@ -263,16 +317,12 @@ function renderMyReservationCards(reservations) {
 
   reservations.forEach((reservation) => {
     const card = document.createElement("article");
-    card.className = "reservation-card";
-    card.innerHTML = `
-      <div class="reservation-card-head">
-        <div>
-          <strong>${reservation.memberName}</strong>
-          <p>#${reservation.id}</p>
-        </div>
-        <div class="menu-wrapper">
-          <button type="button" class="menu-button" data-menu-id="${reservation.id}" aria-label="예약 메뉴">☰</button>
-          <div class="menu-panel hidden" id="menu-${reservation.id}">
+    const isWaiting = reservation.status === "WAITING";
+    const menuId = `${reservation.status}-${reservation.id}`;
+    const statusLabel = isWaiting ? "대기" : "예약";
+    const menuItems = isWaiting
+      ? `<button type="button" class="menu-item delete" data-waiting-delete-id="${reservation.id}">대기 취소</button>`
+      : `
             <button
               type="button"
               class="menu-item edit"
@@ -283,7 +333,23 @@ function renderMyReservationCards(reservations) {
               data-edit-theme-id="${reservation.theme.id}"
               data-edit-theme-name="${reservation.theme.name}"
             >수정</button>
-            <button type="button" class="menu-item delete" data-delete-id="${reservation.id}">삭제</button>
+            <button type="button" class="menu-item delete" data-delete-id="${reservation.id}">예약 취소</button>
+          `;
+
+    card.className = `reservation-card${isWaiting ? " waiting-card" : ""}`;
+    card.innerHTML = `
+      <div class="reservation-card-head">
+        <div>
+          <div class="reservation-title-row">
+            <strong>${reservation.memberName}</strong>
+            <span class="status-badge ${isWaiting ? "waiting" : "reserved"}">${statusLabel}</span>
+          </div>
+          <p>#${reservation.id}${isWaiting ? ` · 대기 ${reservation.waitingOrder}번째` : ""}</p>
+        </div>
+        <div class="menu-wrapper">
+          <button type="button" class="menu-button" data-menu-id="${menuId}" aria-label="${statusLabel} 메뉴">☰</button>
+          <div class="menu-panel hidden" id="menu-${menuId}">
+            ${menuItems}
           </div>
         </div>
       </div>
@@ -291,6 +357,7 @@ function renderMyReservationCards(reservations) {
         <p><span>날짜</span><strong>${reservation.date}</strong></p>
         <p><span>테마</span><strong>${reservation.theme.name}</strong></p>
         <p><span>시간</span><strong>${reservation.time.time}</strong></p>
+        ${isWaiting ? `<p><span>대기 순번</span><strong>${reservation.waitingOrder}번째</strong></p>` : ""}
       </div>
     `;
     myReservationCardsEl.appendChild(card);
@@ -488,16 +555,44 @@ myReservationCardsEl.addEventListener("click", async (e) => {
     return;
   }
 
-  const deleteButton = e.target.closest(".menu-item.delete");
+  const waitingDeleteButton = e.target.closest(".menu-item.delete[data-waiting-delete-id]");
+  if (waitingDeleteButton) {
+    closeMenuPanels();
+    try {
+      const id = waitingDeleteButton.dataset.waitingDeleteId;
+      const confirmed = await confirmAction({
+        title: "대기 취소 확인",
+        message: `대기 ID ${id}를 취소하시겠습니까?`,
+        okLabel: "대기 취소",
+        okDanger: true,
+      });
+      if (!confirmed) {
+        return;
+      }
+      await api(`/user/waitings/${id}`, { method: "DELETE" });
+      await loadMyReservations();
+      await refreshAvailableTimesForCurrentSelection();
+      setStatus(`대기 #${id} 취소 완료`);
+      await showResultModal({
+        title: "대기 취소 성공",
+        message: `대기 ID ${id}가 취소되었습니다.`,
+      });
+    } catch (error) {
+      await showErrorModal("대기 취소 실패", error);
+    }
+    return;
+  }
+
+  const deleteButton = e.target.closest(".menu-item.delete[data-delete-id]");
   if (!deleteButton) return;
 
   closeMenuPanels();
   try {
     const id = deleteButton.dataset.deleteId;
     const confirmed = await confirmAction({
-      title: "예약 삭제 확인",
-      message: `예약 ID ${id}를 정말 삭제하시겠습니까?`,
-      okLabel: "삭제",
+      title: "예약 취소 확인",
+      message: `예약 ID ${id}를 취소하시겠습니까?`,
+      okLabel: "예약 취소",
       okDanger: true,
     });
     if (!confirmed) {
@@ -505,13 +600,14 @@ myReservationCardsEl.addEventListener("click", async (e) => {
     }
     await api(`/user/reservations/${id}`, { method: "DELETE" });
     await loadMyReservations();
-    setStatus(`예약 #${id} 삭제 완료`);
+    await refreshAvailableTimesForCurrentSelection();
+    setStatus(`예약 #${id} 취소 완료`);
     await showResultModal({
-      title: "예약 삭제 성공",
-      message: `예약 ID ${id}가 삭제되었습니다.`,
+      title: "예약 취소 성공",
+      message: `예약 ID ${id}가 취소되었습니다.`,
     });
   } catch (error) {
-    await showErrorModal("예약 삭제 실패", error);
+    await showErrorModal("예약 취소 실패", error);
   }
 });
 

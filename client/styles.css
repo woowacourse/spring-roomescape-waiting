@@ -191,6 +191,17 @@ button:disabled {
   cursor: not-allowed;
 }
 
+#available-times .chip.waitable {
+  border-color: #f59f00;
+  background: #fff9db;
+  color: #8a5a00;
+}
+
+#available-times .chip.waitable:hover {
+  border-color: #f08c00;
+  background: #ffec99;
+}
+
 #edit-available-times .chip.disabled,
 #edit-available-times .chip:disabled {
   opacity: 0.45;
@@ -412,6 +423,11 @@ button:disabled {
   background: #fff;
 }
 
+.reservation-card.waiting-card {
+  border-color: #ffe8a3;
+  background: #fffdf5;
+}
+
 .reservation-card-head {
   display: flex;
   justify-content: space-between;
@@ -422,6 +438,32 @@ button:disabled {
 .reservation-card-head p {
   color: #6b7280;
   font-size: 0.85rem;
+}
+
+.reservation-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.status-badge.reserved {
+  background: #e7f5ff;
+  color: #1864ab;
+}
+
+.status-badge.waiting {
+  background: #fff3bf;
+  color: #8a5a00;
 }
 
 .reservation-card-body p {
