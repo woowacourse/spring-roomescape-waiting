@@ -102,7 +102,7 @@ public class ReservationDao {
                           SELECT COUNT(*)
                           FROM waiting w2
                           WHERE w2.reservation_id = w.reservation_id
-                            AND w2.id <= w.id
+                            AND w2.id < w.id
                       ) AS waiting_order
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id

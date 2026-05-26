@@ -53,7 +53,7 @@ public class WaitingDao {
                 SELECT COUNT(*)
                 FROM waiting w
                 WHERE w.reservation_id = ?
-                  AND w.id <= ?
+                  AND w.id < ?
                 """;
         return jdbcTemplate.queryForObject(
                 sql,
