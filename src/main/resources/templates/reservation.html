@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>예약 — ESCAPE</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#080808;--sur:#0f0f0f;--sur2:#181818;
+  --border:#525252;--text:#d4d4d4;--muted:#aaa;
+  --white:#ebebeb;--acc:#c22235;--acc-h:#e5485a;
+  --glow:rgba(194,34,53,.3);
+}
+body{
+  background-color:#080808;
+  background-image:
+    radial-gradient(ellipse at 0% 0%,rgba(140,20,45,.32) 0%,transparent 52%),
+    radial-gradient(ellipse at 100% 100%,rgba(110,15,35,.22) 0%,transparent 52%);
+  background-attachment:fixed;
+  color:var(--text);font-family:'Inter',sans-serif;font-weight:300;line-height:1.7;
+}
+
+/* ── NAV ── */
+nav{
+  position:fixed;top:0;left:0;right:0;z-index:100;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1.25rem 4rem;
+  background:rgba(7,7,7,.92);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--border);
+}
+.logo{font-family:'Cinzel',serif;font-size:.95rem;letter-spacing:.42em;color:var(--white);text-decoration:none}
+.back{font-size:.82rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s}
+.nav-r{display:flex;align-items:center;gap:1.5rem}
+.btn-logout{background:transparent;border:1px solid var(--border);color:var(--muted);padding:.4rem 1rem;font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s}
+.btn-logout:hover{border-color:var(--acc);color:var(--acc)}
+.back:hover{color:var(--white)}
+
+/* ── BANNER ── */
+.banner{
+  margin-top:64px;position:relative;height:340px;overflow:hidden;
+  background:var(--sur2);border-bottom:1px solid var(--border);
+}
+.banner-img{width:100%;height:100%;object-fit:cover;filter:brightness(.38) saturate(.5)}
+.banner-overlay{
+  position:absolute;inset:0;
+  background:linear-gradient(to top,rgba(7,7,7,1) 0%,rgba(7,7,7,.25) 60%,transparent 100%);
+  display:flex;flex-direction:column;justify-content:flex-end;
+  padding:2.75rem 4rem;
+}
+.t-name{font-family:'Cinzel',serif;font-size:2.6rem;color:var(--white);letter-spacing:.06em;margin-bottom:.5rem}
+.t-desc{font-size:1rem;color:var(--muted);letter-spacing:.05em}
+
+/* ── CONTENT ── */
+.content{max-width:760px;margin:0 auto;padding:4.5rem 2rem 7rem}
+
+.step{margin-bottom:3.5rem}
+.step-num{font-size:.8rem;letter-spacing:.45em;text-transform:uppercase;color:var(--acc);margin-bottom:.85rem}
+.step-title{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--white);margin-bottom:1.75rem;letter-spacing:.04em}
+
+/* DATE INPUT */
+input[type="date"]{
+  background:var(--sur);border:1px solid var(--border);color:var(--white);
+  padding:.8rem 1.2rem;font-size:.82rem;font-family:'Inter',sans-serif;
+  width:220px;outline:none;transition:border-color .3s;color-scheme:dark;
+}
+input[type="date"]:focus{border-color:var(--acc)}
+input[type="date"]::-webkit-calendar-picker-indicator{filter:invert(.5)}
+
+/* TIME SLOTS */
+.time-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:8px}
+.slot{
+  padding:.85rem 1rem;text-align:center;
+  border:1px solid;font-size:.95rem;letter-spacing:.04em;
+  transition:all .3s;font-family:'Inter',sans-serif;cursor:pointer;
+  background:transparent;
+}
+.slot.avail{border-color:var(--acc);color:var(--acc)}
+.slot.avail:hover{background:var(--acc);color:var(--white);box-shadow:0 0 20px var(--glow)}
+.slot.booked{border-color:var(--border);color:var(--muted);cursor:not-allowed}
+.slot.past{border-color:var(--border);color:var(--muted);cursor:not-allowed;opacity:.45}
+.slot-hint{font-size:.75rem;display:block;margin-top:.25rem;opacity:.7;letter-spacing:.05em}
+
+.note{font-size:.88rem;color:var(--muted);margin-top:1.25rem;letter-spacing:.08em}
+.msg{font-size:.9rem;color:var(--muted);letter-spacing:.1em;padding:1.5rem 0}
+
+/* ── MODAL ── */
+.overlay{
+  position:fixed;inset:0;background:rgba(0,0,0,.85);z-index:200;
+  display:none;align-items:center;justify-content:center;padding:2rem;
+}
+.overlay.open{display:flex}
+.modal{background:var(--sur);border:1px solid var(--border);padding:3rem;width:100%;max-width:440px}
+.m-eye{font-size:.75rem;letter-spacing:.45em;text-transform:uppercase;color:var(--acc);margin-bottom:1rem}
+.m-title{font-family:'Cinzel',serif;font-size:1.3rem;color:var(--white);margin-bottom:.5rem}
+.m-info{font-size:.9rem;color:var(--muted);margin-bottom:2.25rem;letter-spacing:.05em}
+.m-label{font-size:.78rem;letter-spacing:.28em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:.75rem}
+.m-input{
+  width:100%;background:transparent;border:none;border-bottom:1px solid var(--border);
+  color:var(--white);padding:.7rem 0;font-size:.9rem;font-family:'Inter',sans-serif;
+  outline:none;transition:border-color .3s;
+}
+.m-input:focus{border-color:var(--acc)}
+.m-actions{display:flex;gap:1rem;justify-content:flex-end;margin-top:2.5rem}
+.btn-g{
+  padding:.72rem 1.6rem;border:1px solid var(--border);color:var(--muted);
+  background:transparent;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;
+}
+.btn-g:hover{border-color:var(--white);color:var(--white)}
+.btn-s{
+  padding:.72rem 1.6rem;border:1px solid var(--acc);color:var(--acc);
+  background:transparent;font-size:.62rem;letter-spacing:.28em;text-transform:uppercase;
+  cursor:pointer;font-family:'Inter',sans-serif;transition:all .3s;
+}
+.btn-s:hover{background:var(--acc);color:var(--white);box-shadow:0 0 20px var(--glow)}
+.btn-s:disabled{opacity:.4;cursor:not-allowed}
+.btn-s:disabled:hover{background:transparent;color:var(--acc);box-shadow:none}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;bottom:2rem;left:50%;transform:translateX(-50%);
+  padding:.85rem 2rem;font-size:.72rem;letter-spacing:.1em;
+  border:1px solid;z-index:300;opacity:0;transition:opacity .3s;white-space:nowrap;
+}
+.toast.show{opacity:1}
+.toast.ok{background:rgba(5,20,12,.9);border-color:#2d6a4f;color:#74c69d}
+.toast.err{background:rgba(20,5,8,.9);border-color:var(--acc);color:var(--acc-h)}
+
+@media(max-width:600px){
+  nav{padding:1rem 1.5rem}
+  .banner-overlay{padding:2rem 1.5rem}
+  .t-name{font-size:1.4rem}
+  .content{padding:2.5rem 1.25rem 5rem}
+  .banner{height:260px}
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <a href="/" class="logo">ESCAPE</a>
+  <div class="nav-r">
+    <a href="/" class="back">← 목록으로</a>
+    <button class="btn-logout" onclick="logout()">로그아웃</button>
+  </div>
+</nav>
+
+<div class="banner" id="banner">
+  <img class="banner-img" id="banner-img" src="" alt="" style="display:none">
+  <div class="banner-overlay">
+    <h1 class="t-name" id="t-name">—</h1>
+    <p class="t-desc" id="t-desc"></p>
+  </div>
+</div>
+
+<div class="content">
+  <div class="step">
+    <p class="step-num">Step 01</p>
+    <h2 class="step-title">날짜를 선택하세요</h2>
+    <input type="date" id="date-input" oninput="onDate(this.value)">
+  </div>
+
+  <div class="step" id="time-section" style="display:none">
+    <p class="step-num">Step 02</p>
+    <h2 class="step-title">시간을 선택하세요</h2>
+    <div class="time-grid" id="time-grid"></div>
+    <p class="note">회색은 이미 예약된 시간입니다</p>
+  </div>
+</div>
+
+<!-- 예약 모달 -->
+<div class="overlay" id="overlay">
+  <div class="modal">
+    <p class="m-eye">예약 확정</p>
+    <h2 class="m-title" id="m-theme">—</h2>
+    <p class="m-info" id="m-info">—</p>
+    <div class="m-actions">
+      <button class="btn-g" onclick="closeModal()">취소</button>
+      <button class="btn-s" id="confirm-btn" onclick="doReserve()">예약 확정</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+async function logout() {
+  await fetch('/logout', { method: 'POST' });
+  location.href = '/login';
+}
+
+const params = new URLSearchParams(location.search);
+const themeId = params.get('themeId');
+let selTimeId = null, selDate = null, theme = null;
+
+if (!themeId) { location.href = '/'; }
+
+const today = new Date().toISOString().split('T')[0];
+const dateInput = document.getElementById('date-input');
+dateInput.min = today;
+dateInput.value = today;
+
+function fmt(t) {
+  if (!t) return '';
+  if (Array.isArray(t)) return `${String(t[0]).padStart(2,'0')}:${String(t[1]).padStart(2,'0')}`;
+  return String(t).substring(0, 5);
+}
+
+async function init() {
+  try {
+    const r = await fetch(`/themes/${themeId}`);
+    if (!r.ok) { location.href = '/'; return; }
+    theme = await r.json();
+    document.getElementById('t-name').textContent = theme.name;
+    document.getElementById('t-desc').textContent = theme.description || '';
+    document.title = `${theme.name} — ESCAPE`;
+    if (theme.thumbnailUrl) {
+      const img = document.getElementById('banner-img');
+      img.src = theme.thumbnailUrl;
+      img.alt = theme.name;
+      img.style.display = 'block';
+    }
+    await onDate(today);
+  } catch {
+    location.href = '/';
+  }
+}
+
+async function onDate(date) {
+  selDate = date;
+  selTimeId = null;
+  const sec = document.getElementById('time-section');
+  const grid = document.getElementById('time-grid');
+  if (!date) { sec.style.display = 'none'; return; }
+  grid.innerHTML = '<p class="msg">불러오는 중...</p>';
+  sec.style.display = 'block';
+  try {
+    const r = await fetch(`/themes/${themeId}/times?localDate=${date}`);
+    if (!r.ok) throw new Error();
+    const times = await r.json();
+    grid.innerHTML = '';
+    if (!times.length) {
+      grid.innerHTML = '<p class="msg">이 날짜에 예약 가능한 시간이 없습니다</p>';
+      return;
+    }
+    const now = new Date();
+    const isToday = date === now.toISOString().slice(0, 10);
+    times.forEach(t => {
+      const [h, m] = (t.time?.startAt || '').split(':').map(Number);
+      const slotTime = new Date(date);
+      slotTime.setHours(h, m, 0, 0);
+      const isPast = isToday && slotTime <= now;
+
+      let stateClass, stateText;
+      if (t.alreadyBooked) {
+        stateClass = 'booked'; stateText = '예약됨';
+      } else if (isPast) {
+        stateClass = 'past'; stateText = '지난 시간';
+      } else {
+        stateClass = 'avail'; stateText = '예약 가능';
+      }
+
+      const btn = document.createElement('button');
+      btn.className = `slot ${stateClass}`;
+      btn.disabled = t.alreadyBooked || isPast;
+      btn.innerHTML = `${fmt(t.time?.startAt)}<span class="slot-hint">${stateText}</span>`;
+      if (!t.alreadyBooked && !isPast) btn.onclick = () => openModal(t.time?.id, fmt(t.time?.startAt));
+      grid.appendChild(btn);
+    });
+  } catch {
+    grid.innerHTML = '<p class="msg">시간 정보를 불러올 수 없습니다</p>';
+  }
+}
+
+function openModal(timeId, timeStr) {
+  selTimeId = timeId;
+  document.getElementById('m-theme').textContent = theme?.name || '';
+  document.getElementById('m-info').textContent = `${selDate}  ·  ${timeStr}`;
+  document.getElementById('overlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('overlay').classList.remove('open');
+  selTimeId = null;
+}
+
+async function doReserve() {
+  if (!selTimeId) return;
+  const btn = document.getElementById('confirm-btn');
+  btn.disabled = true;
+  try {
+    const r = await fetch('/reservations', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ date: selDate, timeId: selTimeId, themeId: Number(themeId) })
+    });
+    if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
+    if (!r.ok) {
+      let msg = '예약에 실패했습니다';
+      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      closeModal();
+      toast('err', msg);
+      return;
+    }
+    closeModal();
+    toast('ok', '예약이 완료되었습니다');
+    await onDate(selDate);
+  } catch {
+    closeModal();
+    toast('err', '네트워크 오류가 발생했습니다');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+function toast(type, msg) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = `toast show ${type}`;
+  setTimeout(() => { el.className = 'toast'; }, 3500);
+}
+
+document.getElementById('overlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+  if (e.key === 'Enter' && document.getElementById('overlay').classList.contains('open')) doReserve();
+});
+
+init();
+</script>
+</body>
+</html>

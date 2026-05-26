@@ -1,0 +1,65 @@
+DROP TABLE IF EXISTS reservations;
+DROP TABLE IF EXISTS members;
+DROP TABLE IF EXISTS stores;
+DROP TABLE IF EXISTS times;
+DROP TABLE IF EXISTS themes;
+
+CREATE TABLE times
+(
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    start_at TIME   NOT NULL,
+    PRIMARY KEY (id),
+    UNIQUE (start_at)
+);
+
+CREATE TABLE themes
+(
+    id            BIGINT      NOT NULL AUTO_INCREMENT,
+    name          VARCHAR(40) NOT NULL,
+    thumbnail_url VARCHAR(2048),
+    description   VARCHAR(400),
+    PRIMARY KEY (id),
+    UNIQUE (name)
+);
+
+CREATE TABLE stores
+(
+    id   BIGINT      NOT NULL AUTO_INCREMENT,
+    name VARCHAR(40) NOT NULL,
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE members
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    name     VARCHAR(20)  NOT NULL,
+    email    VARCHAR(100) NOT NULL,
+    password VARCHAR(100) NOT NULL,
+    role     VARCHAR(10)  NOT NULL DEFAULT 'USER',
+    store_id BIGINT,
+    PRIMARY KEY (id),
+    UNIQUE (email),
+    FOREIGN KEY (store_id) REFERENCES stores (id)
+);
+
+CREATE TABLE reservations
+(
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    member_id  BIGINT,
+    date       DATE        NOT NULL,
+    time_id    BIGINT,
+    theme_id   BIGINT,
+    store_id   BIGINT,
+    status     VARCHAR(20) NOT NULL DEFAULT 'BOOKED',
+    deleted_at TIMESTAMP   NOT NULL DEFAULT '9999-12-31 00:00:00',
+    version    BIGINT      NOT NULL DEFAULT 0,
+    PRIMARY KEY (id),
+    FOREIGN KEY (member_id) REFERENCES members (id),
+    FOREIGN KEY (time_id) REFERENCES times (id),
+    FOREIGN KEY (theme_id) REFERENCES themes (id),
+    FOREIGN KEY (store_id) REFERENCES stores (id),
+    UNIQUE (theme_id, date, time_id, deleted_at)
+);
+
+
+
