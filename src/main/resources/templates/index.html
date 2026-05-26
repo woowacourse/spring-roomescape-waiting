@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Roomescape | 홈</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .hero-section {
+      background: #f8f9fa;
+      padding: 60px 0;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .card-img-top {
+      height: 200px;
+      object-fit: cover;
+    }
+
+    .rank-badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: rgba(220, 53, 69, 0.9);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-weight: bold;
+    }
+
+    .popular-scroll {
+      display: flex;
+      flex-wrap: nowrap;
+      gap: 1.5rem;
+      overflow-x: auto;
+      scroll-behavior: smooth;
+      scroll-snap-type: x mandatory;
+      padding-bottom: 1rem;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .popular-scroll::-webkit-scrollbar {
+      display: none;
+    }
+
+    .popular-scroll-item {
+      flex: 0 0 320px;
+      max-width: 320px;
+      scroll-snap-align: start;
+    }
+
+    .reservation-manager {
+      background: #ffffff;
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .reservation-search {
+      max-width: 520px;
+    }
+
+    .reservation-card {
+      border: 1px solid #dee2e6;
+      border-radius: 8px;
+      padding: 18px;
+      background: #fff;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      font-weight: 700;
+    }
+
+    .status-editable {
+      background: #e7f5ff;
+      color: #0b7285;
+    }
+
+    .status-edit-recommended {
+      background: #fff3bf;
+      color: #8d6b00;
+    }
+
+    .status-locked,
+    .status-canceled {
+      background: #f1f3f5;
+      color: #495057;
+    }
+
+    .resource-badge {
+      display: inline-flex;
+      border-radius: 6px;
+      padding: 3px 8px;
+      background: #fff5f6;
+      color: #842029;
+      font-size: 0.78rem;
+      font-weight: 600;
+    }
+
+    .form-error-summary {
+      display: none;
+      border: 1px solid #f1aeb5;
+      background: #fff5f6;
+      color: #842029;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin-top: 12px;
+      box-shadow: 0 8px 20px rgba(132, 32, 41, 0.06);
+    }
+
+    .field-error {
+      display: none;
+      margin-top: 6px;
+      color: #b42318;
+      font-size: 0.875rem;
+      line-height: 1.35;
+    }
+
+    .form-control.is-invalid,
+    .form-select.is-invalid {
+      border-color: #dc3545;
+      box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.08);
+    }
+
+    .app-modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(33, 37, 41, 0.32);
+      z-index: 1040;
+    }
+
+    .app-modal {
+      display: none;
+      position: fixed;
+      left: 50%;
+      top: 50%;
+      width: min(520px, calc(100vw - 32px));
+      max-height: calc(100vh - 48px);
+      overflow: auto;
+      transform: translate(-50%, -50%);
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 20px 60px rgba(33, 37, 41, 0.22);
+      z-index: 1050;
+    }
+
+    .app-modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 18px 20px;
+      border-bottom: 1px solid #dee2e6;
+    }
+
+    .app-modal-body {
+      padding: 20px;
+    }
+
+    .app-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      padding: 16px 20px;
+      border-top: 1px solid #dee2e6;
+      background: #f8f9fa;
+    }
+
+    @media (max-width: 576px) {
+      .popular-scroll-item {
+        flex-basis: 85%;
+        max-width: 85%;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container">
+    <a class="navbar-brand" href="/">Roomescape</a>
+    <div class="navbar-nav">
+      <a class="nav-link active" href="/">테마예약</a>
+      <a class="nav-link" href="/admin">관리자패널</a>
+    </div>
+  </div>
+</nav>
+
+<header class="hero-section text-center">
+  <div class="container">
+    <h1 class="display-4">최고의 방탈출을 경험하세요</h1>
+    <p class="lead text-muted">인기 테마부터 신규 테마까지 한눈에 확인하세요.</p>
+  </div>
+</header>
+
+<main class="container my-5">
+  <section class="mb-5">
+    <h2 class="mb-4">🔥 실시간 인기 테마 TOP 10</h2>
+    <div id="popular-themes-list" class="popular-scroll">
+      <div class="text-center w-100">로딩 중...</div>
+    </div>
+  </section>
+
+  <hr class="my-5">
+
+  <section class="mb-5">
+    <div class="reservation-manager">
+      <div class="d-flex flex-column flex-md-row justify-content-between gap-3 mb-4">
+        <div>
+          <h2 class="mb-2">내 예약 조회</h2>
+          <p class="text-muted mb-0">예약자 이름으로 예약 상태를 확인하고, 가능한 예약은 수정하거나 취소할 수 있습니다.</p>
+        </div>
+        <form id="reservationLookupForm" class="reservation-search w-100">
+          <label for="reservationLookupName" class="form-label">예약자 이름</label>
+          <div class="input-group">
+            <input type="text" id="reservationLookupName" class="form-control" placeholder="이름 입력" required>
+            <button type="submit" class="btn btn-dark">조회</button>
+          </div>
+          <div id="reservationLookupNameError" class="field-error"></div>
+          <div id="reservationLookupError" class="form-error-summary" role="alert"></div>
+        </form>
+      </div>
+      <div id="userReservationList" class="row g-3">
+        <div class="col-12">
+          <div class="text-center text-muted border rounded py-4 bg-light">예약자 이름을 입력하면 예약 목록이 표시됩니다.</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <hr class="my-5">
+
+  <section>
+    <h2 class="mb-4">전체 테마</h2>
+    <div id="all-themes-list" class="row row-cols-1 row-cols-md-4 g-4">
+    </div>
+  </section>
+</main>
+
+<footer class="py-4 bg-light text-center border-top">
+  <p class="text-muted">&copy; 2026 Roomescape Project. All rights reserved.</p>
+</footer>
+
+<div id="modalBackdrop" class="app-modal-backdrop"></div>
+<div id="editReservationModal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="editReservationTitle">
+  <div class="app-modal-header">
+    <h3 id="editReservationTitle" class="h5 mb-0">예약 수정</h3>
+    <button type="button" class="btn-close" aria-label="닫기" onclick="closeEditReservationModal()"></button>
+  </div>
+  <form id="editReservationForm">
+    <div class="app-modal-body">
+      <input type="hidden" id="editReservationId">
+      <div class="mb-3">
+        <label for="editReservationName" class="form-label">예약자 이름</label>
+        <input type="text" id="editReservationName" class="form-control" readonly>
+        <div id="editReservationNameError" class="field-error"></div>
+      </div>
+      <div class="mb-3">
+        <label for="editReservationDate" class="form-label">날짜</label>
+        <input type="date" id="editReservationDate" class="form-control" required>
+        <div id="editReservationDateError" class="field-error"></div>
+      </div>
+      <div class="mb-3">
+        <label for="editReservationThemeId" class="form-label">테마</label>
+        <select id="editReservationThemeId" class="form-select" required>
+          <option value="">테마를 선택하세요</option>
+        </select>
+        <div id="editReservationThemeIdError" class="field-error"></div>
+      </div>
+      <div class="mb-3">
+        <label for="editReservationTimeId" class="form-label">시간</label>
+        <select id="editReservationTimeId" class="form-select" required>
+          <option value="">날짜와 테마를 선택하세요</option>
+        </select>
+        <div id="editReservationTimeIdError" class="field-error"></div>
+      </div>
+      <div id="editReservationError" class="form-error-summary" role="alert"></div>
+    </div>
+    <div class="app-modal-footer">
+      <button type="button" class="btn btn-outline-secondary" onclick="closeEditReservationModal()">닫기</button>
+      <button type="submit" class="btn btn-primary">저장</button>
+    </div>
+  </form>
+</div>
+
+<div id="cancelReservationModal" class="app-modal" role="dialog" aria-modal="true" aria-labelledby="cancelReservationTitle">
+  <div class="app-modal-header">
+    <h3 id="cancelReservationTitle" class="h5 mb-0">예약 취소</h3>
+    <button type="button" class="btn-close" aria-label="닫기" onclick="closeCancelReservationModal()"></button>
+  </div>
+  <div class="app-modal-body">
+    <input type="hidden" id="cancelReservationId">
+    <p id="cancelReservationDescription" class="mb-0"></p>
+    <div id="cancelReservationError" class="form-error-summary" role="alert"></div>
+  </div>
+  <div class="app-modal-footer">
+    <button type="button" class="btn btn-outline-secondary" onclick="closeCancelReservationModal()">닫기</button>
+    <button type="button" class="btn btn-danger" onclick="cancelReservation()">예약 취소</button>
+  </div>
+</div>
+
+<script>
+  let allThemes = [];
+  let userReservations = [];
+  let lastReservationLookupName = '';
+  let currentEditReservation = null;
+
+  async function parseErrorResponse(response) {
+    try {
+      return await response.json();
+    } catch (error) {
+      return { message: '요청 처리에 실패했습니다.' };
+    }
+  }
+
+  function createRequestError(errorData) {
+    const error = new Error(errorData?.message || '요청 처리에 실패했습니다.');
+    error.data = errorData || {};
+    return error;
+  }
+
+  async function requestJson(url, options = {}) {
+    const response = await fetch(url, options);
+    if (!response.ok) {
+      throw createRequestError(await parseErrorResponse(response));
+    }
+    if (response.status === 204 || response.headers.get('content-length') === '0') {
+      return null;
+    }
+    return response.json();
+  }
+
+  function escapeHtml(value) {
+    return String(value ?? '')
+        .replaceAll('&', '&amp;')
+        .replaceAll('<', '&lt;')
+        .replaceAll('>', '&gt;')
+        .replaceAll('"', '&quot;')
+        .replaceAll("'", '&#039;');
+  }
+
+  function clearFieldErrors(fieldIds, summaryId) {
+    const summary = document.getElementById(summaryId);
+    if (summary) {
+      summary.style.display = 'none';
+      summary.innerText = '';
+    }
+    fieldIds.forEach(id => {
+      document.getElementById(id)?.classList.remove('is-invalid');
+      const error = document.getElementById(`${id}Error`);
+      if (error) {
+        error.innerText = '';
+        error.style.display = 'none';
+      }
+    });
+  }
+
+  function showFieldErrors(errorData, summaryId, fieldMap) {
+    const summary = document.getElementById(summaryId);
+    if (summary) {
+      summary.innerText = errorData?.message || '요청을 처리하지 못했습니다.';
+      summary.style.display = 'block';
+    }
+
+    (errorData?.parameterErrors || []).forEach(({ parameter, message }) => {
+      const fieldId = fieldMap[parameter] || parameter;
+      document.getElementById(fieldId)?.classList.add('is-invalid');
+      const error = document.getElementById(`${fieldId}Error`);
+      if (error) {
+        error.innerText = message;
+        error.style.display = 'block';
+      }
+    });
+  }
+
+  function formatErrorMessage(errorData, fallbackMessage) {
+    const details = (errorData?.parameterErrors || [])
+        .map(({ parameter, message }) => `${parameter}: ${message}`)
+        .join('\n');
+    const message = errorData?.message || fallbackMessage;
+    return details ? `${message}\n${details}` : message;
+  }
+
+  function statusLabel(status) {
+    return {
+      EDITABLE: '수정 가능',
+      EDIT_RECOMMENDED: '수정 권장',
+      LOCKED: '잠김',
+      CANCELED: '취소됨'
+    }[status] || status;
+  }
+
+  function statusClass(status) {
+    return {
+      EDITABLE: 'status-editable',
+      EDIT_RECOMMENDED: 'status-edit-recommended',
+      LOCKED: 'status-locked',
+      CANCELED: 'status-canceled'
+    }[status] || 'status-locked';
+  }
+
+  document.addEventListener('DOMContentLoaded', async () => {
+    try {
+      const popularThemes = await requestJson('/api/themes/rankings/last-7-days');
+      const listContainer = document.getElementById('popular-themes-list');
+
+      if (popularThemes.length === 0) {
+        listContainer.innerHTML = '<p class="text-center w-100">인기 테마가 없습니다.</p>';
+        return;
+      }
+
+      listContainer.innerHTML = popularThemes.map((theme, index) => `
+        <div class="popular-scroll-item">
+          <div class="card h-100 shadow-sm">
+            <div class="rank-badge">TOP ${index + 1}</div>
+            <img src="${escapeHtml(theme.imageUrl)}" class="card-img-top" alt="${escapeHtml(theme.name)}">
+            <div class="card-body">
+              <h5 class="card-title">${escapeHtml(theme.name)}</h5>
+              <p class="card-text text-muted">${escapeHtml(theme.description)}</p>
+              <a href="/reservations?themeId=${theme.id}" class="btn btn-primary w-100">지금 예약</a>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      startPopularAutoScroll(listContainer);
+
+    } catch (error) {
+      console.error('인기 테마 로드 실패:', error);
+      const message = error.data?.message || '테마를 불러오는 중 오류가 발생했습니다.';
+      document.getElementById('popular-themes-list').innerHTML =
+          `<p class="text-center w-100 text-danger">${escapeHtml(message)}</p>`;
+    }
+  });
+
+  document.getElementById('reservationLookupForm').addEventListener('submit', loadUserReservations);
+  document.getElementById('editReservationForm').addEventListener('submit', updateReservation);
+  document.getElementById('editReservationDate').addEventListener('change', () => loadEditTimes());
+  document.getElementById('editReservationThemeId').addEventListener('change', () => loadEditTimes());
+  document.getElementById('modalBackdrop').addEventListener('click', closeAllModals);
+
+  function startPopularAutoScroll(container) {
+    const items = container.querySelectorAll('.popular-scroll-item');
+    if (items.length <= 1) {
+      return;
+    }
+
+    let currentIndex = 0;
+    setInterval(() => {
+      currentIndex = (currentIndex + 1) % items.length;
+      container.scrollTo({
+        left: items[currentIndex].offsetLeft - container.offsetLeft,
+        behavior: 'smooth'
+      });
+    }, 3000);
+  }
+
+  async function loadAllThemes() {
+    try {
+      const themes = await requestJson('/api/themes');
+      allThemes = themes;
+      const container = document.getElementById('all-themes-list');
+
+      if (themes.length === 0) {
+        container.innerHTML = '<p class="text-center w-100">등록된 테마가 없습니다.</p>';
+        return;
+      }
+
+      container.innerHTML = themes.map(theme => `
+                <div class="col">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <img src="${escapeHtml(theme.imageUrl)}" class="card-img-top rounded" alt="${escapeHtml(theme.name)}">
+                        <div class="card-body text-center">
+                            <h6 class="card-title mb-3 font-weight-bold">${escapeHtml(theme.name)}</h6>
+                            <a href="/reservations?themeId=${theme.id}" class="btn btn-outline-dark btn-sm px-4">선택</a>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+    } catch (error) {
+      console.error('테마 로드 실패:', error);
+      const container = document.getElementById('all-themes-list');
+      const message = error.data?.message || '테마 목록을 불러오지 못했습니다.';
+      container.innerHTML = `<p class="text-center w-100 text-danger">${escapeHtml(message)}</p>`;
+    }
+  }
+
+  async function loadUserReservations(event) {
+    event?.preventDefault();
+    clearFieldErrors(['reservationLookupName'], 'reservationLookupError');
+
+    const name = document.getElementById('reservationLookupName').value.trim();
+    if (!name) {
+      showFieldErrors({
+        message: '예약자 이름을 입력해주세요.',
+        parameterErrors: [{ parameter: 'name', message: '예약자명은 필수입니다.' }]
+      }, 'reservationLookupError', { name: 'reservationLookupName' });
+      return;
+    }
+
+    try {
+      lastReservationLookupName = name;
+      userReservations = await requestJson(`/api/reservations?name=${encodeURIComponent(name)}`);
+      renderUserReservations();
+    } catch (error) {
+      userReservations = [];
+      renderEmptyReservations('예약 목록을 불러오지 못했습니다.');
+      showFieldErrors(error.data, 'reservationLookupError', { name: 'reservationLookupName' });
+    }
+  }
+
+  function renderEmptyReservations(message) {
+    document.getElementById('userReservationList').innerHTML = `
+      <div class="col-12">
+        <div class="text-center text-muted border rounded py-4 bg-light">${escapeHtml(message)}</div>
+      </div>
+    `;
+  }
+
+  function renderUserReservations() {
+    if (userReservations.length === 0) {
+      renderEmptyReservations('조회된 예약이 없습니다.');
+      return;
+    }
+
+    document.getElementById('userReservationList').innerHTML = userReservations.map(reservation => {
+      const editable = reservation.status === 'EDITABLE' || reservation.status === 'EDIT_RECOMMENDED';
+      const resourceBadges = [
+        reservation.time?.deleted ? '<span class="resource-badge">시간 제공 중지</span>' : '',
+        reservation.theme?.deleted ? '<span class="resource-badge">테마 제공 중지</span>' : ''
+      ].filter(Boolean).join(' ');
+      const message = reservation.message
+          ? `<p class="small text-muted mt-3 mb-0">${escapeHtml(reservation.message)}</p>`
+          : '';
+      const actions = editable
+          ? `
+            <div class="d-flex gap-2 mt-3">
+              <button type="button" class="btn btn-outline-primary btn-sm"
+                  onclick="openEditReservationModal(${reservation.id})">수정</button>
+              <button type="button" class="btn btn-outline-danger btn-sm"
+                  onclick="openCancelReservationModal(${reservation.id})">취소</button>
+            </div>
+          `
+          : '';
+
+      return `
+        <div class="col-12 col-lg-6">
+          <article class="reservation-card h-100">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+              <div>
+                <div class="fw-bold">${escapeHtml(reservation.theme.name)}</div>
+                <div class="text-muted small">${escapeHtml(reservation.date)} · ${escapeHtml(reservation.time.startAt)}</div>
+              </div>
+              <span class="status-badge ${statusClass(reservation.status)}">${statusLabel(reservation.status)}</span>
+            </div>
+            <div class="d-flex flex-wrap gap-2">${resourceBadges}</div>
+            ${message}
+            ${actions}
+          </article>
+        </div>
+      `;
+    }).join('');
+  }
+
+  async function ensureThemesLoaded() {
+    if (allThemes.length > 0) {
+      return;
+    }
+    allThemes = await requestJson('/api/themes');
+  }
+
+  async function openEditReservationModal(id) {
+    currentEditReservation = userReservations.find(reservation => reservation.id === id);
+    if (!currentEditReservation) {
+      return;
+    }
+
+    clearFieldErrors([
+      'editReservationName',
+      'editReservationDate',
+      'editReservationThemeId',
+      'editReservationTimeId'
+    ], 'editReservationError');
+
+    try {
+      await ensureThemesLoaded();
+      document.getElementById('editReservationId').value = currentEditReservation.id;
+      document.getElementById('editReservationName').value = currentEditReservation.name;
+      document.getElementById('editReservationDate').value = currentEditReservation.date;
+      document.getElementById('editReservationThemeId').innerHTML = '<option value="">테마를 선택하세요</option>' +
+          allThemes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
+      document.getElementById('editReservationThemeId').value = currentEditReservation.theme.deleted
+          ? ''
+          : currentEditReservation.theme.id;
+      await loadEditTimes();
+      openModal('editReservationModal');
+    } catch (error) {
+      showFieldErrors(error.data, 'reservationLookupError', {});
+    }
+  }
+
+  async function loadEditTimes() {
+    const date = document.getElementById('editReservationDate').value;
+    const themeId = document.getElementById('editReservationThemeId').value;
+    const timeSelect = document.getElementById('editReservationTimeId');
+
+    if (!date || !themeId) {
+      timeSelect.innerHTML = '<option value="">날짜와 테마를 선택하세요</option>';
+      return;
+    }
+
+    try {
+      const times = await requestJson(`/api/times?date=${encodeURIComponent(date)}&themeId=${encodeURIComponent(themeId)}`);
+      const options = [...times];
+      const currentTime = currentEditReservation?.time;
+      const isCurrentReservationSlot = currentEditReservation
+          && currentEditReservation.date === date
+          && String(currentEditReservation.theme.id) === String(themeId)
+          && !currentTime.deleted
+          && !options.some(time => time.id === currentTime.id);
+
+      if (isCurrentReservationSlot) {
+        options.unshift(currentTime);
+      }
+
+      if (options.length === 0) {
+        timeSelect.innerHTML = '<option value="">예약 가능한 시간이 없습니다</option>';
+        return;
+      }
+
+      timeSelect.innerHTML = '<option value="">시간을 선택하세요</option>' +
+          options.map(time => `<option value="${time.id}">${escapeHtml(time.startAt)}</option>`).join('');
+      if (isCurrentReservationSlot || options.some(time => time.id === currentTime?.id)) {
+        timeSelect.value = currentTime.id;
+      }
+    } catch (error) {
+      timeSelect.innerHTML = '<option value="">시간을 불러오지 못했습니다</option>';
+      showFieldErrors(error.data, 'editReservationError', {
+        date: 'editReservationDate',
+        themeId: 'editReservationThemeId'
+      });
+    }
+  }
+
+  async function updateReservation(event) {
+    event.preventDefault();
+    clearFieldErrors([
+      'editReservationName',
+      'editReservationDate',
+      'editReservationThemeId',
+      'editReservationTimeId'
+    ], 'editReservationError');
+
+    const id = document.getElementById('editReservationId').value;
+    const body = {
+      name: document.getElementById('editReservationName').value,
+      date: document.getElementById('editReservationDate').value,
+      themeId: document.getElementById('editReservationThemeId').value,
+      timeId: document.getElementById('editReservationTimeId').value
+    };
+
+    try {
+      await requestJson(`/api/reservations/${id}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body)
+      });
+      closeEditReservationModal();
+      await loadUserReservations();
+    } catch (error) {
+      showFieldErrors(error.data, 'editReservationError', {
+        name: 'editReservationName',
+        date: 'editReservationDate',
+        themeId: 'editReservationThemeId',
+        timeId: 'editReservationTimeId'
+      });
+    }
+  }
+
+  function openCancelReservationModal(id) {
+    const reservation = userReservations.find(item => item.id === id);
+    if (!reservation) {
+      return;
+    }
+
+    document.getElementById('cancelReservationId').value = reservation.id;
+    document.getElementById('cancelReservationDescription').innerText =
+        `${reservation.date} ${reservation.time.startAt} · ${reservation.theme.name} 예약을 취소할까요?`;
+    document.getElementById('cancelReservationError').style.display = 'none';
+    openModal('cancelReservationModal');
+  }
+
+  async function cancelReservation() {
+    const id = document.getElementById('cancelReservationId').value;
+    const errorBox = document.getElementById('cancelReservationError');
+    errorBox.style.display = 'none';
+
+    try {
+      await requestJson(`/api/reservations/${id}/cancel?name=${encodeURIComponent(lastReservationLookupName)}`, {
+        method: 'PATCH'
+      });
+      closeCancelReservationModal();
+      await loadUserReservations();
+    } catch (error) {
+      errorBox.innerText = formatErrorMessage(error.data, '예약을 취소하지 못했습니다.');
+      errorBox.style.display = 'block';
+    }
+  }
+
+  function openModal(id) {
+    document.getElementById('modalBackdrop').style.display = 'block';
+    document.getElementById(id).style.display = 'block';
+  }
+
+  function closeAllModals() {
+    closeEditReservationModal();
+    closeCancelReservationModal();
+  }
+
+  function closeEditReservationModal() {
+    document.getElementById('editReservationModal').style.display = 'none';
+    document.getElementById('modalBackdrop').style.display = 'none';
+  }
+
+  function closeCancelReservationModal() {
+    document.getElementById('cancelReservationModal').style.display = 'none';
+    document.getElementById('modalBackdrop').style.display = 'none';
+  }
+
+  window.onload = loadAllThemes;
+</script>
+
+</body>
+</html>
