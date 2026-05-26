@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -13,6 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
+import roomescape.service.exception.ReservationConflictException;
 
 @Repository
 public class ReservationDao {
@@ -39,8 +42,14 @@ public class ReservationDao {
                     new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
                     new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"),
                             rs.getString("theme_thumbnail"))
-            ), rs.getLong("waiting_number")
+            ), rs.getLong("waiting_order")
     );
+
+    public boolean existsReservationByDateAndTimeIdAndThemeIdAndName(LocalDate date, long timeId, long themeId, String username) {
+        return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?",
+                Integer.class, date, timeId, themeId, username), 0) > 0;
+    }
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -85,15 +94,19 @@ public class ReservationDao {
     }
 
     public Reservation save(Reservation reservation) {
-        long id = jdbcReservationInsert.executeAndReturnKey(Map.of(
-                "name", reservation.getName(),
-                "date", reservation.getDate(),
-                "created_at", reservation.getCreatedAt(),
-                "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId()
-        )).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getDate(),
-                reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
+        try {
+            long id = jdbcReservationInsert.executeAndReturnKey(Map.of(
+                    "name", reservation.getName(),
+                    "date", reservation.getDate(),
+                    "created_at", reservation.getCreatedAt(),
+                    "time_id", reservation.getTime().getId(),
+                    "theme_id", reservation.getTheme().getId()
+            )).longValue();
+            return new Reservation(id, reservation.getName(), reservation.getDate(),
+                    reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
+        } catch (DuplicateKeyException duplicateKeyException) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
     }
 
     public boolean existsByTimeId(long timeId) {
@@ -136,15 +149,19 @@ public class ReservationDao {
     }
 
     public Reservation saveWaiting(Reservation reservation) {
-        long id = jdbcWaitingInsert.executeAndReturnKey(Map.of(
-                "name", reservation.getName(),
-                "date", reservation.getDate(),
-                "created_at", reservation.getCreatedAt(),
-                "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId()
-        )).longValue();
-        return new Reservation(id, reservation.getName(), reservation.getDate(),
-                reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
+        try {
+            long id = jdbcWaitingInsert.executeAndReturnKey(Map.of(
+                    "name", reservation.getName(),
+                    "date", reservation.getDate(),
+                    "created_at", reservation.getCreatedAt(),
+                    "time_id", reservation.getTime().getId(),
+                    "theme_id", reservation.getTheme().getId()
+            )).longValue();
+            return new Reservation(id, reservation.getName(), reservation.getDate(),
+                    reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
+        } catch (DuplicateKeyException duplicateKeyException) {
+            throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
+        }
     }
 
     public Optional<Reservation> findByWaitingId(long id) {
@@ -186,5 +203,11 @@ public class ReservationDao {
                 WHERE sub.name = ?;
                 """;
         return jdbcTemplate.query(sql, reservationWaitingRowMapper, username);
+    }
+
+    public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, long timeId, long themeId, String username) {
+        return Objects.requireNonNullElse(jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation_waiting WHERE date = ? AND time_id = ? AND theme_id = ? AND name = ?",
+                Integer.class, date, timeId, themeId, username), 0) > 0;
     }
 }

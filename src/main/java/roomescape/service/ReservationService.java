@@ -82,8 +82,15 @@ public class ReservationService {
         if (!reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
             return save(name, date, timeId, themeId);
         }
+        if (reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
+            throw new ReservationConflictException("이미 예약된 시간입니다.");
+        }
+
         ReservationTime time = validateReservationTime(timeId);
         Theme theme = validateTheme(themeId);
+        if (reservationDao.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
+            throw new ReservationConflictException("이미 대기 신청한 시간입니다.");
+        }
         Reservation reservation = new Reservation(name, date, LocalDateTime.now(clock), time, theme);
         return reservationDao.saveWaiting(reservation);
     }

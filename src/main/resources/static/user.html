@@ -357,10 +357,17 @@
     }
 
     .time-slot.unavailable {
-      opacity: 0.35;
-      cursor: not-allowed;
-      text-decoration: line-through;
+      opacity: 0.6;
+      border-color: rgba(245,158,11,0.3);
       color: var(--muted);
+      cursor: pointer;
+    }
+
+    .time-slot.unavailable:hover {
+      border-color: var(--accent);
+      background: var(--accent-dim);
+      color: var(--accent);
+      opacity: 1;
     }
 
     /* Buttons */
@@ -448,6 +455,25 @@
     }
 
     .reservation-actions { display: flex; gap: 8px; }
+
+    .status-badge {
+      display: inline-block;
+      padding: 3px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .badge-reserved {
+      background: rgba(16,185,129,0.15);
+      color: var(--success);
+      border: 1px solid rgba(16,185,129,0.3);
+    }
+    .badge-waiting {
+      background: rgba(245,158,11,0.15);
+      color: var(--accent);
+      border: 1px solid rgba(245,158,11,0.3);
+    }
 
     /* Modal */
     .modal-overlay {
@@ -688,7 +714,7 @@
             <span>예약자</span><span id="confirm-name">-</span>
           </div>
           <div class="btn-row" style="margin-top:20px">
-            <button class="btn btn-accent" onclick="submitReservation()">예약 확정</button>
+            <button class="btn btn-accent" onclick="submitReservation()" id="submit-btn">예약 확정</button>
             <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
           </div>
         </div>
@@ -885,9 +911,10 @@
         const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
         return `
           <div class="time-slot ${available ? '' : 'unavailable'}"
-               onclick="${available ? `pickTime(${t.id}, '${t.startAt}')` : ''}"
+               onclick="pickTime(${t.id}, '${t.startAt}', ${available})"
                id="slot-${t.id}">
             ${t.startAt}
+            ${available ? '' : '<br><small style="font-size:10px;opacity:0.7">대기 가능</small>'}
           </div>
         `;
       }).join('');
@@ -899,8 +926,8 @@
     }
   }
 
-  function pickTime(id, startAt) {
-    selectedTime = { id, startAt };
+  function pickTime(id, startAt, available) {
+    selectedTime = { id, startAt, available };
     document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
     document.getElementById(`slot-${id}`).classList.add('selected');
     document.getElementById('confirm-time-btn').disabled = false;
@@ -915,12 +942,16 @@
     document.getElementById('confirm-date').textContent = formatDate(selectedDate);
     document.getElementById('confirm-time').textContent = selectedTime.startAt;
     document.getElementById('confirm-name').textContent = username;
+    document.getElementById('submit-btn').textContent = selectedTime.available ? '예약 확정' : '대기 신청';
     goToStep(4);
   }
 
   async function submitReservation() {
+    const endpoint = selectedTime.available
+      ? `${API}/reservations`
+      : `${API}/reservations/waiting`;
     try {
-      const res = await fetch(`${API}/reservations`, {
+      const res = await fetch(endpoint, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -931,13 +962,17 @@
         })
       });
 
-      if (!res.ok) throw new Error();
+      if (!res.ok) {
+        const { message } = await res.json();
+        showToast(message || '요청에 실패했습니다.', 'error');
+        return;
+      }
 
-      showToast('예약이 완료되었습니다! 🎉');
+      showToast(selectedTime.available ? '예약이 완료되었습니다! 🎉' : '대기 신청이 완료되었습니다!');
       resetBookingState();
       switchSection('my');
     } catch (e) {
-      showToast('예약에 실패했습니다. 다시 시도해주세요.', 'error');
+      showToast('요청에 실패했습니다. 다시 시도해주세요.', 'error');
     }
   }
 
@@ -966,30 +1001,46 @@
     document.getElementById('my-empty').style.display = 'none';
 
     try {
-      const res = await fetch(`${API}/reservations?username=${encodeURIComponent(username)}`);
-      const { reservations } = await res.json();
+      const [resData, waitData] = await Promise.all([
+        fetch(`${API}/reservations?username=${encodeURIComponent(username)}`).then(r => r.json()),
+        fetch(`${API}/reservations/waiting?username=${encodeURIComponent(username)}`).then(r => r.json())
+      ]);
 
       document.getElementById('my-loading').style.display = 'none';
 
-      if (!reservations.length) {
+      const reservations = (resData.reservations || []).map(r => ({ ...r, type: 'reservation' }));
+      const waitings = (waitData.reservations || []).map(w => ({ ...w, type: 'waiting' }));
+      const all = [...reservations, ...waitings].sort((a, b) => a.date < b.date ? -1 : a.date > b.date ? 1 : 0);
+
+      if (!all.length) {
         document.getElementById('my-empty').style.display = 'block';
         return;
       }
 
       const list = document.getElementById('my-list');
-      list.innerHTML = reservations.map(r => `
-        <div class="reservation-item" id="res-${r.id}">
-          <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
-          <div class="reservation-info">
-            <div class="reservation-theme">${r.themeName}</div>
-            <div class="reservation-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}</div>
+      list.innerHTML = all.map(item => {
+        const isWaiting = item.type === 'waiting';
+        const badge = isWaiting
+          ? `<span class="status-badge badge-waiting">${item.waitingNumber}번째 대기</span>`
+          : `<span class="status-badge badge-reserved">예약</span>`;
+        const actions = isWaiting
+          ? `<button class="btn btn-danger" onclick="deleteItem(${item.id}, 'waiting')">취소</button>`
+          : `
+            <button class="btn btn-ghost" onclick="openEditModal(${item.id})">변경</button>
+            <button class="btn btn-danger" onclick="deleteItem(${item.id}, 'reservation')">삭제</button>
+          `;
+        return `
+          <div class="reservation-item" id="item-${item.type}-${item.id}">
+            <img src="${item.themeThumbnailUrl}" alt="${item.themeName}" onerror="this.style.background='#1f2937'">
+            <div class="reservation-info">
+              <div class="reservation-theme">${item.themeName}</div>
+              <div class="reservation-meta">📅 ${formatDate(item.date)} &nbsp; ⏰ ${item.time}</div>
+            </div>
+            ${badge}
+            <div class="reservation-actions">${actions}</div>
           </div>
-          <div class="reservation-actions">
-            <button class="btn btn-ghost" onclick="openEditModal(${r.id})">변경</button>
-            <button class="btn btn-danger" onclick="deleteMyReservation(${r.id})">삭제</button>
-          </div>
-        </div>
-      `).join('');
+        `;
+      }).join('');
       list.style.display = 'flex';
     } catch (e) {
       document.getElementById('my-loading').style.display = 'none';
@@ -997,17 +1048,21 @@
     }
   }
 
-  async function deleteMyReservation(id) {
-    if (!confirm('예약을 삭제하시겠습니까?')) return;
+  async function deleteItem(id, type) {
+    const label = type === 'waiting' ? '대기' : '예약';
+    if (!confirm(`${label}를 취소하시겠습니까?`)) return;
+    const endpoint = type === 'waiting'
+      ? `${API}/reservations/waiting/${id}`
+      : `${API}/reservations/${id}`;
     try {
-      const res = await fetch(`${API}/reservations/${id}`, { method: 'DELETE' });
+      const res = await fetch(endpoint, { method: 'DELETE' });
       if (!res.ok) {
         const { message } = await res.json();
-        showToast(message || '삭제에 실패했습니다.', 'error');
+        showToast(message || '취소에 실패했습니다.', 'error');
         return;
       }
-      document.getElementById(`res-${id}`)?.remove();
-      showToast('예약이 삭제되었습니다.');
+      document.getElementById(`item-${type}-${id}`)?.remove();
+      showToast(`${label}가 취소되었습니다.`);
 
       const remaining = document.querySelectorAll('.reservation-item');
       if (!remaining.length) {
@@ -1015,7 +1070,7 @@
         document.getElementById('my-empty').style.display = 'block';
       }
     } catch (e) {
-      showToast('삭제에 실패했습니다.', 'error');
+      showToast('취소에 실패했습니다.', 'error');
     }
   }
 
