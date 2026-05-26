@@ -72,7 +72,7 @@ class ThemeServiceTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(new Reservation(name, date, time, theme));
+        return reservationRepository.save(Reservation.create(name, date, time, theme));
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {

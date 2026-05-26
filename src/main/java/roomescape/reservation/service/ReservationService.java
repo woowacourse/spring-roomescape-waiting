@@ -33,7 +33,7 @@ public class ReservationService {
         ReservationTime time = getReservationTime(timeId);
         Theme theme = getTheme(themeId);
 
-        Reservation reservation = new Reservation(guestName, date, time, theme);
+        Reservation reservation = Reservation.create(guestName, date, time, theme);
 
         reservationValidator.validateCreate(reservation);
 
