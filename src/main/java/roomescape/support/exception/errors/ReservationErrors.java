@@ -5,8 +5,6 @@ import lombok.Getter;
 @Getter
 public enum ReservationErrors implements Errors {
 
-    INVALID_RESERVATION_NAME("이름은 비어 있을 수 없습니다."),
-    INVALID_RESERVATION_NAME_LENGTH("이름은 10자 이하여야 합니다."),
     INVALID_RESERVATION_DATE("날짜는 필수입니다."),
     INVALID_USER_RESERVATION("사용자 예약 정보가 올바르지 않습니다."),
     RESERVATION_NOT_FOUND("존재하지 않는 예약건 입니다"),

@@ -5,7 +5,7 @@ import static org.assertj.core.api.SoftAssertions.assertSoftly;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
-import roomescape.support.exception.errors.ReservationErrors;
+import roomescape.support.exception.errors.UserErrors;
 
 class GlobalExceptionHandlerTest {
 
@@ -14,7 +14,7 @@ class GlobalExceptionHandlerTest {
     void convertRoomescapeExceptionToErrorResponse() {
         // given
         GlobalExceptionHandler globalExceptionHandler = new GlobalExceptionHandler();
-        BadRequestException exception = new BadRequestException(ReservationErrors.INVALID_RESERVATION_NAME);
+        BadRequestException exception = new BadRequestException(UserErrors.INVALID_USER_NAME);
 
         // when
         ResponseEntity<ErrorResponse> response = globalExceptionHandler.handleBadRequestException(exception);
@@ -22,7 +22,7 @@ class GlobalExceptionHandlerTest {
         // then
         assertSoftly(softly -> {
             softly.assertThat(response.getStatusCode().value()).isEqualTo(400);
-            softly.assertThat(response.getBody().code()).isEqualTo("INVALID_RESERVATION_NAME");
+            softly.assertThat(response.getBody().code()).isEqualTo("INVALID_USER_NAME");
             softly.assertThat(response.getBody().message()).isEqualTo("이름은 비어 있을 수 없습니다.");
         });
     }

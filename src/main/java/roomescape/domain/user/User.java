@@ -2,7 +2,7 @@ package roomescape.domain.user;
 
 import lombok.Getter;
 import roomescape.support.exception.BadRequestException;
-import roomescape.support.exception.errors.ReservationErrors;
+import roomescape.support.exception.errors.UserErrors;
 
 @Getter
 public class User {
@@ -32,10 +32,10 @@ public class User {
 
     private static void validate(String name) {
         if (name == null || name.isBlank()) {
-            throw new BadRequestException(ReservationErrors.INVALID_RESERVATION_NAME);
+            throw new BadRequestException(UserErrors.INVALID_USER_NAME);
         }
         if (name.length() > MAX_NAME_LENGTH) {
-            throw new BadRequestException(ReservationErrors.INVALID_RESERVATION_NAME_LENGTH);
+            throw new BadRequestException(UserErrors.INVALID_USER_NAME_LENGTH);
         }
     }
 }
