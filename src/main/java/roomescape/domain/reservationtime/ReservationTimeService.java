@@ -25,14 +25,14 @@ public class ReservationTimeService {
             request.finishAt()
         );
         ReservationTime saved = timeRepository.save(time);
-        return TimeResponse.of(saved);
+        return TimeResponse.from(saved);
     }
 
     public List<TimeResponse> getAllTimes() {
         List<ReservationTime> times = timeRepository.findAll();
 
         return times.stream()
-            .map(TimeResponse::of)
+            .map(TimeResponse::from)
             .toList();
     }
 

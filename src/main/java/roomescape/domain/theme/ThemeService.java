@@ -29,13 +29,13 @@ public class ThemeService {
                 .map((themeId) ->
                         themeRepository.findById(themeId)
                                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND)))
-                .map(ThemeResponse::of)
+                .map(ThemeResponse::from)
                 .toList();
     }
 
     public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll().stream()
-                .map(ThemeResponse::of)
+                .map(ThemeResponse::from)
                 .toList();
     }
 }

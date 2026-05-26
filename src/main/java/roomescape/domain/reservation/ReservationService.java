@@ -11,7 +11,6 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.domain.theme.Theme;
-import roomescape.admin.theme.AdminThemeRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservation.dto.ReservationRequest;
 import roomescape.domain.reservationtime.dto.TimeResponse;
@@ -50,7 +49,7 @@ public class ReservationService {
             theme
         );
         Reservation saved = reservationRepository.save(reservation);
-        return ReservationResponse.of(saved);
+        return ReservationResponse.from(saved);
     }
 
     public List<TimeResponse> getReservations(LocalDate date, Long themeId) {
@@ -59,7 +58,7 @@ public class ReservationService {
 
         return reservationTimes.stream()
             .filter(reservationTime -> !bookedTimeIds.contains(reservationTime.getId()))
-            .map(TimeResponse::of)
+            .map(TimeResponse::from)
             .toList();
     }
 

@@ -11,7 +11,7 @@ public record ReservationResponse(
     Long themeId
 ) {
 
-    public static ReservationResponse of(Reservation reservation) {
+    public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
             reservation.getId(),
             reservation.getName(),
