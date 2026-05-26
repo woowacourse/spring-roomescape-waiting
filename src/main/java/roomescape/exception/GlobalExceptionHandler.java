@@ -14,8 +14,8 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("DUPLICATE_RESERVATION", e.getMessage()));
     }
 
-    @ExceptionHandler(ReservationNotFoundException.class)
-    public ResponseEntity<ErrorResponse> handle(ReservationNotFoundException e) {
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handle(ResourceNotFoundException e) {
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("RESERVATION_NOT_FOUND", e.getMessage()));
     }
