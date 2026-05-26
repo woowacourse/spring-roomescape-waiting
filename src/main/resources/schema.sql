@@ -58,7 +58,7 @@ CREATE TABLE reservations
     FOREIGN KEY (time_id) REFERENCES times (id),
     FOREIGN KEY (theme_id) REFERENCES themes (id),
     FOREIGN KEY (store_id) REFERENCES stores (id),
-    UNIQUE (theme_id, date, time_id, deleted_at)
+    UNIQUE (theme_id, date, time_id, store_id, deleted_at)
 );
 
 CREATE TABLE waitings
@@ -68,11 +68,13 @@ CREATE TABLE waitings
     date       DATE      NOT NULL,
     time_id    BIGINT    NOT NULL,
     theme_id   BIGINT    NOT NULL,
+    store_id   BIGINT,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES members (id),
     FOREIGN KEY (time_id) REFERENCES times (id),
     FOREIGN KEY (theme_id) REFERENCES themes (id),
-    UNIQUE (member_id, date, time_id, theme_id)
+    FOREIGN KEY (store_id) REFERENCES stores (id),
+    UNIQUE (member_id, date, time_id, theme_id, store_id)
 );
 

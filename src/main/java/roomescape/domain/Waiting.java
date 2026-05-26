@@ -8,13 +8,19 @@ public class Waiting {
     private final LocalDate date;
     private final Long timeId;
     private final Long themeId;
+    private final Long storeId;
 
-    public Waiting(Long id, Long memberId, LocalDate date, Long timeId, Long themeId) {
+    public Waiting(Long id, Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
         this.id = id;
         this.memberId = memberId;
         this.date = date;
         this.timeId = timeId;
         this.themeId = themeId;
+        this.storeId = storeId;
+    }
+
+    public Waiting(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
+        this(null, memberId, date, timeId, themeId, storeId);
     }
 
     public Long getId() {
@@ -35,5 +41,9 @@ public class Waiting {
 
     public Long getThemeId() {
         return themeId;
+    }
+
+    public Long getStoreId() {
+        return storeId;
     }
 }
