@@ -12,6 +12,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
@@ -78,7 +79,7 @@ class ReservationDaoTest {
     void 예약_저장() {
         ReservationTime time = reservationTimeDao.findTimeById(1L);
         Theme theme = themeDao.findThemeById(1L);
-        Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time, theme);
+        Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time, theme, ReservationStatus.CONFIRMED);
 
         Reservation saved = reservationDao.save(reservation);
 

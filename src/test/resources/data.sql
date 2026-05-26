@@ -24,25 +24,25 @@ INSERT INTO reservation_time (start_at) VALUES ('16:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('17:00:00');
 INSERT INTO reservation_time (start_at) VALUES ('18:00:00');
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 3, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 4, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 5, 1);
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 1, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 3, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 4, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 2, 1, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -6, CURRENT_DATE), 5, 1, 'CONFIRMED');
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 1, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 2, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 3, 2);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 4, 2);
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 1, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 2, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 3, 2, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -5, CURRENT_DATE), 4, 2, 'CONFIRMED');
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('아나키', DATEADD(DAY, -4, CURRENT_DATE), 1, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -4, CURRENT_DATE), 2, 3);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -4, CURRENT_DATE), 3, 3);
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('아나키', DATEADD(DAY, -4, CURRENT_DATE), 1, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -4, CURRENT_DATE), 2, 3, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -4, CURRENT_DATE), 3, 3, 'CONFIRMED');
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 4);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 5);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 6);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 7);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 8);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 9);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 10);
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 4, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 5, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 6, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 7, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 8, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 9, 'CONFIRMED');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 10, 'CONFIRMED');
