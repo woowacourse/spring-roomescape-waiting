@@ -19,7 +19,7 @@ import roomescape.domain.ReservationTime;
 class JdbcReservationTimeRepositoryTest {
 
     @Autowired
-    JdbcReservationTimeRepository jdbcReservationTimeRepository;
+    ReservationTimeRepository reservationTimeRepository;
 
     @DisplayName("예약시간을 저장한다")
     @Test
@@ -28,7 +28,7 @@ class JdbcReservationTimeRepositoryTest {
         ReservationTime reservationTime = ReservationTime.create(LocalTime.parse("10:00"));
 
         // when
-        ReservationTime saved = jdbcReservationTimeRepository.save(reservationTime);
+        ReservationTime saved = reservationTimeRepository.save(reservationTime);
 
         // then
         assertThat(saved.getId()).isNotNull();
@@ -39,10 +39,10 @@ class JdbcReservationTimeRepositoryTest {
     void 예약시간을_id로_조회한다() {
         // given
         ReservationTime reservationTime = ReservationTime.create(LocalTime.parse("10:00"));
-        ReservationTime saved = jdbcReservationTimeRepository.save(reservationTime);
+        ReservationTime saved = reservationTimeRepository.save(reservationTime);
 
         // when
-        Optional<ReservationTime> result = jdbcReservationTimeRepository.findById(saved.getId());
+        Optional<ReservationTime> result = reservationTimeRepository.findById(saved.getId());
 
         // then
         assertThat(result)
@@ -56,13 +56,13 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     void 저장된_모든_예약시간을_조회한다() {
         // given
-        ReservationTime reservationTime1 = jdbcReservationTimeRepository.save(
+        ReservationTime reservationTime1 = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
-        ReservationTime reservationTime2 = jdbcReservationTimeRepository.save(
+        ReservationTime reservationTime2 = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("11:00")));
 
         // when
-        List<ReservationTime> found = jdbcReservationTimeRepository.findAll();
+        List<ReservationTime> found = reservationTimeRepository.findAll();
 
         // then
         assertThat(found)
@@ -74,12 +74,12 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     void 예약시간을_삭제한다() {
         // given
-        ReservationTime reservationTime = jdbcReservationTimeRepository.save(
+        ReservationTime reservationTime = reservationTimeRepository.save(
                 ReservationTime.create(LocalTime.parse("10:00")));
 
         // when
-        jdbcReservationTimeRepository.delete(reservationTime.getId());
-        Optional<ReservationTime> result = jdbcReservationTimeRepository.findById(
+        reservationTimeRepository.delete(reservationTime.getId());
+        Optional<ReservationTime> result = reservationTimeRepository.findById(
                 reservationTime.getId()
         );
 
