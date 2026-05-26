@@ -35,7 +35,7 @@ public class Reservation {
                 .date(this.date)
                 .time(this.time)
                 .theme(this.theme)
-                .status(Status.ACTIVE)
+                .status(this.status)
                 .is_deleted(0L)
                 .createdAt(this.createdAt)
                 .build();
@@ -58,7 +58,7 @@ public class Reservation {
         time.checkValidDateTime(date, clock);
         return Reservation.builder()
                 .id(id)
-                .name(this.name)
+                .name(username)
                 .date(date)
                 .time(time)
                 .theme(theme)
@@ -73,7 +73,7 @@ public class Reservation {
         time.checkValidDateTime(date, clock);
         return Reservation.builder()
                 .id(id)
-                .name(this.name)
+                .name(username)
                 .date(date)
                 .time(time)
                 .theme(theme)

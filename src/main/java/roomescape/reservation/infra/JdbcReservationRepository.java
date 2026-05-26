@@ -51,15 +51,16 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status) "
-                + "VALUES(:name, :date, :timeId, :themeId, :status)";
+        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status, created_at) "
+                + "VALUES(:name, :date, :timeId, :themeId, :status, :createdAt)";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
                 .addValue("date", reservation.getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("themeId", reservation.getTheme().getId())
-                .addValue("status", reservation.getStatus().name());
+                .addValue("status", reservation.getStatus().name())
+                .addValue("createdAt", reservation.getCreatedAt());
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -184,7 +185,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsActiveReservationByThemeAndTime(Long timeId, Long themeId, LocalDate date) {
+    public boolean existsActiveReservationByThemeAndTime(final Long timeId, final Long themeId, final LocalDate date) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND time_id=:timeId AND date=:date AND status='ACTIVE')";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("themeId", themeId, "timeId", timeId, "date", date),
@@ -192,7 +193,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsPendingReservationByName(Long timeId, Long themeId, LocalDate date, String name) {
+    public boolean existsPendingReservationByName(final Long timeId, final Long themeId, final LocalDate date, final String name) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND time_id=:timeId AND date=:date AND status='PENDING' AND name=:name)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql,

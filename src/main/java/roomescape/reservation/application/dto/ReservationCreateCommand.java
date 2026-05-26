@@ -1,6 +1,8 @@
 package roomescape.reservation.application.dto;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
@@ -14,13 +16,14 @@ public record ReservationCreateCommand(
         Long timeId,
         Long themeId
 ) {
-    public Reservation toEntity(final ReservationTime time, final Theme theme) {
+    public Reservation toEntity(final ReservationTime time, final Theme theme, final Clock clock) {
         return Reservation.builder()
-                .name(this.name)
-                .date(this.date)
+                .name(name)
+                .date(date)
                 .time(time)
                 .theme(theme)
                 .status(Status.ACTIVE)
+                .createdAt(LocalDateTime.now(clock))
                 .build();
     }
 }
