@@ -10,6 +10,7 @@ import roomescape.theme.repository.ThemeRepository;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static roomescape.theme.exception.ThemeErrorCode.*;
@@ -48,7 +49,7 @@ public class ThemeService {
             throw new DomainException(THEME_HAS_RESERVATION);
         }
 
-        if (!themeRepository.cancelById(id)) {
+        if (!themeRepository.cancelById(id, LocalDateTime.now(clock))) {
             throw new DomainException(THEME_NOT_FOUND);
         }
     }

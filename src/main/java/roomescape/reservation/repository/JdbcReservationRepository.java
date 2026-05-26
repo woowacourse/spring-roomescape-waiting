@@ -13,7 +13,6 @@ import roomescape.theme.domain.Theme;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -24,7 +23,6 @@ import java.util.Optional;
 public class JdbcReservationRepository implements ReservationRepository {
 
     private final JdbcTemplate jdbcTemplate;
-    private final Clock clock;
 
     @Override
     public Optional<Reservation> findById(Long id) {
@@ -146,12 +144,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean cancelById(Long id) {
+    public boolean cancelById(Long id, LocalDateTime now) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
                 SET deleted_at = ?, delete_token = ?
                 WHERE id = ? AND deleted_at IS NULL
-                """, LocalDateTime.now(clock), id, id);
+                """, now, id, id);
 
         return rowCount == 1;
     }

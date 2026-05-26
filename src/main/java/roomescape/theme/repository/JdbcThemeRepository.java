@@ -10,7 +10,6 @@ import roomescape.theme.domain.Theme;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,7 +28,6 @@ public class JdbcThemeRepository implements ThemeRepository {
             );
 
     private final JdbcTemplate jdbcTemplate;
-    private final Clock clock;
 
     @Override
     public Theme save(Theme theme) {
@@ -94,12 +92,12 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean cancelById(Long id) {
+    public boolean cancelById(Long id, LocalDateTime now) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE theme
                 SET deleted_at = ?
                 WHERE id = ? AND deleted_at IS NULL
-                """, LocalDateTime.now(clock), id);
+                """, now, id);
         return rowCount > 0;
     }
 
