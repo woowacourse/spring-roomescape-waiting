@@ -32,8 +32,8 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("THEME_NOT_FOUND", e.getMessage()));
     }
 
-    @ExceptionHandler(InvalidReservationException.class)
-    public ResponseEntity<ErrorResponse> handle(InvalidReservationException e) {
+    @ExceptionHandler(ExpiredDateTimeException.class)
+    public ResponseEntity<ErrorResponse> handle(ExpiredDateTimeException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_DATE_OR_TIME", e.getMessage()));
     }
