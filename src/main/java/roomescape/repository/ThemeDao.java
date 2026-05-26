@@ -29,7 +29,8 @@ public class ThemeDao {
             (rs, rowNum) -> new AvailableTimeResponse(
                     rs.getLong("id"),
                     rs.getObject("start_at", LocalTime.class),
-                    rs.getBoolean("available")
+                    rs.getBoolean("available"),
+                    rs.getInt("waiting_count")
             );
 
     public ThemeDao(JdbcTemplate jdbcTemplate) {
@@ -74,7 +75,14 @@ public class ThemeDao {
                 SELECT                                                                                                                                                                                                         \s
                       rt.id,                                                                                                                                                                                                     \s
                       rt.start_at,                                                                                                                                                                                               \s
-                      CASE WHEN r.id IS NULL THEN TRUE ELSE FALSE END AS available                                                                                                                                               \s
+                      CASE WHEN r.id IS NULL THEN TRUE ELSE FALSE END AS available,
+                      CASE WHEN r.id IS NULL THEN 0
+                          ELSE (
+                              SELECT COUNT(*) - 1
+                              FROM waiting w
+                              WHERE w.reservation_id = r.id
+                          )
+                      END AS waiting_count
                   FROM reservation_time rt                                                                                                                                                                                       \s
                   LEFT JOIN reservation r                                                                                                                                                                                      \s
                       ON rt.id = r.time_id
