@@ -245,4 +245,177 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(409)
                 .body("message", equalTo("이미 예약된 시간입니다."));
     }
+
+    @DisplayName("빈 슬롯에 대기 신청하면 일반 예약으로 생성된다")
+    @Test
+    void 빈_슬롯에_대기_신청하면_일반_예약_생성() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "브라운");
+        params.put("date", LocalDate.now().plusDays(1).toString());
+        params.put("timeId", 1);
+        params.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @DisplayName("이미 예약된 슬롯에 다른 사람이 대기 신청하면 201")
+    @Test
+    void 예약된_슬롯에_대기_신청_성공() {
+        String futureDate = LocalDate.now().plusDays(2).toString();
+
+        Map<String, Object> reservationParams = new HashMap<>();
+        reservationParams.put("name", "김철수");
+        reservationParams.put("date", futureDate);
+        reservationParams.put("timeId", 4);
+        reservationParams.put("themeId", 2);
+        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "이영희");
+        params.put("date", futureDate);
+        params.put("timeId", 4);
+        params.put("themeId", 2);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(201);
+    }
+
+    @DisplayName("본인이 이미 예약한 슬롯에 대기 신청하면 409")
+    @Test
+    void 본인_예약_슬롯에_대기_신청하면_409() {
+        // data.sql: 김철수가 2026-05-10 time_id=3 theme_id=1 예약 보유
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "김철수");
+        params.put("date", "2026-05-10");
+        params.put("timeId", 3);
+        params.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("이미 예약된 시간입니다."));
+    }
+
+    @DisplayName("이미 대기 신청한 슬롯에 또 신청하면 409")
+    @Test
+    void 중복_대기_신청하면_409() {
+        String futureDate = LocalDate.now().plusDays(3).toString();
+
+        Map<String, Object> reservationParams = new HashMap<>();
+        reservationParams.put("name", "김철수");
+        reservationParams.put("date", futureDate);
+        reservationParams.put("timeId", 5);
+        reservationParams.put("themeId", 3);
+        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "이영희");
+        params.put("date", futureDate);
+        params.put("timeId", 5);
+        params.put("themeId", 3);
+
+        RestAssured.given().contentType(ContentType.JSON).body(params)
+                .when().post("/reservations/waiting")
+                .then().statusCode(201);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("이미 대기 신청한 시간입니다."));
+    }
+
+    @DisplayName("존재하지 않는 시간으로 대기 신청하면 404")
+    @Test
+    void 존재하지_않는_시간으로_대기_신청하면_404() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "이영희");
+        params.put("date", "2026-05-10");
+        params.put("timeId", 999);
+        params.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(404)
+                .body("message", equalTo("존재하지 않는 예약 시간입니다."));
+    }
+
+    @DisplayName("존재하지 않는 테마로 대기 신청하면 404")
+    @Test
+    void 존재하지_않는_테마로_대기_신청하면_404() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "이영희");
+        params.put("date", "2026-05-10");
+        params.put("timeId", 3);
+        params.put("themeId", 999);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(404)
+                .body("message", equalTo("존재하지 않는 테마입니다."));
+    }
+
+    @DisplayName("대기 취소 성공")
+    @Test
+    void 대기_취소_성공() {
+        String futureDate = LocalDate.now().plusDays(4).toString();
+
+        Map<String, Object> reservationParams = new HashMap<>();
+        reservationParams.put("name", "김철수");
+        reservationParams.put("date", futureDate);
+        reservationParams.put("timeId", 6);
+        reservationParams.put("themeId", 4);
+        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
+                .when().post("/reservations").then().statusCode(201);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "이영희");
+        params.put("date", futureDate);
+        params.put("timeId", 6);
+        params.put("themeId", 4);
+
+        long waitingId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/waiting/{id}", waitingId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @DisplayName("대기 목록 조회 성공")
+    @Test
+    void 대기_목록_조회() {
+        RestAssured.given().log().all()
+                .queryParam("username", "이영희")
+                .when().get("/reservations/waiting")
+                .then().log().all()
+                .statusCode(200);
+    }
 }

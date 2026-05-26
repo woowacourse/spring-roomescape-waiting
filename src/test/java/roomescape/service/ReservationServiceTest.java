@@ -114,4 +114,47 @@ class ReservationServiceTest {
                 .doesNotThrowAnyException();
         then(reservationDao).should().findById(999L);
     }
+
+    @Test
+    void saveWaiting_정상_예약_저장() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
+        given(reservationDao.save(any(Reservation.class)))
+                .willReturn(new Reservation(10L, "브라운", futureDate, fixedNow, sampleTime, sampleTheme));
+
+        Reservation result = reservationService.saveWaiting("브라운", futureDate, 1L, 1L);
+
+        assertThat(result.getId()).isEqualTo(10L);
+        assertThat(result.getName()).isEqualTo("브라운");
+        assertThat(result.getDate()).isEqualTo(futureDate);
+    }
+
+    @Test
+    void saveWaiting_이미_대기_신청한_시간이면_예외() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
+        given(reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(false);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운")).willReturn(true);
+
+        assertThatThrownBy(() -> reservationService.saveWaiting("브라운", futureDate, 1L, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("이미 대기 신청한 시간입니다.");
+    }
+
+    @Test
+    void deleteWaiting_정상_삭제() {
+        fixClock();
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        Reservation reservation = new Reservation(1L, "브라운", futureDate, fixedNow.minusHours(1), sampleTime, sampleTheme);
+        given(reservationDao.findByWaitingId(1L)).willReturn(Optional.of(reservation));
+
+        reservationService.deleteWaiting(1L);
+
+        then(reservationDao).should().deleteWaiting(1L);
+    }
 }

@@ -113,6 +113,7 @@ public class ReservationService {
         });
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationWaiting> findAllWaitingByName(String username) {
         return reservationDao.findAllWaitingByName(username);
     }
