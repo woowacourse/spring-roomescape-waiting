@@ -10,6 +10,7 @@ import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
@@ -29,7 +30,7 @@ import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT
 
 @Service
 @Transactional(readOnly = true)
-@RequiredArgsConstructor
+    @RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
@@ -41,8 +42,8 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> readAllByName(String name) {
-        return reservationRepository.findAllByNameOrderByDateAndTime(name);
+    public List<ReservationWithWaitingTurn> readAllByName(String name) {
+        return reservationRepository.findMyReservationsWithWaitingTurn(name);
     }
 
     @Transactional

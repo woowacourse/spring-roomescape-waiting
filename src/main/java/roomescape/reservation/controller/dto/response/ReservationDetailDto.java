@@ -2,6 +2,7 @@ package roomescape.reservation.controller.dto.response;
 
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -14,7 +15,8 @@ public record ReservationDetailDto(
         Long themeId,
         String themeName,
         String themeThumbnailUrl,
-        ReservationStatus status
+        ReservationStatus status,
+        Long waitingTurn
 ) {
 
     public static ReservationDetailDto from(Reservation reservation) {
@@ -26,7 +28,22 @@ public record ReservationDetailDto(
                 reservation.getTheme().getId(),
                 reservation.getTheme().getName(),
                 reservation.getTheme().getThumbnailUrl(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                null
+        );
+    }
+
+    public static ReservationDetailDto from(ReservationWithWaitingTurn reservation) {
+        return new ReservationDetailDto(
+                reservation.id(),
+                reservation.name(),
+                reservation.date(),
+                reservation.startAt(),
+                reservation.themeId(),
+                reservation.themeName(),
+                reservation.themeThumbnailUrl(),
+                reservation.status(),
+                reservation.waitingTurn()
         );
     }
 

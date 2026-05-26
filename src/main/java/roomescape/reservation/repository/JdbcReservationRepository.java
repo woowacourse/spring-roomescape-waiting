@@ -10,9 +10,13 @@ import org.springframework.stereotype.Repository;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -255,4 +259,60 @@ public class JdbcReservationRepository implements ReservationRepository {
         int updatedCount = jdbcTemplate.update(sql, params);
         return updatedCount > 0;
     }
+
+    public List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName) {
+        String sql = """
+            SELECT
+                r.id,
+                r.name,
+                d.date,
+                t.start_at,
+                th.id AS theme_id,
+                th.name AS theme_name,
+                th.thumbnail_url AS theme_thumbnail_url,
+                r.status,
+                r.reserved_at,
+                CASE 
+                    WHEN r.status = 'WAITING' THEN (
+                        SELECT COUNT(*) + 1 
+                        FROM reservation wait
+                        WHERE wait.date_id = r.date_id
+                          AND wait.time_id = r.time_id
+                          AND wait.theme_id = r.theme_id
+                          AND wait.status = 'WAITING'
+                          AND (wait.reserved_at < r.reserved_at 
+                               OR (wait.reserved_at = r.reserved_at AND wait.id < r.id))
+                    )
+                    ELSE NULL 
+                END AS waiting_turn
+            FROM reservation r
+            INNER JOIN reservation_date d ON r.date_id = d.id
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
+            WHERE r.name = :memberName
+            ORDER BY r.reserved_at DESC
+            """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource("memberName", memberName);
+
+        return jdbcTemplate.query(sql, params, reservationWithWaitingTurnRowMapper);
+    }
+
+    private final RowMapper<ReservationWithWaitingTurn> reservationWithWaitingTurnRowMapper = (rs, rowNum) -> {
+        Long waitingTurn = rs.getObject("waiting_turn", Long.class);
+
+        return new ReservationWithWaitingTurn(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getObject("date", LocalDate.class),
+                rs.getObject("start_at", LocalTime.class),
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_thumbnail_url"),
+                ReservationStatus.valueOf(rs.getString("status")),
+                rs.getObject("reserved_at", LocalDateTime.class),
+                waitingTurn
+        );
+    };
+
 }

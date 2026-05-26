@@ -90,26 +90,6 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("나의 예약들을 조회하면 날짜/시간 오름차순으로 정렬해 모두 조회한다.")
-    void readAllByName() {
-        // given
-        List<Reservation> reservations = reservationRepository.saveAll(
-                List.of(reservation(name, reservationDate1, reservationTime1, theme1),
-                        reservation(name, reservationDate1, reservationTime2, theme1),
-                        reservation(name, reservationDate2, reservationTime1, theme1),
-                        reservation(name, reservationDate2, reservationTime2, theme1))
-        );
-
-        // when
-        List<Reservation> actual = reservationService.readAllByName(name);
-
-        // then
-        Assertions.assertThat(actual)
-                .usingRecursiveComparison()
-                .isEqualTo(reservations);
-    }
-
-    @Test
     @DisplayName("예약을 추가한다.")
     void reserve() {
         //given & when

@@ -20,6 +20,15 @@ public class ReservationFixture {
         return Reservation.create(name, date, time, theme, LocalDateTime.now());
     }
 
+    public static Reservation waitReservation(
+            String name,
+            ReservationDate date,
+            ReservationTime time,
+            Theme theme
+    ) {
+        return Reservation.wait(name, date, time, theme, LocalDateTime.now());
+    }
+
     public static Reservation canceledReservation(
             String name,
             ReservationDate date,

@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 import java.util.List;
 import java.util.Optional;
@@ -26,5 +27,7 @@ public interface ReservationRepository {
     boolean updateStatus(Reservation reservation);
 
     boolean updateSchedule(Reservation reservation);
+
+    List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName);
 
 }

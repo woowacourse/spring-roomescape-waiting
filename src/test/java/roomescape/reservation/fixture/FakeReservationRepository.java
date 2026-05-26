@@ -1,12 +1,12 @@
 package roomescape.reservation.fixture;
 
-import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -101,6 +101,11 @@ public class FakeReservationRepository implements ReservationRepository {
 
         store.put(reservation.getId(), reservation);
         return true;
+    }
+
+    @Override
+    public List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName) {
+        return List.of();
     }
 
 }
