@@ -26,7 +26,8 @@ public class ReservationRestController {
     private final ReservationService reservationService;
     private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationRestController(ReservationService reservationService, ReservationWaitingService reservationWaitingService) {
+    public ReservationRestController(ReservationService reservationService,
+                                     ReservationWaitingService reservationWaitingService) {
         this.reservationService = reservationService;
         this.reservationWaitingService = reservationWaitingService;
     }
@@ -54,7 +55,8 @@ public class ReservationRestController {
     }
 
     @PatchMapping("/reservations/{id}")
-    public ResponseEntity<ReservationResponse> update(@PathVariable Long id, @RequestBody ReservationRequest reservationReq) {
+    public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
+                                                      @RequestBody ReservationRequest reservationReq) {
         ReservationResponse updatedReservation = reservationService.update(id, reservationReq);
         return ResponseEntity.ok(updatedReservation);
     }
@@ -66,8 +68,15 @@ public class ReservationRestController {
     }
 
     @PostMapping("/reservations/waitings")
-    public ResponseEntity<ReservationWaitingResponse> create(@RequestBody ReservationWaitingRequest reservationWaitingReq) {
+    public ResponseEntity<ReservationWaitingResponse> waitingCreate(
+            @RequestBody ReservationWaitingRequest reservationWaitingReq) {
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingReq);
         return new ResponseEntity<>(reservationWaitingResponse, HttpStatus.CREATED);
+    }
+
+    @DeleteMapping("/reservations/waitings/{id}")
+    public ResponseEntity<Void> waitingDelete(@PathVariable Long id) {
+        reservationWaitingService.delete(id);
+        return ResponseEntity.noContent().build();
     }
 }
