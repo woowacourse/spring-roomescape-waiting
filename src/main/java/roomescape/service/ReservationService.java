@@ -1,0 +1,138 @@
+package roomescape.service;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.springframework.dao.OptimisticLockingFailureException;
+import org.springframework.stereotype.Service;
+import roomescape.common.exception.ConflictException;
+import roomescape.common.exception.ForbiddenException;
+import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.UnprocessableEntityException;
+import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.UserName;
+import roomescape.domain.reservation.theme.Theme;
+import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.response.ReservationResponse;
+
+@Service
+public class ReservationService {
+    private final ReservationDao reservationDao;
+    private final ReservationTimeDao reservationTimeDao;
+    private final ThemeDao themeDao;
+    private final Clock clock;
+
+    public ReservationService(
+            ReservationDao reservationDao,
+            ReservationTimeDao reservationTimeDao,
+            ThemeDao themeDao,
+            Clock clock
+    ) {
+        this.reservationDao = reservationDao;
+        this.reservationTimeDao = reservationTimeDao;
+        this.themeDao = themeDao;
+        this.clock = clock;
+    }
+
+    public List<ReservationResponse> findAll() {
+        List<Reservation> reservations = reservationDao.findAll();
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public List<ReservationResponse> findAllByUserName(String userName) {
+        List<Reservation> reservations = reservationDao.findAllByUserName(userName);
+
+        return reservations.stream()
+                .map(ReservationResponse::from)
+                .toList();
+    }
+
+    public ReservationResponse save(ReservationRequest request) {
+        Reservation reservation = convertToReservation(null, request);
+
+        Reservation saved = reservationDao.save(reservation);
+
+        return ReservationResponse.from(saved);
+    }
+
+    public ReservationResponse updateDateTime(Long id, ReservationRequest request) {
+        Reservation origin = reservationDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("변경하려는 예약이 존재하지 않습니다."));
+
+        if (!request.name().equals(origin.getName().value())) {
+            throw new ForbiddenException("다른 사람의 예약은 변경할 수 없습니다.");
+        }
+
+        Reservation modified = convertToReservation(id, request);
+
+        boolean isSuccessful = reservationDao.update(modified);
+
+        if (!isSuccessful) {
+            throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
+        }
+
+        return ReservationResponse.from(modified);
+    }
+
+    private Reservation convertToReservation(Long id, ReservationRequest request) {
+        ReservationTime time = reservationTimeDao.findTimeById(request.timeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
+
+        Theme theme = themeDao.findThemeById(request.themeId())
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+
+        validateAvailability(request.date(), time, theme);
+
+        return new Reservation(
+                id,
+                UserName.parse(request.name()),
+                request.date(),
+                time,
+                theme
+        );
+    }
+
+    private void validateAvailability(LocalDate date, ReservationTime time, Theme theme) {
+        validatePastTime(date, time);
+        validateDuplicate(date, time, theme);
+    }
+
+    private void validatePastTime(LocalDate date, ReservationTime time) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDateTime requestDateTime = LocalDateTime.of(date, time.getStartAt());
+        if (requestDateTime.isBefore(now)) {
+            throw new UnprocessableEntityException("이미 지난 시간입니다.");
+        }
+    }
+
+    private void validateDuplicate(LocalDate date, ReservationTime time, Theme theme) {
+        if (reservationDao.existsBy(date, theme, time)) {
+            throw new ConflictException("이미 존재하는 예약 건입니다.");
+        }
+    }
+
+    public void delete(Long id) {
+        reservationDao.delete(id);
+    }
+
+    public void delete(Long id, String userName) {
+        Reservation origin = reservationDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
+
+        if (!userName.equals(origin.getName().value())) {
+            throw new ForbiddenException("다른 사람의 예약은 삭제할 수 없습니다.");
+        }
+
+        validatePastTime(origin.getDate(), origin.getTime());
+        
+        reservationDao.delete(id);
+    }
+}
