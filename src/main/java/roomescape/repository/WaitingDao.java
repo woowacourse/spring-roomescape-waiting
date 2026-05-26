@@ -15,6 +15,7 @@ import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 
 @Repository
 public class WaitingDao {
@@ -100,5 +101,28 @@ public class WaitingDao {
                 .stream()
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다."));
+    }
+
+    public List<Waiting> findAllByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+        String sql = """
+                SELECT
+                    waiting.id as waiting_id,
+                    waiting.name,
+                    waiting.date,
+                    time.id as time_id,
+                    time.start_at as time_value,
+                    theme.id as theme_id,
+                    theme.name as theme_name,
+                    theme.thumbnail_url as thumbnail_url,
+                    theme.description as theme_description,
+                    waiting.created_at as created_at
+                FROM waiting as waiting
+                INNER JOIN reservation_time as time
+                ON waiting.time_id = time.id
+                INNER JOIN theme as theme
+                ON waiting.theme_id = theme.id
+                WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId);
     }
 }

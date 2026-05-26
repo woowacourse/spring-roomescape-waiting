@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.PastReservationException;
 import roomescape.exception.ResourceNotFoundException;
@@ -52,7 +52,7 @@ public class ReservationCommandService {
             throw new PastReservationException("지나간 시간에는 예약을 생성할 수 없습니다.");
         }
         if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new DuplicateReservationException("해당 날짜와 시간에 이미 예약이 존재합니다.");
+            throw new DuplicateException("해당 날짜와 시간에 이미 예약이 존재합니다.");
         }
         return reservationDao.save(name, date, timeId, themeId);
     }
@@ -77,7 +77,7 @@ public class ReservationCommandService {
         Reservation current = reservationDao.findById(reservationId);
         long themeId = current.reservationTheme().id();
         if (reservationDao.existsByDateAndTimeIdAndThemeIdExcluding(newDate, newTimeId, themeId, reservationId)) {
-            throw new DuplicateReservationException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
+            throw new DuplicateException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
         }
         return reservationDao.updateDateAndTime(reservationId, newDate, newTimeId);
     }
