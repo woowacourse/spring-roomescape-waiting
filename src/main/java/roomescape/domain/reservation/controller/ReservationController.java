@@ -70,7 +70,18 @@ public class ReservationController {
 
     @PostMapping("/waitings")
     public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
-            @Valid @RequestBody ReservationCreateRequestDto requestDto) {
+        @Valid @RequestBody ReservationCreateRequestDto requestDto) {
         return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.saveWaitingReservation(requestDto));
+    }
+
+    @PatchMapping("/{id}/waitings/cancel")
+    public ResponseEntity<ReservationCancelResponseDto> cancelWaitingReservation(
+        @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
+        @RequestParam
+        @NotBlank(message = "예약자명은 필수입니다.")
+        @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")
+        String name
+    ) {
+        return ResponseEntity.ok(reservationService.cancelWaitingReservation(id, name));
     }
 }

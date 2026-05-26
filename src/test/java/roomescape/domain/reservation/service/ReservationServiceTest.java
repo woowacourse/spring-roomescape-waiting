@@ -24,6 +24,7 @@ import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationStatus;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.Status;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.dto.response.ReservationThemeResponseDto;
@@ -573,6 +574,100 @@ class ReservationServiceTest {
                             .extracting(ParameterErrorResponseDto::message)
                             .containsExactly("존재 하지 않는 시간대입니다.", "존재 하지 않는 테마입니다.");
                     });
+            }
+        }
+    }
+
+    @Nested
+    class CancelWaitingReservationTest {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 성공() {
+                // given
+                LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+                Time time = timeRepository.save(Time.create(LocalTime.of(12, 0)));
+                Theme theme = themeRepository.save(
+                    Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto("제이슨", date, time.getId(),
+                    theme.getId());
+                ReservationCreateResponseDto savedReservation = reservationService.saveWaitingReservation(request);
+
+                // when
+                ReservationCancelResponseDto actual = reservationService.cancelWaitingReservation(
+                    savedReservation.id(), "제이슨");
+
+                // then
+                assertThat(actual.id()).isEqualTo(savedReservation.id());
+                assertThat(actual.name()).isEqualTo("제이슨");
+                assertThat(actual.date()).isEqualTo(date);
+                assertThat(actual.timeId()).isEqualTo(time.getId());
+                assertThat(actual.themeId()).isEqualTo(theme.getId());
+                assertThat(reservationRepository.findReservationByIdAndDeletedAtIsNull(savedReservation.id()))
+                    .get()
+                    .extracting(Reservation::getStatus)
+                    .isEqualTo(Status.CANCELED);
+            }
+        }
+
+        @Nested
+        class Failed {
+
+            @Test
+            void 예약_ID가_존재하지_않으면_예외가_발생한다() {
+                // when & then
+                assertThatThrownBy(() -> reservationService.cancelWaitingReservation(999L, "제이슨"))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("예약을 찾을 수 없습니다.");
+            }
+
+            @Test
+            void 조회한_예약과_예약자_이름이_다르면_예외가_발생한다() {
+                // given
+                LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+                Time time = timeRepository.save(Time.create(LocalTime.of(12, 0)));
+                Theme theme = themeRepository.save(
+                    Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto("제이슨", date, time.getId(),
+                    theme.getId());
+                ReservationCreateResponseDto savedReservation = reservationService.saveWaitingReservation(request);
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.cancelWaitingReservation(savedReservation.id(), "시오"))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("예약을 취소할 권한이 없습니다.");
+            }
+
+            @Test
+            void 대기중인_예약이_아니면_예외가_발생한다() {
+                // given
+                LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+                Time time = timeRepository.save(Time.create(LocalTime.of(12, 0)));
+                Theme theme = themeRepository.save(
+                    Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                Reservation savedReservation = reservationRepository.save(Reservation.create("제이슨", date, time, theme));
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.cancelWaitingReservation(savedReservation.getId(), "제이슨"))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("대기중인 예약이 아닙니다.");
+            }
+
+            @Test
+            void 지난_대기_예약이면_예외가_발생한다() {
+                // given
+                Time time = timeRepository.save(Time.create(LocalTime.of(12, 0)));
+                Theme theme = themeRepository.save(
+                    Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                Reservation savedReservation = reservationRepository.save(
+                    Reservation.create("제이슨", LocalDate.now(fixedClock).minusDays(1), time, theme).toWaiting());
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.cancelWaitingReservation(savedReservation.getId(), "제이슨"))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("지난 예약은 취소할 수 없습니다.");
             }
         }
     }

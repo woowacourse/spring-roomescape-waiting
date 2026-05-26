@@ -147,7 +147,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 theme_id = :themeId,
                 status = :status
             WHERE id = :id
-              AND status = 'ACTIVE'
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
@@ -260,11 +259,11 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
 
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
-                "date", reservation.getDate(),
-                "name", reservation.getName(),
-                "timeId", reservation.getTime().getId(),
-                "themeId", reservation.getTheme().getId(),
-                "status", reservation.getStatus().name()
+            "date", reservation.getDate(),
+            "name", reservation.getName(),
+            "timeId", reservation.getTime().getId(),
+            "themeId", reservation.getTheme().getId(),
+            "status", reservation.getStatus().name()
         ));
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);

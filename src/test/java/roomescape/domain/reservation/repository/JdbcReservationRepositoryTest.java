@@ -373,40 +373,6 @@ class JdbcReservationRepositoryTest {
                 )
                 .containsExactly("예약자2", LocalDate.of(2026, 5, 2), updateTime.getId(), updateTheme.getId());
         }
-
-        @Test
-        void 이미_취소된_예약이면_예외가_발생한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Time updateTime = timeRepository.save(Time.create(LocalTime.of(11, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Theme updateTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
-            reservationRepository.update(reservation.cancel());
-            Reservation updateReservation = Reservation.reconstruct(reservation.getId(), "예약자2",
-                LocalDate.of(2026, 5, 2), updateTime, updateTheme, Status.ACTIVE);
-
-            // when & then
-            assertThatThrownBy(() -> reservationRepository.update(updateReservation))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("예약을 찾을 수 없습니다.");
-        }
-
-        @Test
-        void 수정하려는_예약이_이미_삭제되었으면_예외가_발생한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
-            reservationRepository.deleteReservationById(reservation.getId());
-
-            // when & then
-            assertThatThrownBy(() -> reservationRepository.update(reservation))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("예약을 찾을 수 없습니다.");
-        }
     }
 
     @Nested
@@ -485,7 +451,8 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             reservationRepository.save(Reservation.create("예약자", date, time, theme));
-            Reservation differentDate = Reservation.reconstruct(null, "예약자", date.plusDays(1), time, theme, Status.ACTIVE);
+            Reservation differentDate = Reservation.reconstruct(null, "예약자", date.plusDays(1), time, theme,
+                Status.ACTIVE);
 
             // when
             boolean actual = reservationRepository.existsReservation(differentDate);

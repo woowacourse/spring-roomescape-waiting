@@ -239,4 +239,24 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
         }
     }
+
+    @Transactional
+    public ReservationCancelResponseDto cancelWaitingReservation(Long id, String name) {
+        Reservation reservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
+            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+
+        if (!reservation.getName().equals(name)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
+        }
+
+        if (reservation.getStatus() != Status.WAITING) {
+            throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
+        }
+
+        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
+        }
+
+        return ReservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+    }
 }
