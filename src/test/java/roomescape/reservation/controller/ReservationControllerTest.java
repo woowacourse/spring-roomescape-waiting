@@ -11,7 +11,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import roomescape.common.exception.GlobalErrorCode;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationListResponse;
@@ -64,7 +63,7 @@ class ReservationControllerTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = Reservation.of(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
 
         given(reservationService.create(anyString(), any(), anyLong(), anyLong()))
                 .willReturn(reservation);
@@ -188,7 +187,7 @@ class ReservationControllerTest {
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = new Reservation(1L, guestName, LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = Reservation.of(1L, guestName, LocalDate.of(2023, 8, 5), time, theme);
 
         given(reservationService.findByGuestName(guestName))
                 .willReturn(List.of(reservation));
@@ -227,7 +226,7 @@ class ReservationControllerTest {
         Long reservationId = 1L;
         ReservationTime time = new ReservationTime(2L, LocalTime.of(12, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = new Reservation(reservationId, "브라운", LocalDate.of(2023, 8, 10), time, theme);
+        Reservation reservation = Reservation.of(reservationId, "브라운", LocalDate.of(2023, 8, 10), time, theme);
 
         given(reservationService.editDateTime(anyLong(), any(), anyLong(), anyString()))
                 .willReturn(reservation);

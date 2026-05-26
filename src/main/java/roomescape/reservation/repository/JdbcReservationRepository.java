@@ -212,7 +212,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
         );
 
-        return new Reservation(
+        return Reservation.of(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("guest_name"),
                 resultSet.getDate("date").toLocalDate(),

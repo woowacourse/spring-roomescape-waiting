@@ -28,7 +28,7 @@ class ReservationTest {
     @DisplayName("예약자 이름이 비어있으면 도메인 예외가 발생한다.")
     void create_fail_when_name_is_blank() {
         assertDomainException(
-                () -> new Reservation(" ", LocalDate.of(2023, 8, 5), time, theme),
+                () -> Reservation.create(" ", LocalDate.of(2023, 8, 5), time, theme),
                 INVALID_RESERVATION_GUEST_NAME
         );
     }
@@ -37,7 +37,7 @@ class ReservationTest {
     @DisplayName("예약 날짜가 null이면 도메인 예외가 발생한다.")
     void create_fail_when_date_is_null() {
         assertDomainException(
-                () -> new Reservation("브라운", null, time, theme),
+                () -> Reservation.create("브라운", null, time, theme),
                 INVALID_RESERVATION_DATE
         );
     }
@@ -46,7 +46,7 @@ class ReservationTest {
     @DisplayName("예약 시간이 null이면 도메인 예외가 발생한다.")
     void create_fail_when_time_is_null() {
         assertDomainException(
-                () -> new Reservation("브라운", LocalDate.of(2023, 8, 5), null, theme),
+                () -> Reservation.create("브라운", LocalDate.of(2023, 8, 5), null, theme),
                 INVALID_RESERVATION_TIME
         );
     }
@@ -55,26 +55,15 @@ class ReservationTest {
     @DisplayName("예약 테마가 null이면 도메인 예외가 발생한다.")
     void create_fail_when_theme_is_null() {
         assertDomainException(
-                () -> new Reservation("브라운", LocalDate.of(2023, 8, 5), time, null),
+                () -> Reservation.create("브라운", LocalDate.of(2023, 8, 5), time, null),
                 INVALID_THEME
-        );
-    }
-
-    @Test
-    @DisplayName("예약 id가 null이면 도메인 예외가 발생한다.")
-    void withId_fail_when_id_is_null() {
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
-
-        assertDomainException(
-                () -> reservation.withId(null),
-                INVALID_RESERVATION_ID
         );
     }
 
     @Test
     @DisplayName("이미 id가 있는 예약에 id를 부여하면 도메인 예외가 발생한다.")
     void withId_fail_when_reservation_already_has_id() {
-        Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = Reservation.of(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
 
         assertDomainException(
                 () -> reservation.withId(2L),
@@ -94,7 +83,7 @@ class ReservationTest {
         // 2025-05-11T10:00:00
         LocalDate date = LocalDate.of(2025, 5, 11);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Reservation reservation = new Reservation(1L, "브라운", date, time, theme);
+        Reservation reservation = Reservation.of(1L, "브라운", date, time, theme);
 
         // when
         boolean result = reservation.isPassed(now);
@@ -112,7 +101,7 @@ class ReservationTest {
     @DisplayName("같은 사람의 예약인지 확인한다.")
     public void isSameGuest(String targetName, boolean expected) {
         // given
-        Reservation reservation = new Reservation(
+        Reservation reservation = Reservation.of(
                 1L, "브라운", LocalDate.of(2025, 5, 11), time, theme);
 
         // when

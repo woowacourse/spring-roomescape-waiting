@@ -52,9 +52,9 @@ class AdminReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
-                new Reservation(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme),
-                new Reservation(2L, "포비", LocalDate.of(2023, 8, 6), time, theme),
-                new Reservation(3L, "조이", LocalDate.of(2023, 8, 7), time, theme)
+                Reservation.of(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme),
+                Reservation.of(2L, "포비", LocalDate.of(2023, 8, 6), time, theme),
+                Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme)
         );
         given(reservationService.findAllReservations(1, 20)).willReturn(reservations);
 
@@ -83,7 +83,7 @@ class AdminReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
-                new Reservation(3L, "조이", LocalDate.of(2023, 8, 7), time, theme)
+                Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme)
         );
         given(reservationService.findAllReservations(2, 2)).willReturn(reservations);
 

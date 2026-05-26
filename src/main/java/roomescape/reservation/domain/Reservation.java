@@ -25,11 +25,7 @@ public class Reservation {
     private final Theme theme;
     private final LocalDateTime deletedAt;
 
-    public Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        this(id, guestName, date, time, theme, null);
-    }
-
-    public Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime deletedAt) {
+    private Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime deletedAt) {
         validateReservation(guestName, date, time, theme);
         this.id = id;
         this.guestName = guestName;
@@ -39,15 +35,28 @@ public class Reservation {
         this.deletedAt = deletedAt;
     }
 
-    public Reservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, guestName, date, time, theme);
+    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+        return new Reservation(null, guestName, date, time, theme, null);
     }
 
-    public Reservation withId(Long id) {
-        requireNonNull(id, new DomainException(INVALID_RESERVATION_ID));
-        require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
-
+    public static Reservation of(
+            long id,
+            String guestName,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            LocalDateTime deletedAt
+    ) {
         return new Reservation(id, guestName, date, time, theme, deletedAt);
+    }
+
+    public static Reservation of(long id, String guestName, LocalDate date, ReservationTime time, Theme theme) {
+        return of(id, guestName, date, time, theme, null);
+    }
+
+    public Reservation withId(long id) {
+        require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
+        return of(id, guestName, date, time, theme, deletedAt);
     }
 
     private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
@@ -80,8 +89,8 @@ public class Reservation {
 
     public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime) {
 
-        return new Reservation(
-                id, guestName, changedDate, changedTime, theme
+        return of(
+                id, guestName, changedDate, changedTime, theme, deletedAt
         );
     }
 }

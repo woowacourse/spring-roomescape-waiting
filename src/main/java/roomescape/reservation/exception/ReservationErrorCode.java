@@ -6,7 +6,6 @@ import roomescape.common.exception.ErrorPolicy;
 import static org.springframework.http.HttpStatus.*;
 
 public enum ReservationErrorCode implements ErrorPolicy {
-    INVALID_RESERVATION_ID("예약 id는 비어 있을 수 없습니다.", BAD_REQUEST),
     INVALID_RESERVATION_GUEST_NAME("예약자 이름은 비어 있을 수 없습니다.", BAD_REQUEST),
     INVALID_RESERVATION_DATE("예약 날짜는 비어 있을 수 없습니다.", BAD_REQUEST),
     RESERVATION_ALREADY_HAS_ID("이미 식별자가 존재하는 예약입니다.", CONFLICT),

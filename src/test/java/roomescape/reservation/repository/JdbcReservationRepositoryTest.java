@@ -167,7 +167,7 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = new Reservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = Reservation.create("브라운", LocalDate.of(2023, 8, 5), time, theme);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -442,7 +442,7 @@ class JdbcReservationRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return new Reservation(getGeneratedId(keyHolder), guestName, date, time, theme);
+        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme);
     }
 
     private Reservation insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
@@ -463,7 +463,7 @@ class JdbcReservationRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return new Reservation(getGeneratedId(keyHolder), guestName, date, time, theme);
+        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme);
     }
 
     private Map<String, Object> findDateAndTimeIdById(Long id) {
