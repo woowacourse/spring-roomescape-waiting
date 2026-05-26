@@ -1,3 +1,67 @@
+# API 명세서
+
+## 예약 (1단계)
+
+### 예약 생성
+- **POST** `/reservations`
+- Request Body
+  ```json
+  {
+    "name": "홍길동",
+    "date": "2025-06-01",
+    "timeId": 1,
+    "themeId": 1
+  }
+  ```
+- Response `201 Created`
+  ```json
+  {
+    "id": 1,
+    "name": "홍길동",
+    "date": "2025-06-01",
+    "time": { "id": 1, "startAt": "10:00" },
+    "theme": { "id": 1, "name": "테마명", "description": "설명", "thumbnailUrl": "https://..." },
+    "status": "예약"
+  }
+  ```
+  > 슬롯이 이미 예약된 경우 `status`가 `"대기"`로 반환됩니다.
+
+### 예약 / 대기 취소
+- **DELETE** `/reservations/{id}`
+- Response `204 No Content`
+
+---
+
+## 내 예약 목록 조회 (2단계)
+
+### 내 예약 + 대기 목록 조회
+- **GET** `/reservations/mine`
+- Response `200 OK`
+  ```json
+  [
+    {
+      "id": 1,
+      "name": "홍길동",
+      "date": "2025-06-01",
+      "time": { "id": 1, "startAt": "10:00" },
+      "theme": { "id": 1, "name": "테마명", "description": "설명", "thumbnailUrl": "https://..." },
+      "status": "예약",
+      "waitingOrder": null
+    },
+    {
+      "id": 2,
+      "name": "홍길동",
+      "date": "2025-06-02",
+      "time": { "id": 2, "startAt": "14:00" },
+      "theme": { "id": 1, "name": "테마명", "description": "설명", "thumbnailUrl": "https://..." },
+      "status": "대기",
+      "waitingOrder": 2
+    }
+  ]
+  ```
+
+---
+
 # 기능 구현 목록
 
 방탈출 사용자 예약 미션까지는 한 슬롯(날짜+시간+테마)에 한 명만 예약할 수 있었고, 이미 예약된 슬롯은 사용자에게 보이지 않았다.  
