@@ -5,6 +5,7 @@ import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -15,6 +16,8 @@ import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.waiting.dto.MyWaitingResult;
+import roomescape.domain.waiting.dto.MyWaitingsResponse;
 
 @JdbcTest
 @Import(WaitingRepository.class)
@@ -143,6 +146,22 @@ class WaitingRepositoryTest {
             waitingRepository.deleteById(saved.getId());
 
             assertThat(waitingRepository.existsById(saved.getId())).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("이름으로 대기 조회")
+    class FindByName {
+
+        @Test
+        void 이름으로_대기와_순번을_조회할_수_있다() {
+            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
+            Waiting saved = waitingRepository.save(waiting);
+
+            List<MyWaitingResult> myWaitingResults = waitingRepository.findByName(saved.getName());
+
+            assertThat(myWaitingResults).size().isEqualTo(1);
+            assertThat(myWaitingResults.getFirst().waitingNumber()).isEqualTo(1);
         }
     }
 }

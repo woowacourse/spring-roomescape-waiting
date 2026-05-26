@@ -1,5 +1,7 @@
 package roomescape.domain.waiting;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.*;
 
 import io.restassured.RestAssured;
@@ -203,6 +205,37 @@ class WaitingControllerTest {
         return jdbcTemplate.queryForObject(
                 "SELECT MAX(id) FROM waiting", Long.class
         );
+    }
+
+    @Test
+    void 나의_예약_대기_조회_정상_동작_테스트() {
+        Long themeId = insertTheme("테마1");
+        Long timeId = insertTime("10:00", "11:00");
+        insertWaiting("유저2", "2099-12-31", timeId, themeId);
+        insertWaiting("유저1", "2099-12-31", timeId, themeId);
+        insertWaiting("유저1", "2099-12-30", timeId, themeId);
+        insertWaiting("유저2", "2099-12-30", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations/waiting/mine?name=유저1")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(2))
+                .body("waitings[0].name", is("유저1"))
+                .body("waitings[0].themeName", is("테마1"))
+                .body("waitings[0].waitingNumber", is(2))
+                .body("waitings[1].name", is("유저1"))
+                .body("waitings[1].themeName", is("테마1"))
+                .body("waitings[1].waitingNumber", is(1));
+    }
+
+    @Test
+    void 나의_예약_조회_예약이_없는경우_빈_리스트_반환_테스트() {
+        RestAssured.given().log().all()
+                .when().get("/reservations/waiting/mine?name=없는유저")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings", is(empty()));
     }
 
 }

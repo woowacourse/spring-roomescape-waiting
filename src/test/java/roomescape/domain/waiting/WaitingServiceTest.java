@@ -1,5 +1,6 @@
 package roomescape.domain.waiting;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -9,6 +10,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -18,12 +20,13 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.dto.ReservationRequest;
+import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.waiting.dto.MyWaitingResult;
+import roomescape.domain.waiting.dto.MyWaitingsResponse;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
@@ -135,6 +138,40 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.deleteWaiting(99L))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("errorCode").isEqualTo(ErrorCode.WAITING_ID_NOT_FOUND);
+        }
+    }
+
+    @Nested
+    @DisplayName("본인 예약 대기 조회 테스트")
+    class GetMyReservations {
+
+        @Test
+        void 이름으로_조회() {
+            MyWaitingResult myWaitingResult = new MyWaitingResult(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), theme.getName(), 1);
+            when(waitingRepository.findByName("유저1")).thenReturn(List.of(myWaitingResult));
+
+            MyWaitingsResponse response = waitingService.getMyWaitings("유저1");
+
+            assertAll(
+                    () -> assertThat(response.waitings()).hasSize(1),
+                    () -> {
+                        assertNotNull(response.waitings());
+                        assertThat(response.waitings().getFirst().name()).isEqualTo("유저1");
+                    },
+                    () -> {
+                        assertNotNull(response.waitings());
+                        assertThat(response.waitings().getFirst().themeName()).isEqualTo("테마1");
+                    }
+            );
+        }
+
+        @Test
+        void 결과가_없으면_빈_리스트() {
+            when(waitingRepository.findByName("없는유저")).thenReturn(List.of());
+
+            MyWaitingsResponse response = waitingService.getMyWaitings("없는유저");
+
+            assertThat(response.waitings()).isEmpty();
         }
     }
 }
