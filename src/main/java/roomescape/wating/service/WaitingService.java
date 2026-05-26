@@ -29,7 +29,6 @@ public class WaitingService {
     public long create(final WaitingCreateRequest request) {
         final Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(ThemeNotFoundException::new);
-
         final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(ReservationTimeNotFoundException::new);
 
@@ -40,7 +39,6 @@ public class WaitingService {
                 theme,
                 LocalDateTime.now(clock)
         );
-
         try {
             return waitingRepository.save(waiting);
         } catch (DuplicateKeyException exception) {
