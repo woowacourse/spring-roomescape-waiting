@@ -47,7 +47,7 @@ CREATE TABLE reservation (
 );
 
 CREATE UNIQUE INDEX uq_waiting_reservation
-ON reservation (active_waiting, name, date, time_id, theme_id)
+ON reservation (active_waiting, name, date, time_id, theme_id);
 
 CREATE UNIQUE INDEX uq_active_reservation
 ON reservation (active_date, active_time_id, active_theme_id);
