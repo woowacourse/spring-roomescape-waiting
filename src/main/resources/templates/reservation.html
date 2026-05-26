@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomescape Reservation</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="page page-reservation">
+<main class="shell">
+    <section class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">Roomescape Club</p>
+            <h1>테마를 고르고, 시간을 고르고, 바로 예약하세요.</h1>
+            <p class="hero-text">
+                날짜와 테마를 선택하면 예약 가능한 시간만 골라서 보여줍니다.
+                같은 시간이라도 테마가 다르면 별도로 예약할 수 있습니다.
+            </p>
+            <div class="hero-actions">
+                <a class="button ghost" href="#popular-themes">인기 테마 보기</a>
+                <a class="button primary" href="/admin">관리자 대시보드</a>
+            </div>
+        </div>
+        <div class="hero-panel">
+            <div class="stat-card">
+                <span class="stat-label">운영 중인 테마</span>
+                <strong class="stat-value" th:text="${#lists.size(themes)}">0</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">주간 인기 테마</span>
+                <strong class="stat-value" th:text="${#lists.size(popularThemes)}">0</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="content-grid">
+        <div class="panel">
+            <div class="panel-header">
+                <p class="eyebrow">Reservation</p>
+                <h2>예약 만들기</h2>
+            </div>
+
+            <div id="reservation-feedback" class="feedback" hidden></div>
+
+            <form id="reservation-form" class="stack-form">
+                <label class="field">
+                    <span>예약자 이름</span>
+                    <input id="reservation-name" name="name" type="text" placeholder="예: 포비" required>
+                </label>
+
+                <label class="field">
+                    <span>예약 날짜</span>
+                    <input id="reservation-date" name="date" type="date" th:value="${today}" th:attr="min=${today}" required>
+                </label>
+
+                <label class="field">
+                    <span>테마 선택</span>
+                    <select id="theme-select" name="themeId" required>
+                        <option value="">테마를 선택하세요</option>
+                        <option th:each="theme : ${themes}"
+                                th:value="${theme.id}"
+                                th:text="${theme.name}">
+                            미드나잇 시그널
+                        </option>
+                    </select>
+                </label>
+
+                <div class="field">
+                    <span>예약 가능 시간</span>
+                    <div id="availability-summary" class="hint">날짜와 테마를 선택하면 예약 가능한 시간이 표시됩니다.</div>
+                    <div id="available-times" class="time-grid empty-state">
+                        아직 조회된 시간이 없습니다.
+                    </div>
+                </div>
+
+                <button id="reservation-submit" class="button primary" type="submit" disabled>예약 확정</button>
+            </form>
+            <hr style="margin: 2.5rem 0 1.5rem; border: none; border-top: 1px solid #e2e8f0;">
+            <div class="panel-header">
+                <p class="eyebrow">My Reservations</p>
+                <h2>내 예약 확인 및 취소</h2>
+            </div>
+
+            <div id="check-feedback" class="feedback" hidden></div>
+
+            <form id="check-form" class="stack-form" style="margin-bottom: 1rem;">
+                <label class="field">
+                    <span>예약자 이름</span>
+                    <div style="display: flex; gap: 0.5rem;">
+                        <input id="check-name" type="text" placeholder="조회할 이름을 입력하세요" required style="flex: 1;">
+                        <button type="submit" class="button secondary">조회</button>
+                    </div>
+                </label>
+            </form>
+
+            <div id="my-reservation-list" class="empty-state" style="padding: 1rem; background: #f8fafc; border-radius: 8px;">
+                이름을 입력하고 조회 버튼을 눌러주세요.
+            </div>
+        </div>
+
+        <div class="panel">
+            <div class="panel-header">
+                <p class="eyebrow">Themes</p>
+                <h2>전체 테마</h2>
+            </div>
+
+            <div class="theme-grid">
+                <article class="theme-card" th:each="theme : ${themes}">
+                    <img th:src="${theme.thumbnailImageUrl}" th:alt="${theme.name}" loading="lazy">
+                    <div class="theme-card-body">
+                        <div class="theme-card-head">
+                            <strong th:text="${theme.name}">미드나잇 시그널</strong>
+                            <span th:text="${theme.durationTime}">01:30</span>
+                        </div>
+                        <p th:text="${theme.description}">설명</p>
+                    </div>
+                </article>
+                <div class="empty-card" th:if="${#lists.isEmpty(themes)}">
+                    등록된 테마가 없습니다. 관리자 페이지에서 먼저 테마를 추가하세요.
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="popular-themes" class="panel">
+        <div class="panel-header">
+            <p class="eyebrow">Weekly Top 10</p>
+            <h2>최근 1주일 인기 테마</h2>
+        </div>
+
+        <div class="theme-grid compact">
+            <article class="theme-card compact" th:each="theme : ${popularThemes}">
+                <img th:src="${theme.thumbnailImageUrl}" th:alt="${theme.name}" loading="lazy">
+                <div class="theme-card-body">
+                    <div class="theme-card-head">
+                        <strong th:text="${theme.name}">인기 테마</strong>
+                        <span th:text="${theme.durationTime}">01:30</span>
+                    </div>
+                    <p th:text="${theme.description}">설명</p>
+                </div>
+            </article>
+            <div class="empty-card" th:if="${#lists.isEmpty(popularThemes)}">
+                최근 1주일 예약 데이터가 아직 없습니다.
+            </div>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/reservation-page.js}"></script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roomescape Admin</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}">
+</head>
+<body class="page page-admin">
+<main class="shell">
+    <section class="hero admin-hero">
+        <div class="hero-copy">
+            <p class="eyebrow">Admin Dashboard</p>
+            <h1>운영 데이터를 한 화면에서 관리합니다.</h1>
+            <p class="hero-text">
+                예약 목록 확인, 예약 시간 등록, 테마 등록과 삭제를 모두 이 페이지에서 처리할 수 있습니다.
+            </p>
+            <div class="hero-actions">
+                <a class="button ghost" href="/">사용자 예약 페이지</a>
+            </div>
+        </div>
+        <div class="hero-panel admin-stats">
+            <div class="stat-card">
+                <span class="stat-label">현재 예약</span>
+                <strong id="reservation-count" class="stat-value" th:text="${#lists.size(reservations)}">0</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">운영 시간</span>
+                <strong id="time-count" class="stat-value" th:text="${#lists.size(times)}">0</strong>
+            </div>
+            <div class="stat-card">
+                <span class="stat-label">등록 테마</span>
+                <strong id="theme-count" class="stat-value" th:text="${#lists.size(themes)}">0</strong>
+            </div>
+        </div>
+    </section>
+
+    <section class="dashboard-grid">
+        <section class="panel">
+            <div class="panel-header">
+                <p class="eyebrow">Reservations</p>
+                <h2>예약 목록</h2>
+            </div>
+            <div id="reservation-admin-feedback" class="feedback" hidden></div>
+            <div id="reservation-list" class="list-block">
+                <article class="list-row reservation-row" th:each="reservation : ${reservations}">
+                    <div>
+                        <strong th:text="${reservation.name}">포비</strong>
+                        <p th:text="${reservation.theme.name + ' · ' + reservation.date + ' · ' + reservation.time.startAt}">테마 · 날짜 · 시간</p>
+                    </div>
+                    <button class="button danger"
+                            type="button"
+                            data-action="delete-reservation"
+                            th:data-id="${reservation.id}">
+                        예약 취소
+                    </button>
+                </article>
+                <div class="empty-card" th:if="${#lists.isEmpty(reservations)}">
+                    아직 등록된 예약이 없습니다.
+                </div>
+            </div>
+        </section>
+
+        <section class="panel">
+            <div class="panel-header">
+                <p class="eyebrow">Times</p>
+                <h2>예약 시간 관리</h2>
+            </div>
+            <div id="time-feedback" class="feedback" hidden></div>
+            <form id="time-form" class="inline-form">
+                <label class="field compact">
+                    <span>시작 시간</span>
+                    <input id="time-start-at" name="startAt" type="time" required>
+                </label>
+                <button class="button primary" type="submit">시간 추가</button>
+            </form>
+            <div id="time-list" class="list-block">
+                <article class="list-row" th:each="time : ${times}">
+                    <div>
+                        <strong th:text="${time.startAt}">10:00</strong>
+                    </div>
+                    <button class="button danger"
+                            type="button"
+                            data-action="delete-time"
+                            th:attr="data-id=${time.id}">
+                        삭제
+                    </button>
+                </article>
+                <div class="empty-card" th:if="${#lists.isEmpty(times)}">
+                    등록된 예약 시간이 없습니다.
+                </div>
+            </div>
+        </section>
+    </section>
+
+    <section class="panel">
+        <div class="panel-header">
+            <p class="eyebrow">Themes</p>
+            <h2>테마 관리</h2>
+        </div>
+        <div id="theme-feedback" class="feedback" hidden></div>
+        <form id="theme-form" class="stack-form theme-form-grid">
+            <label class="field">
+                <span>테마 이름</span>
+                <input id="theme-name" name="name" type="text" required>
+            </label>
+            <label class="field">
+                <span>썸네일 이미지 URL</span>
+                <input id="theme-thumbnail-image-url" name="thumbnailImageUrl" type="url" required>
+            </label>
+            <label class="field">
+                <span>설명</span>
+                <input id="theme-description" name="description" type="text" required>
+            </label>
+            <label class="field">
+                <span>소요 시간</span>
+                <input id="theme-duration-time" name="durationTime" type="time" required>
+            </label>
+            <button class="button primary fit-content" type="submit">테마 추가</button>
+        </form>
+
+        <div id="theme-list" class="theme-grid">
+            <article class="theme-card admin" th:each="theme : ${themes}">
+                <img th:src="${theme.thumbnailImageUrl}" th:alt="${theme.name}" loading="lazy">
+                <div class="theme-card-body">
+                    <div class="theme-card-head">
+                        <strong th:text="${theme.name}">테마</strong>
+                        <span th:text="${theme.durationTime}">01:30</span>
+                    </div>
+                    <p th:text="${theme.description}">설명</p>
+                    <button class="button danger"
+                            type="button"
+                            data-action="delete-theme"
+                            th:attr="data-id=${theme.id}">
+                        테마 삭제
+                    </button>
+                </div>
+            </article>
+            <div class="empty-card" th:if="${#lists.isEmpty(themes)}">
+                등록된 테마가 없습니다.
+            </div>
+        </div>
+    </section>
+</main>
+<script th:src="@{/js/admin-page.js}"></script>
+</body>
+</html>
