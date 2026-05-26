@@ -36,7 +36,7 @@ public class WaitingDao {
                 rs.getDate("date").toLocalDate(),
                 time,
                 theme,
-                rs.getObject("create_at", LocalDateTime.class)
+                rs.getObject("created_at", LocalDateTime.class)
         );
     };
 
@@ -84,8 +84,8 @@ public class WaitingDao {
                        rt.id AS time_id, rt.start_at,
                        t.id AS theme_id, t.name AS theme_name, t.description, t.url
                 FROM waiting w
-                INNER JOIN reservation_time rt ON r.time_id = rt.id
-                INNER JOIN theme t ON r.theme_id = t.id
+                INNER JOIN reservation_time rt ON w.time_id = rt.id
+                INNER JOIN theme t ON w.theme_id = t.id
                 WHERE w.id = ?
                 """;
 
@@ -110,7 +110,7 @@ public class WaitingDao {
         Boolean result = jdbcTemplate.queryForObject(
                 sql,
                 Boolean.class,
-                waiting.getName(),
+                waiting.getName().value(),
                 waiting.getDate(),
                 waiting.getTime().getId(),
                 waiting.getTheme().getId()

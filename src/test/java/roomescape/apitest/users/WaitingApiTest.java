@@ -18,6 +18,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class WaitingApiTest {
+    private final Long waitingId = 1L;
     private final String userName = "브라운";
     private final Long timeId = 5L;
     private final Long themeId = 1L;
@@ -37,8 +38,17 @@ public class WaitingApiTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservation)
-                .when().post("/waiting")
+                .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201);
+    }
+
+    @Test
+    void 예약_대기_취소_API(){
+        String userName = "토리";
+        RestAssured.given().log().all()
+                .when().delete("/waitings/" + waitingId + "?name=" + userName)
+                .then().log().all()
+                .statusCode(204);
     }
 }
