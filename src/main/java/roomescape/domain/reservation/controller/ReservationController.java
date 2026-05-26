@@ -67,4 +67,10 @@ public class ReservationController {
     ) {
         return ResponseEntity.ok(reservationService.cancelReservation(id, name));
     }
+
+    @PostMapping("/waitings")
+    public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
+            @Valid @RequestBody ReservationCreateRequestDto requestDto) {
+        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.saveWaitingReservation(requestDto));
+    }
 }

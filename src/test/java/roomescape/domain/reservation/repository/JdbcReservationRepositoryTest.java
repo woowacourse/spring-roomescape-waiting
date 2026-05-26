@@ -410,6 +410,107 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
+    class ExistsReservationTest {
+
+        @Test
+        void ACTIVE_상태까지_완전히_일치하는_예약이_있으면_true를_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation reservation = reservationRepository.save(Reservation.create("예약자", date, time, theme));
+
+            // when
+            boolean actual = reservationRepository.existsReservation(reservation);
+
+            // then
+            assertThat(actual).isTrue();
+        }
+
+        @Test
+        void WAITING_상태까지_완전히_일치하는_예약이_있으면_true를_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation saved = reservationRepository.save(Reservation.create("예약자", date, time, theme));
+            Reservation waitingReservation = Reservation.reconstruct(saved.getId(), saved.getName(), saved.getDate(),
+                saved.getTime(), saved.getTheme(), Status.WAITING);
+            reservationRepository.update(waitingReservation);
+
+            // when
+            boolean actual = reservationRepository.existsReservation(waitingReservation);
+
+            // then
+            assertThat(actual).isTrue();
+        }
+
+        @Test
+        void 상태가_다르면_false를_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation saved = reservationRepository.save(Reservation.create("예약자", date, time, theme));
+            Reservation waitingQuery = Reservation.reconstruct(saved.getId(), saved.getName(), saved.getDate(),
+                saved.getTime(), saved.getTheme(), Status.WAITING);
+
+            // when
+            boolean actual = reservationRepository.existsReservation(waitingQuery);
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+        @Test
+        void 이름이_다르면_false를_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            reservationRepository.save(Reservation.create("예약자1", date, time, theme));
+            Reservation differentName = Reservation.reconstruct(null, "예약자2", date, time, theme, Status.ACTIVE);
+
+            // when
+            boolean actual = reservationRepository.existsReservation(differentName);
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+        @Test
+        void 날짜가_다르면_false를_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            reservationRepository.save(Reservation.create("예약자", date, time, theme));
+            Reservation differentDate = Reservation.reconstruct(null, "예약자", date.plusDays(1), time, theme, Status.ACTIVE);
+
+            // when
+            boolean actual = reservationRepository.existsReservation(differentDate);
+
+            // then
+            assertThat(actual).isFalse();
+        }
+
+        @Test
+        void 일치하는_예약이_없으면_false를_반환한다() {
+            // given
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
+            Reservation query = Reservation.reconstruct(null, "예약자", date, time, theme, Status.ACTIVE);
+
+            // when
+            boolean actual = reservationRepository.existsReservation(query);
+
+            // then
+            assertThat(actual).isFalse();
+        }
+    }
+
+    @Nested
     class ExistsReservationByDateAndTimeAndThemeAndIdNotTest {
 
         @Test

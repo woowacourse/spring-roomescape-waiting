@@ -223,4 +223,20 @@ public class ReservationService {
 
         reservationRepository.deleteReservationById(id);
     }
+
+    @Transactional
+    public ReservationCreateResponseDto saveWaitingReservation(ReservationCreateRequestDto requestDto) {
+        Reservation reservation = createReservation(requestDto);
+        Reservation waitingReservation = reservation.toWaiting();
+
+        if (reservationRepository.existsReservation(waitingReservation)) {
+            throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
+        }
+
+        try {
+            return ReservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
+        } catch (DuplicateKeyException e) {
+            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
+        }
+    }
 }

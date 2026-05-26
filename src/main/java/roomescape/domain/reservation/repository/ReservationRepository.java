@@ -27,6 +27,8 @@ public interface ReservationRepository {
 
     boolean existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(LocalDate date, Time time, Theme theme);
 
+    boolean existsReservation(Reservation reservation);
+
     boolean existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(LocalDate date, Time time, Theme theme,
         Long id);
 }

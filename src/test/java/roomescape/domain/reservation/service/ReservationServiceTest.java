@@ -440,6 +440,144 @@ class ReservationServiceTest {
     }
 
     @Nested
+    class SaveWaitingReservationTest {
+
+        @Nested
+        class Success {
+
+            @Test
+            void 성공() {
+                // given
+                Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
+                Theme theme = themeRepository.save(
+                    Theme.create("피온", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto(
+                    "보예",
+                    LocalDate.of(2026, 5, 1),
+                    time.getId(),
+                    theme.getId()
+                );
+
+                // when
+                ReservationCreateResponseDto actual = reservationService.saveWaitingReservation(request);
+
+                // then
+                assertThat(actual).isEqualTo(
+                    new ReservationCreateResponseDto(1L, "보예", LocalDate.of(2026, 5, 1), time.getId(), theme.getId()));
+                assertThat(reservationRepository.findReservationsByDeletedAtIsNull()).hasSize(1);
+            }
+
+            @Test
+            void ACTIVE_예약이_있어도_WAITING_예약을_저장할_수_있다() {
+                // given
+                LocalDate date = LocalDate.of(2026, 5, 1);
+                Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
+                Theme theme = themeRepository.save(
+                    Theme.create("피온", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                reservationRepository.save(Reservation.create("기존예약자", date, time, theme));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto(
+                    "보예", date, time.getId(), theme.getId());
+
+                // when
+                ReservationCreateResponseDto actual = reservationService.saveWaitingReservation(request);
+
+                // then
+                assertThat(actual).isEqualTo(
+                    new ReservationCreateResponseDto(2L, "보예", date, time.getId(), theme.getId()));
+                assertThat(reservationRepository.findReservationsByDeletedAtIsNull()).hasSize(2);
+            }
+
+            @Test
+            void 같은_날짜_시간_테마에_다른_이름으로_WAITING_예약을_저장할_수_있다() {
+                // given
+                LocalDate date = LocalDate.of(2026, 5, 1);
+                Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
+                Theme theme = themeRepository.save(
+                    Theme.create("피온", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                reservationRepository.save(Reservation.create("기존예약자", date, time, theme));
+                ReservationCreateRequestDto request1 = new ReservationCreateRequestDto(
+                    "대기자1", date, time.getId(), theme.getId());
+                ReservationCreateRequestDto request2 = new ReservationCreateRequestDto(
+                    "대기자2", date, time.getId(), theme.getId());
+                reservationService.saveWaitingReservation(request1);
+
+                // when
+                ReservationCreateResponseDto actual = reservationService.saveWaitingReservation(request2);
+
+                // then
+                assertThat(actual.name()).isEqualTo("대기자2");
+                assertThat(reservationRepository.findReservationsByDeletedAtIsNull()).hasSize(3);
+            }
+        }
+
+        @Nested
+        class Failed {
+
+            @Test
+            void 같은_날짜_시간_테마_이름으로_이미_대기_중이면_예외가_발생한다() {
+                // given
+                LocalDate date = LocalDate.of(2026, 5, 1);
+                Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
+                Theme theme = themeRepository.save(
+                    Theme.create("피온", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto(
+                    "보예", date, time.getId(), theme.getId());
+                reservationService.saveWaitingReservation(request);
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.saveWaitingReservation(request))
+                    .isInstanceOf(GeneralException.class)
+                    .hasMessage("이미 대기 중인 날짜, 시간, 테마입니다.");
+            }
+
+            @Test
+            void timeId가_존재하지_않으면_예외가_발생한다() {
+                // given
+                Theme theme = themeRepository.save(
+                    Theme.create("피온", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto(
+                    "보예", LocalDate.of(2026, 5, 1), 999L, theme.getId());
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.saveWaitingReservation(request))
+                    .isInstanceOf(GeneralNotFoundException.class)
+                    .hasMessage("조회할 자원이 존재하지 않습니다.");
+            }
+
+            @Test
+            void themeId가_존재하지_않으면_예외가_발생한다() {
+                // given
+                Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto(
+                    "보예", LocalDate.of(2026, 5, 1), time.getId(), 999L);
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.saveWaitingReservation(request))
+                    .isInstanceOf(GeneralNotFoundException.class)
+                    .hasMessage("조회할 자원이 존재하지 않습니다.");
+            }
+
+            @Test
+            void timeId와_themeId가_모두_존재하지_않으면_파라미터_에러를_모두_포함한다() {
+                // given
+                ReservationCreateRequestDto request = new ReservationCreateRequestDto(
+                    "보예", LocalDate.of(2026, 5, 1), 999L, 999L);
+
+                // when & then
+                assertThatThrownBy(() -> reservationService.saveWaitingReservation(request))
+                    .isInstanceOfSatisfying(GeneralNotFoundException.class, exception -> {
+                        assertThat(exception.getParameterErrors())
+                            .extracting(ParameterErrorResponseDto::parameter)
+                            .containsExactly("timeId", "themeId");
+                        assertThat(exception.getParameterErrors())
+                            .extracting(ParameterErrorResponseDto::message)
+                            .containsExactly("존재 하지 않는 시간대입니다.", "존재 하지 않는 테마입니다.");
+                    });
+            }
+        }
+    }
+
+    @Nested
     class UpdateReservationTest {
 
         @Nested

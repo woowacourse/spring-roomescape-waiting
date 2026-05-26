@@ -34,6 +34,10 @@ public class Reservation {
         return new Reservation(this.id, this.name, this.date, this.time, this.theme, Status.CANCELED);
     }
 
+    public Reservation toWaiting() {
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, Status.WAITING);
+    }
+
     public Long getId() {
         return id;
     }
