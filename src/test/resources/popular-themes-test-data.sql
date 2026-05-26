@@ -70,12 +70,12 @@ VALUES
 
 INSERT INTO reservation (id, name, date, time_id, theme_id)
 VALUES (31, '테스트1', DATEADD('DAY', -8, CURRENT_DATE), 1, 12),
-       (32, '테스트2', DATEADD('DAY', -8, CURRENT_DATE), 2, 12),
-       (33, '테스트3', DATEADD('DAY', -8, CURRENT_DATE), 1, 12),
-       (34, '테스트4', DATEADD('DAY', -8, CURRENT_DATE), 2, 12),
-       (35, '테스트5', DATEADD('DAY', -8, CURRENT_DATE), 1, 12),
-       (36, '테스트6', DATEADD('DAY', -8, CURRENT_DATE), 2, 12),
-       (37, '테스트7', DATEADD('DAY', -8, CURRENT_DATE), 1, 12),
-       (38, '테스트8', DATEADD('DAY', -8, CURRENT_DATE), 2, 12),
-       (39, '테스트9', DATEADD('DAY', -8, CURRENT_DATE), 1, 12),
-       (40, '테스트10', DATEADD('DAY', -8, CURRENT_DATE), 2, 12);
+       (32, '테스트2', DATEADD('DAY', -9, CURRENT_DATE), 2, 12),
+       (33, '테스트3', DATEADD('DAY', -10, CURRENT_DATE), 1, 12),
+       (34, '테스트4', DATEADD('DAY', -11, CURRENT_DATE), 2, 12),
+       (35, '테스트5', DATEADD('DAY', -12, CURRENT_DATE), 1, 12),
+       (36, '테스트6', DATEADD('DAY', -13, CURRENT_DATE), 2, 12),
+       (37, '테스트7', DATEADD('DAY', -14, CURRENT_DATE), 1, 12),
+       (38, '테스트8', DATEADD('DAY', -15, CURRENT_DATE), 2, 12),
+       (39, '테스트9', DATEADD('DAY', -16, CURRENT_DATE), 1, 12),
+       (40, '테스트10', DATEADD('DAY', -17, CURRENT_DATE), 2, 12);
