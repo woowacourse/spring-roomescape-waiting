@@ -12,6 +12,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.Time;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 
 @Repository
 public class ReservationDao {
@@ -20,10 +21,10 @@ public class ReservationDao {
 
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
             rs.getLong("id"),
-            rs.getString("name"),
             rs.getDate("date").toLocalDate(),
             new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
-            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
+            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail")),
+            new Waiting(rs.getLong("wait_id"), rs.getString("name"), rs.getInt("waitNumber"))
     );
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
@@ -33,9 +34,8 @@ public class ReservationDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Long save(String name, LocalDate date, Long timeId, Long themeId) {
+    public Long save(LocalDate date, Long timeId, Long themeId) {
         return jdbcInsert.executeAndReturnKey(Map.of(
-                "name", name,
                 "date", date,
                 "time_id", timeId,
                 "theme_id", themeId
@@ -45,17 +45,20 @@ public class ReservationDao {
     public Reservation findById(Long id) {
         String sql = """
                 SELECT r.id, 
-                       r.name, 
                        r.date,
                        t.id AS time_id, 
                        t.start_at AS time_value,
                        th.id AS theme_id, 
                        th.name AS theme_name, 
                        th.description AS theme_description, 
-                       th.thumbnail_url AS theme_thumbnail
+                       th.thumbnail_url AS theme_thumbnail,
+                        w.id AS wait_id,
+                        w.name AS name
+                        w.waitNumber AS wait_number
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
+                INNER JOIN waiting AS w ON r.id = w.reservation_id
                 where r.id = ?
                 """;
         return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
@@ -64,7 +67,6 @@ public class ReservationDao {
     public List<Reservation> findAll() {
         String sql = """
                 SELECT r.id, 
-                       r.name, 
                        r.date,
                        t.id AS time_id, 
                        t.start_at AS time_value,
@@ -75,6 +77,7 @@ public class ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
+                INNER JOIN waiting AS w ON r.id = w.reservation_id
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
@@ -82,7 +85,6 @@ public class ReservationDao {
     public List<Reservation> findByUserName(String username) {
         String sql = """
                 SELECT r.id, 
-                       r.name, 
                        r.date,
                        t.id AS time_id, 
                        t.start_at AS time_value,
@@ -93,6 +95,7 @@ public class ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
+                INNER JOIN waiting AS w ON r.id = w.reservation_id
                 WHERE r.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, username);

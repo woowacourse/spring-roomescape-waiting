@@ -32,7 +32,7 @@ public class ReservationService {
         validateDateAndTimeNotPast(now,time);
 
         try{
-            Long id = reservationDao.save(request.name(), request.date(), request.timeId(), request.themeId());
+            Long id = reservationDao.save(request.date(), request.timeId(), request.themeId());
             Reservation reservation = reservationDao.findById(id);
             return ReservationResponse.from(reservation);
         } catch (DuplicateKeyException e){

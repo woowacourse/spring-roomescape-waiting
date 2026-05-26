@@ -10,7 +10,6 @@ import roomescape.domain.Theme;
 
 public record AdminReservationResponse(
         Long id,
-        String name,
         LocalDate date,
         String themeName,
         @JsonFormat(pattern = "HH:mm")
@@ -18,7 +17,6 @@ public record AdminReservationResponse(
     public static AdminReservationResponse from(Reservation reservation, Theme theme) {
         return new AdminReservationResponse(
                 reservation.getId(),
-                reservation.getName(),
                 reservation.getDate(),
                 theme.getName(),
                 reservation.getTime().getStartAt()
