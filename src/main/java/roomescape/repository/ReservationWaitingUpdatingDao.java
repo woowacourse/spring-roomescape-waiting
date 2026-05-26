@@ -14,7 +14,7 @@ public class ReservationWaitingUpdatingDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    public Long insert(ReservationWaiting reservationWaiting) {
+    public Long create(ReservationWaiting reservationWaiting) {
         String sql = "insert into waiting(name, date, time_id, theme_id, created_at) values(?, ?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
