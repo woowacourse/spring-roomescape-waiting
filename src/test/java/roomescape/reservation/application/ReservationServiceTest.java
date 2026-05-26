@@ -86,7 +86,6 @@ class ReservationServiceTest {
                 .createdAt(LocalDateTime.now(clock))
                 .build();
 
-
         when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
         when(themeRepository.getById(1L)).thenReturn(mockTheme);
         when(reservationRepository.getById(1L)).thenReturn(mockReservation);
@@ -153,7 +152,8 @@ class ReservationServiceTest {
                 changeCommand.date()))
                 .thenReturn(false);
 
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
+        Assertions.assertThatThrownBy(
+                        () -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
                 .isInstanceOf(IllegalStateReservationException.class);
     }
 
@@ -207,7 +207,10 @@ class ReservationServiceTest {
                 changeCommand.username()))
                 .thenReturn(true);
 
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
+        Assertions.assertThatThrownBy(
+                        () -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
                 .isInstanceOf(DuplicatedReservationException.class);
     }
+
+
 }

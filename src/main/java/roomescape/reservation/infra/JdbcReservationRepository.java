@@ -161,8 +161,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByIdAndUsernameAndActive(final Long reservationId, final String username) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status='ACTIVE' AND is_deleted = 0)";
+    public boolean existsByIdAndUsernameAndActiveOrPending(final Long reservationId, final String username) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status='ACTIVE' OR status='PENDING' AND is_deleted = 0)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("reservationId", reservationId, "username", username),
                         Boolean.class));
@@ -208,7 +208,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void cancel(final Reservation reservation) {
-        String sql = "UPDATE reservation SET status = 'CANCELED', is_deleted=:id WHERE id = :id AND status='ACTIVE'";
+        String sql = "UPDATE reservation SET status = 'CANCELED', is_deleted=:id WHERE id = :id AND status='ACTIVE' OR status='PENDING'";
         jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
     }
 }
