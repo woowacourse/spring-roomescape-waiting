@@ -8,6 +8,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
@@ -52,7 +53,9 @@ public class ReservationService {
                 request.name(),
                 request.date(),
                 time,
-                theme
+                theme,
+                //TODO
+                ReservationStatus.CONFIRMED
         );
 
         Reservation saved = reservationDao.save(reservation);

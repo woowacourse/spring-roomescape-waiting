@@ -8,13 +8,16 @@ public class Reservation {
     private LocalDate date;
     private ReservationTime time;
     private Theme theme;
+    private ReservationStatus status;
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, name, date, time, theme);
+    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
+        this(null, name, date, time, theme, status);
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+                       ReservationStatus status) {
         this.id = id;
+        this.status = status;
         validateName(name);
         validateDate(date);
         validateTime(time);
@@ -60,5 +63,9 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public ReservationStatus getStatus() {
+        return status;
     }
 }
