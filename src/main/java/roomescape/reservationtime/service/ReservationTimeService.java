@@ -21,6 +21,7 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
@@ -42,7 +43,6 @@ public class ReservationTimeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTime> findAllReservationTimes() {
         return reservationTimeRepository.findAll();
     }
@@ -58,7 +58,6 @@ public class ReservationTimeService {
         }
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationTimeAvailability> findAvailableTimes(LocalDate date, Long themeId) {
         if (!themeRepository.existsById(themeId)) {
             throw new DomainException(THEME_NOT_FOUND);

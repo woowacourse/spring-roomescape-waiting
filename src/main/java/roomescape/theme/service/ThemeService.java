@@ -17,6 +17,7 @@ import static roomescape.theme.exception.ThemeErrorCode.*;
 
 @Service
 @RequiredArgsConstructor
+@Transactional(readOnly = true)
 public class ThemeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
@@ -29,12 +30,10 @@ public class ThemeService {
         return themeRepository.save(theme);
     }
 
-    @Transactional(readOnly = true)
     public List<Theme> findAllThemes(){
         return themeRepository.findAll();
     }
 
-    @Transactional(readOnly = true)
     public List<Theme> findPopularThemes(int days, int size){
         LocalDate now = LocalDate.now(clock);
         LocalDate startDate = now.minusDays(days);
