@@ -1,6 +1,6 @@
 package roomescape.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -29,10 +29,10 @@ class JdbcWaitingRepositoryTest {
     @BeforeEach
     void setUp() {
         jdbcWaitingRepository = new JdbcWaitingRepository(jdbcTemplate);
-        insertDependencyData();
+        saveDependencyData();
     }
 
-    private void insertDependencyData() {
+    private void saveDependencyData() {
         JdbcTimeSlotRepository timeRepository = new JdbcTimeSlotRepository(jdbcTemplate);
         JdbcThemeRepository themeRepository = new JdbcThemeRepository(jdbcTemplate);
         savedTimeSlot = timeRepository.save(new TimeSlot(1L, LocalTime.of(10, 0)));
@@ -43,14 +43,14 @@ class JdbcWaitingRepositoryTest {
     @DisplayName("예약 대기를 저장한다.")
     void save() {
         WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
-        jdbcWaitingRepository.insert(waiting);
+        jdbcWaitingRepository.save(waiting);
     }
 
     @Test
     @DisplayName("예약 대기를 삭제한다.")
     void delete() {
         WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
-        jdbcWaitingRepository.insert(waiting);
+        jdbcWaitingRepository.save(waiting);
         jdbcWaitingRepository.delete(waiting);
     }
 
@@ -59,9 +59,9 @@ class JdbcWaitingRepositoryTest {
     void calculateWaitingNumber() {
         WaitingCommand waiting1 = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
         WaitingCommand waiting2 = new WaitingCommand("워니", LocalDate.now(), 1L, 1L);
-        jdbcWaitingRepository.insert(waiting1);
-        jdbcWaitingRepository.insert(waiting2);
+        jdbcWaitingRepository.save(waiting1);
+        jdbcWaitingRepository.save(waiting2);
 
-        assertThat(jdbcWaitingRepository.calculateWaitingNumberByName(waiting2)).isEqualTo(2);
+        assertThat(jdbcWaitingRepository.calculateWaitingNumber(waiting2)).isEqualTo(2);
     }
 }

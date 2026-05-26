@@ -1,7 +1,6 @@
 package roomescape.repository;
 
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
@@ -17,7 +16,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int calculateWaitingNumberByName(WaitingCommand waiting) {
+    public int calculateWaitingNumber(WaitingCommand waiting) {
         String sql = """
                 SELECT COUNT(*)
                 FROM waiting w
@@ -35,11 +34,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 """;
 
         return jdbcTemplate.queryForObject(sql, Integer.class, waiting.date(), waiting.timeId(), waiting.themeId(),
-                        waiting.name(), waiting.date(), waiting.timeId(), waiting.themeId());
+                waiting.name(), waiting.date(), waiting.timeId(), waiting.themeId());
     }
 
     @Override
-    public void insert(WaitingCommand waiting) {
+    public void save(WaitingCommand waiting) {
         SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(waiting);
         insert.execute(params);

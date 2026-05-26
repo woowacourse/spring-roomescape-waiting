@@ -4,9 +4,9 @@ import roomescape.service.dto.WaitingCommand;
 
 public interface WaitingRepository {
 
-    int calculateWaitingNumberByName(WaitingCommand waiting);
+    int calculateWaitingNumber(WaitingCommand waiting);
 
-    void insert(WaitingCommand waiting);
+    void save(WaitingCommand waiting);
 
     void delete(WaitingCommand waiting);
 }
