@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예약 관리 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/admin/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation">예약하기</a>
+      <a href="/my-reservations" class="active">예약 관리</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title"><i class="fas fa-list-alt" style="color:var(--accent);margin-right:10px;"></i>내 예약 관리</h1>
+  <p class="page-subtitle">예약자 이름으로 검색하여 내 예약을 조회·수정·삭제할 수 있습니다.</p>
+
+  <div class="filter-card" style="margin-bottom:20px;">
+    <div class="filter-row" style="grid-template-columns: 1fr auto;">
+      <div>
+        <label class="form-label" for="search-name">예약자 이름</label>
+        <input id="search-name" type="text" class="form-control" placeholder="예: user1" maxlength="500">
+      </div>
+      <div style="display:flex;align-items:flex-end;">
+        <button id="search-btn" class="btn btn-primary"><i class="fas fa-search"></i> 검색</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="table-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th style="width:80px;">번호</th>
+          <th>테마</th>
+          <th style="width:140px;">날짜</th>
+          <th style="width:100px;">시간</th>
+          <th style="width:220px;text-align:right;">관리</th>
+        </tr>
+      </thead>
+      <tbody id="reservation-table-body"></tbody>
+    </table>
+  </div>
+  <div id="reservation-empty" class="empty d-none">조회된 예약이 없습니다.</div>
+  <div id="reservation-hint" class="empty">이름을 입력 후 검색 버튼을 눌러주세요.</div>
+</main>
+
+<script src="/js/nav.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/my-reservations.js"></script>
+</body>
+</html>

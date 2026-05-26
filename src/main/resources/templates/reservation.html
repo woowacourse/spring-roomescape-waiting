@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>예약하기 — ESCAPE ROOM</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+  <link rel="stylesheet" href="/css/styles.css">
+  <link rel="stylesheet" href="/css/reservation.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="topbar-inner">
+    <a href="/admin/theme" class="admin-entry" title="관리자 페이지">
+      <i class="fas fa-user-shield"></i><span>관리자</span>
+    </a>
+    <a href="/" class="brand">
+      <span class="brand-mark"><i class="fas fa-key"></i></span>
+      ESCAPE ROOM
+    </a>
+    <button type="button" class="nav-toggle" aria-label="메뉴"><i class="fas fa-bars"></i></button>
+    <nav class="nav">
+      <a href="/">홈</a>
+      <a href="/popular">인기 테마</a>
+      <a href="/reservation" class="active">예약하기</a>
+      <a href="/my-reservations">예약 관리</a>
+    </nav>
+  </div>
+</header>
+
+<main class="container">
+  <h1 class="page-title"><i class="fas fa-calendar-check" style="color:var(--accent);margin-right:10px;"></i>예약하기</h1>
+  <p class="page-subtitle">날짜 → 테마 → 시간 순으로 선택해주세요. 오늘 이후 날짜만 선택할 수 있습니다.</p>
+
+  <div class="reservation-cards">
+    <section class="r-card">
+      <header class="r-card-head">
+        <span class="step-num">1</span>
+        <h2 class="r-card-title">날짜 선택</h2>
+      </header>
+      <div class="r-card-body">
+        <div id="calendar"></div>
+      </div>
+    </section>
+
+    <section class="r-card">
+      <header class="r-card-head">
+        <span class="step-num">2</span>
+        <h2 class="r-card-title">테마 선택</h2>
+      </header>
+      <div class="r-card-body">
+        <ul id="theme-list" class="theme-scroll"></ul>
+        <div id="theme-empty" class="r-card-hint d-none">등록된 테마가 없습니다.</div>
+      </div>
+    </section>
+
+    <section class="r-card">
+      <header class="r-card-head">
+        <span class="step-num">3</span>
+        <h2 class="r-card-title">예약 가능 시간</h2>
+      </header>
+      <div class="r-card-body">
+        <div id="time-list" class="time-grid d-none"></div>
+        <div id="time-hint" class="r-card-hint">날짜와 테마를 먼저 선택해주세요.</div>
+      </div>
+    </section>
+  </div>
+
+  <div id="booking-bar" class="booking-bar d-none">
+    <div class="booking-summary">
+      <strong id="booking-summary-text"></strong>
+    </div>
+    <input id="booking-name" class="form-control" type="text" placeholder="예약자 이름" maxlength="20">
+    <button id="confirm-booking" class="btn btn-primary"><i class="fas fa-check"></i> 예약 확정</button>
+    <button id="cancel-booking" class="btn btn-ghost">취소</button>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/ko.js"></script>
+<script src="/js/api.js"></script>
+<script src="/js/reservation.js"></script>
+</body>
+</html>
