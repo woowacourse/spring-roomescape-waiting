@@ -26,6 +26,7 @@ public class Reservation {
     private Theme theme;
     private Status status;
     private Long is_deleted;
+    private LocalDateTime createdAt;
 
     public Reservation withId(final Long id) {
         return Reservation.builder()
@@ -36,6 +37,7 @@ public class Reservation {
                 .theme(this.theme)
                 .status(Status.ACTIVE)
                 .is_deleted(0L)
+                .createdAt(this.createdAt)
                 .build();
     }
 
@@ -62,6 +64,22 @@ public class Reservation {
                 .theme(theme)
                 .status(Status.ACTIVE)
                 .is_deleted(0L)
+                .createdAt(LocalDateTime.now(clock))
+                .build();
+    }
+
+    public Reservation pending(final String username, final LocalDate date, final ReservationTime time, final Theme theme, final Clock clock) {
+        checkChangeable(username, clock);
+        time.checkValidDateTime(date, clock);
+        return Reservation.builder()
+                .id(id)
+                .name(this.name)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .status(Status.PENDING)
+                .is_deleted(0L)
+                .createdAt(LocalDateTime.now(clock))
                 .build();
     }
 
@@ -74,6 +92,7 @@ public class Reservation {
                 .theme(theme)
                 .status(Status.CANCELED)
                 .is_deleted(id)
+                .createdAt(createdAt)
                 .build();
     }
 }
