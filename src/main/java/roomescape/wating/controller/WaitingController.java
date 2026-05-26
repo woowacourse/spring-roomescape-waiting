@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import roomescape.wating.service.WaitingService;
 import roomescape.wating.service.dto.request.WaitingCreateRequest;
+import roomescape.wating.service.dto.response.WaitingCreateResponse;
 
 @Controller
 @RequestMapping("/waitings")
@@ -19,13 +20,13 @@ public class WaitingController {
     private final WaitingService waitingService;
 
     @PostMapping
-    public ResponseEntity<Long> create(
+    public ResponseEntity<WaitingCreateResponse> create(
             @Valid @RequestBody WaitingCreateRequest request
     ) {
-        long savedId = waitingService.create(request);
+        final long savedId = waitingService.create(request);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(savedId);
+                .body(new WaitingCreateResponse(savedId));
     }
 
 }
