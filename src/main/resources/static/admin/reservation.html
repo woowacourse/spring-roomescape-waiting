@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>예약 관리 — RoomEscape Admin</title>
+    <meta content="방탈출 예약 관리 - 관리자 대시보드" name="description">
+    <link href="../style.css" rel="stylesheet">
+</head>
+<body>
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-text">🔐 RoomEscape</div>
+            <div class="logo-sub">Admin Panel</div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">관리</div>
+            <a class="nav-item active" href="reservation.html"><span class="icon">📋</span> 예약 관리</a>
+            <a class="nav-item" href="time.html"><span class="icon">🕐</span> 시간 관리</a>
+            <a class="nav-item" href="theme.html"><span class="icon">🎭</span> 테마 관리</a>
+        </div>
+        <div class="sidebar-section" style="margin-top: auto;">
+            <div class="sidebar-section-label">사용자</div>
+            <a class="nav-item" href="../index.html"><span class="icon">🏠</span> 사용자 페이지</a>
+        </div>
+    </nav>
+
+    <main class="main">
+        <section class="card auth-panel" id="admin-auth-panel">
+            <div class="card-header">
+                <span class="card-title">관리자 로그인</span>
+            </div>
+            <form id="admin-login-form">
+                <div class="form-grid" style="margin-bottom:14px;">
+                    <div class="form-group">
+                        <label for="admin-username">아이디</label>
+                        <input id="admin-username" type="text" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">비밀번호</label>
+                        <input id="admin-password" type="password" autocomplete="current-password">
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">로그인</button>
+                <p class="auth-message" id="admin-auth-message"></p>
+            </form>
+        </section>
+
+        <section id="admin-content" style="display:none;">
+            <div class="page-header">
+                <h1 class="page-title">예약 관리</h1>
+                <p class="page-subtitle">전체 예약 현황을 조회하고 삭제합니다.</p>
+                <button class="btn btn-ghost btn-sm" id="admin-logout-btn" type="button" style="margin-top:12px;">로그아웃</button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card blue">
+                    <div class="stat-value" id="total-count">–</div>
+                    <div class="stat-label">조회된 예약</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">예약 목록</span>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <input id="filter-name" placeholder="이름으로 검색..." style="padding: 6px 10px; background: var(--bg-input); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text-primary); font-size: 13px; width: 160px;" type="text">
+                        <button class="btn btn-primary btn-sm" id="search-btn" type="button">검색</button>
+                        <button class="btn btn-ghost btn-sm" id="clear-btn" type="button">전체 보기</button>
+                    </div>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>예약자</th>
+                            <th>테마</th>
+                            <th>날짜</th>
+                            <th>시간</th>
+                            <th>액션</th>
+                        </tr>
+                        </thead>
+                        <tbody id="reservation-table-body"></tbody>
+                    </table>
+                </div>
+                <div style="text-align: center; margin-top: 12px;">
+                    <button class="btn btn-ghost" id="res-load-more-btn" style="display:none;" type="button">더 보기</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="../app.js"></script>
+<script>
+    const R = Roomescape;
+    const resPageState = {page: 0, hasNext: false, totalLoaded: 0, nameFilter: ''};
+
+    function token() {
+        return R.managerToken();
+    }
+
+    async function loadReservations(reset = true) {
+        const tbody = R.byId('reservation-table-body');
+        if (reset) {
+            resPageState.page = 0;
+            resPageState.totalLoaded = 0;
+            R.clear(tbody);
+            tbody.appendChild(R.h('tr', {}, [R.h('td', {colSpan: 6}, [R.loadingState()])]));
+        }
+
+        try {
+            let url = `/admin/reservations?page=${resPageState.page}&size=20`;
+            if (resPageState.nameFilter) url += `&name=${encodeURIComponent(resPageState.nameFilter)}`;
+            const data = await R.api('GET', url, {token: token()});
+            const reservations = data.reservations;
+            resPageState.hasNext = data.hasNext;
+            resPageState.totalLoaded += reservations.length;
+
+            if (reset) R.clear(tbody);
+            if (reset && reservations.length === 0) {
+                tbody.appendChild(R.h('tr', {}, [R.h('td', {colSpan: 6}, [R.emptyState('예약이 없습니다.', '📭')])]));
+                R.byId('total-count').textContent = '0';
+                R.byId('res-load-more-btn').style.display = 'none';
+                return;
+            }
+
+            reservations.forEach(reservation => tbody.appendChild(renderReservationRow(reservation)));
+            R.byId('total-count').textContent = resPageState.hasNext ? `${resPageState.totalLoaded}+` : String(resPageState.totalLoaded);
+            R.byId('res-load-more-btn').style.display = resPageState.hasNext ? '' : 'none';
+        } catch (e) {
+            R.toast(`예약 조회 실패: ${e.message}`, 'error');
+        }
+    }
+
+    function renderReservationRow(reservation) {
+        return R.h('tr', {}, [
+            R.h('td', {}, [R.badge(`#${reservation.id}`)]),
+            R.h('td', {}, [R.h('strong', {text: reservation.name})]),
+            R.h('td', {text: reservation.themeName || '–'}),
+            R.h('td', {text: reservation.date}),
+            R.h('td', {text: reservation.time || '–'}),
+            R.h('td', {}, [
+                R.button('btn btn-danger btn-sm', '🗑 삭제', () => deleteReservation(reservation.id)),
+            ]),
+        ]);
+    }
+
+    function searchReservations() {
+        resPageState.nameFilter = R.byId('filter-name').value.trim();
+        loadReservations(true);
+    }
+
+    function clearSearch() {
+        R.byId('filter-name').value = '';
+        resPageState.nameFilter = '';
+        loadReservations(true);
+    }
+
+    async function loadMore() {
+        resPageState.page += 1;
+        await loadReservations(false);
+    }
+
+    async function deleteReservation(id) {
+        if (!confirm(`예약 #${id}을 삭제할까요?`)) return;
+        try {
+            await R.api('DELETE', `/admin/reservations/${id}`, {token: token()});
+            R.toast('예약이 삭제되었습니다.', 'success');
+            await loadReservations(true);
+        } catch (e) {
+            R.toast(`삭제 실패: ${e.message}`, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        R.byId('search-btn').addEventListener('click', searchReservations);
+        R.byId('clear-btn').addEventListener('click', clearSearch);
+        R.byId('res-load-more-btn').addEventListener('click', loadMore);
+        R.byId('filter-name').addEventListener('keydown', event => {
+            if (event.key === 'Enter') searchReservations();
+        });
+        R.setupAdminAuth(() => loadReservations(true));
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>RoomEscape — 방탈출 예약</title>
+    <meta content="방탈출 테마 선택 및 예약 페이지" name="description">
+    <link href="style.css" rel="stylesheet">
+    <style>
+        .user-layout { min-height: 100vh; display: flex; flex-direction: column; }
+        .top-nav { background: var(--bg-secondary); border-bottom: 1px solid var(--border); padding: 0 36px; min-height: 60px; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 100; gap: 16px; }
+        .top-nav-logo { font-size: 18px; font-weight: 700; background: linear-gradient(135deg, #5b7fff, #a78bfa); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; }
+        .top-nav-links { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .user-main { flex: 1; max-width: 960px; margin: 0 auto; padding: 40px 24px; width: 100%; }
+        .steps { display: flex; align-items: center; gap: 0; margin-bottom: 36px; }
+        .step { display: flex; align-items: center; gap: 8px; flex: 1; position: relative; }
+        .step:not(:last-child)::after { content: ''; position: absolute; right: 0; top: 50%; transform: translateY(-50%); width: calc(100% - 120px); height: 2px; background: var(--border); left: 130px; }
+        .step.done::after { background: var(--accent); }
+        .step-num { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border: 2px solid var(--border); color: var(--text-muted); background: var(--bg-secondary); flex-shrink: 0; transition: all 0.3s; }
+        .step.active .step-num { background: var(--accent); border-color: var(--accent); color: #fff; box-shadow: 0 0 16px rgba(91, 127, 255, 0.4); }
+        .step.done .step-num { background: var(--success); border-color: var(--success); color: #0d0f1a; }
+        .step-label { font-size: 13px; font-weight: 600; color: var(--text-muted); white-space: nowrap; }
+        .step.active .step-label { color: var(--accent); }
+        .step.done .step-label { color: var(--success); }
+        .section-panel { display: none; animation: fadeIn 0.3s ease; }
+        .section-panel.visible { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .booking-summary { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 24px; margin-bottom: 24px; display: flex; gap: 20px; flex-wrap: wrap; }
+        .summary-item { display: flex; flex-direction: column; gap: 2px; }
+        .summary-key { font-size: 11px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+        .summary-val { font-size: 15px; font-weight: 600; color: var(--text-primary); }
+        .summary-val.empty { color: var(--text-muted); font-weight: 400; font-style: italic; }
+        .login-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; align-items: end; }
+        .modal-backdrop { display:none; position:fixed; inset:0; background:rgba(0,0,0,0.6); z-index:200; align-items:center; justify-content:center; }
+        .modal-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:28px; width:100%; max-width:480px; margin:0 16px; }
+    </style>
+</head>
+<body>
+<div class="user-layout">
+    <nav class="top-nav">
+        <div class="top-nav-logo">🔐 RoomEscape</div>
+        <div class="top-nav-links">
+            <span class="auth-status" id="member-status"></span>
+            <button class="btn btn-ghost btn-sm" id="logout-btn" type="button">로그아웃</button>
+            <a class="btn btn-ghost btn-sm" href="/admin/reservation.html">🛠 관리자</a>
+        </div>
+    </nav>
+
+    <main class="user-main">
+        <div style="text-align: center; margin-bottom: 32px;">
+            <h1 style="font-size: 32px; font-weight: 800; margin-bottom: 8px;">방탈출 예약</h1>
+            <p style="color: var(--text-secondary); font-size: 16px;">로그인하고 테마와 시간을 골라 예약하세요.</p>
+        </div>
+
+        <div class="card" id="auth-card" style="margin-bottom:24px;">
+            <div class="card-header">
+                <span class="card-title">계정</span>
+            </div>
+            <div class="login-grid">
+                <div class="form-group">
+                    <label for="auth-username">아이디</label>
+                    <input id="auth-username" placeholder="admin" type="text" autocomplete="username">
+                </div>
+                <div class="form-group">
+                    <label for="auth-password">비밀번호</label>
+                    <input id="auth-password" placeholder="비밀번호" type="password">
+                </div>
+                <div class="form-group">
+                    <label for="auth-name">이름</label>
+                    <input id="auth-name" placeholder="회원가입 시 입력" type="text">
+                </div>
+                <div class="auth-actions">
+                    <button class="btn btn-primary" id="login-btn" type="button">로그인</button>
+                    <button class="btn btn-ghost" id="register-btn" type="button">회원가입</button>
+                </div>
+            </div>
+            <p class="auth-message" id="auth-message"></p>
+        </div>
+
+        <div class="steps" id="steps">
+            <div class="step active" id="step-1"><div class="step-num">1</div><span class="step-label">테마 선택</span></div>
+            <div class="step" id="step-2"><div class="step-num">2</div><span class="step-label">날짜 · 시간</span></div>
+            <div class="step" id="step-3"><div class="step-num">3</div><span class="step-label">예약 완료</span></div>
+        </div>
+
+        <div class="booking-summary" id="booking-summary">
+            <div class="summary-item"><div class="summary-key">테마</div><div class="summary-val empty" id="sum-theme">–</div></div>
+            <div class="summary-item"><div class="summary-key">날짜</div><div class="summary-val empty" id="sum-date">–</div></div>
+            <div class="summary-item"><div class="summary-key">시간</div><div class="summary-val empty" id="sum-time">–</div></div>
+            <div class="summary-item"><div class="summary-key">계정</div><div class="summary-val empty" id="sum-name">–</div></div>
+        </div>
+
+        <div class="section-panel visible" id="panel-1">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">🎭 테마를 선택하세요</span>
+                    <button class="btn btn-ghost btn-sm" id="theme-refresh-btn" type="button">새로고침</button>
+                </div>
+                <div class="theme-grid" id="theme-grid"></div>
+                <div style="text-align: center; margin-top: 16px;">
+                    <button class="btn btn-ghost" id="theme-load-more-btn" style="display:none;" type="button">더 보기</button>
+                </div>
+            </div>
+
+            <div class="card" style="margin-top: 20px;">
+                <div class="card-header">
+                    <span class="card-title">🏆 이번 주 인기 테마</span>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <input id="pop-limit" max="20" min="1" style="width:60px;" type="number" value="5">
+                        <button class="btn btn-primary btn-sm" id="popular-load-btn" type="button">조회</button>
+                    </div>
+                </div>
+                <div id="popular-section"></div>
+            </div>
+        </div>
+
+        <div class="section-panel" id="panel-2">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">📅 날짜와 시간을 선택하세요</span>
+                    <button class="btn btn-ghost btn-sm" id="back-step-1" type="button">← 뒤로</button>
+                </div>
+                <div style="display: flex; gap: 14px; align-items: flex-end; flex-wrap: wrap; margin-bottom: 24px;">
+                    <div class="form-group" style="flex: 1; min-width: 180px;">
+                        <label for="book-date">날짜</label>
+                        <input id="book-date" type="date">
+                    </div>
+                </div>
+                <div id="time-slot-container"></div>
+            </div>
+        </div>
+
+        <div class="section-panel" id="panel-3">
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">✅ 예약 정보 확인</span>
+                    <button class="btn btn-ghost btn-sm" id="back-step-2" type="button">← 뒤로</button>
+                </div>
+                <div id="confirm-summary" style="margin-bottom: 24px; display: grid; grid-template-columns: 1fr 1fr; gap: 14px;"></div>
+                <button class="btn btn-primary btn-full" id="submit-reservation-btn" style="max-width: 300px;" type="button">🎟 예약 확정</button>
+            </div>
+        </div>
+
+        <div class="card" style="margin-top: 32px;">
+            <div class="card-header">
+                <span class="card-title">📋 내 예약 조회 · 수정 · 취소</span>
+                <button class="btn btn-primary btn-sm" id="my-res-refresh-btn" type="button">조회</button>
+            </div>
+            <div id="my-res-section"></div>
+        </div>
+
+        <div class="modal-backdrop" id="edit-modal-backdrop">
+            <div class="modal-card">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <span style="font-size:16px;font-weight:700;">✏️ 예약 수정</span>
+                    <button class="btn btn-ghost btn-sm" id="edit-close-btn" type="button">✕</button>
+                </div>
+                <input id="edit-res-id" type="hidden">
+                <div class="form-grid form-grid-2" style="margin-bottom:14px;">
+                    <div class="form-group">
+                        <label for="edit-date">날짜</label>
+                        <input id="edit-date" type="date">
+                    </div>
+                    <div class="form-group">
+                        <label for="edit-theme">테마</label>
+                        <select id="edit-theme"><option value="">테마 선택</option></select>
+                    </div>
+                    <div class="form-group" style="grid-column: 1 / -1;">
+                        <label for="edit-time">시간</label>
+                        <select id="edit-time"><option value="">시간 선택</option></select>
+                    </div>
+                </div>
+                <div style="display:flex;gap:10px;">
+                    <button class="btn btn-primary" id="edit-save-btn" style="flex:1;" type="button">저장</button>
+                    <button class="btn btn-ghost" id="edit-cancel-btn" type="button">취소</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="app.js"></script>
+<script>
+    const R = Roomescape;
+    const state = {selectedTheme: null, selectedDate: null, selectedTime: null, themes: []};
+    const themePageState = {page: 0, hasNext: false};
+
+    function tokenInfo() {
+        return R.decodeToken(R.auth.getMemberToken());
+    }
+
+    function requireLogin() {
+        if (R.auth.getMemberToken()) return true;
+        R.toast('로그인이 필요합니다.', 'error');
+        return false;
+    }
+
+    function updateAuthUi() {
+        const token = R.auth.getMemberToken();
+        const info = R.decodeToken(token);
+        const status = R.byId('member-status');
+        R.clear(status);
+        if (token && (info?.username || info?.sub)) {
+            status.appendChild(R.h('span', {text: `${info.username || info.sub} 로그인 중`}));
+            R.byId('logout-btn').style.display = '';
+            R.byId('auth-card').style.display = 'none';
+        } else {
+            status.appendChild(R.h('span', {text: '로그인이 필요합니다'}));
+            R.byId('logout-btn').style.display = 'none';
+            R.byId('auth-card').style.display = '';
+        }
+        updateSummary();
+    }
+
+    async function loginMember() {
+        const username = R.byId('auth-username').value.trim();
+        const password = R.byId('auth-password').value;
+        if (!username || !password) {
+            R.byId('auth-message').textContent = '아이디와 비밀번호를 입력해주세요.';
+            return;
+        }
+        try {
+            const token = await R.login(username, password);
+            R.auth.setMemberToken(token);
+            R.byId('auth-password').value = '';
+            R.byId('auth-message').textContent = '';
+            updateAuthUi();
+            R.toast('로그인되었습니다.', 'success');
+            await loadMyReservations();
+        } catch (e) {
+            R.byId('auth-message').textContent = e.message;
+        }
+    }
+
+    async function registerMember() {
+        const username = R.byId('auth-username').value.trim();
+        const password = R.byId('auth-password').value;
+        const name = R.byId('auth-name').value.trim();
+        if (!username || !password || !name) {
+            R.byId('auth-message').textContent = '회원가입에는 아이디, 비밀번호, 이름이 모두 필요합니다.';
+            return;
+        }
+        try {
+            await R.api('POST', '/users', {body: {username, password, name}});
+            R.toast('회원가입이 완료되었습니다. 바로 로그인할게요.', 'success');
+            await loginMember();
+        } catch (e) {
+            R.byId('auth-message').textContent = e.message;
+        }
+    }
+
+    function logoutMember() {
+        R.auth.clearMemberToken();
+        updateAuthUi();
+        renderMyReservations([]);
+        R.toast('로그아웃되었습니다.', 'info');
+    }
+
+    function updateSummary() {
+        const setVal = (id, value) => {
+            const el = R.byId(id);
+            el.textContent = value || '–';
+            el.classList.toggle('empty', !value);
+        };
+        setVal('sum-theme', state.selectedTheme?.name);
+        setVal('sum-date', state.selectedDate);
+        setVal('sum-time', state.selectedTime?.startAt);
+        const info = tokenInfo();
+        setVal('sum-name', info?.username || info?.sub);
+    }
+
+    function goToStep(n) {
+        for (let i = 1; i <= 3; i++) {
+            R.byId(`panel-${i}`).classList.toggle('visible', i === n);
+            const step = R.byId(`step-${i}`);
+            step.classList.toggle('active', i === n);
+            step.classList.toggle('done', i < n);
+        }
+        updateSummary();
+    }
+
+    function renderThemeCard(theme) {
+        const card = R.h('button', {
+            className: 'theme-card',
+            type: 'button',
+            id: `theme-card-${theme.id}`,
+            on: {click: () => selectTheme(theme)},
+        }, [
+            R.h('div', {className: 'theme-thumbnail'}, R.imageOrFallback(theme.thumbnailImageUrl, theme.name, {
+                fallbackStyle: {width: '100%', height: '100%', fontSize: '36px'},
+            })),
+            R.h('div', {className: 'theme-card-body'}, [
+                R.h('div', {className: 'theme-card-name', text: theme.name}),
+                R.h('div', {className: 'theme-card-desc', text: theme.description || '설명 없음'}),
+            ]),
+        ]);
+        return card;
+    }
+
+    async function loadThemes(reset = true) {
+        const grid = R.byId('theme-grid');
+        if (reset) {
+            themePageState.page = 0;
+            state.themes = [];
+            R.clear(grid);
+            grid.appendChild(R.loadingState());
+        }
+        try {
+            const data = await R.api('GET', `/themes?page=${themePageState.page}&size=20`);
+            const themes = data.themes;
+            themePageState.hasNext = data.hasNext;
+            if (reset) R.clear(grid);
+            state.themes = state.themes.concat(themes);
+            if (reset && themes.length === 0) {
+                grid.appendChild(R.emptyState('등록된 테마가 없습니다.', '🎭'));
+            } else {
+                themes.forEach(theme => grid.appendChild(renderThemeCard(theme)));
+            }
+            R.byId('theme-load-more-btn').style.display = themePageState.hasNext ? '' : 'none';
+        } catch (e) {
+            R.clear(grid);
+            grid.appendChild(R.errorState(`로드 실패: ${e.message}`));
+        }
+    }
+
+    async function loadThemeMore() {
+        themePageState.page += 1;
+        await loadThemes(false);
+    }
+
+    function selectTheme(theme) {
+        state.selectedTheme = theme;
+        document.querySelectorAll('.theme-card').forEach(card => card.classList.remove('selected'));
+        R.byId(`theme-card-${theme.id}`)?.classList.add('selected');
+        updateSummary();
+        goToStep(2);
+        if (R.byId('book-date').value) loadAvailableTimes();
+    }
+
+    async function loadPopular() {
+        const limit = R.byId('pop-limit').value || 5;
+        const container = R.byId('popular-section');
+        R.clear(container);
+        container.appendChild(R.loadingState());
+        try {
+            const themes = (await R.api('GET', `/themes/popular?limit=${limit}`)).themes;
+            R.clear(container);
+            if (!themes.length) {
+                container.appendChild(R.emptyState('데이터가 없습니다.', '📊'));
+                return;
+            }
+            const list = R.h('div', {style: {display: 'flex', flexDirection: 'column', gap: '10px'}});
+            themes.forEach((theme, index) => {
+                list.appendChild(R.h('button', {
+                    className: 'nav-item',
+                    type: 'button',
+                    style: {background: 'var(--bg-input)', padding: '12px', width: '100%'},
+                    on: {click: () => selectTheme(theme)},
+                }, [
+                    R.h('span', {text: ['🥇', '🥈', '🥉'][index] || String(index + 1), style: {width: '28px', textAlign: 'center'}}),
+                    R.h('span', {style: {flex: '1', textAlign: 'left'}}, [
+                        R.h('strong', {text: theme.name}),
+                        R.h('div', {text: theme.description || '', style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
+                    ]),
+                    R.badge(`🔖 ${theme.reservedCount}건`, 'yellow'),
+                ]));
+            });
+            container.appendChild(list);
+        } catch (e) {
+            R.clear(container);
+            container.appendChild(R.errorState(`조회 실패: ${e.message}`));
+        }
+    }
+
+    async function loadAvailableTimes() {
+        const date = R.byId('book-date').value;
+        state.selectedDate = date;
+        state.selectedTime = null;
+        updateSummary();
+        const container = R.byId('time-slot-container');
+        R.clear(container);
+        if (!state.selectedTheme || !date) {
+            container.appendChild(R.emptyState('테마와 날짜를 선택해주세요.'));
+            return;
+        }
+        container.appendChild(R.loadingState());
+        try {
+            const times = (await R.api('GET', `/themes/${state.selectedTheme.id}/times?date=${date}`)).times;
+            R.clear(container);
+            if (!times.length) {
+                container.appendChild(R.emptyState('가용 시간이 없습니다.', '⏰'));
+                return;
+            }
+            const grid = R.h('div', {className: 'time-grid'});
+            times.forEach(time => {
+                grid.appendChild(R.h('button', {
+                    className: `time-slot ${time.isReserved ? 'reserved' : 'available'}`,
+                    type: 'button',
+                    disabled: time.isReserved,
+                    id: `ts-${time.id}`,
+                    on: time.isReserved ? {} : {click: () => selectTime(time)},
+                }, [
+                    R.h('div', {text: time.startAt}),
+                    R.h('div', {className: 'time-slot-label', text: time.isReserved ? '예약됨' : '선택 가능'}),
+                ]));
+            });
+            container.appendChild(grid);
+        } catch (e) {
+            R.clear(container);
+            container.appendChild(R.errorState(`조회 실패: ${e.message}`));
+        }
+    }
+
+    function selectTime(time) {
+        state.selectedTime = time;
+        document.querySelectorAll('.time-slot.available').forEach(el => el.classList.remove('selected'));
+        R.byId(`ts-${time.id}`)?.classList.add('selected');
+        updateSummary();
+        buildConfirmSummary();
+        goToStep(3);
+    }
+
+    function buildConfirmSummary() {
+        const container = R.byId('confirm-summary');
+        R.clear(container);
+        container.append(
+            R.h('div', {style: {background: 'var(--bg-input)', borderRadius: 'var(--radius)', padding: '16px'}}, [
+                R.h('div', {text: '테마', style: {fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600'}}),
+                R.h('div', {text: state.selectedTheme?.name || '–', style: {fontSize: '16px', fontWeight: '700'}}),
+                R.h('div', {text: state.selectedTheme?.description || '', style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
+            ]),
+            R.h('div', {style: {background: 'var(--bg-input)', borderRadius: 'var(--radius)', padding: '16px'}}, [
+                R.h('div', {text: '일정', style: {fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600'}}),
+                R.h('div', {text: state.selectedDate || '–', style: {fontSize: '16px', fontWeight: '700'}}),
+                R.h('div', {text: `⏰ ${state.selectedTime?.startAt || '–'}`, style: {fontSize: '12px', color: 'var(--text-secondary)'}}),
+            ]),
+        );
+    }
+
+    async function submitReservation() {
+        if (!requireLogin()) return;
+        if (!state.selectedTheme || !state.selectedDate || !state.selectedTime) {
+            R.toast('테마, 날짜, 시간을 모두 선택해주세요.', 'error');
+            return;
+        }
+        try {
+            await R.api('POST', '/reservations', {
+                token: R.auth.getMemberToken(),
+                body: {themeId: state.selectedTheme.id, date: state.selectedDate, timeId: state.selectedTime.id},
+            });
+            R.toast(`"${state.selectedTheme.name}" 예약이 완료되었습니다.`, 'success');
+            state.selectedTheme = null;
+            state.selectedDate = null;
+            state.selectedTime = null;
+            updateSummary();
+            goToStep(1);
+            await loadThemes(true);
+            await loadMyReservations();
+        } catch (e) {
+            if (e.status === 401) R.auth.clearMemberToken();
+            updateAuthUi();
+            R.toast(`예약 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function loadMyReservations() {
+        const section = R.byId('my-res-section');
+        R.clear(section);
+        if (!R.auth.getMemberToken()) {
+            section.appendChild(R.emptyState('로그인하면 내 예약을 확인할 수 있습니다.', '📋'));
+            return;
+        }
+        section.appendChild(R.loadingState());
+        try {
+            const data = await R.api('GET', '/reservations/mine', {token: R.auth.getMemberToken()});
+            renderMyReservations(data.reservations);
+        } catch (e) {
+            if (e.status === 401) R.auth.clearMemberToken();
+            updateAuthUi();
+            R.clear(section);
+            section.appendChild(R.errorState(`조회 실패: ${e.message}`));
+        }
+    }
+
+    function renderMyReservations(reservations) {
+        const section = R.byId('my-res-section');
+        R.clear(section);
+        if (!R.auth.getMemberToken()) {
+            section.appendChild(R.emptyState('로그인하면 내 예약을 확인할 수 있습니다.', '📋'));
+            return;
+        }
+        if (!reservations.length) {
+            section.appendChild(R.emptyState('예약이 없습니다.', '📭'));
+            return;
+        }
+        const tbody = R.h('tbody');
+        reservations.forEach(reservation => tbody.appendChild(renderMyReservationRow(reservation)));
+        section.appendChild(R.h('div', {className: 'table-wrap'}, [
+            R.h('table', {}, [
+                R.h('thead', {}, [R.h('tr', {}, ['ID', '테마', '날짜', '시간', '액션'].map(text => R.h('th', {text})))]),
+                tbody,
+            ]),
+        ]));
+    }
+
+    function renderMyReservationRow(reservation) {
+        return R.h('tr', {}, [
+            R.h('td', {}, [R.badge(`#${reservation.id}`)]),
+            R.h('td', {text: reservation.themeName || '–'}),
+            R.h('td', {text: reservation.date}),
+            R.h('td', {text: reservation.time || '–'}),
+            R.h('td', {style: {display: 'flex', gap: '6px'}}, [
+                R.button('btn btn-ghost btn-sm', '✏️ 수정', () => openEditModal(reservation)),
+                R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id)),
+            ]),
+        ]);
+    }
+
+    async function cancelReservation(id) {
+        if (!confirm(`예약 #${id}를 취소할까요?`)) return;
+        try {
+            await R.api('DELETE', `/reservations/${id}`, {token: R.auth.getMemberToken()});
+            R.toast('예약이 취소되었습니다.', 'success');
+            await loadMyReservations();
+            if (state.selectedTheme && state.selectedDate) await loadAvailableTimes();
+        } catch (e) {
+            R.toast(`취소 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function openEditModal(reservation) {
+        R.byId('edit-res-id').value = reservation.id;
+        R.byId('edit-date').value = reservation.date;
+        try {
+            const themes = (await R.api('GET', '/themes?page=0&size=100')).themes;
+            R.setOptions(R.byId('edit-theme'), themes, '테마 선택');
+            const matched = themes.find(theme => theme.name === reservation.themeName);
+            if (matched) R.byId('edit-theme').value = String(matched.id);
+        } catch (e) {
+            R.toast(`테마 목록 로드 실패: ${e.message}`, 'error');
+        }
+        R.byId('edit-modal-backdrop').style.display = 'flex';
+        await loadEditTimes();
+    }
+
+    function closeEditModal() {
+        R.byId('edit-modal-backdrop').style.display = 'none';
+    }
+
+    async function loadEditTimes() {
+        const themeId = R.byId('edit-theme').value;
+        const date = R.byId('edit-date').value;
+        const select = R.byId('edit-time');
+        R.clear(select);
+        select.appendChild(new Option('시간 선택', ''));
+        if (!themeId || !date) return;
+        try {
+            const times = (await R.api('GET', `/themes/${themeId}/times?date=${date}`)).times;
+            times.forEach(time => {
+                const option = new Option(`${time.startAt}${time.isReserved ? ' (예약됨)' : ''}`, String(time.id));
+                option.disabled = time.isReserved;
+                select.appendChild(option);
+            });
+        } catch (e) {
+            R.toast(`시간 조회 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function submitEdit() {
+        const id = R.byId('edit-res-id').value;
+        const date = R.byId('edit-date').value;
+        const themeId = R.byId('edit-theme').value;
+        const timeId = R.byId('edit-time').value;
+        if (!date || !themeId || !timeId) {
+            R.toast('날짜, 테마, 시간을 모두 선택해주세요.', 'error');
+            return;
+        }
+        try {
+            await R.api('PUT', `/reservations/${id}`, {
+                token: R.auth.getMemberToken(),
+                body: {date, themeId: Number(themeId), timeId: Number(timeId)},
+            });
+            R.toast('예약이 수정되었습니다.', 'success');
+            closeEditModal();
+            await loadMyReservations();
+        } catch (e) {
+            R.toast(`수정 실패: ${e.message}`, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        R.byId('login-btn').addEventListener('click', loginMember);
+        R.byId('register-btn').addEventListener('click', registerMember);
+        R.byId('logout-btn').addEventListener('click', logoutMember);
+        R.byId('theme-refresh-btn').addEventListener('click', () => loadThemes(true));
+        R.byId('theme-load-more-btn').addEventListener('click', loadThemeMore);
+        R.byId('popular-load-btn').addEventListener('click', loadPopular);
+        R.byId('back-step-1').addEventListener('click', () => goToStep(1));
+        R.byId('back-step-2').addEventListener('click', () => goToStep(2));
+        R.byId('book-date').addEventListener('change', loadAvailableTimes);
+        R.byId('submit-reservation-btn').addEventListener('click', submitReservation);
+        R.byId('my-res-refresh-btn').addEventListener('click', loadMyReservations);
+        R.byId('edit-close-btn').addEventListener('click', closeEditModal);
+        R.byId('edit-cancel-btn').addEventListener('click', closeEditModal);
+        R.byId('edit-save-btn').addEventListener('click', submitEdit);
+        R.byId('edit-theme').addEventListener('change', loadEditTimes);
+        R.byId('edit-date').addEventListener('change', loadEditTimes);
+        R.byId('edit-modal-backdrop').addEventListener('click', event => {
+            if (event.target === R.byId('edit-modal-backdrop')) closeEditModal();
+        });
+        R.byId('auth-password').addEventListener('keydown', event => {
+            if (event.key === 'Enter') loginMember();
+        });
+        R.byId('book-date').value = new Date().toISOString().split('T')[0];
+        R.byId('popular-section').appendChild(R.emptyState('조회 버튼을 눌러 확인하세요.'));
+        updateAuthUi();
+        loadThemes(true);
+        loadMyReservations();
+    });
+</script>
+</body>
+</html>

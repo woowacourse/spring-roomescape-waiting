@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+    <title>시간 관리 — RoomEscape Admin</title>
+    <meta content="방탈출 예약 시간 관리 - 관리자" name="description">
+    <link href="../style.css" rel="stylesheet">
+</head>
+<body>
+<div class="layout">
+    <nav class="sidebar">
+        <div class="sidebar-logo">
+            <div class="logo-text">🔐 RoomEscape</div>
+            <div class="logo-sub">Admin Panel</div>
+        </div>
+        <div class="sidebar-section">
+            <div class="sidebar-section-label">관리</div>
+            <a class="nav-item" href="reservation.html"><span class="icon">📋</span> 예약 관리</a>
+            <a class="nav-item active" href="time.html"><span class="icon">🕐</span> 시간 관리</a>
+            <a class="nav-item" href="theme.html"><span class="icon">🎭</span> 테마 관리</a>
+        </div>
+        <div class="sidebar-section" style="margin-top: auto;">
+            <div class="sidebar-section-label">사용자</div>
+            <a class="nav-item" href="../index.html"><span class="icon">🏠</span> 사용자 페이지</a>
+        </div>
+    </nav>
+
+    <main class="main">
+        <section class="card auth-panel" id="admin-auth-panel">
+            <div class="card-header"><span class="card-title">관리자 로그인</span></div>
+            <form id="admin-login-form">
+                <div class="form-grid" style="margin-bottom:14px;">
+                    <div class="form-group">
+                        <label for="admin-username">아이디</label>
+                        <input id="admin-username" type="text" autocomplete="username">
+                    </div>
+                    <div class="form-group">
+                        <label for="admin-password">비밀번호</label>
+                        <input id="admin-password" type="password" autocomplete="current-password">
+                    </div>
+                </div>
+                <button class="btn btn-primary" type="submit">로그인</button>
+                <p class="auth-message" id="admin-auth-message"></p>
+            </form>
+        </section>
+
+        <section id="admin-content" style="display:none;">
+            <div class="page-header">
+                <h1 class="page-title">시간 관리</h1>
+                <p class="page-subtitle">예약 가능한 시간대를 추가하거나 삭제합니다.</p>
+                <button class="btn btn-ghost btn-sm" id="admin-logout-btn" type="button" style="margin-top:12px;">로그아웃</button>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card green">
+                    <div class="stat-value" id="time-count">–</div>
+                    <div class="stat-label">조회된 시간</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header"><span class="card-title">새 시간 추가</span></div>
+                <div style="display: flex; gap: 14px; align-items: flex-end;">
+                    <div class="form-group" style="flex: 1; max-width: 260px;">
+                        <label for="new-time">시작 시간</label>
+                        <input id="new-time" placeholder="HH:MM" type="time">
+                    </div>
+                    <button class="btn btn-primary" id="create-time-btn" style="margin-bottom: 0;" type="button">
+                        <span>➕</span> 추가
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <span class="card-title">시간 목록</span>
+                    <button class="btn btn-ghost btn-sm" id="refresh-btn" type="button">새로고침</button>
+                </div>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                        <tr><th>ID</th><th>시작 시간</th><th>액션</th></tr>
+                        </thead>
+                        <tbody id="time-table-body"></tbody>
+                    </table>
+                </div>
+                <div style="text-align: center; margin-top: 12px;">
+                    <button class="btn btn-ghost" id="load-more-btn" style="display:none;" type="button">더 보기</button>
+                </div>
+            </div>
+        </section>
+    </main>
+</div>
+
+<div id="toast-container"></div>
+
+<script src="../app.js"></script>
+<script>
+    const R = Roomescape;
+    const pageState = {page: 0, hasNext: false, totalLoaded: 0};
+
+    function token() {
+        return R.managerToken();
+    }
+
+    async function loadTimes(reset = true) {
+        const tbody = R.byId('time-table-body');
+        if (reset) {
+            pageState.page = 0;
+            pageState.totalLoaded = 0;
+            R.clear(tbody);
+            tbody.appendChild(R.h('tr', {}, [R.h('td', {colSpan: 3}, [R.loadingState()])]));
+        }
+
+        try {
+            const data = await R.api('GET', `/times?page=${pageState.page}&size=20`);
+            const times = data.times;
+            pageState.hasNext = data.hasNext;
+            pageState.totalLoaded += times.length;
+
+            if (reset) R.clear(tbody);
+            if (reset && times.length === 0) {
+                tbody.appendChild(R.h('tr', {}, [R.h('td', {colSpan: 3}, [R.emptyState('등록된 시간이 없습니다.', '⏰')])]));
+                R.byId('time-count').textContent = '0';
+                R.byId('load-more-btn').style.display = 'none';
+                return;
+            }
+
+            times.forEach(time => tbody.appendChild(renderTimeRow(time)));
+            R.byId('time-count').textContent = pageState.hasNext ? `${pageState.totalLoaded}+` : String(pageState.totalLoaded);
+            R.byId('load-more-btn').style.display = pageState.hasNext ? '' : 'none';
+        } catch (e) {
+            R.toast(`시간 조회 실패: ${e.message}`, 'error');
+        }
+    }
+
+    function renderTimeRow(time) {
+        return R.h('tr', {}, [
+            R.h('td', {}, [R.badge(`#${time.id}`)]),
+            R.h('td', {}, [R.h('span', {
+                text: time.startAt,
+                style: {fontSize: '18px', fontWeight: '700', color: 'var(--accent)'},
+            })]),
+            R.h('td', {}, [R.button('btn btn-danger btn-sm', '🗑 삭제', () => deleteTime(time.id))]),
+        ]);
+    }
+
+    async function loadMore() {
+        pageState.page += 1;
+        await loadTimes(false);
+    }
+
+    async function createTime() {
+        const startAt = R.byId('new-time').value;
+        if (!startAt) {
+            R.toast('시간을 입력해주세요.', 'error');
+            return;
+        }
+        try {
+            await R.api('POST', '/admin/times', {token: token(), body: {startAt}});
+            R.toast(`${startAt} 시간이 추가되었습니다.`, 'success');
+            R.byId('new-time').value = '';
+            await loadTimes(true);
+        } catch (e) {
+            R.toast(`추가 실패: ${e.message}`, 'error');
+        }
+    }
+
+    async function deleteTime(id) {
+        if (!confirm(`시간 #${id}를 삭제할까요? 연관된 예약이 있으면 실패할 수 있습니다.`)) return;
+        try {
+            await R.api('DELETE', `/admin/times/${id}`, {token: token()});
+            R.toast('시간이 삭제되었습니다.', 'success');
+            await loadTimes(true);
+        } catch (e) {
+            R.toast(`삭제 실패: ${e.message}`, 'error');
+        }
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+        R.byId('create-time-btn').addEventListener('click', createTime);
+        R.byId('refresh-btn').addEventListener('click', () => loadTimes(true));
+        R.byId('load-more-btn').addEventListener('click', loadMore);
+        R.setupAdminAuth(() => loadTimes(true));
+    });
+</script>
+</body>
+</html>
