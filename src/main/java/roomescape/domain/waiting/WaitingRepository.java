@@ -1,15 +1,14 @@
 package roomescape.domain.waiting;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
+import roomescape.domain.waiting.dto.MyWaitingResult;
 
 @Repository
 public class WaitingRepository {
@@ -17,21 +16,13 @@ public class WaitingRepository {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    private final RowMapper<Waiting> rowMapper = (resultSet, rowNum) -> Waiting.of(
+    private final RowMapper<MyWaitingResult> rowMapper = (resultSet, rowNum) -> new MyWaitingResult(
         resultSet.getLong("waiting_id"),
         resultSet.getString("name"),
         resultSet.getDate("date").toLocalDate(),
-        ReservationTime.of(
-            resultSet.getLong("time_id"),
-            resultSet.getTime("time_start_at").toLocalTime(),
-            resultSet.getTime("time_finish_at").toLocalTime()
-        ),
-        Theme.of(
-            resultSet.getLong("theme_id"),
-            resultSet.getString("theme_name"),
-            resultSet.getString("theme_description"),
-            resultSet.getString("theme_image_url")
-        )
+        resultSet.getTime("time_start_at").toLocalTime(),
+        resultSet.getString("theme_name"),
+        resultSet.getInt("waiting_number")
     );
 
     public WaitingRepository(JdbcTemplate jdbcTemplate) {
@@ -75,5 +66,31 @@ public class WaitingRepository {
     public void deleteById(Long id) {
         String query = "delete from waiting where id = ?";
         jdbcTemplate.update(query, id);
+    }
+
+    public List<MyWaitingResult> findByName(String name) {
+        String query = """
+            SELECT ranked.waiting_id, ranked.name, ranked.date,
+                   t.start_at AS time_start_at,
+                   th.name AS theme_name,
+                   ranked.waiting_number
+            FROM (
+                SELECT
+                    w.id AS waiting_id,
+                    w.name,
+                    w.date,
+                    w.time_id,
+                    w.theme_id,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY w.theme_id, w.time_id, w.date
+                        ORDER BY w.id
+                    ) AS waiting_number
+                FROM waiting w
+            ) ranked
+            JOIN reservation_time t ON ranked.time_id = t.id
+            JOIN theme th ON ranked.theme_id = th.id
+            WHERE ranked.name = ?;
+            """;
+        return jdbcTemplate.query(query, rowMapper, name);
     }
 }

@@ -1,11 +1,14 @@
 package roomescape.domain.waiting;
 
 import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.waiting.dto.MyWaitingResult;
+import roomescape.domain.waiting.dto.MyWaitingsResponse;
 import roomescape.domain.waiting.dto.WaitingRequest;
 import roomescape.domain.waiting.dto.WaitingResponse;
 import roomescape.exception.ErrorCode;
@@ -30,12 +33,12 @@ public class WaitingService {
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
 
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
         validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
-                waitingRequest.name());
+            waitingRequest.name());
         reservationTime.validateIfTimePast(waitingRequest.date());
 
         Waiting waiting = Waiting.of(
@@ -50,6 +53,17 @@ public class WaitingService {
         return WaitingResponse.of(saved);
     }
 
+    public void deleteWaiting(Long id) {
+        validateWaitingId(id);
+        waitingRepository.deleteById(id);
+    }
+
+    public MyWaitingsResponse getMyWaitings(String name) {
+        List<MyWaitingResult> myWaitingResults = waitingRepository.findByName(name);
+        return MyWaitingsResponse.from(myWaitingResults);
+    }
+
+
     private void validateDuplicateWaiting(LocalDate date, Long timeId, Long themeId, String name) {
         boolean isDuplicated = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name);
         if (isDuplicated) {
@@ -57,14 +71,10 @@ public class WaitingService {
         }
     }
 
-    public void deleteWaiting(Long id) {
-        validateWaitingId(id);
-        waitingRepository.deleteById(id);
-    }
-
     private void validateWaitingId(Long id) {
         if (!waitingRepository.existsById(id)) {
             throw new RoomescapeException(ErrorCode.WAITING_ID_NOT_FOUND);
         }
     }
+
 }
