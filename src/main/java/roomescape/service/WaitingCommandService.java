@@ -63,9 +63,13 @@ public class WaitingCommandService {
             throw new PastReservationException("지나간 시간에는 예약 대기를 생성할 수 없습니다.");
         }
 
+        if (name.equals(reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).get().username())){
+            throw new DuplicateException("내가 예약한 시간에 예약대기를 생성할 수 없습니다.");
+        }
+
         if (waitingDao.findAllByDateAndTimeIdAndThemeId(date, timeId, themeId).stream()
                 .anyMatch(waiting -> name.equals(waiting.name()))) {
-            throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 걸 수 없습니다.");
+            throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
 
         return waitingDao.save(name, date, timeId, themeId, LocalDateTime.now(clock));
@@ -73,11 +77,13 @@ public class WaitingCommandService {
 
     public void cancel(long waitingId, String name) {
         Waiting waiting = findWaitingReference(waitingId);
+
         if (isPast(waiting.reservationDate(), waiting.reservationTime())) {
             throw new PastReservationException("이미 시작된 게임의 예약대기는 취소할 수 없습니다.");
         }
+
         if (!name.equals(waiting.name())) {
-            throw new ForbiddenException("타인의 예약 대기는 삭제할 수 없습니다.");
+            throw new ForbiddenException("타인의 예약대기는 취소할 수 없습니다.");
         }
 
         waitingDao.delete(waitingId);
