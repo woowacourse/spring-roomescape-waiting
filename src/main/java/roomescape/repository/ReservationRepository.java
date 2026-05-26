@@ -21,6 +21,8 @@ public interface ReservationRepository {
 
     List<Reservation> findByName(String name);
 
+    List<Reservation> findByThemeSlotAndPending(Long themeSlotId);
+
     void updateStatus(Reservation reservation);
 
     void updateThemeSlot(Reservation reservation);
