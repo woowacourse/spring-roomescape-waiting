@@ -29,7 +29,10 @@ public enum ErrorType {
     EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "AUTH401_004", "토큰이 만료되었습니다. 다시 로그인해 주세요."),
 
     INSUFFICIENT_ROLE(HttpStatus.FORBIDDEN, "AUTH403_001", "권한이 없습니다."),
-    WRONG_STORE_ACCESS(HttpStatus.FORBIDDEN, "AUTH403_002", "다른 매장에 접근권한이 없습니다.");
+    WRONG_STORE_ACCESS(HttpStatus.FORBIDDEN, "AUTH403_002", "다른 매장에 접근권한이 없습니다."),
+    RESERVATION_WAIT_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_WAIT404_001", "존재하지 않는 예약 대기입니다."),
+
+    PAST_RESERVATION_WAIT_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "RESERVATION_WAIT422_001", "예약 대기 시간이 이미 지난 시간입니다.");
 
     private final HttpStatus httpStatus;
     private final String errorCode;

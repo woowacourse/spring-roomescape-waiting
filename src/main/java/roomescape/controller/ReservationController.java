@@ -1,8 +1,10 @@
 package roomescape.controller;
 
 import jakarta.validation.Valid;
+
 import java.net.URI;
 import java.util.List;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,6 +19,7 @@ import roomescape.domain.Reservation;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dto.response.ReservationWaitResponse;
 import roomescape.service.ReservationService;
 
 @RequestMapping("/api/v1/reservations")
@@ -52,6 +55,11 @@ public class ReservationController {
                 .body(reservationResponse);
     }
 
+    @PostMapping("/{id}/waits")
+    public ResponseEntity<ReservationWaitResponse> createWait(@LoginMember Long memberId, @PathVariable Long reservationId) {
+        return ResponseEntity.ok(ReservationWaitResponse.from(reservationService.createWait(memberId, reservationId)));
+    }
+
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> updateReservation(
             @PathVariable Long id,
@@ -73,4 +81,6 @@ public class ReservationController {
         reservationService.deleteReservation(id, memberId);
         return ResponseEntity.noContent().build();
     }
+
+
 }

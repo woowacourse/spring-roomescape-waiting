@@ -25,10 +25,10 @@ openssl rand -base64 32
 
 ### 환경 변수 명세
 
-| 변수 | 필수 | 기본값 | 설명 |
-| --- | --- | --- | --- |
-| `JWT_SECRET_KEY` | 필수 | — | HS256 서명에 사용할 Base64 인코딩 키 (32바이트 이상 권장) |
-| `JWT_EXPIRE_LENGTH` | 선택 | `3600000` | 토큰 만료 시간 (ms) |
+| 변수                  | 필수 | 기본값       | 설명                                       |
+|---------------------|----|-----------|------------------------------------------|
+| `JWT_SECRET_KEY`    | 필수 | —         | HS256 서명에 사용할 Base64 인코딩 키 (32바이트 이상 권장) |
+| `JWT_EXPIRE_LENGTH` | 선택 | `3600000` | 토큰 만료 시간 (ms)                            |
 
 `.env`는 `.gitignore`에 포함되어 커밋되지 않습니다.
 값이 누락되면 앱 시작이 실패(fail-fast)합니다.
@@ -92,3 +92,53 @@ Password: 비워두기
 - [ ] 이전 미션의 내 예약 목록 조회를**확장**한다.
 - [ ] 사용자의**예약과 대기가 상태로 구분**되어 함께 표시된다.
 - [ ] 대기에는 본인의**대기 순번**도 함께 보여준다.
+
+## 미션 중 기록
+
+### 막힌 부분
+
+#### member와 store 관계의 정규화 vs 반정규화
+
+현재 member과 그 중 매니저가 관리하는 매장(store)의 스키마를 다음과 같이 정의하였다.
+
+```sql
+-- 
+
+CREATE TABLE member
+(
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL, .
+    .
+    .
+    store_id
+    INT
+    NOT
+    NULL
+)
+```
+
+```sql
+CREATE TABLE member
+(
+    id       INT AUTO_INCREMENT PRIMARY KEY,
+    name     VARCHAR(255) NOT NULL, 
+    store_id INT          NOT NULL
+);
+
+CREATE TABLE store_manager
+(
+    id        INT AUTO_INCREMENT PRIMARY KEY,
+    member_id INT NOT NULL,
+    store_id  INT NOT NULL,
+    PRIMARY KEY (member_id)
+);
+
+CREATE TABLE store
+(
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255)
+);
+```
+
+정규화를 하는 것이 불필요한 null 값을 줄일 수 있다는 의견과 구현의 간단함을 위해 반정규화를 해야한다는 의견이 대립했다.
+상의 끝에 null 값이 많아도 메모리가 차지하는 비율이 적다는 점, JOIN과 코드 복잡도가 늘어난다는 점에서 반정규화를 채택했다.

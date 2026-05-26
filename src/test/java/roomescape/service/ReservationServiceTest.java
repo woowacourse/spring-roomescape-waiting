@@ -1,15 +1,16 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DuplicateKeyException;
@@ -17,31 +18,30 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import roomescape.auth.Role;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ReservationWaitDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.PastReservationCancelNotAllowedException;
-import roomescape.exception.PastReservationNotAllowedException;
-import roomescape.exception.ReservationAlreadyExistsException;
-import roomescape.exception.ReservationNotFoundException;
-import roomescape.exception.ReservationOwnerMismatchException;
-import roomescape.exception.ReservationTimeNotFoundException;
-import roomescape.exception.WrongStoreAccessException;
+import roomescape.domain.ReservationWait;
+import roomescape.exception.*;
 
 public class ReservationServiceTest {
 
+    private static final LocalDate NOW = LocalDate.of(2026, 5, 26);
     private static final Long BROWN_ID = 1L;
     private static final Long JEONGKONG_ID = 2L;
 
     private ReservationDao reservationDao;
     private ReservationTimeDao reservationTimeDao;
     private ReservationService reservationService;
+    private ReservationWaitDao reservationWaitDao;
 
     @BeforeEach
     void setUp() {
         reservationDao = mock(ReservationDao.class);
         reservationTimeDao = mock(ReservationTimeDao.class);
-        reservationService = new ReservationService(reservationDao, reservationTimeDao);
+        reservationWaitDao = mock(ReservationWaitDao.class);
+        reservationService = new ReservationService(reservationDao, reservationTimeDao, reservationWaitDao);
     }
 
     @Test
@@ -348,5 +348,80 @@ public class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateByManager(
                 reservationId, futureDate, newTimeId, hongdaeManager))
                 .isInstanceOf(WrongStoreAccessException.class);
+    }
+
+    @Test
+    void 예약대기를_생성가능() {
+        long id = 1L;
+        LocalDate futureDate = NOW.plusDays(1);
+        Reservation reservation = new Reservation(
+                id,
+                BROWN_ID,
+                futureDate,
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                1L,
+                1L
+        );
+        ReservationWait reservationWait = new ReservationWait(
+                id,
+                1L,
+                BROWN_ID,
+                LocalDateTime.of(futureDate, LocalTime.of(10, 0))
+        );
+
+        when(reservationDao.findReservationById(1L)).thenReturn(reservation);
+        when(reservationWaitDao.createReservationWait(BROWN_ID, 1L))
+                .thenReturn(id);
+        when(reservationWaitDao.findReservationWaitById(id))
+                .thenReturn(Optional.of(reservationWait));
+        assertThatCode(() -> reservationService.createWait(BROWN_ID, 1L))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void 과거_날짜로_예약대기_불가() {
+        long id = 1L;
+        long themeId = 1L;
+        long storeId = 1L;
+        Reservation reservation = new Reservation(
+                id,
+                BROWN_ID,
+                NOW.minusDays(1),
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                themeId,
+                storeId
+        );
+
+        when(reservationDao.findReservationById(1L)).thenReturn(reservation);
+        assertThatThrownBy(() -> reservationService.createWait(BROWN_ID, 1L))
+                .isInstanceOf(PastReservationWaitNotAllowedException.class);
+    }
+
+    @Test
+    void 예약대기_시간을_찾을수_없음() {
+        long id = 1L;
+        LocalDate futureDate = NOW.plusDays(1);
+        Reservation reservation = new Reservation(
+                id,
+                BROWN_ID,
+                futureDate,
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                1L,
+                1L
+        );
+        ReservationWait reservationWait = new ReservationWait(
+                id,
+                1L,
+                BROWN_ID,
+                LocalDateTime.of(futureDate, LocalTime.of(10, 0))
+        );
+
+        when(reservationDao.findReservationById(1L)).thenReturn(reservation);
+        when(reservationWaitDao.createReservationWait(BROWN_ID, 1L))
+                .thenReturn(id);
+        when(reservationWaitDao.findReservationWaitById(id))
+                .thenReturn(Optional.empty());
+        assertThatThrownBy(() -> reservationService.createWait(BROWN_ID, 1L))
+                .isInstanceOf(ReservationWaitNotFoundException.class);
     }
 }

@@ -1,7 +1,5 @@
 package roomescape.service;
 
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -12,15 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ReservationWaitDao;
 import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.PastReservationCancelNotAllowedException;
-import roomescape.exception.PastReservationNotAllowedException;
-import roomescape.exception.ReservationAlreadyExistsException;
-import roomescape.exception.ReservationNotFoundException;
-import roomescape.exception.ReservationOwnerMismatchException;
-import roomescape.exception.ReservationTimeNotFoundException;
+import roomescape.domain.ReservationWait;
+import roomescape.exception.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,10 +23,12 @@ public class ReservationService {
 
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
+    private final ReservationWaitDao reservationWaitDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao) {
+    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao, ReservationWaitDao reservationWaitDao) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
+        this.reservationWaitDao = reservationWaitDao;
     }
 
     public List<Reservation> getReservations(Long memberId) {
@@ -132,5 +129,23 @@ public class ReservationService {
         if (present.isAfter(request)) {
             throw new PastReservationCancelNotAllowedException();
         }
+    }
+
+    private void validatePastReservationWaitCreate(LocalDate date, LocalTime startAt) {
+        LocalDateTime present = LocalDateTime.now();
+        LocalDateTime request = LocalDateTime.of(date, startAt);
+        if (present.isAfter(request)) {
+            throw new PastReservationWaitNotAllowedException();
+        }
+    }
+
+    @Transactional
+    public ReservationWait createWait(Long memberId, Long reservationId) {
+        Reservation reservation = findReservation(reservationId);
+        validatePastReservationWaitCreate(reservation.getDate(), reservation.getTime().getStartAt());
+
+        Long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
+        return reservationWaitDao.findReservationWaitById(waitId)
+                .orElseThrow(ReservationWaitNotFoundException::new);
     }
 }
