@@ -10,6 +10,7 @@ public interface ReservationRepository {
     Reservation save(Reservation reservation);
     void updateById(Long id, Reservation changedReservation);
     Optional<Reservation> findById(Long id);
+    Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId);
     List<Reservation> findAll();
     List<Reservation> findByThemeAndDate(Long themeId, LocalDate date);
     List<ReservationQueryResult> findAllByName(String username);

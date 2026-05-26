@@ -95,4 +95,17 @@ public class Reservation {
                 .createdAt(createdAt)
                 .build();
     }
+
+    public Reservation active() {
+        return Reservation.builder()
+                .id(id)
+                .name(name)
+                .date(date)
+                .time(time)
+                .theme(theme)
+                .status(Status.ACTIVE)
+                .is_deleted(0L)
+                .createdAt(createdAt)
+                .build();
+    }
 }
