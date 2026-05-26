@@ -5,6 +5,9 @@ import roomescape.common.exception.DomainException;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static roomescape.common.domain.DomainPreconditions.require;
+import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
+import static roomescape.common.domain.DomainPreconditions.requireNonNull;
 import static roomescape.theme.exception.ThemeErrorCode.*;
 
 public class Theme {
@@ -23,9 +26,7 @@ public class Theme {
     }
 
     public Theme(Long id, String name, String description, String thumbnail, LocalDateTime deletedAt) {
-        validateName(name);
-        validateDescription(description);
-        validateThumbnail(thumbnail);
+        validateTheme(name, description, thumbnail);
         this.id = id;
         this.name = name;
         this.description = description;
@@ -34,36 +35,16 @@ public class Theme {
     }
 
     public Theme withId(Long id) {
-        validateId(id);
-        if (this.id != null) {
-            throw new DomainException(THEME_ALREADY_HAS_ID);
-        }
+        requireNonNull(id, new DomainException(INVALID_THEME_ID));
+        require(this.id == null, new DomainException(THEME_ALREADY_HAS_ID));
 
         return new Theme(id, name, description, thumbnail, deletedAt);
     }
 
-    private void validateId(Long id) {
-        if (id == null) {
-            throw new DomainException(INVALID_THEME_ID);
-        }
-    }
-
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new DomainException(INVALID_THEME_NAME);
-        }
-    }
-
-    private void validateDescription(String description) {
-        if (description == null || description.isBlank()) {
-            throw new DomainException(INVALID_THEME_DESCRIPTION);
-        }
-    }
-
-    private void validateThumbnail(String thumbnail) {
-        if (thumbnail == null || thumbnail.isBlank()) {
-            throw new DomainException(INVALID_THEME_THUMBNAIL);
-        }
+    private void validateTheme(String name, String description, String thumbnail) {
+        requireNonBlank(name, new DomainException(INVALID_THEME_NAME));
+        requireNonBlank(description, new DomainException(INVALID_THEME_DESCRIPTION));
+        requireNonBlank(thumbnail, new DomainException(INVALID_THEME_THUMBNAIL));
     }
 
     public Long getId() {
