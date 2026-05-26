@@ -1,0 +1,128 @@
+package roomescape.theme.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.util.List;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.annotation.DirtiesContext;
+
+import roomescape.theme.domain.Theme;
+
+@SpringBootTest
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+class JdbcThemeRepositoryTest {
+
+    @Autowired
+    private JdbcThemeRepository jdbcThemeRepository;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @Test
+    void findAll() {
+        assertThat(jdbcThemeRepository.findAll()).isEmpty();
+
+        jdbcThemeRepository.save(new Theme("이름", "설명", "https://img.test/a.png"));
+
+        List<Theme> themes = jdbcThemeRepository.findAll();
+        assertThat(themes).hasSize(1);
+        assertThat(themes.get(0).getId()).isEqualTo(1L);
+        assertThat(themes.get(0).getName()).isEqualTo("이름");
+        assertThat(themes.get(0).getDescription()).isEqualTo("설명");
+        assertThat(themes.get(0).getImageUrl()).isEqualTo("https://img.test/a.png");
+    }
+
+    @Test
+    void save() {
+        Theme saved = jdbcThemeRepository.save(new Theme("테마", "내용", "https://img.test/b.png"));
+
+        assertThat(saved.getId()).isEqualTo(1L);
+        assertThat(saved.getName()).isEqualTo("테마");
+        assertThat(saved.getDescription()).isEqualTo("내용");
+        assertThat(saved.getImageUrl()).isEqualTo("https://img.test/b.png");
+    }
+
+    @Test
+    void deleteById() {
+        jdbcThemeRepository.save(new Theme("x", "y", "https://img.test/c.png"));
+
+        assertThat(jdbcThemeRepository.deleteById(1L)).isTrue();
+        assertThat(jdbcThemeRepository.findAll()).isEmpty();
+
+        assertThat(jdbcThemeRepository.deleteById(1L)).isFalse();
+    }
+
+    @Test
+    void existsById() {
+        assertThat(jdbcThemeRepository.existsById(1L)).isFalse();
+
+        jdbcThemeRepository.save(new Theme("테마", "설명", "https://img.test/a.png"));
+
+        assertThat(jdbcThemeRepository.existsById(1L)).isTrue();
+        assertThat(jdbcThemeRepository.existsById(2L)).isFalse();
+    }
+
+    @Test
+    void findBestThemesByDate() {
+        Theme theme1 = jdbcThemeRepository.save(new Theme("테마1", "설명1", "https://img.test/1.png"));
+        Theme theme2 = jdbcThemeRepository.save(new Theme("테마2", "설명2", "https://img.test/2.png"));
+        Theme theme3 = jdbcThemeRepository.save(new Theme("테마3", "설명3", "https://img.test/3.png"));
+
+        LocalDate startDate = LocalDate.of(2026, 5, 3);
+        LocalDate endDate = LocalDate.of(2026, 5, 10);
+
+        Long timeId7 = insertTime("2026-05-07 10:00:00", "2026-05-07 12:00:00");
+        Long timeId8 = insertTime("2026-05-08 10:00:00", "2026-05-08 12:00:00");
+        Long timeId9 = insertTime("2026-05-09 10:00:00", "2026-05-09 12:00:00");
+        Long timeId10 = insertTime("2026-05-10 10:00:00", "2026-05-10 12:00:00");
+        Long timeId6 = insertTime("2026-05-06 10:00:00", "2026-05-06 12:00:00");
+        Long timeId2 = insertTime("2026-05-02 10:00:00", "2026-05-02 12:00:00");
+
+        insertReservation("a1", timeId7, theme1.getId());
+        insertReservation("a2", timeId8, theme1.getId());
+        insertReservation("a3", timeId10, theme1.getId());
+
+        insertReservation("b1", timeId9, theme2.getId());
+        insertReservation("b2", timeId10, theme2.getId());
+        insertReservation("b_in", timeId6, theme2.getId());
+
+        insertReservation("c_out", timeId2, theme3.getId());
+
+        // when
+        List<Theme> bestThemes = jdbcThemeRepository.findBestThemesByDate(startDate, endDate, 10);
+
+        // then
+        assertThat(bestThemes).hasSize(2);
+        assertThat(bestThemes.get(0).getId()).isEqualTo(theme1.getId());
+        assertThat(bestThemes.get(1).getId()).isEqualTo(theme2.getId());
+        assertThat(bestThemes).extracting(Theme::getName)
+                .containsExactly("테마1", "테마2");
+    }
+
+    private Long insertTime(String startAt, String endAt) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_time (start_time, end_time) VALUES (?, ?)",
+                startAt,
+                endAt
+        );
+        return jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_time WHERE start_time = ?",
+                Long.class,
+                startAt
+        );
+    }
+
+    private void insertReservation(String name, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, time_id, theme_id) VALUES (?, ?, ?)",
+                name,
+                timeId,
+                themeId
+        );
+    }
+}
