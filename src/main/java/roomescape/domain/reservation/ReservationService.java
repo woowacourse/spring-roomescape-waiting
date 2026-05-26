@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.domain.theme.Theme;
@@ -21,22 +22,22 @@ public class ReservationService {
 
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
-    private final AdminThemeRepository adminThemeRepository;
+    private final ThemeRepository themeRepository;
 
     public ReservationService(
         ReservationRepository reservationRepository,
         ReservationTimeRepository reservationTimeRepository,
-        AdminThemeRepository adminThemeRepository
+        ThemeRepository themeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
-        this.adminThemeRepository = adminThemeRepository;
+        this.themeRepository = themeRepository;
     }
 
     public ReservationResponse createReservation(ReservationRequest request) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
-        Theme theme = adminThemeRepository.findById(request.themeId())
+        Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
         validateDuplicateReservation(request.date(), request.timeId(), request.themeId());

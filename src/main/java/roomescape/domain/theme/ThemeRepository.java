@@ -1,6 +1,7 @@
 package roomescape.domain.theme;
 
 import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
@@ -21,9 +22,11 @@ public class ThemeRepository {
         resultSet.getString("image_url")
     );
 
-    public Theme findById(Long id) {
+    public Optional<Theme> findById(Long id) {
         String query = "select * from theme where id = ?";
-        return jdbcTemplate.queryForObject(query, rowMapper, id);
+        return jdbcTemplate.query(query, rowMapper, id)
+                .stream()
+                .findFirst();
     }
 
     public List<Theme> findAll() {
