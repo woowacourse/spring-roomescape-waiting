@@ -28,6 +28,23 @@ function formatTime(time) {
     return (time ?? "").slice(0, 5);
 }
 
+function formatStatus(reservation) {
+    if (reservation.status === "ACTIVE") {
+        return "예약 확정";
+    }
+    if (reservation.status === "PENDING") {
+        return reservation.pendingOrder ? `예약 대기 ${reservation.pendingOrder}순위` : "예약 대기";
+    }
+    if (reservation.status === "CANCELED") {
+        return "예약 취소";
+    }
+    return reservation.status ?? "상태 없음";
+}
+
+function statusClass(status) {
+    return `status-badge ${String(status ?? "").toLowerCase()}`;
+}
+
 async function request(url, options = {}) {
     const response = await fetch(url, {
         headers: { "Content-Type": "application/json", ...(options.headers ?? {}) },
@@ -134,10 +151,11 @@ loadTopAvailableTimes();
 // 2. [하단] 내 예약 확인 / 인라인 수정 / 취소 영역 (GET, PATCH, DELETE)
 // ==========================================
 let inlineEditState = {
-    reservationId: null,     // 현재 수정 중인 예약 ID
-    times: [],               // 해당 날짜/테마의 예약 가능 시간 목록
-    selectedTimeId: null,    // 새로 선택한 시간 ID
-    originalData: null       // 취소 시 복구할 원본 데이터
+    reservationId: null,
+    mode: "active",
+    times: [],
+    selectedTimeId: null,
+    originalData: null
 };
 
 function renderMyReservations(reservations, username) {
@@ -154,7 +172,6 @@ function renderMyReservations(reservations, username) {
         article.style = "background: white; border: 1px solid #e2e8f0; padding: 1rem; border-radius: 8px; margin-bottom: 0.5rem;";
 
         if (isEditing) {
-            // 💡 [수정 모드 UI] 리스트 항목이 입력 폼으로 변신합니다!
             const themesHtml = Array.from(themeSelect.options)
                 .filter(opt => opt.value !== "")
                 .map(opt => `<option value="${opt.value}" ${opt.value == reservation.theme.id ? 'selected' : ''}>${opt.text}</option>`)
@@ -164,9 +181,14 @@ function renderMyReservations(reservations, username) {
                 <div style="display: flex; flex-direction: column; gap: 0.75rem;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <strong style="color: #0f172a;">예약 변경</strong>
+                        <span class="${statusClass(reservation.status)}">${formatStatus(reservation)}</span>
                     </div>
-                    
-                    <!-- 🔥 이름, 날짜, 테마를 나란히 배치합니다 -->
+
+                    <div class="mode-toggle" role="group" aria-label="예약 변경 방식">
+                        <button type="button" class="mode-btn active" data-mode="active">확정 예약으로 변경</button>
+                        <button type="button" class="mode-btn" data-mode="pending">대기 예약으로 변경</button>
+                    </div>
+
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <input type="text" class="edit-name" value="${reservation.name}" placeholder="예약자 이름" required style="flex: 1; min-width: 80px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
                         <input type="date" class="edit-date" value="${reservation.date}" required style="flex: 1; min-width: 120px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
@@ -175,6 +197,7 @@ function renderMyReservations(reservations, username) {
                         </select>
                     </div>
 
+                    <div class="edit-help hint">확정 변경은 빈 시간만 선택할 수 있고, 대기 변경은 이미 확정 예약이 있는 시간에 신청할 수 있습니다.</div>
                     <div class="edit-times time-grid empty-state" style="padding: 0.5rem; background: #f8fafc; border-radius: 4px; border: 1px dashed #cbd5e1;">
                         시간을 조회 중입니다...
                     </div>
@@ -185,29 +208,39 @@ function renderMyReservations(reservations, username) {
                 </div>
             `;
 
-            // DOM 요소 선택에 이름(edit-name) 추가
             const nameInput = article.querySelector('.edit-name');
             const dateInput = article.querySelector('.edit-date');
             const themeInput = article.querySelector('.edit-theme');
             const timesContainer = article.querySelector('.edit-times');
             const saveBtn = article.querySelector('.save-edit-btn');
             const cancelBtn = article.querySelector('.cancel-edit-btn');
+            const modeButtons = Array.from(article.querySelectorAll('.mode-btn'));
+            modeButtons.forEach((modeButton) => {
+                modeButton.classList.toggle("active", modeButton.dataset.mode === inlineEditState.mode);
+            });
 
             const loadInlineTimes = async () => {
                 saveBtn.disabled = true;
                 inlineEditState.selectedTimeId = null;
                 const date = dateInput.value;
                 const themeId = themeInput.value;
+                const mode = inlineEditState.mode;
 
                 timesContainer.innerHTML = "조회 중...";
                 timesContainer.className = "edit-times time-grid empty-state";
 
                 try {
-                    const data = await request(`/times/available?themeId=${themeId}&date=${date}`);
-                    inlineEditState.times = data.times || [];
+                    if (mode === "active") {
+                        const data = await request(`/times/available?themeId=${themeId}&date=${date}`);
+                        inlineEditState.times = data.times || [];
+                    } else {
+                        inlineEditState.times = await request("/times", { method: "GET" });
+                        if (date === reservation.date && String(themeId) === String(reservation.theme.id)) {
+                            inlineEditState.selectedTimeId = reservation.time.id;
+                        }
+                    }
 
-                    // 기존 예약 시간 강제 추가 로직
-                    if (date === reservation.date && String(themeId) === String(reservation.theme.id)) {
+                    if (mode === "active" && date === reservation.date && String(themeId) === String(reservation.theme.id)) {
                         const hasTime = inlineEditState.times.some(t => t.id === reservation.time.id);
                         if (!hasTime) {
                             inlineEditState.times.push(reservation.time);
@@ -224,7 +257,9 @@ function renderMyReservations(reservations, username) {
 
             const renderInlineTimes = () => {
                 if (inlineEditState.times.length === 0) {
-                    timesContainer.innerHTML = "선택한 날짜/테마에 빈 시간이 없습니다.";
+                    timesContainer.innerHTML = inlineEditState.mode === "active"
+                        ? "선택한 날짜/테마에 빈 시간이 없습니다."
+                        : "등록된 운영 시간이 없습니다.";
                     saveBtn.disabled = true;
                     return;
                 }
@@ -246,6 +281,13 @@ function renderMyReservations(reservations, username) {
                 saveBtn.disabled = !inlineEditState.selectedTimeId;
             };
 
+            modeButtons.forEach((button) => {
+                button.onclick = () => {
+                    inlineEditState.mode = button.dataset.mode;
+                    modeButtons.forEach((modeButton) => modeButton.classList.toggle("active", modeButton === button));
+                    loadInlineTimes();
+                };
+            });
             dateInput.addEventListener('change', loadInlineTimes);
             themeInput.addEventListener('change', loadInlineTimes);
 
@@ -254,7 +296,6 @@ function renderMyReservations(reservations, username) {
                 renderMyReservations(reservations, username);
             };
 
-            // 수정 완료 버튼 클릭
             saveBtn.onclick = async () => {
                 const newName = nameInput.value.trim();
 
@@ -266,17 +307,19 @@ function renderMyReservations(reservations, username) {
 
                 clearFeedback(checkFeedback);
                 try {
-                    await request(`/reservations/${reservation.id}`, {
+                    await request(`/reservations/${reservation.id}/${inlineEditState.mode}`, {
                         method: "PATCH",
                         body: JSON.stringify({
-                            username: newName, // 🔥 백엔드 DTO에 맞게 'username'으로 키값을 변경했습니다!
+                            username: newName,
                             date: dateInput.value,
                             themeId: Number(themeInput.value),
                             timeId: inlineEditState.selectedTimeId
                         })
                     });
 
-                    showFeedback(checkFeedback, "success", "예약이 성공적으로 변경되었습니다.");
+                    showFeedback(checkFeedback, "success", inlineEditState.mode === "active"
+                        ? "예약이 확정 상태로 변경되었습니다."
+                        : "예약이 대기 상태로 변경되었습니다.");
                     inlineEditState.reservationId = null;
 
                     // 이름을 변경했다면, 검색창 이름도 갱신하여 재검색 유도
@@ -294,11 +337,13 @@ function renderMyReservations(reservations, username) {
             loadInlineTimes();
 
         } else {
-            // 📖 [일반 뷰 UI] 기존에 보이던 평범한 예약 리스트
             article.innerHTML = `
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <div>
-                        <strong>${reservation.theme.name}</strong>
+                        <div style="display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+                            <strong>${reservation.theme.name}</strong>
+                            <span class="${statusClass(reservation.status)}">${formatStatus(reservation)}</span>
+                        </div>
                         <p style="margin: 0.25rem 0 0; color: #64748b; font-size: 0.875rem;">
                             ${reservation.date} · ${formatTime(reservation.time.startAt)}
                         </p>
@@ -310,19 +355,18 @@ function renderMyReservations(reservations, username) {
                 </div>
             `;
 
-            // 수정 버튼 클릭 시 인라인 폼으로 변신
             article.querySelector('.inline-edit-btn').onclick = () => {
                 inlineEditState.reservationId = reservation.id;
+                inlineEditState.mode = reservation.status === "PENDING" ? "pending" : "active";
                 inlineEditState.originalData = reservation;
-                renderMyReservations(reservations, username); // 리렌더링하여 폼으로 변경
+                renderMyReservations(reservations, username);
             };
 
-            // 취소 (DELETE)
             article.querySelector('.inline-cancel-btn').onclick = async () => {
                 if (!window.confirm("이 예약을 정말 취소하시겠습니까?")) return;
                 clearFeedback(checkFeedback);
                 try {
-                    await request(`/reservations/${reservation.id}?username=${username}`, { method: "DELETE" });
+                    await request(`/reservations/${reservation.id}?username=${encodeURIComponent(username)}`, { method: "DELETE" });
                     showFeedback(checkFeedback, "success", "예약이 성공적으로 취소되었습니다.");
                     checkForm.dispatchEvent(new Event("submit"));
                     loadTopAvailableTimes();
@@ -336,7 +380,6 @@ function renderMyReservations(reservations, username) {
     });
 }
 
-// 사용자 이름 검색 폼 제출 (GET)
 checkForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     clearFeedback(checkFeedback);
@@ -344,7 +387,7 @@ checkForm.addEventListener("submit", async (event) => {
 
     const name = checkNameInput.value.trim();
     try {
-        const reservations = await request(`/reservations?username=${name}`, { method: "GET" });
+        const reservations = await request(`/reservations?username=${encodeURIComponent(name)}`, { method: "GET" });
         renderMyReservations(reservations, name);
     } catch (error) {
         showFeedback(checkFeedback, "error", error.message);

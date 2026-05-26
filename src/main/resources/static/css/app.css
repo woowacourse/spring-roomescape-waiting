@@ -295,6 +295,58 @@ select {
     border-color: var(--accent);
 }
 
+.mode-toggle {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    padding: 4px;
+    border-radius: var(--radius-sm);
+    border: 1px solid rgba(70, 48, 33, 0.12);
+    background: rgba(255, 255, 255, 0.54);
+}
+
+.mode-btn {
+    min-height: 40px;
+    border: 0;
+    border-radius: 10px;
+    background: transparent;
+    color: var(--muted);
+    cursor: pointer;
+    font-weight: 700;
+}
+
+.mode-btn.active {
+    background: var(--accent);
+    color: #f3fff9;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    min-height: 26px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    line-height: 1;
+}
+
+.status-badge.active {
+    background: rgba(27, 77, 62, 0.11);
+    color: var(--accent);
+}
+
+.status-badge.pending {
+    background: rgba(180, 79, 44, 0.12);
+    color: var(--primary-strong);
+}
+
+.status-badge.canceled {
+    background: rgba(146, 43, 33, 0.1);
+    color: var(--danger);
+}
+
 .theme-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -361,6 +413,13 @@ select {
     padding: 16px;
 }
 
+.list-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
 .reservation-row strong,
 .list-row strong {
     display: block;
@@ -404,9 +463,14 @@ select {
     }
 
     .list-row,
-    .theme-card-head {
+    .theme-card-head,
+    .mode-toggle {
         flex-direction: column;
         align-items: flex-start;
+    }
+
+    .mode-toggle {
+        grid-template-columns: 1fr;
     }
 
     .button,
