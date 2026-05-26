@@ -19,6 +19,7 @@ public enum ErrorCode {
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 선택된 예약입니다."),
     TIME_DELETE_NOT_ALLOWED(HttpStatus.CONFLICT, "예약이 존재하는 시간을 삭제할 수 없습니다."),
     DUPLICATE_RESERVATION_NAME(HttpStatus.CONFLICT, "해당 이름의 예약이 이미 존재합니다."),
+    DUPLICATE_WAITING_NAME(HttpStatus.CONFLICT, "해당 이름의 예약 대기가 이미 존재합니다."),
     DUPLICATE_TIME(HttpStatus.CONFLICT, "이미 등록된 시작 시간입니다."),
 
     //422 - UNPROCESSABLE CONTENT

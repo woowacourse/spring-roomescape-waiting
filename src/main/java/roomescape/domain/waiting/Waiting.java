@@ -1,27 +1,44 @@
 package roomescape.domain.waiting;
 
 import java.time.LocalDate;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 public class Waiting {
 
-    private final Long themeId;
-    private final Long timeId;
-    private final LocalDate date;
+    private final Long id;
     private final String name;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final Theme theme;
 
-    public Waiting(Long themeId, Long timeId, LocalDate date, String name) {
-        this.themeId = themeId;
-        this.timeId = timeId;
-        this.date = date;
+    public Waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+        this.id = id;
         this.name = name;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
-    public Long getThemeId() {
-        return themeId;
+    public static Waiting of(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+        return new Waiting(id, name, date, time, theme);
     }
 
-    public Long getTimeId() {
-        return timeId;
+    public static Waiting of(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return new Waiting(null, name, date, time, theme);
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public Theme getTheme() {
+        return theme;
+    }
+
+    public ReservationTime getTime() {
+        return time;
     }
 
     public LocalDate getDate() {
