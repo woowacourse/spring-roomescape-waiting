@@ -1,5 +1,6 @@
 package roomescape.reservation.dto.response;
 
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.reservationtime.dto.response.TimeInformation;
 import roomescape.theme.dto.response.ThemeFindResponse;
@@ -12,7 +13,9 @@ public record ReservationDetailFindResponse(
         String memberName,
         LocalDate date,
         ThemeFindResponse theme,
-        TimeInformation time
+        TimeInformation time,
+        ReservationStatus status,
+        Long waitingOrder
 ) {
     public static List<ReservationDetailFindResponse> from(List<ReservationDetailProjection> projections) {
         return projections.stream()
@@ -34,7 +37,9 @@ public record ReservationDetailFindResponse(
                 new TimeInformation(
                         projection.timeId(),
                         projection.startAt()
-                )
+                ),
+                projection.status(),
+                projection.waitingOrder()
         );
     }
 }

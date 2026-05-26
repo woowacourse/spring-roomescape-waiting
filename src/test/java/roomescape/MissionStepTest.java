@@ -23,7 +23,7 @@ public class MissionStepTest {
     void 예약_조회() {
         String accessToken = RestAssured.given()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "testAdmin", "password", "test2"))
+                .body(Map.of("name", "a", "password", "test1"))
                 .when().post("/api/login")
                 .then().statusCode(200)
                 .extract()
@@ -31,7 +31,7 @@ public class MissionStepTest {
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/reservations")
+                .when().get("/api/user/reservations/me")
                 .then().log().all()
                 .statusCode(200)
                 .body("data.size()", is(4));

@@ -6,7 +6,6 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
-import roomescape.auth.interceptor.ManagerInterceptor;
 import roomescape.auth.interceptor.AuthenticationInterceptor;
 import roomescape.auth.argumentresolver.LoginMemberArgumentResolver;
 
@@ -18,7 +17,6 @@ public class WebConfig implements WebMvcConfigurer {
 
     private final LoginMemberArgumentResolver loginMemberArgumentResolver;
     private final AuthenticationInterceptor authenticationInterceptor;
-    private final ManagerInterceptor managerInterceptor;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -42,10 +40,5 @@ public class WebConfig implements WebMvcConfigurer {
         registry.addInterceptor(authenticationInterceptor)
                 .addPathPatterns("/api/**")
                 .excludePathPatterns("/api/login", "/api/logout", "/api/themes/popular");
-
-        registry.addInterceptor(managerInterceptor)
-                .addPathPatterns(
-                        "/api/manager/**"
-                );
     }
 }

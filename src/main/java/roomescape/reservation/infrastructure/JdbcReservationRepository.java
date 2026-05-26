@@ -9,6 +9,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.member.Role;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 
 import java.time.LocalDate;
@@ -35,7 +36,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                     resultSet.getString("theme_description"),
                     resultSet.getString("theme_thumbnail_url"),
                     resultSet.getLong("time_id"),
-                    resultSet.getTime("start_at").toLocalTime()
+                    resultSet.getTime("start_at").toLocalTime(),
+                    ReservationStatus.RESERVED,
+                    null
             );
 
     @Override

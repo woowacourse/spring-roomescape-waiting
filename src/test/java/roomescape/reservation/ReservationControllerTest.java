@@ -21,21 +21,6 @@ import static org.hamcrest.Matchers.is;
 @Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ReservationControllerTest {
 
-    private String loginManager() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "testAdmin");
-        loginRequest.put("password", "test2");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
-    }
-
     private String loginUser() {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "a");
@@ -75,19 +60,6 @@ public class ReservationControllerTest {
                 .body("data.id", is(5))
                 .body("data.memberId", is(1))
                 .body("data.scheduleId", is(4));
-    }
-
-    @Test
-    void 예약_조회() {
-        String accessToken = loginManager();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(4));
     }
 
     @Test

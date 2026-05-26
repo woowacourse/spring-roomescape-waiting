@@ -31,10 +31,6 @@ abstract class AuthApiTestSupport {
         return loginToken("a", "test1");
     }
 
-    protected String loginAdminToken() {
-        return loginToken("testAdmin", "test2");
-    }
-
     protected String bearer(String token) {
         return "Bearer " + token;
     }

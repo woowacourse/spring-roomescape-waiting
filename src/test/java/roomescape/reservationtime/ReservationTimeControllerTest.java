@@ -21,21 +21,6 @@ import static org.hamcrest.Matchers.is;
 @Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ReservationTimeControllerTest {
 
-    private String login() {
-        Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "testAdmin");
-        loginRequest.put("password", "test2");
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(loginRequest)
-                .when().post("/api/login")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("data.accessToken");
-    }
-
     private String loginUser() {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", "a");
@@ -52,38 +37,8 @@ public class ReservationTimeControllerTest {
     }
 
     @Test
-    void 시간_관리_API() {
-        String accessToken = login();
-
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", "14:00");
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/api/manager/times")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(5));
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/times/5")
-                .then().log().all()
-                .statusCode(204);
-    }
-
-    @Test
     void 특정날짜와_테마에_예약_가능_시간들_조회_API() {
-        String accessToken = login();
+        String accessToken = loginUser();
 
         Map<String, Object> options = new HashMap<>();
         options.put("date", "2026-05-05");
@@ -103,7 +58,6 @@ public class ReservationTimeControllerTest {
     @Test
     @DisplayName("예약 가능 시간 조회 및 예약 생성 이후 예약 가능 시간을 재조회를 할 수 있다.")
     void 정상_흐름_테스트() {
-        String accessToken = login();
         String userToken = loginUser();
 
         Map<String, Object> options = new HashMap<>();
@@ -112,7 +66,7 @@ public class ReservationTimeControllerTest {
 
         // 2026-05-05 4번 테마 조회
         RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + userToken)
                 .params(options)
                 .when().get("/api/user/times/availability")
                 .then().log().all()
@@ -142,7 +96,7 @@ public class ReservationTimeControllerTest {
         options1.put("themeId", 4);
 
         RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
+                .header("Authorization", "Bearer " + userToken)
                 .params(options1)
                 .when().get("/api/user/times/availability")
                 .then().log().all()

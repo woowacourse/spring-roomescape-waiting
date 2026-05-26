@@ -33,14 +33,6 @@ public class ReservationService {
         return ReservationSaveResponse.from(reservation);
     }
 
-    public List<ReservationDetailFindResponse> findAllReservationDetails() {
-        return ReservationDetailFindResponse.from(reservationRepository.findAll());
-    }
-
-    public void deleteById(long reservationId) {
-        deleteInternal(reservationId, oldReservation -> {});
-    }
-
     public void deleteByIdForUser(long reservationId, long memberId) {
         deleteInternal(
                 reservationId,
@@ -52,10 +44,6 @@ public class ReservationService {
         List<ReservationDetailProjection> reservationDetailProjection = reservationRepository.findAllReservationDetailsByMemberId(memberId);
 
         return ReservationDetailFindResponse.from(reservationDetailProjection);
-    }
-
-    public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
-        return updateInternal(body, reservationId, oldReservation -> {});
     }
 
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {

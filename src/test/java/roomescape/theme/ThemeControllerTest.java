@@ -40,8 +40,8 @@ public class ThemeControllerTest {
 
     private String login() {
         Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "testAdmin");
-        loginRequest.put("password", "test2");
+        loginRequest.put("name", "a");
+        loginRequest.put("password", "test1");
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -51,46 +51,6 @@ public class ThemeControllerTest {
                 .statusCode(200)
                 .extract()
                 .path("data.accessToken");
-    }
-
-    @Test
-    void 테마_저장_API_테스트() {
-        String accessToken = login();
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "무서운게 딱 좋아");
-        params.put("description", "무서운 분위기의 방탈출");
-        params.put("thumbnailUrl", "https://example.com/theme.jpg");
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/api/manager/themes")
-                .then().log().all()
-                .statusCode(201);
-    }
-
-    @Test
-    void 테마_추가_및_삭제_API_테스트() {
-        String accessToken = login();
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "무서운게 딱 좋아");
-        params.put("description", "무서운 분위기의 방탈출");
-        params.put("thumbnailUrl", "https://example.com/theme.jpg");
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/api/manager/themes")
-                .then().log().all()
-                .statusCode(201);
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/themes/5")
-                .then().log().all()
-                .statusCode(204);
     }
 
     @Test
@@ -129,22 +89,5 @@ public class ThemeControllerTest {
                 .body("data[0].id", is(2))
                 .body("data[1].id", is(1))
                 .body("data[2].id", is(3));
-    }
-
-    @Test
-    void 테마_전체_조회_API_테스트() {
-        String accessToken = login();
-
-        RestAssured.given().log().all()
-                .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("success", is(true))
-                .body("data.size()", is(4))
-                .body("data[0].id", is(1))
-                .body("data[1].id", is(2))
-                .body("data[2].id", is(3))
-                .body("data[3].id", is(4));
     }
 }

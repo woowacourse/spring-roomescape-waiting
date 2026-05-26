@@ -8,6 +8,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.member.Role;
+import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
@@ -65,23 +66,10 @@ class ReservationServiceTest {
                 "description",
                 "thumbnail",
                 timeId,
-                startAt
+                startAt,
+                ReservationStatus.RESERVED,
+                null
         );
-    }
-
-    @Test
-    @DisplayName("매니저는 예약 삭제에 성공한다.")
-    void deleteById_manager_success() {
-        long reservationId = 1L;
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
-        );
-
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-
-        assertThatCode(() -> reservationService.deleteById(reservationId))
-                .doesNotThrowAnyException();
-        verify(reservationRepository).deleteById(reservationId);
     }
 
     @Test
@@ -110,29 +98,6 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.deleteByIdForUser(reservationId, MEMBER_ID))
                 .isInstanceOf(EscapeRoomException.class);
         verify(reservationRepository, never()).deleteById(anyLong());
-    }
-
-    @Test
-    @DisplayName("매니저는 예약 수정에 성공한다.")
-    void update_manager_success() {
-        long reservationId = 4L;
-        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
-        ReservationDetailProjection oldReservation = reservationDetail(
-                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
-        );
-        Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
-
-        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
-        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
-                .thenReturn(99L);
-        when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
-        when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
-        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
-
-        ReservationSaveResponse response = reservationService.update(request, reservationId);
-
-        assertThat(response.id()).isEqualTo(reservationId);
-        verify(reservationRepository).updateScheduleById(reservationId, 99L);
     }
 
     @Test

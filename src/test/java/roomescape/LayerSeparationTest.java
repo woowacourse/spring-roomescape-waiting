@@ -8,7 +8,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.config.TestTimeConfig;
-import roomescape.reservation.presentation.manager.ManagerReservationController;
+import roomescape.reservation.presentation.user.UserReservationController;
 
 import java.lang.reflect.Field;
 
@@ -20,7 +20,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 @Import(TestTimeConfig.class)
 public class LayerSeparationTest {
     @Autowired
-    private ManagerReservationController reservationController;
+    private UserReservationController reservationController;
 
     @Test
     void 계층화_리팩터링() {

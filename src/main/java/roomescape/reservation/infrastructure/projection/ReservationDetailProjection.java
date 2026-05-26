@@ -1,6 +1,7 @@
 package roomescape.reservation.infrastructure.projection;
 
 import roomescape.member.Role;
+import roomescape.reservation.ReservationStatus;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -17,7 +18,9 @@ public record ReservationDetailProjection(
         String themeDescription,
         String thumbnailUrl,
         Long timeId,
-        LocalTime startAt
+        LocalTime startAt,
+        ReservationStatus status,
+        Long waitingOrder
 ) {
     public long getTimeId() {
         return timeId();

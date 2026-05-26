@@ -44,7 +44,7 @@ public class AuthenticationIntegrationTest extends AuthApiTestSupport {
     void 인증_테스트_4() {
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .when().get("/api/manager/themes")
+                .when().get("/api/user/reservations/me")
                 .then().log().all()
                 .statusCode(401);
     }

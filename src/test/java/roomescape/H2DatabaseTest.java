@@ -30,8 +30,8 @@ public class H2DatabaseTest {
 
     private String login() {
         Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "testAdmin");
-        loginRequest.put("password", "test2");
+        loginRequest.put("name", "a");
+        loginRequest.put("password", "test1");
 
         return RestAssured.given().log().all()
                 .body(loginRequest)
@@ -60,12 +60,12 @@ public class H2DatabaseTest {
 
         List<Reservation> reservations = RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .when().get("/api/manager/reservations")
+                .when().get("/api/user/reservations/me")
                 .then().log().all()
                 .statusCode(200).extract()
                 .jsonPath().getList("data");
 
-        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation", Integer.class);
+        Integer count = jdbcTemplate.queryForObject("SELECT count(*) from reservation where member_id = 1", Integer.class);
 
         assertThat(reservations.size()).isEqualTo(count);
     }
