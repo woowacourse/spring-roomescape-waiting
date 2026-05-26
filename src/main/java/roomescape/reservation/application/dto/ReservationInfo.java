@@ -1,6 +1,7 @@
 package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import lombok.Builder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.theme.application.dto.ThemeInfo;
@@ -12,7 +13,8 @@ public record ReservationInfo(
         String name,
         LocalDate date,
         ReservationTimeInfo time,
-        ThemeInfo theme
+        ThemeInfo theme,
+        LocalDateTime createdAt
 ) {
     public static ReservationInfo from(final Reservation reservation) {
         return ReservationInfo.builder()
@@ -21,6 +23,7 @@ public record ReservationInfo(
                 .date(reservation.getDate())
                 .time(ReservationTimeInfo.from(reservation.getTime()))
                 .theme(ThemeInfo.from(reservation.getTheme()))
+                .createdAt(reservation.getCreatedAt())
                 .build();
     }
 }

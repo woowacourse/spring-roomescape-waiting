@@ -13,6 +13,8 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.exception.DuplicatedReservationException;
+import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -78,11 +80,32 @@ public class ReservationService {
         Reservation reservation = reservationRepository.getById(id);
         ReservationTime time = timeRepository.getById(command.timeId());
         Theme theme = themeRepository.getById(command.themeId());
-        if (reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(id, time.getId(), theme.getId(), command.date())) {
+        if (reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(id, time.getId(), theme.getId(),
+                command.date())) {
             throw new ReservationInUseException("이미 다른 예약이 존재합니다.");
         }
         Reservation changedReservation = reservation.changeTime(command.username(), command.date(), time, theme, clock);
         reservationRepository.updateById(id, changedReservation);
         return ReservationInfo.from(changedReservation);
+    }
+
+    public ReservationInfo changeReservationWaitingStatus(final Long id, final ReservationChangeCommand command) {
+        Reservation reservation = reservationRepository.getById(id);
+        ReservationTime time = timeRepository.getById(command.timeId());
+        Theme theme = themeRepository.getById(command.themeId());
+
+        if (!reservationRepository.existsActiveReservationByThemeAndTime(time.getId(), theme.getId(),
+                command.date())) {
+            throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
+        }
+
+        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), command.date(),
+                command.username())) {
+            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
+        }
+
+        Reservation pendingReservation = reservation.pending(command.username(), command.date(), time, theme, clock);
+        reservationRepository.updateById(id, pendingReservation);
+        return ReservationInfo.from(pendingReservation);
     }
 }
