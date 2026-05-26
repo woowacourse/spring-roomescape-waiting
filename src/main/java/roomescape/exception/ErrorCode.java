@@ -9,6 +9,7 @@ public enum ErrorCode {
     PAST_RESERVATION_UPDATE(HttpStatus.BAD_REQUEST, "이미 지난 예약은 변경할 수 없습니다."),
     PAST_TIME_RESERVATION(HttpStatus.BAD_REQUEST, "이미 지난 시간으로 변경할 수 없습니다."),
     PAST_TIME_CREATE(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 예약할 수 없습니다."),
+    PAST_TIME_WAITING(HttpStatus.BAD_REQUEST, "이미 지난 시간에는 대기 신청할 수 없습니다."),
 
     // 404 - NOT_FOUND
     RESERVATION_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 예약입니다."),
