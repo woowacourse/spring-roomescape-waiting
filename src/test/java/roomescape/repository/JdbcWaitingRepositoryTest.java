@@ -47,6 +47,21 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
+    @DisplayName("저장된 예약 대기 존재를 확인하면, 참을 반환한다.")
+    void existsWaiting() {
+        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        jdbcWaitingRepository.save(waiting);
+        assertThat(jdbcWaitingRepository.isExists(waiting)).isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("저장되지 않은 예약 대기 존재를 확인하면, 거짓을 반환한다.")
+    void notExistsWaiting() {
+        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        assertThat(jdbcWaitingRepository.isExists(waiting)).isEqualTo(false);
+    }
+
+    @Test
     @DisplayName("예약 대기를 삭제한다.")
     void delete() {
         WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);

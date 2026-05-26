@@ -9,4 +9,8 @@ public interface WaitingRepository {
     void save(WaitingCommand waiting);
 
     void delete(WaitingCommand waiting);
+
+    boolean isExists(WaitingCommand waiting);
+
+    int countAllBy(WaitingCommand waitingCommand);
 }

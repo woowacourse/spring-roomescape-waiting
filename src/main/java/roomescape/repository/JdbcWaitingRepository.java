@@ -57,6 +57,36 @@ public class JdbcWaitingRepository implements WaitingRepository {
         jdbcTemplate.update(sql, waiting.name(), waiting.date(), waiting.timeId(), waiting.themeId());
     }
 
+    @Override
+    public boolean isExists(WaitingCommand waiting) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM waiting 
+                    WHERE name = ? 
+                    AND date = ? 
+                    AND time_id = ? 
+                    AND theme_id = ?
+                )
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Boolean.class, waiting.name(), waiting.date(), waiting.timeId(),
+                waiting.themeId());
+    }
+
+    @Override
+    public int countAllBy(WaitingCommand waiting) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM waiting
+                WHERE date = ?
+                  AND time_id = ?
+                  AND theme_id = ?
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Integer.class, waiting.date(), waiting.timeId(), waiting.themeId());
+    }
+
     private SimpleJdbcInsert createInsert() {
         return new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")

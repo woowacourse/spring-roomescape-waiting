@@ -27,9 +27,9 @@ public class WaitingController {
 
     @GetMapping
     public ResponseEntity<Integer> waitingNumber(@RequestParam @NotBlank String name,
-                                        @RequestParam @NotNull LocalDate date,
-                                        @RequestParam @NotNull Long timeId,
-                                        @RequestParam @NotNull Long themeId) {
+                                                 @RequestParam @NotNull LocalDate date,
+                                                 @RequestParam @NotNull Long timeId,
+                                                 @RequestParam @NotNull Long themeId) {
 
         return ResponseEntity.ok(waitingService.waitingNumber(new WaitingCommand(name, date, timeId, themeId)));
     }
@@ -42,11 +42,18 @@ public class WaitingController {
 
     @DeleteMapping
     public ResponseEntity<Void> cancel(@RequestParam @NotBlank String name,
-                       @RequestParam @NotNull LocalDate date,
-                       @RequestParam @NotNull Long timeId,
-                       @RequestParam @NotNull Long themeId) {
+                                       @RequestParam @NotNull LocalDate date,
+                                       @RequestParam @NotNull Long timeId,
+                                       @RequestParam @NotNull Long themeId) {
 
         waitingService.removeWaiting(new WaitingCommand(name, date, timeId, themeId));
         return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping(params = {"date", "timeId", "themeId"})
+    ResponseEntity<Integer> allWaiting(@RequestParam @NotNull LocalDate date,
+                                       @RequestParam @NotNull Long timeId,
+                                       @RequestParam @NotNull Long themeId) {
+        return ResponseEntity.ok(waitingService.allWaiting(WaitingCommand.withoutName(date, timeId, themeId)));
     }
 }

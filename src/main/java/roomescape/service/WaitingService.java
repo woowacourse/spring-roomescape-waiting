@@ -2,6 +2,7 @@ package roomescape.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.exception.DuplicateWaitingException;
 import roomescape.exception.WaitingNotFoundException;
 import roomescape.repository.WaitingRepository;
 import roomescape.service.dto.WaitingCommand;
@@ -40,5 +41,13 @@ public class WaitingService {
     }
 
     private void validDuplicatedReservation(WaitingCommand waiting) {
+        boolean isExists = waitingRepository.isExists(waiting);
+        if (isExists) {
+            throw new DuplicateWaitingException(waiting);
+        }
+    }
+
+    public int allWaiting(WaitingCommand waitingCommand) {
+        return waitingRepository.countAllBy(waitingCommand);
     }
 }
