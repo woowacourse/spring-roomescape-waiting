@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -7,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -43,15 +45,22 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Transactional
     @Override
-    public Reservation create(ReservationSaveServiceDto reservation) {
-        ReservationTime time = findTime(reservation.timeId());
-        Long themeId = reservation.themeId();
+    public Reservation create(ReservationSaveServiceDto request) {
+        ReservationTime time = findTime(request.timeId());
+        Long themeId = request.themeId();
         time.validateReservableSchedule();
         validateThemeId(themeId);
         validateNotHoliday(time);
-        validateDuplicatedReservation(themeId, time);
         Theme theme = themeRepository.findById(themeId);
-        Reservation newReservation = new Reservation(reservation.name(), time).withTheme(theme);
+        Status status = Status.RESERVED;
+        if (isDuplicatedReservation(themeId, time)) {
+            status = Status.WAITING;
+        }
+        Reservation newReservation = new Reservation(request.name(),
+                time,
+                theme,
+                status,
+                LocalDateTime.now());
         return reservationRepository.save(newReservation);
     }
 
@@ -70,10 +79,8 @@ public class ReservationServiceImpl implements ReservationService {
         }
     }
 
-    private void validateDuplicatedReservation(Long themeId, ReservationTime time) {
-        if (reservationRepository.isDuplicated(themeId, time)) {
-            throw new DuplicateReservationException();
-        }
+    private boolean isDuplicatedReservation(Long themeId, ReservationTime time) {
+        return reservationRepository.isDuplicated(themeId, time);
     }
 
     private ReservationTime findTime(Long timeId) {
@@ -112,7 +119,9 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.getTime().validateUpdatableReservation();
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
-        validateDuplicatedReservation(reservation.getTheme().getId(), newTime);
+        if (isDuplicatedReservation(reservation.getTheme().getId(), newTime)) {
+            throw new DuplicateReservationException();
+        }
         boolean updated = reservationRepository.update(id, timeId);
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
