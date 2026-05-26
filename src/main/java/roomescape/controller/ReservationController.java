@@ -63,13 +63,13 @@ public class ReservationController {
     }
 
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/{reservationId}")
+    @PatchMapping("/{waitingId}")
     public void updateReservation(
-            @PathVariable long reservationId,
+            @PathVariable long waitingId,
             @Valid @RequestBody ReservationUpdateRequest request
     ) {
         LocalDateTime now = LocalDateTime.now();
-        reservationService.update(reservationId, now, request);
+        reservationService.update(waitingId, now, request);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)

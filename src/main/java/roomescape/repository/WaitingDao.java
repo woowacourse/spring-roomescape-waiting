@@ -46,6 +46,21 @@ public class WaitingDao {
         return jdbcTemplate.queryForObject(sql, waitingRowMapper, id);
     }
 
+    public boolean existByReservationId(long reservationId) {
+        String sql = """
+            SELECT EXISTS(
+                SELECT 1
+                FROM waiting w
+                WHERE w.reservation_id = ?
+            )
+            """;
+
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, Boolean.class, reservationId
+                )
+        );
+    }
+
     public int findOrderByReservationId(long id, long reservationId) {
         String sql = """
                 SELECT COUNT(*)

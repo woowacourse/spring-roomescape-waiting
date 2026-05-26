@@ -47,34 +47,24 @@ public class ReservationService {
         }
     }
 
-    public void update(Long reservationId, LocalDateTime now, ReservationUpdateRequest request) {
+    public void update(Long waitingId, LocalDateTime now, ReservationUpdateRequest request) {
         try {
             Time time = timeDao.findById(request.timeId());
             LocalDateTime targetDateTime = LocalDateTime.of(request.targetDate(), time.getStartAt());
             validateDateAndTimeNotPast(now, targetDateTime);
+            Waiting waiting = waitingDao.findById(waitingId);
+            waitingDao.delete(waitingId);
 
-            Reservation reservation = reservationDao.findById(reservationId);
-            Optional<Reservation> target = reservationDao.findByDateAndTimeId(request.targetDate(), request.timeId());
-
-            Reservation effectiveTarget;
-
-            if (target.isPresent()) {
-                if (!waitingDao.existsByReservation(target.get().getId())) {
-                    reservationDao.delete(reservationId);
-                }
-                effectiveTarget = target.get();
-            } else {
-                if (!waitingDao.existsByReservation(reservationId)) {
-                    reservationDao.updateDateAndTimeById(reservationId, request.targetDate(), time.getId());
-                } else {
-                    reservationDao.delete(reservationId);
-                }
-                effectiveTarget = new Reservation(reservationId, request.targetDate(), time, reservation.getTheme());
+            if (!waitingDao.existByReservationId(waiting.getReservationId())){
+                reservationDao.delete(waiting.getReservationId());
             }
 
-            waitingDao.delete(waitingDao.findByReservationIdAndName(reservationId, request.name()).getId());
-            waitingDao.save(request.name(), effectiveTarget.getId());
-
+            Reservation reservation = reservationDao.findById(waiting.getReservationId());
+            Optional<Long> reservationId = reservationDao.findIdByDateAndTimeIdAndThemeId(request.targetDate(), request.timeId(), reservation.getTheme().getId());
+            if (reservationId.isEmpty()) {
+                reservationId = Optional.of(reservationDao.save(request.targetDate(), request.timeId(), reservation.getTheme().getId()));
+            }
+            waitingDao.save(request.name(), reservationId.get());
         } catch (DuplicateKeyException e) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION);
         }

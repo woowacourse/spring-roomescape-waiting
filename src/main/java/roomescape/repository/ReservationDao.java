@@ -70,6 +70,27 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
     }
 
+    public Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId
+    ) {
+        String sql = """
+            SELECT r.id
+            FROM reservation r
+            WHERE r.date = ?
+              AND r.time_id = ?
+              AND r.theme_id = ?
+            """;
+
+        List<Long> result = jdbcTemplate.query(
+                sql,
+                (rs, rowNum) -> rs.getLong("id"),
+                date,
+                timeId,
+                themeId
+        );
+
+        return result.stream().findFirst();
+    }
+
     public List<Reservation> findAll() {
         String sql = """
                 SELECT r.id, 
