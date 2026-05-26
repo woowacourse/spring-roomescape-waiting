@@ -1,6 +1,9 @@
 package roomescape.reservation.application;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -18,6 +21,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
+import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
@@ -51,6 +55,53 @@ class ReservationServiceTest {
     void setClock() {
         lenient().when(clock.instant()).thenReturn(Instant.parse("2026-05-26T16:00:00Z"));
         lenient().when(clock.getZone()).thenReturn(ZoneId.of("Asia/Seoul"));
+    }
+
+    @Test
+    @DisplayName("이미 예약이 존재하는 곳에 새로운 예약을 추가하면 Pending 상태로 추가된다.")
+    void addPendingReservationTest() {
+        ReservationCreateCommand command = ReservationCreateCommand.builder()
+                .name("포비")
+                .timeId(1L)
+                .themeId(1L)
+                .date(LocalDate.now(clock))
+                .build();
+
+        ReservationTime mockTime = ReservationTime.builder()
+                .id(1L)
+                .startAt(LocalTime.now(clock))
+                .build();
+
+        Theme mockTheme = Theme.builder()
+                .id(1L)
+                .name("판타지")
+                .description("설명")
+                .durationTime(LocalTime.now(clock))
+                .thumbnailImageUrl("https://~~~")
+                .build();
+
+        Reservation mockReservation = Reservation.builder()
+                .id(1L)
+                .name("포비")
+                .status(Status.PENDING)
+                .date(LocalDate.now(clock))
+                .time(mockTime)
+                .theme(mockTheme)
+                .createdAt(LocalDateTime.now(clock))
+                .build();
+
+        when(reservationTimeRepository.getById(command.timeId()))
+                .thenReturn(mockTime);
+        when(themeRepository.getById(command.themeId()))
+                .thenReturn(mockTheme);
+        when(reservationRepository.existsByReservationTimeAndThemeAndDate(command.timeId(), command.themeId(), command.date()))
+                .thenReturn(true);
+        when(reservationRepository.existsPendingReservationByName(command.timeId(), command.themeId(), command.date(), command.name()))
+                .thenReturn(false);
+        when(reservationRepository.save(any(Reservation.class))).thenReturn(mockReservation);
+
+        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        Assertions.assertThat(reservationService.addReservation(command).status()).isEqualTo(Status.PENDING);
     }
 
     @Test
