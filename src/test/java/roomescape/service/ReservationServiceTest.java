@@ -8,7 +8,7 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.theme.ThemeRequest;
-import roomescape.exception.InvalidReservationException;
+import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
@@ -62,7 +62,7 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().minusDays(1), timeId, themeId);
 
         assertThatThrownBy(() -> reservationService.create(request))
-                .isInstanceOf(InvalidReservationException.class);
+                .isInstanceOf(ExpiredDateTimeException.class);
     }
 
     @Test
@@ -72,7 +72,7 @@ class ReservationServiceTest {
         ReservationRequest reservationReq = new ReservationRequest("브라운", LocalDate.now(), timeId, themeId);
 
         assertThatThrownBy(() -> reservationService.create(reservationReq))
-                .isInstanceOf(InvalidReservationException.class);
+                .isInstanceOf(ExpiredDateTimeException.class);
     }
 
     @Test
@@ -141,7 +141,7 @@ class ReservationServiceTest {
 
 
         assertThatThrownBy(() -> reservationService.update(created.getId(), newReservationReq))
-                .isInstanceOf(InvalidReservationException.class);
+                .isInstanceOf(ExpiredDateTimeException.class);
     }
 
     @Test
