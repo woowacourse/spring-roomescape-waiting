@@ -117,7 +117,7 @@ class JdbcReservationRepositoryTest {
         Long secondSaveId = reservationRepository.save(new Reservation(
                 "브리", findDate, tenClock, findTheme));
         Long thirdSaveId = reservationRepository.save(new Reservation(
-                "브리", FUTURE_THIRD_DATE, tenClock, findTheme));
+                "브리", FUTURE_SECOND_DATE, tenClock, findTheme));
 
         Set<Long> findReservationsId = reservationRepository.findReservedTimeIdsByDateAndThemeId(findDate,
                 findTheme.getId());

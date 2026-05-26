@@ -13,7 +13,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
 import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationRequest;
@@ -49,15 +51,15 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        Reservation reservation = reservationService.addReservation(request);
+        ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(request);
 
-        assertThat(reservation.getId()).isNotNull();
-        assertThat(reservation.getName()).isEqualTo("브라운");
-        assertThat(reservation.getDate()).isEqualTo(FUTURE_SECOND_DATE);
-        assertThat(reservation.getTime().getId()).isEqualTo(reservationTime.getId());
-        assertThat(reservation.getTime().getStartAt()).isEqualTo(reservationTime.getStartAt());
-        assertThat(reservation.getTheme().getId()).isEqualTo(theme.getId());
-        assertThat(reservation.getTheme().getName()).isEqualTo(theme.getName());
+        assertThat(reservationWithStatus.getId()).isNotNull();
+        assertThat(reservationWithStatus.getName()).isEqualTo("브라운");
+        assertThat(reservationWithStatus.getDate()).isEqualTo(FUTURE_SECOND_DATE);
+        assertThat(reservationWithStatus.getTime().getId()).isEqualTo(reservationTime.getId());
+        assertThat(reservationWithStatus.getTime().getStartAt()).isEqualTo(reservationTime.getStartAt());
+        assertThat(reservationWithStatus.getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(reservationWithStatus.getTheme().getName()).isEqualTo(theme.getName());
     }
 
     @Test
@@ -71,7 +73,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(request))
+        assertThatThrownBy(() -> reservationService.reserveOrWait(request))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -86,12 +88,12 @@ class ReservationServiceTest {
                 1L
         );
 
-        assertThatThrownBy(() -> reservationService.addReservation(request))
+        assertThatThrownBy(() -> reservationService.reserveOrWait(request))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
     @Test
-    void 예약을_추가할_때_이미_존재한_예약인_경우_예외() {
+    void 다른_사용자가_이미_예약한_슬롯이면_대기_등록된다() {
         ReservationTime reservationTime = createReservationTime(TEN);
         Theme theme = createTheme();
 
@@ -102,10 +104,81 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.addReservation(request);
+        reservationService.reserveOrWait(request);
 
-        assertThatThrownBy(() -> reservationService.addReservation(request))
+        ReservationRequest waitlistFirstRequest = new ReservationRequest(
+                "워니",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+        reservationService.reserveOrWait(waitlistFirstRequest);
+
+        String other = "브리";
+        ReservationRequest waitlistSecondRequest = new ReservationRequest(
+                other,
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+        ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(waitlistSecondRequest);
+
+        assertThat(reservationWithStatus.getId()).isNotNull();
+        assertThat(reservationWithStatus.getName()).isEqualTo(other);
+        assertThat(reservationWithStatus.getDate()).isEqualTo(FUTURE_SECOND_DATE);
+        assertThat(reservationWithStatus.getTime().getId()).isEqualTo(reservationTime.getId());
+        assertThat(reservationWithStatus.getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(reservationWithStatus.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(reservationWithStatus.getWaitingOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void 걑은_사용자가_이미_예약한_슬롯이면_대기_순번으로_넘어가지_않고_예외() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        ReservationRequest request = new ReservationRequest(
+                "브라운",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        reservationService.reserveOrWait(request);
+
+        assertThatThrownBy(() -> reservationService.reserveOrWait(request))
                 .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 다른_사용자가_이미_예약한_슬롯에서_사용자가_중복_대기할_수_없다() {
+        ReservationTime reservationTime = createReservationTime(TEN);
+        Theme theme = createTheme();
+
+        ReservationRequest request = new ReservationRequest(
+                "브라운",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+
+        reservationService.reserveOrWait(request);
+
+        ReservationRequest waitlistRequest = new ReservationRequest(
+                "브리",
+                FUTURE_SECOND_DATE,
+                reservationTime.getId(),
+                theme.getId()
+        );
+        reservationService.reserveOrWait(waitlistRequest);
+
+        assertThatThrownBy(() -> reservationService.reserveOrWait(waitlistRequest))
+                .isInstanceOf(RoomEscapeException.class);
+    }
+
+    @Test
+    void 동일한_예약을_생성할_때_대기_순번에_생성된다() {
+
     }
 
     @Test
@@ -120,7 +193,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.addReservation(request);
+        reservationService.reserveOrWait(request);
 
         List<Reservation> reservations = reservationService.getReservations();
 
@@ -154,8 +227,8 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.addReservation(requestBrown);
-        reservationService.addReservation(requestBrie);
+        reservationService.reserveOrWait(requestBrown);
+        reservationService.reserveOrWait(requestBrie);
 
         List<Reservation> reservations = reservationService.getReservationsByName(name);
 
@@ -180,7 +253,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        Reservation savedReservation = reservationService.addReservation(request);
+        ReservationWithStatus savedReservation = reservationService.reserveOrWait(request);
 
         Reservation reservation = reservationService.getReservation(savedReservation.getId());
 
@@ -203,7 +276,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        Reservation savedReservation = reservationService.addReservation(request);
+        ReservationWithStatus savedReservation = reservationService.reserveOrWait(request);
 
         reservationService.deleteReservation(savedReservation.getId());
 
@@ -229,7 +302,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        Reservation reservation = reservationService.addReservation(request);
+        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         reservationService.cancelMyReservation(reservation.getId(), name);
 
@@ -270,7 +343,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        Reservation reservation = reservationService.addReservation(request);
+        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         ReservationTime updateTime = createReservationTime(LocalTime.of(12, 0));
         LocalDate updateDate = FUTURE_SECOND_DATE.plusDays(1);
@@ -313,7 +386,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        Reservation reservation = reservationService.addReservation(request);
+        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
                 FUTURE_SECOND_DATE.plusDays(1),
@@ -323,7 +396,7 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateReservation(reservation.getId(), name, updateRequest))
                 .isInstanceOf(RoomEscapeException.class);
     }
-    
+
     @Test
     void 예약을_수정할_때_변경하려는_예약_시간이_이미_차_있으면_예외() {
         ReservationTime tenClock = createReservationTime(TEN);
@@ -337,7 +410,7 @@ class ReservationServiceTest {
                 tenClock.getId(),
                 theme.getId()
         );
-        Reservation reservation = reservationService.addReservation(request);
+        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
 
         ReservationRequest anotherRequest = new ReservationRequest(
                 "브리",
@@ -345,7 +418,7 @@ class ReservationServiceTest {
                 twelveClock.getId(),
                 theme.getId()
         );
-        reservationService.addReservation(anotherRequest);
+        reservationService.reserveOrWait(anotherRequest);
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
                 FUTURE_SECOND_DATE.plusDays(1),

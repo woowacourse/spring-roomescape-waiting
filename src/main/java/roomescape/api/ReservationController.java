@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.dto.ReservationUpdateRequest;
+import roomescape.dto.ReservationWithStatusResponse;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -45,8 +46,8 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> add(@Valid @RequestBody ReservationRequest request) {
-        ReservationResponse response = ReservationResponse.from(reservationService.addReservation(request));
+    public ResponseEntity<ReservationWithStatusResponse> add(@Valid @RequestBody ReservationRequest request) {
+        ReservationWithStatusResponse response = ReservationWithStatusResponse.from(reservationService.reserveOrWait(request));
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
