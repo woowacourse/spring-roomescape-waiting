@@ -62,8 +62,10 @@ class ThemeControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(13))
+                .body("[0].id", is(1))
                 .body("[0].startAt", is("10:00"))
                 .body("[0].isAvailable", is(true))
+                .body("[2].id", is(3))
                 .body("[2].startAt", is("12:00"))
                 .body("[2].isAvailable", is(false));
     }

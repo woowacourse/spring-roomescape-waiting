@@ -38,7 +38,14 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("date", is(date.plusDays(1).toString()))
+                .body("themeName", is("공포의 저택"))
+                .body("themeDescription", is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
+                .body("themeThumbnailUrl", is("https://picsum.photos/seed/haunted/400/250"))
+                .body("time", is("10:00"))
+                .body("waitingResponse.name", is("브라운"))
+                .body("waitingResponse.order", is(0));
     }
 
     @DisplayName("사용자 예약 추가 API - 이상값 예외 테스트")
@@ -68,7 +75,7 @@ class ReservationControllerTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        final long id = RestAssured.given().log().all()
+        final long waitingId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
@@ -76,12 +83,12 @@ class ReservationControllerTest {
                 .statusCode(201)
                 .extract()
                 .jsonPath()
-                .getLong("id");
+                .getLong("waitingResponse.id");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .pathParam("id", id)
-                .when().delete("/reservations/{id}")
+                .pathParam("id", waitingId)
+                .when().delete("/reservations/waitings/{id}")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -100,7 +107,10 @@ class ReservationControllerTest {
                 .body("[0].themeName", is("공포의 저택"))
                 .body("[0].themeDescription", is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
                 .body("[0].themeThumbnailUrl", is("https://picsum.photos/seed/haunted/400/250"))
-                .body("[0].time", is("12:00"));
+                .body("[0].time", is("12:00"))
+                .body("[0].waitingResponse.id", is(1))
+                .body("[0].waitingResponse.name", is("김철수"))
+                .body("[0].waitingResponse.order", is(0));
     }
 
     @DisplayName("사용자 예약 추가 - 날짜 형식 예외 테스트")
@@ -143,7 +153,7 @@ class ReservationControllerTest {
     @Test
     void 사용자_예약_대기_정상_테스트() {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "김철수");
+        params.put("name", "대기자");
         params.put("reservationId", 2);
 
         RestAssured.given().log().all()
@@ -151,14 +161,16 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations/waitings")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("name", is("대기자"))
+                .body("order", is(1));
     }
 
     @DisplayName("사용자 예약 대기 삭제 API")
     @Test
     void 사용자_예약_대기_삭제_API() {
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "김철수");
+        params.put("name", "대기자");
         params.put("reservationId", 2);
 
         final long id = RestAssured.given().log().all()
