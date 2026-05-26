@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Roomescape — 내 예약</title>
+  <meta name="description" content="Roomescape 내 예약 목록 조회, 취소 및 변경 페이지입니다." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/style.css" />
+</head>
+<body>
+
+<header class="site-header">
+  <div class="app-container">
+    <div class="header-inner">
+      <a class="logo" href="/">Room<span>escape</span></a>
+      <nav class="nav-tabs">
+        <a class="nav-tab" href="/">홈</a>
+        <a class="nav-tab" href="/page/reservations">예약</a>
+        <a class="nav-tab active" href="/page/my-reservations">내 예약</a>
+        <a class="nav-tab" href="/page/admin">관리자</a>
+      </nav>
+    </div>
+  </div>
+</header>
+
+<main>
+  <div class="app-container">
+    <div class="admin-header">
+      <div>
+        <h1 class="admin-title">내 예약 목록</h1>
+        <p class="admin-subtitle">내 예약을 조회하고 변경 또는 취소할 수 있습니다.</p>
+      </div>
+    </div>
+
+    <div class="admin-form-card">
+      <div class="admin-form-row">
+        <div class="admin-form-group" style="flex:2">
+          <label class="form-label" for="search-name">예약자 이름으로 조회</label>
+          <input class="form-input" type="text" id="search-name" placeholder="홍길동" autocomplete="name" />
+        </div>
+        <button class="btn-primary" id="btn-search-reservation">조회</button>
+      </div>
+    </div>
+
+    <!-- Reservations List -->
+    <div class="data-table-wrap">
+      <table class="data-table" aria-label="내 예약 목록">
+        <thead><tr><th>#</th><th>날짜</th><th>시간</th><th>테마</th><th>변경</th><th>취소</th></tr></thead>
+        <tbody id="my-reservations-tbody">
+          <tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">이름을 입력하고 조회 버튼을 눌러주세요.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- Modify Booking Modal -->
+<div class="modal-overlay" id="modify-modal" role="dialog" aria-modal="true" aria-labelledby="modify-modal-title">
+  <div class="modal modal-wide">
+    <div class="modal-header">
+      <h2 class="modal-title" id="modify-modal-title">예약 변경</h2>
+      <button class="modal-close" id="modify-modal-close-btn" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body">
+      <!-- 2-column layout for modify -->
+      <div class="booking-layout" style="grid-template-columns: 248px 1fr; margin-bottom: 20px;">
+        <!-- COL 1: 날짜 -->
+        <aside class="booking-col col-date">
+          <div class="col-header">
+            <span class="col-badge">01</span>
+            <h2 class="col-title">날짜 선택</h2>
+          </div>
+          <div class="col-body">
+            <div class="calendar-nav">
+              <button class="calendar-nav-btn" id="modify-cal-prev" aria-label="이전 달">&#8249;</button>
+              <span class="calendar-month-label" id="modify-cal-month-label"></span>
+              <button class="calendar-nav-btn" id="modify-cal-next" aria-label="다음 달">&#8250;</button>
+            </div>
+            <div class="calendar-grid" id="modify-calendar-grid">
+              <div class="calendar-day-label">일</div><div class="calendar-day-label">월</div><div class="calendar-day-label">화</div><div class="calendar-day-label">수</div><div class="calendar-day-label">목</div><div class="calendar-day-label">금</div><div class="calendar-day-label">토</div>
+            </div>
+          </div>
+        </aside>
+
+        <!-- COL 2: 시간 (2열) -->
+        <section class="booking-col col-time">
+          <div class="col-header">
+            <span class="col-badge">02</span>
+            <h2 class="col-title">시간 선택</h2>
+          </div>
+          <div class="col-body">
+            <div id="modify-time-slots-container">
+              <div class="empty-state">
+                <p>🗓</p>
+                <p>날짜를<br>먼저 선택해주세요.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+      </div>
+      <div class="booking-summary">
+        <div><div class="summary-item-label">테마</div><div class="summary-item-value" id="modify-modal-theme">—</div></div>
+        <div><div class="summary-item-label">날짜</div><div class="summary-item-value" id="modify-modal-date">—</div></div>
+        <div><div class="summary-item-label">시간</div><div class="summary-item-value" id="modify-modal-time">—</div></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="modify-modal-cancel-btn">취소</button>
+      <button class="btn-primary" id="confirm-modify-btn" disabled>변경하기</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toast-container" aria-live="polite"></div>
+<script src="/my-reservations.js"></script>
+</body>
+</html>
