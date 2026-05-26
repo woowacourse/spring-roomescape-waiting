@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -115,6 +116,26 @@ public class ReservationDao {
 
     public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
         jdbcTemplate.update("UPDATE reservation SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
+    }
+
+    public Optional<Reservation> findByDateAndTimeId(LocalDate date, Long timeId) {
+        String sql = """
+            SELECT r.id AS reservation_id,
+                   r.date AS date,
+                   rt.id AS time_id,
+                   rt.start_at AS start_at,
+                   t.id AS theme_id,
+                   t.name AS theme_name,
+                   t.description AS description,
+                   t.thumbnail_url AS thumbnail_url
+            FROM reservation r
+            JOIN reservation_time rt ON r.time_id = rt.id
+            JOIN theme t ON r.theme_id = t.id
+            WHERE r.date = ? AND r.time_id = ?
+            """;
+        return jdbcTemplate.query(sql, reservationRowMapper, date, timeId)
+                .stream()
+                .findFirst();
     }
 
     public void delete(Long id) {

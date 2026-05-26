@@ -1073,6 +1073,7 @@
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(isEditing ? {
+          name: username,
           targetDate: selectedDate || null,
           timeId: selectedTime?.id || null
         } : {

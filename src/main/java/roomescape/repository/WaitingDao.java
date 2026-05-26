@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,7 +8,6 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Waiting;
-import roomescape.dto.WaitingResponse;
 
 @Repository
 public class WaitingDao {
@@ -61,6 +59,27 @@ public class WaitingDao {
                 reservationId,
                 id
         );
+    }
+
+    public boolean existsByReservation(Long reservationId) {
+        String sql = """
+            SELECT COUNT(*) > 0
+            FROM waiting w
+            WHERE w.reservation_id = ?
+            """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId));
+    }
+
+    public Waiting findByReservationIdAndName(Long reservationId, String name) {
+        String sql = """
+            SELECT w.id AS id,
+                   w.name AS name,
+                   w.reservation_id AS reservation_id
+            FROM waiting w
+            WHERE w.reservation_id = ?
+              AND w.name = ?
+            """;
+        return jdbcTemplate.queryForObject(sql, waitingRowMapper, reservationId, name);
     }
 
     public void delete(Long id) {

@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -50,9 +51,31 @@ public class ReservationService {
         try {
             Time time = timeDao.findById(request.timeId());
             LocalDateTime targetDateTime = LocalDateTime.of(request.targetDate(), time.getStartAt());
-            validateDateAndTimeNotPast(now,targetDateTime);
-            reservationDao.updateDateAndTimeById(reservationId,request.targetDate(), time.getId());
-        } catch (DuplicateKeyException e){
+            validateDateAndTimeNotPast(now, targetDateTime);
+
+            Reservation reservation = reservationDao.findById(reservationId);
+            Optional<Reservation> target = reservationDao.findByDateAndTimeId(request.targetDate(), request.timeId());
+
+            Reservation effectiveTarget;
+
+            if (target.isPresent()) {
+                if (!waitingDao.existsByReservation(target.get().getId())) {
+                    reservationDao.delete(reservationId);
+                }
+                effectiveTarget = target.get();
+            } else {
+                if (!waitingDao.existsByReservation(reservationId)) {
+                    reservationDao.updateDateAndTimeById(reservationId, request.targetDate(), time.getId());
+                } else {
+                    reservationDao.delete(reservationId);
+                }
+                effectiveTarget = new Reservation(reservationId, request.targetDate(), time, reservation.getTheme());
+            }
+
+            waitingDao.delete(waitingDao.findByReservationIdAndName(reservationId, request.name()).getId());
+            waitingDao.save(request.name(), effectiveTarget.getId());
+
+        } catch (DuplicateKeyException e) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
