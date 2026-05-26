@@ -1,11 +1,9 @@
 package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.theme.application.dto.ThemeInfo;
 import roomescape.time.application.dto.ReservationTimeInfo;
 

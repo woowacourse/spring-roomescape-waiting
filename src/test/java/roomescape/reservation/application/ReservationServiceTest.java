@@ -4,11 +4,8 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -20,11 +17,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.config.TestTimeConfig;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
-import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -118,5 +112,26 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.addReservation(pendingCommand))
                 .isInstanceOf(DuplicatedReservationException.class)
                 .hasMessageContaining("이미 예약 대기 중입니다.");
+    }
+
+    @Test
+    @DisplayName("Active인 예약을 취소하면 Pending 상태인 예약중 첫번째 예약이 Active로 바뀐다.")
+    void updatePendingReservationToActive() {
+        ReservationCreateCommand activeCommand = new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        ReservationInfo reservationInfo = reservationService.addReservation(activeCommand);
+        ReservationCreateCommand pendingFirstCommand = new ReservationCreateCommand(
+                "리사", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(pendingFirstCommand);
+        ReservationCreateCommand pendingSecondCommand = new ReservationCreateCommand(
+                "브리", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(pendingSecondCommand);
+        reservationService.cancelReservation(reservationInfo.id(), reservationInfo.name());
+
+        Assertions.assertThat(reservationService.getReservationsByName(pendingFirstCommand.name()).getFirst().status())
+                .isEqualTo(Status.ACTIVE);
     }
 }

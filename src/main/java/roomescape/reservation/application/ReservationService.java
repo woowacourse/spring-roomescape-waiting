@@ -2,8 +2,8 @@ package roomescape.reservation.application;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -17,6 +17,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
 import roomescape.reservation.domain.exception.IllegalStateReservationException;
@@ -88,8 +89,17 @@ public class ReservationService {
         if (!reservationRepository.existsByIdAndUsernameAndActiveOrPending(id, username)) {
             throw new ReservationNotFoundException("해당 예약을 찾을 수 없거나 취소할 권한이 없습니다.");
         }
-        Reservation canceledReservation = reservationRepository.getById(id).cancel();
+        Reservation reservation = reservationRepository.getById(id);
+        Reservation canceledReservation = reservation.cancel();
         reservationRepository.cancel(canceledReservation);
+        if (reservation.getStatus().equals(Status.ACTIVE)) {
+            Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
+                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+            nextPendingReservation.ifPresent(pending -> {
+                Reservation activeReservation = pending.active();
+                reservationRepository.updateById(activeReservation.getId(), activeReservation);
+            });
+        }
     }
 
     public ReservationInfo changeReservation(final Long id, final ReservationChangeCommand command) {

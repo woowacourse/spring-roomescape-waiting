@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -97,13 +98,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void updateById(final Long id, final Reservation reservation) {
         String sql = "UPDATE reservation "
-                + "SET date = :date, time_id = :timeId, theme_id = :themeId "
+                + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status "
                 + "WHERE id = :id AND is_deleted = 0";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", reservation.getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("themeId", reservation.getTheme().getId())
+                .addValue("status", reservation.getStatus().name())
                 .addValue("id", id);
 
         jdbcTemplate.update(sql, params);
@@ -257,7 +259,31 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void cancel(final Reservation reservation) {
-        String sql = "UPDATE reservation SET status = 'CANCELED', is_deleted=:id WHERE id = :id AND status='ACTIVE' OR status='PENDING'";
+        String sql = "UPDATE reservation SET status = 'CANCELED', is_deleted=:id WHERE id = :id AND (status='ACTIVE' OR status='PENDING')";
         jdbcTemplate.update(sql, Map.of("id", reservation.getId()));
+    }
+
+    @Override
+    public Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId) {
+        String sql = "SELECT r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
+                + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
+                + "t.description AS t_description, t.duration_time AS t_duration_time, "
+                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "FROM reservation r "
+                + "INNER JOIN theme t ON r.theme_id = t.id "
+                + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
+                + "WHERE r.date = :date AND r.time_id = :timeId AND r.theme_id = :themeId "
+                + "AND r.status = 'PENDING' AND r.is_deleted = 0 "
+                + "ORDER BY r.created_at ASC " // 👈 가장 먼저 대기 건 사람 순서대로 줄 세우기
+                + "LIMIT 1";
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId);
+        try {
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, rowMapper));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
     }
 }
