@@ -3,6 +3,7 @@ DROP TABLE IF EXISTS members;
 DROP TABLE IF EXISTS stores;
 DROP TABLE IF EXISTS times;
 DROP TABLE IF EXISTS themes;
+DROP TABLE IF EXISTS waitings;
 
 CREATE TABLE times
 (
@@ -68,7 +69,7 @@ CREATE TABLE waitings
     date       DATE      NOT NULL,
     time_id    BIGINT    NOT NULL,
     theme_id   BIGINT    NOT NULL,
-    store_id   BIGINT,
+    store_id   BIGINT    NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (member_id) REFERENCES members (id),

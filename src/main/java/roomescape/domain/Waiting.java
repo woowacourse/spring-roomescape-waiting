@@ -9,18 +9,24 @@ public class Waiting {
     private final Long timeId;
     private final Long themeId;
     private final Long storeId;
+    private final Long rank;
 
-    public Waiting(Long id, Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
+    public Long getRank() {
+        return rank;
+    }
+
+    public Waiting(Long id, Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId, Long rank) {
         this.id = id;
         this.memberId = memberId;
         this.date = date;
         this.timeId = timeId;
         this.themeId = themeId;
         this.storeId = storeId;
+        this.rank = rank;
     }
 
     public Waiting(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
-        this(null, memberId, date, timeId, themeId, storeId);
+        this(null, memberId, date, timeId, themeId, storeId, null);
     }
 
     public Long getId() {

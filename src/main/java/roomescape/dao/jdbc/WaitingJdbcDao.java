@@ -19,10 +19,24 @@ public class WaitingJdbcDao implements WaitingDao {
             LocalDate.parse(rs.getString("date")),
             rs.getLong("time_id"),
             rs.getLong("theme_id"),
-            rs.getLong("store_id")
+            rs.getLong("store_id"),
+            rs.getLong("rank")
     );
     private static final String BASE_SELECT = """
-            SELECT * FROM WAITINGS
+            SELECT
+                    w.id,
+                    w.member_id,
+                    w.date,
+                    w.time_id,
+                    w.theme_id,
+                    w.store_id,
+                    (SELECT COUNT(*)+1
+                        FROM waitings w2
+                        WHERE w2.date = w.date
+                        AND w2.time_id = w.time_id
+                        AND w2.theme_id = w.theme_id
+                        AND w2.id < w.id) AS rank
+                FROM waitings w
             """;
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
@@ -33,7 +47,7 @@ public class WaitingJdbcDao implements WaitingDao {
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waitings")
                 .usingGeneratedKeyColumns("id")
-                .usingColumns("id", "member_id", "date", "time_id", "theme_id", "store_id");
+                .usingColumns("member_id", "date", "time_id", "theme_id", "store_id");
     }
 
     @Override
@@ -60,9 +74,7 @@ public class WaitingJdbcDao implements WaitingDao {
 
         long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return new Waiting(
-                id, waiting.getMemberId(), waiting.getDate(),
-                waiting.getTimeId(), waiting.getThemeId(), waiting.getStoreId());
+        return findById(id).orElse(null);
     }
 
     @Override
@@ -105,8 +117,8 @@ public class WaitingJdbcDao implements WaitingDao {
     @Override
     public Optional<Waiting> findFirst(LocalDate date, Long timeId, Long themeId, Long storeId) {
         String sql = BASE_SELECT + """
-                ORDER BY id LIMIT 1
                 WHERE date = :date AND time_id = :timeId AND theme_id = :themeId AND store_id = :storeId
+                ORDER BY id LIMIT 1
                 """;
         SqlParameterSource params = new MapSqlParameterSource("date", date)
                 .addValue("timeId", timeId)
@@ -114,5 +126,17 @@ public class WaitingJdbcDao implements WaitingDao {
                 .addValue("storeId", storeId);
 
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, ROW_MAPPER));
+    }
+
+    @Override
+    public List<Waiting> findAllByMemberId(Long memberId) {
+        String sql = BASE_SELECT + """
+                WHERE member_id = :memberId
+                ORDER BY w.date, w.time_id;
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource("memberId", memberId);
+
+        return jdbcTemplate.query(sql, params, ROW_MAPPER);
     }
 }

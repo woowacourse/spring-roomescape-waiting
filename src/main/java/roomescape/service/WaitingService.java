@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.List;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.WaitingDao;
 import roomescape.domain.Waiting;
@@ -13,7 +14,8 @@ public class WaitingService {
     }
 
     public Waiting create(WaitingRequestDto waitingRequestDto) {
-        return waitingDao.insert(new Waiting(waitingRequestDto.memberId(),
+        return waitingDao.insert(new Waiting(
+                waitingRequestDto.memberId(),
                 waitingRequestDto.date(),
                 waitingRequestDto.timeId(),
                 waitingRequestDto.themeId(),
@@ -25,5 +27,13 @@ public class WaitingService {
         if (!waitingDao.delete(waitingId)) {
             throw new EntityNotFoundException("존재하지 않는 예약 대기입니다.");
         }
+    }
+
+    public List<Waiting> findAll(){
+        return waitingDao.findAll();
+    }
+
+    public List<Waiting> findAllByMemberId(Long memberId){
+        return waitingDao.findAllByMemberId(memberId);
     }
 }
