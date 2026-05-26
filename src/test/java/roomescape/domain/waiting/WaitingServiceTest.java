@@ -114,4 +114,27 @@ class WaitingServiceTest {
                     .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_WAITING_NAME);
         }
     }
+
+    @Nested
+    @DisplayName("예약 대기 삭제 테스트")
+    class DeleteWaiting {
+
+        @Test
+        void 정상_삭제() {
+            when(waitingRepository.existsById(1L)).thenReturn(true);
+
+            waitingService.deleteWaiting(1L);
+
+            verify(waitingRepository, times(1)).deleteById(1L);
+        }
+
+        @Test
+        void 존재하지_않는_id면_예외() {
+            when(waitingRepository.existsById(99L)).thenReturn(false);
+
+            assertThatThrownBy(() -> waitingService.deleteWaiting(99L))
+                    .isInstanceOf(RoomescapeException.class)
+                    .extracting("errorCode").isEqualTo(ErrorCode.WAITING_ID_NOT_FOUND);
+        }
+    }
 }
