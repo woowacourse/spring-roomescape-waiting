@@ -8,7 +8,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
 import roomescape.member.Role;
-import roomescape.reservation.ReservationStatus;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
@@ -66,9 +65,7 @@ class ReservationServiceTest {
                 "description",
                 "thumbnail",
                 timeId,
-                startAt,
-                ReservationStatus.RESERVED,
-                null
+                startAt
         );
     }
 

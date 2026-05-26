@@ -12,6 +12,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
+import roomescape.waiting.WaitingRepository;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -22,6 +23,7 @@ import java.util.function.Consumer;
 @RequiredArgsConstructor
 public class ReservationService {
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final ScheduleService scheduleService;
 
     public ReservationSaveResponse save(ReservationSaveRequest body, long memberId) {
@@ -41,9 +43,10 @@ public class ReservationService {
     }
 
     public List<ReservationDetailFindResponse> findMyReservations(long memberId) {
-        List<ReservationDetailProjection> reservationDetailProjection = reservationRepository.findAllReservationDetailsByMemberId(memberId);
-
-        return ReservationDetailFindResponse.from(reservationDetailProjection);
+        return ReservationDetailFindResponse.merge(
+                reservationRepository.findAllReservationDetailsByMemberId(memberId),
+                waitingRepository.findAllWaitingDetailsByMemberId(memberId)
+        );
     }
 
     public ReservationSaveResponse updateForUser(ReservationUpdateRequest body, long reservationId, long memberId) {

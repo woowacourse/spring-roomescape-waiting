@@ -1,5 +1,6 @@
 package roomescape.waiting.application;
 
+import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
@@ -21,13 +22,27 @@ public class WaitingService {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
 
-        if (waitingRepository.existsByScheduleIdAndMemberId(memberId, scheduleId)){
-            throw new EscapeRoomException(ErrorCode.INVALID_INPUT);
+        if (waitingRepository.existsByScheduleIdAndMemberId(memberId, scheduleId)) {
+            throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
         }
 
         Waiting waiting = waitingRepository.save(body.toDomain(memberId, scheduleId));
         long waitingOrder = waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, waiting.getId());
 
         return WaitingResponse.of(waiting, waitingOrder);
+    }
+
+    public void deleteByIdForUser(long waitingId, long memberId) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElse(null);
+        if(waiting == null) {
+            return;
+        }
+
+        if (!Objects.equals(waiting.getMemberId(), memberId)) {
+            throw new EscapeRoomException(ErrorCode.WAITING_NOT_OWNED_BY_MEMBER, waitingId);
+        }
+
+        waitingRepository.deleteById(waitingId);
     }
 }

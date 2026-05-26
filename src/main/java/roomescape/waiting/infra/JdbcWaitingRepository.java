@@ -1,19 +1,48 @@
 package roomescape.waiting.infra;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.member.Role;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingRepository;
+import roomescape.waiting.infra.projection.WaitingDetailProjection;
+
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
 public class JdbcWaitingRepository implements WaitingRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
+
+    private final RowMapper<Waiting> waitingRowMapper = (resultSet, rowNum) -> new Waiting(
+            resultSet.getLong("id"),
+            resultSet.getLong("member_id"),
+            resultSet.getLong("schedule_id")
+    );
+
+    private final RowMapper<WaitingDetailProjection> waitingDetailRowMapper = (resultSet, rowNum) ->
+            new WaitingDetailProjection(
+                    resultSet.getLong("waiting_id"),
+                    resultSet.getLong("member_id"),
+                    resultSet.getString("member_name"),
+                    resultSet.getString("member_password"),
+                    Role.valueOf(resultSet.getString("member_role")),
+                    resultSet.getDate("date").toLocalDate(),
+                    resultSet.getLong("theme_id"),
+                    resultSet.getString("theme_name"),
+                    resultSet.getString("theme_description"),
+                    resultSet.getString("theme_thumbnail_url"),
+                    resultSet.getLong("time_id"),
+                    resultSet.getTime("start_at").toLocalTime(),
+                    resultSet.getLong("waiting_order")
+            );
 
     @Override
     public Waiting save(Waiting waiting) {
@@ -32,6 +61,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
         }
 
         return new Waiting(id.longValue(), waiting.getMemberId(), waiting.getScheduleId());
+    }
+
+    @Override
+    public Optional<Waiting> findById(long waitingId) {
+        String sql = """
+                SELECT id, member_id, schedule_id
+                FROM waiting
+                WHERE id = :waitingId
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("waitingId", waitingId);
+
+        return jdbcTemplate.query(sql, params, waitingRowMapper)
+                .stream()
+                .findFirst();
     }
 
     @Override
@@ -63,5 +108,52 @@ public class JdbcWaitingRepository implements WaitingRepository {
             return 0L;
         }
         return count;
+    }
+
+    @Override
+    public List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId) {
+        String sql = """
+                SELECT
+                    w.id AS waiting_id,
+                    m.id AS member_id,
+                    m.name AS member_name,
+                    m.password AS member_password,
+                    m.role AS member_role,
+                    s.date,
+                    t.id AS theme_id,
+                    t.name AS theme_name,
+                    t.description AS theme_description,
+                    t.thumbnail_url AS theme_thumbnail_url,
+                    rt.id AS time_id,
+                    rt.start_at,
+                    (
+                        SELECT COUNT(*)
+                        FROM waiting previous_waiting
+                        WHERE previous_waiting.schedule_id = w.schedule_id
+                        AND previous_waiting.id <= w.id
+                    ) AS waiting_order
+                FROM waiting w
+                JOIN schedule s ON w.schedule_id = s.id
+                JOIN theme t ON s.theme_id = t.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN member m ON w.member_id = m.id
+                WHERE m.id = :memberId
+                ORDER BY w.id
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("memberId", memberId);
+
+        return jdbcTemplate.query(sql, params, waitingDetailRowMapper);
+    }
+
+    @Override
+    public void deleteById(long waitingId) {
+        String sql = "DELETE FROM waiting WHERE id = :waitingId";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("waitingId", waitingId);
+
+        jdbcTemplate.update(sql, params);
     }
 }

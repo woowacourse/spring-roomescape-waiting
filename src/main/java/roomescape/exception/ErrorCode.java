@@ -16,6 +16,10 @@ public enum ErrorCode {
     RESERVATION_NOT_FOUND_AFTER_UPDATE(HttpStatus.NOT_FOUND, "RESERVATION_404_AFTER_UPDATE", "수정 후 예약(%d번)을 찾을 수 없습니다."),
     RESERVATION_NOT_OWNED_BY_MEMBER(HttpStatus.FORBIDDEN, "RESERVATION_403_OWNER", "본인 예약(%d번)만 처리할 수 있습니다."),
 
+    // Waiting
+    WAITING_ALREADY_EXIST(HttpStatus.CONFLICT, "WAITING_409", "이미 신청한 대기가 존재합니다."),
+    WAITING_NOT_OWNED_BY_MEMBER(HttpStatus.FORBIDDEN, "WAITING_403_OWNER", "본인 대기(%d번)만 처리할 수 있습니다."),
+
     // Schedule
     SCHEDULE_NOT_FOUND_WITH_CONDITION(HttpStatus.NOT_FOUND, "SCHEDULE_404_WITH_CONDITION", "해당 조건의 스케줄 id가 존재하지 않습니다. date=%s, timeId=%d, themeId=%d"),
     SCHEDULE_NOT_FOUND(HttpStatus.NOT_FOUND, "SCHEDULE_404", "스케줄(%d번)이 존재하지 않습니다."),

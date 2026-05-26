@@ -2,9 +2,9 @@ package roomescape.reservation;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Import(TestTimeConfig.class)
 @ActiveProfiles("test")
@@ -21,10 +22,19 @@ import static org.hamcrest.Matchers.is;
 @Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public class ReservationControllerTest {
 
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = 8080;
+    }
+
     private String loginUser() {
+        return login("a", "test1");
+    }
+
+    private String login(String name, String password) {
         Map<String, Object> loginRequest = new HashMap<>();
-        loginRequest.put("name", "a");
-        loginRequest.put("password", "test1");
+        loginRequest.put("name", name);
+        loginRequest.put("password", password);
 
         return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -43,6 +53,14 @@ public class ReservationControllerTest {
         reservation.put("timeId", 4);
         reservation.put("themeId", 4);
         return reservation;
+    }
+
+    private Map<String, Object> waitingRequest() {
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("date", "2026-05-05");
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+        return waiting;
     }
 
     @Test
@@ -88,5 +106,33 @@ public class ReservationControllerTest {
                 .statusCode(200)
                 .body("success", is(true))
                 .body("data.size()", is(3));
+    }
+
+    @Test
+    void 나의_예약_목록에서_대기도_함께_조회한다() {
+        String accessToken = login("b", "test2");
+
+        Integer waitingId = RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(waitingRequest())
+                .when().post("/api/user/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.id", notNullValue())
+                .extract()
+                .path("data.id");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/user/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(1))
+                .body("data[0].id", is(waitingId))
+                .body("data[0].status", is("WAITING"))
+                .body("data[0].waitingOrder", is(1));
     }
 }

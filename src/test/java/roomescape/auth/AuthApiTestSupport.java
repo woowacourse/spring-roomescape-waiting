@@ -2,6 +2,7 @@ package roomescape.auth;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
@@ -15,6 +16,11 @@ import java.util.Map;
 @Import(TestTimeConfig.class)
 @ActiveProfiles("test")
 abstract class AuthApiTestSupport {
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = 8080;
+    }
 
     protected String loginToken(String name, String password) {
         return RestAssured.given().log().all()

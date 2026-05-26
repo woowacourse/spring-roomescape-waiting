@@ -34,12 +34,12 @@ public class WaitingController {
         return ResponseEntity.status(HttpStatus.OK).body(ApiResponse.success(response));
     }
 
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<ApiResponse<Void>> deleteByUser(
-//            @PathVariable @Positive long id,
-//            @LoginMember AuthenticatedMember member
-//    ) {
-//        waitingService.deleteByIdForUser(id, member.id());
-//        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
-//    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteByUser(
+            @PathVariable @Positive long id,
+            @LoginMember AuthenticatedMember member
+    ) {
+        waitingService.deleteByIdForUser(id, member.id());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body(ApiResponse.success(null));
+    }
 }

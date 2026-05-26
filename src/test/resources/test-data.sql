@@ -22,9 +22,9 @@ VALUES ('2026-05-05', 1, 1), -- id=1
 
 INSERT INTO member (name, password, role)
 VALUES ('a', 'test1', 'USER'),
-       ('d', 'test2', 'USER'),
        ('b', 'test2', 'USER'),
-       ('c', 'test3', 'USER');
+       ('c', 'test3', 'USER'),
+       ('d', 'test4', 'USER');
 
 
 INSERT

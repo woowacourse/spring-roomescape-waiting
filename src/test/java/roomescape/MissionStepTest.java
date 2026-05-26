@@ -2,6 +2,7 @@ package roomescape;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Import;
@@ -18,6 +19,11 @@ import static org.hamcrest.Matchers.is;
 @Sql(scripts = {"/truncate.sql", "/test-data.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 @Import(TestTimeConfig.class)
 public class MissionStepTest {
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = 8080;
+    }
 
     @Test
     void 예약_조회() {
