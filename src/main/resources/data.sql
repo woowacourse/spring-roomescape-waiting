@@ -13,12 +13,12 @@ INSERT INTO theme (id, name, description, thumbnail_url) VALUES
 (4, '지하 벙커 113', '냉전 시대의 지하 벙커에서 비상 전력과 암호 장치를 복구하는 긴장감 높은 탈출극입니다.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Bunker%20113%20Bernbach.jpg?width=1200'),
 (5, '심야열차 마지막 칸', '새벽에 멈춰 선 열차 객실에서 남겨진 승차권과 수하물 단서를 따라 사건을 풀어야 합니다.', 'https://commons.wikimedia.org/wiki/Special:FilePath/Passenger%20Compartment%20on%20a%20train%28GN04216%29.jpg?width=1200');
 
-INSERT INTO reservation (id, name, date, time_id, theme_id) VALUES
-(1, '강민준', CURRENT_DATE, 1, 1),
-(2, '이서연', CURRENT_DATE, 2, 2),
-(3, '박도윤', CURRENT_DATE, 3, 3),
-(4, '최하린', DATEADD('DAY', 1, CURRENT_DATE), 4, 4),
-(5, '정우진', DATEADD('DAY', 1, CURRENT_DATE), 5, 5);
+INSERT INTO reservation (id, name, date, time_id, theme_id, created_at) VALUES
+(1, '강민준', CURRENT_DATE, 1, 1, CURRENT_TIMESTAMP),
+(2, '이서연', CURRENT_DATE, 2, 2, CURRENT_TIMESTAMP),
+(3, '박도윤', CURRENT_DATE, 3, 3, CURRENT_TIMESTAMP),
+(4, '최하린', DATEADD('DAY', 1, CURRENT_DATE), 4, 4, CURRENT_TIMESTAMP),
+(5, '정우진', DATEADD('DAY', 1, CURRENT_DATE), 5, 5, CURRENT_TIMESTAMP);
 
 ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 7;
 ALTER TABLE theme ALTER COLUMN id RESTART WITH 6;

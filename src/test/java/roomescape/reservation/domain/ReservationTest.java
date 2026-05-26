@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -72,7 +73,7 @@ class ReservationTest {
         // given
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
         Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
-        Reservation reservation = Reservation.createRow(1L, "인직", LocalDate.now().minusDays(1), time, theme);
+        Reservation reservation = Reservation.createRow(1L, "인직", LocalDate.now().minusDays(1), time, theme, LocalDateTime.now());
 
         // when & then
         assertThatThrownBy(() -> reservation.update("인직", LocalDate.now().plusDays(1), time))

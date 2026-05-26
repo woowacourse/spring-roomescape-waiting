@@ -15,25 +15,28 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final LocalDateTime createdAt;
 
-    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+                        LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.createdAt = createdAt;
     }
 
     public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateCreatableDateTime(date, time);
-        return new Reservation(null, name, date, time, theme);
+        return new Reservation(null, name, date, time, theme, LocalDateTime.now());
     }
 
     public Reservation update(String name, LocalDate date, ReservationTime time) {
         validateOwner(name);
         validateModifiable();
         validateModifiableDateTime(date, time);
-        return new Reservation(id, this.name, date, time, theme);
+        return new Reservation(id, this.name, date, time, theme, this.createdAt);
     }
 
     public void cancel(String name) {
@@ -41,12 +44,12 @@ public class Reservation {
         validateModifiable();
     }
 
-    public static Reservation createRow(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(id, name, date, time, theme);
+    public static Reservation createRow(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+        return new Reservation(id, name, date, time, theme, createdAt);
     }
 
     public Reservation appendId(Long id) {
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(id, name, date, time, theme, createdAt);
     }
 
     public Long getId() {
@@ -67,6 +70,10 @@ public class Reservation {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
     }
 
     private static void validateCreatableDateTime(LocalDate date, ReservationTime time) {

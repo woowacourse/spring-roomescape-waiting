@@ -62,18 +62,18 @@ class PopularThemeJdbcTemplateRepositoryTest {
         );
 
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, date, time_id, theme_id, created_at)
+                VALUES (?, ?, ?, ?, NOW())
                 """, "예약자1", LocalDate.of(2026, 5, 1), 1L, theme1.getId());
 
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, date, time_id, theme_id, created_at)
+                VALUES (?, ?, ?, ?, NOW())
                 """, "예약자2", LocalDate.of(2026, 5, 2), 2L, theme1.getId());
 
         jdbcTemplate.update("""
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO reservation (name, date, time_id, theme_id, created_at)
+                VALUES (?, ?, ?, ?, NOW())
                 """, "예약자3", LocalDate.of(2026, 5, 3), 3L, theme2.getId());
 
         // when

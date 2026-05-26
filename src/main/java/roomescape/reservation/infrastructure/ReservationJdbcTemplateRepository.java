@@ -21,6 +21,7 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
         SELECT r.id,
                r.name AS reservation_name,
                r.date,
+               r.created_at,
                rt.id AS time_id,
                rt.start_at,
                t.id AS theme_id,
@@ -38,6 +39,7 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
         SELECT r.id,
                r.name AS reservation_name,
                r.date,
+               r.created_at,
                rt.id AS time_id,
                rt.start_at,
                t.id AS theme_id,
@@ -53,6 +55,7 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
         SELECT r.id,
                r.name AS reservation_name,
                r.date,
+               r.created_at,
                rt.id AS time_id,
                rt.start_at,
                t.id AS theme_id,
@@ -70,6 +73,7 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
         SELECT r.id,
                r.name AS reservation_name,
                r.date,
+               r.created_at,
                rt.id AS time_id,
                rt.start_at,
                t.id AS theme_id,
@@ -105,6 +109,7 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
         SELECT r.id,
                r.name AS reservation_name,
                r.date,
+               r.created_at,
                rt.id AS time_id,
                rt.start_at,
                t.id AS theme_id,
@@ -136,7 +141,8 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
                 rs.getString("reservation_name"),
                 rs.getDate("date").toLocalDate(),
                 time,
-                theme
+                theme,
+                rs.getTimestamp("created_at").toLocalDateTime()
         );
     };
 
@@ -156,7 +162,8 @@ public class ReservationJdbcTemplateRepository implements ReservationRepository 
                 "name", reservation.getName(),
                 "date", reservation.getDate(),
                 "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId()
+                "theme_id", reservation.getTheme().getId(),
+                "created_at", reservation.getCreatedAt()
         );
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return reservation.appendId(id);

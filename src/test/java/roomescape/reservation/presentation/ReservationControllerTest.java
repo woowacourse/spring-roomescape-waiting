@@ -14,6 +14,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.List;
@@ -68,7 +69,7 @@ class ReservationControllerTest {
                                           Long themeId, String themeName) {
         ReservationTime time = ReservationTime.createRow(timeId, LocalTime.parse(startAt));
         Theme theme = Theme.createRow(themeId, themeName, "설명", "https://thumbnail.com");
-        return Reservation.createRow(id, name, date, time, theme);
+        return Reservation.createRow(id, name, date, time, theme, LocalDateTime.now());
     }
 
     @Test
