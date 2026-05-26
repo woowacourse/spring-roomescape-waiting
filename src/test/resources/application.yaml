@@ -1,0 +1,10 @@
+spring:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  datasource:
+    generate-unique-name: true
+  sql:
+    init:
+      data-locations: optional:classpath:/no-data.sql
