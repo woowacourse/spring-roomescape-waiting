@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -32,8 +33,8 @@ class ThemeServiceTest {
         Theme theme2 = Theme.of(2L, "테마2", "설명2", "url2");
         when(reservationRepository.findThemeIdTop10(any(LocalDate.class), any(LocalDate.class)))
             .thenReturn(List.of(1L, 2L));
-        when(themeRepository.findById(1L)).thenReturn(theme1);
-        when(themeRepository.findById(2L)).thenReturn(theme2);
+        when(themeRepository.findById(1L)).thenReturn(Optional.of(theme1));
+        when(themeRepository.findById(2L)).thenReturn(Optional.of(theme2));
 
         List<ThemeResponse> responses = themeService.getTopThemes();
 

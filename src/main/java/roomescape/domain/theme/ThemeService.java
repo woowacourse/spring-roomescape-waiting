@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.dto.ThemeResponse;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 
 @Service
 public class ThemeService {
@@ -24,14 +26,16 @@ public class ThemeService {
         List<Long> themeIds = reservationRepository.findThemeIdTop10(startDate, endDate);
 
         return themeIds.stream()
-            .map(themeRepository::findById)
-            .map(ThemeResponse::of)
-            .toList();
+                .map((themeId) ->
+                        themeRepository.findById(themeId)
+                                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND)))
+                .map(ThemeResponse::of)
+                .toList();
     }
 
     public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll().stream()
-            .map(ThemeResponse::of)
-            .toList();
+                .map(ThemeResponse::of)
+                .toList();
     }
 }

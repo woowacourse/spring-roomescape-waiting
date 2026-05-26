@@ -28,6 +28,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.reservationtime.dto.TimeResponse;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.theme.ThemeRepository;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -41,7 +42,7 @@ class ReservationServiceTest {
     private ReservationTimeRepository reservationTimeRepository;
 
     @Mock
-    private AdminThemeRepository adminThemeRepository;
+    private ThemeRepository themeRepository;
 
     @InjectMocks
     private ReservationService reservationService;
@@ -64,7 +65,7 @@ class ReservationServiceTest {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             Reservation saved = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-            when(adminThemeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
             when(reservationRepository.save(any(Reservation.class))).thenReturn(saved);
 
@@ -87,7 +88,7 @@ class ReservationServiceTest {
         void 테마_id가_없으면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 99L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-            when(adminThemeRepository.findById(99L)).thenReturn(Optional.empty());
+            when(themeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -98,7 +99,7 @@ class ReservationServiceTest {
         void 과거_날짜면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2000, 1, 1), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-            when(adminThemeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
                 .isInstanceOf(RoomescapeException.class)
@@ -109,7 +110,7 @@ class ReservationServiceTest {
         void 중복_예약이면_예외() {
             ReservationRequest request = new ReservationRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
-            when(adminThemeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
