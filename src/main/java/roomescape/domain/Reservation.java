@@ -95,6 +95,8 @@ public class Reservation {
 
     public void cancel() {
         reservationStatus.cancel(this);
+
+
     }
 
     public void complete() {

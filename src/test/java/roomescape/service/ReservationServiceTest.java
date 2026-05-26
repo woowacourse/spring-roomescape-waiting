@@ -15,6 +15,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
@@ -118,7 +119,16 @@ class ReservationServiceTest {
     @Test
     @DisplayName("취소 대상 상태가 PENDING인 경우, 대상 reservation의 status가 CANCEL된다.")
     void reservationStatusCancelWhenReservationIsPending(){
+        // given
+        reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        Reservation reservation = reservationService.saveReservation("김대기", savedThemeSlot.getId());
 
+        //when
+        reservationService.cancelReservation(reservation.getId());
+
+        //then
+        Reservation findReservation = reservationService.findReservation(reservation.getId());
+        assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
     }
 
     @Test

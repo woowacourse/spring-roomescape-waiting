@@ -1,12 +1,15 @@
 package roomescape.service;
 
 import java.util.ArrayList;
+
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
+import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -14,6 +17,7 @@ import roomescape.repository.ThemeSlotRepository;
 
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 import static roomescape.global.exception.ErrorCode.RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT;
 
@@ -72,9 +76,28 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
-        reservation.cancel();
-        reservationRepository.updateStatus(reservation);
-        themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+        if (reservation.getReservationStatus().equals(PendingStatus.getInstance())) {
+            reservation.cancel();
+            reservationRepository.updateStatus(reservation);
+            return;
+        }
+
+        if (reservation.getReservationStatus().equals(ConfirmedStatus.getInstance())) {
+            reservation.cancel();
+            reservationRepository.updateStatus(reservation);
+
+            Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
+
+            if (waitingReservation.isPresent()) {
+                waitingReservation.ifPresent(Reservation::confirm);
+                reservationRepository.updateStatus(waitingReservation.get());
+            }
+
+            if (waitingReservation.isEmpty()) {
+                reservation.getThemeSlot().swtichIsReserved();
+                themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
+            }
+        }
     }
 
     @Transactional
@@ -102,9 +125,9 @@ public class ReservationService {
 
     public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long id) {
         List<WaitingReservationResponse> list = new ArrayList<>();
-        List<Reservation> reservations= reservationRepository.findByThemeSlotAndPending(id);
-        for (int i = 1 ; i <= reservations.size(); i++) {
-            WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i-1));
+        List<Reservation> reservations = reservationRepository.findByThemeSlotAndPending(id);
+        for (int i = 1; i <= reservations.size(); i++) {
+            WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i - 1));
             list.add(response);
         }
         return list;
