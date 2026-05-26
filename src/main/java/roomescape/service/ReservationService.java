@@ -6,7 +6,7 @@ import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
-import roomescape.exception.InvalidReservationException;
+import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ReservationNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
@@ -63,11 +63,11 @@ public class ReservationService {
                 .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
 
         if (reservationReq.date().isBefore(LocalDate.now())) {
-            throw new InvalidReservationException();
+            throw new ExpiredDateTimeException();
         }
 
         if (reservationReq.date().isEqual(LocalDate.now()) && reservationTimeById.getStartAt().isBefore(LocalTime.now())) {
-            throw new InvalidReservationException();
+            throw new ExpiredDateTimeException();
         }
 
         Optional<Reservation> savedReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(themeById.getId(), reservationReq.date(), reservationTimeById.getId());
@@ -87,11 +87,11 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
 
         if (reservationReq.date().isBefore(LocalDate.now())) {
-            throw new InvalidReservationException();
+            throw new ExpiredDateTimeException();
         }
 
         if (reservationReq.date().isEqual(LocalDate.now()) && newTime.getStartAt().isBefore(LocalTime.now())) {
-            throw new InvalidReservationException();
+            throw new ExpiredDateTimeException();
         }
 
         Optional<Reservation> duplicateReservation = reservationQueryingDao.findReservationByThemeAndDateAndTime(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
@@ -108,10 +108,10 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException(id));
 
         if (reservation.getDate().isBefore(LocalDate.now())) {
-            throw new InvalidReservationException();
+            throw new ExpiredDateTimeException();
         }
         if (reservation.getDate().isEqual(LocalDate.now()) && reservation.getTime().getStartAt().isBefore(LocalTime.now())) {
-            throw new InvalidReservationException();
+            throw new ExpiredDateTimeException();
         }
 
         reservationUpdatingDao.delete(id);
