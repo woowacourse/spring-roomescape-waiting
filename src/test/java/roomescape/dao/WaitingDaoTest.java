@@ -1,0 +1,56 @@
+package roomescape.dao;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.config.FixedClockConfig.NOW_TIME;
+import static roomescape.config.FixedClockConfig.TODAY;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import roomescape.domain.reservation.UserName;
+import roomescape.domain.reservation.Waiting;
+import roomescape.domain.reservation.theme.Description;
+import roomescape.domain.reservation.theme.Theme;
+import roomescape.domain.reservation.theme.ThemeName;
+import roomescape.domain.reservation.theme.ThumbnailUrl;
+import roomescape.domain.reservation.time.ReservationTime;
+
+@JdbcTest
+@Import(WaitingDao.class)
+public class WaitingDaoTest {
+
+    private final UserName userName = UserName.parse("아나키");
+    private final LocalDate date = LocalDate.parse(TODAY);
+    private final ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+    private final ThemeName themeName = ThemeName.parse("공포");
+    private final Description description = Description.parse("너무무서워");
+    private final ThumbnailUrl url = ThumbnailUrl.parse("/images/horror");
+    private final Theme theme = new Theme(1L, themeName, description, url);
+    private final LocalDateTime createdAt =  LocalDateTime.of(
+            LocalDate.parse(TODAY),
+            LocalTime.parse(NOW_TIME)
+    );
+
+    @Autowired
+    private WaitingDao waitingDao;
+
+    @Test
+    void 예약_대기를_생성할_수_있다(){
+        // given
+        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+
+        // when
+        Waiting saved = waitingDao.save(waiting);
+
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getName()).isEqualTo(waiting.getName());
+        assertThat(saved.getCreatedAt()).isEqualTo(waiting.getCreatedAt());
+        assertThat(saved.getDate()).isEqualTo(waiting.getDate());
+        assertThat(saved.getTime()).isEqualTo(waiting.getTime());
+        assertThat(saved.getTheme()).isEqualTo(waiting.getTheme());
+    }
+}
