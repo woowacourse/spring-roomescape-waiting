@@ -2,186 +2,180 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roomescape Admin - 예약 관리</title>
-    <link rel="stylesheet" href="/admin.css">
+    <title>Roomescape - 예약 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="auth-overlay" id="auth-overlay">
-    <section class="auth-card">
-        <h2>관리자 인증</h2>
-        <p>관리자 화면은 비밀번호 확인 후 사용할 수 있습니다.</p>
-        <input id="admin-password" type="password" placeholder="비밀번호">
-        <button class="primary-button" id="auth-button" type="button">확인</button>
-    </section>
+<div id="password-overlay"
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+    <div class="card shadow" style="width: 300px;">
+        <div class="card-body">
+            <h5 class="card-title">관리자 인증</h5>
+            <p class="card-text">비밀번호를 입력하세요.</p>
+            <input class="form-control mb-3" id="admin-password" onkeyup="if(event.key === 'Enter') checkPassword()"
+                   placeholder="비밀번호"
+                   type="password">
+            <button class="btn btn-primary w-100" onclick="checkPassword()">확인</button>
+        </div>
+    </div>
 </div>
 
-<nav class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="/">Roomescape Admin</a>
-        <div class="nav-links">
-            <a href="/">홈</a>
-            <a href="/admin-theme.html">테마 관리</a>
-            <a href="/admin-time.html">시간 관리</a>
-            <a class="active" href="/admin-reservation.html">예약 관리</a>
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Roomescape Admin</a>
+        <div class="navbar-nav">
+            <a class="nav-link" href="/">홈</a>
+            <a class="nav-link" href="/admin-theme.html">테마 관리</a>
+            <a class="nav-link" href="/admin-time.html">시간 관리</a>
+            <a class="nav-link active" href="/admin-reservation.html">예약 관리</a>
         </div>
     </div>
 </nav>
 
-<main class="page">
-    <section class="hero">
-        <div>
-            <h1>전체 예약 관리</h1>
-            <p>관리자는 전체 예약 목록을 확인하고, 새 예약을 추가하거나 기존 예약을 취소할 수 있습니다.</p>
+<div class="container my-5">
+    <h2>예약 관리</h2>
+
+    <div class="card my-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">새 예약 추가</h5>
+            <form class="row g-3" id="reservation-form">
+                <div class="col-md-3">
+                    <label class="form-label" for="date">날짜</label>
+                    <input class="form-control" id="date" required type="date">
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label" for="theme">테마</label>
+                    <select class="form-select" id="theme" required>
+                        <option disabled selected value="">테마 선택</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="time">시간</label>
+                    <select class="form-select" disabled id="time" required>
+                        <option disabled selected value="">시간 선택</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <label class="form-label" for="name">예약자</label>
+                    <input class="form-control" id="name" placeholder="이름" required type="text">
+                </div>
+                <div class="col-md-2 d-flex align-items-end">
+                    <button class="btn btn-primary w-100" type="submit">추가하기</button>
+                </div>
+            </form>
         </div>
-    </section>
+    </div>
 
-    <section class="panel">
-        <h2>새 예약 추가</h2>
-        <form class="grid-form" id="reservation-form">
-            <div class="field">
-                <label for="date">날짜</label>
-                <input id="date" required type="date">
-            </div>
-            <div class="field">
-                <label for="theme">테마</label>
-                <select id="theme" required>
-                    <option value="">테마 선택</option>
-                </select>
-            </div>
-            <div class="field">
-                <label for="time">시간</label>
-                <select disabled id="time" required>
-                    <option value="">날짜와 테마를 먼저 선택</option>
-                </select>
-            </div>
-            <div class="field">
-                <label for="name">예약자</label>
-                <input id="name" maxlength="10" required type="text" placeholder="예약자 이름">
-            </div>
-            <button class="primary-button" type="submit">추가하기</button>
-        </form>
-    </section>
-
-    <section class="table-panel">
-        <div class="table-header">
-            <h2>전체 예약 목록</h2>
-            <span class="count" id="reservation-count">0개</span>
-        </div>
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>날짜</th>
-                <th>시간</th>
-                <th>테마</th>
-                <th>예약자</th>
-                <th>관리</th>
-            </tr>
-            </thead>
-            <tbody id="reservation-table-body"></tbody>
-        </table>
-        <div class="empty" id="reservation-empty" hidden>등록된 예약이 없습니다.</div>
-    </section>
-</main>
-
-<div class="toast" id="toast"></div>
+    <table class="table table-hover mt-4">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>날짜</th>
+            <th>시간</th>
+            <th>테마</th>
+            <th>예약자</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="reservation-table-body">
+        <!-- 예약 목록 -->
+        </tbody>
+    </table>
+</div>
 
 <script>
-    const $ = (selector) => document.querySelector(selector);
+    function checkPassword() {
+        const password = document.getElementById('admin-password').value;
+        if (password === '1234') {
+            sessionStorage.setItem('admin-authorized', 'true');
+            document.getElementById('password-overlay').style.display = 'none';
+        } else {
+            alert('비밀번호가 틀렸습니다.');
+        }
+    }
+
+    if (sessionStorage.getItem('admin-authorized') === 'true') {
+        document.getElementById('password-overlay').style.display = 'none';
+    }
 
     document.addEventListener('DOMContentLoaded', () => {
-        setupAuth();
-        const today = new Date().toISOString().split('T')[0];
-        $('#date').min = today;
-        $('#date').value = today;
-        $('#date').addEventListener('change', fetchAvailableTimes);
-        $('#theme').addEventListener('change', fetchAvailableTimes);
-        $('#reservation-form').addEventListener('submit', addReservation);
-        fetchThemes();
         fetchReservations();
+        fetchThemes();
     });
 
-    function setupAuth() {
-        if (sessionStorage.getItem('admin-authorized') === 'true') {
-            $('#auth-overlay').classList.add('hidden');
-        }
-        $('#auth-button').addEventListener('click', checkPassword);
-        $('#admin-password').addEventListener('keydown', event => {
-            if (event.key === 'Enter') checkPassword();
-        });
-    }
-
-    function checkPassword() {
-        if ($('#admin-password').value === '1234') {
-            sessionStorage.setItem('admin-authorized', 'true');
-            $('#auth-overlay').classList.add('hidden');
-            return;
-        }
-        showToast('비밀번호가 틀렸습니다.');
-    }
+    document.getElementById('date').addEventListener('change', fetchAvailableTimes);
+    document.getElementById('theme').addEventListener('change', fetchAvailableTimes);
+    document.getElementById('reservation-form').addEventListener('submit', addReservation);
 
     function fetchReservations() {
-        fetch('/admin/reservations')
-            .then(toJson)
+        fetch('/reservations')
+            .then(response => response.json())
             .then(reservations => {
-                $('#reservation-count').textContent = `${reservations.length}개`;
-                $('#reservation-empty').hidden = reservations.length !== 0;
-                $('#reservation-table-body').innerHTML = reservations.map(reservation => `
+                const tbody = document.getElementById('reservation-table-body');
+                tbody.innerHTML = reservations.map(res => `
                     <tr>
-                        <td>${reservation.id}</td>
-                        <td>${reservation.date}</td>
-                        <td><strong>${reservation.time.startAt}</strong></td>
-                        <td>${escapeHtml(reservation.theme.name)}</td>
-                        <td>${escapeHtml(reservation.name)}</td>
-                        <td><button class="danger-button" type="button" onclick="deleteReservation(${reservation.id})">취소</button></td>
+                        <td>${res.id}</td>
+                        <td>${res.date}</td>
+                        <td>${res.time.startAt}</td>
+                        <td>${res.theme.name}</td>
+                        <td>${res.name}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteReservation(${res.id})">삭제</button>
+                        </td>
                     </tr>
                 `).join('');
-            })
-            .catch(error => showToast(error.message || '예약 목록을 불러오지 못했습니다.'));
+            });
     }
 
     function fetchThemes() {
         fetch('/themes')
-            .then(toJson)
+            .then(response => response.json())
             .then(themes => {
-                $('#theme').innerHTML = '<option value="">테마 선택</option>' +
-                    themes.map(theme => `<option value="${theme.id}">${escapeHtml(theme.name)}</option>`).join('');
-            })
-            .catch(error => showToast(error.message || '테마를 불러오지 못했습니다.'));
+                const select = document.getElementById('theme');
+                themes.forEach(theme => {
+                    const option = document.createElement('option');
+                    option.value = theme.id;
+                    option.textContent = theme.name;
+                    select.appendChild(option);
+                });
+            });
     }
 
     function fetchAvailableTimes() {
-        const date = $('#date').value;
-        const themeId = $('#theme').value;
-        const timeSelect = $('#time');
+        const date = document.getElementById('date').value;
+        const themeId = document.getElementById('theme').value;
+        const timeSelect = document.getElementById('time');
 
-        if (!date || !themeId) {
+        if (date && themeId) {
+            fetch(`/times?themeId=${themeId}&date=${date}`)
+                .then(response => response.json())
+                .then(times => {
+                    timeSelect.innerHTML = '<option value="" disabled selected>시간 선택</option>';
+                    times.forEach(time => {
+                        const option = document.createElement('option');
+                        option.value = time.id;
+                        option.textContent = time.startAt;
+                        if (!time.isNotReserved) {
+                            option.disabled = true;
+                            option.textContent += ' (예약됨)';
+                        }
+                        timeSelect.appendChild(option);
+                    });
+                    timeSelect.disabled = false;
+                });
+        } else {
             timeSelect.disabled = true;
-            timeSelect.innerHTML = '<option value="">날짜와 테마를 먼저 선택</option>';
-            return;
+            timeSelect.innerHTML = '<option value="" disabled selected>시간 선택</option>';
         }
-
-        fetch(`/times?themeId=${themeId}&date=${date}`)
-            .then(toJson)
-            .then(times => {
-                const availableTimes = times.filter(time => time.isNotReserved);
-                timeSelect.disabled = false;
-                timeSelect.innerHTML = availableTimes.length === 0
-                    ? '<option value="">예약 가능한 시간이 없습니다</option>'
-                    : '<option value="">시간 선택</option>' +
-                    availableTimes.map(time => `<option value="${time.id}">${time.startAt}</option>`).join('');
-            })
-            .catch(error => showToast(error.message || '시간을 불러오지 못했습니다.'));
     }
 
     function addReservation(event) {
         event.preventDefault();
         const payload = {
-            name: $('#name').value.trim(),
-            date: $('#date').value,
-            timeId: Number($('#time').value),
-            themeId: Number($('#theme').value)
+            date: document.getElementById('date').value,
+            themeId: document.getElementById('theme').value,
+            timeId: document.getElementById('time').value,
+            name: document.getElementById('name').value
         };
 
         fetch('/reservations', {
@@ -189,55 +183,29 @@
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload)
         })
-            .then(toJson)
-            .then(() => {
-                showToast('예약이 추가되었습니다.');
-                $('#reservation-form').reset();
-                $('#time').disabled = true;
-                $('#time').innerHTML = '<option value="">날짜와 테마를 먼저 선택</option>';
+        .then(response => {
+            if (response.ok) {
+                alert('예약이 추가되었습니다.');
                 fetchReservations();
-            })
-            .catch(error => showToast(error.message || '예약 추가에 실패했습니다.'));
-    }
-
-    function deleteReservation(id) {
-        if (!confirm('예약을 취소할까요?')) return;
-
-        fetch(`/reservations/${id}`, { method: 'DELETE' })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().catch(() => ({})).then(body => {
-                        throw new Error(body.detail || body.message || '예약 취소에 실패했습니다.');
-                    });
-                }
-                showToast('예약이 취소되었습니다.');
-                fetchReservations();
-            })
-            .catch(error => showToast(error.message || '예약 취소에 실패했습니다.'));
-    }
-
-    function toJson(response) {
-        return response.json().catch(() => ({})).then(body => {
-            if (!response.ok) throw new Error(body.detail || body.message || '요청을 처리하지 못했습니다.');
-            return body;
+                document.getElementById('reservation-form').reset();
+                document.getElementById('time').disabled = true;
+            } else {
+                alert('예약 추가 실패');
+            }
         });
     }
 
-    function showToast(message) {
-        const toast = $('#toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => toast.classList.remove('show'), 3200);
-    }
-
-    function escapeHtml(value) {
-        return String(value)
-            .replaceAll('&', '&amp;')
-            .replaceAll('<', '&lt;')
-            .replaceAll('>', '&gt;')
-            .replaceAll('"', '&quot;')
-            .replaceAll("'", '&#039;');
+    function deleteReservation(id) {
+        if (!confirm('정말 취소하시겠습니까?')) return;
+        fetch(`/reservations/${id}`, { method: 'DELETE' })
+            .then(response => {
+                if (response.ok) {
+                    alert('예약이 취소되었습니다.');
+                    fetchReservations();
+                } else {
+                    alert('예약 취소 실패');
+                }
+            });
     }
 </script>
 </body>

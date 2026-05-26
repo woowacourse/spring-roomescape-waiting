@@ -2,170 +2,184 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roomescape Admin - 시간 관리</title>
-    <link rel="stylesheet" href="/admin.css">
+    <title>Roomescape - 시간 관리</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
-<div class="auth-overlay" id="auth-overlay">
-    <section class="auth-card">
-        <h2>관리자 인증</h2>
-        <p>관리자 화면은 비밀번호 확인 후 사용할 수 있습니다.</p>
-        <input id="admin-password" type="password" placeholder="비밀번호">
-        <button class="primary-button" id="auth-button" type="button">확인</button>
-    </section>
+<div id="password-overlay"
+     style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 9999; display: flex; align-items: center; justify-content: center;">
+    <div class="card shadow" style="width: 300px;">
+        <div class="card-body">
+            <h5 class="card-title">관리자 인증</h5>
+            <p class="card-text">비밀번호를 입력하세요.</p>
+            <input class="form-control mb-3" id="admin-password" onkeyup="if(event.key === 'Enter') checkPassword()"
+                   placeholder="비밀번호"
+                   type="password">
+            <button class="btn btn-primary w-100" onclick="checkPassword()">확인</button>
+        </div>
+    </div>
 </div>
 
-<nav class="nav">
-    <div class="nav-inner">
-        <a class="brand" href="/">Roomescape Admin</a>
-        <div class="nav-links">
-            <a href="/">홈</a>
-            <a href="/admin-theme.html">테마 관리</a>
-            <a class="active" href="/admin-time.html">시간 관리</a>
-            <a href="/admin-reservation.html">예약 관리</a>
+<div class="modal fade" id="successModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-success text-white">
+                <h5 class="modal-title">시간이 등록되었습니다.</h5>
+                <button class="btn-close btn-close-white" data-bs-dismiss="modal" type="button"></button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-bordered mb-0">
+                    <tbody>
+                    <tr>
+                        <th class="table-secondary" style="width: 40%">ID</th>
+                        <td id="modal-time-id"></td>
+                    </tr>
+                    <tr>
+                        <th class="table-secondary">시작 시간</th>
+                        <td id="modal-time-startAt"></td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal" type="button">닫기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="/">Roomescape Admin</a>
+        <div class="navbar-nav">
+            <a class="nav-link" href="/">홈</a>
+            <a class="nav-link" href="/admin-theme.html">테마 관리</a>
+            <a class="nav-link active" href="/admin-time.html">시간 관리</a>
+            <a class="nav-link" href="/admin-reservation.html">예약 관리</a>
         </div>
     </div>
 </nav>
 
-<main class="page">
-    <section class="hero">
-        <div>
-            <h1>예약 시간 관리</h1>
-            <p>예약에 사용할 시간 슬롯을 추가하거나 삭제합니다.</p>
+<div class="container my-5">
+    <h2>시간 관리</h2>
+
+    <div class="card my-4 shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">새 시간 추가</h5>
+            <form class="row g-3" id="time-form">
+                <div class="col-auto">
+                    <select class="form-select" id="time-start" required>
+                        <option disabled selected value="">시간 선택</option>
+                        <option value="10:00">10:00</option>
+                        <option value="11:00">11:00</option>
+                        <option value="12:00">12:00</option>
+                        <option value="13:00">13:00</option>
+                        <option value="14:00">14:00</option>
+                        <option value="15:00">15:00</option>
+                        <option value="16:00">16:00</option>
+                        <option value="17:00">17:00</option>
+                        <option value="18:00">18:00</option>
+                    </select>
+                </div>
+                <div class="col-auto">
+                    <button class="btn btn-primary" type="submit">추가하기</button>
+                </div>
+            </form>
         </div>
-    </section>
+    </div>
 
-    <section class="panel">
-        <h2>새 시간 추가</h2>
-        <form class="grid-form" id="time-form">
-            <div class="field">
-                <label for="time-start">시작 시간</label>
-                <input id="time-start" required step="300" type="time">
-            </div>
-            <button class="primary-button" type="submit">추가하기</button>
-        </form>
-    </section>
+    <table class="table table-hover mt-4">
+        <thead class="table-dark">
+        <tr>
+            <th>ID</th>
+            <th>시작 시간</th>
+            <th>관리</th>
+        </tr>
+        </thead>
+        <tbody id="time-table-body"></tbody>
+    </table>
+</div>
 
-    <section class="table-panel">
-        <div class="table-header">
-            <h2>전체 시간</h2>
-            <span class="count" id="time-count">0개</span>
-        </div>
-        <table>
-            <thead>
-            <tr>
-                <th>ID</th>
-                <th>시작 시간</th>
-                <th>상태</th>
-                <th>관리</th>
-            </tr>
-            </thead>
-            <tbody id="time-table-body"></tbody>
-        </table>
-        <div class="empty" id="time-empty" hidden>등록된 시간이 없습니다.</div>
-    </section>
-</main>
-
-<div class="toast" id="toast"></div>
-
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 <script>
-    const $ = (selector) => document.querySelector(selector);
-
-    document.addEventListener('DOMContentLoaded', () => {
-        setupAuth();
-        $('#time-form').addEventListener('submit', addTime);
-        fetchAllTimes();
-    });
-
-    function setupAuth() {
-        if (sessionStorage.getItem('admin-authorized') === 'true') {
-            $('#auth-overlay').classList.add('hidden');
-        }
-        $('#auth-button').addEventListener('click', checkPassword);
-        $('#admin-password').addEventListener('keydown', event => {
-            if (event.key === 'Enter') checkPassword();
-        });
-    }
-
     function checkPassword() {
-        if ($('#admin-password').value === '1234') {
+        const password = document.getElementById('admin-password').value;
+        if (password === '1234') {
             sessionStorage.setItem('admin-authorized', 'true');
-            $('#auth-overlay').classList.add('hidden');
-            return;
+            document.getElementById('password-overlay').style.display = 'none';
+        } else {
+            alert('비밀번호가 틀렸습니다.');
         }
-        showToast('비밀번호가 틀렸습니다.');
     }
+
+    if (sessionStorage.getItem('admin-authorized') === 'true') {
+        document.getElementById('password-overlay').style.display = 'none';
+    }
+
+    document.addEventListener('DOMContentLoaded', fetchAllTimes);
+    document.getElementById('time-form').addEventListener('submit', addTime);
 
     function fetchAllTimes() {
         fetch('/themes')
-            .then(toJson)
+            .then(response => response.json())
             .then(themes => {
-                if (themes.length === 0) return [];
-                return fetch(`/times?themeId=${themes[0].id}&date=2099-12-31`).then(toJson);
+                if (themes.length === 0) {
+                    alert('테마를 먼저 등록해주세요.');
+                    return;
+                }
+                const themeId = themes[0].id;
+                const date = '2099-12-31';
+                return fetch(`/times?themeId=${themeId}&date=${date}`);
             })
+            .then(response => response.json())
             .then(times => {
-                $('#time-count').textContent = `${times.length}개`;
-                $('#time-empty').hidden = times.length !== 0;
-                $('#time-table-body').innerHTML = times.map(time => `
+                if (!times) return;
+                const tbody = document.getElementById('time-table-body');
+                tbody.innerHTML = times.map(time => `
                     <tr>
-                        <td>${time.id}</td>
-                        <td><strong>${time.startAt}</strong></td>
-                        <td><span class="badge">사용 중</span></td>
-                        <td><button class="danger-button" type="button" onclick="deleteTime(${time.id})">삭제</button></td>
+                        <td>${time.id || time.timeId}</td>
+                        <td>${time.startAt}</td>
+                        <td>
+                            <button class="btn btn-danger btn-sm" onclick="deleteTime(${time.id || time.timeId})">삭제</button>
+                        </td>
                     </tr>
                 `).join('');
-            })
-            .catch(error => showToast(error.message || '시간을 불러오지 못했습니다.'));
+            });
     }
 
     function addTime(event) {
         event.preventDefault();
-        const startAt = $('#time-start').value;
+        const timeValue = document.getElementById('time-start').value;
 
         fetch('/admin/times', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ startAt })
+            body: JSON.stringify({ startAt: timeValue })
         })
-            .then(toJson)
-            .then(() => {
-                showToast('시간이 추가되었습니다.');
-                $('#time-form').reset();
-                fetchAllTimes();
-            })
-            .catch(error => showToast(error.message || '시간 추가에 실패했습니다.'));
+        .then(response => {
+            if (response.ok) return response.json();
+            throw new Error('시간 추가 실패');
+        })
+        .then(data => {
+            document.getElementById('modal-time-id').textContent = data.id;
+            document.getElementById('modal-time-startAt').textContent = data.startAt;
+            new bootstrap.Modal(document.getElementById('successModal')).show();
+            fetchAllTimes();
+        })
+        .catch(() => alert('시간 추가 실패'));
     }
 
     function deleteTime(id) {
-        if (!confirm('시간을 삭제할까요? 예약이 연결된 시간은 삭제할 수 없습니다.')) return;
-
+        if (!confirm('정말 삭제하시겠습니까?')) return;
         fetch(`/admin/times/${id}`, { method: 'DELETE' })
             .then(response => {
-                if (!response.ok) {
-                    return response.json().catch(() => ({})).then(body => {
-                        throw new Error(body.detail || body.message || '시간 삭제에 실패했습니다.');
-                    });
+                if (response.ok) {
+                    alert('시간이 삭제되었습니다.');
+                    fetchAllTimes();
+                } else {
+                    alert('시간 삭제 실패');
                 }
-                showToast('시간이 삭제되었습니다.');
-                fetchAllTimes();
-            })
-            .catch(error => showToast(error.message || '시간 삭제에 실패했습니다.'));
-    }
-
-    function toJson(response) {
-        return response.json().catch(() => ({})).then(body => {
-            if (!response.ok) throw new Error(body.detail || body.message || '요청을 처리하지 못했습니다.');
-            return body;
-        });
-    }
-
-    function showToast(message) {
-        const toast = $('#toast');
-        toast.textContent = message;
-        toast.classList.add('show');
-        clearTimeout(showToast.timer);
-        showToast.timer = setTimeout(() => toast.classList.remove('show'), 3200);
+            });
     }
 </script>
 </body>
