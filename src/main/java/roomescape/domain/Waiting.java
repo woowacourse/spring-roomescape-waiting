@@ -14,8 +14,8 @@ public class Waiting {
     private final Theme reservationTheme;
     private final LocalDateTime createAt;
 
-    public static Waiting create(long id, String name, LocalDate reservationDate, ReservationTime reservationTime, Theme reservationTheme, LocalDateTime createAt) {
-        return new Waiting(id, name, reservationDate, reservationTime, reservationTheme, createAt);
+    public static Waiting create(long id, String name, LocalDate reservationDate, ReservationTime reservationTime, Theme reservationTheme, LocalDateTime createdAt) {
+        return new Waiting(id, name, reservationDate, reservationTime, reservationTheme, createdAt);
     }
 
     public Long id() {

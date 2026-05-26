@@ -13,4 +13,8 @@ import java.util.List;
 public class WaitingQueryService {
 
     private final WaitingDao waitingDao;
+
+    public List<Waiting> getBySlot(LocalDate date, long timeId, long themeId) {
+        return waitingDao.findAllByDateAndTimeIdAndThemeId(date, timeId, themeId);
+    }
 }

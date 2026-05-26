@@ -122,6 +122,7 @@ public class WaitingDao {
                 INNER JOIN theme as theme
                 ON waiting.theme_id = theme.id
                 WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
+                ORDER BY created_at;
                 """;
         return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId);
     }
