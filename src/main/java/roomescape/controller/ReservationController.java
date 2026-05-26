@@ -69,4 +69,10 @@ public class ReservationController {
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
+
+    @DeleteMapping("/waiting/{id}")
+    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable long id) {
+        reservationService.deleteWaiting(id);
+        return ResponseEntity.noContent().build();
+    }
 }

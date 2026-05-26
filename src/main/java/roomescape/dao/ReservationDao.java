@@ -133,4 +133,21 @@ public class ReservationDao {
         return new Reservation(id, reservation.getName(), reservation.getDate(),
                 reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
     }
+
+    public Optional<Reservation> findByWaitingId(long id) {
+        String sql = """
+                SELECT r.id AS reservation_waiting_id, r.name, r.date, r.created_at,
+                       t.id AS time_id, t.start_at AS time_value,
+                       th.id AS theme_id, th.name AS theme_name, th.description AS theme_description, th.thumbnail_url AS theme_thumbnail
+                FROM reservation_waiting AS r
+                INNER JOIN reservation_time AS t ON r.time_id = t.id
+                INNER JOIN theme AS th ON r.theme_id = th.id
+                WHERE r.id = ?
+                """;
+        return jdbcTemplate.query(sql, reservationRowMapper, id).stream().findFirst();
+    }
+
+    public void deleteWaiting(long id) {
+        jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
+    }
 }

@@ -97,4 +97,12 @@ public class ReservationService {
         return themeDao.findById(themeId)
                 .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
     }
+
+    @Transactional
+    public void deleteWaiting(long id) {
+        reservationDao.findByWaitingId(id).ifPresent(reservation -> {
+            reservation.validateCancellable(LocalDateTime.now(clock));
+            reservationDao.deleteWaiting(id);
+        });
+    }
 }
