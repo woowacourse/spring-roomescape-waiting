@@ -43,7 +43,7 @@ public class ReservationWaitingService {
         Long id = reservationWaitingRepository.insert(waiting);
         ReservationWaiting saved = reservationWaitingRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
-        Long turn = reservationWaitingRepository.countEarlierWaitings(saved) + 1;
+        Long turn = reservationWaitingRepository.countEarlierWaitings(saved.getId()) + 1;
         return new ReservationWaitingWithTurn(
                 saved.getId(),
                 saved.getName(),
@@ -56,7 +56,7 @@ public class ReservationWaitingService {
     public List<ReservationWaitingWithTurn> findByName(String name) {
         return reservationWaitingRepository.findByName(name).stream()
                 .map(waiting -> {
-                    Long turn = reservationWaitingRepository.countEarlierWaitings(waiting) + 1;
+                    Long turn = reservationWaitingRepository.countEarlierWaitings(waiting.getId()) + 1;
                     return new ReservationWaitingWithTurn(
                             waiting.getId(),
                             waiting.getName(),
