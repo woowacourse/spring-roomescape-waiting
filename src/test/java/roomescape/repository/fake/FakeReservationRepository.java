@@ -1,6 +1,7 @@
 package roomescape.repository.fake;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -9,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.repository.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -89,9 +91,31 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
+                                                              Long userId) {
+        return store.values().stream()
+                .anyMatch(r -> r.getDate().equals(date)
+                        && r.getTime().getId().equals(timeId)
+                        && r.getTheme().getId().equals(themeId)
+                        && r.getStore().getId().equals(storeId)
+                        && r.getUser().getId().equals(userId));
+    }
+
+    @Override
     public boolean existsByReservationTimeId(Long timeId) {
         return store.values().stream()
                 .anyMatch(r -> r.getTime().getId().equals(timeId));
+    }
+
+    @Override
+    public Boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId, Long storeId,
+                                                                ReservationStatus status) {
+        return store.values().stream()
+                .anyMatch(r -> r.getDate().equals(date)
+                        && r.getTime().getId().equals(timeId)
+                        && r.getTheme().getId().equals(themeId)
+                        && r.getStore().getId().equals(storeId)
+                        && r.getStatus().equals(status));
     }
 
     Collection<Reservation> all() {

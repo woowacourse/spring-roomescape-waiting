@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import roomescape.domain.Password;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Store;
@@ -49,7 +50,7 @@ public final class Fixtures {
     }
 
     public static Reservation reservation(User user, Theme theme, LocalDate date, ReservationTime time) {
-        return new Reservation(null, user, theme, date, time, storeWithId(DEFAULT_STORE_ID, "매장"));
+        return new Reservation(null, user, theme, date, time, storeWithId(DEFAULT_STORE_ID, "매장"), ReservationStatus.RESERVED);
     }
 
     public static Reservation sampleReservation(long id) {
@@ -57,7 +58,7 @@ public final class Fixtures {
         Theme theme = new Theme(1L, "공포", "무서움", "https://thumbnail.url");
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Store store = storeWithId(DEFAULT_STORE_ID, "매장");
-        return new Reservation(id, user, theme, LocalDate.of(2026, 5, 6), time, store);
+        return new Reservation(id, user, theme, LocalDate.of(2026, 5, 6), time, store, ReservationStatus.RESERVED);
     }
 
     public static Reservation reservationOf(long userId, long themeId, long timeId, long storeId, LocalDate date) {
@@ -65,7 +66,7 @@ public final class Fixtures {
         Theme theme = new Theme(themeId, "테마", "설명", "https://thumbnail.url");
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(10, 0));
         Store store = storeWithId(storeId, "매장");
-        return new Reservation(null, user, theme, date, time, store);
+        return new Reservation(null, user, theme, date, time, store, ReservationStatus.RESERVED);
     }
 
     public static CreateReservationCommand createCommand(long userId, long themeId, LocalDate date, long timeId) {

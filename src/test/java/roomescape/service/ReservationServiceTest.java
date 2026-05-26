@@ -9,6 +9,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.TestClockConfig;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
@@ -409,6 +410,6 @@ class ReservationServiceTest {
     private Reservation buildReservationInStore(User user, Long themeId, Long timeId, LocalDate date, long storeId) {
         Theme theme = themeRepository.findById(themeId).orElseThrow();
         ReservationTime time = reservationTimeRepository.findById(timeId).orElseThrow();
-        return new Reservation(null, user, theme, date, time, Fixtures.storeWithId(storeId, "다른매장"));
+        return new Reservation(null, user, theme, date, time, Fixtures.storeWithId(storeId, "다른매장"), ReservationStatus.RESERVED);
     }
 }
