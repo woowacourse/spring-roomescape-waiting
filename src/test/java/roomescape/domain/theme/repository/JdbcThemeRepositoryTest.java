@@ -388,7 +388,7 @@ class JdbcThemeRepositoryTest {
     }
 
     private void deleteReservation(Long id) {
-        jdbcTemplate.update("UPDATE reservation SET deleted_at = CURRENT_TIMESTAMP WHERE id = ?", id);
+        jdbcTemplate.update("UPDATE reservation SET status = 'DELETED' WHERE id = ?", id);
     }
 
     private void deleteTime(Long id) {

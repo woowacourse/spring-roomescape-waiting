@@ -5,19 +5,19 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import javax.sql.DataSource;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.dao.DuplicateKeyException;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.Status;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.JdbcThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -262,7 +262,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.save(Reservation.create("예약자3", date.plusDays(1), time2, theme1));
             reservationRepository.save(Reservation.create("삭제된시간예약자", date, deletedTime, theme1));
             reservationRepository.deleteReservationById(deletedReservation.getId());
-            cancel(canceledReservation);
+            reservationRepository.update(canceledReservation.cancel());
             timeRepository.deleteTimeById(deletedTime.getId());
 
             // when
@@ -317,7 +317,7 @@ class JdbcReservationRepositoryTest {
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
             Reservation reservation = reservationRepository.save(Reservation.create("예약자", date, time, theme));
-            cancel(reservation);
+            reservationRepository.update(reservation.cancel());
 
             // when
             boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(date, time,
@@ -356,7 +356,7 @@ class JdbcReservationRepositoryTest {
             Reservation reservation = reservationRepository.save(
                 Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
             Reservation updateReservation = Reservation.reconstruct(reservation.getId(), "예약자2",
-                LocalDate.of(2026, 5, 2), updateTime, updateTheme, null, null);
+                LocalDate.of(2026, 5, 2), updateTime, updateTheme, Status.ACTIVE);
 
             // when
             Reservation actual = reservationRepository.update(updateReservation);
@@ -383,9 +383,9 @@ class JdbcReservationRepositoryTest {
             Theme updateTheme = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
             Reservation reservation = reservationRepository.save(
                 Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
-            reservationRepository.cancelReservationById(reservation.getId(), LocalDateTime.of(2026, 5, 1, 10, 0));
+            reservationRepository.update(reservation.cancel());
             Reservation updateReservation = Reservation.reconstruct(reservation.getId(), "예약자2",
-                LocalDate.of(2026, 5, 2), updateTime, updateTheme, null, null);
+                LocalDate.of(2026, 5, 2), updateTime, updateTheme, Status.ACTIVE);
 
             // when & then
             assertThatThrownBy(() -> reservationRepository.update(updateReservation))
@@ -404,63 +404,6 @@ class JdbcReservationRepositoryTest {
 
             // when & then
             assertThatThrownBy(() -> reservationRepository.update(reservation))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("예약을 찾을 수 없습니다.");
-        }
-    }
-
-    @Nested
-    class CancelReservationByIdTest {
-
-        @Test
-        void 성공() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
-            LocalDateTime canceledAt = LocalDateTime.of(2026, 5, 1, 10, 0);
-
-            // when
-            Reservation actual = reservationRepository.cancelReservationById(reservation.getId(), canceledAt);
-
-            // then
-            assertThat(actual.getId()).isEqualTo(reservation.getId());
-            assertThat(actual.getCanceledAt()).isEqualTo(canceledAt);
-            assertThat(reservationRepository.findReservationByIdAndDeletedAtIsNull(reservation.getId()))
-                .get()
-                .extracting(Reservation::getCanceledAt)
-                .isEqualTo(canceledAt);
-        }
-
-        @Test
-        void 이미_취소된_예약이면_예외가_발생한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
-            reservationRepository.cancelReservationById(reservation.getId(), LocalDateTime.of(2026, 5, 1, 10, 0));
-
-            // when & then
-            assertThatThrownBy(() -> reservationRepository.cancelReservationById(
-                reservation.getId(), LocalDateTime.of(2026, 5, 1, 11, 0)))
-                .isInstanceOf(GeneralException.class)
-                .hasMessage("예약을 찾을 수 없습니다.");
-        }
-
-        @Test
-        void 이미_삭제된_예약이면_예외가_발생한다() {
-            // given
-            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
-            Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = reservationRepository.save(
-                Reservation.create("예약자1", LocalDate.of(2026, 5, 1), time, theme));
-            reservationRepository.deleteReservationById(reservation.getId());
-
-            // when & then
-            assertThatThrownBy(() -> reservationRepository.cancelReservationById(
-                reservation.getId(), LocalDateTime.of(2026, 5, 1, 10, 0)))
                 .isInstanceOf(GeneralException.class)
                 .hasMessage("예약을 찾을 수 없습니다.");
         }
@@ -512,7 +455,7 @@ class JdbcReservationRepositoryTest {
             Reservation canceledReservation = reservationRepository.save(Reservation.create("예약자1", date, time, theme));
             Reservation reservation = reservationRepository.save(
                 Reservation.create("예약자2", date.plusDays(1), time, theme));
-            cancel(canceledReservation);
+            reservationRepository.update(canceledReservation.cancel());
 
             // when
             boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(
@@ -565,13 +508,10 @@ class JdbcReservationRepositoryTest {
 
     private Integer countDeletedReservationById(Long id) {
         return jdbcTemplate.queryForObject(
-            "SELECT COUNT(*) FROM reservation WHERE id = ? AND deleted_at IS NOT NULL",
+            "SELECT COUNT(*) FROM reservation WHERE id = ? AND status = 'DELETED'",
             Integer.class,
             id
         );
     }
 
-    private void cancel(Reservation reservation) {
-        reservationRepository.cancelReservationById(reservation.getId(), LocalDateTime.of(2026, 5, 1, 10, 0));
-    }
 }

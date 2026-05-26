@@ -26,16 +26,17 @@ CREATE TABLE reservation (
     date DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
-    canceled_at DATETIME DEFAULT NULL,
-    deleted_at DATETIME DEFAULT NULL,
+    status ENUM('ACTIVE', 'CANCELED', 'DELETED', 'WAITING') DEFAULT 'ACTIVE',
+    -- canceled_at DATETIME DEFAULT NULL,
+    -- deleted_at DATETIME DEFAULT NULL,
     active_date DATE GENERATED ALWAYS AS (
-        CASE WHEN deleted_at IS NULL AND canceled_at IS NULL THEN date ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN date ELSE NULL END
     ),
     active_time_id BIGINT GENERATED ALWAYS AS (
-        CASE WHEN deleted_at IS NULL AND canceled_at IS NULL THEN time_id ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN time_id ELSE NULL END
     ),
     active_theme_id BIGINT GENERATED ALWAYS AS (
-        CASE WHEN deleted_at IS NULL AND canceled_at IS NULL THEN theme_id ELSE NULL END
+        CASE WHEN status = 'ACTIVE' THEN theme_id ELSE NULL END
     ),
     PRIMARY KEY (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),

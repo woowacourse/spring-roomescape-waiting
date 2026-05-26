@@ -6,7 +6,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
@@ -109,7 +108,7 @@ class ReservationServiceTest {
             Theme theme = themeRepository.save(
                 Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
             Reservation reservation = reservationRepository.save(Reservation.create("제이콥", date, time, theme));
-            reservationRepository.cancelReservationById(reservation.getId(), LocalDateTime.of(2026, 4, 30, 10, 0));
+            reservationRepository.update(reservation.cancel());
 
             // when
             List<ReservationResponseDto> actual = reservationService.getReservations();
@@ -227,8 +226,7 @@ class ReservationServiceTest {
             Theme theme = themeRepository.save(
                 Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
             Reservation savedReservation = reservationRepository.save(Reservation.create("브라운", date, time, theme));
-            cancel(savedReservation);
-
+            reservationRepository.update(savedReservation.cancel());
             // when
             List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
 
@@ -549,7 +547,7 @@ class ReservationServiceTest {
                 Theme theme = themeRepository.save(
                     Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
                 Reservation savedReservation = reservationRepository.save(Reservation.create("제이슨", date, time, theme));
-                cancel(savedReservation);
+                reservationRepository.update(savedReservation.cancel());
                 ReservationUpdateRequestDto request = new ReservationUpdateRequestDto("제이슨", date, null, null);
 
                 // when & then
@@ -662,7 +660,6 @@ class ReservationServiceTest {
                 assertThat(actual.date()).isEqualTo(date);
                 assertThat(actual.timeId()).isEqualTo(time.getId());
                 assertThat(actual.themeId()).isEqualTo(theme.getId());
-                assertThat(actual.canceledAt()).isNotNull();
             }
         }
 
@@ -700,7 +697,7 @@ class ReservationServiceTest {
                 Theme theme = themeRepository.save(
                     Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
                 Reservation savedReservation = reservationRepository.save(Reservation.create("제이슨", date, time, theme));
-                cancel(savedReservation);
+                reservationRepository.update(savedReservation.cancel());
 
                 // when & then
                 assertThatThrownBy(() -> reservationService.cancelReservation(savedReservation.getId(), "제이슨"))
@@ -765,9 +762,5 @@ class ReservationServiceTest {
                     .hasMessage("예약을 찾을 수 없습니다.");
             }
         }
-    }
-
-    private void cancel(Reservation reservation) {
-        reservationRepository.cancelReservationById(reservation.getId(), LocalDateTime.now(fixedClock));
     }
 }

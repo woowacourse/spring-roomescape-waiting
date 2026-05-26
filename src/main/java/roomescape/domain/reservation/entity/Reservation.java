@@ -1,7 +1,6 @@
 package roomescape.domain.reservation.entity;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 
@@ -12,27 +11,27 @@ public class Reservation {
     private final LocalDate date;
     private final Time time;
     private final Theme theme;
-    private final LocalDateTime canceledAt;
-    private final LocalDateTime deletedAt;
+    private final Status status;
 
-    private Reservation(Long id, String name, LocalDate date, Time time, Theme theme, LocalDateTime canceledAt,
-        LocalDateTime deletedAt) {
+    private Reservation(Long id, String name, LocalDate date, Time time, Theme theme, Status status) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.canceledAt = canceledAt;
-        this.deletedAt = deletedAt;
+        this.status = status;
     }
 
     public static Reservation create(String name, LocalDate date, Time time, Theme theme) {
-        return new Reservation(null, name, date, time, theme, null, null);
+        return new Reservation(null, name, date, time, theme, Status.ACTIVE);
     }
 
-    public static Reservation reconstruct(Long id, String name, LocalDate date, Time time, Theme theme,
-        LocalDateTime canceledAt, LocalDateTime deletedAt) {
-        return new Reservation(id, name, date, time, theme, canceledAt, deletedAt);
+    public static Reservation reconstruct(Long id, String name, LocalDate date, Time time, Theme theme, Status status) {
+        return new Reservation(id, name, date, time, theme, status);
+    }
+
+    public Reservation cancel() {
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, Status.CANCELED);
     }
 
     public Long getId() {
@@ -55,11 +54,7 @@ public class Reservation {
         return theme;
     }
 
-    public LocalDateTime getCanceledAt() {
-        return canceledAt;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
+    public Status getStatus() {
+        return status;
     }
 }

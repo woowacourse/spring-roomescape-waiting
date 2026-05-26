@@ -6,6 +6,7 @@ import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationStatus;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.Status;
 import roomescape.domain.theme.mapper.ThemeMapper;
 import roomescape.domain.time.mapper.TimeMapper;
 
@@ -18,7 +19,7 @@ public final class ReservationMapper {
     public static ReservationResponseDto toResponseDto(Reservation reservation) {
         return new ReservationResponseDto(reservation.getId(), reservation.getName(), reservation.getDate(),
             TimeMapper.toResponseDto(reservation.getTime()), ThemeMapper.toResponseDto(reservation.getTheme()),
-            reservation.getCanceledAt() != null);
+            reservation.getStatus() == Status.CANCELED);
     }
 
     public static ReservationByNameResponseDto toByNameResponseDto(Reservation reservation, ReservationStatus status) {
@@ -34,6 +35,6 @@ public final class ReservationMapper {
 
     public static ReservationCancelResponseDto toCancelResponseDto(Reservation reservation) {
         return new ReservationCancelResponseDto(reservation.getId(), reservation.getName(), reservation.getDate(),
-            reservation.getTime().getId(), reservation.getTheme().getId(), reservation.getCanceledAt());
+            reservation.getTime().getId(), reservation.getTheme().getId());
     }
 }
