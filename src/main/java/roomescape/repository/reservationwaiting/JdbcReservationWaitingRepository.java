@@ -1,0 +1,40 @@
+package roomescape.repository.reservationwaiting;
+
+import java.sql.PreparedStatement;
+import java.sql.Time;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.stereotype.Repository;
+import roomescape.domain.reservationwaiting.ReservationWaiting;
+
+@Repository
+public class JdbcReservationWaitingRepository implements ReservationWaitingRepository{
+    private final JdbcTemplate jdbcTemplate;
+
+    public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
+    @Override
+    public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+        String sql = "INSERT INTO reservation_waiting (reservation_id, name, requested_at) VALUES (?, ?, ?) ";
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        jdbcTemplate.update(connection -> {
+            PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
+            preparedStatement.setLong(1, reservationWaiting.getId());
+            preparedStatement.setString(2, String.valueOf(reservationWaiting.getName()));
+            preparedStatement.setTime(3, Time.valueOf(reservationWaiting.getRequestAt()));
+            return preparedStatement;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("[ERROR] 대기 ID를 생성하지 못했습니다.");
+        }
+
+        return reservationWaiting.withId(key.longValue());
+    }
+}

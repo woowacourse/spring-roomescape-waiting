@@ -258,4 +258,14 @@ public class JdbcReservationRepository implements ReservationRepository {
                 themeId
         ));
     }
+
+    @Override
+    public Long findReservationIdByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId) {
+        final String sql = """
+                              SELECT id FROM reservation
+                              WHERE date = ? AND theme_id = ? AND time_id = ?
+                          """;
+
+        return jdbcTemplate.queryForObject(sql, Long.class, date, themeId, timeId);
+    }
 }
