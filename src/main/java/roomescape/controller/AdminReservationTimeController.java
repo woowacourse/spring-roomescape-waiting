@@ -17,7 +17,7 @@ import roomescape.dto.request.ReservationTimeCreateRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
 
-@RequestMapping("/api/v1/admin/times")
+@RequestMapping("/api/v1/admin/reservation-times")
 @RestController
 public class AdminReservationTimeController {
 
@@ -34,7 +34,7 @@ public class AdminReservationTimeController {
         ReservationTime savedReservationTime = reservationTimeService.createReservationTime(
                 reservationTimeCreateRequest.startAt());
         ReservationTimeResponse reservationTimeResponse = ReservationTimeResponse.from(savedReservationTime);
-        return ResponseEntity.created(URI.create("/api/v1/admin/times/" + reservationTimeResponse.id()))
+        return ResponseEntity.created(URI.create("/api/v1/admin/reservation-times/" + reservationTimeResponse.id()))
                 .body(reservationTimeResponse);
     }
 

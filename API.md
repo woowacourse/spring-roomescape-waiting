@@ -35,9 +35,9 @@
 
 | 분류 | API |
 | --- | --- |
-| **공개** | `POST /api/v1/auth/login`, `POST /api/v1/auth/login/token`, `POST /api/v1/auth/logout`, `GET /api/v1/themes`, `GET /api/v1/themes/popular`, `GET /api/v1/stores`, `GET /api/v1/reservations/times`, `GET /api/v1/reservations/times/availability` |
+| **공개** | `POST /api/v1/auth/login`, `POST /api/v1/auth/login/token`, `POST /api/v1/auth/logout`, `GET /api/v1/themes`, `GET /api/v1/themes/popular`, `GET /api/v1/stores`, `GET /api/v1/reservation-times`, `GET /api/v1/reservation-times/availability` |
 | **인증 필요 (모든 역할)** | `GET /api/v1/auth/me`, `GET /api/v1/reservations`, `POST /api/v1/reservations`, `PATCH /api/v1/reservations/{id}`, `DELETE /api/v1/reservations/{id}` |
-| **MANAGER 권한 필요** | `POST /api/v1/admin/themes`, `DELETE /api/v1/admin/themes/{id}`, `POST /api/v1/admin/times`, `DELETE /api/v1/admin/times/{id}`, `GET /api/v1/admin/store/reservations`, `PATCH /api/v1/admin/store/reservations/{id}`, `DELETE /api/v1/admin/store/reservations/{id}` |
+| **MANAGER 권한 필요** | `POST /api/v1/admin/themes`, `DELETE /api/v1/admin/themes/{id}`, `POST /api/v1/admin/reservation-times`, `DELETE /api/v1/admin/reservation-times/{id}`, `GET /api/v1/admin/store/reservations`, `PATCH /api/v1/admin/store/reservations/{id}`, `DELETE /api/v1/admin/store/reservations/{id}` |
 
 > 실제 인증 적용은 `AuthenticationConfig`의 인터셉터 등록 규칙(`addPathPatterns` + `excludePathPatterns`)을 따른다. 역할 기반 인가는 `LoginMemberArgumentResolver`가 `@LoginMember(role = ...)`를 읽어 처리한다.
 
@@ -413,7 +413,7 @@
 
 ### 2-1. 예약 시간 목록 조회
 
-- `GET /api/v1/reservations/times`
+- `GET /api/v1/reservation-times`
 - 공개
 
 #### 응답 예시
@@ -439,7 +439,7 @@
 
 ### 2-2. 예약 가능 시간 조회
 
-- `GET /api/v1/reservations/times/availability?date={date}&themeId={themeId}`
+- `GET /api/v1/reservation-times/availability?date={date}&themeId={themeId}`
 - 공개
 
 #### 쿼리 파라미터
@@ -557,7 +557,7 @@
 
 ### 4-1. 예약 시간 생성
 
-- `POST /api/v1/admin/times`
+- `POST /api/v1/admin/reservation-times`
 - 인증 필요
 
 #### 요청 본문
@@ -605,7 +605,7 @@
 
 ### 4-2. 예약 시간 삭제
 
-- `DELETE /api/v1/admin/times/{id}`
+- `DELETE /api/v1/admin/reservation-times/{id}`
 - 인증 필요
 
 #### 경로 변수
@@ -902,13 +902,13 @@
 | `POST` | `/api/v1/reservations` | ✅ | 예약 생성 |
 | `PATCH` | `/api/v1/reservations/{id}` | ✅ | 예약 날짜·시간 변경 |
 | `DELETE` | `/api/v1/reservations/{id}` | ✅ | 예약 삭제 |
-| `GET` | `/api/v1/reservations/times` | ❌ | 예약 시간 목록 조회 |
-| `GET` | `/api/v1/reservations/times/availability?date=&themeId=` | ❌ | 예약 가능 시간 조회 |
+| `GET` | `/api/v1/reservation-times` | ❌ | 예약 시간 목록 조회 |
+| `GET` | `/api/v1/reservation-times/availability?date=&themeId=` | ❌ | 예약 가능 시간 조회 |
 | `GET` | `/api/v1/themes` | ❌ | 테마 목록 조회 |
 | `GET` | `/api/v1/themes/popular?from=&to=` | ❌ | 인기 테마 조회 |
 | `GET` | `/api/v1/stores` | ❌ | 매장 목록 조회 |
-| `POST` | `/api/v1/admin/times` | 🔐 MANAGER | 예약 시간 생성 |
-| `DELETE` | `/api/v1/admin/times/{id}` | 🔐 MANAGER | 예약 시간 삭제 |
+| `POST` | `/api/v1/admin/reservation-times` | 🔐 MANAGER | 예약 시간 생성 |
+| `DELETE` | `/api/v1/admin/reservation-times/{id}` | 🔐 MANAGER | 예약 시간 삭제 |
 | `POST` | `/api/v1/admin/themes` | 🔐 MANAGER | 테마 생성 |
 | `DELETE` | `/api/v1/admin/themes/{id}` | 🔐 MANAGER | 테마 삭제 |
 | `GET` | `/api/v1/admin/store/reservations` | 🔐 MANAGER | 자기 매장 예약 목록 |

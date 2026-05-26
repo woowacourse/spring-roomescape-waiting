@@ -45,7 +45,7 @@ public class AdminReservationTimeControllerTest {
             RestAssured.given().contentType(ContentType.JSON)
                     .header("Cookie", cookie)
                     .body(timeParams())
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(1));
@@ -59,7 +59,7 @@ public class AdminReservationTimeControllerTest {
             RestAssured.given().contentType(ContentType.JSON)
                     .header("Cookie", cookie)
                     .body("{}")
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(400)
                     .body("errorCode", is("COMMON400_001"));
@@ -76,7 +76,7 @@ public class AdminReservationTimeControllerTest {
             RestAssured.given().contentType(ContentType.JSON)
                     .header("Cookie", cookie)
                     .body(params)
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(400)
                     .body("errorCode", is("COMMON400_004"));
@@ -94,25 +94,25 @@ public class AdminReservationTimeControllerTest {
             RestAssured.given().contentType(ContentType.JSON)
                     .header("Cookie", cookie)
                     .body(timeParams())
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(1));
 
             RestAssured.given().log().all()
-                    .when().get("/api/v1/reservations/times")
+                    .when().get("/api/v1/reservation-times")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(1));
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
-                    .when().delete("/api/v1/admin/times/1")
+                    .when().delete("/api/v1/admin/reservation-times/1")
                     .then().log().all()
                     .statusCode(204);
 
             RestAssured.given().log().all()
-                    .when().get("/api/v1/reservations/times")
+                    .when().get("/api/v1/reservation-times")
                     .then().log().all()
                     .statusCode(200)
                     .body("size()", is(0));
@@ -126,7 +126,7 @@ public class AdminReservationTimeControllerTest {
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
-                    .when().delete("/api/v1/admin/times/4")
+                    .when().delete("/api/v1/admin/reservation-times/4")
                     .then().log().all()
                     .statusCode(404)
                     .body("errorCode", is("RESERVATION_TIME404_001"));
@@ -150,7 +150,7 @@ public class AdminReservationTimeControllerTest {
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
-                    .when().delete("/api/v1/admin/times/1")
+                    .when().delete("/api/v1/admin/reservation-times/1")
                     .then().log().all()
                     .statusCode(409)
                     .body("errorCode", is("RESERVATION_TIME409_001"));
@@ -164,7 +164,7 @@ public class AdminReservationTimeControllerTest {
         void 비로그인_상태로_예약시간_생성시_401을_반환한다() {
             RestAssured.given().contentType(ContentType.JSON)
                     .body(timeParams())
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_002"));
@@ -173,7 +173,7 @@ public class AdminReservationTimeControllerTest {
         @Test
         void 비로그인_상태로_예약시간_삭제시_401을_반환한다() {
             RestAssured.given().log().all()
-                    .when().delete("/api/v1/admin/times/1")
+                    .when().delete("/api/v1/admin/reservation-times/1")
                     .then().log().all()
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_002"));
@@ -185,7 +185,7 @@ public class AdminReservationTimeControllerTest {
                     .auth().oauth2("invalid.jwt.token")
                     .contentType(ContentType.JSON)
                     .body(timeParams())
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(401)
                     .body("errorCode", is("AUTH401_003"));
@@ -210,7 +210,7 @@ public class AdminReservationTimeControllerTest {
         RestAssured.given().contentType(ContentType.JSON)
                 .header("Cookie", cookie)
                 .body(time)
-                .when().post("/api/v1/admin/times")
+                .when().post("/api/v1/admin/reservation-times")
                 .then().statusCode(201);
 
         Map<String, String> time2 = new HashMap<>();
@@ -219,7 +219,7 @@ public class AdminReservationTimeControllerTest {
         RestAssured.given().contentType(ContentType.JSON)
                 .header("Cookie", cookie)
                 .body(time2)
-                .when().post("/api/v1/admin/times")
+                .when().post("/api/v1/admin/reservation-times")
                 .then().statusCode(201);
 
         Map<String, String> time3 = new HashMap<>();
@@ -228,7 +228,7 @@ public class AdminReservationTimeControllerTest {
         RestAssured.given().contentType(ContentType.JSON)
                 .header("Cookie", cookie)
                 .body(time3)
-                .when().post("/api/v1/admin/times")
+                .when().post("/api/v1/admin/reservation-times")
                 .then().statusCode(201);
     }
 

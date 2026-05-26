@@ -29,8 +29,8 @@ public class AuthenticationConfig implements WebMvcConfigurer {
                         "/api/v1/themes",
                         "/api/v1/themes/popular",
                         "/api/v1/stores",
-                        "/api/v1/reservations/times",
-                        "/api/v1/reservations/times/availability"
+                        "/api/v1/reservation-times",
+                        "/api/v1/reservation-times/availability"
                 );
     }
 

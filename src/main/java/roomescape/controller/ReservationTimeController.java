@@ -13,7 +13,7 @@ import roomescape.dto.response.AvailableTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
 
-@RequestMapping("/api/v1/reservations/times")
+@RequestMapping("/api/v1/reservation-times")
 @RestController
 public class ReservationTimeController {
 

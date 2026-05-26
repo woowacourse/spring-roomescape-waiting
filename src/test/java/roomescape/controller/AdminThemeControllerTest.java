@@ -168,7 +168,7 @@ public class AdminThemeControllerTest {
             RestAssured.given().contentType(ContentType.JSON)
                     .header("Cookie", cookie)
                     .body(time)
-                    .when().post("/api/v1/admin/times")
+                    .when().post("/api/v1/admin/reservation-times")
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(1));

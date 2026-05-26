@@ -415,7 +415,7 @@ public class ReservationControllerTest {
         RestAssured.given().contentType(ContentType.JSON)
                 .header("Cookie", managerCookie)
                 .body(time)
-                .when().post("/api/v1/admin/times")
+                .when().post("/api/v1/admin/reservation-times")
                 .then().statusCode(201);
 
         Map<String, String> time2 = new HashMap<>();
@@ -424,7 +424,7 @@ public class ReservationControllerTest {
         RestAssured.given().contentType(ContentType.JSON)
                 .header("Cookie", managerCookie)
                 .body(time2)
-                .when().post("/api/v1/admin/times")
+                .when().post("/api/v1/admin/reservation-times")
                 .then().statusCode(201);
 
         Map<String, String> time3 = new HashMap<>();
@@ -433,7 +433,7 @@ public class ReservationControllerTest {
         RestAssured.given().contentType(ContentType.JSON)
                 .header("Cookie", managerCookie)
                 .body(time3)
-                .when().post("/api/v1/admin/times")
+                .when().post("/api/v1/admin/reservation-times")
                 .then().statusCode(201);
     }
 
