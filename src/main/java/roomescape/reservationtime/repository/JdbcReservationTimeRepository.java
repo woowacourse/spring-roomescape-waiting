@@ -11,7 +11,6 @@ import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -24,7 +23,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
 
     private final JdbcTemplate jdbcTemplate;
-    private final Clock clock;
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
@@ -87,12 +85,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public boolean cancelById(Long id) {
+    public boolean cancelById(Long id, LocalDateTime now) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation_time
                 SET deleted_at = ?, delete_token = ?
                 WHERE id = ? AND deleted_at IS NULL
-                """, LocalDateTime.now(clock), id, id);
+                """, now, id, id);
         return rowCount > 0;
     }
 

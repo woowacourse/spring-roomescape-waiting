@@ -3,6 +3,7 @@ package roomescape.reservation.repository;
 import roomescape.reservation.domain.Reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -18,7 +19,7 @@ public interface ReservationRepository {
 
     boolean updateDateAndTime(Long id, LocalDate date, Long timeId);
 
-    boolean cancelById(Long id);
+    boolean cancelById(Long id, LocalDateTime now);
 
     boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 

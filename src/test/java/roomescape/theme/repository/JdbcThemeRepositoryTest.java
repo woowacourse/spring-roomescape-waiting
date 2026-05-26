@@ -9,8 +9,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
@@ -27,7 +25,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @JdbcTest
-@Import({JdbcThemeRepository.class, TestClockConfig.class})
+@Import(JdbcThemeRepository.class)
 class JdbcThemeRepositoryTest {
 
     @Autowired
@@ -35,9 +33,6 @@ class JdbcThemeRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private MutableClock clock;
 
     @Test
     @DisplayName("Theme를 저장하고 조회한다.")
@@ -324,9 +319,8 @@ class JdbcThemeRepositoryTest {
 
         Theme theme = Theme.of(getGeneratedId(keyHolder), "kim", "desc1", "thumb1");
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
-        clock.setFixed(now);
 
-        boolean deleted = jdbcThemeRepository.cancelById(theme.getId());
+        boolean deleted = jdbcThemeRepository.cancelById(theme.getId(), now);
 
         assertThat(deleted).isTrue();
         assertThat(jdbcThemeRepository.findAll()).isEmpty();
@@ -342,7 +336,7 @@ class JdbcThemeRepositoryTest {
         Long id = 1L;
 
         // when
-        boolean deleted = jdbcThemeRepository.cancelById(id);
+        boolean deleted = jdbcThemeRepository.cancelById(id, LocalDateTime.now());
 
         // then
         assertThat(deleted).isFalse();
@@ -350,7 +344,6 @@ class JdbcThemeRepositoryTest {
 
     private Theme insertDeletedTheme(String name, String description, String thumbnail) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        LocalDateTime now = LocalDateTime.now(clock);
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
                     INSERT INTO theme (name, description, thumbnail, deleted_at)
@@ -359,7 +352,7 @@ class JdbcThemeRepositoryTest {
             preparedStatement.setString(1, name);
             preparedStatement.setString(2, description);
             preparedStatement.setString(3, thumbnail);
-            preparedStatement.setTimestamp(4, Timestamp.valueOf(now));
+            preparedStatement.setTimestamp(4, Timestamp.valueOf(LocalDateTime.now()));
             return preparedStatement;
         }, keyHolder);
 

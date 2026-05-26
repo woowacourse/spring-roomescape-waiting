@@ -28,7 +28,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import({JdbcReservationTimeRepository.class, TestClockConfig.class})
+@Import(JdbcReservationTimeRepository.class)
 class JdbcReservationTimeRepositoryTest {
 
     @Autowired
@@ -37,8 +37,6 @@ class JdbcReservationTimeRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
-    @Autowired
-    private MutableClock clock;
 
 
     @Test
@@ -124,10 +122,9 @@ class JdbcReservationTimeRepositoryTest {
         // given
         ReservationTime reservationTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
-        clock.setFixed(now);
 
         // when
-        boolean deleted = reservationTimeRepository.cancelById(reservationTime.getId());
+        boolean deleted = reservationTimeRepository.cancelById(reservationTime.getId(), now);
 
         // then
         assertThat(deleted).isTrue();
@@ -145,7 +142,7 @@ class JdbcReservationTimeRepositoryTest {
         Long id = 1L;
 
         // when
-        boolean deleted = reservationTimeRepository.cancelById(id);
+        boolean deleted = reservationTimeRepository.cancelById(id, LocalDateTime.now());
 
         // then
         assertThat(deleted).isFalse();
@@ -239,7 +236,7 @@ class JdbcReservationTimeRepositoryTest {
                     VALUES (?, ?)
                     """, new String[]{"id"});
             preparedStatement.setString(1, startAt.toString());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now(clock)));
+            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
             return preparedStatement;
         }, keyHolder);
 

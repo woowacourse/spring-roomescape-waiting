@@ -15,7 +15,6 @@ public enum ReservationErrorCode implements ErrorPolicy {
     CANNOT_EDIT_ALREADY_STARTED_RESERVATION("이미 시작된 예약은 수정할 수 없습니다.", UNPROCESSABLE_ENTITY),
     CANNOT_EDIT_OTHER_GUEST_RESERVATION("본인의 예약만 수정할 수 있습니다.", FORBIDDEN);
 
-
     private final String code;
     private final String message;
     private final HttpStatus status;

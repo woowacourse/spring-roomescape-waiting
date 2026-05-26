@@ -12,7 +12,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import static roomescape.reservation.exception.ReservationErrorCode.*;
@@ -27,6 +29,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
 
     private final ReservationValidator reservationValidator;
+    private final Clock clock;
 
     @Transactional
     public Reservation create(String guestName, LocalDate date, Long timeId, Long themeId) {
@@ -76,7 +79,7 @@ public class ReservationService {
     }
 
     private void cancelReservation(Long id) {
-        if(!reservationRepository.cancelById(id)) { // 위에서 NOT_FOUND를 검증하긴 하지만, 삭제 과정 중에 다른 사람이 변경할 수도 있기에 이중으로 검증
+        if(!reservationRepository.cancelById(id, LocalDateTime.now(clock))) { // 위에서 NOT_FOUND를 검증하긴 하지만, 삭제 과정 중에 다른 사람이 변경할 수도 있기에 이중으로 검증
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
     }

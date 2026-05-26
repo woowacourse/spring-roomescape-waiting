@@ -30,7 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
 
 @JdbcTest
-@Import({JdbcReservationRepository.class, TestClockConfig.class})
+@Import(JdbcReservationRepository.class)
 class JdbcReservationRepositoryTest {
 
     @Autowired
@@ -38,9 +38,6 @@ class JdbcReservationRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
-    @Autowired
-    private MutableClock clock;
 
 
     @Test
@@ -304,10 +301,9 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
 
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
-        clock.setFixed(now);
 
         // when
-        boolean result = reservationRepository.cancelById(reservation.getId());
+        boolean result = reservationRepository.cancelById(reservation.getId(), now);
 
         // then
         assertThat(result).isTrue();
@@ -323,7 +319,7 @@ class JdbcReservationRepositoryTest {
         Long id = 1L;
 
         // when
-        boolean result = reservationRepository.cancelById(id);
+        boolean result = reservationRepository.cancelById(id, LocalDateTime.now());
 
         // then
         assertThat(result).isFalse();

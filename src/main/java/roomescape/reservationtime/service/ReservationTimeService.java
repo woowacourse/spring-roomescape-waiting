@@ -10,7 +10,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -23,6 +25,8 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+
+    private final Clock clock;
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
@@ -49,7 +53,7 @@ public class ReservationTimeService {
             throw new DomainException(RESERVATION_TIME_HAS_RESERVATION);
         }
 
-        if (!reservationTimeRepository.cancelById(id)) {
+        if (!reservationTimeRepository.cancelById(id, LocalDateTime.now(clock))) {
             throw new DomainException(RESERVATION_TIME_NOT_FOUND);
         }
     }
