@@ -56,6 +56,13 @@ class ReservationTest {
     }
 
     @Test
+    void 상태가_null이면_예외() {
+        assertThatThrownBy(() -> new Reservation(null, USER, THEME, DATE, TIME, STORE, null))
+                .isInstanceOf(InvalidDomainException.class)
+                .hasMessage("예약 상태는 필수입니다.");
+    }
+
+    @Test
     void isInPast_과거_날짜면_true() {
         Reservation reservation = build(LocalDate.of(2026, 5, 6), LocalTime.of(12, 0));
         assertThat(reservation.isInPast(NOW)).isTrue();

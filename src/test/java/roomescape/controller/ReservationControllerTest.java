@@ -29,7 +29,10 @@ import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.ReservationResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
+import roomescape.exception.ReservationNotFoundForWaitingException;
+import roomescape.exception.ReservationNotReservedException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.fixture.Fixtures;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
@@ -252,6 +255,23 @@ class ReservationControllerTest {
     }
 
     @Test
+    void PUT_reservations_id_서비스가_ReservationNotReservedException을_던지면_409과_메시지를_반환한다() throws Exception {
+        willThrow(new ReservationNotReservedException("WAITING"))
+                .given(reservationService).updateOwnReservation(any(UpdateReservationCommand.class));
+
+        Map<String, Object> body = Map.of(
+                "date", "2026-06-02",
+                "themeId", 1,
+                "timeId", 1);
+
+        mockMvc.perform(put("/reservations/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("해당 예약은 예약 확정 상태가 아닙니다. 현재 예약 상태 값: WAITING"));
+    }
+
+    @Test
     void POST_reservations_본문의_date가_형식_오류면_400과_메시지를_반환한다() throws Exception {
         String body = """
                 {"date":"abc","themeId":1,"timeId":1}
@@ -338,5 +358,77 @@ class ReservationControllerTest {
                         .content(brokenBody))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("요청 본문 형식이 올바르지 않습니다."));
+    }
+
+    @Test
+    void POST_reservations_waiting_생성된_id를_Location_헤더에_담아_201을_반환한다() throws Exception {
+        given(reservationService.createWaitingReservation(any(CreateReservationCommand.class)))
+                .willReturn(Fixtures.sampleWaitingReservation(7L));
+
+        Map<String, Object> body = Map.of(
+                "date", "2026-05-01",
+                "themeId", 1,
+                "timeId", 1,
+                "storeId", 1);
+
+        mockMvc.perform(post("/reservations/waiting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", "/reservations/7"));
+    }
+
+    @Test
+    void POST_reservations_waiting_서비스가_ReservationNotFoundForWaitingException을_던지면_409과_메시지를_반환한다() throws Exception {
+        willThrow(new ReservationNotFoundForWaitingException())
+                .given(reservationService).createWaitingReservation(any(CreateReservationCommand.class));
+
+        Map<String, Object> body = Map.of(
+                "date", "2026-06-02",
+                "themeId", 1,
+                "timeId", 1,
+                "storeId", 1);
+
+        mockMvc.perform(post("/reservations/waiting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("확정 예약이 없으므로 대기 예약 생성이 불가능합니다."));
+    }
+
+    @Test
+    void POST_reservations_waiting_서비스가_PastDateTimeReservationException을_던지면_422과_메시지를_반환한다() throws Exception {
+        willThrow(new PastDateTimeReservationException())
+                .given(reservationService).createWaitingReservation(any(CreateReservationCommand.class));
+
+        Map<String, Object> body = Map.of(
+                "date", "2026-06-02",
+                "themeId", 1,
+                "timeId", 1,
+                "storeId", 1);
+
+        mockMvc.perform(post("/reservations/waiting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isUnprocessableEntity())
+                .andExpect(jsonPath("$.message").value("예약 일정이 유효하지 않습니다. 예약 날짜와 시간은 현시간 이후여야 합니다."));
+    }
+
+    @Test
+    void POST_reservations_waiting_서비스가_DuplicateWaitingReservationException을_던지면_409과_메시지를_반환한다() throws Exception {
+        willThrow(new DuplicateWaitingReservationException())
+                .given(reservationService).createWaitingReservation(any(CreateReservationCommand.class));
+
+        Map<String, Object> body = Map.of(
+                "date", "2026-06-02",
+                "themeId", 1,
+                "timeId", 1,
+                "storeId", 1);
+
+        mockMvc.perform(post("/reservations/waiting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.message").value("이미 해당 슬롯에 예약 대기 중입니다."));
     }
 }

@@ -1,7 +1,6 @@
 package roomescape.repository.fake;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
@@ -108,7 +107,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId, Long storeId,
+    public boolean existsByDateAndTimeAndThemeAndStoreAndStatus(LocalDate date, Long timeId, Long themeId, Long storeId,
                                                                 ReservationStatus status) {
         return store.values().stream()
                 .anyMatch(r -> r.getDate().equals(date)
