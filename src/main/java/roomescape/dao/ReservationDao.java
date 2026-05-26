@@ -16,7 +16,8 @@ import roomescape.domain.Theme;
 @Repository
 public class ReservationDao {
     private final JdbcTemplate jdbcTemplate;
-    private final SimpleJdbcInsert jdbcInsert;
+    private final SimpleJdbcInsert jdbcReservationInsert;
+    private final SimpleJdbcInsert jdbcWaitingInsert;
 
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
             rs.getLong("reservation_id"),
@@ -30,8 +31,11 @@ public class ReservationDao {
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
+        this.jdbcReservationInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation")
+                .usingGeneratedKeyColumns("id");
+        this.jdbcWaitingInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("reservation_waiting")
                 .usingGeneratedKeyColumns("id");
     }
 
@@ -68,7 +72,7 @@ public class ReservationDao {
     }
 
     public Reservation save(Reservation reservation) {
-        long id = jdbcInsert.executeAndReturnKey(Map.of(
+        long id = jdbcReservationInsert.executeAndReturnKey(Map.of(
                 "name", reservation.getName(),
                 "date", reservation.getDate(),
                 "created_at", reservation.getCreatedAt(),
@@ -116,5 +120,17 @@ public class ReservationDao {
                 WHERE r.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, username);
+    }
+
+    public Reservation saveWaiting(Reservation reservation) {
+        long id = jdbcWaitingInsert.executeAndReturnKey(Map.of(
+                "name", reservation.getName(),
+                "date", reservation.getDate(),
+                "created_at", reservation.getCreatedAt(),
+                "time_id", reservation.getTime().getId(),
+                "theme_id", reservation.getTheme().getId()
+        )).longValue();
+        return new Reservation(id, reservation.getName(), reservation.getDate(),
+                reservation.getCreatedAt(), reservation.getTime(), reservation.getTheme());
     }
 }

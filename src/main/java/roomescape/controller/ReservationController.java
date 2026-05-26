@@ -60,4 +60,13 @@ public class ReservationController {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> createReservationWaiting(@Valid @RequestBody ReservationRequest request) {
+        Reservation reservation = reservationService.saveWaiting(
+                request.name(), request.date(), request.timeId(), request.themeId());
+        ReservationResponse response = ReservationResponse.from(reservation, reservation.getTheme());
+        URI location = URI.create("/reservations/" + response.id());
+        return ResponseEntity.created(location).body(response);
+    }
 }
