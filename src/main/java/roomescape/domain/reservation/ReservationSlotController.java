@@ -14,23 +14,23 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.dto.CreateReservationRequest;
-import roomescape.domain.reservation.dto.CreateReservationResponse;
-import roomescape.domain.reservation.dto.UpdateReservationRequest;
+import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
 import roomescape.domain.reservation.dto.UserReservationResponse;
 
 @Validated
 @RestController
 @RequiredArgsConstructor
-public class ReservationController {
+public class ReservationSlotController {
 
-    private final ReservationService reservationService;
+    private final ReservationSlotService reservationService;
 
     @PostMapping("/reservations")
-    public ResponseEntity<CreateReservationResponse> createReservation(
-        @Valid @RequestBody CreateReservationRequest request
+    public ResponseEntity<CreateReservationSlotResponse> createReservation(
+        @Valid @RequestBody CreateReservationSlotRequest request
     ) {
-        CreateReservationResponse response = reservationService.createReservation(request);
+        CreateReservationSlotResponse response = reservationService.createReservation(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
@@ -55,7 +55,7 @@ public class ReservationController {
     @PatchMapping("/reservations/{id}")
     public ResponseEntity<Void> updateReservation(
         @PathVariable Long id,
-        @RequestBody UpdateReservationRequest request
+        @RequestBody UpdateReservationSlotRequest request
     ) {
         reservationService.updateReservation(id, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();

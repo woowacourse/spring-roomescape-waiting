@@ -3,7 +3,7 @@ package roomescape.support.exception.errors;
 import lombok.Getter;
 
 @Getter
-public enum ReservationErrors implements Errors {
+public enum ReservationSlotErrors implements Errors {
 
     INVALID_RESERVATION_DATE("날짜는 필수입니다."),
     INVALID_USER_RESERVATION("사용자 예약 정보가 올바르지 않습니다."),
@@ -14,7 +14,7 @@ public enum ReservationErrors implements Errors {
 
     private final String message;
 
-    ReservationErrors(String message) {
+    ReservationSlotErrors(String message) {
         this.message = message;
     }
 

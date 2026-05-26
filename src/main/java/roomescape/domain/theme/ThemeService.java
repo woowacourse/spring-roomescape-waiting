@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.theme.admin.dto.AdminThemeResponse;
 import roomescape.domain.theme.admin.dto.CreateThemeRequest;
 import roomescape.domain.theme.admin.dto.CreateThemeResponse;
@@ -21,7 +21,7 @@ public class ThemeService {
     private static final int RANK_DAYS_LIMIT = 7;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationRepository;
 
     public List<AdminThemeResponse> getAllThemeForAdmin() {
         return themeRepository.findAll().stream()

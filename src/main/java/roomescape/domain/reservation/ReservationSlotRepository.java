@@ -5,11 +5,11 @@ import java.util.List;
 import java.util.Optional;
 import roomescape.domain.theme.Theme;
 
-public interface ReservationRepository {
+public interface ReservationSlotRepository {
 
-    Reservation save(Reservation reservation);
+    ReservationSlot save(ReservationSlot reservation);
 
-    List<Reservation> findAll();
+    List<ReservationSlot> findAll();
 
     int deleteById(Long id);
 
@@ -29,11 +29,11 @@ public interface ReservationRepository {
 
     boolean existsOtherReservation(Long id, Long timeId, Long dateId, Long themeId);
 
-    Optional<Reservation> findBySchedule(Long timeId, Long dateId, Long themeId);
+    Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId);
 
-    List<Reservation> findByName(String name);
+    List<ReservationSlot> findByName(String name);
 
-    Optional<Reservation> findById(Long id);
+    Optional<ReservationSlot> findById(Long id);
 
-    Optional<Reservation> update(Long id, Reservation withoutId);
+    Optional<ReservationSlot> update(Long id, ReservationSlot withoutId);
 }

@@ -22,19 +22,19 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.reservation.dto.CreateReservationRequest;
-import roomescape.domain.reservation.dto.CreateReservationResponse;
-import roomescape.domain.reservation.dto.CreateReservationResponse.ThemePayload;
-import roomescape.domain.reservation.dto.UpdateReservationRequest;
+import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservation.dto.CreateReservationSlotResponse.ThemePayload;
+import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
 import roomescape.domain.reservation.dto.UserReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.NotFoundException;
-import roomescape.support.exception.errors.ReservationErrors;
+import roomescape.support.exception.errors.ReservationSlotErrors;
 
-@WebMvcTest(ReservationController.class)
-class ReservationControllerTest {
+@WebMvcTest(ReservationSlotController.class)
+class ReservationSlotControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -43,25 +43,25 @@ class ReservationControllerTest {
     private ObjectMapper objectMapper;
 
     @MockitoBean
-    private ReservationService reservationService;
+    private ReservationSlotService reservationService;
 
     @Test
     @DisplayName("예약 생성 요청과 응답을 확인한다.")
     void createReservation() throws Exception {
         // given
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             1L,
             2L,
             3L
         );
-        CreateReservationResponse response = new CreateReservationResponse(
+        CreateReservationSlotResponse response = new CreateReservationSlotResponse(
             10L,
             LocalDate.of(2026, 5, 20),
             LocalTime.of(10, 0),
             ThemePayload.from(Theme.of(1L, "공포", "무섭다", "theme-url"))
         );
-        given(reservationService.createReservation(any(CreateReservationRequest.class)))
+        given(reservationService.createReservation(any(CreateReservationSlotRequest.class)))
             .willReturn(response);
 
         // when & then
@@ -81,7 +81,7 @@ class ReservationControllerTest {
     @DisplayName("필수 파라미터가 누락되었을 때 예외가 발생한다.")
     void createWrongParameterReservation() throws Exception {
         // given
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             1L,
             null,
@@ -103,7 +103,7 @@ class ReservationControllerTest {
         // given
         String name = "보예";
         UserReservationResponse response = UserReservationResponse.of("보예",
-            List.of(Reservation.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
+            List.of(ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
                     ReservationTime.of(1L, LocalTime.of(10, 10)),
                     Theme.of(1L, "공포", "아무서워", "theme-url")
                 )
@@ -154,7 +154,7 @@ class ReservationControllerTest {
     void updateReservation() throws Exception {
         // given
         Long id = 1L;
-        UpdateReservationRequest request = new UpdateReservationRequest(
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(
             LocalDate.of(2026, 5, 18),
             LocalTime.of(14, 30)
         );
@@ -193,11 +193,11 @@ class ReservationControllerTest {
     void updateReservationWhenReservationNotFound() throws Exception {
         // given
         Long id = 999L;
-        UpdateReservationRequest request = new UpdateReservationRequest(
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(
             LocalDate.of(2026, 5, 18),
             LocalTime.of(14, 30)
         );
-        willThrow(new NotFoundException(ReservationErrors.RESERVATION_NOT_FOUND))
+        willThrow(new NotFoundException(ReservationSlotErrors.RESERVATION_NOT_FOUND))
             .given(reservationService)
             .updateReservation(id, request);
 

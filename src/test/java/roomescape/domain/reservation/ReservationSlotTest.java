@@ -13,7 +13,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.RoomescapeException;
 
-class ReservationTest {
+class ReservationSlotTest {
 
     @Test
     @DisplayName("id가 없는 예약 슬롯을 생성한다.")
@@ -24,7 +24,7 @@ class ReservationTest {
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
 
         // when
-        Reservation reservation = Reservation.createWithoutId(date, time, theme);
+        ReservationSlot reservation = ReservationSlot.createWithoutId(date, time, theme);
 
         // then
         assertSoftly(softly -> {
@@ -43,14 +43,14 @@ class ReservationTest {
         ReservationTime time = ReservationTime.createWithoutId(LocalTime.of(15, 40));
         ReservationDate date = ReservationDate.createWithoutId(LocalDate.of(2023, 8, 5));
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
-        Reservation reservation = Reservation.createWithoutId(
+        ReservationSlot reservation = ReservationSlot.createWithoutId(
             date,
             time,
             theme
         );
 
         // when
-        Reservation reservationWithId = Reservation.of(
+        ReservationSlot reservationWithId = ReservationSlot.of(
             1L,
             reservation.getDate(),
             reservation.getTime(),
@@ -77,7 +77,7 @@ class ReservationTest {
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
 
         // when
-        Reservation reservation = Reservation.of(id, date, time, theme);
+        ReservationSlot reservation = ReservationSlot.of(id, date, time, theme);
 
         // then
         assertSoftly(softly -> {
@@ -98,7 +98,7 @@ class ReservationTest {
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
 
         // when & hen
-        assertThatThrownBy(() -> Reservation.createWithoutId(date, time, theme))
+        assertThatThrownBy(() -> ReservationSlot.createWithoutId(date, time, theme))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("날짜는 필수입니다.");
     }
@@ -112,7 +112,7 @@ class ReservationTest {
         Theme theme = Theme.of(1L, "공포", "무서운 테마", "theme-url");
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createWithoutId(date, time, theme))
+        assertThatThrownBy(() -> ReservationSlot.createWithoutId(date, time, theme))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("시간은 필수입니다.");
     }
@@ -126,7 +126,7 @@ class ReservationTest {
         Theme theme = null;
 
         // when & then
-        assertThatThrownBy(() -> Reservation.createWithoutId(date, time, theme))
+        assertThatThrownBy(() -> ReservationSlot.createWithoutId(date, time, theme))
             .isInstanceOf(RoomescapeException.class)
             .hasMessage("테마는 필수입니다.");
     }

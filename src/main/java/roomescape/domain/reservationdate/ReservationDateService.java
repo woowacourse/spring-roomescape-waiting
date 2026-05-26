@@ -3,7 +3,7 @@ package roomescape.domain.reservationdate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse;
@@ -15,7 +15,7 @@ import roomescape.support.exception.errors.ReservationDateErrors;
 @RequiredArgsConstructor
 public class ReservationDateService {
 
-    private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationRepository;
     private final ReservationDateRepository reservationDateRepository;
 
     public List<AdminReservationDateResponse> getAllReservationDateForAdmin() {

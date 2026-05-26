@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeRequest;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeResponse;
@@ -21,20 +21,20 @@ import roomescape.domain.theme.Theme;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.fake.FakeReservationDateRepository;
-import roomescape.support.fake.FakeReservationRepository;
+import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeReservationTimeRepository;
 import roomescape.support.fake.FakeThemeRepository;
 
 class ReservationTimeServiceTest {
 
-    private FakeReservationRepository reservationRepository;
+    private FakeReservationSlotRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
     private FakeThemeRepository themeRepository;
     private FakeReservationDateRepository reservationDateRepository;
 
     @BeforeEach
     void setUp() {
-        reservationRepository = new FakeReservationRepository();
+        reservationRepository = new FakeReservationSlotRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
         reservationDateRepository = new FakeReservationDateRepository();
@@ -91,7 +91,7 @@ class ReservationTimeServiceTest {
             ReservationTime.createWithoutId(LocalTime.of(10, 0))
         );
         reservationRepository.save(
-            Reservation.createWithoutId(ReservationDate.of(1L, LocalDate.of(2026, 5, 12)),
+            ReservationSlot.createWithoutId(ReservationDate.of(1L, LocalDate.of(2026, 5, 12)),
                 reservationTime,
                 Theme.of(1L, "공포", "무서운 테마", "theme-url")
             )
@@ -135,7 +135,7 @@ class ReservationTimeServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, firstReservationTime, theme)
+            ReservationSlot.createWithoutId(reservationDate, firstReservationTime, theme)
         );
         ReservationTimeService reservationTimeService = createReservationTimeService();
 

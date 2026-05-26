@@ -11,17 +11,17 @@ import roomescape.domain.theme.admin.dto.AdminThemeResponse;
 import roomescape.domain.theme.admin.dto.CreateThemeRequest;
 import roomescape.domain.theme.admin.dto.CreateThemeResponse;
 import roomescape.domain.theme.dto.ThemeResponse;
-import roomescape.support.fake.FakeReservationRepository;
+import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeThemeRepository;
 
 class ThemeServiceTest {
 
-    private FakeReservationRepository reservationRepository;
+    private FakeReservationSlotRepository reservationRepository;
     private FakeThemeRepository themeRepository;
 
     @BeforeEach
     void setUp() {
-        reservationRepository = new FakeReservationRepository();
+        reservationRepository = new FakeReservationSlotRepository();
         themeRepository = new FakeThemeRepository();
     }
 

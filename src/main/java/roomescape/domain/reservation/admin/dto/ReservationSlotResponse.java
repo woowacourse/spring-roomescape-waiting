@@ -3,19 +3,19 @@ package roomescape.domain.reservation.admin.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-public record ReservationResponse(
+public record ReservationSlotResponse(
     Long id,
     LocalDate date,
     ReservationTimePayload time,
     ThemePayload theme
 ) {
 
-    public static ReservationResponse from(Reservation reservation) {
-        return new ReservationResponse(
+    public static ReservationSlotResponse from(ReservationSlot reservation) {
+        return new ReservationSlotResponse(
             reservation.getId(),
             reservation.getDate().getDate(),
             ReservationTimePayload.from(reservation.getTime()),

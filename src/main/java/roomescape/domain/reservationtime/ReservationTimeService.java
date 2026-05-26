@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Set;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.ReservationSlotRepository;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeRequest;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeResponse;
@@ -23,7 +23,7 @@ import roomescape.support.exception.errors.ThemeErrors;
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ReservationRepository reservationRepository;
+    private final ReservationSlotRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final ReservationDateRepository reservationDateRepository;
 

@@ -5,19 +5,19 @@ import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.BadRequestException;
-import roomescape.support.exception.errors.ReservationErrors;
+import roomescape.support.exception.errors.ReservationSlotErrors;
 import roomescape.support.exception.errors.ReservationTimeErrors;
 import roomescape.support.exception.errors.ThemeErrors;
 
 @Getter
-public class Reservation {
+public class ReservationSlot {
 
     private final Long id;
     private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
 
-    private Reservation(
+    private ReservationSlot(
         Long id,
         ReservationDate date,
         ReservationTime time,
@@ -30,12 +30,12 @@ public class Reservation {
         this.theme = theme;
     }
 
-    public static Reservation createWithoutId(
+    public static ReservationSlot createWithoutId(
         ReservationDate date,
         ReservationTime time,
         Theme theme
     ) {
-        return new Reservation(
+        return new ReservationSlot(
             null,
             date,
             time,
@@ -43,7 +43,7 @@ public class Reservation {
         );
     }
 
-    public static Reservation createWithId(long id, Reservation reservation) {
+    public static ReservationSlot createWithId(long id, ReservationSlot reservation) {
         return of(
             id,
             reservation.getDate(),
@@ -52,13 +52,13 @@ public class Reservation {
         );
     }
 
-    public static Reservation of(
+    public static ReservationSlot of(
         long id,
         ReservationDate date,
         ReservationTime time,
         Theme theme
     ) {
-        return new Reservation(
+        return new ReservationSlot(
             id,
             date,
             time,
@@ -68,7 +68,7 @@ public class Reservation {
 
     private static void validate(ReservationDate date, ReservationTime time, Theme theme) {
         if (date == null) {
-            throw new BadRequestException(ReservationErrors.INVALID_RESERVATION_DATE);
+            throw new BadRequestException(ReservationSlotErrors.INVALID_RESERVATION_DATE);
         }
         if (time == null) {
             throw new BadRequestException(ReservationTimeErrors.INVALID_RESERVATION_TIME);

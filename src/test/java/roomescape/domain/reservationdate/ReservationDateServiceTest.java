@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse;
@@ -18,16 +18,16 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.fake.FakeReservationDateRepository;
-import roomescape.support.fake.FakeReservationRepository;
+import roomescape.support.fake.FakeReservationSlotRepository;
 
 class ReservationDateServiceTest {
 
-    private FakeReservationRepository reservationRepository;
+    private FakeReservationSlotRepository reservationRepository;
     private FakeReservationDateRepository reservationDateRepository;
 
     @BeforeEach
     void setUp() {
-        reservationRepository = new FakeReservationRepository();
+        reservationRepository = new FakeReservationSlotRepository();
         reservationDateRepository = new FakeReservationDateRepository();
     }
 
@@ -83,7 +83,7 @@ class ReservationDateServiceTest {
         ReservationDate reservationDate = reservationDateRepository.save(
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 4)));
         reservationRepository.save(
-            Reservation.createWithoutId(reservationDate,
+            ReservationSlot.createWithoutId(reservationDate,
                 ReservationTime.of(1L, LocalTime.of(10, 0)),
                 Theme.of(1L, "공포", "무서운 테마", "theme-url")
             )

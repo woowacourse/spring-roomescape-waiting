@@ -3,10 +3,10 @@ package roomescape.domain.reservation.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.theme.Theme;
 
-public record CreateReservationResponse(
+public record CreateReservationSlotResponse(
     Long id,
     LocalDate date,
     @JsonFormat(pattern = "HH:mm")
@@ -14,8 +14,8 @@ public record CreateReservationResponse(
     ThemePayload theme
 ) {
 
-    public static CreateReservationResponse from(Reservation reservation) {
-        return new CreateReservationResponse(
+    public static CreateReservationSlotResponse from(ReservationSlot reservation) {
+        return new CreateReservationSlotResponse(
             reservation.getId(),
             reservation.getDate().getDate(), // TODO: 네이밍 변경!!!
             reservation.getTime().getStartAt(),

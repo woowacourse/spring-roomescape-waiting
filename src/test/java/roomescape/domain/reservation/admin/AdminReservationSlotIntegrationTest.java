@@ -16,7 +16,7 @@ import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-class AdminReservationIntegrationTest {
+class AdminReservationSlotIntegrationTest {
 
     @LocalServerPort
     private int port;

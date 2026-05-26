@@ -14,10 +14,10 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.admin.dto.ReservationResponse;
-import roomescape.domain.reservation.dto.CreateReservationRequest;
-import roomescape.domain.reservation.dto.CreateReservationResponse;
-import roomescape.domain.reservation.dto.UpdateReservationRequest;
+import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
+import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
 import roomescape.domain.reservation.dto.UserReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -28,16 +28,16 @@ import roomescape.domain.userreservation.WaitingStatus;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.fake.FakeReservationDateRepository;
-import roomescape.support.fake.FakeReservationRepository;
+import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeReservationTimeRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeUserRepository;
 import roomescape.support.fake.FakeUserReservationRepository;
 
-class ReservationServiceTest {
+class ReservationSlotServiceTest {
 
     private static final ZoneId ZONE_ID = ZoneId.systemDefault();
-    private FakeReservationRepository reservationRepository;
+    private FakeReservationSlotRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
     private FakeReservationDateRepository reservationDateRepository;
     private FakeThemeRepository themeRepository;
@@ -46,7 +46,7 @@ class ReservationServiceTest {
 
     @BeforeEach
     void setUp() {
-        reservationRepository = new FakeReservationRepository();
+        reservationRepository = new FakeReservationSlotRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         reservationDateRepository = new FakeReservationDateRepository();
         themeRepository = new FakeThemeRepository();
@@ -64,7 +64,7 @@ class ReservationServiceTest {
         ReservationDate reservationDate = ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13));
         ReservationDate savedReservationDate = reservationDateRepository.save(reservationDate);
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -73,7 +73,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             savedReservationDate.getId(),
             savedReservationTime.getId(),
@@ -81,7 +81,7 @@ class ReservationServiceTest {
         );
 
         // when
-        CreateReservationResponse response = reservationService.createReservation(request);
+        CreateReservationSlotResponse response = reservationService.createReservation(request);
 
         // then
         assertSoftly(softly -> {
@@ -96,7 +96,7 @@ class ReservationServiceTest {
     void throwExceptionWhenCreatingReservationWithNonExistentReservationTime() {
         // given
         Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -105,7 +105,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest("보예", 1L, 1L, 1L);
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest("보예", 1L, 1L, 1L);
 
         // when & then
         assertThatThrownBy(() -> reservationService.createReservation(request))
@@ -122,7 +122,7 @@ class ReservationServiceTest {
             ReservationTime.createWithoutId(LocalTime.of(10, 0)));
         ReservationDate reservationDate = reservationDateRepository.save(
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13)));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -131,7 +131,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             reservationDate.getId(),
             reservationTime.getId(),
@@ -157,12 +157,12 @@ class ReservationServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
         reservationRepository.save(
-            Reservation.createWithoutId(savedReservationDate,
+            ReservationSlot.createWithoutId(savedReservationDate,
                 reservationTime,
                 theme
             )
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -173,7 +173,7 @@ class ReservationServiceTest {
         );
 
         // when
-        List<ReservationResponse> responses = reservationService.getAllReservations();
+        List<ReservationSlotResponse> responses = reservationService.getAllReservations();
 
         // then
         assertSoftly(softly -> {
@@ -203,14 +203,14 @@ class ReservationServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
         User user = userRepository.save(User.createWithoutId(name));
-        Reservation secondReservation = reservationRepository.save(
-            Reservation.createWithoutId(secondReservationDate,
+        ReservationSlot secondReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(secondReservationDate,
                 reservationTime,
                 theme
             )
         );
-        Reservation firstReservation = reservationRepository.save(
-            Reservation.createWithoutId(firstReservationDate,
+        ReservationSlot firstReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(firstReservationDate,
                 reservationTime,
                 theme
             )
@@ -231,7 +231,7 @@ class ReservationServiceTest {
             LocalDateTime.of(2026, 5, 12, 13, 0),
             LocalDateTime.of(2026, 5, 12, 13, 0)
         ));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -273,7 +273,7 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 10))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -282,7 +282,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             beforeToday.getId(),
             reservationTime.getId(),
@@ -307,7 +307,7 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 12))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -316,7 +316,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             today.getId(),
             beforeNow.getId(),
@@ -341,7 +341,7 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 12))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -350,7 +350,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             today.getId(),
             nowTime.getId(),
@@ -358,8 +358,8 @@ class ReservationServiceTest {
         );
 
         // when
-        CreateReservationResponse response = reservationService.createReservation(request);
-        Reservation reservation = reservationRepository.findById(response.id()).orElseThrow();
+        CreateReservationSlotResponse response = reservationService.createReservation(request);
+        ReservationSlot reservation = reservationRepository.findById(response.id()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
@@ -385,7 +385,7 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -394,7 +394,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             today.getId(),
             reservationTime.getId(),
@@ -402,8 +402,8 @@ class ReservationServiceTest {
         );
 
         // when
-        CreateReservationResponse response = reservationService.createReservation(request);
-        Reservation reservation = reservationRepository.findById(response.id()).orElseThrow();
+        CreateReservationSlotResponse response = reservationService.createReservation(request);
+        ReservationSlot reservation = reservationRepository.findById(response.id()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
@@ -427,7 +427,7 @@ class ReservationServiceTest {
         ReservationDate reservationDate = ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13));
         ReservationDate savedReservationDate = reservationDateRepository.save(reservationDate);
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -436,7 +436,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        CreateReservationRequest request = new CreateReservationRequest(
+        CreateReservationSlotRequest request = new CreateReservationSlotRequest(
             "보예",
             savedReservationDate.getId(),
             savedReservationTime.getId(),
@@ -462,10 +462,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -494,10 +494,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 12))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -525,10 +525,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 11))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -549,7 +549,7 @@ class ReservationServiceTest {
     void throwExceptionWhenUserDeletesNonExistentReservation() {
         // given
         Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -583,10 +583,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 14))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(beforeReservationDate, beforeReservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(beforeReservationDate, beforeReservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -595,7 +595,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(
             afterReservationDate.getDate(),
             afterReservationTime.getStartAt()
         );
@@ -604,7 +604,7 @@ class ReservationServiceTest {
         reservationService.updateReservation(savedReservation.getId(), request);
 
         // then
-        Reservation updatedReservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+        ReservationSlot updatedReservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
         assertSoftly(softly -> {
             assertThat(updatedReservation.getDate().getDate()).isEqualTo(LocalDate.of(2026, 5, 14));
             assertThat(updatedReservation.getTime().getStartAt()).isEqualTo(LocalTime.of(15, 0));
@@ -627,10 +627,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, beforeReservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, beforeReservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -639,11 +639,11 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, afterReservationTime.getStartAt());
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, afterReservationTime.getStartAt());
 
         // when
         reservationService.updateReservation(savedReservation.getId(), request);
-        Reservation updatedReservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
+        ReservationSlot updatedReservation = reservationRepository.findById(savedReservation.getId()).orElseThrow();
 
         // then
         assertSoftly(softly -> {
@@ -657,7 +657,7 @@ class ReservationServiceTest {
     void throwExceptionWhenUpdatingNonExistentReservation() {
         // given
         Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -666,7 +666,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0));
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0));
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(1L, request))
@@ -686,10 +686,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -698,7 +698,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.of(2026, 5, 14), null);
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(LocalDate.of(2026, 5, 14), null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
@@ -718,10 +718,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -730,7 +730,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, LocalTime.of(15, 0));
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, LocalTime.of(15, 0));
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
@@ -753,10 +753,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 11))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -765,7 +765,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(beforeToday.getDate(), null);
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(beforeToday.getDate(), null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
@@ -788,10 +788,10 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 12))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -800,7 +800,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, beforeNow.getStartAt());
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, beforeNow.getStartAt());
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
@@ -823,13 +823,13 @@ class ReservationServiceTest {
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        Reservation savedReservation = reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, reservationTime, theme)
+        ReservationSlot savedReservation = reservationRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
         reservationRepository.save(
-            Reservation.createWithoutId(reservationDate, otherReservationTime, theme)
+            ReservationSlot.createWithoutId(reservationDate, otherReservationTime, theme)
         );
-        ReservationService reservationService = new ReservationService(
+        ReservationSlotService reservationService = new ReservationSlotService(
             reservationRepository,
             reservationTimeRepository,
             reservationDateRepository,
@@ -838,7 +838,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, otherReservationTime.getStartAt());
+        UpdateReservationSlotRequest request = new UpdateReservationSlotRequest(null, otherReservationTime.getStartAt());
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))

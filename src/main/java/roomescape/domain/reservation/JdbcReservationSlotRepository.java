@@ -17,7 +17,7 @@ import roomescape.domain.theme.Theme;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcReservationRepository implements ReservationRepository {
+public class JdbcReservationSlotRepository implements ReservationSlotRepository {
 
     private static final String COLUMN_ID = "id";
     private static final String COLUMN_NAME = "name";
@@ -154,7 +154,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Reservation save(Reservation reservation) {
+    public ReservationSlot save(ReservationSlot reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS);
@@ -164,11 +164,11 @@ public class JdbcReservationRepository implements ReservationRepository {
             return ps;
         }, keyHolder);
         long id = extractId(keyHolder);
-        return Reservation.createWithId(id, reservation);
+        return ReservationSlot.createWithId(id, reservation);
     }
 
     @Override
-    public List<Reservation> findAll() {
+    public List<ReservationSlot> findAll() {
         return jdbcTemplate.query(FIND_ALL_SQL, reservationRowMapper());
     }
 
@@ -245,8 +245,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findBySchedule(Long timeId, Long dateId, Long themeId) {
-        List<Reservation> result = jdbcTemplate.query(
+    public Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId) {
+        List<ReservationSlot> result = jdbcTemplate.query(
             FIND_BY_SCHEDULE_SQL,
             reservationRowMapper(),
             timeId,
@@ -257,18 +257,18 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
+    public List<ReservationSlot> findByName(String name) {
         return jdbcTemplate.query(FIND_BY_USER_NAME_SQL, reservationRowMapper(), name);
     }
 
     @Override
-    public Optional<Reservation> findById(Long id) {
-        List<Reservation> result = jdbcTemplate.query(FIND_BY_ID_SQL, reservationRowMapper(), id);
+    public Optional<ReservationSlot> findById(Long id) {
+        List<ReservationSlot> result = jdbcTemplate.query(FIND_BY_ID_SQL, reservationRowMapper(), id);
         return result.stream().findFirst();
     }
 
     @Override
-    public Optional<Reservation> update(Long id, Reservation withoutId) {
+    public Optional<ReservationSlot> update(Long id, ReservationSlot withoutId) {
         int updatedCount = jdbcTemplate.update(
             UPDATE_SQL,
             withoutId.getDate().getId(),
@@ -282,8 +282,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         return findById(id);
     }
 
-    private RowMapper<Reservation> reservationRowMapper() {
-        return (rs, rowNum) -> Reservation.of(
+    private RowMapper<ReservationSlot> reservationRowMapper() {
+        return (rs, rowNum) -> ReservationSlot.of(
             rs.getLong(COLUMN_ID),
             ReservationDate.of(
                 rs.getLong(COLUMN_DATE_ID),

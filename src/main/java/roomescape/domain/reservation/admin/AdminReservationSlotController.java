@@ -9,23 +9,23 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.ReservationService;
-import roomescape.domain.reservation.admin.dto.ReservationResponse;
+import roomescape.domain.reservation.ReservationSlotService;
+import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
 import roomescape.support.auth.AdminRequestValidator;
 
 @RestController
 @RequiredArgsConstructor
-public class AdminReservationController {
+public class AdminReservationSlotController {
 
-    private final ReservationService reservationService;
+    private final ReservationSlotService reservationService;
     private final AdminRequestValidator validator;
 
     @GetMapping("/admin/reservations")
-    public ResponseEntity<List<ReservationResponse>> getAllReservation(HttpServletRequest request) {
+    public ResponseEntity<List<ReservationSlotResponse>> getAllReservation(HttpServletRequest request) {
         if (validator.isUnauthorized(request)) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
-        List<ReservationResponse> response = reservationService.getAllReservations();
+        List<ReservationSlotResponse> response = reservationService.getAllReservations();
         return ResponseEntity.ok(response);
     }
 

@@ -2,16 +2,16 @@ package roomescape.domain.userreservation;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.user.User;
 import roomescape.support.exception.BadRequestException;
-import roomescape.support.exception.errors.ReservationErrors;
+import roomescape.support.exception.errors.ReservationSlotErrors;
 
 @Getter
 public class UserReservation {
 
     private final Long id;
-    private final Reservation reservation;
+    private final ReservationSlot reservation;
     private final User user;
     private final Long waitingNumber;
     private final WaitingStatus status;
@@ -20,7 +20,7 @@ public class UserReservation {
 
     private UserReservation(
         Long id,
-        Reservation reservation,
+        ReservationSlot reservation,
         User user,
         Long waitingNumber,
         WaitingStatus status,
@@ -38,7 +38,7 @@ public class UserReservation {
     }
 
     public static UserReservation createWithoutId(
-        Reservation reservation,
+        ReservationSlot reservation,
         User user,
         Long waitingNumber,
         WaitingStatus status,
@@ -62,7 +62,7 @@ public class UserReservation {
 
     public static UserReservation of(
         long id,
-        Reservation reservation,
+        ReservationSlot reservation,
         User user,
         Long waitingNumber,
         WaitingStatus status,
@@ -73,7 +73,7 @@ public class UserReservation {
     }
 
     private static void validate(
-        Reservation reservation,
+        ReservationSlot reservation,
         User user,
         Long waitingNumber,
         WaitingStatus status,
@@ -81,10 +81,10 @@ public class UserReservation {
         LocalDateTime updatedAt
     ) {
         if (reservation == null || user == null || status == null || createdAt == null || updatedAt == null) {
-            throw new BadRequestException(ReservationErrors.INVALID_USER_RESERVATION);
+            throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
         if (status == WaitingStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {
-            throw new BadRequestException(ReservationErrors.INVALID_USER_RESERVATION);
+            throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
     }
 }

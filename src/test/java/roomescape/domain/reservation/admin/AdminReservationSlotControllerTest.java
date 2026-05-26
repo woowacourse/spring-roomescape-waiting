@@ -22,22 +22,22 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.reservation.ReservationService;
-import roomescape.domain.reservation.admin.dto.ReservationResponse;
-import roomescape.domain.reservation.admin.dto.ReservationResponse.ReservationTimePayload;
-import roomescape.domain.reservation.admin.dto.ReservationResponse.ThemePayload;
+import roomescape.domain.reservation.ReservationSlotService;
+import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
+import roomescape.domain.reservation.admin.dto.ReservationSlotResponse.ReservationTimePayload;
+import roomescape.domain.reservation.admin.dto.ReservationSlotResponse.ThemePayload;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.auth.AdminRequestValidator;
 
-@WebMvcTest(AdminReservationController.class)
-class AdminReservationControllerTest {
+@WebMvcTest(AdminReservationSlotController.class)
+class AdminReservationSlotControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
 
     @MockitoBean
-    private ReservationService reservationService;
+    private ReservationSlotService reservationService;
 
     @MockitoBean
     private AdminRequestValidator validator;
@@ -46,7 +46,7 @@ class AdminReservationControllerTest {
     @DisplayName("관리자가 전체 예약 조회 시 요청과 응답을 확인한다.")
     void getAllReservation() throws Exception {
         // given
-        ReservationResponse response = new ReservationResponse(
+        ReservationSlotResponse response = new ReservationSlotResponse(
             1L,
             LocalDate.of(2026, 5, 10),
             ReservationTimePayload.from(ReservationTime.of(2L, LocalTime.of(10, 10))),

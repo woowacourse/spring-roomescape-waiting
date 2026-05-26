@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -289,7 +289,7 @@ public class JdbcUserReservationRepository implements UserReservationRepository 
     private RowMapper<UserReservation> userReservationRowMapper() {
         return (rs, rowNum) -> UserReservation.of(
             rs.getLong(COLUMN_ID),
-            Reservation.of(
+            ReservationSlot.of(
                 rs.getLong(COLUMN_RESERVATION_ID),
                 ReservationDate.of(
                     rs.getLong(COLUMN_DATE_ID),
