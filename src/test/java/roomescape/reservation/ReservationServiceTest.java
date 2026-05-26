@@ -7,7 +7,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
-import roomescape.member.Role;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.dto.response.ReservationSaveResponse;
@@ -43,6 +42,28 @@ class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
+
+    private ReservationDetailProjection reservationDetail(
+            Long reservationId,
+            Long memberId,
+            LocalDate date,
+            Long themeId,
+            Long timeId,
+            LocalTime startAt
+    ) {
+        return new ReservationDetailProjection(
+                reservationId,
+                memberId,
+                "member",
+                date,
+                themeId,
+                "theme",
+                "description",
+                "thumbnail",
+                timeId,
+                startAt
+        );
+    }
 
     @Test
     @DisplayName("유저는 본인 예약 삭제에 성공한다.")
@@ -127,29 +148,5 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
                 .isInstanceOf(IllegalStateException.class);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
-    }
-
-    private ReservationDetailProjection reservationDetail(
-            Long reservationId,
-            Long memberId,
-            LocalDate date,
-            Long themeId,
-            Long timeId,
-            LocalTime startAt
-    ) {
-        return new ReservationDetailProjection(
-                reservationId,
-                memberId,
-                "member",
-                "password",
-                Role.USER,
-                date,
-                themeId,
-                "theme",
-                "description",
-                "thumbnail",
-                timeId,
-                startAt
-        );
     }
 }

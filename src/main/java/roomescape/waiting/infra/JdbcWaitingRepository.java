@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.member.Role;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingRepository;
 import roomescape.waiting.infra.projection.WaitingDetailProjection;
@@ -30,10 +29,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final RowMapper<WaitingDetailProjection> waitingDetailRowMapper = (resultSet, rowNum) ->
             new WaitingDetailProjection(
                     resultSet.getLong("waiting_id"),
-                    resultSet.getLong("member_id"),
                     resultSet.getString("member_name"),
-                    resultSet.getString("member_password"),
-                    Role.valueOf(resultSet.getString("member_role")),
                     resultSet.getDate("date").toLocalDate(),
                     resultSet.getLong("theme_id"),
                     resultSet.getString("theme_name"),
@@ -115,10 +111,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         String sql = """
                 SELECT
                     w.id AS waiting_id,
-                    m.id AS member_id,
                     m.name AS member_name,
-                    m.password AS member_password,
-                    m.role AS member_role,
                     s.date,
                     t.id AS theme_id,
                     t.name AS theme_name,
