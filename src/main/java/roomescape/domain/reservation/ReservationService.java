@@ -8,15 +8,15 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.admin.dto.ReservationResponse;
+import roomescape.domain.reservation.dto.CreateReservationRequest;
+import roomescape.domain.reservation.dto.CreateReservationResponse;
+import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservation.dto.UserReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationslot.ReservationSlotRepository;
-import roomescape.domain.reservation.admin.dto.ReservationResponse;
-import roomescape.domain.reservation.dto.CreateReservationRequest;
-import roomescape.domain.reservation.dto.CreateReservationResponse;
-import roomescape.domain.reservation.dto.UpdateReservationRequest;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -66,8 +66,7 @@ public class ReservationService {
             user,
             reservationCount,
             waitingStatus,
-            now,
-            now
+            clock
         );
         reservationRepository.save(userReservation);
 
@@ -127,13 +126,11 @@ public class ReservationService {
         Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
         WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
 
-        Reservation updatedUserReservation = Reservation.createWithoutId(
+        Reservation updatedUserReservation = userReservation.update(
             updatedReservation,
-            user,
             reservationCount,
             waitingStatus,
-            userReservation.getCreatedAt(),
-            LocalDateTime.now(clock)
+            clock
         );
 
         reservationRepository.update(userReservation.getId(), updatedUserReservation)

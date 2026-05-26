@@ -2,10 +2,6 @@ package roomescape.domain.reservation.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import roomescape.domain.reservationslot.ReservationSlot;
-import roomescape.domain.reservationdate.ReservationDate;
-import roomescape.domain.reservationtime.ReservationTime;
-import roomescape.domain.theme.Theme;
 
 public record CreateReservationRequest(
     @NotBlank(message = "이름은 비어있을 수 없습니다.")
@@ -21,11 +17,4 @@ public record CreateReservationRequest(
     Long themeId
 ) {
 
-    public ReservationSlot toEntity(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
-        return ReservationSlot.createWithoutId(
-            reservationDate,
-            reservationTime,
-            theme
-        );
-    }
 }

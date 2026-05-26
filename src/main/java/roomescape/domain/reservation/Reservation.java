@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.Getter;
 import roomescape.domain.reservationslot.ReservationSlot;
@@ -42,10 +43,17 @@ public class Reservation {
         User user,
         Long waitingNumber,
         WaitingStatus status,
-        LocalDateTime createdAt,
-        LocalDateTime updatedAt
+        Clock clock
     ) {
-        return new Reservation(null, reservation, user, waitingNumber, status, createdAt, updatedAt);
+        return new Reservation(
+            null,
+            reservation,
+            user,
+            waitingNumber,
+            status,
+            LocalDateTime.now(clock),
+            LocalDateTime.now(clock)
+        );
     }
 
     public static Reservation createWithId(long id, Reservation userReservation) {
@@ -57,6 +65,23 @@ public class Reservation {
             userReservation.getStatus(),
             userReservation.getCreatedAt(),
             userReservation.getUpdatedAt()
+        );
+    }
+
+    public Reservation update(
+        ReservationSlot updatedReservationSlot,
+        Long reservationCount,
+        WaitingStatus waitingStatus,
+        Clock clock
+    ) {
+        return new Reservation(
+            id,
+            updatedReservationSlot,
+            user,
+            reservationCount,
+            waitingStatus,
+            createdAt,
+            LocalDateTime.now(clock)
         );
     }
 
