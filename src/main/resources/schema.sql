@@ -43,12 +43,10 @@ CREATE TABLE reservation
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
     user_id  BIGINT NOT NULL,
-    theme_id BIGINT  NOT NULL,
+    theme_id BIGINT,
     date     DATE   NOT NULL,
-    time_id  BIGINT  NOT NULL,
+    time_id  BIGINT,
     store_id BIGINT NOT NULL,
-    status   VARCHAR(30) NOT NULL,
-    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (id),
     FOREIGN KEY (user_id) REFERENCES users (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
@@ -66,4 +64,4 @@ CREATE TABLE store_managers
 );
 
 ALTER TABLE reservation
-    ADD CONSTRAINT unique_reservation UNIQUE (date, time_id, theme_id, store_id, user_id);
+    ADD CONSTRAINT unique_reservation UNIQUE (date, time_id, theme_id);

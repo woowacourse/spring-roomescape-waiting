@@ -19,11 +19,7 @@ public class RoomescapeExceptionStatusMapper {
             Map.entry(DuplicateUsernameException.class, HttpStatus.CONFLICT),
             Map.entry(InvalidLoginException.class, HttpStatus.UNAUTHORIZED),
             Map.entry(UnauthenticatedException.class, HttpStatus.UNAUTHORIZED),
-            Map.entry(UnauthorizedException.class, HttpStatus.FORBIDDEN),
-            Map.entry(ReservationNotFoundForWaitingException.class, HttpStatus.CONFLICT),
-            Map.entry(ReservationNotReservedException.class, HttpStatus.CONFLICT),
-            Map.entry(ReservationNotWaitingException.class, HttpStatus.CONFLICT),
-            Map.entry(DuplicateWaitingReservationException.class, HttpStatus.CONFLICT)
+            Map.entry(UnauthorizedException.class, HttpStatus.FORBIDDEN)
     );
 
     public HttpStatus statusOf(RoomescapeBaseException exception) {

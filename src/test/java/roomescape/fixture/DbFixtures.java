@@ -69,30 +69,11 @@ public final class DbFixtures {
         return insertReservationInStore(jdbc, userId, themeId, date, timeId, defaultStoreId(jdbc));
     }
 
-    public static long insertReservation(JdbcTemplate jdbc, long userId, long themeId, String date, long timeId,
-                                         long storeId) {
-        return insertReservationInStore(jdbc, userId, themeId, date, timeId, storeId);
-    }
-
-    public static long insertReservation(JdbcTemplate jdbc, long userId, long themeId, String date, long timeId,
-                                         long storeId, String status) {
-        return insertAndReturnKey(jdbc, "reservation", Map.of(
-                "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
-                "store_id", storeId, "status", status));
-    }
-
-    public static long insertReservation(JdbcTemplate jdbc, long userId, long themeId, String date, long timeId,
-                                         String status) {
-        return insertAndReturnKey(jdbc, "reservation", Map.of(
-                "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
-                "store_id", defaultStoreId(jdbc), "status", status));
-    }
-
     public static long insertReservationInStore(
             JdbcTemplate jdbc, long userId, long themeId, String date, long timeId, long storeId) {
         return insertAndReturnKey(jdbc, "reservation", Map.of(
                 "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
-                "store_id", storeId, "status", "RESERVED"));
+                "store_id", storeId));
     }
 
     public static void assignManager(JdbcTemplate jdbc, long storeId, long userId) {
@@ -113,7 +94,6 @@ public final class DbFixtures {
         return new SimpleJdbcInsert(jdbc)
                 .withTableName(table)
                 .usingGeneratedKeyColumns("id")
-                .usingColumns(values.keySet().toArray(new String[0]))
                 .executeAndReturnKey(values)
                 .longValue();
     }

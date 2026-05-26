@@ -21,7 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.Theme;
-import roomescape.dto.request.CreateThemeRequest;
+import roomescape.dto.theme.CreateThemeRequest;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
 import roomescape.infrastructure.LoginCheckInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;
@@ -75,9 +75,9 @@ class AdminThemeControllerTest {
     }
 
     @Test
-    void DELETE_admin_themes_id_204를_반환하고_서비스에_위임한다() throws Exception {
+    void DELETE_admin_themes_id_200을_반환하고_서비스에_위임한다() throws Exception {
         mockMvc.perform(delete("/admin/themes/3"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isOk());
 
         verify(themeService).deleteTheme(3L);
     }

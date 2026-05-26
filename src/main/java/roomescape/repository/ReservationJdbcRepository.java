@@ -5,9 +5,7 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +15,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Password;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Role;
 import roomescape.domain.Store;
@@ -28,7 +25,7 @@ import roomescape.domain.User;
 public class ReservationJdbcRepository implements ReservationRepository {
 
     private static final String SELECT_BASE = """
-            select r.id, r.date, r.status,
+            select r.id, r.date,
                    u.id as u_id, u.username as u_username, u.password as u_password,
                    u.name as u_name, u.role as u_role,
                    t.id as time_id, t.start_at,
@@ -74,8 +71,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
                 theme,
                 resultSet.getDate("date").toLocalDate(),
                 time,
-                store,
-                ReservationStatus.valueOf(resultSet.getString("status"))
+                store
         );
     };
 
@@ -114,54 +110,8 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByUserId(Long userId) {
-        String sql = SELECT_BASE
-                + """
-                 where u.id = ?
-                 order by case r.status
-                              when 'RESERVED' then 0
-                              when 'WAITING' then 1
-                              else 2
-                          end,
-                          r.date,
-                          t.start_at,
-                          r.created_at,
-                          r.id
-                """;
+        String sql = SELECT_BASE + " where u.id = ? order by r.id";
         return jdbcTemplate.query(sql, rowMapper, userId);
-    }
-
-    @Override
-    public Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId) {
-        String sql = """
-                select *
-                from (
-                    select r.id, r.date, r.status,
-                           u.id as u_id, u.username as u_username, u.password as u_password,
-                           u.name as u_name, u.role as u_role,
-                           t.id as time_id, t.start_at,
-                           th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
-                           s.id as store_id, s.name as store_name,
-                           row_number() over (
-                               partition by r.date, r.time_id, r.theme_id, r.store_id
-                               order by r.created_at, r.id
-                           ) as waiting_order
-                    from reservation r
-                    join users u on r.user_id = u.id
-                    join reservation_time t on r.time_id = t.id
-                    join theme th on r.theme_id = th.id
-                    join store s on r.store_id = s.id
-                    where r.status = ?
-                ) waiting_reservation
-                where u_id = ?
-                order by date, start_at, waiting_order
-                """;
-
-        Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
-        jdbcTemplate.query(sql, resultSet -> {
-            Reservation reservation = rowMapper.mapRow(resultSet, resultSet.getRow());
-            waitingReservations.put(reservation, resultSet.getInt("waiting_order"));
-        }, ReservationStatus.WAITING.name(), userId);
-        return waitingReservations;
     }
 
     @Override
@@ -180,7 +130,7 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public Long save(Reservation reservation) {
-        String sql = "insert into reservation(user_id, theme_id, date, time_id, store_id, status) values(?, ?, ?, ?, ?, ?)";
+        String sql = "insert into reservation(user_id, theme_id, date, time_id, store_id) values(?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
@@ -190,7 +140,6 @@ public class ReservationJdbcRepository implements ReservationRepository {
             ps.setDate(3, Date.valueOf(reservation.getDate()));
             ps.setLong(4, reservation.getTime().getId());
             ps.setLong(5, reservation.getStore().getId());
-            ps.setString(6, reservation.getStatus().name());
             return ps;
         }, keyHolder);
 
@@ -205,14 +154,13 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public int update(Reservation reservation) {
-        String sql = "update reservation set user_id = ?, theme_id = ?, date = ?, time_id = ?, store_id = ?, status = ? where id = ?";
+        String sql = "update reservation set user_id = ?, theme_id = ?, date = ?, time_id = ?, store_id = ? where id = ?";
         return jdbcTemplate.update(sql,
                 reservation.getUser().getId(),
                 reservation.getTheme().getId(),
                 Date.valueOf(reservation.getDate()),
                 reservation.getTime().getId(),
                 reservation.getStore().getId(),
-                reservation.getStatus().name(),
                 reservation.getId());
     }
 
@@ -227,21 +175,9 @@ public class ReservationJdbcRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId,
-                                                               Long storeId) {
-        String sql = """
-                select exists(
-                    select 1
-                    from reservation
-                    where date = ?
-                      and time_id = ?
-                      and theme_id = ?
-                      and store_id = ?
-                      and status = ?
-                )
-                """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class,
-                date, timeId, themeId, storeId, ReservationStatus.RESERVED.name()));
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String sql = "select exists(select 1 from reservation where date = ? and time_id = ? and theme_id = ?)";
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId));
     }
 
     @Override
@@ -249,13 +185,4 @@ public class ReservationJdbcRepository implements ReservationRepository {
         String sql = "select exists(select 1 from reservation where time_id = ?)";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, timeId));
     }
-
-    @Override
-    public boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
-                                                              Long userId) {
-        String sql = "select exists(select 1 from reservation where date = ? and time_id = ? and theme_id = ? and store_id = ? and user_id = ?)";
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, storeId, userId));
-    }
-
 }

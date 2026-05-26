@@ -1,21 +1,16 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.fixture.DbFixtures;
 import roomescape.fixture.Fixtures;
 
@@ -101,90 +96,6 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void findAllByUserId_예약_확정과_예약_대기를_상태와_예약일시_생성순으로_정렬해_조회한다() {
-        Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운"); //주인공
-        Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
-        Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
-        Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
-        Long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
-        Long time = DbFixtures.insertTime(jdbcTemplate, "10:00");
-
-        long reservedBrownId = DbFixtures.insertReservation(jdbcTemplate, brown, themeA, "2026-06-01", time,
-                ReservationStatus.RESERVED.name());
-        DbFixtures.insertReservation(jdbcTemplate, charles, themeB, "2026-06-01", time,
-                ReservationStatus.RESERVED.name());
-        DbFixtures.insertReservation(jdbcTemplate, aron, themeB, "2026-06-01", time, ReservationStatus.WAITING.name());
-        long waitingBrownId = DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-01", time,
-                ReservationStatus.WAITING.name());
-
-        List<Reservation> results = repository.findAllByUserId(brown);
-
-        assertThat(results).hasSize(2);
-        assertThat(results).extracting(reservation -> reservation.getUser().getName())
-                .containsOnly("브라운");
-        assertThat(results).extracting(Reservation::getId)
-                .containsExactly(reservedBrownId, waitingBrownId);
-        assertThat(results).extracting(
-                        Reservation::getStatus,
-                        Reservation::getDate,
-                        reservation -> reservation.getTime().getStartAt(),
-                        reservation -> reservation.getTheme().getName()
-                )
-                .containsExactly(
-                        tuple(ReservationStatus.RESERVED, LocalDate.of(2026, 6, 1), LocalTime.of(10, 0), "A"),
-                        tuple(ReservationStatus.WAITING, LocalDate.of(2026, 6, 1), LocalTime.of(10, 0), "B")
-                );
-    }
-
-    @Test
-    void findWaitingReservationsWithOrderByUserId_두_개의_슬롯에_건_대기는_슬롯별로_순번을_독립_계산한다() {
-        Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
-        Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
-        Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
-        Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
-        Long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
-        Long time = DbFixtures.insertTime(jdbcTemplate, "10:00");
-
-        long slotAFirstWaitingId = DbFixtures.insertReservation(jdbcTemplate, aron, themeA, "2026-06-01", time,
-                ReservationStatus.WAITING.name());
-        long slotABrownWaitingId = DbFixtures.insertReservation(jdbcTemplate, brown, themeA, "2026-06-01", time,
-                ReservationStatus.WAITING.name());
-        long slotBFirstWaitingId = DbFixtures.insertReservation(jdbcTemplate, charles, themeB, "2026-06-02", time,
-                ReservationStatus.WAITING.name());
-        long slotBSecondWaitingId = DbFixtures.insertReservation(jdbcTemplate, aron, themeB, "2026-06-02", time,
-                ReservationStatus.WAITING.name());
-        long slotBBrownWaitingId = DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-02", time,
-                ReservationStatus.WAITING.name());
-
-        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
-                slotAFirstWaitingId);
-        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 10:00:00",
-                slotABrownWaitingId);
-        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
-                slotBFirstWaitingId);
-        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 10:00:00",
-                slotBSecondWaitingId);
-        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 11:00:00",
-                slotBBrownWaitingId);
-
-        Map<Reservation, Integer> results = repository.findWaitingReservationsWithOrderByUserId(brown);
-
-        assertThat(results).hasSize(2);
-        assertThat(results.keySet()).extracting(Reservation::getId)
-                .containsExactly(slotABrownWaitingId, slotBBrownWaitingId);
-        assertThat(results.values()).containsExactly(2, 3);
-        assertThat(results.keySet()).extracting(
-                        Reservation::getStatus,
-                        Reservation::getDate,
-                        reservation -> reservation.getTheme().getName()
-                )
-                .containsExactly(
-                        tuple(ReservationStatus.WAITING, LocalDate.of(2026, 6, 1), "A"),
-                        tuple(ReservationStatus.WAITING, LocalDate.of(2026, 6, 2), "B")
-                );
-    }
-
-    @Test
     void update_지정한_id의_필드를_갱신한다() {
         Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
@@ -194,21 +105,15 @@ class ReservationJdbcRepositoryTest {
         Long reservationId = DbFixtures.insertReservation(jdbcTemplate, userId, themeA, "2026-06-01", time1);
         Long storeId = DbFixtures.defaultStoreId(jdbcTemplate);
 
-        int affected = repository.update(Fixtures.reservation(
-                Fixtures.memberWithId(userId, "브라운"),
-                new Theme(themeB, "B", "설명", "https://thumbnail.url"),
-                LocalDate.of(2026, 6, 2),
-                new ReservationTime(time2, LocalTime.of(11, 0)),
-                Fixtures.storeWithId(storeId, "매장"),
-                ReservationStatus.WAITING
-        ).withId(reservationId));
+        int affected = repository.update(
+                Fixtures.reservationOf(userId, themeB, time2, storeId, LocalDate.of(2026, 6, 2))
+                        .withId(reservationId));
 
         assertThat(affected).isEqualTo(1);
         Reservation found = repository.findById(reservationId).orElseThrow();
         assertThat(found.getDate()).isEqualTo(LocalDate.of(2026, 6, 2));
         assertThat(found.getTheme().getId()).isEqualTo(themeB);
         assertThat(found.getTime().getId()).isEqualTo(time2);
-        assertThat(found.getStatus()).isEqualTo(ReservationStatus.WAITING);
     }
 
     @Test
@@ -244,42 +149,25 @@ class ReservationJdbcRepositoryTest {
     }
 
     @Test
-    void existsReservedByDateAndTimeAndThemeAndStore_같은_확정_예약이_있으면_true() {
+    void existsByDateAndTimeIdAndThemeId_같은_조합이_있으면_true() {
         Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
         Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
-        Long storeId = DbFixtures.insertStore(jdbcTemplate, "강남점");
-        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-06", timeId, storeId);
+        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-06", timeId);
 
-        boolean exists = repository.existsReservedByDateAndTimeAndThemeAndStore(
-                LocalDate.of(2026, 5, 6), timeId, themeId, storeId);
+        boolean exists = repository.existsByDateAndTimeIdAndThemeId(
+                LocalDate.of(2026, 5, 6), timeId, themeId);
 
         assertThat(exists).isTrue();
     }
 
     @Test
-    void existsReservedByDateAndTimeAndThemeAndStore_같은_확정_예약이_없으면_false() {
+    void existsByDateAndTimeIdAndThemeId_같은_조합이_없으면_false() {
         Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
         Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
-        Long storeId = DbFixtures.insertStore(jdbcTemplate, "강남점");
 
-        boolean exists = repository.existsReservedByDateAndTimeAndThemeAndStore(
-                LocalDate.of(2026, 5, 6), timeId, themeId, storeId);
-
-        assertThat(exists).isFalse();
-    }
-
-    @Test
-    void existsReservedByDateAndTimeAndThemeAndStore_같은_조합의_대기만_있으면_false() {
-        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
-        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
-        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
-        Long storeId = DbFixtures.insertStore(jdbcTemplate, "강남점");
-        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-06", timeId, storeId,
-                ReservationStatus.WAITING.name());
-
-        boolean exists = repository.existsReservedByDateAndTimeAndThemeAndStore(
-                LocalDate.of(2026, 5, 6), timeId, themeId, storeId);
+        boolean exists = repository.existsByDateAndTimeIdAndThemeId(
+                LocalDate.of(2026, 5, 6), timeId, themeId);
 
         assertThat(exists).isFalse();
     }
@@ -312,30 +200,4 @@ class ReservationJdbcRepositoryTest {
         assertThat(repository.existsByReservationTimeId(targetTimeId)).isFalse();
     }
 
-
-    @Test
-    void existsByDateAndTimeAndThemeAndStoreAndUser_해당_방탈출_슬롯에_사용자가_이미_예약_혹은_대기를_건_경우_true() {
-        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
-        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
-        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
-        LocalDate date = LocalDate.of(2026, 5, 6);
-        Long storeId = DbFixtures.insertStore(jdbcTemplate, "매장");
-        DbFixtures.insertReservation(jdbcTemplate, userId, themeId, "2026-05-06", timeId,
-                storeId);
-
-        assertThat(repository.existsByDateAndTimeAndThemeAndStoreAndUser(date, timeId, themeId,
-                storeId, userId)).isTrue();
-    }
-
-    @Test
-    void existsByDateAndTimeAndThemeAndStoreAndUser_해당_방탈출_슬롯에_사용자가_아직_예약_혹은_대기를_걸지_않은_경우_false() {
-        Long userId = DbFixtures.insertMember(jdbcTemplate, "브라운");
-        Long themeId = DbFixtures.insertTheme(jdbcTemplate, "공포");
-        Long timeId = DbFixtures.insertTime(jdbcTemplate, "10:00");
-        LocalDate date = LocalDate.of(2026, 5, 6);
-        Long storeId = DbFixtures.insertStore(jdbcTemplate, "매장");
-
-        assertThat(repository.existsByDateAndTimeAndThemeAndStoreAndUser(date, timeId, themeId,
-                storeId, userId)).isFalse();
-    }
 }

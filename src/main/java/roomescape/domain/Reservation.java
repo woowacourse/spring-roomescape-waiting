@@ -12,22 +12,18 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Store store;
-    private final ReservationStatus status;
 
-    public Reservation(Long id, User user, Theme theme, LocalDate date, ReservationTime time, Store store,
-                       ReservationStatus status) {
-        validate(user, theme, date, time, store, status);
+    public Reservation(Long id, User user, Theme theme, LocalDate date, ReservationTime time, Store store) {
+        validate(user, theme, date, time, store);
         this.id = id;
         this.user = user;
         this.theme = theme;
         this.date = date;
         this.time = time;
         this.store = store;
-        this.status = status;
     }
 
-    private void validate(User user, Theme theme, LocalDate date, ReservationTime time, Store store,
-                          ReservationStatus status) {
+    private void validate(User user, Theme theme, LocalDate date, ReservationTime time, Store store) {
         if (user == null) {
             throw new InvalidDomainException("예약자는 필수입니다.");
         }
@@ -43,9 +39,6 @@ public class Reservation {
         if (store == null) {
             throw new InvalidDomainException("매장은 필수입니다.");
         }
-        if (status == null) {
-            throw new InvalidDomainException("예약 상태는 필수입니다.");
-        }
     }
 
     public boolean isInPast(LocalDateTime currentDateTime) {
@@ -54,23 +47,13 @@ public class Reservation {
     }
 
     public boolean hasSameSlot(Reservation other) {
-        return date.equals(other.date) && time.getId().equals(other.time.getId()) && theme.getId()
-                .equals(other.theme.getId());
-    }
-
-    public boolean isReserved() {
-        return status.equals(ReservationStatus.RESERVED);
-    }
-
-    public boolean isWaiting() {
-        return status.equals(ReservationStatus.WAITING);
+        return date.equals(other.date)
+                && time.getId().equals(other.time.getId())
+                && theme.getId().equals(other.theme.getId());
     }
 
     public Reservation withId(Long id) {
-        if (this.id != null) {
-            throw new InvalidDomainException("이미 id가 존재하는 도메인입니다. 도메인 id는 생성 이후 수정될 수 없습니다.");
-        }
-        return new Reservation(id, user, theme, date, time, store, status);
+        return new Reservation(id, user, theme, date, time, store);
     }
 
     public Long getId() {
@@ -95,9 +78,5 @@ public class Reservation {
 
     public Store getStore() {
         return store;
-    }
-
-    public ReservationStatus getStatus() {
-        return status;
     }
 }

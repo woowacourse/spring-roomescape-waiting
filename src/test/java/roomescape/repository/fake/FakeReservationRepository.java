@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.repository.ReservationRepository;
 
 public class FakeReservationRepository implements ReservationRepository {
@@ -42,27 +41,8 @@ public class FakeReservationRepository implements ReservationRepository {
     public List<Reservation> findAllByUserId(Long userId) {
         return store.values().stream()
                 .filter(r -> r.getUser().getId().equals(userId))
-                .sorted(Comparator.comparing(Reservation::getStatus)
-                        .thenComparing(Reservation::getDate)
-                        .thenComparing(r -> r.getTime().getStartAt())
-                        .thenComparing(Reservation::getId))
+                .sorted(Comparator.comparing(Reservation::getId))
                 .toList();
-    }
-
-    @Override
-    public Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId) {
-        return store.values().stream()
-                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
-                .sorted(Comparator.comparing(Reservation::getDate)
-                        .thenComparing(r -> r.getTime().getStartAt())
-                        .thenComparing(Reservation::getId))
-                .filter(r -> r.getUser().getId().equals(userId))
-                .collect(java.util.stream.Collectors.toMap(
-                        reservation -> reservation,
-                        this::waitingOrder,
-                        (left, right) -> left,
-                        java.util.LinkedHashMap::new
-                ));
     }
 
     @Override
@@ -101,25 +81,11 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservedByDateAndTimeAndThemeAndStore(LocalDate date, Long timeId, Long themeId,
-                                                               Long storeId) {
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         return store.values().stream()
                 .anyMatch(r -> r.getDate().equals(date)
                         && r.getTime().getId().equals(timeId)
-                        && r.getTheme().getId().equals(themeId)
-                        && r.getStore().getId().equals(storeId)
-                        && r.getStatus().equals(ReservationStatus.RESERVED));
-    }
-
-    @Override
-    public boolean existsByDateAndTimeAndThemeAndStoreAndUser(LocalDate date, Long timeId, Long themeId, Long storeId,
-                                                              Long userId) {
-        return store.values().stream()
-                .anyMatch(r -> r.getDate().equals(date)
-                        && r.getTime().getId().equals(timeId)
-                        && r.getTheme().getId().equals(themeId)
-                        && r.getStore().getId().equals(storeId)
-                        && r.getUser().getId().equals(userId));
+                        && r.getTheme().getId().equals(themeId));
     }
 
     @Override
@@ -130,16 +96,5 @@ public class FakeReservationRepository implements ReservationRepository {
 
     Collection<Reservation> all() {
         return Collections.unmodifiableCollection(store.values());
-    }
-
-    private int waitingOrder(Reservation target) {
-        return (int) store.values().stream()
-                .filter(r -> r.getStatus().equals(ReservationStatus.WAITING))
-                .filter(r -> r.getDate().equals(target.getDate()))
-                .filter(r -> r.getTime().getId().equals(target.getTime().getId()))
-                .filter(r -> r.getTheme().getId().equals(target.getTheme().getId()))
-                .filter(r -> r.getStore().getId().equals(target.getStore().getId()))
-                .filter(r -> r.getId() <= target.getId())
-                .count();
     }
 }

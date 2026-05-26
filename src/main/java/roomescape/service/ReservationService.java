@@ -1,28 +1,23 @@
 package roomescape.service;
 
 import java.util.List;
-import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Store;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
-import roomescape.dto.command.CancelReservationCommand;
-import roomescape.dto.command.CreateReservationCommand;
-import roomescape.dto.response.ReservationWithStatusResponses;
-import roomescape.dto.command.UpdateReservationCommand;
+import roomescape.dto.reservation.CancelReservationCommand;
+import roomescape.dto.reservation.CreateReservationCommand;
+import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
 import roomescape.exception.PastReservationModificationException;
-import roomescape.exception.ReservationNotFoundForWaitingException;
-import roomescape.exception.ReservationNotReservedException;
-import roomescape.exception.ReservationNotWaitingException;
 import roomescape.exception.ReservationOwnerMismatchException;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.exception.StoreManagementForbiddenException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.StoreRepository;
@@ -53,27 +48,47 @@ public class ReservationService {
         this.timeProvider = timeProvider;
     }
 
-    @Transactional(readOnly = true)
+    public ReservationResponses getReservations(int page, int size, String name, Long managerId) {
+        List<Long> storeIds = storeRepository.findStoreIdsByUserId(managerId);
+        if (storeIds.isEmpty()) {
+            return ReservationResponses.of(List.of(), false);
+        }
+        List<Reservation> reservations = fetchReservations(page, size, name, storeIds);
+        boolean hasNext = reservations.size() > size;
+        if (hasNext) {
+            reservations = reservations.subList(0, size);
+        }
+        return ReservationResponses.of(reservations, hasNext);
+    }
+
+    private List<Reservation> fetchReservations(int page, int size, String name, List<Long> storeIds) {
+        if (name == null) {
+            return reservationRepository.findAllByStoreIds(storeIds, size + 1, page * size);
+        }
+        return reservationRepository.findAllByStoreIdsAndName(storeIds, name, size + 1, page * size);
+    }
+
     public Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("예약", id));
     }
 
-    @Transactional(readOnly = true)
-    public ReservationWithStatusResponses getMyReservations(Long userId) {
-        List<Reservation> reservations = reservationRepository.findAllByUserId(userId).stream()
-                .filter(Reservation::isReserved)
-                .toList();
-
-        Map<Reservation, Integer> waitingReservations =
-                reservationRepository.findWaitingReservationsWithOrderByUserId(userId);
-
-        return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
+    public ReservationResponses getMyReservations(Long userId) {
+        List<Reservation> reservations = reservationRepository.findAllByUserId(userId);
+        return ReservationResponses.of(reservations, false);
     }
 
     @Transactional
     public Reservation createReservation(CreateReservationCommand command) {
-        Reservation newReservation = buildReservation(command, ReservationStatus.RESERVED);
+        User user = userRepository.findById(command.userId())
+                .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
+        Theme theme = themeRepository.findById(command.themeId())
+                .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
+        ReservationTime reservationTime = reservationTimeRepository.findById(command.timeId())
+                .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
+        Store store = storeRepository.findById(command.storeId())
+                .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
+        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store);
 
         validateNotPastDateTime(newReservation);
         validateNotDuplicated(newReservation);
@@ -83,33 +98,18 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation createWaitingReservation(CreateReservationCommand command) {
-        validateReservationAlreadyExists(command);
-
-        Reservation newWaitingReservation = buildReservation(command, ReservationStatus.WAITING);
-
-        validateNotPastDateTime(newWaitingReservation);
-
-        validateNotDuplicatedWaiting(newWaitingReservation);
-
-        Long newReservationId = reservationRepository.save(newWaitingReservation);
-        return newWaitingReservation.withId(newReservationId);
-    }
-
-    @Transactional
     public Reservation updateOwnReservation(UpdateReservationCommand command) {
         Reservation existing = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
         validateReservationOwner(command.userId(), existing);
         validateExistingNotInPast(existing);
-        validateIsReserved(existing);
 
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
         Reservation updated = new Reservation(command.reservationId(), existing.getUser(), theme, command.date(), time,
-                existing.getStore(), existing.getStatus());
+                existing.getStore());
 
         validateNotPastDateTime(updated);
         validateNotDuplicatedForUpdate(existing, updated);
@@ -119,64 +119,27 @@ public class ReservationService {
     }
 
     @Transactional
+    public void deleteReservation(Long reservationId, Long managerId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("예약", reservationId));
+        validateManagesStore(managerId, reservation.getStore().getId());
+        reservationRepository.deleteById(reservationId);
+    }
+
+    private void validateManagesStore(Long managerId, Long storeId) {
+        if (!storeRepository.existsByStoreIdAndUserId(storeId, managerId)) {
+            throw new StoreManagementForbiddenException();
+        }
+    }
+
+    @Transactional
     public void cancelOwnReservation(CancelReservationCommand command) {
         Reservation reservation = reservationRepository.findById(command.reservationId())
                 .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
         validateReservationOwner(command.userId(), reservation);
-        validateIsReserved(reservation);
         validateExistingNotInPast(reservation);
 
         reservationRepository.deleteById(command.reservationId());
-    }
-
-    @Transactional
-    public void cancelOwnWaitingReservation(CancelReservationCommand command) {
-        Reservation reservation = reservationRepository.findById(command.reservationId())
-                .orElseThrow(() -> new ResourceNotFoundException("예약", command.reservationId()));
-        validateReservationOwner(command.userId(), reservation);
-        validateIsWaiting(reservation);
-        validateExistingNotInPast(reservation);
-
-        reservationRepository.deleteById(command.reservationId());
-    }
-
-    /**
-     * 헬퍼메서드
-     */
-    private Reservation buildReservation(CreateReservationCommand command, ReservationStatus status) {
-        User user = userRepository.findById(command.userId())
-                .orElseThrow(() -> new ResourceNotFoundException("사용자", command.userId()));
-        Theme theme = themeRepository.findById(command.themeId())
-                .orElseThrow(() -> new ResourceNotFoundException("테마", command.themeId()));
-        ReservationTime reservationTime = reservationTimeRepository.findById(command.timeId())
-                .orElseThrow(() -> new ResourceNotFoundException("예약 시간", command.timeId()));
-        Store store = storeRepository.findById(command.storeId())
-                .orElseThrow(() -> new ResourceNotFoundException("매장", command.storeId()));
-        Reservation newReservation = new Reservation(null, user, theme, command.date(), reservationTime, store,
-                status);
-        return newReservation;
-    }
-
-    private void validateIsReserved(Reservation existing) {
-        if (!existing.isReserved()) {
-            throw new ReservationNotReservedException(existing.getStatus().toString());
-        }
-    }
-
-    private void validateIsWaiting(Reservation existing) {
-        if (!existing.isWaiting()) {
-            throw new ReservationNotWaitingException(existing.getStatus().toString());
-        }
-    }
-
-    private void validateReservationAlreadyExists(CreateReservationCommand command) {
-        Boolean isReservedExist = reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(
-                command.date(), command.timeId(), command.themeId(), command.storeId()
-        );
-
-        if (!isReservedExist) {
-            throw new ReservationNotFoundForWaitingException();
-        }
     }
 
     private void validateNotDuplicatedForUpdate(Reservation existing, Reservation updated) {
@@ -205,19 +168,9 @@ public class ReservationService {
     }
 
     private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsReservedByDateAndTimeAndThemeAndStore(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getStore().getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId())) {
             throw new DuplicateReservationException();
-        }
-    }
-
-    private void validateNotDuplicatedWaiting(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeAndThemeAndStoreAndUser(
-                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId(),
-                reservation.getStore().getId(),
-                reservation.getUser().getId())) {
-            throw new DuplicateWaitingReservationException();
         }
     }
 }

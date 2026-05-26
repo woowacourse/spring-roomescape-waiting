@@ -4,7 +4,7 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Password;
 import roomescape.domain.Role;
 import roomescape.domain.User;
-import roomescape.dto.request.CreateUserRequest;
+import roomescape.dto.user.CreateUserRequest;
 import roomescape.exception.DuplicateUsernameException;
 import roomescape.repository.UserRepository;
 

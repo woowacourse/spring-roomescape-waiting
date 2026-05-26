@@ -15,7 +15,7 @@ import org.springframework.context.annotation.FilterType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.ReservationTime;
-import roomescape.dto.response.ReservationTimeResponses;
+import roomescape.dto.reservationtime.ReservationTimeResponses;
 import roomescape.infrastructure.AdminAuthorizationInterceptor;
 import roomescape.infrastructure.LoginCheckInterceptor;
 import roomescape.infrastructure.LoginUserArgumentResolver;

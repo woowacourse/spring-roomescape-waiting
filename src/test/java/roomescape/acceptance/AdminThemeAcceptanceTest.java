@@ -78,7 +78,7 @@ class AdminThemeAcceptanceTest {
                 .header(AUTHORIZATION, managerBearer())
                 .when().delete("/admin/themes/" + themeId)
                 .then().log().all()
-                .statusCode(204);
+                .statusCode(200);
     }
 
     @Test
