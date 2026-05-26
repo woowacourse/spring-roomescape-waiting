@@ -13,14 +13,17 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.context.SpringBootTest.WebEnvironment;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
+import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.test.annotation.DirtiesContext.ClassMode;
 import roomescape.config.TestTimeConfig;
 import roomescape.reservation.presentation.dto.ReservationChangeRequest;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.theme.presentation.dto.ThemeRequest;
 import roomescape.time.presentation.dto.ReservationTimeRequest;
 
-@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 @Import(TestTimeConfig.class)
+@SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+@DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationControllerTest {
 
     @LocalServerPort
