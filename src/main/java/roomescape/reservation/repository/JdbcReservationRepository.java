@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -34,6 +35,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                    r.name,
                    r.time_id,
                    r.theme_id,
+                   r.status,
+                   r.created_at,
                    rt.start_time,
                    rt.end_time,
                    t.name AS theme_name,
@@ -82,7 +85,9 @@ public class JdbcReservationRepository implements ReservationRepository {
         Number id = reservationInsert.executeAndReturnKey(new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
                 .addValue("time_id", reservation.getTime().getId())
-                .addValue("theme_id", reservation.getTheme().getId()));
+                .addValue("theme_id", reservation.getTheme().getId())
+                .addValue("status", reservation.getStatus().name())
+                .addValue("created_at", reservation.getCreatedAt()));
         return reservation.withId(id.longValue());
     }
 
@@ -151,10 +156,16 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ).withId(rs.getLong("theme_id"));
             }
 
+            Status status = Status.valueOf(rs.getString("status"));
+            LocalDateTime createdAt = rs.getObject("created_at", LocalDateTime.class);
+
             return new Reservation(
                     rs.getString("name"),
-                    time
-            ).withId(rs.getLong("id")).withTheme(theme);
+                    time,
+                    theme,
+                    status,
+                    createdAt
+            ).withId(rs.getLong("id"));
         }
     }
 }
