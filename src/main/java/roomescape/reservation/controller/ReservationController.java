@@ -61,13 +61,4 @@ public class ReservationController {
                 reservationService.create(reservationRequest.toServiceDto()));
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
-
-
-//    @PostMapping("/waiting")
-//    public ResponseEntity<ReservationWaitingResponseDto> createWaiting(
-//            @Valid @RequestBody ReservationSaveRequestDto request) {
-//        Reservation reservation = reservationService.createWaiting(request.toServiceDto());
-//        ReservationWaitingResponseDto body = ReservationWaitingResponseDto.from(reservation);
-//        return ResponseEntity.status(HttpStatus.CREATED).body(body);
-//    }
 }
