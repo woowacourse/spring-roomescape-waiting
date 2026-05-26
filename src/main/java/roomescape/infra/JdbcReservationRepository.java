@@ -138,6 +138,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsBySameUser(Reservation reservation) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?;
+                """;
+        Integer count = jdbcTemplate.queryForObject(
+                sql,
+                Integer.class,
+                reservation.getName(),
+                reservation.getDate(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+        return count != null && count > 0;
+    }
+
+    @Override
     public Long save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
