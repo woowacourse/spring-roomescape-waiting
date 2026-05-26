@@ -7,14 +7,14 @@ public class Waiting {
 
     private final Long id;
     private final String name;
-    private final int waitNumber;
+    private final Long reservationId;
 
-    public Waiting(Long id, String name, int waitNumber) {
+    public Waiting(Long id, String name, Long reservationId) {
         validateName(name);
         
         this.id = id;
         this.name = name;
-        this.waitNumber = waitNumber;
+        this.reservationId = reservationId;
     }
 
     private void validateName(String name) {
@@ -35,7 +35,7 @@ public class Waiting {
         return name;
     }
 
-    public int getWaitNumber() {
-        return waitNumber;
+    public Long getReservationId() {
+        return reservationId;
     }
 }

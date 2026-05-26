@@ -20,18 +20,23 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
 import roomescape.dto.ReservationUpdateRequest;
+import roomescape.dto.WaitingRequest;
+import roomescape.dto.ReservationResponse;
+import roomescape.dto.WaitingResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.WaitingService;
 
 @RequestMapping("/reservations")
 @RestController
 @Validated
 public class ReservationController {
     private final ReservationService reservationService;
+    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
         this.reservationService = reservationService;
+        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -72,5 +77,15 @@ public class ReservationController {
     public void deleteReservation(@PathVariable Long id) {
         LocalDateTime now = LocalDateTime.now();
         reservationService.delete(now, id);
+    }
+
+    @PostMapping("/waitings")
+    public ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request) {
+        LocalDateTime now = LocalDateTime.now();
+        WaitingResponse response = waitingService.save(now, request);
+        URI location = URI.create("/waiting/" + response.id());
+        return ResponseEntity
+                .created(location)
+                .body(response);
     }
 }

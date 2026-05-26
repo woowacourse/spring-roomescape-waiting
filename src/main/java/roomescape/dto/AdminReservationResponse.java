@@ -12,6 +12,7 @@ public record AdminReservationResponse(
         Long id,
         LocalDate date,
         String themeName,
+
         @JsonFormat(pattern = "HH:mm")
         LocalTime time) {
     public static AdminReservationResponse from(Reservation reservation, Theme theme) {

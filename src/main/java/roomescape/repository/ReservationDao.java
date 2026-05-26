@@ -23,8 +23,7 @@ public class ReservationDao {
             rs.getLong("id"),
             rs.getDate("date").toLocalDate(),
             new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
-            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail")),
-            new Waiting(rs.getLong("wait_id"), rs.getString("name"), rs.getInt("waitNumber"))
+            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
     );
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
@@ -52,13 +51,9 @@ public class ReservationDao {
                        th.name AS theme_name, 
                        th.description AS theme_description, 
                        th.thumbnail_url AS theme_thumbnail,
-                        w.id AS wait_id,
-                        w.name AS name
-                        w.waitNumber AS wait_number
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                INNER JOIN waiting AS w ON r.id = w.reservation_id
                 where r.id = ?
                 """;
         return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
@@ -77,7 +72,6 @@ public class ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                INNER JOIN waiting AS w ON r.id = w.reservation_id
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
@@ -95,7 +89,6 @@ public class ReservationDao {
                 FROM reservation AS r
                 INNER JOIN reservation_time AS t ON r.time_id = t.id
                 INNER JOIN theme AS th ON r.theme_id = th.id
-                INNER JOIN waiting AS w ON r.id = w.reservation_id
                 WHERE r.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper, username);

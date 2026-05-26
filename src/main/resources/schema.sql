@@ -33,7 +33,7 @@ CREATE TABLE IF NOT EXISTS reservation
 CREATE TABLE IF NOT EXISTS waiting
 (
     id              BIGINT       NOT NULL AUTO_INCREMENT,
-    name            VARCHAR(255) NOT NULL UNIQUE,
+    name            VARCHAR(255) NOT NULL,
     reservation_id  BIGINT       NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
