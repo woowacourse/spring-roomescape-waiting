@@ -8,6 +8,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
@@ -88,4 +89,23 @@ class ReservationServiceTest {
         Reservation reservation2 = reservationService.saveReservation("브라운", savedThemeSlot.getId());
         assertThat(reservation2.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
     }
+
+    @Test
+    @DisplayName("같은 슬롯에 대한 대기는 신청 순서대로 순번이 부여된다")
+    void giveOrderByApplicationOrder() {
+        reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        Reservation reservation1 = reservationService.saveReservation("김대기", savedThemeSlot.getId());
+        Reservation reservation2 = reservationService.saveReservation("나피리", savedThemeSlot.getId());
+        Reservation reservation3 = reservationService.saveReservation("드레이븐", savedThemeSlot.getId());
+
+        List<WaitingReservationResponse> responses = reservationService.findWaitingReservationWithOrder(savedThemeSlot.getId());
+        assertThat(responses).extracting(WaitingReservationResponse::waitingOrder)
+                .containsExactly(1, 2, 3);
+
+
+
+
+
+    }
+
 }
