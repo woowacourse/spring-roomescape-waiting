@@ -1,13 +1,13 @@
 package roomescape.wating.domain;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.Objects;
 import lombok.Getter;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.exception.PastDateTimeWaitingException;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 @Getter
 public class Waiting {
@@ -27,6 +27,7 @@ public class Waiting {
             ReservationTime time,
             Theme theme
     ) {
+        validateNotNull(customerName, reservationDate, time, theme);
         this.id = id;
         this.customerName = customerName;
         this.reservationDate = reservationDate;
@@ -51,10 +52,24 @@ public class Waiting {
                 theme);
 
         waiting.validateNotPast(now);
-
         return waiting;
     }
 
+    private void validateNotNull(
+            final CustomerName customerName,
+            final LocalDate reservationDate,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        try {
+            Objects.requireNonNull(customerName);
+            Objects.requireNonNull(reservationDate);
+            Objects.requireNonNull(time);
+            Objects.requireNonNull(theme);
+        } catch (NullPointerException exception) {
+            throw new IllegalStateException("예약자명/예약대기날짜/시간/테마는 필수 입력값입니다.");
+        }
+    }
 
     private void validateNotPast(final LocalDateTime now) {
         if (isPast(now)) {
