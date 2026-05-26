@@ -60,6 +60,23 @@ function formatTime(time) {
     return (time ?? "").slice(0, 5);
 }
 
+function formatStatus(status) {
+    if (status === "ACTIVE") {
+        return "확정";
+    }
+    if (status === "PENDING") {
+        return "대기";
+    }
+    if (status === "CANCELED") {
+        return "취소";
+    }
+    return status ?? "상태 없음";
+}
+
+function statusClass(status) {
+    return `status-badge ${String(status ?? "").toLowerCase()}`;
+}
+
 function renderReservations(reservations) {
     reservationCount.textContent = String(reservations.length);
 
@@ -71,7 +88,10 @@ function renderReservations(reservations) {
     reservationList.innerHTML = reservations.map((reservation) => `
         <article class="list-row reservation-row">
             <div>
-                <strong>${reservation.name}</strong>
+                <div class="list-title">
+                    <strong>${reservation.name}</strong>
+                    <span class="${statusClass(reservation.status)}">${formatStatus(reservation.status)}</span>
+                </div>
                 <p>${reservation.theme.name} · ${reservation.date} · ${formatTime(reservation.time.startAt)}</p>
             </div>
             <button class="button danger" type="button" data-action="delete-reservation" data-id="${reservation.id}">

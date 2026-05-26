@@ -45,7 +45,13 @@
             <div id="reservation-list" class="list-block">
                 <article class="list-row reservation-row" th:each="reservation : ${reservations}">
                     <div>
-                        <strong th:text="${reservation.name}">포비</strong>
+                        <div class="list-title">
+                            <strong th:text="${reservation.name}">포비</strong>
+                            <span th:class="'status-badge ' + ${#strings.toLowerCase(reservation.status)}"
+                                  th:text="${reservation.status.name() == 'ACTIVE' ? '확정' : (reservation.status.name() == 'PENDING' ? '대기' : '취소')}">
+                                확정
+                            </span>
+                        </div>
                         <p th:text="${reservation.theme.name + ' · ' + reservation.date + ' · ' + reservation.time.startAt}">테마 · 날짜 · 시간</p>
                     </div>
                     <button class="button danger"
