@@ -8,7 +8,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationAlreadyExistException;
-import roomescape.exception.ReservationNotFoundException;
+import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
@@ -37,8 +37,7 @@ public class ReservationService {
     }
 
     public ReservationResponse read(Long id) {
-        Reservation reservationById = reservationQueryingDao.findReservationById(id)
-                .orElseThrow(() -> new ReservationNotFoundException(id));
+        Reservation reservationById = getReservation(id);
         return ReservationResponse.from(reservationById);
     }
 
@@ -81,8 +80,7 @@ public class ReservationService {
     }
 
     public ReservationResponse update(Long id, ReservationRequest reservationReq) {
-        Reservation existedReservation = reservationQueryingDao.findReservationById(id)
-                .orElseThrow(() -> new ReservationNotFoundException(id));
+        Reservation existedReservation = getReservation(id);
         ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
 
@@ -104,8 +102,7 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
-        Reservation reservation = reservationQueryingDao.findReservationById(id)
-                .orElseThrow(() -> new ReservationNotFoundException(id));
+        Reservation reservation = getReservation(id);
 
         if (reservation.getDate().isBefore(LocalDate.now())) {
             throw new ExpiredDateTimeException();
@@ -115,5 +112,10 @@ public class ReservationService {
         }
 
         reservationUpdatingDao.delete(id);
+    }
+
+    private Reservation getReservation(Long id) {
+        return reservationQueryingDao.findReservationById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(id + "번 예약이 존재하지 않습니다."));
     }
 }

@@ -10,7 +10,7 @@ import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.theme.ThemeRequest;
 import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.ReservationAlreadyExistException;
-import roomescape.exception.ReservationNotFoundException;
+import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
 import roomescape.repository.ReservationQueryingDao;
@@ -168,6 +168,6 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId);
 
         assertThatThrownBy(() -> reservationService.update(999L, request))
-                .isInstanceOf(ReservationNotFoundException.class);
+                .isInstanceOf(ResourceNotFoundException.class);
     }
 }
