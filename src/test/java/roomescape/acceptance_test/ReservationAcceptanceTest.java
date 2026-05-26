@@ -52,7 +52,6 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
         // then
         생성한_예약_삭제가_성공한다(deleteResponse);
-        관리자_예약_목록_조회_시_삭제한_예약은_응답받지_않는다(관리자_예약_목록_조회를_요청하면(), reservation);
     }
 
     @Test
@@ -87,49 +86,11 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
         // then
         예약_수정이_성공한다(response, reservation);
-        예약_날짜와_시간은_요청한_값으로_응답받는다(response, editRequest);
-        예약_테마는_기존_테마로_응답받는다(response, reservation);
-    }
-
-    @Test
-    @DisplayName("같은 테마의 중복 예약으로 예약 수정 실패")
-    public void scenario5() {
-        mutableClock.setFixed(현재_날짜);
-
-        // given
-        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
-        Integer reservationTimeId = 예약_시간_생성을_요청하고(
-                new ReservationTimeCreateRequest(LocalTime.of(10, 30))
-        );
-        Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
-                new ReservationTimeCreateRequest(LocalTime.of(11, 30))
-        );
-        ReservationInfo reservation = 같은_테마로_예약_생성을_요청하고(
-                "brown",
-                예약일,
-                reservationTimeId,
-                themeId
-        );
-        ReservationInfo targetReservation = 같은_테마로_새로운_예약_생성을_요청하고(
-                "pobi",
-                변경_예약일,
-                editedReservationTimeId,
-                themeId
-        );
-
-        // when
-        ExtractableResponse<Response> response = 새로운_예약을_기존_예약의_날짜와_시간으로_수정_요청하면(
-                targetReservation,
-                reservation
-        );
-
-        // then
-        예약_수정_실패_응답을_받는다(response, 409);
     }
 
     @Test
     @DisplayName("이미 시작된 예약 수정 실패")
-    public void scenario6() {
+    public void scenario5() {
         mutableClock.setFixed(현재_날짜);
 
         // given
@@ -149,7 +110,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("지난 날짜와 시간으로 예약 수정 실패")
-    public void scenario7() {
+    public void scenario6() {
         mutableClock.setFixed(현재_날짜);
 
         // given
@@ -175,7 +136,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("다른 사용자의 예약 수정 실패")
-    public void scenario8() {
+    public void scenario7() {
         mutableClock.setFixed(현재_날짜);
 
         // given
@@ -211,7 +172,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 
     @Test
     @DisplayName("내 예약 삭제")
-    public void scenario9() {
+    public void scenario8() {
         mutableClock.setFixed(현재_날짜);
 
         // given

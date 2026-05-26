@@ -11,9 +11,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.dto.ReservationWaitingDto;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
@@ -46,7 +46,7 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservation.getId());
@@ -65,30 +65,14 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("id로 특정 예약을 조회는 deleted_at이 null인 정보만 조회할 수 있다.")
-    public void findById_softDelete() {
-        // given
-        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        // 삭제처리된 데이터
-        Reservation reservation = insertDeletedReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
-
-        // when
-        Optional<Reservation> optionalReservation = reservationRepository.findById(reservation.getId());
-
-        // then
-        assertThat(optionalReservation).isEmpty();
-    }
-
-    @Test
     @DisplayName("예약의 목록을 페이지 단위로 조회한다")
     void findAllWithPaging() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
-        Reservation reservation2 = insertReservation("포비", LocalDate.of(2023, 8, 6), time, theme);
-        insertReservation("조이", LocalDate.of(2023, 8, 7), time, theme);
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        Reservation reservation2 = insertReservation("포비", LocalDate.of(2023, 8, 6), time, theme, Status.WAITING);
+        insertReservation("조이", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING);
 
         // when
         List<Reservation> reservations = reservationRepository.findAll(2, 1);
@@ -102,60 +86,33 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약 목록은 삭제되지 않은 예약만 조회할 수 있다.")
-    void findAllWithPaging_softDelete() {
-        // given
-        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation deletedReservation = insertDeletedReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
-        Reservation notDeletedReservation1 = insertReservation("포비", LocalDate.of(2023, 8, 6), time, theme);
-        Reservation notDeletedReservation2 = insertReservation("조이", LocalDate.of(2023, 8, 7), time, theme);
-
-        // when
-        List<Reservation> reservations = reservationRepository.findAll(1, 3);
-
-        // then
-        assertThat(reservations).hasSize(2)
-                .contains(notDeletedReservation1, notDeletedReservation2)
-                .doesNotContain(deletedReservation);
-    }
-
-    @Test
     @DisplayName("예약자 이름으로 예약 정보를 조회한다.")
     public void findByGuest() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        List<Reservation> reservations = reservationRepository.findByGuestName(reservation.getGuestName());
+        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findAllByGuestName(reservation.getGuestName());
 
         // then
-        assertThat(reservations)
+        assertThat(reservationWaitingDtos)
                 .extracting(
-                        Reservation::getId, Reservation::getGuestName, Reservation::getDate,
-                        Reservation::getTime, Reservation::getTheme
+                        ReservationWaitingDto::id,
+                        ReservationWaitingDto::guestName,
+                        ReservationWaitingDto::date,
+                        ReservationWaitingDto::time,
+                        ReservationWaitingDto::theme
                 ).containsExactly(
-                        tuple(reservation.getId(), reservation.getGuestName(), reservation.getDate(),
-                                reservation.getTime(), reservation.getTheme())
+                        tuple(
+                                reservation.getId(),
+                                reservation.getGuestName(),
+                                reservation.getDate(),
+                                reservation.getTime(),
+                                reservation.getTheme()
+                        )
                 );
-    }
-
-    @Test
-    @DisplayName("예약자 이름으로 예약 정보를 조회할 때, 삭제되지 않은 예약만 조회할 수 있다.")
-    public void findByGuest_softdelete() {
-        // given
-        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = insertDeletedReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
-
-        // when
-        List<Reservation> reservations = reservationRepository.findByGuestName(reservation.getGuestName());
-
-        // then
-        assertThat(reservations)
-                .extracting(Reservation::getId).doesNotContain(reservation.getId());
     }
 
     @Test
@@ -164,7 +121,7 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = Reservation.create("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = Reservation.create("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -187,13 +144,13 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         LocalDate updatedDate = LocalDate.of(2023, 9, 7);
         ReservationTime updatedTime = insertReservationTime(LocalTime.of(12, 0));
 
         // when
-        boolean result = reservationRepository.updateDateAndTime(reservation.getId(), updatedDate, updatedTime.getId());
+        boolean result = reservationRepository.updateDateAndTime(reservation.getId(), updatedDate, updatedTime.getId(), Status.WAITING);
 
         // then
         assertThat(result).isTrue();
@@ -207,18 +164,18 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마를 가진 예약이 존재하는지 확인한다.")
-    public void existsByDateAndTimeIdAndThemeId() {
+    public void existsByDateAndTimeIdAndThemeIdAndGuestName() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = insertReservationTime(LocalTime.of(12, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Theme theme2 = insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
-        insertReservation("브라운", targetDate, time, theme);
+        insertReservation("브라운", targetDate, time, theme, Status.WAITING);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(targetDate, time.getId(), theme.getId());
-        boolean notExists = reservationRepository.existsByDateAndTimeIdAndThemeId(targetDate, time2.getId(), theme2.getId());
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate, time.getId(), theme.getId(), "브라운");
+        boolean notExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate, time2.getId(), theme2.getId(), "브라운");
 
         // then
         assertThat(exists).isTrue();
@@ -227,7 +184,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 날짜, 시간, 테마를 가진 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existsByDateAndTimeIdAndThemeId_softDelete() {
+    public void existsByDateAndTimeIdAndThemeId_AndGuestName_softDelete() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -235,41 +192,47 @@ class JdbcReservationRepositoryTest {
         insertDeletedReservation("브라운", targetDate, time, theme);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                targetDate, time.getId(), theme.getId());
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+                targetDate, time.getId(), theme.getId(), "브라운");
 
         // then
         assertThat(exists).isFalse();
     }
 
-
     @ParameterizedTest
     @CsvSource({
-            "true, false",
-            "false, true"
+            "target, other, false",
+            "target, target, true"
     })
-    @DisplayName("특정 예약이 아닌 예약 중에서 특정 날짜, 시간, 테마가 겹치는 예약이 존재하는지 확인한다.")
-    public void existsByDateAndTimeIdAndThemeIdAndIdNot(
-            boolean isTargetReservationId, boolean expected
+    @DisplayName("해당 예약을 제외하고 동일 슬롯에 활성 예약이 존재하는지 확인한다.")
+    public void existsActiveReservationBySlotExceptGuestName(
+            String target1,
+            String target2,
+            boolean expected
     ) {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         ReservationTime otherTime = insertReservationTime(LocalTime.of(12, 0));
 
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Theme otherTheme = insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme theme = insertTheme(
+                "레벨2 탈출",
+                "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://example.com/theme.png"
+        );
 
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
-        Reservation targetReservation = insertReservation("브라운", targetDate, time, theme);
-        Reservation otherReservation = insertReservation("제이", targetDate, otherTime, otherTheme);
 
-        Long excludedReservationId = isTargetReservationId
-                ? targetReservation.getId()
-                : otherReservation.getId();
+        insertReservation(target1, targetDate, time, theme, Status.CONFIRMED);
+        insertReservation(target2, targetDate, otherTime, theme, Status.CONFIRMED);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                targetDate, time.getId(), theme.getId(), excludedReservationId);
+        boolean exists = reservationRepository
+                .existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+                        targetDate,
+                        otherTime.getId(),
+                        theme.getId(),
+                        target1
+                );
 
         // then
         assertThat(exists).isEqualTo(expected);
@@ -277,40 +240,21 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("특정 예약이 아닌 예약 중에서 겹치는 예약이 삭제된 예약이면 존재하지 않는 것으로 확인한다.")
-    public void existsByDateAndTimeIdAndThemeIdAndIdNot_softDelete() {
+    public void existsByDateAndTimeIdAndThemeIdAndIdNot_AndStatusCanceled_softDeleteAndGuestName() {
         // given
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
-        Reservation deletedReservation = insertDeletedReservation("브라운", targetDate, time, theme);
+        insertDeletedReservation("브라운", targetDate, time, theme);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                targetDate, time.getId(), theme.getId(), deletedReservation.getId() + 1);
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+                targetDate, time.getId(), theme.getId(), "브라운");
 
         // then
         assertThat(exists).isFalse();
     }
 
-    @Test
-    @DisplayName("예약을 취소하면 deleted_at이 현재시간, delete_token이 해당 데이터의 pk값으로 설정된다.")
-    public void cancelById_success() {
-        // given
-        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
-
-        LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
-
-        // when
-        boolean result = reservationRepository.cancelById(reservation.getId(), now);
-
-        // then
-        assertThat(result).isTrue();
-        Map<String, Object> reservationMap = findDeleteAtAndDeleteToken(reservation.getId());
-        assertThat(((Timestamp) reservationMap.get("deleted_at")).toLocalDateTime()).isEqualTo(now);
-        assertThat(((Long) reservationMap.get("delete_token"))).isEqualTo(reservation.getId());
-    }
 
     @Test
     @DisplayName("존재하지 않는 예약은 취소되지 않는다.")
@@ -319,7 +263,7 @@ class JdbcReservationRepositoryTest {
         Long id = 1L;
 
         // when
-        boolean result = reservationRepository.cancelById(id, LocalDateTime.now());
+        boolean result = reservationRepository.cancelById(id);
 
         // then
         assertThat(result).isFalse();
@@ -332,7 +276,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = insertReservationTime(LocalTime.of(12, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
         boolean exists = reservationRepository.existByTimeId(time.getId());
@@ -365,7 +309,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Theme theme2 = insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
-        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme);
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
         boolean exists = reservationRepository.existByThemeId(theme.getId());
@@ -389,6 +333,40 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(exists).isFalse();
+    }
+
+    @Test
+    @DisplayName("특정 테마 id를 가진 조회 시 순번을 반환해야한다.")
+    public void findWaitingById() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED);
+        insertReservation("주디", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        Reservation reservation = insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+
+        // when
+        ReservationWaitingDto reservationWaitingDto = reservationRepository.findWaitingById(reservation.getId()).get();
+
+        // then
+        assertThat(reservationWaitingDto.waitNumber()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("예약 조회에서 날짜, 시간, 테마가 같고 Confiremd인 것만 조회한다.")
+    public void existsReservationBySlot() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED);
+        insertReservation("주디", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        Reservation reservation = insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+
+        // when
+        boolean result = reservationRepository.existsReservationBySlot(reservation.getDate(), time.getId(), theme.getId());
+
+        // then
+        assertThat(result).isTrue();
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
@@ -423,22 +401,23 @@ class JdbcReservationRepositoryTest {
         return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
     }
 
-    private Reservation insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+    private Reservation insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
+                    VALUES (?, ?, ?, ?, ?)
                     """, new String[]{"id"});
             preparedStatement.setString(1, guestName);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
+            preparedStatement.setString(5, status.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme);
+        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme, status);
     }
 
     private Reservation insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
@@ -447,19 +426,18 @@ class JdbcReservationRepositoryTest {
         LocalDateTime now = LocalDateTime.now();
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, deleted_at)
+                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
                     VALUES (?, ?, ?, ?, ?)
                     """, new String[]{"id"});
             preparedStatement.setString(1, guestName);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
-
-            preparedStatement.setTimestamp(5, Timestamp.valueOf(now));
+            preparedStatement.setString(5, Status.CANCELED.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme);
+        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme, Status.CANCELED);
     }
 
     private Map<String, Object> findDateAndTimeIdById(Long id) {

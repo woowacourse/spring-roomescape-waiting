@@ -23,20 +23,20 @@ public class Reservation {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
-    private final LocalDateTime deletedAt;
+    private final Status status;
 
-    private Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime deletedAt) {
+    private Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
         validateReservation(guestName, date, time, theme);
         this.id = id;
         this.guestName = guestName;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.deletedAt = deletedAt;
+        this.status = status;
     }
 
-    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(null, guestName, date, time, theme, null);
+    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
+        return new Reservation(null, guestName, date, time, theme, status);
     }
 
     public static Reservation of(
@@ -45,18 +45,14 @@ public class Reservation {
             LocalDate date,
             ReservationTime time,
             Theme theme,
-            LocalDateTime deletedAt
+            Status status
     ) {
-        return new Reservation(id, guestName, date, time, theme, deletedAt);
-    }
-
-    public static Reservation of(long id, String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        return of(id, guestName, date, time, theme, null);
+        return new Reservation(id, guestName, date, time, theme, status);
     }
 
     public Reservation withId(long id) {
         require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
-        return of(id, guestName, date, time, theme, deletedAt);
+        return of(id, guestName, date, time, theme, status);
     }
 
     private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
@@ -87,10 +83,7 @@ public class Reservation {
         return Objects.equals(this.guestName, guestName);
     }
 
-    public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime) {
-
-        return of(
-                id, guestName, changedDate, changedTime, theme, deletedAt
-        );
+    public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime, Status status) {
+        return of(id, guestName, changedDate, changedTime, theme, status);
     }
 }

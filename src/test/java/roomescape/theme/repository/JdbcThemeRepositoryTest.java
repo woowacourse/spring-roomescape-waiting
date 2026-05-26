@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.reservation.domain.Status;
 import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
@@ -377,13 +378,14 @@ class JdbcThemeRepositoryTest {
     private void insertReservation(String guestName, LocalDate date, Long timeId, Theme theme) {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id)
-                    VALUES (?, ?, ?, ?)
+                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
+                    VALUES (?, ?, ?, ?, ?)
                     """);
             preparedStatement.setString(1, guestName);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, timeId);
             preparedStatement.setLong(4, theme.getId());
+            preparedStatement.setString(5, Status.WAITING.toString());
             return preparedStatement;
         });
     }
@@ -391,14 +393,14 @@ class JdbcThemeRepositoryTest {
     private void insertDeletedReservation(String guestName, LocalDate date, Long timeId, Theme theme) {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, deleted_at)
+                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
                     VALUES (?, ?, ?, ?, ?)
                     """);
             preparedStatement.setString(1, guestName);
             preparedStatement.setDate(2, Date.valueOf(date));
             preparedStatement.setLong(3, timeId);
             preparedStatement.setLong(4, theme.getId());
-            preparedStatement.setTimestamp(5, Timestamp.valueOf(LocalDateTime.now()));
+            preparedStatement.setString(5, Status.CANCELED.toString());
             return preparedStatement;
         });
     }

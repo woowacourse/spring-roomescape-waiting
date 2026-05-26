@@ -25,11 +25,11 @@ CREATE TABLE reservation
     date     DATE         NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
-    deleted_at TIMESTAMP,
     delete_token BIGINT NOT NULL DEFAULT 0,
+    status VARCHAR(50) NOT NULL,
 
     PRIMARY KEY (id),
-    UNIQUE (date, time_id, theme_id, delete_token),
+    UNIQUE (guest_name ,date, time_id, theme_id, delete_token),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

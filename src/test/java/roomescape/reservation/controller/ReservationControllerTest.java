@@ -11,10 +11,9 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import roomescape.reservation.controller.dto.ReservationCreateRequest;
-import roomescape.reservation.controller.dto.ReservationEditRequest;
-import roomescape.reservation.controller.dto.ReservationListResponse;
-import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.*;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.reservation.domain.Reservation;
@@ -63,10 +62,11 @@ class ReservationControllerTest {
         // given
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = Reservation.of(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme);
+        ReservationWaitingResult reservationWaitingResult =
+                new ReservationWaitingResult(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED, 0);
 
         given(reservationService.create(anyString(), any(), anyLong(), anyLong()))
-                .willReturn(reservation);
+                .willReturn(reservationWaitingResult);
 
         ReservationCreateRequest request = new ReservationCreateRequest(
                 "브라운",
@@ -84,37 +84,45 @@ class ReservationControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        ReservationResponse reservationResponse = objectMapper.readValue(
+        ReservationWaitingResponse reservationWaitingResponse = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
-                ReservationResponse.class
+                ReservationWaitingResponse.class
         );
 
-        assertReservation(reservationResponse, reservation);
-        assertTime(reservationResponse, time);
-        assertTheme(reservationResponse, theme);
+        assertReservation(reservationWaitingResponse, reservationWaitingResult);
+        assertTime(reservationWaitingResponse.time(), time);
+        assertTheme(reservationWaitingResponse.theme(), theme);
 
         then(reservationService)
                 .should()
                 .create(request.guestName(), request.date(), request.timeId(), request.themeId());
     }
 
-    private static void assertReservation(ReservationResponse reservationResponse, Reservation reservation) {
-        assertThat(reservationResponse).extracting(
-                ReservationResponse::id,
-                ReservationResponse::guestName,
-                ReservationResponse::date
-        ).containsExactly(reservation.getId(), reservation.getGuestName(), reservation.getDate().toString());
+    private static void assertReservation(ReservationWaitingResponse reservationWaitingResponse, ReservationWaitingResult reservationWaitingResult) {
+        assertThat(reservationWaitingResponse).extracting(
+                ReservationWaitingResponse::id,
+                ReservationWaitingResponse::guestName,
+                ReservationWaitingResponse::date,
+                ReservationWaitingResponse::status,
+                ReservationWaitingResponse::waitNumber
+        ).containsExactly(
+                reservationWaitingResult.id(),
+                reservationWaitingResult.guestName(),
+                reservationWaitingResult.date().toString(),
+                reservationWaitingResult.status().toString(),
+                reservationWaitingResult.waitNumber()
+        );
     }
 
-    private static void assertTime(ReservationResponse reservationResponse, ReservationTime time) {
-        assertThat(reservationResponse.time()).extracting(
+    private static void assertTime(ReservationTimeResponse reservationTimeResponse, ReservationTime time) {
+        assertThat(reservationTimeResponse).extracting(
                 ReservationTimeResponse::id,
                 ReservationTimeResponse::startAt
         ).containsExactly(time.getId(), time.getStartAt().toString());
     }
 
-    private static void assertTheme(ReservationResponse reservationResponse, Theme theme) {
-        assertThat(reservationResponse.theme()).extracting(
+    private static void assertTheme(ThemeResponse themeResponse, Theme theme) {
+        assertThat(themeResponse).extracting(
                 ThemeResponse::id,
                 ThemeResponse::name,
                 ThemeResponse::description,
@@ -187,10 +195,10 @@ class ReservationControllerTest {
 
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = Reservation.of(1L, guestName, LocalDate.of(2023, 8, 5), time, theme);
-
+        ReservationWaitingResult reservationWaitingResult =
+                new ReservationWaitingResult(1L, guestName, LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED, 0);
         given(reservationService.findByGuestName(guestName))
-                .willReturn(List.of(reservation));
+                .willReturn(List.of(reservationWaitingResult));
 
         // when then
         MvcResult result = mockMvc.perform(
@@ -200,19 +208,17 @@ class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        ReservationListResponse reservationListResponse = objectMapper.readValue(
+        ReservationWaitingListResponse reservationWaitingListResponse = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
-                ReservationListResponse.class
+                ReservationWaitingListResponse.class
         );
 
-        List<ReservationResponse> reservations = reservationListResponse.reservations();
-        assertThat(reservations).hasSize(1);
-
-        for (ReservationResponse response : reservations) {
-            assertReservation(response, reservation);
-            assertTime(response, time);
-            assertTheme(response, theme);
-        }
+        List<ReservationWaitingResponse> responses = reservationWaitingListResponse.reservations();
+        assertThat(responses).hasSize(1);
+        ReservationWaitingResponse response = responses.getFirst();
+        assertReservation(response, reservationWaitingResult);
+        assertTime(response.time(), time);
+        assertTheme(response.theme(), theme);
 
         then(reservationService)
                 .should()
@@ -220,16 +226,13 @@ class ReservationControllerTest {
     }
 
     @Test
-    @DisplayName("예약의 날짜 및 시간을 수정하는 요청을 하면 수정된 예약 정보가 응답으로 반환된다.")
+    @DisplayName("예약의 날짜 및 시간을 수정하는 요청을 하면 200 응답 코드가 반환된다.")
     public void editDateTime_success() throws Exception {
         // given
         Long reservationId = 1L;
         ReservationTime time = ReservationTime.of(2L, LocalTime.of(12, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        Reservation reservation = Reservation.of(reservationId, "브라운", LocalDate.of(2023, 8, 10), time, theme);
 
-        given(reservationService.editDateTime(anyLong(), any(), anyLong(), anyString()))
-                .willReturn(reservation);
 
         ReservationEditRequest request = new ReservationEditRequest(
                 LocalDate.of(2023, 8, 10),
@@ -238,24 +241,14 @@ class ReservationControllerTest {
 
         // when then
         String guestNameHeader = URLEncoder.encode("브라운", StandardCharsets.UTF_8);
-        MvcResult result = mockMvc.perform(
+        mockMvc.perform(
                         patch("/reservations/{id}", reservationId)
                                 .content(objectMapper.writeValueAsString(request))
                                 .contentType(MediaType.APPLICATION_JSON)
                                 .header(GUEST_NAME_HEADER, guestNameHeader)
                 )
                 .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
-        ReservationResponse reservationResponse = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                ReservationResponse.class
-        );
-
-        assertReservation(reservationResponse, reservation);
-        assertTime(reservationResponse, time);
-        assertTheme(reservationResponse, theme);
+                .andExpect(status().isNoContent());
 
         then(reservationService)
                 .should()
