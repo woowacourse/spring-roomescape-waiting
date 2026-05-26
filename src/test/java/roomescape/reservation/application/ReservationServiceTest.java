@@ -1,264 +1,115 @@
 package roomescape.reservation.application;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.lenient;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatThrownBy;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.ZoneId;
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.reservation.application.dto.ReservationChangeCommand;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.config.TestTimeConfig;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
-import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.domain.ReservationTimeRepository;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
+@Transactional
+@Import(TestTimeConfig.class)
 class ReservationServiceTest {
 
-    @Mock
-    private Clock clock;
-
-    @Mock
-    private ReservationRepository reservationRepository;
-
-    @Mock
-    private ReservationTimeRepository reservationTimeRepository;
-
-    @Mock
-    private ThemeRepository themeRepository;
-
-    @InjectMocks
+    @Autowired
     private ReservationService reservationService;
 
+    @Autowired
+    private ReservationTimeRepository timeRepository;
+
+    @Autowired
+    private ThemeRepository themeRepository;
+
+    @Autowired
+    private Clock clock;
+
+    private ReservationTime savedTime;
+    private Theme savedTheme;
+    private LocalDate targetDate;
+
     @BeforeEach
-    void setClock() {
-        lenient().when(clock.instant()).thenReturn(Instant.parse("2026-05-26T16:00:00Z"));
-        lenient().when(clock.getZone()).thenReturn(ZoneId.of("Asia/Seoul"));
+    void setUp() {
+        savedTime = timeRepository.save(
+                ReservationTime.builder()
+                        .startAt(LocalTime.of(14, 0))
+                        .build()
+        );
+
+        savedTheme = themeRepository.save(
+                Theme.builder()
+                        .name("판타지 테마")
+                        .description("진짜 재밌는 방탈출")
+                        .durationTime(LocalTime.of(1, 0))
+                        .thumbnailImageUrl("https://example.com/image.png")
+                        .build()
+        );
+        targetDate = LocalDate.now(clock).plusDays(3);
     }
 
     @Test
-    @DisplayName("이미 예약이 존재하는 곳에 새로운 예약을 추가하면 Pending 상태로 추가된다.")
-    void addPendingReservationTest() {
-        ReservationCreateCommand command = ReservationCreateCommand.builder()
-                .name("포비")
-                .timeId(1L)
-                .themeId(1L)
-                .date(LocalDate.now(clock))
-                .build();
+    @DisplayName("해당 타겟 시간에 예약이 전혀 없으면, ACTIVE(확정) 상태로 DB에 정상 저장된다.")
+    void addReservation_success_active() {
+        ReservationCreateCommand command = new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        );
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationInfo result = reservationService.addReservation(command);
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
-
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.PENDING)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
-
-        when(reservationTimeRepository.getById(command.timeId()))
-                .thenReturn(mockTime);
-        when(themeRepository.getById(command.themeId()))
-                .thenReturn(mockTheme);
-        when(reservationRepository.existsByReservationTimeAndThemeAndDate(command.timeId(), command.themeId(), command.date()))
-                .thenReturn(true);
-        when(reservationRepository.existsPendingReservationByName(command.timeId(), command.themeId(), command.date(), command.name()))
-                .thenReturn(false);
-        when(reservationRepository.save(any(Reservation.class))).thenReturn(mockReservation);
-
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
-        Assertions.assertThat(reservationService.addReservation(command).status()).isEqualTo(Status.PENDING);
+        assertThat(result.id()).isNotNull();
+        assertThat(result.status()).isEqualTo(Status.ACTIVE);
+        assertThat(result.name()).isEqualTo("포비");
     }
 
     @Test
-    @DisplayName("변경하려는 시간에 Active인 예약이 있고, 시간을 변경하면 정상 동작한다.")
-    void normalPendingTest() {
-        ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
-                .username("포비")
-                .themeId(1L)
-                .timeId(1L)
-                .date(LocalDate.now(clock))
-                .build();
+    @DisplayName("해당 타겟 시간에 이미 예약이 존재하면, 동일 인물이 아닐 때 PENDING(대기) 상태로 DB에 정상 저장된다.")
+    void addReservation_success_pending() {
+        ReservationCreateCommand firstCommand = new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(firstCommand);
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationCreateCommand secondCommand = new ReservationCreateCommand(
+                "리사", targetDate, savedTime.getId(), savedTheme.getId()
+        );
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
+        ReservationInfo result = reservationService.addReservation(secondCommand);
 
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.ACTIVE)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
-
-
-        when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
-        when(themeRepository.getById(1L)).thenReturn(mockTheme);
-        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
-
-        when(reservationRepository.existsActiveReservationByThemeAndTime(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date()))
-                .thenReturn(true);
-
-        when(reservationRepository.existsPendingReservationByName(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date(),
-                changeCommand.username()))
-                .thenReturn(false);
-
-        ReservationInfo reservationInfo = reservationService.changeReservationPendingStatus(
-                mockReservation.getId(),
-                changeCommand);
-        Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.PENDING);
+        assertThat(result.status()).isEqualTo(Status.PENDING);
+        assertThat(result.name()).isEqualTo("리사");
     }
 
     @Test
-    @DisplayName("Active인 예약이 존재하지 않으면 예외를 발생한다.")
-    void notFoundActiveReservationTest() {
-        ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
-                .username("포비")
-                .themeId(1L)
-                .timeId(1L)
-                .date(LocalDate.now(clock))
-                .build();
+    @DisplayName("동일한 사람이 이미 대기를 걸어둔 상태에서 또 예약을 시도하면 중복 대기 예외가 발생한다.")
+    void addReservation_fail_duplicated_pending() {
+        ReservationCreateCommand activeCommand = new ReservationCreateCommand(
+                "포비", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(activeCommand);
 
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
+        ReservationCreateCommand pendingCommand = new ReservationCreateCommand(
+                "리사", targetDate, savedTime.getId(), savedTheme.getId()
+        );
+        reservationService.addReservation(pendingCommand);
 
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
-
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.ACTIVE)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
-
-        when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
-        when(themeRepository.getById(1L)).thenReturn(mockTheme);
-        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
-
-        when(reservationRepository.existsActiveReservationByThemeAndTime(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date()))
-                .thenReturn(false);
-
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
-                .isInstanceOf(IllegalStateReservationException.class);
-    }
-
-    @Test
-    @DisplayName("active인 예약이 존재하고, 이미 대기중이라면 예외를 발생한다.")
-    void duplicatedTest() {
-        ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
-                .username("포비")
-                .themeId(1L)
-                .timeId(1L)
-                .date(LocalDate.now(clock))
-                .build();
-
-        ReservationTime mockTime = ReservationTime.builder()
-                .id(1L)
-                .startAt(LocalTime.now(clock))
-                .build();
-
-        Theme mockTheme = Theme.builder()
-                .id(1L)
-                .name("판타지")
-                .description("설명")
-                .durationTime(LocalTime.now(clock))
-                .thumbnailImageUrl("https://~~~")
-                .build();
-
-        Reservation mockReservation = Reservation.builder()
-                .id(1L)
-                .name("포비")
-                .status(Status.ACTIVE)
-                .date(LocalDate.now(clock))
-                .time(mockTime)
-                .theme(mockTheme)
-                .createdAt(LocalDateTime.now(clock))
-                .build();
-
-        when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
-        when(themeRepository.getById(1L)).thenReturn(mockTheme);
-        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
-
-        when(reservationRepository.existsActiveReservationByThemeAndTime(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date()))
-                .thenReturn(true);
-
-        when(reservationRepository.existsPendingReservationByName(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date(),
-                changeCommand.username()))
-                .thenReturn(true);
-
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
-                .isInstanceOf(DuplicatedReservationException.class);
+        assertThatThrownBy(() -> reservationService.addReservation(pendingCommand))
+                .isInstanceOf(DuplicatedReservationException.class)
+                .hasMessageContaining("이미 예약 대기 중입니다.");
     }
 }
