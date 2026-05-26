@@ -49,4 +49,8 @@ public class ThemeSlot {
     public boolean isReserved() {
         return isReserved;
     }
+
+    public void swtichIsReserved() {
+        this.isReserved = !isReserved;
+    }
 }

@@ -12,6 +12,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
+import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.repository.FakeReservationDao;
 import roomescape.repository.FakeThemeDao;
 import roomescape.repository.FakeThemeSlotDao;
@@ -69,5 +71,21 @@ class ReservationServiceTest {
         Reservation savedReservation = reservationService.saveReservation("브라운", savedThemeSlot.getId());
         Reservation foundReservation = reservationService.findReservation(savedReservation.getId());
         assertThat(foundReservation.getName()).isEqualTo("브라운");
+    }
+
+    @Test
+    @DisplayName("예약 테이블에 themeSlot에 해당하는 예약이 없다면, reservation 상태가 confirm으로 변경된다.")
+    void saveReservationByNotExistsThemeSlot() {
+        Reservation reservation = reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        assertThat(reservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+        assertThat(reservation.getThemeSlot().isReserved()).isEqualTo(true);
+    }
+
+    @Test
+    @DisplayName("예약 테이블에 themeSlot에 해당하는 예약이 존재한다면, reservation 상태가 pending이다.")
+    void saveReservationByExistsThemeSlot() {
+        reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        Reservation reservation2 = reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        assertThat(reservation2.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
     }
 }

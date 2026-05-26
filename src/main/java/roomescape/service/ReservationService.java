@@ -34,17 +34,20 @@ public class ReservationService {
     @Transactional
     public Reservation saveReservation(String name, Long themeSlotId) {
         ThemeSlot themeSlot = getThemeSlotOrElseThrow(themeSlotId);
-
         validateBeforeDate(themeSlot);
-        validateIsExistBy(themeSlotId);
+//        validateIsExistBy(themeSlotId);
         validateDateTime(themeSlot);
+        Reservation reservation = new Reservation(name, themeSlot);
 
-        Reservation reservation = reservationRepository.save(new Reservation(name, themeSlot));
+        // RESERVATION 테이블에 ThemeSlot id가 없다면, 바로 themeSlot은 true로, reservation을 confirm로 변경 후 저장
+        if (!reservationRepository.existsByThemeSlotId(themeSlotId)) {
+            themeSlot.swtichIsReserved();
+            themeSlotRepository.update(themeSlot);
+            reservation.confirm();
+        }
 
-        // TODO: 예약 대기 신청 후 관리자가 확정처리 한 후에 themeSlot 예약되어있다고 표시
-        themeSlotRepository.update(new ThemeSlot(themeSlot.getTheme(), themeSlot.getDate(), themeSlot.getTime(), true));
-
-        return reservation;
+        // RESERVATION 테이블에 ThemeSlot id가 있다면, reservation을 pending 상태로 바로 저장
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
