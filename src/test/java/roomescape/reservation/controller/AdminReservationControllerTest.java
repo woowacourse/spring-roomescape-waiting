@@ -1,5 +1,7 @@
 package roomescape.reservation.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +39,7 @@ public class AdminReservationControllerTest {
         ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0), LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        Mockito.when(reservationService.getAll()).thenReturn(List.of(reservation));
+        when(reservationService.getAll()).thenReturn(List.of(reservation));
 
         // when & then
         mockMvc.perform(get("/admin/reservations")
@@ -51,10 +53,12 @@ public class AdminReservationControllerTest {
     @Test
     void 예약_생성_테스트() throws Exception {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0), LocalDateTime.of(2030, 6, 1, 12, 0));
+        ReservationTime time = new ReservationTime(1L,
+                LocalDateTime.of(2030, 6, 1, 10, 0),
+                LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        Mockito.when(reservationService.create(Mockito.any())).thenReturn(saved);
+        Mockito.when(reservationService.create(any())).thenReturn(saved);
 
         String requestBody = """
                 {

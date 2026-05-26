@@ -1,7 +1,10 @@
 package roomescape.reservation.controller;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -18,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 
+import roomescape.reservation.controller.dto.ReservationSaveRequestDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.time.domain.ReservationTime;
@@ -182,5 +186,61 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    void 예약이_없는_경우_예약_생성_테스트() throws Exception {
+        // given
+        ReservationTime time = new ReservationTime(1L,
+                LocalDateTime.of(2030, 6, 1, 10, 0),
+                LocalDateTime.of(2030, 6, 1, 12, 0));
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation saved = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        when(reservationService.create(any())).thenReturn(saved);
+
+        String requestBody = """
+                {
+                    "name": "라이",
+                    "themeId": 1,
+                    "timeId": 1
+                }
+                """;
+
+        // when & then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("라이"))
+                .andExpect(jsonPath("$.status").value(Status.RESERVED.name()));
+    }
+
+    @Test
+    void 예약이_존재하는_경우_예약대기_생성_테스트() throws Exception {
+        // given
+        ReservationTime time = new ReservationTime(1L,
+                LocalDateTime.of(2030, 6, 1, 10, 0),
+                LocalDateTime.of(2030, 6, 1, 12, 0));
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation saved = new Reservation("라이", time, theme, Status.WAITING, LocalDateTime.now()).withId(1L);
+        when(reservationService.create(any())).thenReturn(saved);
+
+        String requestBody = """
+                {
+                    "name": "라이",
+                    "themeId": 1,
+                    "timeId": 1
+                }
+                """;
+
+        // when&then
+        mockMvc.perform(post("/reservations")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(requestBody))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.id").value(1L))
+                .andExpect(jsonPath("$.name").value("라이"))
+                .andExpect(jsonPath("$.status").value(Status.WAITING.name()));
     }
 }
