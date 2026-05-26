@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.ReservationService;
 import roomescape.reservation.presentation.dto.ReservationChangeRequest;
+import roomescape.reservation.presentation.dto.ReservationPendingResponse;
 import roomescape.reservation.presentation.dto.ReservationRequest;
 import roomescape.reservation.presentation.dto.ReservationResponse;
 
@@ -27,10 +28,10 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservationsByName(@RequestParam final String username) {
-        List<ReservationResponse> responses = reservationService.getReservationsByName(username)
+    public ResponseEntity<List<ReservationPendingResponse>> getReservationsByName(@RequestParam final String username) {
+        List<ReservationPendingResponse> responses = reservationService.getReservationsByName(username)
                 .stream()
-                .map(ReservationResponse::from)
+                .map(ReservationPendingResponse::from)
                 .toList();
         return ResponseEntity.ok(responses);
     }

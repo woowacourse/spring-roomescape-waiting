@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -48,6 +49,30 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .build();
     };
 
+    private final RowMapper<ReservationQueryResult> queryResultRowMapper = (resultSet, rowNum)->{
+        Theme theme = Theme.builder()
+                .id(resultSet.getLong("t_id"))
+                .name(resultSet.getString("t_name"))
+                .thumbnailImageUrl(resultSet.getString("t_thumbnail_image_url"))
+                .description(resultSet.getString("t_description"))
+                .durationTime(resultSet.getTime("t_duration_time").toLocalTime())
+                .build();
+
+        ReservationTime time = ReservationTime.builder()
+                .id(resultSet.getLong("rt_id"))
+                .startAt(resultSet.getTime("rt_start_at").toLocalTime())
+                .build();
+
+        return  ReservationQueryResult.builder()
+                .id(resultSet.getLong("r_id"))
+                .name(resultSet.getString("r_name"))
+                .date(resultSet.getDate("r_date").toLocalDate())
+                .status(Status.valueOf(resultSet.getString("r_status")))
+                .pendingIndex(resultSet.getLong("pending_index"))
+                .time(time)
+                .theme(theme)
+                .build();
+    };
 
     @Override
     public Reservation save(final Reservation reservation) {
@@ -134,17 +159,40 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByName(final String username) {
+    public List<ReservationQueryResult> findAllByName(final String username) {
         String sql = "SELECT "
-                + "r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, "
-                + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
-                + "t.description AS t_description, t.duration_time AS t_duration_time, "
-                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                + "    r.id AS r_id, "
+                + "    r.name AS r_name, "
+                + "    r.date AS r_date, "
+                + "    r.status AS r_status, "
+                + "    r.created_at AS r_created_at, "
+                + "    t.id AS t_id, "
+                + "    t.name AS t_name, "
+                + "    t.thumbnail_image_url AS t_thumbnail_image_url, "
+                + "    t.description AS t_description, "
+                + "    t.duration_time AS t_duration_time, "
+                + "    rt.id AS rt_id, "
+                + "    rt.start_at AS rt_start_at, "
+                + "    p.pending_index AS pending_index "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.name = :username AND r.status = 'ACTIVE' AND r.is_deleted = 0";
-        return jdbcTemplate.query(sql, Map.of("username", username), rowMapper);
+                + "LEFT JOIN ( "
+                + "    SELECT "
+                + "        id, "
+                + "        ROW_NUMBER() OVER ( "
+                + "            PARTITION BY date, time_id, theme_id "
+                + "            ORDER BY created_at ASC "
+                + "        ) AS pending_index "
+                + "    FROM reservation "
+                + "    WHERE status = 'PENDING' "
+                + "      AND is_deleted = 0 "
+                + ") p ON r.id = p.id "
+                + "WHERE r.name = :username "
+                + "  AND r.is_deleted = 0 "
+                + "ORDER BY r.created_at DESC";
+
+        return jdbcTemplate.query(sql, Map.of("username", username), queryResultRowMapper);
     }
 
     @Override

@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.dto.ReservationQueryResult;
 
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
@@ -11,7 +12,7 @@ public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
     List<Reservation> findAll();
     List<Reservation> findByThemeAndDate(Long themeId, LocalDate date);
-    List<Reservation> findAllByName(String username);
+    List<ReservationQueryResult> findAllByName(String username);
     boolean existsByReservationTime(Long timeId);
     boolean existsByReservationTimeAndThemeAndDate(Long timeId, Long themeId, LocalDate date);
     boolean existsByIdAndUsernameAndActiveOrPending(Long id, String username);

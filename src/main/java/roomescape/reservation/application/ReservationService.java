@@ -12,10 +12,12 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.application.dto.ReservationChangeCommand;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationInfo;
+import roomescape.reservation.application.dto.ReservationPendingInfo;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.application.exception.ReservationInUseException;
 import roomescape.reservation.application.exception.ReservationNotFoundException;
+import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
 import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
@@ -45,10 +47,12 @@ public class ReservationService {
     }
 
     @Transactional(readOnly = true)
-    public List<ReservationInfo> getReservationsByName(final String username) {
-        return reservationRepository.findAllByName(username)
-                .stream()
-                .map(ReservationInfo::from)
+    public List<ReservationPendingInfo> getReservationsByName(final String username) {
+        List<ReservationQueryResult> results =
+                reservationRepository.findAllByName(username);
+
+        return results.stream()
+                .map(ReservationPendingInfo::from)
                 .toList();
     }
 
