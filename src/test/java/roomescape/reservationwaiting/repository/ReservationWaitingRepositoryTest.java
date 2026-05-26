@@ -4,6 +4,7 @@ package roomescape.reservationwaiting.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +16,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
+import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -38,7 +40,7 @@ public class ReservationWaitingRepositoryTest {
         Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥",reservation)
+                reservationWaitingFactory.create("현미밥", reservation)
         );
         assertThat(saved.getId()).isNotNull();
     }
@@ -46,7 +48,7 @@ public class ReservationWaitingRepositoryTest {
     @Test
     @DisplayName("이미 지난 시간과 날짜에 대해서는 대기를 신청할 수 없다")
     void 예약_대기_실패() {
-    Reservation reservation = reservationRepository.findById(1L).orElseThrow(() -> new BusinessException(
+        Reservation reservation = reservationRepository.findById(1L).orElseThrow(() -> new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));
         assertThatThrownBy(() -> reservationWaitingFactory.create("현미밥", reservation))
                 .isInstanceOf(BusinessException.class);
@@ -58,10 +60,24 @@ public class ReservationWaitingRepositoryTest {
         Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
                 ErrorCode.RESERVATION_NOT_FOUND));
         ReservationWaiting saved = jdbcReservationWaitingRepository.save(
-                reservationWaitingFactory.create("현미밥",reservation)
+                reservationWaitingFactory.create("현미밥", reservation)
         );
         Long id = saved.getId();
         jdbcReservationWaitingRepository.deleteById(id);
         assertThat(jdbcReservationWaitingRepository.findByName("현미밥")).hasSize(0);
+    }
+
+    @Test
+    @DisplayName("이름으로 예약 대기 상황을 조회한다.")
+    void 예약_대기_조회() {
+        Reservation reservation = reservationRepository.findById(12L).orElseThrow(() -> new BusinessException(
+                ErrorCode.RESERVATION_NOT_FOUND));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", reservation));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥2", reservation));
+        jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", reservation));
+        List<ReservationWaitingTurnResponse> reservationWaitingTurnResponses = jdbcReservationWaitingRepository.findByName(
+                "현미밥3");
+        System.out.println("reservationWaitingTurnResponses.size() = " + reservationWaitingTurnResponses.size());
+        assertThat(reservationWaitingTurnResponses.get(0).turn()).isEqualTo(3);
     }
 }

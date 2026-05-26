@@ -1,8 +1,6 @@
 package roomescape.reservationwaiting.service;
 
 import java.util.List;
-import java.util.stream.Collectors;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -13,6 +11,7 @@ import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
+import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.repository.JdbcReservationWaitingRepository;
 
 @Service
@@ -23,7 +22,9 @@ public class ReservationWaitingService {
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingFactory reservationWaitingFactory;
 
-    public ReservationWaitingService(JdbcReservationWaitingRepository jdbcReservationWaitingRepository, ReservationRepository reservationRepository, ReservationWaitingFactory reservationWaitingFactory) {
+    public ReservationWaitingService(JdbcReservationWaitingRepository jdbcReservationWaitingRepository,
+                                     ReservationRepository reservationRepository,
+                                     ReservationWaitingFactory reservationWaitingFactory) {
         this.jdbcReservationWaitingRepository = jdbcReservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationWaitingFactory = reservationWaitingFactory;
@@ -31,11 +32,14 @@ public class ReservationWaitingService {
 
     @Transactional
     public ReservationWaitingResponse createWaiting(ReservationWaitingRequest request) {
-        Reservation reservation = reservationRepository.findById(request.reservationId()).orElseThrow(() ->new BusinessException(
-                ErrorCode.RESERVATION_NOT_FOUND));
-        if (jdbcReservationWaitingRepository.existsByNameAndReservationId(request.name(), reservation.getId()))
+        Reservation reservation = reservationRepository.findById(request.reservationId())
+                .orElseThrow(() -> new BusinessException(
+                        ErrorCode.RESERVATION_NOT_FOUND));
+        if (jdbcReservationWaitingRepository.existsByNameAndReservationId(request.name(), reservation.getId())) {
             throw new BusinessException(ErrorCode.DUPLICATE_WAITING);
-        ReservationWaiting reservationWaiting = jdbcReservationWaitingRepository.save(reservationWaitingFactory.create(request.name(), reservation));
+        }
+        ReservationWaiting reservationWaiting = jdbcReservationWaitingRepository.save(
+                reservationWaitingFactory.create(request.name(), reservation));
         return ReservationWaitingResponse.from(reservationWaiting);
     }
 
@@ -44,9 +48,7 @@ public class ReservationWaitingService {
         reservationRepository.deleteById(id);
     }
 
-    public List<ReservationWaitingResponse> getWaitingByName(String name) {
-        return jdbcReservationWaitingRepository.findByName(name).stream()
-                .map(ReservationWaitingResponse::from)
-                .collect(Collectors.toList());
+    public List<ReservationWaitingTurnResponse> getWaitingByName(String name) {
+        return jdbcReservationWaitingRepository.findByName(name);
     }
 }

@@ -1,5 +1,6 @@
 package roomescape.reservationwaiting.repository;
 
+import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,9 +10,8 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
+import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.theme.domain.Theme;
-
-import java.util.List;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -19,25 +19,26 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    private final RowMapper<ReservationWaiting> rowMapper = (resultSet, rowNum) -> ReservationWaiting.restore(
-            resultSet.getLong("id"),
-            resultSet.getString("name"),
-            Reservation.restore(
-                    resultSet.getLong("reservation_id"),
-                    resultSet.getString("reservation_name"),
-                    resultSet.getDate("reservation_date").toLocalDate(),
-                    ReservationTime.restore(
-                            resultSet.getLong("time_id"),
-                            resultSet.getTime("time_start_at").toLocalTime(),
-                            resultSet.getTime("time_finish_at").toLocalTime()
-                    ),
-                    Theme.restore(
-                            resultSet.getLong("theme_id"),
-                            resultSet.getString("theme_name"),
-                            resultSet.getString("theme_description"),
-                            resultSet.getString("theme_image_url")
-                    )
-            )
+    private final RowMapper<ReservationWaitingTurnResponse> rowMapper = (resultSet, rowNum) -> ReservationWaitingTurnResponse.from(
+            ReservationWaiting.restore(resultSet.getLong("reservation_waiting_id"),
+                    resultSet.getString("name"),
+                    Reservation.restore(
+                            resultSet.getLong("reservation_id"),
+                            resultSet.getString("reservation_name"),
+                            resultSet.getDate("reservation_date").toLocalDate(),
+                            ReservationTime.restore(
+                                    resultSet.getLong("time_id"),
+                                    resultSet.getTime("time_start_at").toLocalTime(),
+                                    resultSet.getTime("time_finish_at").toLocalTime()
+                            ),
+                            Theme.restore(
+                                    resultSet.getLong("theme_id"),
+                                    resultSet.getString("theme_name"),
+                                    resultSet.getString("theme_description"),
+                                    resultSet.getString("theme_image_url")
+                            )
+                    )),
+            resultSet.getLong("turn")
     );
 
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
@@ -51,7 +52,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
         SqlParameterSource parameters = new MapSqlParameterSource()
                 .addValue("name", reservationWaiting.getName())
-                .addValue("reservation_id", reservationWaiting.getId());
+                .addValue("reservation_id", reservationWaiting.getReservation().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return ReservationWaiting.restore(id, reservationWaiting.getName(), reservationWaiting.getReservation());
     }
@@ -63,19 +64,21 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public List<ReservationWaiting> findByName(String name) {
+    public List<ReservationWaitingTurnResponse> findByName(String name) {
         String query = """
                 SELECT rw.id as reservation_waiting_id, rw.name,
-                       r.id as reservation_id, r.name, r.date,
+                       r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url,
+                       ROW_NUMBER() OVER(PARTITION BY r.id ORDER BY rw.id) as turn
                 FROM reservation_waiting rw
                 JOIN reservation r ON rw.reservation_id = r.id
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
                 WHERE rw.name = ?
-                ORDER BY r.date DESC, rt.start_at DESC
+                ORDER BY rw.id;
                 """;
+
         return jdbcTemplate.query(query, rowMapper, name);
     }
 

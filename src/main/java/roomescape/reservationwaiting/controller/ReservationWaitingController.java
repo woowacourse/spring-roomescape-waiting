@@ -1,14 +1,21 @@
 package roomescape.reservationwaiting.controller;
 
 import jakarta.validation.Valid;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
-import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
-import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
-import roomescape.reservationwaiting.service.ReservationWaitingService;
-
 import java.net.URI;
 import java.util.List;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
+import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
+import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
+import roomescape.reservationwaiting.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/waiting")
@@ -19,20 +26,21 @@ public class ReservationWaitingController {
         this.reservationWaitingService = reservationWaitingService;
     }
 
-   @PostMapping
-   public ResponseEntity<ReservationWaitingResponse> createWaiting(@Valid @RequestBody ReservationWaitingRequest request) {
-       ReservationWaitingResponse response = reservationWaitingService.createWaiting(request);
-       return ResponseEntity.created(URI.create("/waiting/" + response.id())).body(response);
-   }
+    @PostMapping
+    public ResponseEntity<ReservationWaitingResponse> createWaiting(
+            @Valid @RequestBody ReservationWaitingRequest request) {
+        ReservationWaitingResponse response = reservationWaitingService.createWaiting(request);
+        return ResponseEntity.created(URI.create("/waiting/" + response.id())).body(response);
+    }
 
     @GetMapping
-    public ResponseEntity<List<ReservationWaitingResponse>> getWaitingByName(@RequestParam String name) {
+    public ResponseEntity<List<ReservationWaitingTurnResponse>> getWaitingByName(@RequestParam String name) {
         return ResponseEntity.ok(reservationWaitingService.getWaitingByName(name));
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteWaiting(@PathVariable Long id) {
-       reservationWaitingService.deleteWaiting(id);
+        reservationWaitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();
     }
 }
