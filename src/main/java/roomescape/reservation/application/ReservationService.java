@@ -1,6 +1,7 @@
 package roomescape.reservation.application;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -52,11 +53,19 @@ public class ReservationService {
         ReservationTime time = timeRepository.getById(command.timeId());
         time.checkValidDateTime(command.date(), clock);
         Theme theme = themeRepository.getById(command.themeId());
+        Reservation reservation = command.toEntity(time, theme);
         if (reservationRepository.existsByReservationTimeAndThemeAndDate(time.getId(), theme.getId(), command.date())) {
-            throw new ReservationInUseException("이미 예약이 존재합니다.");
+            checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
+            reservation = reservation.pending(
+                    reservation.getName(),
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    reservation.getTheme(),
+                    clock
+            );
         }
         try {
-            return ReservationInfo.from(reservationRepository.save(command.toEntity(time, theme)));
+            return ReservationInfo.from(reservationRepository.save(reservation));
         } catch (DataIntegrityViolationException e) {
             throw new ReservationInUseException("이미 예약이 존재합니다.");
         }
@@ -99,13 +108,16 @@ public class ReservationService {
             throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
         }
 
-        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), command.date(),
-                command.username())) {
-            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
-        }
+        checkDuplicatePendingReservation(command.date(), command.username(), time, theme);
 
         Reservation pendingReservation = reservation.pending(command.username(), command.date(), time, theme, clock);
         reservationRepository.updateById(id, pendingReservation);
         return ReservationInfo.from(pendingReservation);
+    }
+
+    private void checkDuplicatePendingReservation(final LocalDate date, final String username, final ReservationTime time, final Theme theme) {
+        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), date, username)) {
+            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
+        }
     }
 }
