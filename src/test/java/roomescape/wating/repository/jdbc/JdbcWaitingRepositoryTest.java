@@ -1,5 +1,6 @@
 package roomescape.wating.repository.jdbc;
 
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,12 +11,23 @@ import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
 
 import java.sql.Time;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 class JdbcWaitingRepositoryTest {
+
+    private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
+            LocalDate.of(2026, 5, 8)
+                    .atTime(10, 30)
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toInstant(),
+            ZoneId.of("Asia/Seoul")
+    ));
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -34,9 +46,11 @@ class JdbcWaitingRepositoryTest {
         Theme theme = insertTheme("링", "공포 테마", "http:~");
         Waiting waiting = Waiting.create(
                 "코로구",
-                LocalDate.of(2026, 5, 26),
+                NOW.plusDays(1).toLocalDate(),
                 time,
-                theme);
+                theme,
+                NOW
+        );
 
         //when
         final Long savedWaitingId = jdbcWaitingRepository.save(waiting);

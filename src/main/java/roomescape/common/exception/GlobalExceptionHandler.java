@@ -31,6 +31,12 @@ public class GlobalExceptionHandler {
         return new ErrorResponse(exception.getMessage());
     }
 
+    @ResponseStatus(HttpStatus.UNPROCESSABLE_ENTITY)
+    @ExceptionHandler(UnprocessableContentException.class)
+    public ErrorResponse handleUnprocessableContentException(final UnprocessableContentException exception) {
+        return new ErrorResponse(exception.getMessage());
+    }
+
     // JSON 본문 파싱 실패, 파라미터 타입 변환 실패, 필수 쿼리 파라미터 누락
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler({

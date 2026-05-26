@@ -4,6 +4,7 @@ import lombok.Getter;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+import roomescape.wating.domain.exception.PastDateTimeWaitingException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -38,14 +39,34 @@ public class Waiting {
             final String customerName,
             final LocalDate date,
             final ReservationTime time,
-            final Theme theme
+            final Theme theme,
+            final LocalDateTime now
     ) {
-        return new Waiting(
+        final Waiting waiting = new Waiting(
                 null,
                 CustomerName.from(customerName),
                 date,
                 null,
                 time,
                 theme);
+
+        waiting.validateNotPast(now);
+
+        return waiting;
+    }
+
+
+    private void validateNotPast(final LocalDateTime now) {
+        if (isPast(now)) {
+            throw new PastDateTimeWaitingException();
+        }
+    }
+
+    private boolean isPast(final LocalDateTime now) {
+        return reservationDateTime().isBefore(now);
+    }
+
+    private LocalDateTime reservationDateTime() {
+        return LocalDateTime.of(reservationDate, time.getStartAt());
     }
 }
