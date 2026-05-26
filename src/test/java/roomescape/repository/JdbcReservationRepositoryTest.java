@@ -16,6 +16,8 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
+import roomescape.domain.reservationStatus.PendingStatus;
 
 @JdbcTest
 @Sql({"/schema.sql", "/test-data.sql"})
@@ -89,5 +91,39 @@ class JdbcReservationRepositoryTest {
                 time.getId()
         );
         return new ThemeSlot(id, theme, date, time, isReserved);
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 대한 대기 예약은 신청 순서대로 가져와진다")
+    void assignWaitingOrderByApplicationOrder() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+
+        List<Reservation> pendingReservations = jdbcReservationRepository.findByThemeSlotAndPending(
+                themeSlot.getId());
+
+        assertThat(pendingReservations.get(0).getName()).isEqualTo("브라운1");
+        assertThat(pendingReservations.get(1).getName()).isEqualTo("브라운2");
+        assertThat(pendingReservations.get(2).getName()).isEqualTo("브라운3");
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 대한 대기 예약은 전부 PENDING 상태다")
+    void findByThemeSlotAndPendingMustBePending(){
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+
+        List<Reservation> pendingReservations = jdbcReservationRepository.findByThemeSlotAndPending(
+                themeSlot.getId());
+
+        assertThat(pendingReservations.get(0).getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+        assertThat(pendingReservations.get(1).getReservationStatus()).isEqualTo(PendingStatus.getInstance());
+        assertThat(pendingReservations.get(2).getReservationStatus()).isEqualTo(PendingStatus.getInstance());
     }
 }
