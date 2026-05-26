@@ -691,7 +691,7 @@ class ReservationServiceTest {
                 // when & then
                 assertThatThrownBy(() -> reservationService.updateReservation(savedReservation.getId(), request))
                     .isInstanceOf(GeneralException.class)
-                    .hasMessage("이미 취소된 예약입니다.");
+                    .hasMessage("활성된 예약이 아닙니다.");
             }
 
             @Test
