@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>관리자 — 예약 시간</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>예약 시간 관리</h1>
+    <p class="muted"><a th:href="@{/admin}">← 관리자 홈</a></p>
+    <div class="panel">
+        <h2>시간 추가</h2>
+        <p class="muted">API: <code>POST /times</code> — 본문 <code>{"startAt": "10:00"}</code></p>
+        <div class="form-row">
+            <label>시작 시각 (HH:mm)
+                <input type="time" id="startAt" step="60" required/>
+            </label>
+            <button type="button" class="btn btn-primary" id="addBtn">추가</button>
+        </div>
+        <p id="formMsg" class="status-msg" style="display:none;"></p>
+    </div>
+    <div class="panel">
+        <h2>등록된 시간</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>시작</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+        <p id="empty" class="muted" style="display:none;">등록된 시간이 없습니다.</p>
+        <p id="err" class="status-msg err" style="display:none;"></p>
+    </div>
+</main>
+<script>
+    const rows = document.getElementById('rows');
+    const empty = document.getElementById('empty');
+    const err = document.getElementById('err');
+    const formMsg = document.getElementById('formMsg');
+
+    function showFormMsg(text, ok) {
+        formMsg.textContent = text;
+        formMsg.className = 'status-msg ' + (ok ? 'ok' : 'err');
+        formMsg.style.display = 'block';
+    }
+
+    async function load() {
+        err.style.display = 'none';
+        try {
+            const res = await fetch('/times');
+            if (!res.ok) throw new Error('조회 실패');
+            const list = await res.json();
+            rows.innerHTML = '';
+            empty.style.display = list.length ? 'none' : 'block';
+            for (const t of list) {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${t.id}</td>
+                    <td>${t.startAt}</td>
+                    <td><button type="button" class="btn btn-danger" data-id="${t.id}">삭제</button></td>`;
+                rows.appendChild(tr);
+            }
+            rows.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.addEventListener('click', () => remove(btn.dataset.id));
+            });
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    }
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const input = document.getElementById('startAt');
+        const v = input.value;
+        if (!v) {
+            showFormMsg('시간을 선택하세요.', false);
+            return;
+        }
+        formMsg.style.display = 'none';
+        try {
+            const res = await fetch('/times', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({startAt: v})
+            });
+            if (!res.ok) throw new Error('추가 실패');
+            showFormMsg('추가되었습니다.', true);
+            await load();
+        } catch (e) {
+            showFormMsg(e.message, false);
+        }
+    });
+
+    async function remove(id) {
+        if (!confirm('이 시간을 삭제할까요? (예약에 쓰이면 실패할 수 있습니다)')) return;
+        err.style.display = 'none';
+        try {
+            const res = await fetch('/times/' + id, {method: 'DELETE'});
+            if (!res.ok) throw new Error('삭제 실패');
+            await load();
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    }
+
+    load();
+</script>
+</body>
+</html>

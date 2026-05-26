@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>사용자 — 홈</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>사용자</h1>
+    <p class="lead">로그인 없이 이름만으로 예약합니다. 날짜·테마·시간을 고른 뒤 <code>POST /reservations</code>로 예약이 전송됩니다.</p>
+    <div class="card-grid">
+        <article class="card">
+            <h2>예약하기</h2>
+            <p>관리자가 등록한 시간 중, 선택한 날짜와 테마에 아직 예약이 없는 시간만 선택할 수 있습니다.</p>
+            <a class="btn btn-primary" th:href="@{/user/reserve}">예약 화면으로</a>
+        </article>
+        <article class="card">
+            <h2>인기 테마</h2>
+            <p>어제를 끝으로 최근 7일(게임 날짜) 예약 수가 많은 테마 상위 10개를 <code>/themes/most-reserved-themes</code>로 조회합니다.</p>
+            <a class="btn btn-primary" th:href="@{/user/popular}">인기 테마 보기</a>
+        </article>
+    </div>
+</main>
+</body>
+</html>

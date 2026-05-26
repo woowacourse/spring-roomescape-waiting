@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>사용자 — 예약</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>예약하기</h1>
+    <p class="muted"><a th:href="@{/user}">← 사용자 홈</a></p>
+    <div class="panel">
+        <h2>1. 날짜</h2>
+        <div class="form-row">
+            <label>게임 날짜
+                <input type="date" id="gameDate"/>
+            </label>
+        </div>
+    </div>
+    <div class="panel">
+        <h2>2. 테마</h2>
+        <p id="themeHint" class="muted">테마 목록을 불러오는 중…</p>
+        <div id="themePick" class="theme-pick" style="display:none;"></div>
+    </div>
+    <div class="panel">
+        <h2>3. 예약 가능한 시간</h2>
+        <p class="muted">같은 날짜·시간이라도 테마가 다르면 각각 예약할 수 있습니다.</p>
+        <div id="timeChips" class="time-chips"></div>
+        <p id="timeHint" class="muted">날짜와 테마를 먼저 선택하세요.</p>
+    </div>
+    <div class="panel">
+        <h2>4. 이름으로 예약</h2>
+        <div class="form-row">
+            <label>예약자 이름
+                <input type="text" id="memberName" maxlength="255" placeholder="이름"/>
+            </label>
+            <button type="button" class="btn btn-primary" id="submitBtn" disabled>예약 요청</button>
+        </div>
+        <p id="status" class="status-msg" style="display:none;"></p>
+    </div>
+</main>
+<script>
+    const gameDate = document.getElementById('gameDate');
+    const themePick = document.getElementById('themePick');
+    const themeHint = document.getElementById('themeHint');
+    const timeChips = document.getElementById('timeChips');
+    const timeHint = document.getElementById('timeHint');
+    const memberName = document.getElementById('memberName');
+    const submitBtn = document.getElementById('submitBtn');
+    const status = document.getElementById('status');
+
+    let themes = [];
+    let times = [];
+    let reservations = [];
+    let selectedThemeId = null;
+    let selectedTimeId = null;
+
+    function localYmd(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function showStatus(text, ok) {
+        status.textContent = text;
+        status.className = 'status-msg ' + (ok ? 'ok' : 'err');
+        status.style.display = 'block';
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    async function refreshReservations() {
+        const res = await fetch('/reservations');
+        if (!res.ok) throw new Error('예약 목록을 불러오지 못했습니다.');
+        reservations = await res.json();
+    }
+
+    function bookedTimeIds(dateStr, themeId) {
+        return new Set(
+            reservations
+                .filter(r => r.date === dateStr && r.theme.id === themeId)
+                .map(r => r.time.id)
+        );
+    }
+
+    function renderTimes() {
+        timeChips.innerHTML = '';
+        selectedTimeId = null;
+        submitBtn.disabled = true;
+        const dateStr = gameDate.value;
+        if (!dateStr || selectedThemeId == null) {
+            timeHint.textContent = '날짜와 테마를 먼저 선택하세요.';
+            return;
+        }
+        const taken = bookedTimeIds(dateStr, selectedThemeId);
+        const available = times.filter(t => !taken.has(t.id));
+        timeHint.textContent = available.length
+            ? '시간을 선택하세요.'
+            : '이 날짜·테마에 예약 가능한 시간이 없습니다. (관리자에게 시간 등록을 요청하세요)';
+        for (const t of times) {
+            const btn = document.createElement('button');
+            btn.type = 'button';
+            btn.className = 'time-chip';
+            const label = typeof t.startAt === 'string' ? t.startAt.slice(0, 5) : String(t.startAt).slice(0, 5);
+            btn.textContent = label;
+            const dis = taken.has(t.id);
+            btn.disabled = dis;
+            if (dis) btn.title = '이미 예약됨';
+            btn.addEventListener('click', () => {
+                if (btn.disabled) return;
+                selectedTimeId = t.id;
+                timeChips.querySelectorAll('.time-chip').forEach(b => b.classList.remove('selected'));
+                btn.classList.add('selected');
+                submitBtn.disabled = !memberName.value.trim();
+            });
+            timeChips.appendChild(btn);
+        }
+    }
+
+    function renderThemes() {
+        themePick.innerHTML = '';
+        if (!themes.length) {
+            themeHint.textContent = '등록된 테마가 없습니다. 관리자 화면에서 테마를 추가하세요.';
+            themePick.style.display = 'none';
+            return;
+        }
+        themeHint.textContent = '테마를 선택하세요.';
+        themePick.style.display = 'grid';
+        for (const th of themes) {
+            const b = document.createElement('button');
+            b.type = 'button';
+            b.className = 'theme-option' + (selectedThemeId === th.id ? ' selected' : '');
+            b.innerHTML = `
+                <img src="${escapeHtml(th.imageUrl)}" alt=""/>
+                <div class="t-name">${escapeHtml(th.name)}</div>
+                <div class="t-desc">${escapeHtml(th.description)}</div>`;
+            b.addEventListener('click', () => {
+                selectedThemeId = th.id;
+                themePick.querySelectorAll('.theme-option').forEach(el => el.classList.remove('selected'));
+                b.classList.add('selected');
+                renderTimes();
+            });
+            themePick.appendChild(b);
+        }
+    }
+
+    gameDate.addEventListener('change', () => {
+        renderTimes();
+    });
+
+    memberName.addEventListener('input', () => {
+        submitBtn.disabled = !(selectedTimeId && memberName.value.trim());
+    });
+
+    submitBtn.addEventListener('click', async () => {
+        status.style.display = 'none';
+        const body = {
+            name: memberName.value.trim(),
+            date: gameDate.value,
+            timeId: selectedTimeId,
+            themeId: selectedThemeId
+        };
+        try {
+            const res = await fetch('/reservations', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify(body)
+            });
+            if (!res.ok) throw new Error('예약에 실패했습니다.');
+            showStatus('예약이 완료되었습니다.', true);
+            await refreshReservations();
+            renderTimes();
+            memberName.value = '';
+            submitBtn.disabled = true;
+        } catch (e) {
+            showStatus(e.message, false);
+        }
+    });
+
+    (async function init() {
+        const today = new Date();
+        gameDate.value = localYmd(today);
+        try {
+            const [tr, ts, rr] = await Promise.all([
+                fetch('/themes'),
+                fetch('/times'),
+                fetch('/reservations')
+            ]);
+            if (!tr.ok || !ts.ok || !rr.ok) throw new Error('데이터를 불러오지 못했습니다.');
+            themes = await tr.json();
+            times = await ts.json();
+            reservations = await rr.json();
+            renderThemes();
+            renderTimes();
+        } catch (e) {
+            themeHint.textContent = e.message;
+        }
+    })();
+</script>
+</body>
+</html>

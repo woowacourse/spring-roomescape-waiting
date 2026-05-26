@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>사용자 — 인기 테마</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>인기 테마 TOP 10</h1>
+    <p class="muted"><a th:href="@{/user}">← 사용자 홈</a></p>
+    <p id="range" class="muted"></p>
+    <div id="list" class="popular-list"></div>
+    <p id="empty" class="muted" style="display:none;">해당 기간에 집계된 테마가 없습니다.</p>
+    <p id="err" class="status-msg err" style="display:none;"></p>
+</main>
+<script>
+    const listEl = document.getElementById('list');
+    const rangeEl = document.getElementById('range');
+    const empty = document.getElementById('empty');
+    const err = document.getElementById('err');
+
+    function localYmd(d) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+
+    function lastWeekGameDates() {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const end = new Date(today);
+        end.setDate(end.getDate() - 1);
+        const start = new Date(end);
+        start.setDate(start.getDate() - 6);
+        return {start, end};
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    (async function () {
+        const {start, end} = lastWeekGameDates();
+        const sd = localYmd(start);
+        const ed = localYmd(end);
+        rangeEl.textContent = `집계 구간(게임 날짜): ${sd} ~ ${ed}`;
+        const url = `/themes/most-reserved-themes?limit=10&startDate=${sd}&endDate=${ed}`;
+        err.style.display = 'none';
+        try {
+            const res = await fetch(url);
+            if (!res.ok) throw new Error('조회에 실패했습니다.');
+            const items = await res.json();
+            listEl.innerHTML = '';
+            const withCount = items.filter(x => x.reservationCount > 0);
+            empty.style.display = withCount.length ? 'none' : 'block';
+            let rank = 1;
+            for (const t of withCount) {
+                const div = document.createElement('div');
+                div.className = 'popular-item';
+                div.innerHTML = `
+                    <span class="rank">${rank++}</span>
+                    <img src="${escapeHtml(t.imageUrl)}" alt=""/>
+                    <div class="meta">
+                        <strong>${escapeHtml(t.name)}</strong>
+                        <div class="muted" style="font-size:0.85rem;">${escapeHtml(t.description)}</div>
+                    </div>
+                    <span class="count">${t.reservationCount}건</span>`;
+                listEl.appendChild(div);
+            }
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    })();
+</script>
+</body>
+</html>

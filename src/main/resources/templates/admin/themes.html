@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>관리자 — 테마</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>테마 관리</h1>
+    <p class="muted"><a th:href="@{/admin}">← 관리자 홈</a></p>
+    <div class="panel">
+        <h2>테마 추가</h2>
+        <p class="muted">API: <code>POST /themes</code> — 본문 <code>{"name","description","imageUrl"}</code> (201 Created)</p>
+        <div class="form-row">
+            <label>이름<input type="text" id="name" maxlength="255"/></label>
+            <label>설명<input type="text" id="description" maxlength="255"/></label>
+        </div>
+        <div class="form-row">
+            <label style="flex:1;min-width:240px;">썸네일 URL<input type="text" id="imageUrl" style="width:100%;"/></label>
+        </div>
+        <button type="button" class="btn btn-primary" id="addBtn">추가</button>
+        <p id="formMsg" class="status-msg" style="display:none;"></p>
+    </div>
+    <div class="panel">
+        <h2>등록된 테마</h2>
+        <table>
+            <thead>
+            <tr>
+                <th>ID</th>
+                <th>썸네일</th>
+                <th>이름</th>
+                <th>설명</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="rows"></tbody>
+        </table>
+        <p id="empty" class="muted" style="display:none;">등록된 테마가 없습니다.</p>
+        <p id="err" class="status-msg err" style="display:none;"></p>
+    </div>
+</main>
+<script>
+    const rows = document.getElementById('rows');
+    const empty = document.getElementById('empty');
+    const err = document.getElementById('err');
+    const formMsg = document.getElementById('formMsg');
+
+    function showFormMsg(text, ok) {
+        formMsg.textContent = text;
+        formMsg.className = 'status-msg ' + (ok ? 'ok' : 'err');
+        formMsg.style.display = 'block';
+    }
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({
+            '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+        }[c]));
+    }
+
+    async function load() {
+        err.style.display = 'none';
+        try {
+            const res = await fetch('/themes');
+            if (!res.ok) throw new Error('조회 실패');
+            const list = await res.json();
+            rows.innerHTML = '';
+            empty.style.display = list.length ? 'none' : 'block';
+            for (const t of list) {
+                const tr = document.createElement('tr');
+                const safeUrl = escapeHtml(t.imageUrl);
+                tr.innerHTML = `
+                    <td>${t.id}</td>
+                    <td><img src="${safeUrl}" alt="" width="56" height="56" style="object-fit:cover;border-radius:6px;background:var(--border);"/></td>
+                    <td>${escapeHtml(t.name)}</td>
+                    <td>${escapeHtml(t.description)}</td>
+                    <td><button type="button" class="btn btn-danger" data-id="${t.id}">삭제</button></td>`;
+                rows.appendChild(tr);
+            }
+            rows.querySelectorAll('button[data-id]').forEach(btn => {
+                btn.addEventListener('click', () => remove(btn.dataset.id));
+            });
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    }
+
+    document.getElementById('addBtn').addEventListener('click', async () => {
+        const name = document.getElementById('name').value.trim();
+        const description = document.getElementById('description').value.trim();
+        const imageUrl = document.getElementById('imageUrl').value.trim();
+        if (!name || !description || !imageUrl) {
+            showFormMsg('이름, 설명, URL을 모두 입력하세요.', false);
+            return;
+        }
+        formMsg.style.display = 'none';
+        try {
+            const res = await fetch('/themes', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({name, description, imageUrl})
+            });
+            if (!res.ok) throw new Error('추가 실패');
+            showFormMsg('추가되었습니다.', true);
+            document.getElementById('name').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('imageUrl').value = '';
+            await load();
+        } catch (e) {
+            showFormMsg(e.message, false);
+        }
+    });
+
+    async function remove(id) {
+        if (!confirm('이 테마를 삭제할까요?')) return;
+        err.style.display = 'none';
+        try {
+            const res = await fetch('/themes/' + id, {method: 'DELETE'});
+            if (!res.ok) throw new Error('삭제 실패');
+            await load();
+        } catch (e) {
+            err.textContent = e.message;
+            err.style.display = 'block';
+        }
+    }
+
+    load();
+</script>
+</body>
+</html>
