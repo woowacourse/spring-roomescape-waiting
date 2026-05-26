@@ -33,6 +33,10 @@ public class ReservationWaiting {
         this.createdAt = createdAt;
     }
 
+    public ReservationWaiting withReservationWaitingId(Long id) {
+        return new ReservationWaiting(id, this.name, this.date, this.time, this.theme, this.sequence, this.createdAt);
+    }
+
     public Long getId() {
         return id;
     }
