@@ -1,5 +1,6 @@
 SET REFERENTIAL_INTEGRITY FALSE;
 TRUNCATE TABLE reservation RESTART IDENTITY;
+TRUNCATE TABLE waiting RESTART IDENTITY;
 TRUNCATE TABLE reservation_time RESTART IDENTITY;
 TRUNCATE TABLE theme RESTART IDENTITY;
 SET REFERENTIAL_INTEGRITY TRUE;
@@ -25,3 +26,11 @@ VALUES ('user_b', '2026-06-05', 2, 1);
 -- 중복 검증용 (user_b가 2026-06-05/time_id=1로 변경 시 409, id=3)
 INSERT INTO reservation (name, date, time_id, theme_id)
 VALUES ('user_c', '2026-06-05', 1, 1);
+
+-- 예약 대기 데이터
+INSERT INTO waiting (name, date, time_id, theme_id, created_at)
+VALUES ('user_d', '2026-06-05', 2, 1, '2026-06-05 10:30:00');
+
+-- 과거 예약 대기 데이터
+INSERT INTO waiting (name, date, time_id, theme_id, created_at)
+VALUES ('user_d', '2026-04-28', 1, 1, '2026-04-27 10:30:00');
