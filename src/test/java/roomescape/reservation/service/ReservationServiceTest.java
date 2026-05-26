@@ -320,7 +320,7 @@ class ReservationServiceTest {
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
-        return reservationTimeRepository.save(new ReservationTime(startAt));
+        return reservationTimeRepository.save(ReservationTime.create(startAt));
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {

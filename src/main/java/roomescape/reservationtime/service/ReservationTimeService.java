@@ -26,7 +26,7 @@ public class ReservationTimeService {
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
-        ReservationTime reservationTime = new ReservationTime(startAt);
+        ReservationTime reservationTime = ReservationTime.create(startAt);
         validateNotDuplicated(reservationTime);
 
         return reservationTimeRepository.save(reservationTime);

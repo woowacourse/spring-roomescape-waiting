@@ -1,5 +1,6 @@
 package roomescape.theme.domain;
 
+import lombok.Getter;
 import roomescape.common.exception.DomainException;
 
 import java.time.LocalDateTime;
@@ -9,6 +10,7 @@ import static roomescape.common.domain.DomainPreconditions.require;
 import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
 import static roomescape.theme.exception.ThemeErrorCode.*;
 
+@Getter
 public class Theme {
     private final Long id;
     private final String name;
@@ -58,26 +60,6 @@ public class Theme {
         requireNonBlank(name, new DomainException(INVALID_THEME_NAME));
         requireNonBlank(description, new DomainException(INVALID_THEME_DESCRIPTION));
         requireNonBlank(thumbnail, new DomainException(INVALID_THEME_THUMBNAIL));
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public String getDescription() {
-        return description;
-    }
-
-    public String getThumbnail() {
-        return thumbnail;
-    }
-
-    public LocalDateTime getDeletedAt() {
-        return deletedAt;
     }
 
     @Override

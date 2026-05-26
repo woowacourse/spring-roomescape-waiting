@@ -45,9 +45,9 @@ class ReservationTimeControllerTest {
     public void getReservationTimeList() throws Exception {
         // given
         List<ReservationTime> times = List.of(
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                new ReservationTime(2L, LocalTime.of(12, 0)),
-                new ReservationTime(3L, LocalTime.of(14, 0))
+                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                ReservationTime.of(2L, LocalTime.of(12, 0)),
+                ReservationTime.of(3L, LocalTime.of(14, 0))
         );
         given(reservationTimeService.findAllReservationTimes()).willReturn(times);
 
@@ -88,8 +88,8 @@ class ReservationTimeControllerTest {
         // given
         LocalDate date = LocalDate.of(2023, 8, 5);
         Long themeId = 1L;
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        ReservationTime time2 = new ReservationTime(2L, LocalTime.of(12, 0));
+        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
+        ReservationTime time2 = ReservationTime.of(2L, LocalTime.of(12, 0));
         List<ReservationTimeAvailability> timeAvailabilities = List.of(
                 ReservationTimeAvailability.available(time),
                 ReservationTimeAvailability.unavailable(time2)

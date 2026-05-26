@@ -46,7 +46,7 @@ class JdbcReservationTimeRepositoryTest {
     void save() {
 
         // given
-        ReservationTime reservationTime = new ReservationTime(LocalTime.of(10, 0));
+        ReservationTime reservationTime = ReservationTime.create(LocalTime.of(10, 0));
 
         // given
         ReservationTime saved = reservationTimeRepository.save(reservationTime);
@@ -227,7 +227,7 @@ class JdbcReservationTimeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), startAt);
+        return ReservationTime.of(getGeneratedId(keyHolder), startAt);
     }
 
     private ReservationTime insertDeletedReservationTime(LocalTime startAt) {
@@ -243,7 +243,7 @@ class JdbcReservationTimeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        return new ReservationTime(getGeneratedId(keyHolder), startAt);
+        return ReservationTime.of(getGeneratedId(keyHolder), startAt);
     }
 
     private Theme insertTheme(String name, String description, String thumbnail) {
