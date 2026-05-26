@@ -22,7 +22,7 @@ CREATE TABLE time_slot
 
 CREATE TABLE waiting
 (
-    created_at      TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     name            VARCHAR(250) NOT NULL,
     date            DATE         NOT NULL,
     time_id         BIGINT       NOT NULL,

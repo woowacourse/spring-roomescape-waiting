@@ -1,5 +1,7 @@
 package roomescape.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
@@ -38,9 +40,28 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약을 저장한다.")
+    @DisplayName("예약 대기를 저장한다.")
     void save() {
         WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
         jdbcWaitingRepository.insert(waiting);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 삭제한다.")
+    void delete() {
+        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        jdbcWaitingRepository.insert(waiting);
+        jdbcWaitingRepository.delete(waiting);
+    }
+
+    @Test
+    @DisplayName("예약 대기 순번을 계산한다.")
+    void calculateWaitingNumber() {
+        WaitingCommand waiting1 = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        WaitingCommand waiting2 = new WaitingCommand("워니", LocalDate.now(), 1L, 1L);
+        jdbcWaitingRepository.insert(waiting1);
+        jdbcWaitingRepository.insert(waiting2);
+
+        assertThat(jdbcWaitingRepository.calculateWaitingNumberByName(waiting2)).isEqualTo(2);
     }
 }
