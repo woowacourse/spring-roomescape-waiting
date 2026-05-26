@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static roomescape.config.FixedClockConfig.NOW_TIME;
 import static roomescape.config.FixedClockConfig.TODAY;
 
@@ -30,7 +31,7 @@ public class WaitingDaoTest {
     private final Description description = Description.parse("너무무서워");
     private final ThumbnailUrl url = ThumbnailUrl.parse("/images/horror");
     private final Theme theme = new Theme(1L, themeName, description, url);
-    private final LocalDateTime createdAt =  LocalDateTime.of(
+    private final LocalDateTime createdAt = LocalDateTime.of(
             LocalDate.parse(TODAY),
             LocalTime.parse(NOW_TIME)
     );
@@ -39,7 +40,7 @@ public class WaitingDaoTest {
     private WaitingDao waitingDao;
 
     @Test
-    void 예약_대기를_생성할_수_있다(){
+    void 예약_대기를_생성할_수_있다() {
         // given
         Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
 
@@ -52,5 +53,12 @@ public class WaitingDaoTest {
         assertThat(saved.getDate()).isEqualTo(waiting.getDate());
         assertThat(saved.getTime()).isEqualTo(waiting.getTime());
         assertThat(saved.getTheme()).isEqualTo(waiting.getTheme());
+    }
+
+    @Test
+    void 예약_삭제_정상_테스트() {
+        Long id = 1L;
+
+        assertDoesNotThrow(() -> waitingDao.delete(id));
     }
 }

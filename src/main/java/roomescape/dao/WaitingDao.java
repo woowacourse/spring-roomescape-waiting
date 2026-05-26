@@ -68,6 +68,15 @@ public class WaitingDao {
         );
     }
 
+    public void delete(Long id) {
+        String sql = """
+                DELETE FROM waiting 
+                       WHERE id = ?
+                """;
+
+        jdbcTemplate.update(sql, id);
+    }
+
     public boolean existsBy(Waiting waiting) {
         String sql = """
                 SELECT EXISTS(
