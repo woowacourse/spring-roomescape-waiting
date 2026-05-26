@@ -1,0 +1,111 @@
+package roomescape.dao;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
+import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
+
+class ReservationDaoTest {
+
+    private EmbeddedDatabase dataSource;
+    private ReservationDao reservationDao;
+
+    @BeforeEach
+    void setUp() {
+        dataSource = new EmbeddedDatabaseBuilder()
+                .setType(EmbeddedDatabaseType.H2)
+                .addScript("classpath:schema.sql")
+                .addScript("classpath:data.sql")
+                .build();
+        reservationDao = new ReservationDao(new JdbcTemplate(dataSource));
+    }
+
+    @AfterEach
+    void tearDown() {
+        dataSource.shutdown();
+    }
+
+    @Test
+    void findAll_전체_예약_조회() {
+        List<Reservation> reservations = reservationDao.findAll(0, 100);
+
+        assertThat(reservations).isNotEmpty();
+        assertThat(reservations).allMatch(r -> r.getName() != null && r.getDate() != null);
+    }
+
+    @Test
+    void findByName_이름으로_예약_조회() {
+        List<Reservation> reservations = reservationDao.findByName("김철수");
+
+        assertThat(reservations).hasSize(4);
+        assertThat(reservations).allMatch(r -> r.getName().equals("김철수"));
+    }
+
+    @Test
+    void findByName_없는_이름이면_빈_목록() {
+        List<Reservation> reservations = reservationDao.findByName("없는사람");
+
+        assertThat(reservations).isEmpty();
+    }
+
+    @Test
+    void save_예약_저장() {
+        ReservationTime time = new ReservationTime(1L, java.time.LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "공포의 저택", "설명", "https://example.com/img.jpg");
+        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 12, 31), LocalDateTime.now(), time, theme);
+
+        Reservation saved = reservationDao.save(reservation);
+
+        assertThat(saved.getId()).isNotNull();
+        assertThat(saved.getName()).isEqualTo("브라운");
+    }
+
+    @Test
+    void delete_예약_삭제() {
+        int beforeSize = reservationDao.findAll(0, 100).size();
+        reservationDao.delete(1L);
+
+        assertThat(reservationDao.findAll(0, 100)).hasSize(beforeSize - 1);
+    }
+
+    @Test
+    void existsByTimeId_사용중이면_true() {
+        assertThat(reservationDao.existsByTimeId(3L)).isTrue();
+    }
+
+    @Test
+    void existsByTimeId_미사용이면_false() {
+        assertThat(reservationDao.existsByTimeId(12L)).isFalse();
+    }
+
+    @Test
+    void existsByThemeId_사용중이면_true() {
+        assertThat(reservationDao.existsByThemeId(1L)).isTrue();
+    }
+
+    @Test
+    void existsByThemeId_미사용이면_false() {
+        assertThat(reservationDao.existsByThemeId(99L)).isFalse();
+    }
+
+    @Test
+    void existsByDateAndTimeIdAndThemeId_존재하면_true() {
+        assertThat(reservationDao.existsByDateAndTimeIdAndThemeId(LocalDate.of(2026, 4, 29), 3L, 1L)).isTrue();
+    }
+
+    @Test
+    void existsByDateAndTimeIdAndThemeId_없으면_false() {
+        assertThat(reservationDao.existsByDateAndTimeIdAndThemeId(LocalDate.of(2026, 12, 31), 3L, 1L)).isFalse();
+    }
+}
