@@ -23,4 +23,7 @@ public class ReservationWaitingRepository {
     public Optional<ReservationWaiting> findById(Long id) {
         return null;
     }
+
+    public void delete(Long id) {
+    }
 }

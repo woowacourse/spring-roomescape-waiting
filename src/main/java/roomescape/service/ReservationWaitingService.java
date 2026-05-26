@@ -1,6 +1,10 @@
 package roomescape.service;
 
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
@@ -62,4 +66,12 @@ public class ReservationWaitingService {
                             turn);
                 }).toList();
     }
+
+    public void delete(Long id, String name) {
+        ReservationWaiting waiting = reservationWaitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+        // todo: 본인의 예약 대기인지 검증 로직 추가
+        reservationWaitingRepository.delete(id);
+    }
+
 }

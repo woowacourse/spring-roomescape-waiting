@@ -2,6 +2,7 @@ package roomescape.controller.user;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Positive;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -45,12 +46,11 @@ public class ReservationWaitingController {
         return ResponseEntity.ok(reservationWaitings);
     }
 
-    // todo: 예약 대기 삭제 API 구현
-//    @DeleteMapping("/{id}")
-//    public ResponseEntity<Void> deleteReservation(
-//            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
-//            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
-//        service.delete(id, name);
-//        return ResponseEntity.noContent().build();
-//    }
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteReservation(
+            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
+            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
+        service.delete(id, name);
+        return ResponseEntity.noContent().build();
+    }
 }
