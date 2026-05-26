@@ -3,6 +3,7 @@ package roomescape.dao;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -75,6 +76,25 @@ public class WaitingDao {
                 """;
 
         jdbcTemplate.update(sql, id);
+    }
+
+    public Optional<Waiting> findById(Long id) {
+        String sql = """
+                SELECT w.id, w.name, w.date, w.created_at,
+                       rt.id AS time_id, rt.start_at,
+                       t.id AS theme_id, t.name AS theme_name, t.description, t.url
+                FROM waiting w
+                INNER JOIN reservation_time rt ON r.time_id = rt.id
+                INNER JOIN theme t ON r.theme_id = t.id
+                WHERE w.id = ?
+                """;
+
+        return jdbcTemplate.query(
+                        sql,
+                        WAITING_ROW_MAPPER,
+                        id
+                ).stream()
+                .findFirst();
     }
 
     public boolean existsBy(Waiting waiting) {

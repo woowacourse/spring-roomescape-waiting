@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static roomescape.config.FixedClockConfig.NOW_TIME;
@@ -63,11 +64,12 @@ class WaitingServiceTest {
 
     @BeforeEach
     public void setUp() {
-        waitingService = new WaitingService(this.reservationDao, this.waitingDao, this.reservationTimeDao, this.themeDao);
+        waitingService = new WaitingService(this.reservationDao, this.waitingDao, this.reservationTimeDao,
+                this.themeDao);
     }
 
     @Test
-    public void 예약_생성_정상_테스트() {
+    public void 예약_대기_생성_정상_테스트() {
         WaitingCommand command = new WaitingCommand(
                 userName,
                 date,
@@ -96,5 +98,21 @@ class WaitingServiceTest {
         assertThat(result.timeResult()).isEqualTo(ReservationTimeResult.from(saved.getTime()));
         assertThat(result.themeResult()).isEqualTo(ThemeResult.from(saved.getTheme()));
         assertThat(result.createdAt()).isEqualTo(saved.getCreatedAt());
+    }
+
+    @Test
+    public void 예약_대기_삭제_정상_테스트() {
+        Waiting origin = new Waiting(
+                waitingId,
+                UserName.parse(userName),
+                date,
+                time,
+                theme,
+                createAt
+        );
+
+        given(waitingDao.findById(waitingId)).willReturn(Optional.of(origin));
+
+        assertDoesNotThrow(() -> waitingService.delete(waitingId, userName));
     }
 }

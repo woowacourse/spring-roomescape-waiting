@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.dao.ReservationDao;
@@ -59,5 +60,16 @@ public class WaitingService {
         Waiting saved = waitingDao.save(waiting);
 
         return WaitingResult.from(saved);
+    }
+
+    public void delete(Long id, String userName) {
+        Waiting origin = waitingDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약 대기가 존재하지 않습니다."));
+
+        if (!userName.equals(origin.getName().value())) {
+            throw new ForbiddenException("다른 사람의 예약 대기는 삭제할 수 없습니다.");
+        }
+
+        reservationDao.delete(id);
     }
 }
