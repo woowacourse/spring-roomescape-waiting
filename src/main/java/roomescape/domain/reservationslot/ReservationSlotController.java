@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationslot;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
@@ -14,10 +14,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservation.dto.ReservationResponse;
 
 @Validated
 @RestController
@@ -35,12 +35,12 @@ public class ReservationSlotController {
     }
 
     @GetMapping("/reservations")
-    public ResponseEntity<UserReservationResponse> getUserReservations(
+    public ResponseEntity<ReservationResponse> getUserReservations(
         @RequestParam
         @NotBlank(message = "예약자 이름은 필수 입력값 입니다.")
         String name
     ) {
-        UserReservationResponse response = reservationService.getUserReservations(name);
+        ReservationResponse response = reservationService.getUserReservations(name);
         return ResponseEntity.ok(response);
     }
 

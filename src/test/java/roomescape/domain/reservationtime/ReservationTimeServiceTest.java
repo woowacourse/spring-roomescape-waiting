@@ -11,7 +11,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeRequest;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeResponse;

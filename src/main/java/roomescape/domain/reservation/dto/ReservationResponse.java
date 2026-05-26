@@ -4,18 +4,18 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
-public record UserReservationResponse(
+public record ReservationResponse(
     String name,
     List<ReservationSlotPayload> reservation
 ) {
 
-    public static UserReservationResponse of(String name, List<ReservationSlot> reservation) {
-        return new UserReservationResponse(
+    public static ReservationResponse of(String name, List<ReservationSlot> reservation) {
+        return new ReservationResponse(
             name,
             reservation.stream()
                 .map(ReservationSlotPayload::from)

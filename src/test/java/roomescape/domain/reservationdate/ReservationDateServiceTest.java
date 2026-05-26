@@ -10,7 +10,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse;

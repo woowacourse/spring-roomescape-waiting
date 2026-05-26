@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationslot;
 
 import lombok.Getter;
 import roomescape.domain.reservationdate.ReservationDate;

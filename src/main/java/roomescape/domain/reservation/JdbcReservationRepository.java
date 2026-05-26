@@ -1,4 +1,4 @@
-package roomescape.domain.userreservation;
+package roomescape.domain.reservation;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
@@ -11,7 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -19,7 +19,7 @@ import roomescape.domain.user.User;
 
 @Repository
 @RequiredArgsConstructor
-public class JdbcUserReservationRepository implements UserReservationRepository {
+public class JdbcReservationRepository implements ReservationRepository {
 
     private static final String COLUMN_ID = "user_reservation_id";
     private static final String COLUMN_USER_ID = "user_id";
@@ -188,7 +188,7 @@ public class JdbcUserReservationRepository implements UserReservationRepository 
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public UserReservation save(UserReservation userReservation) {
+    public Reservation save(Reservation userReservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(INSERT_SQL, new String[]{"id"});
@@ -205,22 +205,22 @@ public class JdbcUserReservationRepository implements UserReservationRepository 
             return ps;
         }, keyHolder);
         long id = extractId(keyHolder);
-        return UserReservation.createWithId(id, userReservation);
+        return Reservation.createWithId(id, userReservation);
     }
 
     @Override
-    public List<UserReservation> findAll() {
+    public List<Reservation> findAll() {
         return jdbcTemplate.query(FIND_ALL_SQL, userReservationRowMapper());
     }
 
     @Override
-    public Optional<UserReservation> findById(Long id) {
-        List<UserReservation> result = jdbcTemplate.query(FIND_BY_ID_SQL, userReservationRowMapper(), id);
+    public Optional<Reservation> findById(Long id) {
+        List<Reservation> result = jdbcTemplate.query(FIND_BY_ID_SQL, userReservationRowMapper(), id);
         return result.stream().findFirst();
     }
 
     @Override
-    public List<UserReservation> findByUserId(Long userId) {
+    public List<Reservation> findByUserId(Long userId) {
         return jdbcTemplate.query(FIND_BY_USER_ID_SQL, userReservationRowMapper(), userId);
     }
 
@@ -234,12 +234,12 @@ public class JdbcUserReservationRepository implements UserReservationRepository 
     }
 
     @Override
-    public List<UserReservation> findAllByReservationIdOrder(Long reservationId) {
+    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
         return jdbcTemplate.query(FIND_ALL_BY_RESERVATION_ID_ORDER_SQL, userReservationRowMapper(), reservationId);
     }
 
     @Override
-    public Optional<UserReservation> update(Long id, UserReservation userReservation) {
+    public Optional<Reservation> update(Long id, Reservation userReservation) {
         int updatedCount = jdbcTemplate.update(
             UPDATE_SQL,
             userReservation.getReservation().getId(),
@@ -273,7 +273,7 @@ public class JdbcUserReservationRepository implements UserReservationRepository 
     }
 
     @Override
-    public void updateWaitingNumbers(List<UserReservation> userReservations) {
+    public void updateWaitingNumbers(List<Reservation> userReservations) {
         AtomicLong waitingNumber = new AtomicLong(0L);
         jdbcTemplate.batchUpdate(
             UPDATE_WAITING_NUMBER_SQL,
@@ -286,8 +286,8 @@ public class JdbcUserReservationRepository implements UserReservationRepository 
         );
     }
 
-    private RowMapper<UserReservation> userReservationRowMapper() {
-        return (rs, rowNum) -> UserReservation.of(
+    private RowMapper<Reservation> userReservationRowMapper() {
+        return (rs, rowNum) -> Reservation.of(
             rs.getLong(COLUMN_ID),
             ReservationSlot.of(
                 rs.getLong(COLUMN_RESERVATION_ID),

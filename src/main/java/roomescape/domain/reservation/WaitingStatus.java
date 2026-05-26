@@ -1,4 +1,4 @@
-package roomescape.domain.userreservation;
+package roomescape.domain.reservation;
 
 public enum WaitingStatus {
     CONFIRMED,

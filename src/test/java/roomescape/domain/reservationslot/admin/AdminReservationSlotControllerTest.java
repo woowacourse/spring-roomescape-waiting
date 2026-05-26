@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.admin;
+package roomescape.domain.reservationslot.admin;
 
 
 import static org.mockito.ArgumentMatchers.any;
@@ -22,10 +22,10 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.reservation.ReservationSlotService;
-import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
-import roomescape.domain.reservation.admin.dto.ReservationSlotResponse.ReservationTimePayload;
-import roomescape.domain.reservation.admin.dto.ReservationSlotResponse.ThemePayload;
+import roomescape.domain.reservationslot.ReservationSlotService;
+import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse;
+import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse.ReservationTimePayload;
+import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse.ThemePayload;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.support.auth.AdminRequestValidator;

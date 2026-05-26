@@ -1,9 +1,9 @@
-package roomescape.domain.reservation.dto;
+package roomescape.domain.reservationslot.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.theme.Theme;
 
 public record CreateReservationSlotResponse(

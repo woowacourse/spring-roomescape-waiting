@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.admin;
+package roomescape.domain.reservationslot.admin;
 
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.is;

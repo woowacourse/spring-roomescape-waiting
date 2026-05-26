@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationslot;
 
 import java.sql.PreparedStatement;
 import java.sql.Statement;

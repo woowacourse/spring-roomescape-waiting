@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationslot;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -14,17 +14,17 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
-import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
-import roomescape.domain.userreservation.UserReservation;
-import roomescape.domain.userreservation.WaitingStatus;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.WaitingStatus;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.fake.FakeReservationDateRepository;
@@ -32,7 +32,7 @@ import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeReservationTimeRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeUserRepository;
-import roomescape.support.fake.FakeUserReservationRepository;
+import roomescape.support.fake.FakeReservationRepository;
 
 class ReservationSlotServiceTest {
 
@@ -42,7 +42,7 @@ class ReservationSlotServiceTest {
     private FakeReservationDateRepository reservationDateRepository;
     private FakeThemeRepository themeRepository;
     private FakeUserRepository userRepository;
-    private FakeUserReservationRepository userReservationRepository;
+    private FakeReservationRepository userReservationRepository;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +51,7 @@ class ReservationSlotServiceTest {
         reservationDateRepository = new FakeReservationDateRepository();
         themeRepository = new FakeThemeRepository();
         userRepository = new FakeUserRepository();
-        userReservationRepository = new FakeUserReservationRepository();
+        userReservationRepository = new FakeReservationRepository();
     }
 
     @Test
@@ -215,7 +215,7 @@ class ReservationSlotServiceTest {
                 theme
             )
         );
-        userReservationRepository.save(UserReservation.createWithoutId(
+        userReservationRepository.save(Reservation.createWithoutId(
             secondReservation,
             user,
             null,
@@ -223,7 +223,7 @@ class ReservationSlotServiceTest {
             LocalDateTime.of(2026, 5, 12, 13, 0),
             LocalDateTime.of(2026, 5, 12, 13, 0)
         ));
-        userReservationRepository.save(UserReservation.createWithoutId(
+        userReservationRepository.save(Reservation.createWithoutId(
             firstReservation,
             user,
             null,
@@ -242,7 +242,7 @@ class ReservationSlotServiceTest {
         );
 
         // when
-        UserReservationResponse userReservations = reservationService.getUserReservations(name);
+        ReservationResponse userReservations = reservationService.getUserReservations(name);
 
         // then
         assertSoftly(softly -> {

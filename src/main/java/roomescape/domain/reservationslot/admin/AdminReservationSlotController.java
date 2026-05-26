@@ -1,4 +1,4 @@
-package roomescape.domain.reservation.admin;
+package roomescape.domain.reservationslot.admin;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.reservation.ReservationSlotService;
-import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
+import roomescape.domain.reservationslot.ReservationSlotService;
+import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse;
 import roomescape.support.auth.AdminRequestValidator;
 
 @RestController

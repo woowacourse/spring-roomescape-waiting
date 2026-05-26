@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationslot;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -8,11 +8,11 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.reservation.admin.dto.ReservationSlotResponse;
-import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservationslot.admin.dto.ReservationSlotResponse;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateRepository;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -21,16 +21,16 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.user.User;
 import roomescape.domain.user.UserRepository;
-import roomescape.domain.userreservation.UserReservation;
-import roomescape.domain.userreservation.UserReservationRepository;
-import roomescape.domain.userreservation.WaitingStatus;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.WaitingStatus;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.errors.ReservationDateErrors;
 import roomescape.support.exception.errors.ReservationSlotErrors;
 import roomescape.support.exception.errors.ReservationTimeErrors;
 import roomescape.support.exception.errors.ThemeErrors;
-import roomescape.support.exception.errors.UserReservationErrors;
+import roomescape.support.exception.errors.ReservationErrors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,7 +39,7 @@ public class ReservationSlotService {
     private final ReservationSlotRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationDateRepository reservationDateRepository;
-    private final UserReservationRepository userReservationRepository;
+    private final ReservationRepository userReservationRepository;
     private final ThemeRepository themeRepository;
     private final UserRepository userRepository;
 
@@ -62,7 +62,7 @@ public class ReservationSlotService {
         Long reservationCount = userReservationRepository.countByReservationId(reservation.getId());
         WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
         LocalDateTime now = LocalDateTime.now(clock);
-        UserReservation userReservation = UserReservation.createWithoutId(
+        Reservation userReservation = Reservation.createWithoutId(
             reservation,
             user,
             reservationCount,
@@ -112,13 +112,13 @@ public class ReservationSlotService {
             .toList();
     }
 
-    public UserReservationResponse getUserReservations(String name) {
+    public ReservationResponse getUserReservations(String name) {
         User user = userRepository.findByName(name)
             .orElseThrow(() -> new NotFoundException(ReservationSlotErrors.RESERVATION_NOT_FOUND));
         List<ReservationSlot> reservations = userReservationRepository.findByUserId(user.getId()).stream()
-            .map(UserReservation::getReservation)
+            .map(Reservation::getReservation)
             .toList();
-        return UserReservationResponse.of(name, reservations);
+        return ReservationResponse.of(name, reservations);
     }
 
     public void cancelReservationByAdmin(Long id) {
@@ -134,8 +134,8 @@ public class ReservationSlotService {
 
     @Transactional
     public void updateReservation(Long id, UpdateReservationSlotRequest request) {
-        UserReservation userReservation = userReservationRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(UserReservationErrors.USER_RESERVATION_NOT_FOUND));
+        Reservation userReservation = userReservationRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
 
         ReservationSlot reservation = userReservation.getReservation();
 
@@ -152,7 +152,7 @@ public class ReservationSlotService {
         Long reservationCount = userReservationRepository.countByReservationId(reservation.getId());
         WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
 
-        UserReservation updatedUserReservation = UserReservation.createWithoutId(
+        Reservation updatedUserReservation = Reservation.createWithoutId(
                 updatedReservation,
                 user,
                 reservationCount,
@@ -162,13 +162,13 @@ public class ReservationSlotService {
         );
 
         userReservationRepository.update(userReservation.getId(), updatedUserReservation)
-                .orElseThrow(() -> new NotFoundException(UserReservationErrors.USER_RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
 
         reorderWaitingNumbers(reservation);
     }
 
     private void reorderWaitingNumbers(ReservationSlot reservation) {
-        List<UserReservation> userReservations = userReservationRepository.findAllByReservationIdOrder(reservation.getId());
+        List<Reservation> userReservations = userReservationRepository.findAllByReservationIdOrder(reservation.getId());
         userReservationRepository.updateWaitingNumbers(userReservations);
         userReservationRepository.updateStatus(userReservations.getFirst().getId(), WaitingStatus.CONFIRMED);
     }

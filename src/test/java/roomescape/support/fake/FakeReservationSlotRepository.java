@@ -7,8 +7,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import roomescape.domain.reservation.ReservationSlot;
-import roomescape.domain.reservation.ReservationSlotRepository;
+import roomescape.domain.reservationslot.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.domain.theme.Theme;
 
 public class FakeReservationSlotRepository implements ReservationSlotRepository {

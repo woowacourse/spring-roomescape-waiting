@@ -3,7 +3,7 @@ package roomescape.domain.reservationdate;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservation.ReservationSlotRepository;
+import roomescape.domain.reservationslot.ReservationSlotRepository;
 import roomescape.domain.reservationdate.admin.dto.AdminReservationDateResponse;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateRequest;
 import roomescape.domain.reservationdate.admin.dto.CreateReservationDateResponse;

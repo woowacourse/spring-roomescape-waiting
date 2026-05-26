@@ -1,4 +1,4 @@
-package roomescape.domain.reservation;
+package roomescape.domain.reservationslot;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -22,11 +22,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.domain.reservation.dto.CreateReservationSlotRequest;
-import roomescape.domain.reservation.dto.CreateReservationSlotResponse;
-import roomescape.domain.reservation.dto.CreateReservationSlotResponse.ThemePayload;
-import roomescape.domain.reservation.dto.UpdateReservationSlotRequest;
-import roomescape.domain.reservation.dto.UserReservationResponse;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotRequest;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse;
+import roomescape.domain.reservationslot.dto.CreateReservationSlotResponse.ThemePayload;
+import roomescape.domain.reservationslot.dto.UpdateReservationSlotRequest;
+import roomescape.domain.reservation.dto.ReservationResponse;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
@@ -102,7 +102,7 @@ class ReservationSlotControllerTest {
     void getUserReservations() throws Exception {
         // given
         String name = "보예";
-        UserReservationResponse response = UserReservationResponse.of("보예",
+        ReservationResponse response = ReservationResponse.of("보예",
             List.of(ReservationSlot.of(1L, ReservationDate.of(1L, LocalDate.of(2026, 5, 17)),
                     ReservationTime.of(1L, LocalTime.of(10, 10)),
                     Theme.of(1L, "공포", "아무서워", "theme-url")

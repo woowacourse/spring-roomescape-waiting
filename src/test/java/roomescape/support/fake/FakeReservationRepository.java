@@ -6,40 +6,40 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import roomescape.domain.userreservation.UserReservation;
-import roomescape.domain.userreservation.UserReservationRepository;
-import roomescape.domain.userreservation.WaitingStatus;
+import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.reservation.WaitingStatus;
 
-public class FakeUserReservationRepository implements UserReservationRepository {
+public class FakeReservationRepository implements ReservationRepository {
 
-    private final Map<Long, UserReservation> storage = new LinkedHashMap<>();
+    private final Map<Long, Reservation> storage = new LinkedHashMap<>();
     private long sequence = 1L;
 
     @Override
-    public UserReservation save(UserReservation userReservation) {
+    public Reservation save(Reservation userReservation) {
         Long id = userReservation.getId();
         if (id == null) {
             id = sequence++;
         } else {
             sequence = Math.max(sequence, id + 1);
         }
-        UserReservation savedUserReservation = UserReservation.createWithId(id, userReservation);
+        Reservation savedUserReservation = Reservation.createWithId(id, userReservation);
         storage.put(id, savedUserReservation);
         return savedUserReservation;
     }
 
     @Override
-    public List<UserReservation> findAll() {
+    public List<Reservation> findAll() {
         return new ArrayList<>(storage.values());
     }
 
     @Override
-    public Optional<UserReservation> findById(Long id) {
+    public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(storage.get(id));
     }
 
     @Override
-    public List<UserReservation> findByUserId(Long userId) {
+    public List<Reservation> findByUserId(Long userId) {
         return storage.values().stream()
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
             .toList();
@@ -53,32 +53,32 @@ public class FakeUserReservationRepository implements UserReservationRepository 
     }
 
     @Override
-    public List<UserReservation> findAllByReservationIdOrder(Long reservationId) {
+    public List<Reservation> findAllByReservationIdOrder(Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> reservationId.equals(userReservation.getReservation().getId()))
             .filter(userReservation -> userReservation.getStatus() == WaitingStatus.WAITING)
-            .sorted(Comparator.comparing(UserReservation::getUpdatedAt)
-                .thenComparing(UserReservation::getId))
+            .sorted(Comparator.comparing(Reservation::getUpdatedAt)
+                .thenComparing(Reservation::getId))
             .toList();
     }
 
     @Override
-    public Optional<UserReservation> update(Long id, UserReservation userReservation) {
+    public Optional<Reservation> update(Long id, Reservation userReservation) {
         if (!storage.containsKey(id)) {
             return Optional.empty();
         }
-        UserReservation updatedUserReservation = UserReservation.createWithId(id, userReservation);
+        Reservation updatedUserReservation = Reservation.createWithId(id, userReservation);
         storage.put(id, updatedUserReservation);
         return Optional.of(updatedUserReservation);
     }
 
     @Override
     public void updateStatus(Long id, WaitingStatus status) {
-        UserReservation userReservation = storage.get(id);
+        Reservation userReservation = storage.get(id);
         if (userReservation == null) {
             return;
         }
-        UserReservation updatedUserReservation = UserReservation.of(
+        Reservation updatedUserReservation = Reservation.of(
             userReservation.getId(),
             userReservation.getReservation(),
             userReservation.getUser(),
@@ -99,11 +99,11 @@ public class FakeUserReservationRepository implements UserReservationRepository 
     }
 
     @Override
-    public void updateWaitingNumbers(List<UserReservation> userReservations) {
+    public void updateWaitingNumbers(List<Reservation> userReservations) {
         for (int index = 0; index < userReservations.size(); index++) {
-            UserReservation userReservation = userReservations.get(index);
+            Reservation userReservation = userReservations.get(index);
             WaitingStatus status = index == 0 ? WaitingStatus.CONFIRMED : WaitingStatus.WAITING;
-            UserReservation rerankedUserReservation = UserReservation.of(
+            Reservation rerankedUserReservation = Reservation.of(
                 userReservation.getId(),
                 userReservation.getReservation(),
                 userReservation.getUser(),

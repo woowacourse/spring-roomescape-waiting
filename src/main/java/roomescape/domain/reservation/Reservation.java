@@ -1,14 +1,14 @@
-package roomescape.domain.userreservation;
+package roomescape.domain.reservation;
 
 import java.time.LocalDateTime;
 import lombok.Getter;
-import roomescape.domain.reservation.ReservationSlot;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.user.User;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.errors.ReservationSlotErrors;
 
 @Getter
-public class UserReservation {
+public class Reservation {
 
     private final Long id;
     private final ReservationSlot reservation;
@@ -18,7 +18,7 @@ public class UserReservation {
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
-    private UserReservation(
+    private Reservation(
         Long id,
         ReservationSlot reservation,
         User user,
@@ -37,7 +37,7 @@ public class UserReservation {
         this.updatedAt = updatedAt;
     }
 
-    public static UserReservation createWithoutId(
+    public static Reservation createWithoutId(
         ReservationSlot reservation,
         User user,
         Long waitingNumber,
@@ -45,10 +45,10 @@ public class UserReservation {
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
-        return new UserReservation(null, reservation, user, waitingNumber, status, createdAt, updatedAt);
+        return new Reservation(null, reservation, user, waitingNumber, status, createdAt, updatedAt);
     }
 
-    public static UserReservation createWithId(long id, UserReservation userReservation) {
+    public static Reservation createWithId(long id, Reservation userReservation) {
         return of(
             id,
             userReservation.getReservation(),
@@ -60,7 +60,7 @@ public class UserReservation {
         );
     }
 
-    public static UserReservation of(
+    public static Reservation of(
         long id,
         ReservationSlot reservation,
         User user,
@@ -69,7 +69,7 @@ public class UserReservation {
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
-        return new UserReservation(id, reservation, user, waitingNumber, status, createdAt, updatedAt);
+        return new Reservation(id, reservation, user, waitingNumber, status, createdAt, updatedAt);
     }
 
     private static void validate(
