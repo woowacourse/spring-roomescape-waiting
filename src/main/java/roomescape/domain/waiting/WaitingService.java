@@ -19,8 +19,8 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
-                          ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository
+        ReservationTimeRepository reservationTimeRepository,
+        ThemeRepository themeRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -39,10 +39,10 @@ public class WaitingService {
         reservationTime.validateIfTimePast(waitingRequest.date());
 
         Waiting waiting = Waiting.of(
-                waitingRequest.name(),
-                waitingRequest.date(),
-                reservationTime,
-                theme
+            waitingRequest.name(),
+            waitingRequest.date(),
+            reservationTime,
+            theme
         );
 
         Waiting saved = waitingRepository.save(waiting);
@@ -54,6 +54,17 @@ public class WaitingService {
         boolean isDuplicated = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name);
         if (isDuplicated) {
             throw new RoomescapeException(ErrorCode.DUPLICATE_WAITING_NAME);
+        }
+    }
+
+    public void deleteWaiting(Long id) {
+        validateWaitingId(id);
+        waitingRepository.deleteById(id);
+    }
+
+    private void validateWaitingId(Long id) {
+        if (!waitingRepository.existsById(id)) {
+            throw new RoomescapeException(ErrorCode.WAITING_ID_NOT_FOUND);
         }
     }
 }

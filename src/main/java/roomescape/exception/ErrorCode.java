@@ -14,6 +14,7 @@ public enum ErrorCode {
     TIME_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 time id를 찾을 수 없습니다."),
     THEME_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 theme id를 찾을 수 없습니다."),
     RESERVATION_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 reservation id를 찾을 수 없습니다."),
+    WAITING_ID_NOT_FOUND(HttpStatus.NOT_FOUND, "해당 waiting id를 찾을 수 없습니다."),
 
     //409 - CONFLICT
     DUPLICATE_RESERVATION(HttpStatus.CONFLICT, "이미 선택된 예약입니다."),

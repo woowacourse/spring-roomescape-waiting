@@ -18,20 +18,20 @@ public class WaitingRepository {
     private final SimpleJdbcInsert simpleJdbcInsert;
 
     private final RowMapper<Waiting> rowMapper = (resultSet, rowNum) -> Waiting.of(
-            resultSet.getLong("waiting_id"),
-            resultSet.getString("name"),
-            resultSet.getDate("date").toLocalDate(),
-            ReservationTime.of(
-                    resultSet.getLong("time_id"),
-                    resultSet.getTime("time_start_at").toLocalTime(),
-                    resultSet.getTime("time_finish_at").toLocalTime()
-            ),
-            Theme.of(
-                    resultSet.getLong("theme_id"),
-                    resultSet.getString("theme_name"),
-                    resultSet.getString("theme_description"),
-                    resultSet.getString("theme_image_url")
-            )
+        resultSet.getLong("waiting_id"),
+        resultSet.getString("name"),
+        resultSet.getDate("date").toLocalDate(),
+        ReservationTime.of(
+            resultSet.getLong("time_id"),
+            resultSet.getTime("time_start_at").toLocalTime(),
+            resultSet.getTime("time_finish_at").toLocalTime()
+        ),
+        Theme.of(
+            resultSet.getLong("theme_id"),
+            resultSet.getString("theme_name"),
+            resultSet.getString("theme_description"),
+            resultSet.getString("theme_image_url")
+        )
     );
 
     public WaitingRepository(JdbcTemplate jdbcTemplate) {
@@ -43,13 +43,13 @@ public class WaitingRepository {
 
     public Waiting save(Waiting waiting) {
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("name", waiting.getName())
-                .addValue("date", waiting.getDate())
-                .addValue("time_id", waiting.getTime().getId())
-                .addValue("theme_id", waiting.getTheme().getId());
+            .addValue("name", waiting.getName())
+            .addValue("date", waiting.getDate())
+            .addValue("time_id", waiting.getTime().getId())
+            .addValue("theme_id", waiting.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Waiting.of(id, waiting.getName(), waiting.getDate(), waiting.getTime(),
-                waiting.getTheme());
+            waiting.getTheme());
     }
 
     public boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name) {
@@ -60,5 +60,20 @@ public class WaitingRepository {
             """;
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId, name);
         return count != null && count > 0;
+    }
+
+    public boolean existsById(Long id) {
+        String query = """
+            SELECT COUNT(*)
+            FROM waiting
+            WHERE id = ?
+            """;
+        Integer count = jdbcTemplate.queryForObject(query, Integer.class, id);
+        return count != null && count > 0;
+    }
+
+    public void deleteById(Long id) {
+        String query = "delete from waiting where id = ?";
+        jdbcTemplate.update(query, id);
     }
 }
