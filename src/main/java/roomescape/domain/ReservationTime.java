@@ -3,8 +3,9 @@ package roomescape.domain;
 import lombok.Getter;
 
 import java.time.LocalTime;
+
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationTimeException;
 
 @Getter
 public class ReservationTime {
@@ -23,19 +24,19 @@ public class ReservationTime {
 
     private static void validateId(final Long id) {
         if (id == null) {
-            throw new ReservationTimeException(ErrorCode.TIME_ID_NULL);
+            throw new BusinessException(ErrorCode.TIME_ID_NULL);
         }
     }
 
     private static void validateStartAt(final LocalTime startAt) {
         if (startAt == null) {
-            throw new ReservationTimeException(ErrorCode.START_TIME_NULL);
+            throw new BusinessException(ErrorCode.START_TIME_NULL);
         }
     }
 
     private static void validateEndAt(final LocalTime endAt) {
         if (endAt == null) {
-            throw new ReservationTimeException(ErrorCode.END_TIME_NULL);
+            throw new BusinessException(ErrorCode.END_TIME_NULL);
         }
     }
 

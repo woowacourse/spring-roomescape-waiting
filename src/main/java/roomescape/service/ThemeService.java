@@ -3,8 +3,8 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.command.ThemeCreateCommand;
@@ -37,13 +37,13 @@ public class ThemeService {
     public void delete(final Long themeId) {
         final boolean hasAnyOngoingReservation = reservationRepository.existsByThemeId(themeId);
         if (hasAnyOngoingReservation) {
-            throw new ThemeException(ErrorCode.THEME_HAS_RESERVATION);
+            throw new BusinessException(ErrorCode.THEME_HAS_RESERVATION);
         }
 
         boolean deleted = themeRepository.deleteById(themeId);
 
         if (!deleted) {
-            throw new ThemeException(ErrorCode.THEME_NOT_FOUND);
+            throw new BusinessException(ErrorCode.THEME_NOT_FOUND);
         }
     }
 

@@ -19,8 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -86,7 +86,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(request))
-                .isInstanceOf(ReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
     }
 
@@ -102,7 +102,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.create(request))
-                .isInstanceOf(ReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_RESERVED);
     }
 
@@ -128,7 +128,7 @@ class ReservationServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationService.deleteWithValidation(1L, "거위"))
-                .isInstanceOf(ReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
     }
 
@@ -162,7 +162,7 @@ class ReservationServiceTest {
 
         // when & them
         assertThatThrownBy(() -> reservationService.modify(request))
-                .isInstanceOf(ReservationException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
     }
 

@@ -3,8 +3,8 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationTimeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.command.ReservationTimeCreateCommand;
@@ -40,13 +40,13 @@ public class ReservationTimeService {
     public void delete(final Long timeId) {
         final boolean hasAnyOngoingReservation = reservationRepository.existsByTimeId(timeId);
         if (hasAnyOngoingReservation) {
-            throw new ReservationTimeException(ErrorCode.TIME_HAS_RESERVATION);
+            throw new BusinessException(ErrorCode.TIME_HAS_RESERVATION);
         }
 
         final boolean deleted = reservationTimeRepository.delete(timeId);
 
         if (!deleted) {
-            throw new ReservationTimeException(ErrorCode.TIME_NOT_FOUND);
+            throw new BusinessException(ErrorCode.TIME_NOT_FOUND);
         }
     }
 

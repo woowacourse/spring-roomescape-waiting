@@ -1,8 +1,8 @@
 package roomescape.domain;
 
 import lombok.Getter;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ThemeException;
 
 @Getter
 public class Theme {
@@ -25,23 +25,23 @@ public class Theme {
 
     private static void validateId(final Long id) {
         if (id == null) {
-            throw new ThemeException(ErrorCode.THEME_ID_NULL);
+            throw new BusinessException(ErrorCode.THEME_ID_NULL);
         }
     }
 
     private void validateDescription(String description) {
         if (description == null || description.isBlank()) {
-            throw new ThemeException(ErrorCode.DESCRIPTION_NULL_OR_BLANK);
+            throw new BusinessException(ErrorCode.DESCRIPTION_NULL_OR_BLANK);
         }
 
         if (description.length() < DESCRIPTION_MINIMUM_LENGTH) {
-            throw new ThemeException(ErrorCode.DESCRIPTION_TOO_SHORT);
+            throw new BusinessException(ErrorCode.DESCRIPTION_TOO_SHORT);
         }
     }
 
     private void validateThumbnailUrl(String thumbnailUrl) {
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new ThemeException(ErrorCode.THUMBNAIL_URL_NULL_OR_BLANK);
+            throw new BusinessException(ErrorCode.THUMBNAIL_URL_NULL_OR_BLANK);
         }
     }
 

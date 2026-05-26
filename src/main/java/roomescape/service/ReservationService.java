@@ -7,8 +7,8 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -72,7 +72,7 @@ public class ReservationService {
         final boolean deleted = reservationRepository.deleteById(reservationId);
 
         if (!deleted) {
-            throw new ReservationException(ErrorCode.RESERVATION_NOT_FOUND);
+            throw new BusinessException(ErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 
@@ -154,23 +154,23 @@ public class ReservationService {
 
     private Reservation getReservation(final Long reservationId) {
         return reservationRepository.findById(reservationId)
-                .orElseThrow(() -> new ReservationException(ErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private ReservationTime getReservationTime(final Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new ReservationException(ErrorCode.TIME_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
     }
 
     private Theme getTheme(final Long themeId) {
         return themeRepository.findById(themeId)
-                .orElseThrow(() -> new ReservationException(ErrorCode.THEME_NOT_FOUND));
+                .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
     }
 
     private void validateFutureOrPresentDate(final LocalDate date) {
         final LocalDate today = LocalDate.now();
         if (date.isBefore(today)) {
-            throw new ReservationException(ErrorCode.DATE_ALREADY_PASSED);
+            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }
     }
 
@@ -178,7 +178,7 @@ public class ReservationService {
         final LocalDate today = LocalDate.now();
         final LocalTime now = LocalTime.now();
         if (date.equals(today) && reservationTime.isBefore(now)) {
-            throw new ReservationException(ErrorCode.TIME_ALREADY_PASSED);
+            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }
 
@@ -190,7 +190,7 @@ public class ReservationService {
         );
 
         if (isAlreadyReserved) {
-            throw new ReservationException(ErrorCode.TIME_ALREADY_RESERVED);
+            throw new BusinessException(ErrorCode.TIME_ALREADY_RESERVED);
         }
     }
 
@@ -199,7 +199,7 @@ public class ReservationService {
         final boolean isUserNameMatched = reservationOwnerName.equals(name);
 
         if (!isUserNameMatched) {
-            throw new ReservationException(ErrorCode.USER_NAME_NOT_MATCHED);
+            throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
         }
     }
 }

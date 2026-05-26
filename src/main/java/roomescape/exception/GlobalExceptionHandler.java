@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(CustomException.class)
-    public ResponseEntity<ErrorResponse> handleCustomException(CustomException e) {
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleCustomException(BusinessException e) {
         final ErrorCode errorCode = e.getErrorCode();
         final ErrorResponse response = ErrorResponse.from(errorCode);
         return ResponseEntity.status(errorCode.getHttpStatus()).body(response);

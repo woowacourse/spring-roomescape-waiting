@@ -1,8 +1,8 @@
 package roomescape.domain;
 
 import lombok.Getter;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ThemeException;
 
 @Getter
 public class ThemeName {
@@ -16,7 +16,7 @@ public class ThemeName {
 
     private void validate(final String value) {
         if (value == null || value.isBlank()) {
-            throw new ThemeException(ErrorCode.THEME_NAME_NULL_OR_BLANK);
+            throw new BusinessException(ErrorCode.THEME_NAME_NULL_OR_BLANK);
         }
     }
 }

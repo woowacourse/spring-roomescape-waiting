@@ -1,8 +1,8 @@
 package roomescape.domain;
 
 import lombok.Getter;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationException;
 
 @Getter
 public class PersonName {
@@ -16,7 +16,7 @@ public class PersonName {
 
     private void validate(final String value) {
         if (value == null || value.isBlank()) {
-            throw new ReservationException(ErrorCode.PERSON_NAME_NULL_OR_BLANK);
+            throw new BusinessException(ErrorCode.PERSON_NAME_NULL_OR_BLANK);
         }
     }
 }

@@ -3,10 +3,10 @@ package roomescape.exception;
 import lombok.Getter;
 
 @Getter
-public class CustomException extends RuntimeException {
+public class BusinessException extends RuntimeException {
     private final ErrorCode errorCode;
 
-    public CustomException(final ErrorCode errorCode) {
+    public BusinessException(final ErrorCode errorCode) {
         this.errorCode = errorCode;
     }
 }

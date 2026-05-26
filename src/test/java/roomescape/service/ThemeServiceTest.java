@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Theme;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ThemeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.command.ThemeCreateCommand;
@@ -72,7 +72,7 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(targetThemeId))
-                .isInstanceOf(ThemeException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THEME_HAS_RESERVATION);
 
         verify(themeRepository, org.mockito.Mockito.never()).deleteById(anyLong());
@@ -86,7 +86,7 @@ class ThemeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(targetThemeId))
-                .isInstanceOf(ThemeException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.THEME_NOT_FOUND);
     }
 

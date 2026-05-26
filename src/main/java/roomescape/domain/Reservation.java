@@ -4,8 +4,9 @@ import java.util.Objects;
 import lombok.Getter;
 
 import java.time.LocalDate;
+
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationException;
 
 @Getter
 public class Reservation {
@@ -27,13 +28,13 @@ public class Reservation {
 
     private static void validateId(final Long id) {
         if (id == null) {
-            throw new ReservationException(ErrorCode.RESERVATION_ID_NULL);
+            throw new BusinessException(ErrorCode.RESERVATION_ID_NULL);
         }
     }
 
     private static void validateDate(final LocalDate date) {
         if (date == null) {
-            throw new ReservationException(ErrorCode.DATE_NULL);
+            throw new BusinessException(ErrorCode.DATE_NULL);
         }
     }
 

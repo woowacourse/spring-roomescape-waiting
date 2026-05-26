@@ -15,8 +15,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.ReservationTime;
+import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
-import roomescape.exception.ReservationTimeException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.command.ReservationTimeCreateCommand;
@@ -94,7 +94,7 @@ class ReservationTimeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(targetTimeId))
-                .isInstanceOf(ReservationTimeException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_HAS_RESERVATION);
 
         verify(reservationTimeRepository, org.mockito.Mockito.never()).delete(anyLong());
@@ -109,7 +109,7 @@ class ReservationTimeServiceTest {
 
         // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(targetTimeId))
-                .isInstanceOf(ReservationTimeException.class)
+                .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_NOT_FOUND);
     }
 }
