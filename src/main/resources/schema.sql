@@ -1,3 +1,7 @@
+DROP TABLE IF EXISTS reservation;
+DROP TABLE IF EXISTS reservation_time;
+DROP TABLE IF EXISTS theme;
+
 CREATE TABLE reservation_time
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
