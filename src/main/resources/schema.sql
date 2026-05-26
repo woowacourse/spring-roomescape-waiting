@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS waiting
     id                  BIGINT      NOT NULL AUTO_INCREMENT,
     customer_name       VARCHAR(10) NOT NULL,
     reservation_date    DATE        NOT NULL,
-    created_at          TIMESTAMP    NOT NULL,
+    created_at          TIMESTAMP   DEFAULT CURRENT_TIMESTAMP,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),

@@ -4,5 +4,5 @@ import roomescape.wating.domain.Waiting;
 
 public interface WaitingRepository {
 
-    Waiting save(Waiting waiting);
+    Long save(Waiting waiting);
 }

@@ -1,11 +1,14 @@
 package roomescape.wating.domain;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+import lombok.Getter;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+
+@Getter
 public class Waiting {
 
     private final Long id;
@@ -29,5 +32,20 @@ public class Waiting {
         this.createdAt = createdAt;
         this.time = time;
         this.theme = theme;
+    }
+
+    public static Waiting create(
+            final String customerName,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        return new Waiting(
+                null,
+                CustomerName.from(customerName),
+                date,
+                null,
+                time,
+                theme);
     }
 }
