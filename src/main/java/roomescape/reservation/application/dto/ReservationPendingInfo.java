@@ -1,7 +1,6 @@
 package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import lombok.Builder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
@@ -10,22 +9,24 @@ import roomescape.theme.application.dto.ThemeInfo;
 import roomescape.time.application.dto.ReservationTimeInfo;
 
 @Builder
-public record ReservationInfo(
+public record ReservationPendingInfo(
         Long id,
         String name,
         LocalDate date,
         ReservationTimeInfo time,
         ThemeInfo theme,
-        Status status
+        Status status,
+        Long pendingOrder
 ) {
-    public static ReservationInfo from(final Reservation reservation) {
-        return ReservationInfo.builder()
-                .id(reservation.getId())
-                .name(reservation.getName())
-                .date(reservation.getDate())
-                .time(ReservationTimeInfo.from(reservation.getTime()))
-                .theme(ThemeInfo.from(reservation.getTheme()))
-                .status(reservation.getStatus())
+    public static ReservationPendingInfo from(final ReservationQueryResult result){
+        return ReservationPendingInfo.builder()
+                .id(result.id())
+                .name(result.name())
+                .date(result.date())
+                .time(ReservationTimeInfo.from(result.time()))
+                .theme(ThemeInfo.from(result.theme()))
+                .status(result.status())
+                .pendingOrder(result.pendingIndex())
                 .build();
     }
 }
