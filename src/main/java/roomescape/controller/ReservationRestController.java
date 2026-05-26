@@ -1,5 +1,6 @@
 package roomescape.controller;
 
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,18 +12,23 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.dto.reservation.ReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
+import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
+import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
 import java.util.List;
+import roomescape.service.ReservationWaitingService;
 
 @RestController
 public class ReservationRestController {
 
     private final ReservationService reservationService;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationRestController(ReservationService reservationService) {
+    public ReservationRestController(ReservationService reservationService, ReservationWaitingService reservationWaitingService) {
         this.reservationService = reservationService;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @GetMapping("/reservations")
@@ -44,8 +50,7 @@ public class ReservationRestController {
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> create(@RequestBody ReservationRequest reservationReq) {
         ReservationResponse newReservation = reservationService.create(reservationReq);
-        URI uri = URI.create("/reservations/" + newReservation.getId());
-        return ResponseEntity.created(uri).body(newReservation);
+        return new ResponseEntity<>(newReservation, HttpStatus.CREATED);
     }
 
     @PatchMapping("/reservations/{id}")
@@ -58,5 +63,11 @@ public class ReservationRestController {
     public ResponseEntity<Void> delete(@PathVariable Long id) {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/reservations/waitings")
+    public ResponseEntity<ReservationWaitingResponse> create(@RequestBody ReservationWaitingRequest reservationWaitingReq) {
+        ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingReq);
+        return new ResponseEntity<>(reservationWaitingResponse, HttpStatus.CREATED);
     }
 }
