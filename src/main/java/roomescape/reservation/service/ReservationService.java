@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -22,7 +23,6 @@ import java.util.List;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
-import static roomescape.reservation.exception.ReservaitonErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservaitonErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
@@ -56,10 +56,13 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        validateNotAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
-        return reservationRepository.save(
-                Reservation.create(name, reservationDate, reservationTime, theme)
-        );
+        LocalDateTime now = LocalDateTime.now();
+
+        boolean isAlreadyBooked = checkAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
+        if (isAlreadyBooked) {
+            return reservationRepository.save(Reservation.wait(name, reservationDate, reservationTime, theme, now));
+        }
+        return reservationRepository.save(Reservation.create(name, reservationDate, reservationTime, theme, now));
     }
 
     @Transactional
@@ -87,7 +90,7 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        validateNotAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        checkAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
 
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
         reservationRepository.updateSchedule(reservation);
@@ -103,7 +106,7 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        validateNotAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        checkAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
 
         reservation.changeScheduleByManager(newDate, newTime);
         reservationRepository.updateSchedule(reservation);
@@ -130,10 +133,8 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
-    private void validateNotAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
-        if (reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId)) {
-            throw new ReservationException(RESERVATION_ALREADY_BOOKED);
-        }
+    private boolean checkAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
+        return reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId);
     }
 
 }

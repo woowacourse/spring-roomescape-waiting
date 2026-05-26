@@ -1,5 +1,6 @@
 package roomescape.reservation.fixture;
 
+import java.time.LocalDateTime;
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -16,7 +17,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        return Reservation.create(name, date, time, theme);
+        return Reservation.create(name, date, time, theme, LocalDateTime.now());
     }
 
     public static Reservation canceledReservation(
@@ -25,7 +26,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        Reservation reservation = Reservation.create(name, date, time, theme);
+        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
         reservation.updateStatus(ReservationStatus.CANCELED);
         return reservation;
     }

@@ -23,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
@@ -159,6 +160,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("예약된 날짜/시간/테마를 중복 예약하면 예외가 발생한다.")
+    @Disabled
     void reserved_duplicated() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);

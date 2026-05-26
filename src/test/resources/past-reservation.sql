@@ -14,11 +14,12 @@ VALUES ('09:00:00', TRUE);
 INSERT INTO theme (name, description, thumbnail_url, is_active)
 VALUES ('테마1', '설명1', 'https://example.com/theme1.png', TRUE);
 
-INSERT INTO reservation (name, date_id, time_id, theme_id, status)
+INSERT INTO reservation (name, date_id, time_id, theme_id, reserved_at, status)
 VALUES (
            'member',
            SELECT id FROM reservation_date WHERE date = DATEADD('DAY', -1, CURRENT_DATE),
            SELECT id FROM reservation_time WHERE start_at = '09:00:00',
            SELECT id FROM theme WHERE name = '테마1',
+           DATEADD('DAY', -2, CURRENT_TIMESTAMP),
            'RESERVED'
        );

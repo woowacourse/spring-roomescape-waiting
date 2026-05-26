@@ -24,17 +24,26 @@ public class Reservation {
     private ReservationTime time;
     private Theme theme;
     private ReservationStatus status;
+    private LocalDateTime reservedAt;
 
-    public static Reservation create(String name, ReservationDate reservationDate, ReservationTime time, Theme theme) {
-        validate(name, reservationDate, time, theme);
-        validatePast(reservationDate.getDate(), time.getStartAt());
-        return new Reservation(null, name, reservationDate, time, theme, ReservationStatus.RESERVED);
+    public static Reservation create(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
+        return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, reservedAt);
     }
 
-    public static Reservation load(Long id, String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status) {
+    public static Reservation wait(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
+        return of(name, reservationDate, time, theme, ReservationStatus.WAITING, reservedAt);
+    }
+
+    private static Reservation of(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+        validate(name, reservationDate, time, theme);
+        validatePast(reservationDate.getDate(), time.getStartAt());
+        return new Reservation(null, name, reservationDate, time, theme, status, reservedAt);
+    }
+
+    public static Reservation load(Long id, String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
         validate(name, reservationDate, time, theme);
         validateId(id);
-        return new Reservation(id, name, reservationDate, time, theme, status);
+        return new Reservation(id, name, reservationDate, time, theme, status, reservedAt);
     }
 
     public void cancel(String requesterName) {

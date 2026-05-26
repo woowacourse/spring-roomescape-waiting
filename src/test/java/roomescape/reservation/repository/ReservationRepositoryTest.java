@@ -5,6 +5,7 @@ import static roomescape.reservation.fixture.ReservationFixture.canceledReservat
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -68,7 +69,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약 정보를 단건 조회한다.")
     void findById() {
         // given
-        Reservation saved = save(Reservation.create(name, reservationDate1, reservationTime1, theme));
+        Reservation saved = save(Reservation.create(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()));
 
         // when
         Reservation actual = jdbcReservationRepository.findById(saved.getId()).get();
@@ -98,8 +99,8 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         List<Reservation> reservations = List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme),
-                Reservation.create(name, reservationDate1, reservationTime2, theme)
+                Reservation.create(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()),
+                Reservation.create(name, reservationDate1, reservationTime2, theme, LocalDateTime.now())
         );
         saveAll(reservations);
 
@@ -116,10 +117,10 @@ class ReservationRepositoryTest {
     void findAllByName() {
         // given
         List<Reservation> reservations = saveAll(List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme),
-                Reservation.create(name, reservationDate1, reservationTime2, theme),
-                Reservation.create(name, reservationDate2, reservationTime1, theme),
-                Reservation.create(name, reservationDate2, reservationTime2, theme))
+                Reservation.create(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()),
+                Reservation.create(name, reservationDate1, reservationTime2, theme, LocalDateTime.now()),
+                Reservation.create(name, reservationDate2, reservationTime1, theme, LocalDateTime.now()),
+                Reservation.create(name, reservationDate2, reservationTime2, theme, LocalDateTime.now()))
         );
         reservations.sort(
                 Comparator.comparing((Reservation reservation) -> reservation.getDate().getDate(), Comparator.reverseOrder())

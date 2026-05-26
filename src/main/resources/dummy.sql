@@ -50,31 +50,32 @@ WHERE NOT EXISTS (
 );
 
 -- Reservation Dummy Data
-INSERT INTO reservation (name, date_id, time_id, theme_id, status)
+INSERT INTO reservation (name, date_id, time_id, theme_id, reserved_at, status)
 SELECT
     v.name,
     rd.id AS date_id,
     rt.id AS time_id,
     t.id AS theme_id,
+    v.reserved_at,
     v.status
 FROM (
          VALUES
-             ('김민준', DATEADD('DAY', 0, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('이서연', DATEADD('DAY', 0, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('박지후', DATEADD('DAY', 0, CURRENT_DATE), '13:00:00', '사라진 탐정', 'RESERVED'),
-             ('최하은', DATEADD('DAY', -1, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('정도윤', DATEADD('DAY', -1, CURRENT_DATE), '14:00:00', '고대 유적의 비밀', 'RESERVED'),
-             ('한지민', DATEADD('DAY', -1, CURRENT_DATE), '15:00:00', '사라진 탐정', 'RESERVED'),
-             ('윤서준', DATEADD('DAY', -1, CURRENT_DATE), '16:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('오지아', DATEADD('DAY', -2, CURRENT_DATE), '17:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('강민재', DATEADD('DAY', -2, CURRENT_DATE), '18:00:00', '고대 유적의 비밀', 'RESERVED'),
-             ('신예린', DATEADD('DAY', -3, CURRENT_DATE), '11:00:00', '사라진 탐정', 'RESERVED'),
-             ('송우석', DATEADD('DAY', -3, CURRENT_DATE), '19:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('장하준', DATEADD('DAY', -3, CURRENT_DATE), '20:00:00', '유령 호텔', 'RESERVED'),
-             ('임수아', DATEADD('DAY', -4, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', 'RESERVED'),
-             ('문지호', DATEADD('DAY', -4, CURRENT_DATE), '13:00:00', '고대 유적의 비밀', 'RESERVED'),
-             ('백서윤', DATEADD('DAY', -4, CURRENT_DATE), '21:00:00', '유령 호텔', 'CANCELED')
-     ) AS v(name, reservation_date, start_at, theme_name, status)
+             ('김민준', DATEADD('DAY', 0, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', DATEADD('DAY', -7, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('이서연', DATEADD('DAY', 0, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', DATEADD('DAY', -7, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('박지후', DATEADD('DAY', 0, CURRENT_DATE), '13:00:00', '사라진 탐정', DATEADD('DAY', -7, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('최하은', DATEADD('DAY', -1, CURRENT_DATE), '11:00:00', '잠겨버린 연구실', DATEADD('DAY', -8, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('정도윤', DATEADD('DAY', -1, CURRENT_DATE), '14:00:00', '고대 유적의 비밀', DATEADD('DAY', -8, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('한지민', DATEADD('DAY', -1, CURRENT_DATE), '15:00:00', '사라진 탐정', DATEADD('DAY', -8, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('윤서준', DATEADD('DAY', -1, CURRENT_DATE), '16:00:00', '잠겨버린 연구실', DATEADD('DAY', -8, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('오지아', DATEADD('DAY', -2, CURRENT_DATE), '17:00:00', '잠겨버린 연구실', DATEADD('DAY', -9, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('강민재', DATEADD('DAY', -2, CURRENT_DATE), '18:00:00', '고대 유적의 비밀', DATEADD('DAY', -9, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('신예린', DATEADD('DAY', -3, CURRENT_DATE), '11:00:00', '사라진 탐정', DATEADD('DAY', -10, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('송우석', DATEADD('DAY', -3, CURRENT_DATE), '19:00:00', '잠겨버린 연구실', DATEADD('DAY', -10, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('장하준', DATEADD('DAY', -3, CURRENT_DATE), '20:00:00', '유령 호텔', DATEADD('DAY', -10, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('임수아', DATEADD('DAY', -4, CURRENT_DATE), '12:00:00', '잠겨버린 연구실', DATEADD('DAY', -11, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('문지호', DATEADD('DAY', -4, CURRENT_DATE), '13:00:00', '고대 유적의 비밀', DATEADD('DAY', -11, CURRENT_TIMESTAMP), 'RESERVED'),
+             ('백서윤', DATEADD('DAY', -4, CURRENT_DATE), '21:00:00', '유령 호텔', DATEADD('DAY', -11, CURRENT_TIMESTAMP), 'CANCELED')
+     ) AS v(name, reservation_date, start_at, theme_name, reserved_at, status)
          JOIN reservation_date rd ON rd.date = v.reservation_date
          JOIN reservation_time rt ON rt.start_at = v.start_at
          JOIN theme t ON t.name = v.theme_name
