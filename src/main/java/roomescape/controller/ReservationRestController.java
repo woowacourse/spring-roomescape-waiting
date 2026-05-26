@@ -79,4 +79,13 @@ public class ReservationRestController {
         reservationWaitingService.delete(id);
         return ResponseEntity.noContent().build();
     }
-}
+
+    @GetMapping("/reservations/waitings")
+    public List<ReservationWaitingResponse> waitingReadAll() {
+        return reservationWaitingService.readAll();
+    }
+
+    @GetMapping("/reservations/waitings/mine")
+    public List<ReservationWaitingResponse> waitingReadMine(@RequestParam String name) {
+        return reservationWaitingService.readByName(name);
+    }}
