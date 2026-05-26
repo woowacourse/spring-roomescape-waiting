@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDateTime;
 
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 
 import roomescape.domain.Reservation;
@@ -28,11 +29,15 @@ public class WaitingService {
         Reservation reservation = reservationDao.findById(request.reservationId());
         LocalDateTime time = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
         validateDateAndTimeNotPast(now,time);
+        try{
+            long waitingId = waitingDao.save(request.name(), request.reservationId());
+            int order =  waitingDao.findOrderByReservationId(waitingId, request.reservationId());
+            Waiting waiting = new Waiting(waitingId, request.name(), request.reservationId());
+            return WaitingResponse.from(waiting, order);
+        } catch (DataIntegrityViolationException e) {
+            throw new CustomException(ErrorCode.ALREADY_EXISTS_RESERVATION);
+        }
 
-        long waitingId = waitingDao.save(request.name(), request.reservationId());
-        int order =  waitingDao.findOrderByReservationId(waitingId, request.reservationId());
-        Waiting waiting = new Waiting(waitingId, request.name(), request.reservationId());
-        return WaitingResponse.from(waiting, order);
     }
 
     public void delete(LocalDateTime now, Long id) {

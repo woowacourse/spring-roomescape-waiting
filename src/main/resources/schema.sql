@@ -36,5 +36,9 @@ CREATE TABLE IF NOT EXISTS waiting
     name            VARCHAR(255) NOT NULL,
     reservation_id  BIGINT       NOT NULL,
     PRIMARY KEY (id),
+
+    CONSTRAINT unique_waiting
+    UNIQUE(name, reservation_id),
+
     FOREIGN KEY (reservation_id) REFERENCES reservation (id)
     );
