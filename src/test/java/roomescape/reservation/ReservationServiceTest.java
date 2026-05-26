@@ -22,7 +22,6 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doThrow;
@@ -44,30 +43,6 @@ class ReservationServiceTest {
 
     @InjectMocks
     private ReservationService reservationService;
-
-    private ReservationDetailProjection reservationDetail(
-            Long reservationId,
-            Long memberId,
-            LocalDate date,
-            Long themeId,
-            Long timeId,
-            LocalTime startAt
-    ) {
-        return new ReservationDetailProjection(
-                reservationId,
-                memberId,
-                "member",
-                "password",
-                Role.USER,
-                date,
-                themeId,
-                "theme",
-                "description",
-                "thumbnail",
-                timeId,
-                startAt
-        );
-    }
 
     @Test
     @DisplayName("유저는 본인 예약 삭제에 성공한다.")
@@ -152,5 +127,29 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.updateForUser(request, reservationId, MEMBER_ID))
                 .isInstanceOf(IllegalStateException.class);
         verify(reservationRepository, never()).updateScheduleById(anyLong(), anyLong());
+    }
+
+    private ReservationDetailProjection reservationDetail(
+            Long reservationId,
+            Long memberId,
+            LocalDate date,
+            Long themeId,
+            Long timeId,
+            LocalTime startAt
+    ) {
+        return new ReservationDetailProjection(
+                reservationId,
+                memberId,
+                "member",
+                "password",
+                Role.USER,
+                date,
+                themeId,
+                "theme",
+                "description",
+                "thumbnail",
+                timeId,
+                startAt
+        );
     }
 }
