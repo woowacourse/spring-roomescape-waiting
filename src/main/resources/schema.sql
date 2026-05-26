@@ -14,11 +14,25 @@ CREATE TABLE theme
     running_time BIGINT       NOT NULL,
     PRIMARY KEY (id)
 );
+
+CREATE TABLE waiting
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(255) NOT NULL,
+    date           DATE         NOT NULL,
+    time_id        BIGINT       NOT NULL,
+    theme_id       BIGINT       NOT NULL,
+    waiting_number BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
 CREATE TABLE reservation
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     name     VARCHAR(255) NOT NULL,
-    date     DATE NOT NULL,
+    date     DATE         NOT NULL,
     time_id  BIGINT       NOT NULL,
     theme_id BIGINT       NOT NULL,
     PRIMARY KEY (id),
