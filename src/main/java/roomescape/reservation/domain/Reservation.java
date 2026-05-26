@@ -9,6 +9,9 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+import static roomescape.common.domain.DomainPreconditions.require;
+import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
+import static roomescape.common.domain.DomainPreconditions.requireNonNull;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 import static roomescape.theme.exception.ThemeErrorCode.*;
@@ -40,41 +43,18 @@ public class Reservation {
         this(null, guestName, date, time, theme);
     }
 
+    public Reservation withId(Long id) {
+        requireNonNull(id, new DomainException(INVALID_RESERVATION_ID));
+        require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
+
+        return new Reservation(id, guestName, date, time, theme, deletedAt);
+    }
+
     private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        validateGuestName(guestName);
-        validateDate(date);
-        validateTime(time);
-        validateTheme(theme);
-    }
-
-    private void validateId(Long id) {
-        if (id == null) {
-            throw new DomainException(INVALID_RESERVATION_ID);
-        }
-    }
-
-    private void validateGuestName(String guestName) {
-        if (guestName == null || guestName.isBlank()) {
-            throw new DomainException(INVALID_RESERVATION_GUEST_NAME);
-        }
-    }
-
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new DomainException(INVALID_RESERVATION_DATE);
-        }
-    }
-
-    private void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new DomainException(INVALID_RESERVATION_TIME);
-        }
-    }
-
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new DomainException(INVALID_THEME);
-        }
+        requireNonBlank(guestName, new DomainException(INVALID_RESERVATION_GUEST_NAME));
+        requireNonNull(date, new DomainException(INVALID_RESERVATION_DATE));
+        requireNonNull(time, new DomainException(INVALID_RESERVATION_TIME));
+        requireNonNull(theme, new DomainException(INVALID_THEME));
     }
 
     @Override
@@ -96,15 +76,6 @@ public class Reservation {
 
     public boolean isSameGuest(String guestName) {
         return Objects.equals(this.guestName, guestName);
-    }
-
-    public Reservation withId(Long id) {
-        validateId(id);
-        if (this.id != null) {
-            throw new DomainException(RESERVATION_ALREADY_HAS_ID);
-        }
-
-        return new Reservation(id, guestName, date, time, theme, deletedAt);
     }
 
     public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime) {
