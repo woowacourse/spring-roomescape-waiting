@@ -52,6 +52,14 @@ public class WaitingService {
         return WaitingResult.of(waiting, order);
     }
 
+    public void deleteWaiting(Long id, String name) {
+        Waiting waiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        waiting.validateOwner(name);
+        waitingRepository.delete(waiting);
+    }
+
     private void checkDuplicatedWaiting(Waiting waiting) {
         boolean duplicated = waitingRepository.findByScheduleAndName(waiting).isPresent();
 

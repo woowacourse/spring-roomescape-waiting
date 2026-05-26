@@ -75,6 +75,30 @@ public class WaitingRepository {
         }
     }
 
+    public Optional<Waiting> findById(long id) {
+        String sql = """
+                SELECT w.id          AS waiting_id,
+                       w.name        AS waiting_name,
+                       w.date        AS waiting_date,
+                       t.id          AS time_id,
+                       t.start_at    AS time_start_at,
+                       th.id         AS theme_id,
+                       th.name       AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail  AS theme_thumbnail
+                FROM waiting w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.id = ?
+                """;
+        try {
+            Waiting waiting = jdbcTemplate.queryForObject(sql, reservationRowsMapper(), id);
+            return Optional.ofNullable(waiting);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
+
     public Long countByThemeIdAndDateAndTimeIdAndIdLessThan(Long id, Theme theme, LocalDate date, ReservationTime time) {
         String sql = """
             SELECT COUNT(*) FROM waiting
@@ -90,6 +114,11 @@ public class WaitingRepository {
                 date,
                 time.getId(),
                 id);
+    }
+
+    public void delete(Waiting waiting) {
+        String sql = "DELETE FROM waiting WHERE id = ?";
+        jdbcTemplate.update(sql, waiting.getId());
     }
 
     private RowMapper<Waiting> reservationRowsMapper() {

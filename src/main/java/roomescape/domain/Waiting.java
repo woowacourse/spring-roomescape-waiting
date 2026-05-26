@@ -45,6 +45,12 @@ public class Waiting {
         return new Waiting(name, date, time, theme);
     }
 
+    public void validateOwner(String name) {
+        if (!this.name.equals(name)) {
+            throw new DomainConflictException("본인의 예약대기만 취소할 수 있습니다.");
+        }
+    }
+
     public boolean isSameName(String name) {
         return this.name.equals(name);
     }
