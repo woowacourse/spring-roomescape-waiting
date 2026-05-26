@@ -3,6 +3,7 @@ package roomescape.theme.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -119,10 +120,12 @@ class JdbcThemeRepositoryTest {
 
     private void insertReservation(String name, Long timeId, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, time_id, theme_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (name, time_id, theme_id, status, created_at) VALUES (?, ?, ?, ?, ?)",
                 name,
                 timeId,
-                themeId
+                themeId,
+                "RESERVED",
+                LocalDateTime.now()
         );
     }
 }

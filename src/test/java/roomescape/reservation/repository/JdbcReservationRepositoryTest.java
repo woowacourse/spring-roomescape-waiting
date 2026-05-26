@@ -4,11 +4,17 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 
+import java.time.LocalDateTime;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -52,6 +58,28 @@ class JdbcReservationRepositoryTest {
                 .containsExactly(timeId1);
     }
 
+    @Test
+    @DisplayName("save로 예약을 저장한다.")
+    void 예약_저장_테스트() {
+        // given
+        Long themeId = insertTheme("테마");
+        Theme theme = new Theme("테마", "테마 설명입니다", "test-url").withId(themeId);
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        ReservationTime time = new ReservationTime(timeId, LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(3));
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now());
+
+        // when
+        Reservation saved = reservationRepository.save(reservation);
+
+        // then
+        assertThat(saved.getTheme().getName()).isEqualTo(theme.getName());
+        assertThat(saved.getTime().getStartAt()).isEqualTo(time.getStartAt());
+        assertThat(saved.getTime().getEndAt()).isEqualTo(time.getEndAt());
+        assertThat(saved.getStatus()).isEqualTo(Status.RESERVED);
+    }
+
     private Long insertTime(String startAt, String endAt) {
         jdbcTemplate.update(
                 "INSERT INTO reservation_time (start_time, end_time) VALUES (?, ?)",
@@ -81,10 +109,12 @@ class JdbcReservationRepositoryTest {
 
     private void insertReservation(String name, Long timeId, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, time_id, theme_id) VALUES (?, ?, ?)",
+                "INSERT INTO reservation (name, time_id, theme_id, status, created_at) VALUES (?, ?, ?, ?, ?)",
                 name,
                 timeId,
-                themeId
+                themeId,
+                "RESERVED",
+                LocalDateTime.now()
         );
     }
 }

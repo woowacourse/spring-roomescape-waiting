@@ -2,6 +2,7 @@ package roomescape;
 
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.HashMap;
 import java.util.List;
@@ -55,8 +56,8 @@ public class DatabaseMissionStepTest {
         );
 
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, time_id, theme_id) VALUES (?, ?, ?)",
-                "브라운", timeId, 1L
+                "INSERT INTO reservation (name, time_id, theme_id, status, created_at) VALUES (?, ?, ?, ?, ?)",
+                "브라운", timeId, 1L, "RESERVED", LocalDateTime.now()
         );
 
         List<?> reservations = RestAssured.given().log().all()
