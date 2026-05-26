@@ -62,13 +62,13 @@ public class ReservationWaitingQueryingDao {
         );
 
         return new ReservationWaiting(
-                resultSet.getLong("waiting_id"),
-                resultSet.getString("waiting_name"),
-                resultSet.getObject("waiting_date", LocalDate.class),
+                resultSet.getLong("id"),
+                resultSet.getString("name"),
+                resultSet.getObject("date", LocalDate.class),
                 reservationTime,
                 theme,
-                resultSet.getLong("waiting_sequence"),
-                resultSet.getObject("waiting_created_at", LocalDateTime.class)
+                resultSet.getLong("sequence"),
+                resultSet.getObject("created_at", LocalDateTime.class)
         );
     };
 
