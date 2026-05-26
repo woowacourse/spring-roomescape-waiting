@@ -9,8 +9,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.dto.ReservationWaitingDto;
+import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
@@ -57,19 +60,40 @@ class ReservationServiceTest {
 
 
     @Test
-    @DisplayName("이미 같은 날짜, 시간, 테마의 예약이 존재하면 예외가 발생한다.")
-    public void create_fail1() {
+    @DisplayName("해당 날짜, 시간, 테마에 처음으로 예약을 추가하면 예약이 확정된다.")
+    public void create_success1() {
         // given
-        clock.setFixed(LocalDateTime.of(2026, 10, 10, 10, 0));
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        LocalDate date = LocalDate.of(2026, 10, 11);
-        insertReservation("브라운", date, time, theme);
+        LocalDate date = LocalDate.of(2025, 5, 11);
 
-        // when, then
-        assertThatThrownBy(() -> reservationService.create("포비", date, time.getId(), theme.getId()))
-                .isInstanceOf(DomainException.class)
-                .hasMessage(RESERVATION_ALREADY_EXISTS.message());
+        clock.setFixed(LocalDate.of(2025, 5, 10));
+
+        // when
+        ReservationWaitingResult reservationWaitingResult =
+                reservationService.create("포비", date, time.getId(), theme.getId());
+
+        // then
+        assertThat(reservationWaitingResult.status()).isEqualTo(Status.CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("예약이 존재하는 날짜, 시간, 테마로 새로운 예약을 추가하면 예약이 대기 상태로 들어간다.")
+    public void create_success2() {
+        // given
+        clock.setFixed(LocalDate.of(2025, 5, 10));
+
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2025, 5, 11);
+        insertConfirmedReservation(date, time, theme, "포비");
+
+        // when
+        ReservationWaitingResult reservationWaitingResult =
+                reservationService.create("브라운", date, time.getId(), theme.getId());
+
+        // then
+        assertThat(reservationWaitingResult.status()).isEqualTo(Status.WAITING);
     }
 
     @Test
@@ -108,13 +132,13 @@ class ReservationServiceTest {
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Reservation reservation = insertReservation(LocalDate.of(2023, 8, 10), time, "브라운");
+        Reservation reservation = insertWaitingReservation(LocalDate.of(2023, 8, 10), time, "브라운");
 
         // when
         reservationService.deleteMine(reservation.getId(), reservation.getGuestName());
 
         // then
-        assertThat(reservationRepository.findById(reservation.getId())).isEmpty();
+        assertThat(reservationRepository.findById(reservation.getId()).get().getStatus()).isEqualTo(Status.CANCELED);
     }
 
     @Test
@@ -136,7 +160,7 @@ class ReservationServiceTest {
         clock.setFixed(LocalDate.of(2023, 8, 11));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Reservation reservation = insertReservation(LocalDate.of(2023, 8, 10), time, "브라운");
+        Reservation reservation = insertWaitingReservation(LocalDate.of(2023, 8, 10), time, "브라운");
 
         // when, then
         assertThatThrownBy(() -> reservationService.deleteMine(reservation.getId(), reservation.getGuestName()))
@@ -151,7 +175,7 @@ class ReservationServiceTest {
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Reservation reservation = insertReservation(LocalDate.of(2023, 8, 10), time, "브라운");
+        Reservation reservation = insertWaitingReservation(LocalDate.of(2023, 8, 10), time, "브라운");
 
         // when, then
         assertThatThrownBy(() -> reservationService.deleteMine(reservation.getId(), "포비"))
@@ -165,7 +189,7 @@ class ReservationServiceTest {
         // given
         ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 5);
-        Reservation reservation = insertReservation(existDate, existTime, "브라운");
+        Reservation reservation = insertWaitingReservation(existDate, existTime, "브라운");
 
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
         ReservationTime editedTime = insertReservationTime(LocalTime.of(12, 0));
@@ -173,12 +197,13 @@ class ReservationServiceTest {
         clock.setFixed(LocalDate.of(2023, 7, 20));
 
         // when
-        Reservation editedReservation =
-                reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName());
+        reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName());
 
         // then
-        assertThat(editedReservation)
-                .extracting(Reservation::getDate, r -> r.getTime().getId())
+        ReservationWaitingDto reservationWaitingDto = reservationRepository.findWaitingById(reservation.getId()).get();
+
+        assertThat(reservationWaitingDto)
+                .extracting(ReservationWaitingDto::date, r -> r.time().getId())
                 .containsExactly(editedDate, editedTime.getId());
     }
 
@@ -204,7 +229,7 @@ class ReservationServiceTest {
 
         ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 5);
-        Reservation reservation = insertReservation(existDate, existTime, "브라운");
+        Reservation reservation = insertWaitingReservation(existDate, existTime, "브라운");
 
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
         Long editedTimeId = 999L;
@@ -223,7 +248,7 @@ class ReservationServiceTest {
 
         ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 5);
-        Reservation reservation = insertReservation(existDate, existTime, "브라운");
+        Reservation reservation = insertWaitingReservation(existDate, existTime, "브라운");
 
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
         ReservationTime editedTime = insertReservationTime(LocalTime.of(12, 0));
@@ -235,7 +260,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 예외가 발생한다.")
+    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 대기 상태가 된다.")
     public void editDateTime_fail4() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
@@ -245,20 +270,21 @@ class ReservationServiceTest {
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
         ReservationTime editedTime = insertReservationTime(LocalTime.of(10, 0));
 
-        insertReservation("브라운", editedDate, editedTime, theme);
+        insertReservation("브라운", editedDate, editedTime, theme, Status.CONFIRMED);
 
         LocalDate existDate = LocalDate.of(2023, 8, 6);
         ReservationTime existTime = insertReservationTime(LocalTime.of(12, 0));
-        Reservation reservation = insertReservation("포비", existDate, existTime, theme);
+        Reservation reservation = insertReservation("포비", existDate, existTime, theme, Status.CONFIRMED);
 
-        // when then
-        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName()))
-                .isInstanceOf(DomainException.class)
-                .hasMessage(RESERVATION_ALREADY_EXISTS.message());
+        reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), "포비");
+
+        // then
+        assertThat(reservationRepository.findById(reservation.getId()).get().getStatus())
+                .isEqualTo(Status.WAITING);
     }
 
     @Test
-    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재는 하는데 그게 본인의 예약인 경우 예외가 발생하지 않는다.")
+    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재는 하는데 그게 본인의 예약이며 취소한 경우 예외가 발생하지 않는다.")
     public void editDateTime_fail4_2() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
@@ -267,7 +293,7 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.of(2023, 8, 10);
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
 
-        Reservation reservation = insertReservation("브라운", date, time, theme);
+        Reservation reservation = insertReservation("브라운", date, time, theme, Status.CANCELED);
 
         // when then
         assertThatCode(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(), reservation.getGuestName()))
@@ -285,7 +311,7 @@ class ReservationServiceTest {
         clock.setFixed(LocalDateTime.of(2023, 7, 6, 10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 6);
         ReservationTime existTime = insertReservationTime(LocalTime.of(12, 0));
-        Reservation reservation = insertReservation(existDate, existTime, "브라운");
+        Reservation reservation = insertWaitingReservation(existDate, existTime, "브라운");
 
         ReservationTime editedTime = insertReservationTime(et);
 
@@ -305,7 +331,7 @@ class ReservationServiceTest {
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
 
-        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme);
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme, Status.CONFIRMED);
 
         // when then
         assertThatThrownBy(() -> reservationService.editDateTime(
@@ -314,9 +340,13 @@ class ReservationServiceTest {
                 .hasMessage(CANNOT_EDIT_OTHER_GUEST_RESERVATION.message());
     }
 
-    private Reservation insertReservation(LocalDate existDate, ReservationTime existTime, String guestName) {
+    private Reservation insertConfirmedReservation(LocalDate date, ReservationTime time, Theme theme, String guestName) {
+        return insertReservation(guestName, date, time, theme, Status.CONFIRMED);
+    }
+
+    private Reservation insertWaitingReservation(LocalDate existDate, ReservationTime existTime, String guestName) {
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        return insertReservation(guestName, existDate, existTime, theme);
+        return insertReservation(guestName, existDate, existTime, theme, Status.WAITING);
     }
 
     private ReservationTime insertReservationTime(LocalTime startAt) {
@@ -327,7 +357,7 @@ class ReservationServiceTest {
         return themeRepository.save(Theme.create(name, description, thumbnail));
     }
 
-    private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(Reservation.create(name, date, time, theme));
+    private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme, Status status) {
+        return reservationRepository.save(Reservation.create(name, date, time, theme, status));
     }
 }

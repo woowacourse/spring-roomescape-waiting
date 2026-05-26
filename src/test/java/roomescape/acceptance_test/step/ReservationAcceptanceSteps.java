@@ -115,24 +115,6 @@ public final class ReservationAcceptanceSteps {
         return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
     }
 
-    public static ReservationInfo 같은_테마로_예약_생성을_요청하고(
-            String guestName,
-            LocalDate date,
-            Integer reservationTimeId,
-            Integer themeId
-    ) {
-        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
-    }
-
-    public static ReservationInfo 같은_테마로_새로운_예약_생성을_요청하고(
-            String guestName,
-            LocalDate date,
-            Integer reservationTimeId,
-            Integer themeId
-    ) {
-        return 예약_생성을_요청하고(guestName, date, reservationTimeId, themeId);
-    }
-
     public static ReservationInfo 다른_사용자_이름으로_새로운_예약_생성을_요청하고(
             String guestName,
             LocalDate date,
@@ -170,14 +152,6 @@ public final class ReservationAcceptanceSteps {
         assertThat(response.statusCode()).isEqualTo(204);
     }
 
-    public static void 관리자_예약_목록_조회_시_삭제한_예약은_응답받지_않는다(
-            ExtractableResponse<Response> response,
-            ReservationInfo reservation
-    ) {
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath().getList("reservations.id", Integer.class)).doesNotContain(reservation.id());
-    }
-
     public static ExtractableResponse<Response> 내_예약_목록_조회를_요청하면(String guestName) {
         return get("/reservations/me", Map.of(), Map.of(GUEST_NAME_HEADER, guestName));
     }
@@ -207,35 +181,7 @@ public final class ReservationAcceptanceSteps {
             ExtractableResponse<Response> response,
             ReservationInfo reservation
     ) {
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath().getInt("id")).isEqualTo(reservation.id());
-        assertThat(response.jsonPath().getString("guestName")).isEqualTo(reservation.guestName());
-    }
-
-    public static void 예약_날짜와_시간은_요청한_값으로_응답받는다(
-            ExtractableResponse<Response> response,
-            ReservationEditRequest request
-    ) {
-        assertThat(response.jsonPath().getString("date")).isEqualTo(request.date().toString());
-        assertThat(response.jsonPath().getInt("time.id")).isEqualTo(request.timeId().intValue());
-    }
-
-    public static void 예약_테마는_기존_테마로_응답받는다(
-            ExtractableResponse<Response> response,
-            ReservationInfo reservation
-    ) {
-        assertThat(response.jsonPath().getInt("theme.id")).isEqualTo(reservation.themeId().intValue());
-    }
-
-    public static ExtractableResponse<Response> 새로운_예약을_기존_예약의_날짜와_시간으로_수정_요청하면(
-            ReservationInfo targetReservation,
-            ReservationInfo reservation
-    ) {
-        ReservationEditRequest request = new ReservationEditRequest(
-                reservation.date(),
-                reservation.timeId()
-        );
-        return 예약_날짜와_시간_수정을_요청하면(targetReservation, request);
+        assertThat(response.statusCode()).isEqualTo(204);
     }
 
     public static void 현재_시간이_예약_시작_이후가_되고(MutableClock mutableClock) {
@@ -290,7 +236,7 @@ public final class ReservationAcceptanceSteps {
             ReservationInfo reservation
     ) {
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath().getList("reservations.id", Integer.class)).doesNotContain(reservation.id());
+        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains("CANCELED");
     }
 
     public record ReservationInfo(

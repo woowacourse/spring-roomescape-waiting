@@ -27,7 +27,7 @@ public class ReservationValidator {
         validateIsMyReservation(guestName, original);
         validateAlreadyStarted(original);
         validateNotPast(changed);
-        validateNotDuplicatedExceptMine(changed);
+        validateNotDuplicatedExcept(changed);
     }
 
     public void validateDelete(Reservation deleted, String guestName) {
@@ -36,21 +36,22 @@ public class ReservationValidator {
     }
 
     private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
                 reservation.getDate(),
                 reservation.getTime().getId(),
-                reservation.getTheme().getId()
+                reservation.getTheme().getId(),
+                reservation.getGuestName()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
         }
     }
 
-    private void validateNotDuplicatedExceptMine(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
+    private void validateNotDuplicatedExcept(Reservation reservation) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
-                reservation.getId()
+                reservation.getGuestName()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
         }
