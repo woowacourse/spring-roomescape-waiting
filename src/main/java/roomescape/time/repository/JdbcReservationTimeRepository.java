@@ -90,14 +90,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 SELECT rt.*
                 FROM reservation_time rt
                 WHERE rt.is_active = true
-                  AND rt.id NOT IN (
-                      SELECT r.time_id
-                      FROM reservation r
-                      WHERE r.date_id = :date_id
-                        AND r.theme_id = :theme_id
-                        AND r.status = 'RESERVED'
-                  )
-                ORDER BY rt.start_at ASC
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()

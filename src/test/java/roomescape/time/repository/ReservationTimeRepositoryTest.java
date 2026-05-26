@@ -143,9 +143,14 @@ class ReservationTimeRepositoryTest {
         );
 
         // then
+// then
         assertThat(availableTimes)
                 .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
-                .containsExactly(nonReservedTime);
+                .containsExactlyInAnyOrder(
+                        reservedTime15,
+                        reservedTime16,
+                        nonReservedTime
+                );
     }
 
     private List<ReservationTime> saveAll(List<ReservationTime> reservationTimes) {

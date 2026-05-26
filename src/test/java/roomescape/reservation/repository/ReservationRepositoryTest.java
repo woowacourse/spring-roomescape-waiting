@@ -22,6 +22,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
+import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -69,7 +70,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약 정보를 단건 조회한다.")
     void findById() {
         // given
-        Reservation saved = save(Reservation.create(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()));
+        Reservation saved = save(ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme));
 
         // when
         Reservation actual = jdbcReservationRepository.findById(saved.getId()).get();
@@ -117,11 +118,11 @@ class ReservationRepositoryTest {
     void findAllByName() {
         // given
         List<Reservation> reservations = saveAll(List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()),
-                Reservation.create(name, reservationDate1, reservationTime2, theme, LocalDateTime.now()),
-                Reservation.create(name, reservationDate2, reservationTime1, theme, LocalDateTime.now()),
-                Reservation.create(name, reservationDate2, reservationTime2, theme, LocalDateTime.now()))
-        );
+                ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme),
+                ReservationFixture.reservation(name, reservationDate1, reservationTime2, theme),
+                ReservationFixture.reservation(name, reservationDate2, reservationTime1, theme),
+                ReservationFixture.reservation(name, reservationDate2, reservationTime2, theme)
+        ));
         reservations.sort(
                 Comparator.comparing((Reservation reservation) -> reservation.getDate().getDate(), Comparator.reverseOrder())
                         .thenComparing(reservation -> reservation.getTime().getStartAt())

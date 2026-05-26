@@ -1,6 +1,8 @@
 package roomescape.reservation.fixture;
 
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
@@ -17,7 +19,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        return Reservation.create(name, date, time, theme, LocalDateTime.now());
+        return Reservation.create(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation waitReservation(
@@ -26,7 +28,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        return Reservation.wait(name, date, time, theme, LocalDateTime.now());
+        return Reservation.wait(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation canceledReservation(

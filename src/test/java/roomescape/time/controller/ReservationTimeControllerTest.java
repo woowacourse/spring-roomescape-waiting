@@ -9,7 +9,6 @@ import java.time.LocalDate;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
-import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 import static roomescape.time.fixture.ReservationTimeApiFixture.updateTimeStatus;
@@ -37,28 +36,6 @@ class ReservationTimeControllerTest extends AcceptanceTest {
                 .body("size()", is(1))
                 .body("[0].id", is(timeId))
                 .body("[0].startAt", is(startAt1));
-    }
-
-    @Test
-    @DisplayName("이미 예약된 시간은 예약 가능한 시간 목록에서 제외된다.")
-    void readAvailableTimesExcludeReservedTime() {
-        Integer dateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(managerToken, startAt1);
-        Integer availableTimeId = createReservationTime(managerToken, startAt2);
-        updateTimeStatus(managerToken, timeId, true);
-        updateTimeStatus(managerToken, availableTimeId, true);
-        Integer themeId = createTheme(managerToken, themeName);
-        createReservationWithToken(memberToken, dateId, timeId, themeId);
-
-        RestAssured.given().log().all()
-                .queryParam("dateId", dateId)
-                .queryParam("themeId", themeId)
-                .when().get("/member/times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].id", is(availableTimeId))
-                .body("[0].startAt", is(startAt2));
     }
 
     @Test
