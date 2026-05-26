@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -76,6 +77,20 @@ public class ReservationWaitingService {
         }
 
         reservationWaitingUpdatingDao.delete(id);
+    }
+
+    public List<ReservationWaitingResponse> readAll() {
+        return reservationWaitingQueryingDao.findAllReservationWaiting()
+                .stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+    }
+
+    public List<ReservationWaitingResponse> readByName(String name) {
+        return reservationWaitingQueryingDao.findAllByName(name)
+                .stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
     }
 
     private Reservation getReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
