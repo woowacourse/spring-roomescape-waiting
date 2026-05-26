@@ -1,23 +1,25 @@
 package roomescape.facade;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationUpdateRequest;
+import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.TimeWithStatusResponse;
 import roomescape.exception.BusinessRuleViolationException;
 import roomescape.exception.ConflictException;
 import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
+import roomescape.service.ReservationWaitingService;
 import roomescape.service.ThemeService;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 
 @Component
 public class ReservationFacade {
@@ -28,18 +30,23 @@ public class ReservationFacade {
     private static final String PAST_RESERVATION_REJECTED = "지난 시각에는 예약할 수 없습니다.";
     private static final String PAST_RESERVATION_UPDATE_REJECTED = "지난 시각으로 예약을 변경할 수 없습니다.";
     private static final String EXPIRED_RESERVATION_UPDATE_REJECTED = "이미 지난 예약은 변경할 수 없습니다.";
+    private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
+    private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
 
     private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
+    private final ReservationWaitingService reservationWaitingService;
     private final ThemeService themeService;
 
     public ReservationFacade(
             ReservationService reservationService,
             ReservationTimeService reservationTimeService,
+            ReservationWaitingService reservationWaitingService,
             ThemeService themeService
     ) {
         this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
+        this.reservationWaitingService = reservationWaitingService;
         this.themeService = themeService;
     }
 
@@ -114,6 +121,26 @@ public class ReservationFacade {
         }
 
         return reservationService.updateReservation(updated);
+    }
+
+    @Transactional
+    public ReservationWaiting addWaiting(ReservationWaitingRequest request) {
+        ReservationTime reservationTime = reservationTimeService.findById(request.timeId());
+        Theme theme = themeService.findById(request.themeId());
+        Reservations reservations = reservationService.findByDateAndThemeId(request.date(), theme.getId());
+        Reservation reservation = reservations.findByTime(reservationTime);
+
+        if (reservation.isOwnedBy(request.name())) {
+            throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
+        }
+
+        ReservationWaiting reservationWaiting = new ReservationWaiting(
+                request.name(),
+                LocalDateTime.now(),
+                reservation
+        );
+
+        return reservationWaitingService.addWaiting(reservationWaiting);
     }
 
     public List<TimeWithStatusResponse> getTimesWithAvailability(LocalDate date, Long themeId) {
