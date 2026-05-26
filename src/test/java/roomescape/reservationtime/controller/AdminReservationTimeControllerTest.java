@@ -41,7 +41,7 @@ class AdminReservationTimeControllerTest {
     @DisplayName("예약 시간을 생성하는 요청을 하면 생성된 예약 시간 정보가 응답으로 반환된다.")
     public void create_success() throws Exception {
         // given
-        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(10, 0));
+        ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.of(10, 0));
 
         given(reservationTimeService.create(any()))
                 .willReturn(reservationTime);

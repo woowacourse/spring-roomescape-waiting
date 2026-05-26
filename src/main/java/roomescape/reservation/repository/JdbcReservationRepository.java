@@ -198,7 +198,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = new ReservationTime(
+        ReservationTime reservationTime = ReservationTime.of(
                 resultSet.getLong("time_id"),
                 resultSet.getTime("start_at").toLocalTime(),
                 toLocalDateTime(resultSet.getTimestamp("time_deleted_at"))
