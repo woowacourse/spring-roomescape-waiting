@@ -1,0 +1,56 @@
+package roomescape.controller.user;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
+import roomescape.controller.dto.ReservationWaitingRequest;
+import roomescape.controller.dto.ReservationWaitingResponse;
+import roomescape.service.ReservationWaitingService;
+import roomescape.service.dto.ReservationWaitingWithTurn;
+
+import java.net.URI;
+import java.util.List;
+
+@Validated
+@RestController
+@RequestMapping("/waitings")
+public class ReservationWaitingController {
+
+    private final ReservationWaitingService service;
+
+    public ReservationWaitingController(ReservationWaitingService service) {
+        this.service = service;
+    }
+
+    @PostMapping
+    public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
+            @Valid @RequestBody ReservationWaitingRequest request) {
+        ReservationWaitingWithTurn waitingWithTurn = service.create(
+                request.name(),
+                request.date(),
+                request.timeId(),
+                request.themeId());
+        return ResponseEntity.created(URI.create("/waitings/" + waitingWithTurn.id()))
+                .body(ReservationWaitingResponse.from(waitingWithTurn));
+    }
+
+    @GetMapping
+    public ResponseEntity<List<ReservationWaitingResponse>> getReservationWaitingsByName(
+            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
+        List<ReservationWaitingResponse> reservationWaitings = service.findByName(name).stream()
+                .map(ReservationWaitingResponse::from)
+                .toList();
+        return ResponseEntity.ok(reservationWaitings);
+    }
+
+    // todo: 예약 대기 삭제 API 구현
+//    @DeleteMapping("/{id}")
+//    public ResponseEntity<Void> deleteReservation(
+//            @PathVariable @Positive(message = "id는 양수이어야 합니다.") Long id,
+//            @RequestParam("name") @NotBlank(message = "name은 비어 있을 수 없습니다.") String name) {
+//        service.delete(id, name);
+//        return ResponseEntity.noContent().build();
+//    }
+}
