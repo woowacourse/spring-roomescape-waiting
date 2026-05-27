@@ -1,8 +1,8 @@
-package roomescape.reservation.dto;
+package roomescape.reservation.controller.dto;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.theme.dto.ThemeResponse;
+import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
+import roomescape.theme.controller.dto.ThemeResponse;
 
 public record ReservationResponse(
         Long id,

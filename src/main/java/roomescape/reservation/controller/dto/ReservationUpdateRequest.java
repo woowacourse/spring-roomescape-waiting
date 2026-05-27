@@ -1,4 +1,4 @@
-package roomescape.reservation.dto;
+package roomescape.reservation.controller.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.NotBlank;
@@ -8,7 +8,7 @@ import jakarta.validation.constraints.Size;
 
 import java.time.LocalDate;
 
-public record ReservationCreateRequest(
+public record ReservationUpdateRequest(
         @NotBlank(message = "예약자 이름은 비어 있을 수 없습니다.")
         @Size(max = 255, message = "예약자 이름은 255자를 넘을 수 없습니다.")
         String name,
@@ -19,10 +19,6 @@ public record ReservationCreateRequest(
 
         @NotNull(message = "예약 시간 id는 비어 있을 수 없습니다.")
         @Positive(message = "예약 시간 id는 1 이상의 숫자여야 합니다.")
-        Long timeId,
-
-        @NotNull(message = "테마 id는 비어 있을 수 없습니다.")
-        @Positive(message = "테마 id는 1 이상의 숫자여야 합니다.")
-        Long themeId
+        Long timeId
 ) {
 }

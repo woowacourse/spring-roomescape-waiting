@@ -6,10 +6,10 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservationtime.dto.AvailableTimeResponse;
-import roomescape.reservationtime.dto.AvailableTimesResponse;
-import roomescape.reservationtime.dto.ReservationTimeResponse;
-import roomescape.reservationtime.dto.ReservationTimesResponse;
+import roomescape.reservationtime.controller.dto.AvailableTimeResponse;
+import roomescape.reservationtime.controller.dto.AvailableTimesResponse;
+import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
+import roomescape.reservationtime.controller.dto.ReservationTimesResponse;
 import roomescape.reservationtime.service.ReservationTimeAvailability;
 import roomescape.reservationtime.service.ReservationTimeService;
 
