@@ -13,13 +13,13 @@ public record ReservationWaitingResponse(
         Long turn
 ) {
 
-    public static ReservationWaitingResponse from(WaitingResult waitingWithTurn) {
+    public static ReservationWaitingResponse from(WaitingResult waitingResult) {
         return new ReservationWaitingResponse(
-                waitingWithTurn.id(),
-                waitingWithTurn.name(),
-                waitingWithTurn.date(),
-                ReservationWaitingTimeResponse.from(waitingWithTurn.time()),
-                ReservationWaitingThemeResponse.from(waitingWithTurn.theme()),
-                waitingWithTurn.turn());
+                waitingResult.id(),
+                waitingResult.name(),
+                waitingResult.date(),
+                ReservationWaitingTimeResponse.from(waitingResult.time()),
+                ReservationWaitingThemeResponse.from(waitingResult.theme()),
+                waitingResult.turn());
     }
 }
