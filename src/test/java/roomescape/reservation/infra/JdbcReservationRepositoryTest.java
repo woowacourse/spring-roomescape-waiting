@@ -40,7 +40,12 @@ class JdbcReservationRepositoryTest {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
-        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
 
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow();
@@ -92,7 +97,12 @@ class JdbcReservationRepositoryTest {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
-        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
 
         assertThat(reservationRepository.delete(reservationId)).isEqualTo(1);
     }
@@ -104,7 +114,12 @@ class JdbcReservationRepositoryTest {
         Long nineTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
-        Long reservationId = testHelper.insertReservation("스타크", date, themeId, nineTimeId);
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                nineTimeId
+        );
 
         Reservation reservation = Reservation.builder()
                 .id(reservationId)
@@ -152,7 +167,12 @@ class JdbcReservationRepositoryTest {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
-        Long reservationId = testHelper.insertReservation("스타크", date, themeId, timeId);
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
 
         LocalDate newDate = LocalDate.of(2026, 5, 8);
         Long newTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));

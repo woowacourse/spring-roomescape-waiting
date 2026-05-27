@@ -51,7 +51,12 @@ class ReservationApiTest {
     void delete_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
-        Long reservationId = testHelper.insertReservation("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         RestAssured.given()
                 .when().delete("/reservations/{id}", reservationId)
@@ -117,7 +122,12 @@ class ReservationApiTest {
     void save_waiting_if_reservation_exists() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
-        testHelper.insertReservation("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
 
@@ -196,7 +206,12 @@ class ReservationApiTest {
                 themeId,
                 timeId
         );
-        testHelper.insertReservation("비밥", ReservationFixture.futureReservationDate(), themeId, updateTimeId);
+        testHelper.insertReservation(
+                "비밥",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                updateTimeId
+        );
 
         Map<String, String> params = ReservationFixture.futureReservationUpdateParams(updateTimeId);
 
@@ -251,9 +266,24 @@ class ReservationApiTest {
         LocalDate earlierDate = LocalDate.of(2026, 5, 6);
         LocalDate laterDate = LocalDate.of(2026, 5, 7);
 
-        testHelper.insertReservation("스타크", earlierDate, themeId, nineTimeId);
-        testHelper.insertReservation("비밥", laterDate, themeId, nineTimeId);
-        testHelper.insertReservation("스타크", laterDate, themeId, tenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                earlierDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "비밥",
+                laterDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "스타크",
+                laterDate,
+                themeId,
+                tenTimeId
+        );
 
         RestAssured.given()
                 .when().get("/reservations")
@@ -294,9 +324,24 @@ class ReservationApiTest {
         LocalDate earlierDate = LocalDate.of(2026, 5, 6);
         LocalDate laterDate = LocalDate.of(2026, 5, 7);
 
-        testHelper.insertReservation("스타크", earlierDate, themeId, nineTimeId);
-        testHelper.insertReservation("비밥", laterDate, themeId, nineTimeId);
-        testHelper.insertReservation("스타크", laterDate, themeId, tenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                earlierDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "비밥",
+                laterDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "스타크",
+                laterDate,
+                themeId,
+                tenTimeId
+        );
 
         RestAssured.given()
                 .param("username", "스타크")
@@ -325,8 +370,12 @@ class ReservationApiTest {
     void delete_past_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        Long reservationId = testHelper.insertReservation("스타크", ReservationFixture.pastReservationDate(), themeId,
-                timeId);
+        Long reservationId = testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.pastReservationDate(),
+                themeId,
+                timeId
+        );
 
         RestAssured.given()
                 .when().delete("/reservations/{id}", reservationId)
@@ -340,7 +389,12 @@ class ReservationApiTest {
     void delete_waiting_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
-        Long waitingId = testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         RestAssured.given()
                 .when().delete("/reservations/waitings/{id}", waitingId)

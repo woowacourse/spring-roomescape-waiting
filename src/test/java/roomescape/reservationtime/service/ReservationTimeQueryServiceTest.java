@@ -54,7 +54,12 @@ public class ReservationTimeQueryServiceTest {
         Long elevenId = testHelper.insertReservationTime(LocalTime.of(11, 0));
 
         LocalDate reservationDate = LocalDate.of(2026, 5, 6);
-        testHelper.insertReservation("스타크", reservationDate, themeId, nineId);
+        testHelper.insertReservation(
+                "스타크",
+                reservationDate,
+                themeId,
+                nineId
+        );
 
         List<AvailableReservationTimeResult> times = timeQueryService.findAvailableTimes(themeId, reservationDate);
 

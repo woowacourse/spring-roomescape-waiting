@@ -40,7 +40,12 @@ class JdbcWaitingRepositoryTest {
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long themeId = testHelper.insertTheme("theme name", "theme description", "theme img url");
         LocalDate date = LocalDate.of(2026, 5, 6);
-        Long waitingId = testHelper.insertWaiting("스타크", date, themeId, timeId);
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
         ReservationSlot slot = waitingRepository.findSlotById(waitingId)
                 .orElseThrow();
 
@@ -84,7 +89,12 @@ class JdbcWaitingRepositoryTest {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
-        Long waitingId = testHelper.insertWaiting("스타크", date, themeId, timeId);
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
 
         assertThat(waitingRepository.delete(waitingId)).isEqualTo(1);
     }
@@ -95,9 +105,24 @@ class JdbcWaitingRepositoryTest {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         LocalDate date = LocalDate.of(2026, 5, 6);
-        testHelper.insertWaiting("스타크", date, themeId, timeId);
-        testHelper.insertWaiting("피노", date, themeId, timeId);
-        Long thirdWaitingId = testHelper.insertWaiting("네오", date, themeId, timeId);
+        testHelper.insertWaiting(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피노",
+                date,
+                themeId,
+                timeId
+        );
+        Long thirdWaitingId = testHelper.insertWaiting(
+                "네오",
+                date,
+                themeId,
+                timeId
+        );
 
         ReservationSlot slot = waitingRepository.findSlotById(thirdWaitingId)
                 .orElseThrow();

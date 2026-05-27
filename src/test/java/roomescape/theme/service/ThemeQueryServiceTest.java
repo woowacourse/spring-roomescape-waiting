@@ -55,10 +55,30 @@ public class ThemeQueryServiceTest {
         Long firstThemeId = testHelper.insertTheme(ThemeFixture.themeCreateCommand(1));
         Long secondThemeId = testHelper.insertTheme(ThemeFixture.themeCreateCommand(2));
 
-        testHelper.insertReservation("테마1 예약자1", CURRENT_DATE.minusDays(1), firstThemeId, nineTimeId);
-        testHelper.insertReservation("테마1 예약자2", CURRENT_DATE.minusDays(1), firstThemeId, tenTimeId);
-        testHelper.insertReservation("테마2 예약자1", CURRENT_DATE.minusDays(2), secondThemeId, nineTimeId);
-        testHelper.insertReservation("기간 밖 예약자", CURRENT_DATE.minusDays(8), secondThemeId, tenTimeId);
+        testHelper.insertReservation(
+                "테마1 예약자1",
+                CURRENT_DATE.minusDays(1),
+                firstThemeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마1 예약자2",
+                CURRENT_DATE.minusDays(1),
+                firstThemeId,
+                tenTimeId
+        );
+        testHelper.insertReservation(
+                "테마2 예약자1",
+                CURRENT_DATE.minusDays(2),
+                secondThemeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "기간 밖 예약자",
+                CURRENT_DATE.minusDays(8),
+                secondThemeId,
+                tenTimeId
+        );
 
         List<PopularThemeResult> responses = themeQueryService.findPopularThemes(CURRENT_DATE);
 

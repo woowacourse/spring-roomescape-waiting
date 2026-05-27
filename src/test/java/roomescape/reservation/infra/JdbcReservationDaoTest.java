@@ -11,8 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.reservation.application.dto.ReservationDetail;
 import roomescape.reservation.application.dao.ReservationDetailDao;
+import roomescape.reservation.application.dto.ReservationDetail;
 import roomescape.support.TestDataHelper;
 
 @JdbcTest
@@ -39,8 +39,18 @@ class JdbcReservationDaoTest {
         Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long elevenTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         LocalDate date = LocalDate.of(2026, 5, 10);
-        testHelper.insertReservation("스타크", date, themeId, tenTimeId);
-        testHelper.insertReservation("비밥", date, themeId, elevenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                tenTimeId
+        );
+        testHelper.insertReservation(
+                "비밥",
+                date,
+                themeId,
+                elevenTimeId
+        );
 
         List<ReservationDetail> details = reservationDao.findAll();
         ReservationDetail first = details.getFirst();
@@ -62,8 +72,18 @@ class JdbcReservationDaoTest {
         Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         Long elevenTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         LocalDate date = LocalDate.of(2026, 5, 10);
-        testHelper.insertReservation("스타크", date, themeId, tenTimeId);
-        testHelper.insertReservation("비밥", date, themeId, elevenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                tenTimeId
+        );
+        testHelper.insertReservation(
+                "비밥",
+                date,
+                themeId,
+                elevenTimeId
+        );
 
         List<ReservationDetail> details = reservationDao.findByName("비밥");
         ReservationDetail first = details.getFirst();

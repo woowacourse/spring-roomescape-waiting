@@ -64,9 +64,24 @@ class JdbcAvailableTimeDaoTest {
         Long elevenTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         LocalDate reservationDate = LocalDate.of(2026, 5, 6);
 
-        testHelper.insertReservation("예약자", reservationDate, themeId, nineTimeId);
-        testHelper.insertReservation("다른 테마 예약자", reservationDate, otherThemeId, tenTimeId);
-        testHelper.insertReservation("다른 날짜 예약자", reservationDate.plusDays(1), themeId, elevenTimeId);
+        testHelper.insertReservation(
+                "예약자",
+                reservationDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "다른 테마 예약자",
+                reservationDate,
+                otherThemeId,
+                tenTimeId
+        );
+        testHelper.insertReservation(
+                "다른 날짜 예약자",
+                reservationDate.plusDays(1),
+                themeId,
+                elevenTimeId
+        );
 
         List<AvailableReservationTimeResult> times = availableTimeDao.findByThemeAndDate(themeId, reservationDate);
 

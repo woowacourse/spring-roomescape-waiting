@@ -69,7 +69,12 @@ public class ThemeCommandServiceTest {
         Long themeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         LocalDate date = LocalDate.of(2026, 5, 10);
-        testHelper.insertReservation("스타크", date, themeId, timeId);
+        testHelper.insertReservation(
+                "스타크",
+                date,
+                themeId,
+                timeId
+        );
 
         assertThatThrownBy(() -> themeCommandService.delete(themeId))
                 .isInstanceOf(ConflictException.class)

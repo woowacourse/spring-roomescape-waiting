@@ -35,8 +35,18 @@ class ReservationQueryServiceTest {
         LocalDate earlierDate = LocalDate.of(2026, 5, 6);
         LocalDate laterDate = LocalDate.of(2026, 5, 7);
 
-        testHelper.insertReservation("스타크", earlierDate, themeId, nineTimeId);
-        testHelper.insertReservation("비밥", laterDate, themeId, tenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                earlierDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "비밥",
+                laterDate,
+                themeId,
+                tenTimeId
+        );
 
         ReservationSearchCondition condition = new ReservationSearchCondition(null);
         List<ReservationResult> reservations = reservationQueryService.findAll(condition);
@@ -68,9 +78,24 @@ class ReservationQueryServiceTest {
         LocalDate earlierDate = LocalDate.of(2026, 5, 6);
         LocalDate laterDate = LocalDate.of(2026, 5, 7);
 
-        testHelper.insertReservation("스타크", earlierDate, themeId, nineTimeId);
-        testHelper.insertReservation("비밥", laterDate, themeId, nineTimeId);
-        testHelper.insertReservation("스타크", laterDate, themeId, tenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                earlierDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "비밥",
+                laterDate,
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "스타크",
+                laterDate,
+                themeId,
+                tenTimeId
+        );
 
         ReservationSearchCondition condition = new ReservationSearchCondition("스타크");
         List<ReservationResult> reservations = reservationQueryService.findAll(condition);

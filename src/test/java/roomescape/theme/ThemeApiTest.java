@@ -157,21 +157,81 @@ public class ThemeApiTest {
         LocalDate fourDaysAgo = today.minusDays(4);
         LocalDate eightDaysAgo = today.minusDays(8);
 
-        testHelper.insertReservation("테마1 예약자1", oneDayAgo, theme1Id, nineTimeId);
-        testHelper.insertReservation("테마1 예약자2", oneDayAgo, theme1Id, tenTimeId);
-        testHelper.insertReservation("테마1 예약자3", twoDaysAgo, theme1Id, nineTimeId);
-        testHelper.insertReservation("테마1 예약자4", threeDaysAgo, theme1Id, nineTimeId);
-        testHelper.insertReservation("테마1 예약자5", fourDaysAgo, theme1Id, nineTimeId);
+        testHelper.insertReservation(
+                "테마1 예약자1",
+                oneDayAgo,
+                theme1Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마1 예약자2",
+                oneDayAgo,
+                theme1Id,
+                tenTimeId
+        );
+        testHelper.insertReservation(
+                "테마1 예약자3",
+                twoDaysAgo,
+                theme1Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마1 예약자4",
+                threeDaysAgo,
+                theme1Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마1 예약자5",
+                fourDaysAgo,
+                theme1Id,
+                nineTimeId
+        );
 
-        testHelper.insertReservation("테마2 예약자1", oneDayAgo, theme2Id, nineTimeId);
-        testHelper.insertReservation("테마2 예약자2", twoDaysAgo, theme2Id, nineTimeId);
-        testHelper.insertReservation("테마2 예약자3", threeDaysAgo, theme2Id, nineTimeId);
+        testHelper.insertReservation(
+                "테마2 예약자1",
+                oneDayAgo,
+                theme2Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마2 예약자2",
+                twoDaysAgo,
+                theme2Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마2 예약자3",
+                threeDaysAgo,
+                theme2Id,
+                nineTimeId
+        );
 
-        testHelper.insertReservation("테마3 예약자1", oneDayAgo, theme3Id, nineTimeId);
-        testHelper.insertReservation("테마3 예약자2", twoDaysAgo, theme3Id, nineTimeId);
+        testHelper.insertReservation(
+                "테마3 예약자1",
+                oneDayAgo,
+                theme3Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "테마3 예약자2",
+                twoDaysAgo,
+                theme3Id,
+                nineTimeId
+        );
 
-        testHelper.insertReservation("테마4 예약자1", oneDayAgo, theme4Id, nineTimeId);
-        testHelper.insertReservation("기간 밖 예약자", eightDaysAgo, theme4Id, tenTimeId);
+        testHelper.insertReservation(
+                "테마4 예약자1",
+                oneDayAgo,
+                theme4Id,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "기간 밖 예약자",
+                eightDaysAgo,
+                theme4Id,
+                tenTimeId
+        );
 
         RestAssured.given().log().all()
                 .when().get("/themes/popular-top-10")

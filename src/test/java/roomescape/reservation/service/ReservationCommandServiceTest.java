@@ -220,7 +220,12 @@ class ReservationCommandServiceTest {
     void save_waiting_if_reservation_exists() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        testHelper.insertReservation("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        testHelper.insertReservation(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
         ReservationResult savedWaiting = reservationCommandService.save(request);
@@ -240,9 +245,24 @@ class ReservationCommandServiceTest {
     void check_waiting_rank() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        testHelper.insertReservation("네오", ReservationFixture.futureReservationDate(), themeId, timeId);
-        testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
-        testHelper.insertWaiting("피노", ReservationFixture.futureReservationDate(), themeId, timeId);
+        testHelper.insertReservation(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피노",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
         ReservationResult savedWaiting = reservationCommandService.save(request);
@@ -255,7 +275,12 @@ class ReservationCommandServiceTest {
     void delete_waiting_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        Long waitingId = testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         assertThatNoException().isThrownBy(() -> reservationCommandService.deleteWaiting(waitingId, NOW));
     }
@@ -265,9 +290,18 @@ class ReservationCommandServiceTest {
     void delete_confirmed_reservation_and_waiting_to_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        Long reservationId = testHelper.insertReservation("피노", ReservationFixture.futureReservationDate(), themeId,
-                timeId);
-        Long waitingId = testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        Long reservationId = testHelper.insertReservation(
+                "피노",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         reservationCommandService.deleteReservation(reservationId, NOW);
 
@@ -291,9 +325,18 @@ class ReservationCommandServiceTest {
     void update_reservation_and_waiting_to_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(0, 0));
-        Long reservationId = testHelper.insertReservation("피노", ReservationFixture.futureReservationDate(), themeId,
-                timeId);
-        testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        Long reservationId = testHelper.insertReservation(
+                "피노",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
 
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
         reservationCommandService.update(

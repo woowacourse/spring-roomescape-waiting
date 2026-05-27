@@ -12,8 +12,8 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.support.TestDataHelper;
-import roomescape.theme.application.dto.PopularThemeResult;
 import roomescape.theme.application.dao.PopularThemeDao;
+import roomescape.theme.application.dto.PopularThemeResult;
 import roomescape.theme.domain.PopularThemePeriod;
 
 @JdbcTest
@@ -45,9 +45,24 @@ public class JdbcPopularThemeDaoTest {
         Long firstThemeId = testHelper.insertTheme("테마1", "설명1", "img1.jpg");
         Long secondThemeId = testHelper.insertTheme("테마2", "설명2", "img2.jpg");
 
-        testHelper.insertReservation("스타크", yesterday, firstThemeId, nineTimeId);
-        testHelper.insertReservation("카야", yesterday, secondThemeId, tenTimeId);
-        testHelper.insertReservation("스타크", yesterday, firstThemeId, tenTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                yesterday,
+                firstThemeId,
+                nineTimeId
+        );
+        testHelper.insertReservation(
+                "카야",
+                yesterday,
+                secondThemeId,
+                tenTimeId
+        );
+        testHelper.insertReservation(
+                "스타크",
+                yesterday,
+                firstThemeId,
+                tenTimeId
+        );
 
         List<PopularThemeResult> popularThemes = themeDao.findTop10PopularThemes(PopularThemePeriod.from(today));
 

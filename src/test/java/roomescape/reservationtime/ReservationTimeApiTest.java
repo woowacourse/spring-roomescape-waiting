@@ -109,7 +109,12 @@ class ReservationTimeApiTest {
         testHelper.insertReservationTime(LocalTime.of(11, 0));
         LocalDate reservationDate = LocalDate.of(2028, 5, 4);
 
-        testHelper.insertReservation("스타크", reservationDate, themeId, nineTimeId);
+        testHelper.insertReservation(
+                "스타크",
+                reservationDate,
+                themeId,
+                nineTimeId
+        );
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
