@@ -103,8 +103,8 @@ class ReservationDAOTest {
                 "INSERT INTO theme (id, name, description, image_url) VALUES (2, 't2', '설명', 'url')",
                 "INSERT INTO reservation_time (id, start_at) VALUES (1, '10:10')",
                 "INSERT INTO reservation_time (id, start_at) VALUES (2, '10:20')",
-                "INSERT INTO reservation (id, name, date, time_id, theme_id) VALUES (1, '브라운', '2023-08-05', 1, 1)",
-                "INSERT INTO reservation (id, name, date, time_id, theme_id) VALUES (2, '조다현', '2023-08-05', 2, 2)"
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (1, '브라운', '2023-08-05', 1, 1, 'RESERVED')",
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (2, '조다현', '2023-08-05', 2, 2, 'RESERVED')"
         })
         void 저장된_모든_예약을_조회한다() {
             // given
@@ -136,7 +136,7 @@ class ReservationDAOTest {
         @Sql(statements = {
                 "INSERT INTO theme (id, name, description, image_url) VALUES (1, 't1', '설명', 'url')",
                 "INSERT INTO reservation_time (id, start_at) VALUES (1, '10:10')",
-                "INSERT INTO reservation (id, name, date, time_id, theme_id) VALUES (1, '브라운', '2023-08-05', 1, 1)"
+                "INSERT INTO reservation (id, name, date, time_id, theme_id, status) VALUES (1, '브라운', '2023-08-05', 1, 1, 'RESERVED')"
         })
         void ID로_예약을_조회한다() {
             // given

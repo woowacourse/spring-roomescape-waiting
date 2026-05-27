@@ -2,12 +2,14 @@ package roomescape.reservation.service;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.dao.ReservationDAO;
 import roomescape.reservation.dao.ReservationTimeDAO;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
+import roomescape.reservation.dto.request.UpdateMyReservation;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ThemeSimpleResponse;
@@ -71,4 +73,33 @@ public class ReservationService {
   public void deleteByIdAndName(Long id, String name) {
         reservationDAO.deleteByIdAndName(id, name);
   }
+
+    public void deleteByNameAndReservationId(String name, Long reservationId) {
+        boolean isExistReservation = reservationDAO.existsByNameAndReservationId(name, reservationId);
+        if (!isExistReservation) {
+            throw new IllegalStateException("해당 예약이 이미 존재하지 않습니다.");
+        }
+
+        reservationDAO.deleteByNameAndReservationId(name, reservationId);
+    }
+
+    public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
+        Reservation reservation = reservationDAO.findById(reservationId);
+        validateReservationAuthority(name, reservation);
+        isReservationExists(updateMyReservation.date(), updateMyReservation.timeId(), reservation.getTheme().getId());
+        reservationDAO.updateReservation(updateMyReservation.date(), updateMyReservation.timeId(), name, reservationId);
+    }
+
+    private static void validateReservationAuthority(String name, Reservation reservation) {
+        if (!Objects.equals(reservation.getName(), name)) {
+            throw new IllegalStateException("다른 사람의 예약은 변경할 수 없습니다.");
+        }
+    }
+
+    private void isReservationExists(LocalDate date, Long timeId, Long themeId) {
+        boolean reservationExist = reservationDAO.existsByTimeIdAndThemeId(date, timeId, themeId);
+        if (reservationExist) {
+            throw new IllegalStateException("해당 시간대는 이미 예약이 완료되었습니다.");
+        }
+    }
 }

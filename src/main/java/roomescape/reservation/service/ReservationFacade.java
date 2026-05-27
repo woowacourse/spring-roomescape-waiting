@@ -4,6 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
+import roomescape.reservation.dto.request.UpdateMyReservation;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
@@ -52,7 +53,11 @@ public class ReservationFacade {
         return reservationService.findById(id);
     }
 
-  public void deleteReservationWithName(Long id, String name) {
-        reservationService.deleteByIdAndName(id, name);
-  }
+    public void deleteReservationByNameAndReservationId(String name, Long reservationId) {
+        reservationService.deleteByNameAndReservationId(name, reservationId);
+    }
+
+    public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
+        reservationService.updateMyReservation(updateMyReservation, name, reservationId);
+    }
 }

@@ -36,6 +36,11 @@ public class CustomExceptionResolver implements HandlerExceptionResolver, Ordere
                 return new ModelAndView();
             }
 
+            if (ex instanceof IllegalStateException) {
+                writeJsonResponse(response, HttpStatus.BAD_REQUEST, ex.getMessage());
+                return new ModelAndView();
+            }
+
             if (ex instanceof DataIntegrityViolationException) {
                 writeJsonResponse(response, HttpStatus.CONFLICT, "데이터 무결성 제약 조건을 위반했습니다.");
                 return new ModelAndView();
