@@ -1,6 +1,7 @@
 package roomescape.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import java.util.Arrays;
 import org.springframework.core.MethodParameter;
 import org.springframework.stereotype.Component;
 import org.springframework.web.bind.support.WebDataBinderFactory;
@@ -11,8 +12,6 @@ import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
 import roomescape.exception.auth.InsufficientRoleException;
 import roomescape.exception.auth.UnauthorizedException;
-
-import java.util.Arrays;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {

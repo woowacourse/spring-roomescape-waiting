@@ -1,11 +1,10 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.StoreDao;
 import roomescape.domain.Store;
-
-import java.util.List;
 
 @Service
 @Transactional(readOnly = true)

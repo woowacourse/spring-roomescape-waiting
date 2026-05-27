@@ -1,12 +1,11 @@
 package roomescape.auth;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.lang.reflect.Method;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.MethodParameter;
 import roomescape.domain.Member;
-
-import java.lang.reflect.Method;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 class LoginMemberArgumentResolverTest {
 

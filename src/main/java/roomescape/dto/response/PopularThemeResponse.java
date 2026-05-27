@@ -1,8 +1,7 @@
 package roomescape.dto.response;
 
-import roomescape.dto.PopularThemeResult;
-
 import java.util.List;
+import roomescape.dto.PopularThemeResult;
 
 public record PopularThemeResponse(
         Long id,

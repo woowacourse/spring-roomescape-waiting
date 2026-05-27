@@ -1,9 +1,8 @@
 package roomescape.dto.response;
 
-import roomescape.domain.ReservationTime;
-
 import java.util.List;
 import java.util.Map;
+import roomescape.domain.ReservationTime;
 
 public record AvailableTimeResponse(
         Long id,

@@ -1,9 +1,8 @@
 package roomescape.dto.response;
 
-import roomescape.dto.WaitingResponseResult;
-
 import java.time.LocalDateTime;
 import java.util.List;
+import roomescape.dto.WaitingResponseResult;
 
 public record WaitingResponse(
         Long order,
