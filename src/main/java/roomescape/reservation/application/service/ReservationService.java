@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -89,6 +90,24 @@ public class ReservationService {
         Reservation reservation = toReservation(reservationDetail);
         validateOwner(name, reservation);
         validateReservationNotPast(reservationDetail, currentDateTime);
+
+        Optional<Waiting> oldestWaiting = waitingRepository.findOldestByDateAndThemeIdAndTimeId(
+                reservation.getDate(), reservation.getThemeId(),
+                reservation.getTimeId());
+
+        if (oldestWaiting.isPresent()) {
+            Waiting waiting = oldestWaiting.get();
+            Reservation waitingToReservation = Reservation.builder()
+                    .id(reservation.getId())
+                    .name(waiting.getName())
+                    .date(waiting.getDate())
+                    .themeId(waiting.getThemeId())
+                    .timeId(waiting.getTimeId())
+                    .build();
+            reservationRepository.update(waitingToReservation);
+            return waitingRepository.delete(waiting.getId());
+        }
+
         return reservationRepository.delete(id);
     }
 
