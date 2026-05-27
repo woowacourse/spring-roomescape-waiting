@@ -57,6 +57,7 @@ public class Reservation {
     public void changeSchedule(String requesterName, ReservationDate newDate, ReservationTime newTime) {
         validateOwner(requesterName);
         validateNotCanceled();
+        validateNotWaiting();
         validateNotPast(date.getDate(), time.getStartAt());
         validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
 
@@ -66,6 +67,7 @@ public class Reservation {
 
     public void changeScheduleByManager(ReservationDate newDate, ReservationTime newTime) {
         validateNotCanceled();
+        validateNotWaiting();
         validateNotPast(date.getDate(), time.getStartAt());
         validateNewScheduleIsPast(newDate.getDate(), newTime.getStartAt());
 
@@ -133,6 +135,12 @@ public class Reservation {
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
+        }
+    }
+
+    private void validateNotWaiting() {
+        if (status == ReservationStatus.WAITING) {
+            throw new ReservationException(RESERVATION_ALREADY_WAITING);
         }
     }
 
