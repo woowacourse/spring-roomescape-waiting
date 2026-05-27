@@ -93,4 +93,53 @@ class WaitingJdbcTemplateRepositoryTest {
         assertThat(((Number) row.get("TIME_ID")).longValue()).isEqualTo(savedTime.getId());
         assertThat(((Number) row.get("THEME_ID")).longValue()).isEqualTo(savedTheme.getId());
     }
+
+    @Test
+    @DisplayName("ID로 예약 대기를 조회한다")
+    void findById_success() {
+        // given
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", LocalDate.now().plusDays(1), savedTime, savedTheme)
+        );
+
+        // when & then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 ID로 예약 대기를 조회하면 빈 Optional을 반환한다")
+    void findById_returns_empty_with_not_found_id() {
+        // when & then
+        assertThat(waitingRepository.findById(999L)).isEmpty();
+    }
+
+    @Test
+    @DisplayName("ID와 이름이 일치하는 예약 대기를 삭제한다")
+    void deleteByIdAndName_success() {
+        // given
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", LocalDate.now().plusDays(1), savedTime, savedTheme)
+        );
+
+        // when
+        waitingRepository.deleteByIdAndName(savedWaiting.getId(), "브라운");
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).isEmpty();
+    }
+
+    @Test
+    @DisplayName("이름이 일치하지 않으면 예약 대기를 삭제하지 않는다")
+    void deleteByIdAndName_does_not_delete_with_different_name() {
+        // given
+        Waiting savedWaiting = waitingRepository.save(
+                Waiting.create("브라운", LocalDate.now().plusDays(1), savedTime, savedTheme)
+        );
+
+        // when
+        waitingRepository.deleteByIdAndName(savedWaiting.getId(), "다른사람");
+
+        // then
+        assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+    }
 }

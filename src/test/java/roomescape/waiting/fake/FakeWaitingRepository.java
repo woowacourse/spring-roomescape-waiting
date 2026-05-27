@@ -34,6 +34,14 @@ public class FakeWaitingRepository implements WaitingRepository {
         return Optional.ofNullable(store.get(id));
     }
 
+    @Override
+    public void deleteByIdAndName(Long id, String name) {
+        store.values().removeIf(waiting ->
+                waiting.getId().equals(id)
+                        && waiting.getName().equals(name)
+        );
+    }
+
     public boolean isEmpty() {
         return store.isEmpty();
     }

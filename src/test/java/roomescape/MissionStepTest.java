@@ -136,6 +136,28 @@ public class MissionStepTest {
                 .body("theme.id", is(1));
     }
 
+    @Test
+    void 예약_대기_삭제() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "브라운",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().delete("/waiting/me/1")
+                .then().log().all()
+                .statusCode(204);
+
+        Integer count = jdbcTemplate.queryForObject("SELECT COUNT(*) FROM waiting", Integer.class);
+        assertThat(count).isZero();
+    }
+
     @Autowired
     private ReservationController reservationController;
 
