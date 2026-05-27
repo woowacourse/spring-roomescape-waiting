@@ -3,10 +3,9 @@ package roomescape.reservation.fixture;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.specification.RequestSpecification;
-import org.springframework.http.HttpHeaders;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.HttpHeaders;
 
 public class ReservationApiFixture {
 

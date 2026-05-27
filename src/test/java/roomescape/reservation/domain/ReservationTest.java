@@ -2,15 +2,20 @@ package roomescape.reservation.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
 import static roomescape.reservation.domain.ReservationStatus.RESERVED;
-import static roomescape.reservation.exception.ReservationErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_DATE_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ID_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NAME_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_TIME_IS_NULL;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

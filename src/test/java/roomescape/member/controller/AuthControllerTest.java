@@ -1,17 +1,16 @@
 package roomescape.member.controller;
 
+import static roomescape.member.fixture.MemberApiFixture.registerMember;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.util.HashMap;
+import java.util.Map;
 import org.hamcrest.Matchers;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.AcceptanceTest;
-
-import java.util.HashMap;
-import java.util.Map;
-
-import static roomescape.member.fixture.MemberApiFixture.registerMember;
 
 class AuthControllerTest extends AcceptanceTest {
 

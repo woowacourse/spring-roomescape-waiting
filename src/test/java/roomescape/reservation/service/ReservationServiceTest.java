@@ -2,7 +2,11 @@ package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.reservation.exception.ReservationErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
 import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import static roomescape.reservation.fixture.ReservationFixture.toCommand;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
@@ -11,7 +15,6 @@ import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;

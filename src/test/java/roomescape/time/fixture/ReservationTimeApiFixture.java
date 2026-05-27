@@ -2,10 +2,9 @@ package roomescape.time.fixture;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import org.springframework.http.HttpHeaders;
-
 import java.util.HashMap;
 import java.util.Map;
+import org.springframework.http.HttpHeaders;
 
 public class ReservationTimeApiFixture {
 

@@ -2,11 +2,10 @@ package roomescape.reservation.fixture;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
-
 import roomescape.date.domain.ReservationDate;
+import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
-import roomescape.reservation.controller.dto.request.ReservationSaveDto;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;

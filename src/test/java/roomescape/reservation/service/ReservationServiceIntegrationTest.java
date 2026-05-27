@@ -3,6 +3,7 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -27,8 +28,6 @@ import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.fixture.ReservationTimeFixture;
 import roomescape.time.repository.JdbcReservationTimeRepository;
-
-import java.util.List;
 
 @JdbcTest
 @Import({ReservationService.class, JdbcReservationRepository.class,

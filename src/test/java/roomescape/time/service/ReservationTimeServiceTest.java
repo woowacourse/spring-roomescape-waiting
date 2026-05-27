@@ -8,13 +8,12 @@ import static roomescape.time.fixture.ReservationTimeFixture.saveDto;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import roomescape.time.domain.ReservationTime;
 import roomescape.time.controller.dto.request.ReservationTimeSaveDto;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeException;
 import roomescape.time.fixture.FakeReservationTimeRepository;
 import roomescape.time.fixture.ReservationTimeFixture;

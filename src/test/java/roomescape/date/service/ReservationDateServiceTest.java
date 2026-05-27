@@ -1,5 +1,13 @@
 package roomescape.date.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.date.exception.ReservationDateErrorInformation.DATE_ALREADY_EXISTS;
+import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
+
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -8,15 +16,6 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.fixture.FakeReservationDateRepository;
 import roomescape.date.fixture.ReservationDateFixture;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.date.exception.ReservationDateErrorInformation.DATE_ALREADY_EXISTS;
-import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 
 class ReservationDateServiceTest {
 
@@ -160,7 +159,7 @@ class ReservationDateServiceTest {
 
             // when  & then
             assertThatThrownBy(
-                    () -> reservationDateService.updateStatus(deregisteredId, false))
+                () -> reservationDateService.updateStatus(deregisteredId, false))
                 .isInstanceOf(ReservationDateException.class)
                 .hasMessage(DATE_NOT_FOUND.getMessage());
         }

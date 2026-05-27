@@ -1,15 +1,15 @@
 package roomescape.theme.controller;
 
 import static org.hamcrest.Matchers.is;
-import static roomescape.theme.exception.ThemeErrorInformation.*;
+import static roomescape.theme.exception.ThemeErrorInformation.DESCRIPTION_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.NAME_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.THUMBNAIL_URL_IS_NULL;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

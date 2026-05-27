@@ -4,7 +4,11 @@ import static org.hamcrest.Matchers.is;
 import static roomescape.date.exception.ReservationDateErrorInformation.INACTIVE_DATE_NOT_ALLOWED;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
 import static roomescape.date.fixture.ReservationDateApiFixture.updateDateStatus;
-import static roomescape.reservation.exception.ReservationErrorInformation.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
 import static roomescape.reservation.fixture.ReservationApiFixture.cancelReservationWithToken;
 import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
 import static roomescape.theme.exception.ThemeErrorInformation.INACTIVE_THEME_NOT_ALLOWED;
@@ -16,13 +20,11 @@ import static roomescape.time.fixture.ReservationTimeApiFixture.updateTimeStatus
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;

@@ -2,7 +2,10 @@ package roomescape.theme.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.theme.exception.ThemeErrorInformation.*;
+import static roomescape.theme.exception.ThemeErrorInformation.DESCRIPTION_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.ID_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.NAME_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.THUMBNAIL_URL_IS_NULL;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;

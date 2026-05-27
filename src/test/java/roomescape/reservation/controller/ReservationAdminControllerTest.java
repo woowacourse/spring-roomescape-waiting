@@ -2,20 +2,20 @@ package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.is;
 import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
-import static roomescape.reservation.exception.ReservationErrorInformation.*;
-import static roomescape.reservation.fixture.ReservationApiFixture.*;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
+import static roomescape.reservation.fixture.ReservationApiFixture.cancelReservationWithToken;
+import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
 import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
 import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;

@@ -1,12 +1,12 @@
 package roomescape.member.domain;
 
+import static roomescape.member.exception.MemberExceptionInformation.PASSWORD_NOT_MATCH;
+
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.member.exception.MemberException;
-
-import static roomescape.member.exception.MemberExceptionInformation.PASSWORD_NOT_MATCH;
 
 class MemberTest {
 

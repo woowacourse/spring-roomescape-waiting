@@ -1,13 +1,12 @@
 package roomescape.common.validation;
 
+import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.validation.annotation.NotBlank;
 import roomescape.common.validation.validator.FieldBlankValidator;
-
-import java.util.List;
 
 class FieldBlankValidatorTest {
 
