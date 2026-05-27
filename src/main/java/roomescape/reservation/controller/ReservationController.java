@@ -27,7 +27,7 @@ public class ReservationController {
     public ResponseEntity<ReservationsAndWaitingsResponse> findReservationsByCustomerName(
         @RequestParam("customer-name") String customerName
     ) {
-        final ReservationsAndWaitingsResponse response = reservationService.findReservationsByCustomerName(customerName);
+        final ReservationsAndWaitingsResponse response = reservationService.findReservationsAndWaitingsByCustomerName(customerName);
         return ResponseEntity.ok(response);
     }
 

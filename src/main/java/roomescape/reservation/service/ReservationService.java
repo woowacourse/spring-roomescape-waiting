@@ -51,7 +51,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationsAndWaitingsResponse findReservationsByCustomerName(final String customerName) {
+    public ReservationsAndWaitingsResponse findReservationsAndWaitingsByCustomerName(final String customerName) {
         final LocalDateTime now = LocalDateTime.now(clock);
         final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
             new CustomerName(customerName),

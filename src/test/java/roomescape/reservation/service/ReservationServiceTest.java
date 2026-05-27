@@ -117,7 +117,7 @@ class ReservationServiceTest {
         ));
 
         // when
-        ReservationsAndWaitingsResponse responses = reservationService.findReservationsByCustomerName(CUSTOMER_NAME);
+        ReservationsAndWaitingsResponse responses = reservationService.findReservationsAndWaitingsByCustomerName(CUSTOMER_NAME);
 
         // then
         assertThat(responses.reservations()).hasSize(1);
@@ -162,7 +162,7 @@ class ReservationServiceTest {
         ));
 
         // when
-        ReservationsAndWaitingsResponse responses = reservationService.findReservationsByCustomerName(CUSTOMER_NAME);
+        ReservationsAndWaitingsResponse responses = reservationService.findReservationsAndWaitingsByCustomerName(CUSTOMER_NAME);
 
         // then
         assertThat(responses.waitings()).hasSize(2);
@@ -471,12 +471,12 @@ class ReservationServiceTest {
         final Theme theme = SAVED_THEME;
         final LocalDate futureDate = LocalDate.of(2026, 5, 9);
 
-        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
+        waitingRepository.add(Waiting.of(1L, "크루", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
         waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
         waitingRepository.add(Waiting.of(3L, CUSTOMER_NAME, Date.valueOf(futureDate), NOW, time, theme));
 
         // when
-        ReservationsAndWaitingsResponse response = reservationService.findReservationsByCustomerName(CUSTOMER_NAME);
+        ReservationsAndWaitingsResponse response = reservationService.findReservationsAndWaitingsByCustomerName(CUSTOMER_NAME);
 
         // then
         assertThat(response.waitings()).hasSize(1);
