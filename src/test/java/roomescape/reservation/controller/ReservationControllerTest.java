@@ -16,7 +16,6 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
-import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.service.ReservationService;
@@ -333,7 +332,7 @@ class ReservationControllerTest {
 
         then(reservationService)
                 .should()
-                .deleteMine(reservationId, "브라운");
+                .cancelMine(reservationId, "브라운");
     }
 
 }

@@ -56,7 +56,7 @@ public class ReservationController {
             @PathVariable("id") Long id,
             @CurrentUser String guestName
     ) {
-        reservationService.deleteMine(id, guestName);
+        reservationService.cancelMine(id, guestName);
         return ResponseEntity.noContent().build();
     }
 

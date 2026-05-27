@@ -115,7 +115,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("확정된 상태의 예약을 취소하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다. ")
+    @DisplayName("예약을 취소할 때 확정된 상태의 예약을 취소하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다. ")
     public void cancel_success() {
         // given
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -147,8 +147,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("본인의 예약을 삭제한다.")
-    public void cancelMine_success() {
+    @DisplayName("본인의 예약을 취소하면 해당 예약의 상태가 취소됨으로 변경된다.")
+    public void cancelMine_success1() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -162,6 +162,28 @@ class ReservationServiceTest {
         // then
         assertThat(reservationRepository.findById(reservation.getId()).get().getStatus()).isEqualTo(Status.CANCELED);
     }
+
+    @Test
+    @DisplayName("본인의 예약을 취소할 때 확정된 상태의 예약을 취소하면 기존 대기 중인 예약 중 가장 우선순위 높은 예약이 확정 상태로 변한다.")
+    public void cancelMine_success2() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2023, 8, 10);
+
+        Reservation cancel = insertReservation("브라운", date, time, theme, CONFIRMED);
+        Reservation waiting1 = insertReservation("포비", date, time, theme, WAITING);
+        Reservation waiting2 = insertReservation("브리", date, time, theme, WAITING);
+
+        // when
+        reservationService.cancelMine(cancel.getId(), cancel.getGuestName());
+
+        // then
+        Reservation updatedWaiting = reservationRepository.findById(waiting1.getId()).get();
+        assertThat(updatedWaiting.getStatus()).isEqualTo(CONFIRMED);
+    }
+
 
     @Test
     @DisplayName("해당 예약이 존재하지 않으면 본인의 예약을 삭제할 수 없기 때문에 예외가 발생한다.")

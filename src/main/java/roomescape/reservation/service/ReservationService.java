@@ -104,6 +104,7 @@ public class ReservationService {
         Reservation reservation = getReservation(id);
         reservationValidator.validateDelete(reservation, guestName);
         cancelReservation(id);
+        updateTopWaitingConfirmed(reservation);
     }
 
     private void cancelReservation(Long id) {
