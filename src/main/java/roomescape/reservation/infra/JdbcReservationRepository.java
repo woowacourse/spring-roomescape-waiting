@@ -81,13 +81,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Integer update(Reservation reservation) {
-        ReservationSlot slot = reservation.getSlot();
+    public Integer update(Long id, ReservationSlot slot) {
         return jdbcTemplate.update(
                 "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
                 slot.date(),
                 slot.timeId(),
-                reservation.getId());
+                id);
     }
 
     @Override
@@ -96,8 +95,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Boolean existsBySlot(Reservation reservation) {
-        ReservationSlot slot = reservation.getSlot();
+    public Boolean existsBySlot(ReservationSlot slot) {
         return jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?)",
                 Boolean.class,

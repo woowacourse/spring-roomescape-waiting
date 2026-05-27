@@ -277,12 +277,49 @@ class ReservationCommandServiceTest {
                 .timeId(timeId)
                 .startAt(LocalTime.of(10, 0))
                 .build();
-        Reservation upReservation = testHelper.findReservationBySlot(slot);
+        Reservation promoteReservation = testHelper.findReservationBySlot(slot);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(upReservation.getName()).isEqualTo("스타크");
+            softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
             softly.assertThatThrownBy(() -> reservationCommandService.deleteWaiting(waitingId, NOW))
                     .isInstanceOf(NotFoundException.class);
+        });
+    }
+
+    @DisplayName("확정 예약의 예약 변경 시 대기 중인 예약이 자동 승격 됨을 테스트합니다.")
+    @Test
+    void update_reservation_and_waiting_to_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(0, 0));
+        Long reservationId = testHelper.insertReservation("피노", ReservationFixture.futureReservationDate(), themeId,
+                timeId);
+        testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+
+        Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
+        reservationCommandService.update(
+                reservationId,
+                new ReservationUpdateCommand(ReservationFixture.futureReservationDate(), updateTimeId, NOW)
+        );
+
+        ReservationSlot originalSlot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(0, 0))
+                .build();
+        Reservation promoteReservation = testHelper.findReservationBySlot(originalSlot);
+
+        ReservationSlot updatedSlot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(updateTimeId)
+                .startAt(LocalTime.of(11, 0))
+                .build();
+        Reservation changeReservation = testHelper.findReservationBySlot(updatedSlot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(changeReservation.getName()).isEqualTo("피노");
+            softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
         });
     }
 }

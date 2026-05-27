@@ -31,16 +31,15 @@ public class Reservation {
                 .build();
     }
 
-    public Reservation updateDateAndTime(LocalDate date, Long timeId, LocalTime startAt) {
+    public Reservation updateDateAndTime(LocalDate date, Long timeId, LocalTime startAt, LocalDateTime now) {
+        ReservationSlot updatedSlot = slot.updateDateAndTime(date, timeId, startAt);
+        updatedSlot.validateReservable(now);
+
         return Reservation.builder()
                 .id(this.id)
                 .name(this.name)
-                .slot(slot.updateDateAndTime(date, timeId, startAt))
+                .slot(updatedSlot)
                 .build();
-    }
-
-    public void validateReservable(LocalDateTime now) {
-        slot.validateReservable(now);
     }
 
     private static String requireName(String name) {

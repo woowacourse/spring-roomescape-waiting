@@ -1,6 +1,7 @@
 package roomescape.reservation.application.service;
 
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -43,9 +44,7 @@ public class ReservationCommandService {
         ReservationSlot slot = request.toSlot(time.getStartAt());
         slot.validateReservable(request.now());
 
-        Reservation reservation = request.toReservation(slot);
-
-        if (reservationRepository.existsBySlot(reservation)) {
+        if (reservationRepository.existsBySlot(slot)) {
             Waiting waiting = request.toWaiting(slot);
             Waiting savedWaiting;
             try {
@@ -62,39 +61,36 @@ public class ReservationCommandService {
             );
         }
 
-        Reservation savedReservation;
         try {
-            savedReservation = reservationRepository.save(reservation);
+            Reservation reservation = request.toReservation(slot);
+            Reservation savedReservation = reservationRepository.save(reservation);
+            return ReservationResult.confirmed(
+                    savedReservation,
+                    ThemeResult.from(theme),
+                    ReservationTimeResult.from(time)
+            );
         } catch (DataIntegrityViolationException e) {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
-
-        return ReservationResult.confirmed(
-                savedReservation,
-                ThemeResult.from(theme),
-                ReservationTimeResult.from(time)
-        );
     }
 
     public ReservationResult update(Long reservationId, ReservationUpdateCommand request) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 
-        ReservationTime time = timeRepository.findById(request.timeId())
+        ReservationTime updateTime = timeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        Reservation updatedReservation = reservation.updateDateAndTime(request.date(), request.timeId(), time.getStartAt());
-        updatedReservation.validateReservable(request.now());
+        Reservation updatedReservation = updateReservationSlot(request, updateTime.getStartAt(), reservation);
+        promoteFirstWaitingToReservation(reservation.getSlot());
 
-        updateReservation(updatedReservation);
-
-        Theme theme = themeRepository.findById(reservation.getSlot().themeId())
+        Theme theme = themeRepository.findById(updatedReservation.getSlot().themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
         return ReservationResult.confirmed(
                 updatedReservation,
                 ThemeResult.from(theme),
-                ReservationTimeResult.from(time)
+                ReservationTimeResult.from(updateTime)
         );
     }
 
@@ -108,16 +104,7 @@ public class ReservationCommandService {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
 
-        Optional<Waiting> firstWaitingBySlot = waitingRepository.findFirstBySlot(slot);
-        firstWaitingBySlot.ifPresent(waiting -> {
-            waitingRepository.delete(waiting.getId());
-
-            Reservation reservation = Reservation.builder()
-                    .name(waiting.getName())
-                    .slot(waiting.getSlot())
-                    .build();
-            reservationRepository.save(reservation);
-        });
+        promoteFirstWaitingToReservation(slot);
     }
 
     public void deleteWaiting(Long waitingId, LocalDateTime now) {
@@ -131,15 +118,38 @@ public class ReservationCommandService {
         }
     }
 
-    private void updateReservation(Reservation reservation) {
-        checkAlreadyExistsDateAndTime(reservation);
+    private Reservation updateReservationSlot(ReservationUpdateCommand request, LocalTime startAt,
+                                              Reservation reservation) {
+        Reservation updatedReservation = reservation.updateDateAndTime(
+                request.date(),
+                request.timeId(),
+                startAt,
+                request.now()
+        );
 
-        if (reservationRepository.update(reservation) == 0) {
+        validateNoDuplicateReservationSlot(updatedReservation);
+        if (reservationRepository.update(updatedReservation.getId(), updatedReservation.getSlot()) == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
+
+        return updatedReservation;
     }
 
-    private void checkAlreadyExistsDateAndTime(Reservation reservation) {
+    private void promoteFirstWaitingToReservation(ReservationSlot slot) {
+        Optional<Waiting> firstWaitingBySlot = waitingRepository.findFirstBySlot(slot);
+        firstWaitingBySlot.ifPresent(waiting -> {
+            waitingRepository.delete(waiting.getId());
+
+            reservationRepository.save(
+                    Reservation.builder()
+                            .name(waiting.getName())
+                            .slot(waiting.getSlot())
+                            .build()
+            );
+        });
+    }
+
+    private void validateNoDuplicateReservationSlot(Reservation reservation) {
         if (reservationRepository.existsDuplicateExcluding(reservation)) {
             throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
         }

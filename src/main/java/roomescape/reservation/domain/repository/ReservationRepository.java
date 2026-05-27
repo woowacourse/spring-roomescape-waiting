@@ -9,11 +9,11 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    Integer update(Reservation reservation);
+    Integer update(Long id, ReservationSlot slot);
 
     Integer delete(Long id);
 
-    Boolean existsBySlot(Reservation reservation);
+    Boolean existsBySlot(ReservationSlot slot);
 
     Boolean existsDuplicateExcluding(Reservation reservation);
 

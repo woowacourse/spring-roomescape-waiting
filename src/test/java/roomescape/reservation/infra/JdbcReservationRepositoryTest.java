@@ -168,7 +168,7 @@ class JdbcReservationRepositoryTest {
                         .build())
                 .build();
 
-        reservationRepository.update(updateReservation);
+        reservationRepository.update(updateReservation.getId(), updateReservation.getSlot());
 
         Reservation updated = reservationRepository.findById(reservationId).orElseThrow();
 
