@@ -441,21 +441,21 @@
       border-color: var(--danger);
     }
 
-    .reservation-actions {
+    .reservationSlot-actions {
       display: flex;
       gap: 8px;
       flex-shrink: 0;
     }
 
     /* Reservation list */
-    .reservation-list {
+    .reservationSlot-list {
       display: flex;
       flex-direction: column;
       gap: 12px;
       max-width: 700px;
     }
 
-    .reservation-item {
+    .reservationSlot-item {
       background: var(--card);
       border: 1px solid var(--border);
       border-radius: var(--radius);
@@ -465,7 +465,7 @@
       gap: 16px;
     }
 
-    .reservation-item img {
+    .reservationSlot-item img {
       width: 56px;
       height: 40px;
       object-fit: cover;
@@ -473,15 +473,15 @@
       flex-shrink: 0;
     }
 
-    .reservation-info { flex: 1; }
+    .reservationSlot-info { flex: 1; }
 
-    .reservation-theme {
+    .reservationSlot-theme {
       font-size: 15px;
       font-weight: 700;
       margin-bottom: 4px;
     }
 
-    .reservation-meta {
+    .reservationSlot-meta {
       font-size: 13px;
       color: var(--muted);
     }
@@ -696,7 +696,7 @@
             <span>예약자</span><span id="confirm-name">-</span>
           </div>
           <div class="btn-row" id="confirm-actions" style="margin-top:20px">
-            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservation-btn">예약 확정</button>
+            <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">예약 확정</button>
             <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
           </div>
         </div>
@@ -708,7 +708,7 @@
       <h2 class="section-title">📋 내 예약</h2>
       <p class="section-desc">나의 예약 내역을 확인하고 관리하세요.</p>
       <div class="loading-center" id="my-loading"><div class="spinner"></div></div>
-      <div class="reservation-list" id="my-list" style="display:none"></div>
+      <div class="reservationSlot-list" id="my-list" style="display:none"></div>
       <div class="empty-state" id="my-empty" style="display:none">
         <div class="icon">📭</div>
         <p>예약 내역이 없습니다.</p>
@@ -727,7 +727,7 @@
   let selectedDate = null;
   let selectedTime = null;
   let selectedWaitingTarget = null;
-  let editingReservationId = null;
+  let editingWaitingId = null;
   let cachedThemes = null;
   let cachedAdminReservations = null;
 
@@ -841,8 +841,8 @@
       getThemes(),
       getAdminReservationsSafely()
     ]);
-    const counts = reservations.reduce((acc, reservation) => {
-      acc[reservation.themeName] = (acc[reservation.themeName] || 0) + 1;
+    const counts = reservations.reduce((acc, reservationSlot) => {
+      acc[reservationSlot.themeName] = (acc[reservationSlot.themeName] || 0) + 1;
       return acc;
     }, {});
 
@@ -891,7 +891,7 @@
     document.getElementById('confirm-box-title').textContent = editing ? '수정 확인' : '예약 확인';
     document.getElementById('confirm-id-row').style.display = 'none';
     document.getElementById('confirm-actions').innerHTML = `
-      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservation-btn">${editing ? '수정 완료' : '예약 확정'}</button>
+      <button class="btn btn-accent" onclick="submitReservation()" id="submit-reservationSlot-btn">${editing ? '수정 완료' : '예약 확정'}</button>
       <button class="btn btn-ghost" onclick="goToStep(3)">← 뒤로</button>
     `;
   }
@@ -1008,7 +1008,7 @@
       const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
       if (available) return t;
 
-      const reservationId = t.reservationId ?? t.reservation?.id ?? matchedReservation?.id ?? null;
+      const reservationId = t.reservationId ?? t.reservationSlot?.id ?? matchedReservation?.id ?? null;
 
       return { ...t, isAvailable: false, available: false, reservationId };
     });
@@ -1026,7 +1026,7 @@
   }
 
   function backFromDateStep() {
-    if (editingReservationId !== null) {
+    if (editingWaitingId !== null) {
       resetBookingState();
       switchSection('my');
       return;
@@ -1046,19 +1046,19 @@
     goToStep(4);
   }
 
-  function renderReservationSummary(reservation) {
-    document.getElementById('confirm-theme').textContent = reservation.themeName;
-    document.getElementById('confirm-date').textContent = formatDate(reservation.date);
-    document.getElementById('confirm-time').textContent = reservation.time;
-    document.getElementById('confirm-name').textContent = reservation.name || username;
+  function renderReservationSummary(reservationSlot) {
+    document.getElementById('confirm-theme').textContent = reservationSlot.themeName;
+    document.getElementById('confirm-date').textContent = formatDate(reservationSlot.date);
+    document.getElementById('confirm-time').textContent = reservationSlot.time;
+    document.getElementById('confirm-name').textContent = reservationSlot.name || username;
   }
 
-  function showReservationComplete(reservation) {
+  function showReservationComplete(reservationSlot) {
     document.getElementById('booking-title').textContent = '예약 완료';
     document.getElementById('booking-desc').textContent = '예약이 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 완료';
     document.getElementById('confirm-id-row').style.display = 'none';
-    renderReservationSummary(reservation);
+    renderReservationSummary(reservationSlot);
     document.getElementById('confirm-actions').innerHTML = `
       <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
       <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
@@ -1068,7 +1068,7 @@
 
   async function submitReservation() {
     try {
-      const isEditing = editingReservationId !== null;
+      const isEditing = editingWaitingId !== null;
       const request = {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -1085,14 +1085,14 @@
       };
 
       if (isEditing) {
-        await fetchEmpty(`${API}/reservations/${editingReservationId}`, request, '예약 수정에 실패했습니다.');
+        await fetchEmpty(`${API}/reservations/waitings/${editingWaitingId}`, request, '예약 수정에 실패했습니다.');
         showToast('예약이 수정되었습니다!');
         resetBookingState();
         switchSection('my');
       } else {
-        const reservation = await fetchJson(`${API}/reservations`, request, '예약에 실패했습니다.');
+        const reservationSlot = await fetchJson(`${API}/reservations`, request, '예약에 실패했습니다.');
         showToast('예약이 완료되었습니다!');
-        showReservationComplete(reservation);
+        showReservationComplete(reservationSlot);
         resetBookingState();
       }
     } catch (e) {
@@ -1158,7 +1158,7 @@
     selectedDate = null;
     selectedTime = null;
     selectedWaitingTarget = null;
-    editingReservationId = null;
+    editingWaitingId = null;
   }
 
   async function submitWaiting() {
@@ -1168,7 +1168,7 @@
     }
 
     try {
-      const waiting = await fetchJson(`${API}/reservations/waitings`, {
+      const reservation = await fetchJson(`${API}/reservations/waitings`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1178,30 +1178,30 @@
       }, '예약 대기에 실패했습니다.');
 
       cachedAdminReservations = null;
-      showWaitingComplete(waiting);
+      showWaitingComplete(reservation);
     } catch (e) {
       showToast(e.message, 'error');
     }
   }
 
-  function showWaitingComplete(waiting) {
+  function showWaitingComplete(reservation) {
     document.getElementById('booking-title').textContent = '예약 대기 완료';
     document.getElementById('booking-desc').textContent = '예약 대기가 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 대기 완료';
     document.querySelector('#confirm-id-row span:first-child').textContent = '대기 번호';
-    document.getElementById('confirm-id').textContent = `${waiting.order}번째`;
+    document.getElementById('confirm-id').textContent = `${reservation.order}번째`;
     document.getElementById('confirm-id-row').style.display = 'flex';
     renderReservationSummary({
       themeName: selectedTheme.name,
       date: selectedDate,
       time: selectedWaitingTarget?.startAt || '-',
-      name: waiting.name || username
+      name: reservation.name || username
     });
     document.getElementById('confirm-actions').innerHTML = `
       <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
       <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
     `;
-    showToast(`예약 대기가 등록되었습니다. 대기 번호 ${waiting.order}번`);
+    showToast(`예약 대기가 등록되었습니다. 대기 번호 ${reservation.order}번`);
     resetBookingState();
     goToStep(4);
   }
@@ -1228,13 +1228,13 @@
 
       const list = document.getElementById('my-list');
       list.innerHTML = reservations.map(r => `
-        <div class="reservation-item" id="res-${r.id}">
+        <div class="reservationSlot-item" id="res-${r.id}">
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
-          <div class="reservation-info">
-            <div class="reservation-theme">${r.themeName}</div>
-            <div class="reservation-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
+          <div class="reservationSlot-info">
+            <div class="reservationSlot-theme">${r.themeName}</div>
+            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
           </div>
-          <div class="reservation-actions">
+          <div class="reservationSlot-actions">
             <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
             <button class="btn btn-danger" onclick="deleteMyReservation(${r.waitingResponse?.id ?? r.id})">삭제</button>
           </div>
@@ -1247,32 +1247,37 @@
     }
   }
 
-  async function startReservationEdit(reservation) {
+  async function startReservationEdit(reservationSlot) {
     try {
       const themes = await getThemes();
-      const theme = themes.find(t => t.name === reservation.themeName);
+      const theme = themes.find(t => t.name === reservationSlot.themeName);
 
       if (!theme) {
         showToast('수정할 예약의 테마 정보를 찾을 수 없습니다.', 'error');
         return;
       }
 
-      editingReservationId = reservation.id;
+      if (reservationSlot.waitingResponse?.id == null) {
+        showToast('수정할 대기 정보를 찾을 수 없습니다.', 'error');
+        return;
+      }
+
+      editingWaitingId = reservationSlot.waitingResponse?.id ?? null;
       selectedTheme = theme;
-      selectedDate = reservation.date;
+      selectedDate = reservationSlot.date;
       selectedTime = null;
 
       const themeInfoHtml = `
-        <img src="${reservation.themeThumbnailUrl}" alt="${reservation.themeName}" onerror="this.style.background='#1f2937'">
+        <img src="${reservationSlot.themeThumbnailUrl}" alt="${reservationSlot.themeName}" onerror="this.style.background='#1f2937'">
         <div>
-          <h3>${reservation.themeName}</h3>
-          <p>${reservation.themeDescription}</p>
+          <h3>${reservationSlot.themeName}</h3>
+          <p>${reservationSlot.themeDescription}</p>
         </div>
       `;
       document.getElementById('selected-theme-info').innerHTML = themeInfoHtml;
       document.getElementById('selected-theme-info-2').innerHTML = themeInfoHtml;
       document.getElementById('booking-date').removeAttribute('min');
-      document.getElementById('booking-date').value = reservation.date;
+      document.getElementById('booking-date').value = reservationSlot.date;
 
       setBookingMode('edit');
       showBookingSection();
@@ -1282,8 +1287,8 @@
     }
   }
 
-  function waitingMeta(reservation) {
-    const order = reservation.waitingResponse?.order;
+  function waitingMeta(reservationSlot) {
+    const order = reservationSlot.waitingResponse?.order;
     return order > 0 ? ` &nbsp; 대기 ${order}번` : '';
   }
 
@@ -1294,7 +1299,7 @@
       document.getElementById(`res-${id}`)?.remove();
       showToast('예약이 삭제되었습니다.');
 
-      const remaining = document.querySelectorAll('.reservation-item');
+      const remaining = document.querySelectorAll('.reservationSlot-item');
       if (!remaining.length) {
         document.getElementById('my-list').style.display = 'none';
         document.getElementById('my-empty').style.display = 'block';

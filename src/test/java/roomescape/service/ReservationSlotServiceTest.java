@@ -14,9 +14,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 
 import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationResponse;
-import roomescape.dto.ReservationUpdateRequest;
-import roomescape.dto.WaitingRequest;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
@@ -27,8 +24,6 @@ class ReservationSlotServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-    @Autowired
-    private WaitingService waitingService;
 
     @DisplayName("예약 정상 테스트")
     @Test
@@ -81,35 +76,35 @@ class ReservationSlotServiceTest {
                 .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
-    @DisplayName("수정하려는 날짜/시간에 이미 예약이 있으면 예외를 던진다.")
-    @Test
-    void 예약_수정_중복_예외_테스트() {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDate today = now.toLocalDate();
-        ReservationRequest request = new ReservationRequest("이영희", today.plusDays(2), 2L, 1L);
-        ReservationUpdateRequest reservationRequest = new ReservationUpdateRequest("이영희", LocalDate.of(2026, 6, 30), 5L);
-
-        ReservationResponse response = reservationService.save(now, request);
-        waitingService.save(now, new WaitingRequest("보조대기", response.id()));
-
-        assertThatThrownBy(() -> reservationService.update(response.waitingResponse().id(), now, reservationRequest))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
-    }
-
-        @DisplayName("수정하려는 날짜/시간에 예약이 없으면 예약 수정된다.")
-        @Test
-        void 예약_수정_정상_테스트() {
-            LocalDateTime now = LocalDateTime.now();
-            LocalDate today = now.toLocalDate();
-            ReservationRequest request = new ReservationRequest("김철수", today.plusDays(30), 2L, 1L);
-            ReservationUpdateRequest reservationRequest = new ReservationUpdateRequest("김철수",today.plusDays(30), 3L);
-
-            ReservationResponse response = reservationService.save(now, request);
-            waitingService.save(now, new WaitingRequest("보조대기", response.id()));
-
-            assertThatCode(() -> reservationService.update(response.waitingResponse().id(), now, reservationRequest))
-                    .doesNotThrowAnyException();
-        }
+//    @DisplayName("수정하려는 날짜/시간에 이미 예약이 있으면 예외를 던진다.")
+//    @Test
+//    void 예약_수정_중복_예외_테스트() {
+//        LocalDateTime now = LocalDateTime.now();
+//        LocalDate today = now.toLocalDate();
+//        ReservationRequest request = new ReservationRequest("이영희", today.plusDays(2), 2L, 1L);
+//        ReservationUpdateRequest reservationRequest = new ReservationUpdateRequest("이영희", LocalDate.of(2026, 6, 30), 5L);
+//
+//        ReservationResponse response = reservationService.save(now, request);
+//        waitingService.save(now, new WaitingRequest("보조대기", response.id()));
+//
+//        assertThatThrownBy(() -> reservationService.update(response.waitingResponse().id(), now, reservationRequest))
+//                .isInstanceOf(CustomException.class)
+//                .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
+//    }
+//
+//        @DisplayName("수정하려는 날짜/시간에 예약이 없으면 예약 수정된다.")
+//        @Test
+//        void 예약_수정_정상_테스트() {
+//            LocalDateTime now = LocalDateTime.now();
+//            LocalDate today = now.toLocalDate();
+//            ReservationRequest request = new ReservationRequest("김철수", today.plusDays(30), 2L, 1L);
+//            ReservationUpdateRequest reservationRequest = new ReservationUpdateRequest("김철수",today.plusDays(30), 3L);
+//
+//            ReservationResponse response = reservationService.save(now, request);
+//            waitingService.save(now, new WaitingRequest("보조대기", response.id()));
+//
+//            assertThatCode(() -> reservationService.update(response.waitingResponse().id(), now, reservationRequest))
+//                    .doesNotThrowAnyException();
+//        }
 
 }

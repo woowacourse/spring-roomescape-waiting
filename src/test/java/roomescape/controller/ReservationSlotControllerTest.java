@@ -3,6 +3,7 @@ package roomescape.controller;
 import static org.hamcrest.core.Is.is;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -44,8 +45,8 @@ class ReservationSlotControllerTest {
                 .body("themeDescription", is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
                 .body("themeThumbnailUrl", is("https://picsum.photos/seed/haunted/400/250"))
                 .body("time", is("10:00"))
-                .body("waitingResponse.name", is("브라운"))
-                .body("waitingResponse.order", is(0));
+                .body("name", is("브라운"))
+                .body("order", is(0));
     }
 
     @DisplayName("사용자 예약 추가 API - 이상값 예외 테스트")
@@ -88,7 +89,7 @@ class ReservationSlotControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("id", waitingId)
-                .when().delete("/reservations/waitings/{id}")
+                .when().delete("/reservations/{id}")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -102,15 +103,14 @@ class ReservationSlotControllerTest {
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200)
-                .body("[0].id", is(1))
+                .body("[0].reservationId", is(1))
+                .body("[0].name", is("김철수"))
                 .body("[0].date", is("2026-04-29"))
                 .body("[0].themeName", is("공포의 저택"))
                 .body("[0].themeDescription", is("버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다."))
                 .body("[0].themeThumbnailUrl", is("https://picsum.photos/seed/haunted/400/250"))
                 .body("[0].time", is("12:00"))
-                .body("[0].waitingResponse.id", is(1))
-                .body("[0].waitingResponse.name", is("김철수"))
-                .body("[0].waitingResponse.order", is(0));
+                .body("[0].order", is(0));
     }
 
     @DisplayName("사용자 예약 추가 - 날짜 형식 예외 테스트")
@@ -152,17 +152,39 @@ class ReservationSlotControllerTest {
     @DisplayName("사용자 예약 대기 - 정상 테스트")
     @Test
     void 사용자_예약_대기_정상_테스트() {
+        LocalDate date = LocalDate.now();
+
+        // 첫번째 예약
         Map<String, Object> params = new HashMap<>();
-        params.put("name", "대기자");
-        params.put("reservationId", 2);
+        params.put("name", "브");
+        params.put("date", date.plusDays(1));
+        params.put("timeId", 1);
+        params.put("themeId", 1);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/reservations/waitings")
+                .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
-                .body("name", is("대기자"))
+                .body("name", is("브"))
+                .body("order", is(0));
+
+
+        // 두번째 예약
+        params = new HashMap<>();
+        params.put("name", "브라운");
+        params.put("date", date.plusDays(1));
+        params.put("timeId", 1);
+        params.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("name", is("브라운"))
                 .body("order", is(1));
     }
 
@@ -176,7 +198,7 @@ class ReservationSlotControllerTest {
         final long id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/reservations/waitings")
+                .when().post("/reservations/")
                 .then().log().all()
                 .statusCode(201)
                 .extract()
@@ -186,7 +208,7 @@ class ReservationSlotControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("id", id)
-                .when().delete("/reservations/waitings/{id}")
+                .when().delete("/reservations/{id}")
                 .then().log().all()
                 .statusCode(204);
     }
