@@ -19,7 +19,7 @@ public class ReservationValidator {
     private final Clock clock;
 
     public void validateCreate(Reservation created) {
-        validateNotDuplicated(created);
+        validateNotDuplicatedExcept(created);
         validateNotPast(created);
     }
 
@@ -33,17 +33,6 @@ public class ReservationValidator {
     public void validateDelete(Reservation deleted, String guestName) {
         validateIsMyReservation(guestName, deleted);
         validateAlreadyStarted(deleted);
-    }
-
-    private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getGuestName()
-        )) {
-            throw new DomainException(RESERVATION_ALREADY_EXISTS);
-        }
     }
 
     private void validateNotDuplicatedExcept(Reservation reservation) {

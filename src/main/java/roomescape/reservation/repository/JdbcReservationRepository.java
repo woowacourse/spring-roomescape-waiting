@@ -137,7 +137,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.description AS theme_description,
                     th.thumbnail AS theme_thumbnail,
                     th.deleted_at AS theme_deleted_at,
-                    
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
                         ORDER BY r.id
@@ -149,7 +148,37 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.theme_id = th.id
                 WHERE r.guest_name = ?
                 """, reservationWaitingDtoRowMapper, guestName);
+    }
 
+    @Override
+    public List<ReservationWaitingDto> findAllByGuestNameExceptCanceled(String guestName) {
+        return jdbcTemplate.query("""
+                SELECT
+                    r.id AS reservation_id,
+                    r.guest_name,
+                    r.date,
+                    r.status AS status,
+
+                    t.id AS time_id,
+                    t.start_at,
+                    t.deleted_at AS time_deleted_at,
+
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail AS theme_thumbnail,
+                    th.deleted_at AS theme_deleted_at,
+                    ROW_NUMBER() OVER (
+                        PARTITION BY r.date, t.id, th.id, r.status
+                        ORDER BY r.id
+                    ) AS wait_number
+                FROM reservation r
+                INNER JOIN reservation_time t
+                    ON r.time_id = t.id
+                INNER JOIN theme th
+                    ON r.theme_id = th.id
+                WHERE r.guest_name = ? AND r.status != 'CANCELED'
+                """, reservationWaitingDtoRowMapper, guestName);
     }
 
     @Override

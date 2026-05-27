@@ -18,6 +18,8 @@ public interface ReservationRepository {
 
     List<ReservationWaitingDto> findAllByGuestName(String guestName);
 
+    List<ReservationWaitingDto> findAllByGuestNameExceptCanceled(String guestName);
+
     Reservation save(Reservation reservation);
 
     boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status);

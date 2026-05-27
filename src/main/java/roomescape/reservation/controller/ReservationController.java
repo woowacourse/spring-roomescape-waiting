@@ -33,12 +33,27 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationWaitingListResponse> getListByGuestName(@CurrentUser String guestName) {
+    public ResponseEntity<ReservationWaitingListResponse> getMyReservations(@CurrentUser String guestName) {
 
         return ResponseEntity.ok(
                 ReservationWaitingListResponse.from(reservationService.findByGuestName(guestName).stream()
                         .map(ReservationWaitingResponse::from)
                         .toList()));
+    }
+
+    @GetMapping("/me/active")
+    public ResponseEntity<ReservationWaitingListResponse> getMyActiveReservations(
+            @CurrentUser String guestName
+    ) {
+        var result = reservationService.findByGuestNameExceptCanceled(guestName);
+
+        return ResponseEntity.ok(
+                ReservationWaitingListResponse.from(
+                        result.stream()
+                                .map(ReservationWaitingResponse::from)
+                                .toList()
+                )
+        );
     }
 
     @PatchMapping("/{id}")

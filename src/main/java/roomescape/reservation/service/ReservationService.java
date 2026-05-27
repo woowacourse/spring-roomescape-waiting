@@ -60,6 +60,12 @@ public class ReservationService {
                 .toList();
     }
 
+    public List<ReservationWaitingResult> findByGuestNameExceptCanceled(String guestName) {
+        return reservationRepository.findAllByGuestNameExceptCanceled(guestName).stream()
+                .map(ReservationWaitingResult::from)
+                .toList();
+    }
+
     @Transactional
     public void editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
         Reservation reservation = getReservation(reservationId);
