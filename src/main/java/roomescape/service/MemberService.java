@@ -3,6 +3,7 @@ package roomescape.service;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.common.exception.InvalidInputException;
@@ -13,6 +14,7 @@ import roomescape.dto.request.LoginRequestDto;
 import roomescape.dto.request.SignupRequestDto;
 
 @Service
+@Transactional
 public class MemberService {
     private final MemberDao memberDao;
     private final PasswordEncoder passwordEncoder;
@@ -22,6 +24,7 @@ public class MemberService {
         this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional(readOnly = true)
     public Member login(LoginRequestDto request) {
         Member member = memberDao.findByEmail(request.email())
                 .orElseThrow(() -> new InvalidInputException("이메일 또는 비밀번호가 올바르지 않습니다."));
@@ -41,6 +44,7 @@ public class MemberService {
         }
     }
 
+    @Transactional(readOnly = true)
     public Member findById(Long id) {
         return memberDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 멤버입니다."));

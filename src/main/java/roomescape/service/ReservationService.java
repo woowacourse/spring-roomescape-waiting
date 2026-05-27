@@ -19,7 +19,7 @@ import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.request.ReservationRequestDto;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final TimeDao timeDao;
@@ -38,10 +38,12 @@ public class ReservationService {
         this.authorizationService = authorizationService;
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByMemberId(Long memberId) {
         return reservationDao.findAllByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     public Reservation findActiveById(Long id) {
         Reservation reservation = reservationDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
@@ -51,7 +53,6 @@ public class ReservationService {
         return reservation;
     }
 
-    @Transactional
     public Reservation create(Member member, ReservationRequestDto request) {
         Reservation reservation = buildReservation(member, request, LocalDateTime.now());
         try {
@@ -61,7 +62,6 @@ public class ReservationService {
         }
     }
 
-    @Transactional
     public Reservation updateByUser(Long id, Long memberId, ReservationPatchDto request) {
         authorizationService.validateMemberCanAccess(memberId, id);
         Reservation reservation = findActiveById(id);
@@ -71,7 +71,6 @@ public class ReservationService {
         return reservationDao.update(reservation);
     }
 
-    @Transactional
     public void cancel(Long id, Long memberId) {
         authorizationService.validateMemberCanAccess(memberId, id);
         Reservation reservation = findActiveById(id);

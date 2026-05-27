@@ -18,7 +18,7 @@ import roomescape.dto.request.ThemeRequestDto;
 import roomescape.dto.response.AvailableTimeResponseDto;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ThemeService {
     private final ThemeDao themeDao;
     private final ReservationDao reservationDao;
@@ -28,17 +28,18 @@ public class ThemeService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findAll() {
         return themeDao.findAll();
     }
 
 
+    @Transactional(readOnly = true)
     public Theme findById(Long id) {
         return themeDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 테마입니다."));
     }
 
-    @Transactional
     public Theme create(ThemeRequestDto themeRequest) {
         Name name = new Name(themeRequest.name());
         if (themeDao.existsByName(name)) {
@@ -53,7 +54,6 @@ public class ThemeService {
         }
     }
 
-    @Transactional
     public void delete(Long id) {
         if (reservationDao.existsByThemeId(id)) {
             throw new BusinessRuleViolationException("예약이 존재하여 테마를 삭제할 수 없습니다.");
@@ -68,10 +68,12 @@ public class ThemeService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<AvailableTimeResponseDto> findAvailableTimesById(Long themeId, LocalDate localDate) {
         return themeDao.findAvailableTimesById(themeId, localDate);
     }
 
+    @Transactional(readOnly = true)
     public List<Theme> findPopulars(PopularThemeRequestDto popularThemeRequestDto) {
         LocalDate to = LocalDate.now();
         int minusDays = popularThemeRequestDto.days() - 1;
