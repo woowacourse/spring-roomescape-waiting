@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.InvalidInputException;
@@ -36,6 +37,6 @@ public record ReservationWaitingRequest (String name, LocalDate date, Long timeI
     }
 
     public ReservationWaiting to(ReservationTime reservationTime, Theme theme) {
-        return new ReservationWaiting(name, date, reservationTime, theme, LocalDateTime.now());
+        return new ReservationWaiting(name, date, reservationTime, theme);
     }
 }
