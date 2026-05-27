@@ -3,6 +3,7 @@ package roomescape.waiting.presentation;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.then;
 import static org.mockito.BDDMockito.willThrow;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -29,6 +30,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.global.auth.AdminInterceptor;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
+import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.application.WaitingService;
@@ -171,5 +173,46 @@ class WaitingControllerTest {
                         .content(objectMapper.writeValueAsString(body)))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.message").value("존재하지 않는 예약 시간입니다."));
+    }
+
+    @Test
+    @DisplayName("DELETE /waiting/me/{id} - 본인의 예약 대기를 취소하면 204를 반환한다")
+    void deleteUserWaiting_success() throws Exception {
+        // when & then
+        mockMvc.perform(delete("/waiting/me/{id}", 1L)
+                        .param("name", "브라운"))
+                .andExpect(status().isNoContent());
+
+        then(waitingService).should().cancelWaiting(1L, "브라운");
+    }
+
+    @Test
+    @DisplayName("DELETE /waiting/me/{id} - 존재하지 않는 예약 대기면 에러 응답을 반환한다")
+    void deleteUserWaiting_fail_with_not_found_waiting() throws Exception {
+        // given
+        willThrow(new EntityNotFoundException(WaitingErrorCode.WAITING_NOT_FOUND, 999L))
+                .given(waitingService)
+                .cancelWaiting(999L, "브라운");
+
+        // when & then
+        mockMvc.perform(delete("/waiting/me/{id}", 999L)
+                        .param("name", "브라운"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.message").value("예약을 찾을 수 없습니다. id: 999"));
+    }
+
+    @Test
+    @DisplayName("DELETE /waiting/me/{id} - 다른 사용자의 예약 대기면 에러 응답을 반환한다")
+    void deleteUserWaiting_fail_with_owner_mismatch() throws Exception {
+        // given
+        willThrow(new BusinessException(WaitingErrorCode.WAITING_OWNER_MISMATCH))
+                .given(waitingService)
+                .cancelWaiting(1L, "다른사람");
+
+        // when & then
+        mockMvc.perform(delete("/waiting/me/{id}", 1L)
+                        .param("name", "다른사람"))
+                .andExpect(status().isForbidden())
+                .andExpect(jsonPath("$.message").value("수정할 수 있는 권한이 없습니다."));
     }
 }
