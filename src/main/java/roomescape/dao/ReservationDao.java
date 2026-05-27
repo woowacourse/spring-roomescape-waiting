@@ -4,12 +4,12 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationOrder;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -30,13 +30,13 @@ public class ReservationDao {
     public List<Reservation> findAll() {
         return jdbcTemplate.query(
                 """
-                        SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
-                        t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                        r.status
-                        FROM reservation r
-                        INNER JOIN reservation_time rt ON r.time_id = rt.id
-                        INNER JOIN theme t ON r.theme_id = t.id;
-                    """,
+                            SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
+                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                            r.status
+                            FROM reservation r
+                            INNER JOIN reservation_time rt ON r.time_id = rt.id
+                            INNER JOIN theme t ON r.theme_id = t.id;
+                        """,
                 (rs, rowNum) -> {
                     ReservationTime time = new ReservationTime(
                             rs.getLong("time_id"),
@@ -63,14 +63,14 @@ public class ReservationDao {
     public Reservation findById(Long id) {
         return jdbcTemplate.queryForObject(
                 """
-                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                    r.status
-                    FROM reservation r
-                    INNER JOIN reservation_time rt ON r.time_id = rt.id
-                    INNER JOIN theme t ON r.theme_id = t.id
-                    WHERE r.id = ?
-                """,
+                            SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                            r.status
+                            FROM reservation r
+                            INNER JOIN reservation_time rt ON r.time_id = rt.id
+                            INNER JOIN theme t ON r.theme_id = t.id
+                            WHERE r.id = ?
+                        """,
                 (rs, rowNum) -> {
                     ReservationTime time = new ReservationTime(
                             rs.getLong("time_id"),
@@ -95,12 +95,16 @@ public class ReservationDao {
         );
     }
 
-    public Optional<Reservation> findByName(String name) {
+    public List<ReservationOrder> findByName(String name) {
         return jdbcTemplate.query(
                 """
-                            SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                            r.status
+                            SELECT
+                                r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                                t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                                r.status,
+                                CASE WHEN r.status = 'WAITING' 
+                                     THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
+                                END as waiting_order
                             FROM reservation r
                             INNER JOIN reservation_time rt ON r.time_id = rt.id
                             INNER JOIN theme t ON r.theme_id = t.id
@@ -117,7 +121,7 @@ public class ReservationDao {
                             rs.getString("description"),
                             rs.getString("url")
                     );
-                    return new Reservation(
+                    Reservation reservation = new Reservation(
                             rs.getLong("id"),
                             rs.getString("name"),
                             rs.getDate("date").toLocalDate(),
@@ -125,21 +129,23 @@ public class ReservationDao {
                             theme,
                             ReservationStatus.valueOf(rs.getString("status"))
                     );
+
+                    return new ReservationOrder(reservation, rs.getLong("waiting_order"));
                 },
                 name
-        ).stream().findFirst();
+        );
     }
 
     public boolean existsBy(LocalDate date, Theme theme, ReservationTime time) {
         Boolean result = jdbcTemplate.queryForObject("""
-        SELECT EXISTS(
-            SELECT *
-            FROM reservation
-            WHERE date = ?
-                AND time_id = ?
-                AND theme_id = ?
-        )
-        """,
+                        SELECT EXISTS(
+                            SELECT *
+                            FROM reservation
+                            WHERE date = ?
+                                AND time_id = ?
+                                AND theme_id = ?
+                        )
+                        """,
                 Boolean.class,
                 date,
                 time.getId(),
@@ -159,17 +165,17 @@ public class ReservationDao {
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(),reservation.getStatus());
+                reservation.getTheme(), reservation.getStatus());
     }
 
     @Transactional
     public Reservation update(Long id, LocalDate date, Long timeId) {
         jdbcTemplate.update(
                 """
-                    UPDATE reservation
-                    SET date = ?, time_id = ?
-                    WHERE id = ?
-                """,
+                            UPDATE reservation
+                            SET date = ?, time_id = ?
+                            WHERE id = ?
+                        """,
                 date,
                 timeId,
                 id

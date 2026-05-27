@@ -9,14 +9,15 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationOrder;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
+import roomescape.dto.response.ReservationOrderResponse;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.exception.IdNotFoundException;
-import roomescape.exception.NameNotFoundException;
 
 @Service
 public class ReservationService {
@@ -30,10 +31,11 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
-    public ReservationResponse find(String name) {
-        Reservation response = reservationDao.findByName(name)
-                .orElseThrow(() -> new NameNotFoundException("해당 이름의 예약이 존재하지 않습니다"));
-        return ReservationResponse.from(response);
+    public List<ReservationOrderResponse> find(String name) {
+        List<ReservationOrder> response = reservationDao.findByName(name);
+        return response.stream()
+                .map(ReservationOrderResponse::from)
+                .toList();
     }
 
     public List<ReservationResponse> findAll() {
@@ -70,7 +72,7 @@ public class ReservationService {
         validateReservationDateTime(request.date(), time);
         ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
-        if(status == ReservationStatus.WAITING) {
+        if (status == ReservationStatus.WAITING) {
             throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
         }
 

@@ -5,13 +5,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationOrder;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -44,14 +44,13 @@ class ReservationDaoTest {
 
     @Test
     void 이름으로_예약_조회() {
-        Optional<Reservation> reservation = reservationDao.findByName("브라운");
-        assertThat(reservation).isPresent();
-        assertThat(reservation.get().getName()).isEqualTo("브라운");
+        List<ReservationOrder> reservation = reservationDao.findByName("아나키");
+        assertThat(reservation).hasSize(1);
     }
 
     @Test
     void 존재하지_않는_이름으로_조회하면_빈값_반환() {
-        Optional<Reservation> reservation = reservationDao.findByName("없는이름");
+        List<ReservationOrder> reservation = reservationDao.findByName("없는이름");
         assertThat(reservation).isEmpty();
     }
 
@@ -79,7 +78,8 @@ class ReservationDaoTest {
     void 예약_저장() {
         ReservationTime time = reservationTimeDao.findTimeById(1L);
         Theme theme = themeDao.findThemeById(1L);
-        Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time, theme, ReservationStatus.CONFIRMED);
+        Reservation reservation = new Reservation("테스트", LocalDate.now().plusDays(1), time, theme,
+                ReservationStatus.CONFIRMED);
 
         Reservation saved = reservationDao.save(reservation);
 
