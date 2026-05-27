@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.e2e;
 
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.notNullValue;

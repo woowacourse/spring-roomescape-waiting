@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -19,7 +19,7 @@ import static org.hamcrest.Matchers.notNullValue;
 class ReservationTimeApiTest {
 
     @Test
-    void 시간_조회_빈목록() {
+    void 시간이_없으면_빈_목록을_반환한다() {
         RestAssured.given().log().all()
                 .when().get("/times")
                 .then().log().all()
@@ -28,7 +28,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 시간_추가() {
+    void 시간을_추가하면_201과_생성된_시간을_반환한다() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "10:00");
 
@@ -43,7 +43,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 시간_추가_후_조회() {
+    void 시간을_추가한_뒤_조회하면_목록에_포함된다() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "13:30");
 
@@ -63,7 +63,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 시간_추가_및_삭제() {
+    void 시간을_추가한_뒤_삭제하면_목록에서_제거된다() {
         Map<String, String> params = new HashMap<>();
         params.put("startAt", "20:00");
 
@@ -85,6 +85,18 @@ class ReservationTimeApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("reservationTimes.size()", is(0));
+    }
+
+    @Test
+    void 사용중인_시간을_삭제하면_422() {
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        Integer timeId = createTime("10:00");
+        createReservation("브라운", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/times/" + timeId)
+                .then().log().all()
+                .statusCode(422);
     }
 
     @Test
@@ -113,7 +125,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 가용_시간_조회_등록된_시간_없음() {
+    void 가용_시간_조회시_등록된_시간이_없으면_빈_목록을_반환한다() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
 
         RestAssured.given().log().all()
@@ -124,7 +136,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 가용_시간_조회_예약_없으면_모두_false() {
+    void 가용_시간_조회시_예약이_없으면_모든_시간이_false를_반환한다() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         createTime("10:00");
         createTime("11:00");
@@ -138,7 +150,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 가용_시간_조회_일부_예약된_시간만_true() {
+    void 가용_시간_조회시_예약된_시간만_true를_반환한다() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer reservedTimeId = createTime("10:00");
         createTime("11:00");
@@ -154,7 +166,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 가용_시간_조회_다른_테마의_예약은_영향_없음() {
+    void 가용_시간_조회시_다른_테마의_예약은_영향을_주지_않는다() {
         Integer themeA = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer themeB = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
         Integer timeId = createTime("10:00");
@@ -169,7 +181,7 @@ class ReservationTimeApiTest {
     }
 
     @Test
-    void 가용_시간_조회_다른_날짜의_예약은_영향_없음() {
+    void 가용_시간_조회시_다른_날짜의_예약은_영향을_주지_않는다() {
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer timeId = createTime("10:00");
         createReservation("브라운", "2026-08-05", timeId, themeId);

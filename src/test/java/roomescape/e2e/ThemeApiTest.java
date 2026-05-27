@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -24,7 +24,7 @@ class ThemeApiTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void 테마_조회_빈목록() {
+    void 테마가_없으면_빈_목록을_반환한다() {
         RestAssured.given().log().all()
                 .when().get("/themes")
                 .then().log().all()
@@ -33,7 +33,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 테마_추가() {
+    void 테마를_추가하면_201과_생성된_테마를_반환한다() {
         Map<String, String> params = new HashMap<>();
         params.put("name", "공포");
         params.put("description", "무서운 테마");
@@ -52,7 +52,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 테마_추가_후_조회() {
+    void 테마를_추가한_뒤_조회하면_목록에_포함된다() {
         Map<String, String> params = new HashMap<>();
         params.put("name", "추리");
         params.put("description", "단서를 찾아라");
@@ -74,7 +74,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 인기_테마_조회_now_기준_윈도우_내_예약수로_정렬된다() {
+    void 인기_테마_조회시_now_기준_윈도우_내_예약수가_많은_순으로_정렬된다() {
         Integer themeA = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer themeB = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
         Integer time = createTime("10:00");
@@ -98,7 +98,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 인기_테마_조회_윈도우_내_예약이_없으면_빈_결과() {
+    void 인기_테마_조회시_윈도우_내_예약이_없으면_빈_목록을_반환한다() {
         Integer theme = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer time = createTime("10:00");
         createReservation("user1", "2026-05-05", time, theme);
@@ -111,7 +111,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 인기_테마_조회_limit_파라미터로_결과_개수를_조절한다() {
+    void 인기_테마_조회시_limit_파라미터로_결과_개수를_제한한다() {
         Integer themeA = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
         Integer themeB = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
         Integer themeC = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");
@@ -132,7 +132,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 인기_테마_조회_now_미지정시_시스템_시각_기준_200() {
+    void 인기_테마_조회시_now를_지정하지_않으면_시스템_시각_기준_200을_반환한다() {
         RestAssured.given().log().all()
                 .when().get("/themes/popular")
                 .then().log().all()
@@ -156,7 +156,7 @@ class ThemeApiTest {
     }
 
     @Test
-    void 테마_추가_및_삭제() {
+    void 테마를_추가한_뒤_삭제하면_목록에서_제거된다() {
         Map<String, String> params = new HashMap<>();
         params.put("name", "SF");
         params.put("description", "우주에서 탈출");
@@ -180,6 +180,18 @@ class ThemeApiTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("themes.size()", is(0));
+    }
+
+    @Test
+    void 사용중인_테마를_삭제하면_422() {
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        Integer timeId = createTime("10:00");
+        createReservation("브라운", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .when().delete("/themes/" + themeId)
+                .then().log().all()
+                .statusCode(422);
     }
 
     private Integer createTheme(String name, String description, String thumbnailImageUrl) {

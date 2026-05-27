@@ -1,4 +1,4 @@
-package roomescape;
+package roomescape.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -24,7 +24,7 @@ class ReservationApiTest {
     private JdbcTemplate jdbcTemplate;
 
     @Test
-    void 예약_조회_빈목록() {
+    void 예약이_없으면_빈_목록을_반환한다() {
         RestAssured.given().log().all()
                 .when().get("/reservations")
                 .then().log().all()
@@ -36,7 +36,7 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약_추가() {
+    void 예약을_추가하면_201과_생성된_예약을_반환한다() {
         Integer timeId = createTime("11:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
 
@@ -58,7 +58,7 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약_추가_후_조회() {
+    void 예약을_추가한_뒤_조회하면_목록에_포함된다() {
         Integer timeId = createTime("14:00");
         Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
 
@@ -85,7 +85,7 @@ class ReservationApiTest {
     }
 
     @Test
-    void 예약_추가_및_삭제() {
+    void 예약을_추가한_뒤_삭제하면_목록에서_제거된다() {
         Integer timeId = createTime("18:00");
         Integer themeId = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");
 
