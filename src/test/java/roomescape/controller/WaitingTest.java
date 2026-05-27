@@ -37,7 +37,7 @@ public class WaitingTest {
     public void cancelWaitingTest() {
         RestAssured.given().log().all()
                 .queryParam("name", "user_d")
-                .when().delete("/reservations/waitings/1")
+                .when().delete("/reservations/waitings/2")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -115,7 +115,7 @@ public class WaitingTest {
     public void cancelPastWaitingTest() {
         RestAssured.given().log().all()
                 .queryParam("name", "user_d")
-                .when().delete("/reservations/waitings/2")
+                .when().delete("/reservations/waitings/1")
                 .then().log().all()
                 .statusCode(400);
     }
@@ -125,9 +125,8 @@ public class WaitingTest {
     public void cancelOtherWaitingTest() {
         RestAssured.given().log().all()
                 .queryParam("name", "녀녕")
-                .when().delete("/reservations/waitings/1")
+                .when().delete("/reservations/waitings/2")
                 .then().log().all()
                 .statusCode(403);
     }
-
 }

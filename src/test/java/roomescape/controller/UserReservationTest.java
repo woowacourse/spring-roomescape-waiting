@@ -130,4 +130,17 @@ class UserReservationTest {
                 .then().log().all()
                 .statusCode(404);
     }
+
+
+    @Test
+    @DisplayName("예약과 예약 대기가 같이 조회되는지 확인한다.")
+    void getMyReservationsAndWaitingTest() {
+        RestAssured.given().log().all()
+                .queryParam("name", "user_b")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[1].rank", is(2));
+    }
 }
