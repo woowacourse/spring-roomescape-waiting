@@ -9,8 +9,8 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
-import roomescape.reservation.application.dto.ReservationResult;
-import roomescape.reservation.application.dto.ReservationSearchCondition;
+import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -48,11 +48,11 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationSearchCondition condition = new ReservationSearchCondition(null);
-        List<ReservationResult> reservations = reservationQueryService.findAll(condition);
+        ReservationApplicationSearchCondition condition = new ReservationApplicationSearchCondition(null);
+        List<ReservationApplicationResult> reservations = reservationQueryService.findAll(condition);
 
-        ReservationResult first = reservations.getFirst();
-        ReservationResult second = reservations.get(1);
+        ReservationApplicationResult first = reservations.getFirst();
+        ReservationApplicationResult second = reservations.get(1);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);
@@ -97,11 +97,11 @@ class ReservationQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationSearchCondition condition = new ReservationSearchCondition("스타크");
-        List<ReservationResult> reservations = reservationQueryService.findAll(condition);
+        ReservationApplicationSearchCondition condition = new ReservationApplicationSearchCondition("스타크");
+        List<ReservationApplicationResult> reservations = reservationQueryService.findAll(condition);
 
-        ReservationResult first = reservations.getFirst();
-        ReservationResult second = reservations.get(1);
+        ReservationApplicationResult first = reservations.getFirst();
+        ReservationApplicationResult second = reservations.get(1);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(reservations).hasSize(2);

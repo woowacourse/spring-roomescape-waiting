@@ -6,8 +6,7 @@ import roomescape.reservation.domain.Waiting;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.theme.application.dto.ThemeResult;
 
-// TODO: ReservationResult라는 이름은 수정 검토
-public record ReservationResult(
+public record ReservationApplicationResult(
         Long id,
         String name,
         LocalDate date,
@@ -17,9 +16,9 @@ public record ReservationResult(
         Long rank
 ) {
 
-    public static ReservationResult confirmed(Reservation reservation, ThemeResult themeResult,
-                                              ReservationTimeResult timeResult) {
-        return new ReservationResult(
+    public static ReservationApplicationResult confirmed(Reservation reservation, ThemeResult themeResult,
+                                                         ReservationTimeResult timeResult) {
+        return new ReservationApplicationResult(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getSlot().date(),
@@ -30,10 +29,10 @@ public record ReservationResult(
         );
     }
 
-    public static ReservationResult waiting(Waiting waiting, ThemeResult themeResult,
-                                            ReservationTimeResult timeResult,
-                                            Long rank) {
-        return new ReservationResult(
+    public static ReservationApplicationResult waiting(Waiting waiting, ThemeResult themeResult,
+                                                       ReservationTimeResult timeResult,
+                                                       Long rank) {
+        return new ReservationApplicationResult(
                 waiting.getId(),
                 waiting.getName(),
                 waiting.getSlot().date(),
@@ -44,8 +43,8 @@ public record ReservationResult(
         );
     }
 
-    public static ReservationResult from(ReservationDetail reservationDetail) {
-        return new ReservationResult(
+    public static ReservationApplicationResult from(ReservationDetail reservationDetail) {
+        return new ReservationApplicationResult(
                 reservationDetail.reservationId(),
                 reservationDetail.username(),
                 reservationDetail.date(),
@@ -64,8 +63,8 @@ public record ReservationResult(
         );
     }
 
-    public static ReservationResult from(WaitingDetail waitingDetail) {
-        return new ReservationResult(
+    public static ReservationApplicationResult from(WaitingDetail waitingDetail) {
+        return new ReservationApplicationResult(
                 waitingDetail.waitingId(),
                 waitingDetail.username(),
                 waitingDetail.date(),

@@ -14,13 +14,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.dto.ReservationResult;
-import roomescape.reservation.application.dto.ReservationSearchCondition;
+import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
 import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservation.application.service.WaitingQueryService;
-import roomescape.reservation.presentation.dto.ReservationCreateRequest;
-import roomescape.reservation.presentation.dto.ReservationResponse;
+import roomescape.reservation.presentation.dto.ReservationApplicationCreateRequest;
+import roomescape.reservation.presentation.dto.ReservationApplicationResponse;
 
 @RequiredArgsConstructor
 @RequestMapping("/waitings")
@@ -31,23 +31,24 @@ public class WaitingController {
     private final WaitingQueryService waitingQueryService;
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> save(
-            @Valid @RequestBody ReservationCreateRequest request
+    public ResponseEntity<ReservationApplicationResponse> save(
+            @Valid @RequestBody ReservationApplicationCreateRequest request
     ) {
-        ReservationCreateCommand createCommand = request.toCommand(LocalDateTime.now());
+        ReservationApplicationCreateCommand createCommand = request.toCommand(LocalDateTime.now());
 
         return ResponseEntity.status(HttpStatus.CREATED)
-                .body(ReservationResponse.from(waitingCommandService.save(createCommand)));
+                .body(ReservationApplicationResponse.from(waitingCommandService.save(createCommand)));
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> findByName(
+    public ResponseEntity<List<ReservationApplicationResponse>> findByName(
             @RequestParam String username
     ) {
-        List<ReservationResult> results = waitingQueryService.findByName(new ReservationSearchCondition(username));
+        List<ReservationApplicationResult> results = waitingQueryService.findByName(
+                new ReservationApplicationSearchCondition(username));
 
-        List<ReservationResponse> responses = results.stream()
-                .map(ReservationResponse::from)
+        List<ReservationApplicationResponse> responses = results.stream()
+                .map(ReservationApplicationResponse::from)
                 .toList();
 
         return ResponseEntity.ok(responses);

@@ -9,8 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.dto.ReservationResult;
+import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationApplicationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
@@ -34,7 +34,7 @@ public class ReservationCommandService {
     private final ReservationTimeRepository timeRepository;
     private final WaitingRepository waitingRepository;
 
-    public ReservationResult save(ReservationCreateCommand request) {
+    public ReservationApplicationResult save(ReservationApplicationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
@@ -51,7 +51,7 @@ public class ReservationCommandService {
         try {
             Reservation reservation = request.toReservation(slot);
             Reservation savedReservation = reservationRepository.save(reservation);
-            return ReservationResult.confirmed(
+            return ReservationApplicationResult.confirmed(
                     savedReservation,
                     ThemeResult.from(theme),
                     ReservationTimeResult.from(time)
@@ -61,7 +61,7 @@ public class ReservationCommandService {
         }
     }
 
-    public ReservationResult update(Long reservationId, ReservationUpdateCommand request) {
+    public ReservationApplicationResult update(Long reservationId, ReservationUpdateCommand request) {
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 
@@ -74,7 +74,7 @@ public class ReservationCommandService {
         Theme theme = themeRepository.findById(updatedReservation.getSlot().themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
-        return ReservationResult.confirmed(
+        return ReservationApplicationResult.confirmed(
                 updatedReservation,
                 ThemeResult.from(theme),
                 ReservationTimeResult.from(updateTime)

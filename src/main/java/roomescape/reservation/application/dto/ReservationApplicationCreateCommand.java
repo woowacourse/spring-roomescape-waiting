@@ -7,7 +7,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 
-public record ReservationCreateCommand(
+public record ReservationApplicationCreateCommand(
         String name,
         LocalDate date,
         Long themeId,

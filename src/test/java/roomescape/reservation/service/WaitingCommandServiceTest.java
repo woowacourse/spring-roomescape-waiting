@@ -16,9 +16,9 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.dto.ReservationResult;
-import roomescape.reservation.application.dto.ReservationResult.Status;
+import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationApplicationResult.Status;
 import roomescape.reservation.application.service.WaitingCommandService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -48,8 +48,8 @@ class WaitingCommandServiceTest {
                 timeId
         );
 
-        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
-        ReservationResult savedWaiting = waitingCommandService.save(request);
+        ReservationApplicationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
+        ReservationApplicationResult savedWaiting = waitingCommandService.save(request);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(savedWaiting.id()).isPositive();
@@ -86,8 +86,8 @@ class WaitingCommandServiceTest {
                 timeId
         );
 
-        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
-        ReservationResult savedWaiting = waitingCommandService.save(request);
+        ReservationApplicationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
+        ReservationApplicationResult savedWaiting = waitingCommandService.save(request);
 
         assertThat(savedWaiting.rank()).isEqualTo(3L);
     }
@@ -98,7 +98,7 @@ class WaitingCommandServiceTest {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
 
-        ReservationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+        ReservationApplicationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
 
         assertThatThrownBy(() -> waitingCommandService.save(request))
                 .isInstanceOf(RoomEscapeException.class)
@@ -123,7 +123,7 @@ class WaitingCommandServiceTest {
                 timeId
         );
 
-        ReservationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+        ReservationApplicationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
 
         assertThatThrownBy(() -> waitingCommandService.save(request))
                 .isInstanceOf(ConflictException.class)

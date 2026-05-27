@@ -9,9 +9,9 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
-import roomescape.reservation.application.dto.ReservationResult;
-import roomescape.reservation.application.dto.ReservationResult.Status;
-import roomescape.reservation.application.dto.ReservationSearchCondition;
+import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationApplicationResult.Status;
+import roomescape.reservation.application.dto.ReservationApplicationSearchCondition;
 import roomescape.reservation.application.service.WaitingQueryService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
@@ -29,7 +29,7 @@ class WaitingQueryServiceTest {
 
     @DisplayName("특정 이름으로 예약 대기 조회를 테스트합니다.")
     @Test
-    void find_all_reservations() {
+    void find_waitings_by_name() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long nineTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
@@ -54,14 +54,15 @@ class WaitingQueryServiceTest {
                 tenTimeId
         );
 
-        ReservationSearchCondition condition = new ReservationSearchCondition("피노");
-        List<ReservationResult> reservations = waitingQueryService.findByName(condition);
+        ReservationApplicationSearchCondition condition = new ReservationApplicationSearchCondition("피노");
+        List<ReservationApplicationResult> waitings = waitingQueryService.findByName(condition);
 
-        ReservationResult first = reservations.getFirst();
-        ReservationResult second = reservations.get(1);
+        ReservationApplicationResult first = waitings.getFirst();
+        ReservationApplicationResult second = waitings.get(1);
 
         SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(reservations).hasSize(2);
+            softly.assertThat(waitings).hasSize(2);
+
             softly.assertThat(first.id()).isPositive();
             softly.assertThat(first.name()).isEqualTo("피노");
             softly.assertThat(first.date()).isEqualTo(earlierDate);

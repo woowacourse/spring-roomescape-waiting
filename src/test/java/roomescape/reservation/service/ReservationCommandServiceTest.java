@@ -15,9 +15,9 @@ import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
-import roomescape.reservation.application.dto.ReservationCreateCommand;
-import roomescape.reservation.application.dto.ReservationResult;
-import roomescape.reservation.application.dto.ReservationResult.Status;
+import roomescape.reservation.application.dto.ReservationApplicationCreateCommand;
+import roomescape.reservation.application.dto.ReservationApplicationResult;
+import roomescape.reservation.application.dto.ReservationApplicationResult.Status;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservation.domain.Reservation;
@@ -44,8 +44,8 @@ class ReservationCommandServiceTest {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
 
-        ReservationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
-        ReservationResult result = reservationCommandService.save(request);
+        ReservationApplicationCreateCommand request = ReservationFixture.futureStarkCreateCommand(themeId, timeId, NOW);
+        ReservationApplicationResult result = reservationCommandService.save(request);
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(result.id()).isPositive();
@@ -123,7 +123,7 @@ class ReservationCommandServiceTest {
         );
 
         Long updateTimeId = testHelper.insertReservationTime(LocalTime.of(11, 0));
-        ReservationResult result = reservationCommandService.update(
+        ReservationApplicationResult result = reservationCommandService.update(
                 reservationId,
                 new ReservationUpdateCommand(ReservationFixture.futureReservationDate(), updateTimeId, NOW)
         );
@@ -226,7 +226,7 @@ class ReservationCommandServiceTest {
                 timeId
         );
 
-        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
+        ReservationApplicationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
 
         assertThatThrownBy(() -> reservationCommandService.save(request))
                 .isInstanceOf(ConflictException.class)
