@@ -74,7 +74,7 @@ class ReservationTest {
                 .createdAt(LocalDateTime.now(clock))
                 .build();
 
-        Reservation canceledReservation = reservation.cancel();
+        Reservation canceledReservation = reservation.cancel(reservation.getName(), clock);
         Assertions.assertThat(canceledReservation.getStatus()).isEqualTo(Status.CANCELED);
     }
 
