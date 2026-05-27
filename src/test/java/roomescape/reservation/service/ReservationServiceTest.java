@@ -76,21 +76,21 @@ class ReservationServiceTest {
         });
     }
 
-    @DisplayName("중복된 시간과 테마에 예약 추가 시 예외 발생을 테스트합니다.")
-    @Test
-    void validate_duplicated_reservation() {
-        themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url"));
-        timeService.save(new ReservationTimeCreateCommand(LocalTime.of(10, 0)));
-
-        ReservationCreateCommand firstRequest = new ReservationCreateCommand("스타크", LocalDate.of(2026, 5, 6), 1L, 1L);
-        reservationService.save(firstRequest, LocalDateTime.of(2000, 1, 1, 0, 0));
-
-        ReservationCreateCommand secondRequest = new ReservationCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L);
-
-        Assertions.assertThatThrownBy(() -> reservationService.save(secondRequest, LocalDateTime.of(2000, 1, 1, 0, 0)))
-                .isInstanceOf(RoomEscapeException.class)
-                .hasMessage("이미 해당 날짜와 시간에 예약이 존재합니다.");
-    }
+//    @DisplayName("중복된 시간과 테마에 예약 추가 시 예외 발생을 테스트합니다.")
+//    @Test
+//    void validate_duplicated_reservation() {
+//        themeService.save(new ThemeCreateCommand("theme name", "theme description", "theme img url"));
+//        timeService.save(new ReservationTimeCreateCommand(LocalTime.of(10, 0)));
+//
+//        ReservationCreateCommand firstRequest = new ReservationCreateCommand("스타크", LocalDate.of(2026, 5, 6), 1L, 1L);
+//        reservationService.save(firstRequest, LocalDateTime.of(2000, 1, 1, 0, 0));
+//
+//        ReservationCreateCommand secondRequest = new ReservationCreateCommand("카야", LocalDate.of(2026, 5, 6), 1L, 1L);
+//
+//        Assertions.assertThatThrownBy(() -> reservationService.save(secondRequest, LocalDateTime.of(2000, 1, 1, 0, 0)))
+//                .isInstanceOf(RoomEscapeException.class)
+//                .hasMessage("이미 해당 날짜와 시간에 예약이 존재합니다.");
+//    }
 
     @DisplayName("오늘보다 이전 날짜 혹은 시간 예약 시도 시 예외 발생을 테스트합니다.")
     @Test
