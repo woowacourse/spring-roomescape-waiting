@@ -5,10 +5,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import roomescape.auth.LoginMember;
 import roomescape.domain.Reservation;
+import roomescape.dto.WaitingResponseResult;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
+import roomescape.dto.response.MyReservationsAndWaitsResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.dto.response.ReservationWaitResponse;
+import roomescape.dto.response.PostReservationWaitResponse;
+import roomescape.dto.response.WaitingResponse;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
@@ -25,10 +28,12 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservations(@LoginMember Long memberId) {
+    public ResponseEntity<MyReservationsAndWaitsResponse> getReservations(@LoginMember Long memberId) {
         List<Reservation> reservations = reservationService.getReservations(memberId);
-        List<ReservationResponse> reservationResponses = ReservationResponse.fromAll(reservations);
-        return ResponseEntity.ok().body(reservationResponses);
+        List<WaitingResponseResult> waitingResponseResults = reservationService.getWaitings(memberId);
+        MyReservationsAndWaitsResponse myReservationsAndWaitsResponse = new MyReservationsAndWaitsResponse(
+                ReservationResponse.fromAll(reservations), WaitingResponse.fromAll(waitingResponseResults));
+        return ResponseEntity.ok().body(myReservationsAndWaitsResponse);
     }
 
     @PostMapping
@@ -48,9 +53,9 @@ public class ReservationController {
     }
 
     @PostMapping("/{id}/waits")
-    public ResponseEntity<ReservationWaitResponse> createWait(@LoginMember Long memberId, @PathVariable Long id) {
+    public ResponseEntity<PostReservationWaitResponse> createWait(@LoginMember Long memberId, @PathVariable Long id) {
         return ResponseEntity.created(URI.create("/api/v1/reservations/" + id + "/waits"))
-                .body(ReservationWaitResponse.from(reservationService.createWait(memberId, id)));
+                .body(PostReservationWaitResponse.from(reservationService.createWait(memberId, id)));
     }
 
     @PatchMapping("/{id}")

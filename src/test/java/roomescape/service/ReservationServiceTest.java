@@ -22,6 +22,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
+import roomescape.exception.reservationwait.SelfReservationWaitNotAllowedException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -406,7 +407,7 @@ public class ReservationServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(
                 id,
-                BROWN_ID,
+                JEONGKONG_ID,
                 futureDate,
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 1L,
@@ -454,17 +455,11 @@ public class ReservationServiceTest {
         LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(
                 id,
-                BROWN_ID,
+                JEONGKONG_ID,
                 futureDate,
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 1L,
                 1L
-        );
-        ReservationWait reservationWait = new ReservationWait(
-                id,
-                1L,
-                BROWN_ID,
-                LocalDateTime.of(futureDate, LocalTime.of(10, 0))
         );
 
         when(reservationDao.findReservationById(1L)).thenReturn(reservation);
@@ -472,6 +467,20 @@ public class ReservationServiceTest {
                 .thenThrow(new DuplicateKeyException("Duplicate key exception"));
         assertThatThrownBy(() -> reservationService.createWait(BROWN_ID, 1L))
                 .isInstanceOf(ReservationWaitAlreadyExistsException.class);
+    }
 
+    @Test
+    void 본인_예약에는_대기를_생성할_수_없다() {
+        long memberId = 1L;
+        long reservationId = 1L;
+        when(reservationDao.findReservationById(reservationId))
+                .thenReturn(new Reservation(
+                        reservationId, memberId,
+                        LocalDate.now().plusDays(1),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        1L, 1L));
+
+        assertThatThrownBy(() -> reservationService.createWait(memberId, reservationId))
+                .isInstanceOf(SelfReservationWaitNotAllowedException.class);
     }
 }

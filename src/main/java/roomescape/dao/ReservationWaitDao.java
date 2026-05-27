@@ -1,5 +1,6 @@
 package roomescape.dao;
 
+import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -11,6 +12,8 @@ import roomescape.domain.ReservationWait;
 import java.sql.PreparedStatement;
 import java.util.Objects;
 import java.util.Optional;
+import roomescape.dto.WaitingResponseProjection;
+import roomescape.dto.response.WaitingResponse;
 
 @Repository
 public class ReservationWaitDao {
@@ -43,6 +46,36 @@ public class ReservationWaitDao {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public List<WaitingResponseProjection> findWaitingsByMemberId(Long memberId) {
+        String sql = """
+              SELECT
+                  ranked.order_num,
+                  ranked.reservation_id,
+                  ranked.member_id,
+                  ranked.created_at
+              FROM (
+                  SELECT
+                      reservation_id,
+                      member_id,
+                      created_at,
+                      ROW_NUMBER() OVER (
+                          PARTITION BY reservation_id
+                          ORDER BY created_at
+                      ) AS order_num
+                  FROM reservation_wait
+              ) AS ranked
+              WHERE ranked.member_id = ?
+              ORDER BY ranked.created_at
+              """;
+
+        return jdbcTemplate.query(sql, (rs, rowNum) -> new WaitingResponseProjection(
+                rs.getLong("order_num"),
+                rs.getLong("reservation_id"),
+                rs.getLong("member_id"),
+                rs.getTimestamp("created_at").toLocalDateTime()
+        ), memberId);
     }
 
     public void deleteByReservationIdAndMemberId(Long reservationId, Long memberId) {

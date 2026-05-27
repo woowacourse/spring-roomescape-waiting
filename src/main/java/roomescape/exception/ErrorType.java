@@ -32,8 +32,10 @@ public enum ErrorType {
     WRONG_STORE_ACCESS(HttpStatus.FORBIDDEN, "AUTH403_002", "다른 매장에 접근권한이 없습니다."),
     RESERVATION_WAIT_NOT_FOUND(HttpStatus.NOT_FOUND, "RESERVATION_WAIT404_001", "존재하지 않는 예약 대기입니다."),
 
-    PAST_RESERVATION_WAIT_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "RESERVATION_WAIT422_001", "예약 대기 시간이 이미 지난 시간입니다."),
-    RESERVATION_WAIT_ALREADY_EXISTS(HttpStatus.CONFLICT, "RESERVATION_WAIT409_001", "이미 해당 슬롯에 대기 중입니다.");
+    PAST_RESERVATION_WAIT_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "RESERVATION_WAIT422_001",
+            "예약 대기 시간이 이미 지난 시간입니다."),
+    RESERVATION_WAIT_ALREADY_EXISTS(HttpStatus.CONFLICT, "RESERVATION_WAIT409_001", "이미 해당 슬롯에 대기 중입니다."),
+    SELF_RESERVATION_WAIT_NOT_ALLOWED(HttpStatus.UNPROCESSABLE_ENTITY, "RESERVATION_WAIT422_002", "본인 예약에는 대기를 신청할 수 없습니다.");
 
     private final HttpStatus httpStatus;
     private final String errorCode;

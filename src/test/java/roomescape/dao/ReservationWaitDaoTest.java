@@ -1,5 +1,11 @@
 package roomescape.dao;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -8,12 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationWait;
-
-import java.util.Optional;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import roomescape.dto.WaitingResponseProjection;
 
 @Import(ReservationWaitDao.class)
 @ActiveProfiles("test")
@@ -189,5 +190,23 @@ class ReservationWaitDaoTest {
     void 예약_대기자가_없으면_먼저_예약대기한_멤버는_없다() {
         Optional<Long> earliestMemberId = dao.findEarliestMemberId(1L);
         assertThat(earliestMemberId).isEmpty();
+    }
+
+    @Test
+    @Sql("/member-waitings.sql")
+    void memberId로_내_예약대기_목록을_조회한다() {
+        List<WaitingResponseProjection> waitingResponseProjections = dao.findWaitingsByMemberId(1L);
+
+        assertThat(waitingResponseProjections)
+                .hasSize(3)
+                .extracting(
+                        WaitingResponseProjection::reservationId,
+                        WaitingResponseProjection::memberId
+                )
+                .containsExactly(
+                        tuple(1L, 1L),
+                        tuple(2L, 1L),
+                        tuple(3L, 1L)
+                );
     }
 }

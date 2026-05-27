@@ -1,7 +1,14 @@
 package roomescape.controller;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.hamcrest.Matchers.everyItem;
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,17 +18,8 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
-import roomescape.dao.ReservationDao;
-import roomescape.domain.Reservation;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.TokenResponse;
-
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
-
-import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
-import static org.hamcrest.Matchers.is;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -49,8 +47,6 @@ public class ReservationControllerTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-    @Autowired
-    private ReservationDao reservationDao;
 
     @Nested
     class 예약_생성 {
@@ -179,39 +175,6 @@ public class ReservationControllerTest {
     }
 
     @Nested
-    class 예약_조회 {
-
-        @Test
-        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 생성된_예약을_반환한다() {
-            String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
-
-            RestAssured.given().log().all()
-                    .header("Cookie", cookie)
-                    .contentType(ContentType.JSON)
-                    .body(reservationParams())
-                    .when().post("/api/v1/reservations")
-                    .then().log().all()
-                    .statusCode(201)
-                    .body("id", is(1));
-
-            RestAssured.given().log().all()
-                    .header("Cookie", cookie)
-                    .when().get("/api/v1/reservations")
-                    .then().log().all()
-                    .statusCode(200)
-                    .body("size()", is(1))
-                    .body("[0].id", is(1))
-                    .body("[0].memberId", is(1))
-                    .body("[0].date", is(LocalDate.now().plusDays(1).toString()))
-                    .body("[0].time.id", is(1))
-                    .body("[0].time.startAt", is("10:00"));
-        }
-    }
-
-    @Nested
     class 예약_삭제 {
 
         @Test
@@ -235,7 +198,7 @@ public class ReservationControllerTest {
                     .when().get("/api/v1/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1));
+                    .body("reservations.size()", is(1));
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -248,7 +211,7 @@ public class ReservationControllerTest {
                     .when().get("/api/v1/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(0));
+                    .body("reservations.size()", is(0));
         }
 
         @Test
@@ -312,7 +275,7 @@ public class ReservationControllerTest {
                     .when().get("/api/v1/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(0));
+                    .body("reservations.size()", is(0));
         }
     }
 
@@ -426,8 +389,8 @@ public class ReservationControllerTest {
                     .when().get("/api/v1/reservations")
                     .then().log().all()
                     .statusCode(200)
-                    .body("size()", is(1))
-                    .body("[0].memberId", is(1));
+                    .body("reservations.size()", is(1))
+                    .body("reservations[0].memberId", is(1));
         }
     }
 
@@ -435,29 +398,28 @@ public class ReservationControllerTest {
     class 예약대기 {
 
         @Test
-        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_DEFAULT_MEMBER_SQL,
+                """
+                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                """,
+                """
+                INSERT INTO theme (id, name, description, img_url)
+                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                        'https://images.example.com/themes/horror-house.jpg');
+                """,
+                """
+                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                VALUES (1, 2, '2026-12-01', 1, 1, 1);
+                """
+        })
         void 예약대기_생성에_성공하면_201을_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
-                    .contentType(ContentType.JSON)
-                    .body(reservationParams())
-                    .when().post("/api/v1/reservations")
-                    .then().log().all()
-                    .statusCode(201);
-
-            Map<String, Object> waitTimeParams = new HashMap<>();
-            waitTimeParams.put("reservationId", 1L);
-            waitTimeParams.put("memberId", 1L);
-
-            RestAssured.given()
-                    .header("Cookie", cookie)
-                    .contentType(ContentType.JSON)
-                    .body(waitTimeParams)
-                    .when().post("/api/v1/reservations/" + 1L + "/waits")
+                    .when().post("/api/v1/reservations/1/waits")
                     .then().log().all()
                     .statusCode(201)
                     .body("id", is(1))
@@ -505,41 +467,34 @@ public class ReservationControllerTest {
         }
 
         @Test
-        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 같은_사용자가_같은_슬롯에_중복_대기하면_422를_반환한다() {
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_DEFAULT_MEMBER_SQL,
+                """
+                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                """,
+                """
+                INSERT INTO theme (id, name, description, img_url)
+                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                        'https://images.example.com/themes/horror-house.jpg');
+                """,
+                """
+                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                VALUES (1, 2, '2026-12-01', 1, 1, 1);
+                """
+        })
+        void 같은_사용자가_같은_슬롯에_중복_대기하면_409를_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
-                    .contentType(ContentType.JSON)
-                    .body(reservationParams())
-                    .when().post("/api/v1/reservations")
+                    .when().post("/api/v1/reservations/1/waits")
                     .then().log().all()
-                    .statusCode(201)
-                    .body("id", is(1));
+                    .statusCode(201);
 
-            Map<String, Object> waitTimeParams = new HashMap<>();
-            waitTimeParams.put("reservationId", 1L);
-            waitTimeParams.put("memberId", 1L);
-
-            RestAssured.given()
+            RestAssured.given().log().all()
                     .header("Cookie", cookie)
-                    .contentType(ContentType.JSON)
-                    .body(waitTimeParams)
-                    .when().post("/api/v1/reservations/" + 1L + "/waits")
-                    .then().log().all()
-                    .statusCode(201)
-                    .body("id", is(1))
-                    .body("reservationId", is(1))
-                    .body("memberId", is(1));
-
-            RestAssured.given()
-                    .header("Cookie", cookie)
-                    .contentType(ContentType.JSON)
-                    .body(waitTimeParams)
-                    .when().post("/api/v1/reservations/" + 1L + "/waits")
+                    .when().post("/api/v1/reservations/1/waits")
                     .then().log().all()
                     .statusCode(409)
                     .body("errorCode", is("RESERVATION_WAIT409_001"));
@@ -566,6 +521,102 @@ public class ReservationControllerTest {
                     .when().delete("/api/v1/reservations/1/waits/mine")
                     .then().log().all()
                     .statusCode(204);
+        }
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_DEFAULT_MEMBER_SQL,
+                """
+                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                """,
+                """
+                INSERT INTO theme (id, name, description, img_url)
+                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                        'https://images.example.com/themes/horror-house.jpg');
+                """,
+                """
+                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                VALUES (1, 1, '2026-12-01', 1, 1, 1);
+                """
+        })
+        void 본인_예약에_대기_신청시_422를_반환한다() {
+            String cookie = authenticate();
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().post("/api/v1/reservations/1/waits")
+                    .then().log().all()
+                    .statusCode(422)
+                    .body("errorCode", is("RESERVATION_WAIT422_002"));
+        }
+    }
+
+    @Nested
+    class 내_예약과_대기_목록_조회 {
+
+        @Test
+        @Sql(statements = {
+                INSERT_DEFAULT_STORE_SQL,
+                INSERT_DEFAULT_MEMBER_SQL,
+                """
+                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                """,
+                """
+                INSERT INTO theme (id, name, description, img_url)
+                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                        'https://images.example.com/themes/horror-house.jpg');
+                """,
+                """
+                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                VALUES (1, 1, '2026-12-01', 1, 1, 1),
+                       (2, 1, '2026-12-02', 1, 1, 1),
+                       (3, 2, '2026-12-03', 1, 1, 1);
+                """,
+                """
+                INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
+                VALUES (1, 3, 2, '2026-05-27 12:00:01'),
+                       (2, 3, 1, '2026-05-27 12:00:05');
+                """
+        })
+        void 내_확정예약과_내_대기를_순번과_함께_반환한다() {
+            String cookie = authenticate();
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().get("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("reservations.size()", is(2))
+                    .body("reservations.memberId", everyItem(is(1)))
+                    .body("reservations.id", containsInAnyOrder(1, 2))
+                    .body("waitings.size()", is(1))
+                    .body("waitings[0].order", is(2))
+                    .body("waitings[0].reservationId", is(3))
+                    .body("waitings[0].memberId", is(1));
+        }
+
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 예약도_대기도_없으면_빈_목록을_반환한다() {
+            String cookie = authenticate();
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().get("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("reservations.size()", is(0))
+                    .body("waitings.size()", is(0));
+        }
+
+        @Test
+        void 비로그인_상태로_조회하면_401을_반환한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(401)
+                    .body("errorCode", is("AUTH401_002"));
         }
     }
 
