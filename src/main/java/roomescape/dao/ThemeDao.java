@@ -1,6 +1,6 @@
 package roomescape.dao;
 
-import static roomescape.dao.rowMapper.ReservationTimeMapper.RESERVATION_TIME_ROW_MAPPER;
+import static roomescape.dao.rowMapper.ReservationTimeMapper.RESERVATION_TIME_STATUS_ROW_MAPPER;
 import static roomescape.dao.rowMapper.ThemeMapper.THEME_ROW_MAPPER;
 
 import java.time.LocalDate;
@@ -11,7 +11,7 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Theme;
 
 @Repository
@@ -91,17 +91,19 @@ public class ThemeDao {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
     }
 
-    public List<ReservationTime> findAvailableTime(Long id, LocalDate date) {
+    public List<TimeQueryResult> findTimeStatusBy(Long id, LocalDate date) {
         return jdbcTemplate.query(
                 """
-                             SELECT t.id AS time_id, t.start_at
-                             FROM reservation_time t
-                             LEFT JOIN reservation r ON t.id = r.time_id
-                                AND r.theme_id = ?
-                                AND r.date = ?
-                             WHERE r.id is NULL
+                          SELECT t.id AS time_id,
+                                 t.start_at,
+                                 CASE WHEN r.id IS NULL THEN FALSE ELSE TRUE END AS reserved
+                          FROM reservation_time t
+                          LEFT JOIN reservation r ON t.id = r.time_id
+                              AND r.theme_id = ?
+                              AND r.date = ?
+                          ORDER BY t.start_at
                         """,
-                RESERVATION_TIME_ROW_MAPPER,
+                RESERVATION_TIME_STATUS_ROW_MAPPER,
                 id,
                 date
         );

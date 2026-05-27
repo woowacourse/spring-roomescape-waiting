@@ -1,14 +1,14 @@
 package roomescape.apitest.users;
 
+import static org.hamcrest.Matchers.is;
+import static roomescape.config.FixedClockConfig.TODAY;
+
 import io.restassured.RestAssured;
 import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
-
-import static org.hamcrest.Matchers.is;
-import static roomescape.config.FixedClockConfig.TODAY;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -19,7 +19,7 @@ class ThemeApiTest {
         LocalDate now = LocalDate.parse(TODAY);
 
         RestAssured.given().log().all()
-                .when().get("/themes/1/available-time?date=" + now)
+                .when().get("/themes/1/schedule?date=" + now)
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(9));

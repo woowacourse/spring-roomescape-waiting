@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import roomescape.controller.dto.request.ThemeRequest;
+import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Description;
+import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.theme.ThemeName;
 import roomescape.domain.reservation.theme.ThumbnailUrl;
-import roomescape.domain.reservation.time.ReservationTime;
-import roomescape.domain.reservation.theme.Theme;
-import roomescape.controller.dto.request.ThemeRequest;
-import roomescape.controller.dto.response.ReservationTimeResponse;
-import roomescape.controller.dto.response.ThemeResponse;
+import roomescape.service.dto.result.ReservationTimeDetailResult;
 
 @Service
 public class ThemeService {
@@ -80,11 +80,11 @@ public class ThemeService {
         themeDao.delete(id);
     }
 
-    public List<ReservationTimeResponse> findAvailableTime(Long id, LocalDate date) {
-        List<ReservationTime> availableTimes = themeDao.findAvailableTime(id, date);
+    public List<ReservationTimeDetailResult> findThemeSchedule(Long id, LocalDate date) {
+        List<TimeQueryResult> availableTimes = themeDao.findTimeStatusBy(id, date);
 
         return availableTimes.stream()
-                .map(ReservationTimeResponse::from)
+                .map(ReservationTimeDetailResult::from)
                 .toList();
     }
 }

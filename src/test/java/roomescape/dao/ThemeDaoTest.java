@@ -11,7 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Theme;
 
 @JdbcTest
@@ -28,14 +28,13 @@ class ThemeDaoTest {
         // given
         Long themeId = 1L;
         LocalDate date = LocalDate.parse(TODAY).minusDays(7);
-        String expectedTime = "15:00";
+        boolean expected = false;
 
         // when
-        List<ReservationTime> availableTimes = themeDao.findAvailableTime(themeId, date);
+        List<TimeQueryResult> availableTimes = themeDao.findTimeStatusBy(themeId, date);
 
         // then
-        assertThat(availableTimes).hasSize(4);
-        assertThat(availableTimes.get(0).getStartAt()).isEqualTo(expectedTime);
+        assertThat(availableTimes.get(5).isReserved()).isEqualTo(expected);
     }
 
     @Test

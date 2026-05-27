@@ -8,9 +8,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.response.ReservationTimeResponse;
+import roomescape.controller.dto.response.ReservationTimeDetailResponse;
 import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
+import roomescape.service.dto.result.ReservationTimeDetailResult;
 
 @RestController
 @RequestMapping("/themes")
@@ -21,14 +22,16 @@ public class ThemeController {
         this.themeService = themeService;
     }
 
-    @GetMapping("/{id}/available-time")
-    public ResponseEntity<List<ReservationTimeResponse>> getAvailableTime(
+    @GetMapping("/{id}/schedule")
+    public ResponseEntity<List<ReservationTimeDetailResponse>> getThemeSchedule(
             @PathVariable long id,
             @RequestParam LocalDate date
     ) {
-        List<ReservationTimeResponse> availableTimes = themeService.findAvailableTime(id, date);
+        List<ReservationTimeDetailResult> availableTimes = themeService.findThemeSchedule(id, date);
+        List<ReservationTimeDetailResponse> response = availableTimes.stream().map(ReservationTimeDetailResponse::from)
+                .toList();
 
-        return ResponseEntity.ok().body(availableTimes);
+        return ResponseEntity.ok().body(response);
     }
 
     @GetMapping
