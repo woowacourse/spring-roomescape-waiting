@@ -1,5 +1,6 @@
 package roomescape.reservation.controller;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -83,12 +84,12 @@ class ReservationControllerTest {
                 .andExpect(status().isCreated())
                 .andReturn();
 
-        ReservationWaitingResponse reservationWaitingResponse = objectMapper.readValue(
+        ConfirmedReservationResponse reservationWaitingResponse = objectMapper.readValue(
                 result.getResponse().getContentAsString(),
-                ReservationWaitingResponse.class
+                ConfirmedReservationResponse.class
         );
 
-        assertReservation(reservationWaitingResponse, reservationWaitingResult);
+        assertNonWaitingReservation(reservationWaitingResponse, reservationWaitingResult);
         assertTime(reservationWaitingResponse.time(), time);
         assertTheme(reservationWaitingResponse.theme(), theme);
 
@@ -97,19 +98,18 @@ class ReservationControllerTest {
                 .create(request.guestName(), request.date(), request.timeId(), request.themeId());
     }
 
-    private static void assertReservation(ReservationWaitingResponse reservationWaitingResponse, ReservationWaitingResult reservationWaitingResult) {
-        assertThat(reservationWaitingResponse).extracting(
+    private static void assertNonWaitingReservation(ReservationWaitingResponse reservationWaitingResponse, ReservationWaitingResult reservationWaitingResult) {
+        assertThat(reservationWaitingResponse).isInstanceOf(ConfirmedReservationResponse.class);
+        assertThat((ConfirmedReservationResponse) reservationWaitingResponse).extracting(
                 ReservationWaitingResponse::id,
                 ReservationWaitingResponse::guestName,
                 ReservationWaitingResponse::date,
-                ReservationWaitingResponse::status,
-                ReservationWaitingResponse::waitNumber
+                ReservationWaitingResponse::status
         ).containsExactly(
                 reservationWaitingResult.id(),
                 reservationWaitingResult.guestName(),
                 reservationWaitingResult.date().toString(),
-                reservationWaitingResult.status().toString(),
-                reservationWaitingResult.waitNumber()
+                reservationWaitingResult.status().toString()
         );
     }
 
@@ -194,10 +194,14 @@ class ReservationControllerTest {
 
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-        ReservationWaitingResult reservationWaitingResult =
+        ReservationWaitingResult confirmed =
                 new ReservationWaitingResult(1L, guestName, LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED, 0);
+        ReservationWaitingResult waiting =
+                new ReservationWaitingResult(1L, guestName, LocalDate.of(2023, 8, 5), time, theme, Status.WAITING, 5);
+        ReservationWaitingResult canceled =
+                new ReservationWaitingResult(1L, guestName, LocalDate.of(2023, 8, 5), time, theme, Status.CANCELED, 0);
         given(reservationService.findByGuestName(guestName))
-                .willReturn(List.of(reservationWaitingResult));
+                .willReturn(List.of(confirmed, waiting, canceled));
 
         // when then
         MvcResult result = mockMvc.perform(
@@ -207,21 +211,46 @@ class ReservationControllerTest {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        ReservationWaitingListResponse reservationWaitingListResponse = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                ReservationWaitingListResponse.class
-        );
+        JsonNode responses = objectMapper.readTree(result.getResponse().getContentAsString())
+                .get("reservations");
+        assertThat(responses).hasSize(3);
 
-        List<ReservationWaitingResponse> responses = reservationWaitingListResponse.reservations();
-        assertThat(responses).hasSize(1);
-        ReservationWaitingResponse response = responses.getFirst();
-        assertReservation(response, reservationWaitingResult);
-        assertTime(response.time(), time);
-        assertTheme(response.theme(), theme);
-
+        assertNonWaitingReservation(responses.get(0), confirmed);
+        assertWaitingReservation(responses.get(1), waiting);
+        assertNonWaitingReservation(responses.get(2), canceled);
         then(reservationService)
                 .should()
                 .findByGuestName(guestName);
+    }
+
+    private static void assertNonWaitingReservation(JsonNode response, ReservationWaitingResult reservationWaitingResult) {
+        assertThat(response.get("id").asLong()).isEqualTo(reservationWaitingResult.id());
+        assertThat(response.get("guestName").asText()).isEqualTo(reservationWaitingResult.guestName());
+        assertThat(response.get("date").asText()).isEqualTo(reservationWaitingResult.date().toString());
+        assertTime(response.get("time"), reservationWaitingResult.time());
+        assertTheme(response.get("theme"), reservationWaitingResult.theme());
+        assertThat(response.get("status").asText()).isEqualTo(reservationWaitingResult.status().toString());
+    }
+    private static void assertWaitingReservation(JsonNode response, ReservationWaitingResult reservationWaitingResult) {
+        assertThat(response.get("id").asLong()).isEqualTo(reservationWaitingResult.id());
+        assertThat(response.get("guestName").asText()).isEqualTo(reservationWaitingResult.guestName());
+        assertThat(response.get("date").asText()).isEqualTo(reservationWaitingResult.date().toString());
+        assertTime(response.get("time"), reservationWaitingResult.time());
+        assertTheme(response.get("theme"), reservationWaitingResult.theme());
+        assertThat(response.get("status").asText()).isEqualTo(reservationWaitingResult.status().toString());
+        assertThat(response.get("waitNumber").asLong()).isEqualTo(reservationWaitingResult.waitNumber());
+    }
+
+    private static void assertTime(JsonNode response, ReservationTime time) {
+        assertThat(response.get("id").asLong()).isEqualTo(time.getId());
+        assertThat(response.get("startAt").asText()).isEqualTo(time.getStartAt().toString());
+    }
+
+    private static void assertTheme(JsonNode response, Theme theme) {
+        assertThat(response.get("id").asLong()).isEqualTo(theme.getId());
+        assertThat(response.get("name").asText()).isEqualTo(theme.getName());
+        assertThat(response.get("description").asText()).isEqualTo(theme.getDescription());
+        assertThat(response.get("thumbnail").asText()).isEqualTo(theme.getThumbnail());
     }
 
     @Test

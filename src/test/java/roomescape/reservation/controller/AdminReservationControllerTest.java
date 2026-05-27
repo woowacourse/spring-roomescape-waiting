@@ -73,7 +73,7 @@ class AdminReservationControllerTest {
                 ReservationListResponse.class
         );
 
-        assertReservationsResponse(response);
+        assertConfirmedReservationsResponse(response);
 
         then(reservationService)
                 .should()
@@ -139,7 +139,7 @@ class AdminReservationControllerTest {
                 .findAllReservations(anyInt(), anyInt());
     }
 
-    private static void assertReservationsResponse(ReservationListResponse response) {
+    private static void assertConfirmedReservationsResponse(ReservationListResponse response) {
         assertThat(response.reservations()).hasSize(3)
                 .extracting(
                         ReservationResponse::id,
