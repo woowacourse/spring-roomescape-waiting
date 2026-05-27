@@ -21,6 +21,7 @@ CREATE TABLE schedule
     time_id  BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT uk_schedule_date_time_theme UNIQUE (date, time_id, theme_id),
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT ,
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT
 );
@@ -39,6 +40,7 @@ CREATE TABLE waiting
     id          BIGINT NOT NULL AUTO_INCREMENT,
     member_id   BIGINT NOT NULL,
     schedule_id BIGINT NOT NULL,
+    CONSTRAINT uk_waiting_member_schedule UNIQUE (member_id, schedule_id),
     FOREIGN KEY (member_id) REFERENCES member (id),
     FOREIGN KEY (schedule_id) REFERENCES schedule (id),
     PRIMARY KEY (id)
@@ -50,6 +52,7 @@ CREATE TABLE reservation
     member_id   BIGINT NOT NULL,
     schedule_id BIGINT,
     PRIMARY KEY (id),
+    CONSTRAINT uk_reservation_schedule UNIQUE (schedule_id),
     FOREIGN KEY (member_id) REFERENCES member (id) ON DELETE RESTRICT,
     FOREIGN KEY (schedule_id) REFERENCES schedule (id) ON DELETE RESTRICT
 );
