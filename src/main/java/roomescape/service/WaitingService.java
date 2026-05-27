@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.WaitingRequestDTO;
@@ -39,14 +40,16 @@ public class WaitingService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
 
-        boolean exist = reservationRepository.existsByDateAndTimeAndTheme(
+        Reservation existReservation = reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
                 time,
                 theme
+        ).orElseThrow(() ->
+                new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE)
         );
 
-        if (!exist) {
-            throw new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE);
+        if(existReservation.isSameName(request.name())) {
+            throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
         }
 
         boolean b = waitingRepository.existsByNameAndDateAndTimeAndTheme(
@@ -56,9 +59,8 @@ public class WaitingService {
                 theme
         );
 
-        if (b) {
+        if(b) {
             throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
         }
-
     }
 }

@@ -127,6 +127,34 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByDateAndTimeAndTheme(LocalDate date, ReservationTime time, Theme theme) {
+        String sql = """
+                    select r.id as reservation_id,   
+                    r.name, r.date, 
+                    t.id as reservation_time_id,
+                    t.start_at as time_value,
+                    th.id as reservation_theme_id,
+                    th.name as reservation_theme_name,
+                    th.description as reservation_theme_description,
+                    th.image_url as reservation_theme_image_url
+                    from reservation as r 
+                    inner join reservation_time as t
+                    on r.time_id = t.id 
+                    inner join theme as th
+                    on r.theme_id = th.id
+                    where r.date = :date
+                    and t.id = :time_id
+                    and th.id = :theme_id
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource().addValue("date", date)
+                .addValue("time_id", time.getId()).addValue("theme_id", theme.getId());
+
+        List<Reservation> results = jdbcTemplate.query(sql, params, getReservationRowMapper());
+        return results.stream().findFirst();
+    }
+
+    @Override
     public Reservation update(Long id, LocalDate date, ReservationTime time) {
         String sql = "update reservation set date = :date, time_id = :time_id where id = :id";
         SqlParameterSource params = new MapSqlParameterSource().addValue("date", date)
