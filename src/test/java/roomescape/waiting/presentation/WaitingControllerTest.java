@@ -68,7 +68,7 @@ class WaitingControllerTest {
         LocalDate date = LocalDate.of(2026, 5, 5);
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
         Theme theme = Theme.createRow(1L, "테스트-테마", "설명", "https://thumbnail.com");
-        Waiting waiting = Waiting.createRow(1L, "브라운", date, time, theme, LocalDateTime.now());
+        Waiting waiting = Waiting.createRow(1L, "브라운", date, time, theme, 1L, LocalDateTime.now());
         WaitingCreateCommand command = new WaitingCreateCommand("브라운", date, 1L, 1L);
         given(waitingService.save(command)).willReturn(waiting);
 
@@ -91,7 +91,8 @@ class WaitingControllerTest {
                 .andExpect(jsonPath("$.time.id").value(1))
                 .andExpect(jsonPath("$.time.startAt").value("10:00"))
                 .andExpect(jsonPath("$.theme.id").value(1))
-                .andExpect(jsonPath("$.theme.name").value("테스트-테마"));
+                .andExpect(jsonPath("$.theme.name").value("테스트-테마"))
+                .andExpect(jsonPath("$.rank").value(1));
 
         then(waitingService).should().save(command);
     }

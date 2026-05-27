@@ -31,6 +31,7 @@ class WaitingTest {
         assertThat(waiting.getDate()).isEqualTo(date);
         assertThat(waiting.getTime()).isEqualTo(time);
         assertThat(waiting.getTheme()).isEqualTo(theme);
+        assertThat(waiting.getRank()).isNull();
         assertThat(waiting.getCreatedAt()).isBeforeOrEqualTo(LocalDateTime.now());
     }
 
@@ -65,5 +66,6 @@ class WaitingTest {
         assertThat(savedWaiting.getDate()).isEqualTo(waiting.getDate());
         assertThat(savedWaiting.getTime()).isEqualTo(waiting.getTime());
         assertThat(savedWaiting.getTheme()).isEqualTo(waiting.getTheme());
+        assertThat(savedWaiting.getRank()).isEqualTo(waiting.getRank());
     }
 }
