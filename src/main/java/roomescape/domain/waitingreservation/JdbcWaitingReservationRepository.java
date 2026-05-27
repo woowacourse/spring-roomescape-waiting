@@ -3,11 +3,18 @@ package roomescape.domain.waitingreservation;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 
 @Repository
 @RequiredArgsConstructor
@@ -22,6 +29,20 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
             from waiting_reservation
             where name = ? and date_id = ? and time_id = ? and theme_id = ?
             );
+            """;
+
+    private static final String FIND_OLDEST_SQL =
+        """
+            select wr.id, wr.name, wr.created_at,
+                   rd.id as date_id, rd.play_day,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from waiting_reservation wr
+            join reservation_date rd on wr.date_id = rd.id
+            join reservation_time rt on wr.time_id = rt.id
+            join theme th on wr.theme_id = th.id
+            order by wr.created_at asc, wr.id asc
+            limit 1
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -52,6 +73,35 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
     @Override
     public boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, long dateId, long timeId, long themeId) {
         return jdbcTemplate.queryForObject(EXIST_BY_NAME_DATE_TIME_THEME_SQL, Boolean.class, name, dateId, timeId, themeId);
+    }
+
+    @Override
+    public Optional<WaitingReservation> findOldest() {
+        return jdbcTemplate.query(FIND_OLDEST_SQL, waitingReservationRowMapper())
+            .stream()
+            .findFirst();
+    }
+
+    private RowMapper<WaitingReservation> waitingReservationRowMapper() {
+        return (rs, rowNum) -> WaitingReservation.of(
+            rs.getLong("id"),
+            rs.getString("name"),
+            ReservationDate.of(
+                rs.getLong("date_id"),
+                LocalDate.parse(rs.getString("play_day"))
+            ),
+            ReservationTime.of(
+                rs.getLong("time_id"),
+                LocalTime.parse(rs.getString("start_at"))
+            ),
+            Theme.of(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_content"),
+                rs.getString("theme_url")
+            ),
+            rs.getTimestamp("created_at").toLocalDateTime()
+        );
     }
 
     private long extractId(KeyHolder keyHolder) {
