@@ -17,8 +17,6 @@ public interface ReservationSlotRepository {
 
     int countByReservationDateId(Long dateId);
 
-    List<Long> findReservedTimes(Long themeId, Long dateId);
-
     List<Theme> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate today);
 
     int countByThemeId(Long id);

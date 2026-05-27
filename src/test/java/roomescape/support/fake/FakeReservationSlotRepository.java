@@ -2,7 +2,6 @@ package roomescape.support.fake;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -70,17 +69,6 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public List<Long> findReservedTimes(Long themeId, Long dateId) {
-        List<Long> reservedTimeIds = new ArrayList<>();
-        for (ReservationSlot reservation : storage.values()) {
-            if (reservation.getTheme().getId().equals(themeId) && reservation.getDate().getId().equals(dateId)) {
-                reservedTimeIds.add(reservation.getTime().getId());
-            }
-        }
-        return reservedTimeIds;
-    }
-
-    @Override
     public List<Theme> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate endDay) {
         return List.of();
     }
@@ -105,8 +93,8 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     public boolean existsBySchedule(Long timeId, Long dateId, Long themeId) {
         for (ReservationSlot reservation : storage.values()) {
             if (timeId.equals(reservation.getTime().getId())
-                && dateId.equals(reservation.getDate().getId())
-                && themeId.equals(reservation.getTheme().getId())) {
+                    && dateId.equals(reservation.getDate().getId())
+                    && themeId.equals(reservation.getTheme().getId())) {
                 return true;
             }
         }
@@ -116,10 +104,10 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     @Override
     public Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId) {
         return storage.values().stream()
-            .filter(reservation -> timeId.equals(reservation.getTime().getId()))
-            .filter(reservation -> dateId.equals(reservation.getDate().getId()))
-            .filter(reservation -> themeId.equals(reservation.getTheme().getId()))
-            .findFirst();
+                .filter(reservation -> timeId.equals(reservation.getTime().getId()))
+                .filter(reservation -> dateId.equals(reservation.getDate().getId()))
+                .filter(reservation -> themeId.equals(reservation.getTheme().getId()))
+                .findFirst();
     }
 
     @Override
@@ -130,12 +118,5 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
         ReservationSlot updatedReservation = ReservationSlot.createWithId(id, withoutId);
         storage.put(id, updatedReservation);
         return Optional.of(updatedReservation);
-    }
-
-    private Comparator<ReservationSlot> latestReservationFirst() {
-        return Comparator.comparing((ReservationSlot reservation) -> reservation.getDate().getDate())
-            .reversed()
-            .thenComparing(reservation -> reservation.getTime().getStartAt(), Comparator.reverseOrder())
-            .thenComparing(ReservationSlot::getId, Comparator.reverseOrder());
     }
 }

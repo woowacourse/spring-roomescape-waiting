@@ -58,14 +58,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             where date_id = ?
             """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation_slot where id = ?";
-    private static final String FIND_BY_THEME_AND_DATE_SQL =
-        """
-            select distinct rs.time_id
-            from reservation_slot rs
-            join reservation r on r.reservation_slot_id = rs.id
-            where rs.theme_id = ? and rs.date_id = ?
-            """;
-
     private static final String FIND_POPULAR_THEME_SQL =
         """
             select
@@ -173,11 +165,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public List<Long> findReservedTimes(Long themeId, Long dateId) {
-        return jdbcTemplate.query(FIND_BY_THEME_AND_DATE_SQL, reservationTimeIdRowMapper(), themeId, dateId);
-    }
-
-    @Override
     public List<Theme> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate endDay) {
         return jdbcTemplate.query(FIND_POPULAR_THEME_SQL, popularThemeRowMapper(), startDay, endDay, rankLimit);
     }
@@ -259,10 +246,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 rs.getString(COLUMN_THEME_URL)
             )
         );
-    }
-
-    private RowMapper<Long> reservationTimeIdRowMapper() {
-        return (rs, rowNum) -> rs.getLong(COLUMN_TIME_ID);
     }
 
     private RowMapper<Theme> popularThemeRowMapper() {
