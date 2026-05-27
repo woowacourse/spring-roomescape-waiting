@@ -1,6 +1,7 @@
 package roomescape.reservation.domain;
 
 import java.time.LocalDateTime;
+import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -64,5 +65,15 @@ public class Reservation {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public boolean isReserved() {
+        return this.status.equals(Status.RESERVED);
+    }
+
+    public void isOwnedBy(String name) {
+        if (!this.name.equals(name)) {
+            throw new ForbiddenRequestException();
+        }
     }
 }

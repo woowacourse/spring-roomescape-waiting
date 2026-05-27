@@ -12,7 +12,8 @@ public enum ErrorCode {
     THEME_NOT_FOUND("테마를 찾을 수 없습니다."),
     INVALID_FORMAT("요청 형식이 올바르지 않습니다."),
     INVALID_REQUEST("입력값이 유효하지 않습니다."),
-    INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다.");
+    INTERNAL_SERVER_ERROR("서버 오류가 발생했습니다."),
+    RESERVATION_FORBIDDEN_REQUEST("예약에 대한 접근 권한이 없습니다.");
 
     private final String message;
 
