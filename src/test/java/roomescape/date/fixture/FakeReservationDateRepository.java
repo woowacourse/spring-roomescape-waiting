@@ -16,8 +16,8 @@ public class FakeReservationDateRepository implements ReservationDateRepository 
     @Override
     public Optional<ReservationDate> findById(Long id) {
         return reservationDates.stream()
-                .filter(reservationDate -> reservationDate.getId() == id)
-                .findFirst();
+            .filter(reservationDate -> reservationDate.getId() == id)
+            .findFirst();
     }
 
     @Override
@@ -33,7 +33,8 @@ public class FakeReservationDateRepository implements ReservationDateRepository 
     @Override
     public ReservationDate save(ReservationDate reservationDate) {
         autoIncrement();
-        ReservationDate savedReservationDate = ReservationDate.load(autoIncrement, reservationDate.getDate(), true);
+        ReservationDate savedReservationDate = ReservationDate.load(autoIncrement,
+            reservationDate.getDate(), true);
         this.reservationDates.add(savedReservationDate);
         return savedReservationDate;
     }
@@ -60,7 +61,7 @@ public class FakeReservationDateRepository implements ReservationDateRepository 
     @Override
     public boolean existsByDate(LocalDate date) {
         return reservationDates.stream()
-                .anyMatch(reservationDate -> reservationDate.getDate().equals(date));
+            .anyMatch(reservationDate -> reservationDate.getDate().equals(date));
     }
 
     private void autoIncrement() {

@@ -17,14 +17,14 @@ public class ReservationDateApiFixture {
         params.put("date", date);
 
         return RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/dates")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("id");
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/admin/dates")
+            .then().log().all()
+            .statusCode(200)
+            .extract()
+            .path("id");
     }
 
     public static void updateDateStatus(String token, Integer futureDateId, boolean isActive) {
@@ -32,12 +32,12 @@ public class ReservationDateApiFixture {
         updateActive.put("isActive", isActive);
 
         RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(ContentType.JSON)
-                .body(updateActive)
-                .when().patch("/admin/dates/" + futureDateId + "/status")
-                .then().log().all()
-                .statusCode(200);
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .contentType(ContentType.JSON)
+            .body(updateActive)
+            .when().patch("/admin/dates/" + futureDateId + "/status")
+            .then().log().all()
+            .statusCode(200);
     }
 
 }

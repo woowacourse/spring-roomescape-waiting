@@ -19,27 +19,28 @@ public class JdbcReservationDateRepository implements ReservationDateRepository 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final RowMapper<ReservationDate> reservationDateRowMapper = (resultSet, rowMapper) ->
-            ReservationDate.load(
-                    resultSet.getLong("id"),
-                    resultSet.getDate("date").toLocalDate(),
-                    resultSet.getBoolean("is_active")
-            );
+        ReservationDate.load(
+            resultSet.getLong("id"),
+            resultSet.getDate("date").toLocalDate(),
+            resultSet.getBoolean("is_active")
+        );
 
     public JdbcReservationDateRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
-                .withTableName("reservation_date")
-                .usingGeneratedKeyColumns("id");
+            .withTableName("reservation_date")
+            .usingGeneratedKeyColumns("id");
     }
 
     @Override
     public Optional<ReservationDate> findById(Long id) {
         String sql = "SELECT id, date, is_active FROM reservation_date where id = :id";
         MapSqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", id);
+            .addValue("id", id);
 
         try {
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, reservationDateRowMapper));
+            return Optional.ofNullable(
+                jdbcTemplate.queryForObject(sql, params, reservationDateRowMapper));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -54,14 +55,14 @@ public class JdbcReservationDateRepository implements ReservationDateRepository 
     @Override
     public List<ReservationDate> findAllAfterToday() {
         String sql = """
-                SELECT id, date, is_active
-                FROM reservation_date 
-                WHERE date >= :today
-                AND is_active = true
-                ORDER BY date ASC
-                """;
+            SELECT id, date, is_active
+            FROM reservation_date 
+            WHERE date >= :today
+            AND is_active = true
+            ORDER BY date ASC
+            """;
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("today", LocalDate.now());
+            .addValue("today", LocalDate.now());
 
         return jdbcTemplate.query(sql, params, reservationDateRowMapper);
     }
@@ -69,8 +70,8 @@ public class JdbcReservationDateRepository implements ReservationDateRepository 
     @Override
     public ReservationDate save(ReservationDate reservationDate) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date", reservationDate.getDate())
-                .addValue("is_active", reservationDate.isActive());
+            .addValue("date", reservationDate.getDate())
+            .addValue("is_active", reservationDate.isActive());
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return ReservationDate.load(id, reservationDate.getDate(), reservationDate.isActive());
     }
@@ -78,13 +79,13 @@ public class JdbcReservationDateRepository implements ReservationDateRepository 
     @Override
     public boolean updateStatus(ReservationDate reservationDate) {
         String sql = """
-                UPDATE reservation_date 
-                SET is_active = :is_active
-                WHERE id = :id
-                """;
+            UPDATE reservation_date 
+            SET is_active = :is_active
+            WHERE id = :id
+            """;
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", reservationDate.getId())
-                .addValue("is_active", reservationDate.isActive());
+            .addValue("id", reservationDate.getId())
+            .addValue("is_active", reservationDate.isActive());
 
         int updateCount = jdbcTemplate.update(sql, params);
         return updateCount > 0;
