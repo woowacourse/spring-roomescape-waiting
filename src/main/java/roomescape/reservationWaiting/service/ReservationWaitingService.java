@@ -5,12 +5,15 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.AuthorizationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.exception.AlreadyReservedException;
 import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
+import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
 import roomescape.reservationWaiting.exception.WaitingTargetReservationNotFoundException;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
@@ -55,13 +58,13 @@ public class ReservationWaitingService {
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(ThemeNotFoundException::new);
 
-         Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(
+        Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(
                 command.date(), command.timeId(), command.themeId()
         ).orElseThrow(WaitingTargetReservationNotFoundException::new);
 
-         if (reservation.getName().equals(command.name())) {
-             throw new AlreadyReservedException();
-         }
+        if (reservation.getName().equals(command.name())) {
+            throw new AlreadyReservedException();
+        }
 
         try {
             return reservationWaitingRepository.save(
@@ -74,6 +77,23 @@ public class ReservationWaitingService {
             );
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateReservationWaitingException();
+        }
+    }
+
+    @Transactional
+    public void deleteReservationWaiting(Long id, String userName) {
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(id).orElseThrow(
+                ReservationWaitingNotFoundException::new
+        );
+
+        validateExpiry(reservationWaiting.getDate(), reservationWaiting.getTime().getStartAt());
+        if (!reservationWaiting.getName().equals(userName)) {
+            throw new AuthorizationException();
+        }
+
+        int count = reservationWaitingRepository.deleteById(id);
+        if (count == 0) {
+            throw new ReservationWaitingNotFoundException();
         }
     }
 

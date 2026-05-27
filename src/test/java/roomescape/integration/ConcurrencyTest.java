@@ -26,6 +26,7 @@ import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
+import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.theme.exception.DuplicateThemeException;
@@ -346,6 +347,32 @@ class ConcurrencyTest {
         );
 
         //then
+        assertThat(result.get(0)).isEqualTo(1);
+        assertThat(result.get(1)).isEqualTo(99);
+        assertThat(result.get(2)).isEqualTo(0);
+    }
+
+    @Test
+    void deleteReservationWaiting() throws InterruptedException {
+        // given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
+                "포비",
+                LocalDate.of(2026, 5, 15),
+                1L,
+                1L
+        ));
+
+        // when
+        List<Integer> result = runConcurrentlyAndCountResults(
+                () -> reservationWaitingService.deleteReservationWaiting(1L, "포비"),
+                100,
+                ReservationWaitingNotFoundException.class
+        );
+
+        // then
         assertThat(result.get(0)).isEqualTo(1);
         assertThat(result.get(1)).isEqualTo(99);
         assertThat(result.get(2)).isEqualTo(0);

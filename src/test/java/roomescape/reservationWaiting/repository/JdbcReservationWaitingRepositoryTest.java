@@ -2,10 +2,12 @@ package roomescape.reservationWaiting.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -142,9 +144,41 @@ class JdbcReservationWaitingRepositoryTest {
         )).isFalse();
     }
 
+    @Test
+    @DisplayName("아이디를 기반으로 예약 대기를 삭제한다")
+    void deleteById_success() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+
+        // when
+        int deletedCount = reservationWaitingRepository.deleteById(saved.getId());
+
+        // then
+        assertThat(deletedCount).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("아이디를 기반으로 예약 대기를 잘 찾는다")
+    void findById_success() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+
+        // when
+        Optional<ReservationWaiting> found = reservationWaitingRepository.findById(saved.getId());
+
+        // then
+        assertTrue(found.isPresent());
+    }
+
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationWaitingRepository.save(
-                ReservationWaiting.of( name, date, time, theme)
+                ReservationWaiting.of(name, date, time, theme)
         );
     }
 }
