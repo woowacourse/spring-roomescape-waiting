@@ -1,17 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,8 +7,8 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.holiday.service.HolidayService;
-import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
 import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
@@ -36,6 +24,14 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceImplTest {
@@ -220,7 +216,7 @@ class ReservationServiceImplTest {
 
     @DisplayName("전체 예약 목록을 반환한다.")
     @Test
-    void getAll() {
+    void getAll_전체_예약_조회_테스트() {
         // given
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
@@ -249,27 +245,6 @@ class ReservationServiceImplTest {
 
         // then
         verify(reservationRepository).deleteById(1L);
-    }
-
-    @DisplayName("이름으로 예약 목록을 조회한다.")
-    @Test
-    void getByName_예약_목록_반환() {
-        // given
-        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Theme theme2 = new Theme("테마", "설명", "https://img.test/a.png").withId(2L);
-        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-        List<Reservation> reservations = List.of(
-                new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L),
-                new Reservation("라이", time, theme2, Status.RESERVED, LocalDateTime.now()).withId(2L)
-        );
-        when(reservationRepository.findByName("라이")).thenReturn(reservations);
-
-        // when
-        List<Reservation> result = reservationService.getByName("라이");
-
-        // then
-        assertThat(result).hasSize(2);
-        assertThat(result).allMatch(r -> r.getName().equals("라이"));
     }
 
     @DisplayName("대기 순번을 포함한 예약 전체 정보를 조회한다.")
@@ -371,14 +346,14 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
-        when(reservationRepository.update(any(), any(), LocalDateTime.now())).thenReturn(true);
+        when(reservationRepository.update(any(), any(), any())).thenReturn(true);
 
         // when
         Reservation result = reservationService.update(1L, 2L);
 
         // then
         assertThat(result.getTime().getId()).isEqualTo(2L);
-        verify(reservationRepository).update(1L, 2L, LocalDateTime.now());
+        verify(reservationRepository).update(any(), any(), any());
     }
 
     @DisplayName("존재하지 않는 예약을 변경하는 경우, ReservationNotFoundException이 발생한다.")

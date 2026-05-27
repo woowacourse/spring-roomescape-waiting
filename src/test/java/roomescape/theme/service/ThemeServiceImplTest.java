@@ -157,4 +157,45 @@ class ThemeServiceImplTest {
         assertThat(themeService.getAvailableTimes(1L, date))
                 .isEqualTo(timesForDate);
     }
+
+    @org.junit.jupiter.api.DisplayName("getBestThemes는 dayCount/rankCount 설정에 맞춰 리포지토리를 호출한다.")
+    @Test
+    void getBestThemes_정상_조회_테스트() {
+        // given
+        List<Theme> best = List.of(
+                new Theme("1위", "설명", "https://img.test/1.png").withId(1L),
+                new Theme("2위", "설명", "https://img.test/2.png").withId(2L));
+        when(themeRepository.findBestThemesByDate(any(LocalDate.class), any(LocalDate.class), org.mockito.ArgumentMatchers.eq(10)))
+                .thenReturn(best);
+
+        // when
+        List<Theme> result = themeService.getBestThemes();
+
+        // then
+        assertThat(result).isEqualTo(best);
+
+        ArgumentCaptor<LocalDate> startCaptor = ArgumentCaptor.forClass(LocalDate.class);
+        ArgumentCaptor<LocalDate> endCaptor = ArgumentCaptor.forClass(LocalDate.class);
+        ArgumentCaptor<Integer> limitCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(themeRepository).findBestThemesByDate(startCaptor.capture(), endCaptor.capture(), limitCaptor.capture());
+
+        LocalDate today = LocalDate.now();
+        assertThat(startCaptor.getValue()).isEqualTo(today.minusDays(7));
+        assertThat(endCaptor.getValue()).isEqualTo(today.minusDays(1));
+        assertThat(limitCaptor.getValue()).isEqualTo(10);
+    }
+
+    @org.junit.jupiter.api.DisplayName("getBestThemes는 리포지토리 결과를 빈 리스트일 때도 그대로 반환한다.")
+    @Test
+    void getBestThemes_빈_결과() {
+        // given
+        when(themeRepository.findBestThemesByDate(any(LocalDate.class), any(LocalDate.class), org.mockito.ArgumentMatchers.eq(10)))
+                .thenReturn(Collections.emptyList());
+
+        // when
+        List<Theme> result = themeService.getBestThemes();
+
+        // then
+        assertThat(result).isEmpty();
+    }
 }
