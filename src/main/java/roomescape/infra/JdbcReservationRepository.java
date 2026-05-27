@@ -13,7 +13,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 
@@ -46,6 +48,29 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     };
 
+    private final RowMapper<ReservationWithStatus> reservationWithStatusRowMapper = (rs, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                rs.getLong("time_id"),
+                rs.getTime("time_value").toLocalTime()
+        );
+        Theme theme = new Theme(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_description"),
+                rs.getString("theme_thumbnail")
+        );
+
+        return new ReservationWithStatus(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme,
+                ReservationStatus.valueOf(rs.getString("status")),
+                rs.getObject("waiting_order", Integer.class)
+        );
+    };
+
     @Override
     public List<Reservation> findAll() {
         String sql = """
@@ -63,20 +88,51 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
+    public List<ReservationWithStatus> findByName(String name) {
         String sql = """
-                SELECT r.id as reservation_id, r.name, r.date,
-                       t.id as time_id, t.start_at as time_value,
-                       th.id as theme_id, th.name as theme_name,
-                       th.description as theme_description, th.thumbnail_image_url as theme_thumbnail
-                FROM reservation as r
-                INNER JOIN reservation_time as t ON r.time_id = t.id
-                INNER JOIN theme as th ON r.theme_id = th.id
-                WHERE r.name = ?
-                ORDER BY r.date DESC, time_value ASC;
+                SELECT *
+                FROM (
+                    SELECT r.id as id, r.name as name, r.date as date,
+                           t.id as time_id, t.start_at as time_value,
+                           th.id as theme_id, th.name as theme_name,
+                           th.description as theme_description, th.thumbnail_image_url as theme_thumbnail,
+                           'RESERVED' AS status,
+                           NULL AS waiting_order
+                    FROM reservation as r
+                    INNER JOIN reservation_time as t ON r.time_id = t.id
+                    INNER JOIN theme as th ON r.theme_id = th.id
+                    WHERE r.name = ?
+                
+                    UNION ALL
+                
+                    SELECT w.id as id, w.name as name, w.date as date,
+                           t.id as time_id, t.start_at as time_value,
+                           th.id as theme_id, th.name as theme_name,
+                           th.description as theme_description, th.thumbnail_image_url as theme_thumbnail,
+                           'WAITING' as status,
+                           (
+                               SELECT COUNT(*) + 1
+                                FROM waitlist before_w
+                                WHERE before_w.date = w.date
+                                    AND before_w.time_id = w.time_id
+                                    AND before_w.theme_id = w.theme_id
+                                    AND (
+                                        before_w.created_at < w.created_at
+                                        OR (
+                                            before_w.created_at = w.created_at
+                                            AND before_w.id < w.id 
+                                        )
+                                    )
+                           ) as waiting_order
+                    FROM waitlist as w
+                    INNER JOIN reservation_time as t ON w.time_id = t.id
+                    INNER JOIN theme as th ON w.theme_id = th.id
+                    WHERE w.name = ?
+                ) my_reservations
+                ORDER BY date DESC, time_value ASC; 
                 """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+        return jdbcTemplate.query(sql, reservationWithStatusRowMapper, name, name);
     }
 
     @Override

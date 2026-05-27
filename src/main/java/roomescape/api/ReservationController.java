@@ -38,9 +38,9 @@ public class ReservationController {
     }
 
     @GetMapping(params = "name")
-    public ResponseEntity<List<ReservationResponse>> findByName(@RequestParam String name) {
-        List<ReservationResponse> responses = reservationService.getReservationsByName(name).stream()
-                .map(ReservationResponse::from)
+    public ResponseEntity<List<ReservationWithStatusResponse>> findByName(@RequestParam String name) {
+        List<ReservationWithStatusResponse> responses = reservationService.getMyReservations(name).stream()
+                .map(ReservationWithStatusResponse::from)
                 .toList();
         return ResponseEntity.ok().body(responses);
     }
