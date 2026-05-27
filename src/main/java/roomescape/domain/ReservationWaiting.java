@@ -25,20 +25,11 @@ public class ReservationWaiting {
     }
 
     public ReservationWaiting(
-            Long id,
             String name,
             LocalDateTime createdAt,
             Reservation reservation
     ) {
-        this(id, name, createdAt, reservation, 0);
-    }
-
-    public ReservationWaiting(
-            String name,
-            LocalDateTime createdAt,
-            Reservation reservation
-    ) {
-        this(null, name, createdAt, reservation);
+        this(null, name, createdAt, reservation, 0);
     }
 
     public Long getId() {

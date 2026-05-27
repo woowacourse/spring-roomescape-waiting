@@ -1,8 +1,5 @@
 package roomescape.facade;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -20,6 +17,10 @@ import roomescape.service.ReservationService;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
 import roomescape.service.ThemeService;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Component
 public class ReservationFacade {
@@ -132,6 +133,10 @@ public class ReservationFacade {
 
         if (reservation.isOwnedBy(request.name())) {
             throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
+        }
+
+        if (reservationWaitingService.existBy(request.name(), reservation.getId())) {
+            throw new BusinessRuleViolationException(ALREADY_WAITING);
         }
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(
