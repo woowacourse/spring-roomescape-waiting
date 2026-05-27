@@ -111,6 +111,41 @@
             margin: 0;
         }
 
+        .title-row {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            min-height: 24px;
+            padding: 3px 8px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 700;
+            line-height: 1;
+        }
+
+        .status-badge.reserved {
+            background: #e8f1ff;
+            color: #0057b8;
+        }
+
+        .status-badge.waiting {
+            background: #fff7ed;
+            color: #c2410c;
+        }
+
+        .waiting-order {
+            color: #c2410c;
+            font-size: 14px;
+            font-weight: 600;
+            margin: -8px 0 16px;
+        }
+
         .reservation-when {
             color: #666;
             font-size: 15px;
@@ -233,6 +268,10 @@
             text-align: center;
         }
 
+        .hidden {
+            display: none;
+        }
+
         .toast {
             position: fixed;
             top: 100px;
@@ -306,7 +345,7 @@
             }
             const reservations = await res.json();
             if (reservations.length === 0) {
-                listEl.innerHTML = `<p class="empty">${name}님 이름으로 된 예약이 없습니다.</p>`;
+                listEl.innerHTML = `<p class="empty">${name}님 이름으로 된 예약과 대기가 없습니다.</p>`;
                 return;
             }
             listEl.innerHTML = reservations.map(renderCard).join('');
@@ -317,23 +356,31 @@
     }
 
     function renderCard(r) {
+        const isWaiting = r.status === 'WAITING';
+        const statusText = isWaiting ? '대기' : '예약';
+        const cancelText = isWaiting ? '대기 취소' : '취소';
+
         return `
-            <div class="reservation-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
+            <div class="reservation-card" data-id="${r.id}" data-theme-id="${r.theme.id}" data-status="${r.status}">
                 <div class="reservation-header">
                     <div>
-                        <p class="reservation-theme">${escapeHtml(r.theme.name)}</p>
+                        <div class="title-row">
+                            <p class="reservation-theme">${escapeHtml(r.theme.name)}</p>
+                            <span class="status-badge ${isWaiting ? 'waiting' : 'reserved'}">${statusText}</span>
+                        </div>
                         <p class="reservation-when">
                             <span class="current-date">${r.date}</span>
                             <span class="current-time">${r.time.startAt}</span>
                         </p>
+                        ${isWaiting ? `<p class="waiting-order">대기 순번 ${r.waitingOrder}번</p>` : ''}
                     </div>
                     <div class="actions">
-                        <button class="update-btn">변경</button>
-                        <button class="cancel-btn">취소</button>
+                        ${isWaiting ? '' : '<button class="update-btn">변경</button>'}
+                        <button class="cancel-btn">${cancelText}</button>
                     </div>
                 </div>
 
-                <div class="update-form">
+                <div class="update-form ${isWaiting ? 'hidden' : ''}">
                     <div class="update-form-row">
                         <label>날짜</label>
                         <input type="date" class="update-date">
@@ -358,37 +405,43 @@
         document.querySelectorAll('.reservation-card').forEach(card => {
             const id = card.dataset.id;
             const themeId = card.dataset.themeId;
+            const status = card.dataset.status;
 
             card.querySelector('.cancel-btn').addEventListener('click',
-                () => onCancel(card, id));
+                () => onCancel(card, id, status));
 
-            card.querySelector('.update-btn').addEventListener('click',
-                () => onToggleUpdate(card));
+            if (status === 'RESERVED') {
+                card.querySelector('.update-btn').addEventListener('click',
+                    () => onToggleUpdate(card));
 
-            card.querySelector('.update-date').addEventListener('change',
-                e => onDateChange(card, themeId, e.target.value));
+                card.querySelector('.update-date').addEventListener('change',
+                    e => onDateChange(card, themeId, e.target.value));
 
-            card.querySelector('.update-time').addEventListener('change',
-                e => onTimeChange(card, e.target.value));
+                card.querySelector('.update-time').addEventListener('change',
+                    e => onTimeChange(card, e.target.value));
 
-            card.querySelector('.submit-update').addEventListener('click',
-                () => onSubmitUpdate(card, id, themeId));
+                card.querySelector('.submit-update').addEventListener('click',
+                    () => onSubmitUpdate(card, id));
+            }
         });
     }
 
-    async function onCancel(card, id) {
-        if (!confirm('정말 이 예약을 취소하시겠습니까?')) return;
+    async function onCancel(card, id, status) {
+        const isWaiting = status === 'WAITING';
+        const targetName = isWaiting ? '대기' : '예약';
+        if (!confirm(`정말 이 ${targetName}를 취소하시겠습니까?`)) return;
 
         const msgEl = card.querySelector('.card-message');
         msgEl.className = 'card-message';
 
         try {
+            const endpoint = isWaiting ? '/user/waitings' : '/user/reservations';
             const res = await fetch(
-                `/user/reservations/${id}?name=${encodeURIComponent(currentName)}`,
+                `${endpoint}/${id}?name=${encodeURIComponent(currentName)}`,
                 {method: 'DELETE'}
             );
             if (res.status === 204) {
-                showToast('예약이 취소되었습니다.');
+                showToast(`${targetName}가 취소되었습니다.`);
                 await lookup();
                 return;
             }
@@ -406,8 +459,19 @@
         form.classList.toggle('active');
         if (form.classList.contains('active')) {
             const dateInput = card.querySelector('.update-date');
-            dateInput.min = new Date().toISOString().split('T')[0];
+            dateInput.min = formatLocalDate(new Date());
         }
+    }
+
+    function formatLocalDate(date) {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).formatToParts(date);
+        const value = type => parts.find(part => part.type === type).value;
+        return `${value('year')}-${value('month')}-${value('day')}`;
     }
 
     async function onDateChange(card, themeId, date) {
@@ -446,7 +510,7 @@
         submitBtn.disabled = !timeId;
     }
 
-    async function onSubmitUpdate(card, id, themeId) {
+    async function onSubmitUpdate(card, id) {
         const date = card.querySelector('.update-date').value;
         const timeSelect = card.querySelector('.update-time');
         const timeId = timeSelect.value;

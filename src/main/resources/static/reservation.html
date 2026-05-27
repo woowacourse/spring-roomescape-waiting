@@ -117,7 +117,7 @@
         }
 
         .time-btn {
-            padding: 12px;
+            padding: 12px 8px;
             background: #f0f0f3;
             border: 2px solid transparent;
             border-radius: 8px;
@@ -128,13 +128,43 @@
             font-family: inherit;
         }
 
+        .time-btn span {
+            display: block;
+            font-size: 11px;
+            font-weight: 500;
+            margin-top: 4px;
+            color: #666;
+        }
+
         .time-btn:hover {
             background: #e8e8ed;
+        }
+
+        .time-btn.waiting {
+            background: #fff7ed;
+            border-color: #fed7aa;
+            color: #9a3412;
+        }
+
+        .time-btn.waiting span {
+            color: #c2410c;
         }
 
         .time-btn.selected {
             background: #007aff;
             color: #fff;
+        }
+
+        .time-btn.selected span {
+            color: #fff;
+        }
+
+        .submit-btn.waiting {
+            background: #c2410c;
+        }
+
+        .submit-btn.waiting:hover:not(:disabled) {
+            background: #9a3412;
         }
 
         .submit-btn {
@@ -248,6 +278,7 @@
     const themeId = params.get('themeId');
 
     let selectedTimeId = null;
+    let selectedTimeStatus = null;
 
     if (!themeId) {
         document.querySelector('main').innerHTML = '<p class="error">테마가 선택되지 않았습니다. <a href="index.html">메인으로</a></p>';
@@ -285,14 +316,24 @@
 
     function setupDateInput() {
         const input = document.getElementById('date-input');
-        // 오늘 이후만 선택 가능 (UI 안내 — 실제 검증은 서버/사이클 2)
-        const today = new Date().toISOString().split('T')[0];
+        const today = formatLocalDate(new Date());
         input.min = today;
         input.value = today;
         input.addEventListener('change', loadAvailableTimes);
         loadAvailableTimes();
     }
-    
+
+    function formatLocalDate(date) {
+        const parts = new Intl.DateTimeFormat('en-CA', {
+            timeZone: 'Asia/Seoul',
+            year: 'numeric',
+            month: '2-digit',
+            day: '2-digit'
+        }).formatToParts(date);
+        const value = type => parts.find(part => part.type === type).value;
+        return `${value('year')}-${value('month')}-${value('day')}`;
+    }
+
     function showToast(message) {
         const toast = document.getElementById('toast');
         toast.textContent = message;
@@ -306,8 +347,11 @@
 
         // 이전 선택 초기화
         selectedTimeId = null;
+        selectedTimeStatus = null;
         document.getElementById('name-step').classList.add('hidden');
         document.getElementById('result').innerHTML = '';
+        document.getElementById('submit').textContent = '예약하기';
+        document.getElementById('submit').classList.remove('waiting');
 
         const container = document.getElementById('times');
         const step = document.getElementById('time-step');
@@ -315,17 +359,32 @@
         container.innerHTML = '<p class="empty">불러오는 중...</p>';
 
         try {
-            const res = await fetch(`/user/themes/${themeId}/available-times?date=${date}`);
-            if (!res.ok) throw new Error(res.status);
-            const times = await res.json();
+            const [allRes, availableRes] = await Promise.all([
+                fetch('/admin/times'),
+                fetch(`/user/themes/${themeId}/available-times?date=${date}`)
+            ]);
+
+            if (!allRes.ok || !availableRes.ok) throw new Error('시간 조회 실패');
+
+            const allTimes = await allRes.json();
+            const availableTimes = await availableRes.json();
+            const availableIds = new Set(availableTimes.map(t => String(t.id)));
+            const times = allTimes.map(t => ({
+                ...t,
+                status: availableIds.has(String(t.id)) ? 'AVAILABLE' : 'WAITING'
+            }));
 
             if (times.length === 0) {
-                container.innerHTML = '<p class="empty">예약 가능한 시간이 없습니다.</p>';
+                container.innerHTML = '<p class="empty">등록된 시간이 없습니다.</p>';
                 return;
             }
 
             container.innerHTML = times.map(t =>
-                `<button class="time-btn" data-id="${t.id}">${t.startAt}</button>`
+                `<button class="time-btn ${t.status === 'WAITING' ? 'waiting' : ''}"
+                         data-id="${t.id}" data-status="${t.status}">
+                    ${t.startAt}
+                    <span>${t.status === 'WAITING' ? '대기 가능' : '예약 가능'}</span>
+                 </button>`
             ).join('');
 
             container.querySelectorAll('.time-btn').forEach(btn => {
@@ -340,7 +399,16 @@
         document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
         btn.classList.add('selected');
         selectedTimeId = btn.dataset.id;
+        selectedTimeStatus = btn.dataset.status;
 
+        const submitBtn = document.getElementById('submit');
+        if (selectedTimeStatus === 'WAITING') {
+            submitBtn.textContent = '대기 신청하기';
+            submitBtn.classList.add('waiting');
+        } else {
+            submitBtn.textContent = '예약하기';
+            submitBtn.classList.remove('waiting');
+        }
         document.getElementById('name-step').classList.remove('hidden');
         validateForm();
     }
@@ -363,7 +431,9 @@
         result.innerHTML = '';
 
         try {
-            const res = await fetch('/user/reservations', {
+            const endpoint = selectedTimeStatus === 'WAITING' ? '/user/waitings' : '/user/reservations';
+            const actionName = selectedTimeStatus === 'WAITING' ? '대기 신청' : '예약';
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify({
@@ -377,18 +447,22 @@
             if (!res.ok) {
                 const body = await res.json().catch(() => ({}));
                 const msg = body.message || `서버 오류 (${res.status})`;
-                result.innerHTML = `<p class="error">예약에 실패했습니다. ${msg}</p>`;
+                result.innerHTML = `<p class="error">${actionName}에 실패했습니다. ${msg}</p>`;
                 submitBtn.disabled = false;
                 return;
             }
 
             const r = await res.json();
-            showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 예약 완료!`);
+            if (selectedTimeStatus === 'WAITING') {
+                showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 대기 ${r.order}번 신청 완료!`);
+            } else {
+                showToast(`${r.date} ${r.time.startAt} ${r.theme.name} 예약 완료!`);
+            }
 
-            // 가능 시간 다시 조회 (방금 예약한 시간이 빠진 것 확인 가능)
+            document.getElementById('name-input').value = '';
             await loadAvailableTimes();
         } catch (e) {
-            result.innerHTML = `<p class="error">예약에 실패했습니다. ${e.message}</p>`;
+            result.innerHTML = `<p class="error">처리에 실패했습니다. ${e.message}</p>`;
             submitBtn.disabled = false;
         }
     }
