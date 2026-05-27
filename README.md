@@ -73,8 +73,6 @@ PATCH /reservations/{reservationId}/cancel
 | 예약 없음                                                  | 404 Not Found            |
 | 본인 예약이 아닌 경우                                      | 403 Forbidden            |
 | 취소할 수 없는 예약 (이미 취소되었거나, 완료 처리 된 예약) | 422 Unprocessable Entity |
-|                                                            |                          |
-|                                                            |                          |
 
 ---
 
@@ -106,6 +104,64 @@ PATCH /reservations/{reservationId}/cancel
 이전 미션의 내 예약 목록 조회를 확장한다.
 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다.
 대기에는 본인의 대기 순번도 함께 보여준다.
+
+
+
+#### 내 예약 조회
+
+```
+GET /reservations?name={name}
+```
+
+| 파라미터 | 타입   | 필수 | 설명      |
+|----------|--------|------|-----------|
+| name     | String | O    | 예약자 이름 |
+
+**응답 200 OK**
+```json
+{
+  "reservationResponses": [
+    {
+      "id": 1,
+      "name": "브라운",
+      "date": "2026-05-15",
+      "time": {
+        "id": 1,
+        "startAt": "10:00",
+        "isAvailable": true
+      },
+      "theme": {
+        "id": 1,
+        "name": "공포의 방",
+        "description": "무서운 방탈출",
+        "thumbnailUrl": "https://example.com/thumbnail.jpg"
+      },
+      "status": "CONFIRMED"
+    }
+  ],
+  "waitingReservationResponses": [
+    {
+      "id": 1,
+      "name": "브라운",
+      "date": "2026-05-15",
+      "time": {
+        "id": 1,
+        "startAt": "10:00",
+        "isAvailable": true
+      },
+      "theme": {
+        "id": 1,
+        "name": "공포의 방",
+        "description": "무서운 방탈출",
+        "thumbnailUrl": "https://example.com/thumbnail.jpg"
+      },
+      "status": "CONFIRMED",
+      "waitingOrder": 1
+    }
+  ]
+}
+```
+
 
 ### 중요 로직 플로우
 
