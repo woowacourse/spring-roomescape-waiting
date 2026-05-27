@@ -1,19 +1,21 @@
-package roomescape;
-
-import static org.hamcrest.Matchers.is;
+package roomescape.e2e;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-public class MissionStep1Test {
+public class MissionStep3Test {
 
     @LocalServerPort
     int port;
@@ -24,16 +26,42 @@ public class MissionStep1Test {
     }
 
     @Test
-    void 예약_가능_시간_정상_흐름() {
+    void 시간_관리_API() {
+        Map<String, String> params = new HashMap<>();
+        params.put("startAt", "20:00");
+        params.put("finishAt", "21:00");
+
+        Integer newId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract().path("id");
+
         RestAssured.given().log().all()
-                .when().get("/times/available?date=2099-08-05&themeId=1")
+                .when().get("/times")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(3));
+                .body("size()", is(4));
+
+        RestAssured.given().log().all()
+                .when().delete("/times/" + newId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void 예약과_시간_연결() {
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", "2099-08-05");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "테스터", "date", "2099-08-05", "timeId", 1, "themeId", 1))
+                .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201);
@@ -43,17 +71,5 @@ public class MissionStep1Test {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
-    }
-
-    @Test
-    void 인기_테마_조회() {
-        RestAssured.given().log().all()
-                .when().get("/themes/top/3")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3))
-                .body("[0].name", is("테마A"))
-                .body("[1].name", is("테마B"))
-                .body("[2].name", is("테마C"));
     }
 }
