@@ -188,8 +188,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
-                            VALUES (?, ?, ?, ?, ?)
+                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, confirmed_token)
+                            VALUES (?, ?, ?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
@@ -198,6 +198,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
             preparedStatement.setString(5, reservation.getStatus().toString());
+            preparedStatement.setObject(6, toConfirmedToken(reservation.getStatus()));
             return preparedStatement;
         }, keyHolder);
 
@@ -208,7 +209,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?, status = ?
+                SET date = ?, time_id = ?, status = ?, confirmed_token = ?
                 WHERE id = ?
                 """;
 
@@ -216,6 +217,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 date,
                 timeId,
                 status.toString(),
+                toConfirmedToken(status),
                 id);
 
         return count == 1;
@@ -225,9 +227,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean cancelById(Long id) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET delete_token = ?, status = 'CANCELED'
+                SET status = 'CANCELED', confirmed_token = NULL
                 WHERE id = ?
-                """, id, id);
+                """, id);
 
         return rowCount == 1;
     }
@@ -237,9 +239,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean updateStatus(Long id, Status status) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET status = ?
+                SET status = ?, confirmed_token = ?
                 WHERE id = ?
-                """, status.toString(), id);
+                """, status.toString(), toConfirmedToken(status), id);
         return rowCount == 1;
     }
 
@@ -293,6 +295,13 @@ public class JdbcReservationRepository implements ReservationRepository {
                 WHERE theme_id = ? AND status != 'CANCELED'
                 """, Integer.class, themeId);
         return count != null && count > 0;
+    }
+
+    private Integer toConfirmedToken(Status status) {
+        if (status == Status.CONFIRMED) {
+            return 1;
+        }
+        return null;
     }
 
     private final RowMapper<Reservation> reservationRowMapper = (resultSet, rowNum) -> {
