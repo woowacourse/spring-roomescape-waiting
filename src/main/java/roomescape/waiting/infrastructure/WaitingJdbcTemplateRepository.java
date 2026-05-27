@@ -1,15 +1,61 @@
 package roomescape.waiting.infrastructure;
 
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import javax.sql.DataSource;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.reservationTime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 
 @Repository
 public class WaitingJdbcTemplateRepository implements WaitingRepository {
+
+    private static final String FIND_BY_ID_QUERY = """
+        SELECT w.id,
+               w.name AS waiting_name,
+               w.date,
+               w.created_at,
+               rt.id AS time_id,
+               rt.start_at,
+               t.id AS theme_id,
+               t.name AS theme_name,
+               t.description AS theme_description,
+               t.thumbnail_url
+        FROM waiting w
+        JOIN reservation_time rt ON w.time_id = rt.id
+        JOIN theme t ON w.theme_id = t.id
+        WHERE w.id = ?
+        """;
+    private static final String DELETE_BY_ID_AND_NAME_QUERY = "DELETE FROM waiting WHERE id = ? AND name = ?";
+
+    private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> {
+        ReservationTime time = ReservationTime.createRow(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime()
+        );
+
+        Theme theme = Theme.createRow(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_description"),
+                rs.getString("thumbnail_url")
+        );
+
+        return Waiting.createRow(
+                rs.getLong("id"),
+                rs.getString("waiting_name"),
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme,
+                rs.getTimestamp("created_at").toLocalDateTime()
+        );
+    };
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -33,5 +79,25 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
         );
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
         return waiting.appendId(id);
+    }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        List<Waiting> waiting = jdbcTemplate.query(
+                FIND_BY_ID_QUERY,
+                ROW_MAPPER,
+                id
+        );
+        return waiting.stream()
+                .findFirst();
+    }
+
+    @Override
+    public void deleteByIdAndName(Long id, String name) {
+        jdbcTemplate.update(
+                DELETE_BY_ID_AND_NAME_QUERY,
+                id,
+                name
+        );
     }
 }

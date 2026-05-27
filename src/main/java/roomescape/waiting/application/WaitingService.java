@@ -1,8 +1,12 @@
 package roomescape.waiting.application;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.ReservationErrorCode;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
+import roomescape.global.exception.customException.EntityNotFoundException;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
@@ -41,5 +45,13 @@ public class WaitingService {
                 theme
         );
         return waitingRepository.save(waiting);
+    }
+
+    @Transactional
+    public void cancelWaiting(Long id, String name) {
+        Waiting targetWaiting = waitingRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException(WaitingErrorCode.WAITING_NOT_FOUND, id));
+        targetWaiting.cancel(name);
+        waitingRepository.deleteByIdAndName(id, name);
     }
 }
