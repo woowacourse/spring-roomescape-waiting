@@ -204,7 +204,7 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
-    public boolean selectForUpdateByThemeIdAndTimeIdAndDate(Long themeId, Long timeId, LocalDate date) {
+    public boolean existsByThemeIdAndTimeIdAndDateForUpdate(Long themeId, Long timeId, LocalDate date) {
         String sql = """
                 SELECT id FROM reservations
                 WHERE theme_id = :themeId AND time_id = :timeId AND date = :date
@@ -220,10 +220,11 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
-    public Optional<Reservation> findByThemeIdAndTimeIdAndDate(Long themeId, Long timeId, LocalDate date) {
+    public Optional<Reservation> findByThemeIdAndTimeIdAndDateForUpdate(Long themeId, Long timeId, LocalDate date) {
         String sql = BASE_SELECT + """
                 WHERE r.theme_id = :themeId AND r.time_id = :timeId AND r.date = :date
                 AND r.deleted_at = :sentinel
+                FOR UPDATE
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()

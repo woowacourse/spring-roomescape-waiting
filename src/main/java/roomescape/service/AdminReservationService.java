@@ -87,13 +87,13 @@ public class AdminReservationService {
     }
 
     private Reservation buildReservation(Member member, AdminReservationRequestDto request) {
+        if (reservationDao.existsByThemeIdAndTimeIdAndDateForUpdate(request.themeId(), request.timeId(), request.date())) {
+            throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
+        }
         Time time = timeDao.findById(request.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         Theme theme = themeDao.findById(request.themeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 테마입니다."));
-        if (reservationDao.selectForUpdateByThemeIdAndTimeIdAndDate(request.themeId(), request.timeId(), request.date())) {
-            throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
-        }
         return Reservation.createByAdmin(member, request.date(), time, theme, request.storeId());
     }
 }
