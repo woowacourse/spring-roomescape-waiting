@@ -25,7 +25,8 @@ public record ReservationResponse(
                         reservation.getTheme().getId(),
                         reservation.getTheme().getName(),
                         reservation.getTheme().getDescription(),
-                        reservation.getTheme().getThumbnail())
+                        reservation.getTheme().getThumbnail()
+                )
         );
     }
 }

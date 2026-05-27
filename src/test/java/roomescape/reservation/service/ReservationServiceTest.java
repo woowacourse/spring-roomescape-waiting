@@ -9,13 +9,18 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.command.CreateReservationCommand;
 import roomescape.reservation.dto.command.UpdateReservationCommand;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservation.dto.response.ReservationStatus;
+import roomescape.reservationWaiting.dao.ReservationWaitingDao;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationtime.dao.ReservationTimeDao;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -36,6 +41,9 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationDao reservationDao;
+
+    @Autowired
+    private ReservationWaitingDao waitingDao;
 
     @Test
     void 예약을_추가한다() {
@@ -115,6 +123,33 @@ class ReservationServiceTest {
     }
 
     @Test
+    void 내_예약과_대기를_함께_조회한다() {
+        ReservationTime time = saveTime(10, 0);
+        Theme theme1 = saveTheme("방탈출1", "설명1", "https://thumbnail1.com");
+        Theme theme2 = saveTheme("방탈출2", "설명2", "https://thumbnail2.com");
+        saveReservation("브라운", LocalDate.of(2026, 5, 10), time, theme1);
+        saveReservationWaiting("브라운", LocalDate.of(2026, 5, 10), time, theme2);
+
+        List<MyReservationResponse> responses = reservationService.getMyReservations("브라운");
+
+        assertThat(responses).hasSize(2);
+        assertThat(responses).extracting(MyReservationResponse::status).containsExactly(ReservationStatus.RESERVED, ReservationStatus.WAITING);
+    }
+
+    @Test
+    void 내_예약과_대기가_날짜_순으로_정렬된다(){
+        ReservationTime time = saveTime(10, 0);
+        Theme theme1 = saveTheme("방탈출1", "설명1", "https://thumbnail1.com");
+        Theme theme2 = saveTheme("방탈출2", "설명2", "https://thumbnail2.com");
+        saveReservation("브라운", LocalDate.of(2026, 5, 10), time, theme1);
+        saveReservationWaiting("브라운", LocalDate.of(2026, 5, 5), time, theme2);
+
+        List<MyReservationResponse> responses = reservationService.getMyReservations("브라운");
+
+        assertThat(responses).extracting(MyReservationResponse::date).containsExactly(LocalDate.of(2026, 5, 5), LocalDate.of(2026, 5, 10));
+    }
+
+    @Test
     void 예약_날짜_시간을_변경한다() {
         ReservationTime time1 = saveTime(10, 0);
         ReservationTime time2 = saveTime(11, 0);
@@ -191,5 +226,9 @@ class ReservationServiceTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationDao.insert(Reservation.createWithoutId(name, date, time, theme));
+    }
+
+    private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return waitingDao.insert(ReservationWaiting.createWithoutId(name, LocalDateTime.now(), date, time, theme));
     }
 }

@@ -78,6 +78,11 @@ public class ReservationDao {
         }
     }
 
+    public List<Reservation> selectByName(String name) {
+        String sql = baseSelectSql() + " WHERE r.name = ?";
+        return jdbcTemplate.query(sql, ROW_MAPPER, name);
+    }
+
     public List<Reservation> selectByThemeIdAndDate(long themeId, LocalDate date) {
         String sql = baseSelectSql() + " WHERE r.theme_id = ? AND r.date = ?";
         return jdbcTemplate.query(sql, ROW_MAPPER, themeId, date);

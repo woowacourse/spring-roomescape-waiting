@@ -7,6 +7,7 @@ import roomescape.reservation.dto.command.CreateReservationCommand;
 import roomescape.reservation.dto.command.UpdateReservationCommand;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.UpdateReservationRequest;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
@@ -36,8 +37,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> responses = reservationService.getAllReservations();
+    public ResponseEntity<List<MyReservationResponse>> getMyReservations(@RequestParam(name = "name") String name) {
+        List<MyReservationResponse> responses = reservationService.getMyReservations(name);
         return ResponseEntity.ok(responses);
     }
 

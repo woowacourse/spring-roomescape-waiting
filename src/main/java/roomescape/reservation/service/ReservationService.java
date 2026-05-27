@@ -1,8 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -14,22 +11,33 @@ import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.command.CreateReservationCommand;
 import roomescape.reservation.dto.command.UpdateReservationCommand;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
+import roomescape.reservationWaiting.dao.ReservationWaitingDao;
 import roomescape.reservationtime.dao.ReservationTimeDao;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.theme.domain.Theme;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
+import java.util.stream.Stream;
+
 @Service
 @Transactional
 public class ReservationService {
     private final ReservationDao reservationDao;
+    private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationTimeDao reservationTimeDao,
+    public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao,
                               ThemeDao themeDao) {
         this.reservationDao = reservationDao;
+        this.reservationWaitingDao = reservationWaitingDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
     }
@@ -51,6 +59,30 @@ public class ReservationService {
         return reservationDao.select().stream()
                 .map(ReservationResponse::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public List<MyReservationResponse> getMyReservations(String name) {
+        List<MyReservationResponse> reservations = reservationDao.selectByName(name).stream()
+                .map(MyReservationResponse::fromReservation)
+                .toList();
+        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()
+                .map(waiting -> MyReservationResponse.fromReservationWaiting(
+                        waiting,
+                        reservationWaitingDao.countOrder(
+                                waiting.getReservationDate(),
+                                waiting.getTime().getId(),
+                                waiting.getTheme().getId(),
+                                waiting.getId()
+                        )))
+                .toList();
+
+        List<MyReservationResponse> reservationResponses = new ArrayList<>();
+        reservationResponses.addAll(reservations);
+        reservationResponses.addAll(reservationWaitings);
+        reservationResponses.sort(Comparator.comparing(MyReservationResponse::date));
+
+        return reservationResponses;
     }
 
     public ReservationResponse update(Long reservationId, UpdateReservationCommand command) {

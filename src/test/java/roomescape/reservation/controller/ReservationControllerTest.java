@@ -1,13 +1,10 @@
 package roomescape.reservation.controller;
 
-import static org.hamcrest.Matchers.hasItem;
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.ValidatableResponse;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,6 +12,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.DatabaseInitializer;
+import roomescape.reservation.dto.response.ReservationStatus;
+
+import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -81,18 +81,22 @@ public class ReservationControllerTest {
     }
 
     @Test
-    void 전체_예약을_조회한다() {
+    void 내_예약_목록을_조회한다() {
         int timeId1 = createTime("10:00");
         int timeId2 = createTime("11:00");
         int themeId = createTheme("방탈출1", "다함께 탈출해요 방탈출", "https://asdfsdf.sdfs");
-        createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId1, themeId).statusCode(201);
-        createReservation("로지", LocalDate.now().plusDays(1).toString(), timeId2, themeId).statusCode(201);
+        String name = createReservation("브라운", LocalDate.now().plusDays(1).toString(), timeId1, themeId)
+                .statusCode(201)
+                .extract()
+                .path("name");
+        createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId2, themeId).statusCode(201);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/reservations?name=" + name)
                 .then().log().all()
                 .statusCode(200)
-                .body("name", hasItem("브라운"));
+                .body("name", hasItem("브라운"))
+                .body("status", hasItem("WAITING"));
     }
 
     @Test
@@ -195,6 +199,14 @@ public class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of("name", name, "date", date, "timeId", timeId, "themeId", themeId))
                 .when().post("/reservations")
+                .then().log().all();
+    }
+
+    private ValidatableResponse createReservationWaiting(String name, LocalDate reservationDate, int timeId, int themeId) {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(Map.of("name", name, "reservationDate", reservationDate, "timeId", timeId, "themeId", themeId))
+                .when().post("/waitings")
                 .then().log().all();
     }
 }
