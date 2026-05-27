@@ -12,31 +12,38 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeMapper;
+import roomescape.theme.repository.entity.ThemeEntity;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.ReservationTimeMapper;
+import roomescape.time.repository.entity.ReservationTimeEntity;
+import roomescape.reservationWaiting.repository.entity.ReservationWaitingEntity;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
     private static final RowMapper<ReservationWaiting> RESERVATION_WAITING_ROW_MAPPER = (resultSet, rowNum) -> {
-        ReservationTime time = new ReservationTime(
+        ReservationTimeEntity timeEntity = new ReservationTimeEntity(
                 resultSet.getLong("time_id"),
                 resultSet.getTime("time_start_at").toLocalTime()
         );
 
-        Theme theme = new Theme(
+        ThemeEntity themeEntity = new ThemeEntity(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
                 resultSet.getString("theme_thumbnail_url")
         );
 
-        return new ReservationWaiting(
+        ReservationWaitingEntity waitingEntity = new ReservationWaitingEntity(
                 resultSet.getLong("reservation_waiting_id"),
                 resultSet.getString("reservation_waiting_name"),
                 resultSet.getDate("reservation_waiting_date").toLocalDate(),
-                time,
-                theme
+                timeEntity,
+                themeEntity
         );
+
+        return ReservationWaitingMapper.toDomain(waitingEntity);
     };
 
     private final JdbcTemplate jdbcTemplate;
@@ -47,6 +54,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {
+        ReservationWaitingEntity entity = ReservationWaitingMapper.toEntity(reservationWaiting);
+
         String sql = """
                 INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id)
                 VALUES (?, ?, ?, ?)
@@ -56,22 +65,24 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservationWaiting.getName());
-            ps.setDate(2, Date.valueOf(reservationWaiting.getDate()));
-            ps.setLong(3, reservationWaiting.getTime().getId());
-            ps.setLong(4, reservationWaiting.getTheme().getId());
+            ps.setString(1, entity.getName());
+            ps.setDate(2, Date.valueOf(entity.getDate()));
+            ps.setLong(3, entity.getTime().getId());
+            ps.setLong(4, entity.getTheme().getId());
             return ps;
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
 
-        return new ReservationWaiting(
+        ReservationWaitingEntity savedEntity = new ReservationWaitingEntity(
                 id,
-                reservationWaiting.getName(),
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime(),
-                reservationWaiting.getTheme()
+                entity.getName(),
+                entity.getDate(),
+                entity.getTime(),
+                entity.getTheme()
         );
+
+        return ReservationWaitingMapper.toDomain(savedEntity);
     }
 
     @Override

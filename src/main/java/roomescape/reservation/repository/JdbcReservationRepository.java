@@ -14,31 +14,38 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.theme.domain.Theme;
+import roomescape.theme.repository.ThemeMapper;
+import roomescape.theme.repository.entity.ThemeEntity;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.repository.ReservationTimeMapper;
+import roomescape.time.repository.entity.ReservationTimeEntity;
+import roomescape.reservation.repository.entity.ReservationEntity;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
 
     private static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (resultSet, rowNum) -> {
-        ReservationTime time = new ReservationTime(
+        ReservationTimeEntity timeEntity = new ReservationTimeEntity(
                 resultSet.getLong("time_id"),
                 resultSet.getTime("time_start_at").toLocalTime()
         );
 
-        Theme theme = new Theme(
+        ThemeEntity themeEntity = new ThemeEntity(
                 resultSet.getLong("theme_id"),
                 resultSet.getString("theme_name"),
                 resultSet.getString("theme_description"),
                 resultSet.getString("theme_thumbnail_url")
         );
 
-        return new Reservation(
+        ReservationEntity reservationEntity = new ReservationEntity(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 resultSet.getDate("reservation_date").toLocalDate(),
-                time,
-                theme
+                timeEntity,
+                themeEntity
         );
+
+        return ReservationMapper.toDomain(reservationEntity);
     };
 
     private final JdbcTemplate jdbcTemplate;
@@ -49,6 +56,8 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(Reservation reservation) {
+        ReservationEntity entity = ReservationMapper.toEntity(reservation);
+
         String sql = """
                 INSERT INTO reservation (name, reservation_date, time_id, theme_id)
                 VALUES (?, ?, ?, ?)
@@ -58,22 +67,24 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, reservation.getName());
-            ps.setDate(2, Date.valueOf(reservation.getDate()));
-            ps.setLong(3, reservation.getTime().getId());
-            ps.setLong(4, reservation.getTheme().getId());
+            ps.setString(1, entity.getName());
+            ps.setDate(2, Date.valueOf(entity.getDate()));
+            ps.setLong(3, entity.getTime().getId());
+            ps.setLong(4, entity.getTheme().getId());
             return ps;
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
 
-        return new Reservation(
+        ReservationEntity savedEntity = new ReservationEntity(
                 id,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme()
+                entity.getName(),
+                entity.getDate(),
+                entity.getTime(),
+                entity.getTheme()
         );
+
+        return ReservationMapper.toDomain(savedEntity);
     }
 
     @Override
@@ -234,6 +245,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public void update(Reservation reservation) {
+        ReservationEntity entity = ReservationMapper.toEntity(reservation);
         String sql = """
                 UPDATE reservation
                 SET name = ?, reservation_date = ?, time_id = ?, theme_id = ?
@@ -242,11 +254,11 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         int affectedRow = jdbcTemplate.update(
                 sql,
-                reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getId()
+                entity.getName(),
+                entity.getDate(),
+                entity.getTime().getId(),
+                entity.getTheme().getId(),
+                entity.getId()
         );
 
         if (affectedRow == 0) {

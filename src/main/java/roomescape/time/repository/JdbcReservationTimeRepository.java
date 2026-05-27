@@ -13,15 +13,18 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
+import roomescape.time.repository.entity.ReservationTimeEntity;
 
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
-    private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (resultSet, rowNum) ->
-            new ReservationTime(
+    private static final RowMapper<ReservationTime> RESERVATION_TIME_ROW_MAPPER = (resultSet, rowNum) -> {
+        ReservationTimeEntity entity = new ReservationTimeEntity(
                 resultSet.getLong("id"),
                 resultSet.getTime("start_at").toLocalTime()
-    );
+        );
+        return ReservationTimeMapper.toDomain(entity);
+    };
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -31,6 +34,8 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
+        ReservationTimeEntity entity = ReservationTimeMapper.toEntity(reservationTime);
+
         String sql = """
                INSERT INTO reservation_time (start_at)
                VALUES (?)
@@ -40,13 +45,15 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         jdbcTemplate.update(connection -> {
             PreparedStatement ps = connection.prepareStatement(sql, new String[]{"id"});
-            ps.setTime(1, Time.valueOf(reservationTime.getStartAt()));
+            ps.setTime(1, Time.valueOf(entity.getStartAt()));
             return ps;
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
 
-        return new ReservationTime(id, reservationTime.getStartAt());
+        ReservationTimeEntity savedEntity = new ReservationTimeEntity(id, entity.getStartAt());
+
+        return ReservationTimeMapper.toDomain(savedEntity);
     }
 
     @Override
