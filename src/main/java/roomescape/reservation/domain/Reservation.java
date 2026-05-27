@@ -6,65 +6,45 @@ import java.time.LocalTime;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
-import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.RoomEscapeException;
 
 @Getter
-@EqualsAndHashCode(of = {"name", "date", "themeId", "timeId"})
+@EqualsAndHashCode(of = {"name", "slot"})
 public class Reservation {
 
     private final Long id;
     private final String name;
-    private final LocalDate date;
-    private final Long themeId;
-    private final Long timeId;
-    private final LocalTime startAt;
+    private final ReservationSlot slot;
 
     @Builder
-    public Reservation(Long id, String name, LocalDate date, Long themeId, Long timeId, LocalTime startAt) {
+    public Reservation(Long id, String name, ReservationSlot slot) {
         this.id = id;
         this.name = requireName(name);
-        this.date = requireDate(date);
-        this.themeId = requireTheme(themeId);
-        this.timeId = requireTime(timeId);
-        this.startAt = startAt;
+        this.slot = slot;
     }
 
     public Reservation withId(Long generatedId) {
         return Reservation.builder()
                 .id(generatedId)
                 .name(this.name)
-                .date(this.date)
-                .themeId(this.themeId)
-                .timeId(this.timeId)
-                .startAt(this.startAt)
+                .slot(this.slot)
                 .build();
     }
 
     public Reservation updateDateAndTime(LocalDate date, Long timeId, LocalTime startAt) {
-        if (this.date.equals(date) && this.timeId.equals(timeId)) {
-            throw new ConflictException("동일한 날짜와 시간으로 변경할 수 없습니다.");
-        }
         return Reservation.builder()
                 .id(this.id)
                 .name(this.name)
-                .date(date)
-                .themeId(this.themeId)
-                .timeId(timeId)
-                .startAt(startAt)
+                .slot(slot.updateDateAndTime(date, timeId, startAt))
                 .build();
     }
 
     public void validateReservable(LocalDateTime now) {
-        if (LocalDateTime.of(date, startAt).isBefore(now)) {
-            throw new RoomEscapeException("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
-        }
+        slot.validateReservable(now);
     }
 
     public void validateDeletable(LocalDateTime now) {
-        if (LocalDateTime.of(date, startAt).isBefore(now)) {
-            throw new RoomEscapeException("이미 지나간 예약은 삭제할 수 없습니다.");
-        }
+        slot.validateDeletable(now);
     }
 
     private static String requireName(String name) {
@@ -72,26 +52,5 @@ public class Reservation {
             throw new RoomEscapeException("이름은 비어있을 수 없습니다.");
         }
         return name;
-    }
-
-    private static LocalDate requireDate(LocalDate date) {
-        if (date == null) {
-            throw new RoomEscapeException("날짜는 비어있을 수 없습니다.");
-        }
-        return date;
-    }
-
-    private static Long requireTheme(Long themeId) {
-        if (themeId == null || themeId <= 0) {
-            throw new RoomEscapeException("테마ID는 올바른 값이어야 합니다.");
-        }
-        return themeId;
-    }
-
-    private static Long requireTime(Long timeId) {
-        if (timeId == null || timeId <= 0) {
-            throw new RoomEscapeException("시간ID는 올바른 값이어야 합니다.");
-        }
-        return timeId;
     }
 }

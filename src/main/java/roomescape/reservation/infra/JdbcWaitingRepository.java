@@ -5,6 +5,7 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
 
@@ -23,11 +24,12 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public Waiting save(Waiting waiting) {
+        ReservationSlot slot = waiting.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", waiting.getName())
-                .addValue("date", waiting.getDate())
-                .addValue("theme_id", waiting.getThemeId())
-                .addValue("time_id", waiting.getTimeId());
+                .addValue("date", slot.date())
+                .addValue("theme_id", slot.themeId())
+                .addValue("time_id", slot.timeId());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return waiting.withId(id);
@@ -35,6 +37,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public Long getRank(Waiting waiting) {
+        ReservationSlot slot = waiting.getSlot();
         return jdbcTemplate.queryForObject("""
                             SELECT COUNT(*)
                             FROM waiting
@@ -45,8 +48,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
                         """,
                 Long.class,
                 waiting.getId(),
-                waiting.getDate(),
-                waiting.getThemeId(),
-                waiting.getTimeId());
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
     }
 }

@@ -46,7 +46,12 @@ public class ReservationCommandService {
             Waiting waiting = request.toWaiting(theme.getId(), time.getId(), time.getStartAt());
             // 위에서 예약에 대해서 이전 시간 예약인지 검증했지만, 대기도 명시적으로 일단 검증 추가
             waiting.validateReservable(request.now());
-            Waiting savedWaiting = waitingRepository.save(waiting);
+            Waiting savedWaiting;
+            try {
+                savedWaiting = waitingRepository.save(waiting);
+            } catch (DataIntegrityViolationException e) {
+                throw new ConflictException("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");
+            }
             Long rank = waitingRepository.getRank(savedWaiting);
             return ReservationResult.waiting(
                     savedWaiting,
@@ -82,7 +87,7 @@ public class ReservationCommandService {
 
         updateReservation(updatedReservation);
 
-        Theme theme = themeRepository.findById(reservation.getThemeId())
+        Theme theme = themeRepository.findById(reservation.getSlot().themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
         return ReservationResult.confirmed(
@@ -114,15 +119,6 @@ public class ReservationCommandService {
     private void checkAlreadyExistsDateAndTime(Reservation reservation) {
         if (reservationRepository.existsDuplicateExcluding(reservation)) {
             throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
-        }
-    }
-
-    private void validateDuplicateReservation(Reservation reservation) {
-        // 예약이 존재하는지 확인하는 메서드
-        // 현재는 예약이 있으면 예외
-        // TODO: 그런데 이제는 예약이 있으면 예외가 아니라 Waiting을 만들고 Reservation은 만들면 안됨
-        if (reservationRepository.existsBySlot(reservation)) {
-            throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
     }
 }

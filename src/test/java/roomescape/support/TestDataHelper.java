@@ -25,12 +25,6 @@ public class TestDataHelper {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public void clearDatabase() {
-        jdbcTemplate.update("DELETE FROM reservation");
-        jdbcTemplate.update("DELETE FROM reservation_time");
-        jdbcTemplate.update("DELETE FROM theme");
-    }
-
     public Long insertTheme(String name, String description, String thumbnailImgUrl) {
         return themeInsert.executeAndReturnKey(Map.of(
                 "name", name,

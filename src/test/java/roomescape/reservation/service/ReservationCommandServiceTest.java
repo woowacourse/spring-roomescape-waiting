@@ -7,12 +7,9 @@ import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
@@ -25,26 +22,20 @@ import roomescape.reservation.application.dto.ReservationResult.Status;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
+import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ServiceTest
 @Transactional
 class ReservationCommandServiceTest {
 
     private static final LocalDateTime NOW = LocalDateTime.of(2026, 1, 1, 0, 0);
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ReservationCommandService reservationCommandService;
 
+    @Autowired
     private TestDataHelper testHelper;
-
-    @BeforeEach
-    void setUp() {
-        testHelper = new TestDataHelper(jdbcTemplate);
-    }
 
     @DisplayName("사용자의 방탈출 예약 생성을 테스트합니다.")
     @Test

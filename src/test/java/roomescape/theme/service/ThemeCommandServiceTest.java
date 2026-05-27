@@ -6,36 +6,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.NotFoundException;
+import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 import roomescape.theme.application.dto.ThemeResult;
 import roomescape.theme.application.service.ThemeCommandService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ServiceTest
 @Transactional
 public class ThemeCommandServiceTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ThemeCommandService themeCommandService;
 
+    @Autowired
     private TestDataHelper testHelper;
-
-    @BeforeEach
-    void setUp() {
-        testHelper = new TestDataHelper(jdbcTemplate);
-    }
 
     @DisplayName("테마의 정상 추가를 테스트합니다.")
     @Test

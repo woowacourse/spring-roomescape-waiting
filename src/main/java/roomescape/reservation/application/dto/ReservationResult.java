@@ -21,7 +21,7 @@ public record ReservationResult(
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getName(),
-                reservation.getDate(),
+                reservation.getSlot().date(),
                 themeResult,
                 timeResult,
                 Status.CONFIRM,
@@ -35,7 +35,7 @@ public record ReservationResult(
         return new ReservationResult(
                 waiting.getId(),
                 waiting.getName(),
-                waiting.getDate(),
+                waiting.getSlot().date(),
                 themeResult,
                 timeResult,
                 Status.WAITING,

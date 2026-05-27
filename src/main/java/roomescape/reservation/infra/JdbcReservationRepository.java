@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.repository.ReservationRepository;
 
 @Repository
@@ -31,24 +32,31 @@ public class JdbcReservationRepository implements ReservationRepository {
                     JOIN reservation_time rt ON r.time_id = rt.id
                     WHERE r.id = ?
                 """,
-                (rs, rowNum) -> Reservation.builder()
-                        .id(rs.getLong("id"))
-                        .name(rs.getString("name"))
-                        .date(rs.getDate("date").toLocalDate())
-                        .themeId(rs.getLong("theme_id"))
-                        .timeId(rs.getLong("time_id"))
-                        .startAt(rs.getObject("start_at", LocalTime.class))
-                        .build()
+                (rs, rowNum) -> {
+                    ReservationSlot slot = ReservationSlot.builder()
+                            .date(rs.getDate("date").toLocalDate())
+                            .themeId(rs.getLong("theme_id"))
+                            .timeId(rs.getLong("time_id"))
+                            .startAt(rs.getObject("start_at", LocalTime.class))
+                            .build();
+
+                    return Reservation.builder()
+                            .id(rs.getLong("id"))
+                            .name(rs.getString("name"))
+                            .slot(slot)
+                            .build();
+                }
                 , id).stream().findFirst();
     }
 
     @Override
     public Reservation save(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
-                .addValue("date", reservation.getDate())
-                .addValue("theme_id", reservation.getThemeId())
-                .addValue("time_id", reservation.getTimeId());
+                .addValue("date", slot.date())
+                .addValue("theme_id", slot.themeId())
+                .addValue("time_id", slot.timeId());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return reservation.withId(id);
@@ -56,10 +64,11 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Integer update(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         return jdbcTemplate.update(
                 "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?",
-                reservation.getDate(),
-                reservation.getTimeId(),
+                slot.date(),
+                slot.timeId(),
                 reservation.getId());
     }
 
@@ -70,22 +79,24 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Boolean existsBySlot(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         return jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?)",
                 Boolean.class,
-                reservation.getDate(),
-                reservation.getThemeId(),
-                reservation.getTimeId());
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
     }
 
     @Override
     public Boolean existsDuplicateExcluding(Reservation reservation) {
+        ReservationSlot slot = reservation.getSlot();
         return jdbcTemplate.queryForObject(
                 "SELECT EXISTS(SELECT 1 FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ? AND id != ?)",
                 Boolean.class,
-                reservation.getDate(),
-                reservation.getThemeId(),
-                reservation.getTimeId(),
+                slot.date(),
+                slot.themeId(),
+                slot.timeId(),
                 reservation.getId());
     }
 

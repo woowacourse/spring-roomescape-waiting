@@ -6,35 +6,26 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
 import roomescape.reservationtime.application.dto.AvailableReservationTimeResult;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.reservationtime.application.service.ReservationTimeQueryService;
+import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ServiceTest
 @Transactional
 public class ReservationTimeQueryServiceTest {
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ReservationTimeQueryService timeQueryService;
 
+    @Autowired
     private TestDataHelper testHelper;
-
-    @BeforeEach
-    void setUp() {
-        testHelper = new TestDataHelper(jdbcTemplate);
-    }
 
     @DisplayName("예약 시간의 전체 조회를 테스트합니다.")
     @Test

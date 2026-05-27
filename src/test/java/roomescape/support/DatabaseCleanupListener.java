@@ -12,12 +12,15 @@ public class DatabaseCleanupListener extends AbstractTestExecutionListener {
         String port = testContext.getApplicationContext()
                 .getEnvironment()
                 .getProperty("local.server.port");
-        RestAssured.port = Integer.parseInt(port);
+        if (port != null) {
+            RestAssured.port = Integer.parseInt(port);
+        }
 
         JdbcTemplate jdbcTemplate = testContext.getApplicationContext()
                 .getBean(JdbcTemplate.class);
 
         jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM waiting");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
     }

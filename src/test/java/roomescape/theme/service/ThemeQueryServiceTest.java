@@ -4,37 +4,28 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.fixture.ThemeFixture;
+import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
-import roomescape.theme.application.dto.ThemeResult;
 import roomescape.theme.application.dto.PopularThemeResult;
+import roomescape.theme.application.dto.ThemeResult;
 import roomescape.theme.application.service.ThemeQueryService;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
+@ServiceTest
 @Transactional
 public class ThemeQueryServiceTest {
 
     private static final LocalDate CURRENT_DATE = LocalDate.of(2026, 5, 6);
 
     @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Autowired
     private ThemeQueryService themeQueryService;
 
+    @Autowired
     private TestDataHelper testHelper;
-
-    @BeforeEach
-    void setUp() {
-        testHelper = new TestDataHelper(jdbcTemplate);
-    }
 
     @DisplayName("테마의 전체 조회를 테스트합니다.")
     @Test
