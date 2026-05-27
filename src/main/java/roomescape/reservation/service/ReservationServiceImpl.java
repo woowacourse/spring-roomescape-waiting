@@ -2,14 +2,11 @@ package roomescape.reservation.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -17,6 +14,7 @@ import roomescape.reservation.service.dto.ReservationSaveServiceDto;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.TimeService;
 
 @Service
@@ -103,11 +101,21 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationRepository.findByName(name);
     }
 
+    @Transactional
     @Override
-    public void cancelForUser(Long id) {
+    public void cancelForUser(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
+        reservation.isOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
+
+        if (reservation.isReserved()) {
+            reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
+                    .ifPresent(waitingId -> {
+                        if (!reservationRepository.updateStatus(waitingId)) {
+                            throw new ReservationNotFoundException(id);
+                        }});
+        }
         reservationRepository.deleteById(id);
     }
 
@@ -125,6 +133,7 @@ public class ReservationServiceImpl implements ReservationService {
         boolean updated = reservationRepository.update(id, timeId);
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
+
         }
         return reservation.withTime(newTime);
     }

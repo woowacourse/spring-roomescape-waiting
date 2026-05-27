@@ -133,6 +133,28 @@ public class JdbcReservationRepository implements ReservationRepository {
         return exists != null && exists == 1;
     }
 
+    @Override
+    public Optional<Long> findEarliestWaiting(Long timeId, Long themeId) {
+        Long waitingId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation "
+                        + "WHERE time_id = ? "
+                        + "AND theme_id = ? "
+                        + "AND status = WAITING "
+                        + "ORDER BY created_at ASC "
+                        + "LIMIT 1",
+                Long.class,
+                timeId, themeId);
+        return Optional.ofNullable(waitingId);
+    }
+
+    @Override
+    public boolean updateStatus(Long waitingId) {
+        int affected = jdbcTemplate.update(
+                "UPDATE reservation SET status = RESERVED where id = ?",
+                waitingId);
+        return affected > 0;
+    }
+
     private static class ReservationRowMapper implements RowMapper<Reservation> {
         @Override
         public Reservation mapRow(ResultSet rs, int rowNum) throws SQLException {
@@ -168,4 +190,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             ).withId(rs.getLong("id"));
         }
     }
+
+
 }

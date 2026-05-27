@@ -10,6 +10,6 @@ public interface ReservationService {
     Reservation create(ReservationSaveServiceDto reservation);
     void cancel(Long id);
     List<Reservation> getByName(String name);
-    void cancelForUser(Long id);
+    void cancelForUser(Long id, String name);
     Reservation update(Long id, Long timeId);
 }

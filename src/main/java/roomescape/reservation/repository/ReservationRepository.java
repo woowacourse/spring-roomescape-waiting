@@ -24,4 +24,8 @@ public interface ReservationRepository {
     boolean isDuplicated(Long themeId, ReservationTime time);
 
     boolean existsByTimeId(Long timeId);
+
+    Optional<Long> findEarliestWaiting(Long timeId, Long themeId);
+
+    boolean updateStatus(Long waitingId);
 }
