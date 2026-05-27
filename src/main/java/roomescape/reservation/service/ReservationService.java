@@ -64,7 +64,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
+    public ReservationWaitingResult editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
         Reservation reservation = getReservation(reservationId);
         ReservationTime changedTime = getReservationTime(timeId);
 
@@ -75,6 +75,11 @@ public class ReservationService {
 
         updateReservation(changedReservation);
         promoteWaitingIfNeeded(reservation, changedReservation);
+
+        return ReservationWaitingResult.from(
+                reservationRepository.findWaitingById(reservationId)
+                        .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND))
+        );
     }
 
     @Transactional

@@ -65,13 +65,13 @@ public class ReservationController {
     }
 
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> editDateTime(
+    public ResponseEntity<ReservationWaitingResponse> editDateTime(
             @PathVariable("id") Long id,
             @RequestBody @Valid ReservationEditRequest request,
             @CurrentUser String guestName
     ) {
-        reservationService.editDateTime(id, request.date(), request.timeId(), guestName);
-        return ResponseEntity.noContent().build();
+        ReservationWaitingResult result = reservationService.editDateTime(id, request.date(), request.timeId(), guestName);
+        return ResponseEntity.ok(ReservationWaitingResponse.from(result));
     }
 
     @DeleteMapping("/{id}")

@@ -181,7 +181,8 @@ public final class ReservationAcceptanceSteps {
             ExtractableResponse<Response> response,
             ReservationInfo reservation
     ) {
-        assertThat(response.statusCode()).isEqualTo(204);
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.jsonPath().getInt("id")).isEqualTo(reservation.id());
     }
 
     public static void 현재_시간이_예약_시작_이후가_되고(MutableClock mutableClock) {
