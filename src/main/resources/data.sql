@@ -6,6 +6,7 @@ INSERT INTO members(name, email, password, role) VALUES ('어드민', 'admin@tes
 INSERT INTO members(name, email, password, role) VALUES ('유저', 'user@test.com', '$2a$10$LzNRNMIeDFJdLCa.esEa0.RW6uxlRb3JruT7QtWUHF.xAIJeDzDrC', 'USER');
 INSERT INTO members(name, email, password, role, store_id) VALUES ('강남매니저', 'manager1@test.com', '$2a$10$LzNRNMIeDFJdLCa.esEa0.RW6uxlRb3JruT7QtWUHF.xAIJeDzDrC', 'MANAGER', 1);
 INSERT INTO members(name, email, password, role, store_id) VALUES ('홍대매니저', 'manager2@test.com', '$2a$10$LzNRNMIeDFJdLCa.esEa0.RW6uxlRb3JruT7QtWUHF.xAIJeDzDrC', 'MANAGER', 2);
+INSERT INTO members(name, email, password, role) VALUES ('유저2', 'user2@test.com', '$2a$10$LzNRNMIeDFJdLCa.esEa0.RW6uxlRb3JruT7QtWUHF.xAIJeDzDrC', 'USER');
 
 INSERT INTO times(start_at) values ('10:00');
 INSERT INTO times(start_at) values ('12:00');
@@ -55,3 +56,25 @@ VALUES (2, '2026-10-01', 3, 3, 1, 'BOOKED');
 -- 홍대점 매니저(manager2@test.com) 조회용 예약
 INSERT INTO reservations(member_id, date, theme_id, time_id, store_id, status)
 VALUES (2, CURRENT_DATE, 4, 4, 2, 'BOOKED');
+
+-- 유저2(5) 예약: 내 예약 목록에서 BOOKED + WAITING 섞이는 케이스 만들기 위함
+INSERT INTO reservations(member_id, date, theme_id, time_id, store_id, status)
+VALUES (5, CURRENT_DATE, 5, 5, 1, 'BOOKED');
+
+-- 예약 대기 데이터
+-- 슬롯 A: 유저(2)가 예약한 (오늘, theme 1, time 1, 강남점)
+--   → 유저2(5)가 1순위, 어드민(1)이 2순위 대기
+INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (5, CURRENT_DATE, 1, 1, 1);
+INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (1, CURRENT_DATE, 1, 1, 1);
+
+-- 슬롯 B: 유저(2)가 예약한 (오늘, theme 2, time 2, 강남점)
+--   → 유저2(5)가 1순위 대기
+INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (5, CURRENT_DATE, 2, 2, 1);
+
+-- 슬롯 C: 유저(2)가 예약한 (2026-10-01, theme 3, time 3, 강남점)
+--   → 어드민(1)이 1순위 대기
+INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (1, '2026-10-01', 3, 3, 1);
+
+-- 슬롯 D: 유저2(5)가 예약한 (오늘, theme 5, time 5, 강남점)
+--   → 유저(2)가 1순위 대기 (이걸로 유저(2)도 BOOKED+WAITING 둘 다 보유)
+INSERT INTO waitings(member_id, date, time_id, theme_id, store_id) VALUES (2, CURRENT_DATE, 5, 5, 1);
