@@ -3,6 +3,7 @@ package roomescape.domain.theme;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.dto.ThemeResponse;
 import roomescape.exception.ErrorCode;
@@ -19,6 +20,7 @@ public class ThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getTopThemes() {
         LocalDate startDate = LocalDate.now().minusDays(7);
         LocalDate endDate = LocalDate.now();
@@ -33,6 +35,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll().stream()
                 .map(ThemeResponse::from)

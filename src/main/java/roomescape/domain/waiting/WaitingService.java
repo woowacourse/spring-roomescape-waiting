@@ -3,6 +3,7 @@ package roomescape.domain.waiting;
 import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -30,8 +31,8 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
-
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRequest.timeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
@@ -53,11 +54,13 @@ public class WaitingService {
         return WaitingResponse.of(saved);
     }
 
+    @Transactional
     public void deleteWaiting(Long id) {
         validateWaitingId(id);
         waitingRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public MyWaitingsResponse getMyWaitings(String name) {
         List<MyWaitingResult> myWaitingResults = waitingRepository.findByName(name);
         return MyWaitingsResponse.from(myWaitingResults);

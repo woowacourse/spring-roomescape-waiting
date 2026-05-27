@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.ReservationFixRequest;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservation.dto.ReservationResponse;
@@ -33,6 +34,7 @@ public class ReservationService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public ReservationResponse createReservation(ReservationRequest request) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
             .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
@@ -52,6 +54,7 @@ public class ReservationService {
         return ReservationResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<TimeResponse> getReservations(LocalDate date, Long themeId) {
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         List<Long> bookedTimeIds = reservationRepository.findTimeByDateAndThemeId(date, themeId);
@@ -62,16 +65,19 @@ public class ReservationService {
             .toList();
     }
 
+    @Transactional
     public void deleteReservation(Long id) {
         validateReservationId(id);
         reservationRepository.deleteById(id);
     }
 
+    @Transactional(readOnly = true)
     public MyReservationsResponse getMyReservations(String name) {
         List<Reservation> reservations = reservationRepository.findByName(name);
         return MyReservationsResponse.from(reservations);
     }
 
+    @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
         Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));

@@ -1,6 +1,7 @@
 package roomescape.admin.theme;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.theme.dto.AdminThemeRequest;
 import roomescape.admin.theme.dto.AdminThemeResponse;
 import roomescape.admin.theme.dto.AdminThemesResponse;
@@ -25,6 +26,7 @@ public class AdminThemeService {
         this.reservationRepository = reservationRepository;
     }
 
+    @Transactional
     public AdminThemeResponse createTheme(AdminThemeRequest request) {
         validateDuplicateTheme(request.name());
         Theme theme = Theme.of(
@@ -37,12 +39,14 @@ public class AdminThemeService {
         return AdminThemeResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public AdminThemesResponse getAllThemes() {
         List<Theme> themes = adminThemeRepository.findAll();
 
         return AdminThemesResponse.from(themes);
     }
 
+    @Transactional
     public void deleteTheme(Long themeId) {
         validateThemeId(themeId);
         validateTimeDeletable(themeId);

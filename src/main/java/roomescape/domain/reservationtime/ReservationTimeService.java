@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 import roomescape.domain.reservationtime.dto.TimeRequest;
@@ -18,6 +19,7 @@ public class ReservationTimeService {
         this.timeRepository = timeRepository;
     }
 
+    @Transactional
     public TimeResponse createTime(TimeRequest request) {
         validateDuplicateTime(request.startAt());
         ReservationTime time = ReservationTime.of(
@@ -28,6 +30,7 @@ public class ReservationTimeService {
         return TimeResponse.from(saved);
     }
 
+    @Transactional(readOnly = true)
     public List<TimeResponse> getAllTimes() {
         List<ReservationTime> times = timeRepository.findAll();
 
@@ -36,6 +39,7 @@ public class ReservationTimeService {
             .toList();
     }
 
+    @Transactional
     public void deleteById(Long id) {
         validateReservationTimeId(id);
         timeRepository.deleteById(id);
