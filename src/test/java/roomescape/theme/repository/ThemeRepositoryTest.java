@@ -63,7 +63,7 @@ class ThemeRepositoryTest {
     @Test
     @DisplayName("인기 테마 id 조회")
     void 인기_테마_id_조회() {
-        List<Long> ids = themeRepository.findTopThemeIds(LocalDate.of(2026, 5, 3), LocalDate.of(2026, 5, 10), 10);
+        List<Long> ids = themeRepository.findTopThemeIds(LocalDate.now().minusDays(6), LocalDate.now().minusDays(1), 10);
         assertThat(ids).containsExactly(1L, 2L, 3L);
     }
 

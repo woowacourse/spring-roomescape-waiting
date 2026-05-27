@@ -41,7 +41,7 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("예약 가능 시간 조회")
     void 예약_가능_시간_조회() {
-        List<TimeResponse> available = reservationTimeService.getAvailableTimes(LocalDate.of(2026, 5, 10), 1L);
+        List<TimeResponse> available = reservationTimeService.getAvailableTimes(LocalDate.now().minusDays(1), 1L);
         assertThat(available).hasSize(2);
     }
 

@@ -61,7 +61,7 @@ class ReservationTimeRepositoryTest {
     @Test
     @DisplayName("예약 가능 시간 조회")
     void 예약_가능_시간_조회() {
-        List<ReservationTime> available = timeRepository.findAvailableByDateAndThemeId(LocalDate.of(2026, 5, 10), 1L);
+        List<ReservationTime> available = timeRepository.findAvailableByDateAndThemeId(LocalDate.now().minusDays(1), 1L);
         assertThat(available).hasSize(2);
     }
 }

@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -65,8 +66,9 @@ class ReservationTimeControllerTest {
     @Test
     @DisplayName("예약 가능 시간 조회 성공")
     void 예약_가능_시간_조회_성공() {
+        String date = LocalDate.now().minusDays(1).toString();
         RestAssured.given().log().all()
-                .when().get("/times/available?date=2026-05-10&themeId=1")
+                .when().get("/times/available?date=" + date + "&themeId=1")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(2));
