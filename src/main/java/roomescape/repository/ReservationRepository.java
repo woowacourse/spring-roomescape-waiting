@@ -14,6 +14,9 @@ public interface ReservationRepository {
 
     boolean existsByDateAndTimeAndTheme(LocalDate date, Long timeId, Long themeId);
 
+    boolean existsBySlotAndName(LocalDate date, Long timeId, Long themeId, String name);
+
+
     boolean existsByTimeId(Long timeId);
 
     List<Reservation> findByNameOrderByDateAscTimeAsc(String name);

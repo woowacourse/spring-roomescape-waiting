@@ -38,13 +38,11 @@ public class WaitingService {
         Theme theme = themeRepository.findById(command.getThemeId())
                 .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 테마입니다."));
 
-//        todo : Optional<Reservation> r = reservationRepository.findBySlot();
-//        if (r.isEmpty())
-//            throw new BusinessRuleViolationException(
-//                    "예약 가능한 시간입니다. 대기가 아닌 예약을 신청해 주세요.");
-//        Reservation reservation = r.get();
-//        if (reservation.getName().equals(command.getName()))
-//            throw error;
+        if (reservationRepository.existsBySlotAndName(
+                command.getDate(), command.getTimeId(), command.getThemeId(), command.getName())) {
+            throw new BusinessRuleViolationException(
+                    "이미 본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
+        }
 
         if (!reservationRepository.existsByDateAndTimeAndTheme(
                 command.getDate(), command.getTimeId(), command.getThemeId())) {
