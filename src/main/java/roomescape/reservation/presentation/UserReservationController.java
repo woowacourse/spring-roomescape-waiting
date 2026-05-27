@@ -1,4 +1,4 @@
-package roomescape.reservation.presentation.user;
+package roomescape.reservation.presentation;
 
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Positive;

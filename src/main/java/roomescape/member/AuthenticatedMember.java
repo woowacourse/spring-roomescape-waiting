@@ -7,4 +7,8 @@ public record AuthenticatedMember(
     public static AuthenticatedMember of(long id, Role role) {
         return new AuthenticatedMember(id, role);
     }
+
+    public boolean isManager() {
+        return role == Role.MANAGER;
+    }
 }

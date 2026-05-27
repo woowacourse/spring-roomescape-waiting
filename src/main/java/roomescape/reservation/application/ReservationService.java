@@ -35,6 +35,14 @@ public class ReservationService {
         return ReservationSaveResponse.from(reservation);
     }
 
+    public List<ReservationDetailFindResponse> findReservationDetails() {
+        return ReservationDetailFindResponse.from(reservationRepository.findAll());
+    }
+
+    public void deleteById(long reservationId) {
+        deleteInternal(reservationId, oldReservation -> {});
+    }
+
     public void deleteByIdForUser(long reservationId, long memberId) {
         deleteInternal(
                 reservationId,
@@ -55,6 +63,10 @@ public class ReservationService {
                 reservationId,
                 oldReservation -> validateReservationOwner(reservationId, oldReservation, memberId)
         );
+    }
+
+    public ReservationSaveResponse update(ReservationUpdateRequest body, long reservationId) {
+        return updateInternal(body, reservationId, oldReservation -> {});
     }
 
     private static void validateReservationOwner(

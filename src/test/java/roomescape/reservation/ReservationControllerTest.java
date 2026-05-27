@@ -31,6 +31,10 @@ public class ReservationControllerTest {
         return login("a", "test1");
     }
 
+    private String loginManager() {
+        return login("d", "test4");
+    }
+
     private String login(String name, String password) {
         Map<String, Object> loginRequest = new HashMap<>();
         loginRequest.put("name", name);
@@ -134,5 +138,51 @@ public class ReservationControllerTest {
                 .body("data[0].id", is(waitingId))
                 .body("data[0].status", is("WAITING"))
                 .body("data[0].waitingOrder", is(1));
+    }
+
+    @Test
+    void 매니저_예약_목록_조회() {
+        String accessToken = loginManager();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/manager/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(4));
+    }
+
+    @Test
+    void 매니저_예약_삭제() {
+        String accessToken = loginManager();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .pathParam("id", 1)
+                .when().delete("/api/manager/reservations/{id}")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void 매니저_예약_수정() {
+        String accessToken = loginManager();
+
+        Map<String, Object> updateRequest = new HashMap<>();
+        updateRequest.put("date", "2026-05-05");
+        updateRequest.put("timeId", 1);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(updateRequest)
+                .pathParam("id", 1)
+                .when().patch("/api/manager/reservations/{id}")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.id", is(1))
+                .body("data.memberId", is(1));
     }
 }

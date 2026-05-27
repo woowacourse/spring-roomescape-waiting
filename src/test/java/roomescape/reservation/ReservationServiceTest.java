@@ -80,6 +80,20 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("매니저는 예약 삭제에 성공한다.")
+    void deleteById_manager_success() {
+        long reservationId = 1L;
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 1L, 1L, LocalTime.of(10, 0)
+        );
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+
+        assertThatCode(() -> reservationService.deleteById(reservationId))
+                .doesNotThrowAnyException();
+        verify(reservationRepository).deleteById(reservationId);
+    }
+
+    @Test
     @DisplayName("유저는 타인 예약 삭제를 할 수 없다.")
     void deleteById_user_other_member_forbidden() {
         long reservationId = 1L;
@@ -111,6 +125,29 @@ class ReservationServiceTest {
         when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
 
         ReservationSaveResponse response = reservationService.updateForUser(request, reservationId, MEMBER_ID);
+
+        assertThat(response.id()).isEqualTo(reservationId);
+        verify(reservationRepository).updateScheduleById(reservationId, 99L);
+    }
+
+    @Test
+    @DisplayName("매니저는 예약 수정에 성공한다.")
+    void update_manager_success() {
+        long reservationId = 4L;
+        ReservationUpdateRequest request = new ReservationUpdateRequest(LocalDate.of(2026, 6, 2), 4L);
+        ReservationDetailProjection oldReservation = reservationDetail(
+                reservationId, MEMBER_ID, LocalDate.of(2026, 6, 1), 3L, 3L, LocalTime.of(11, 0)
+        );
+        Reservation updated = new Reservation(reservationId, MEMBER_ID, 99L);
+
+        when(reservationRepository.findDetailById(reservationId)).thenReturn(Optional.of(oldReservation));
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), 3L))
+                .thenReturn(99L);
+        when(reservationRepository.existsByScheduleIdAndIdNot(99L, reservationId)).thenReturn(false);
+        when(reservationRepository.updateScheduleById(reservationId, 99L)).thenReturn(1);
+        when(reservationRepository.findById(reservationId)).thenReturn(Optional.of(updated));
+
+        ReservationSaveResponse response = reservationService.update(request, reservationId);
 
         assertThat(response.id()).isEqualTo(reservationId);
         verify(reservationRepository).updateScheduleById(reservationId, 99L);

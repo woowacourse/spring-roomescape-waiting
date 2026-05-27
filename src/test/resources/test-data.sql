@@ -24,7 +24,7 @@ INSERT INTO member (name, password, role)
 VALUES ('a', 'test1', 'USER'),
        ('b', 'test2', 'USER'),
        ('c', 'test3', 'USER'),
-       ('d', 'test4', 'USER');
+       ('d', 'test4', 'MANAGER');
 
 
 INSERT

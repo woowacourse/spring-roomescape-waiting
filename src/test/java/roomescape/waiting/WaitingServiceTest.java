@@ -87,15 +87,13 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("이미 예약한 스케줄이면 대기를 신청할 수 없다.")
+    @DisplayName("유저가 이미 예약한 스케줄이면 다시 대기를 신청할 수 없다.")
     void save_테스트_3() {
         WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
         long scheduleId = 1L;
 
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
-        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
-                .thenReturn(false);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(true);
 

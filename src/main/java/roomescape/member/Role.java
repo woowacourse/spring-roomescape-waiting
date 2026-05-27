@@ -1,5 +1,6 @@
 package roomescape.member;
 
 public enum Role {
-    USER
+    USER,
+    MANAGER
 }
