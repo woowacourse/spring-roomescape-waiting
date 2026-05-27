@@ -1,7 +1,7 @@
 package roomescape.dao;
 
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -23,14 +23,14 @@ public class ThemeDao {
 
     public Theme findById(Long id) {
         String sql = "SELECT * FROM theme WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, themeRowMapper, id);
+        return jdbcTemplate.queryForObject(sql, new DataClassRowMapper<>(Theme.class), id);
     }
 
     public List<Theme> findAllThemes() {
         String sql = "SELECT * FROM theme";
         List<Theme> themes = jdbcTemplate.query(
                 sql,
-                themeRowMapper
+                new DataClassRowMapper<>(Theme.class)
         );
         return themes;
     }
@@ -58,7 +58,7 @@ public class ThemeDao {
     public List<PopularThemeProjection> findPopularThemes(LocalDate from, LocalDate to) {
         String sql = """
                 SELECT
-                    ranked.theme_rank,
+                    ranked.theme_rank AS rank,
                     ranked.id,
                     ranked.name,
                     ranked.description,
@@ -80,31 +80,10 @@ public class ThemeDao {
                 WHERE ranked.theme_rank <= 10
                 ORDER BY ranked.theme_rank;
                 """;
-        List<PopularThemeProjection> popularThemeProjections = jdbcTemplate.query(sql, popularThemeRowMapper,
+        List<PopularThemeProjection> popularThemeProjections = jdbcTemplate.query(sql,
+                new DataClassRowMapper<>(PopularThemeProjection.class),
                 from.toString(),
                 to.toString());
         return popularThemeProjections;
     }
-
-    private RowMapper<Theme> themeRowMapper = (resultSet, rowNum) -> {
-        Theme theme = new Theme(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("img_url")
-        );
-        return theme;
-    };
-
-    private RowMapper<PopularThemeProjection> popularThemeRowMapper = (resultSet, rowNum) -> {
-        PopularThemeProjection popularThemeProjection = new PopularThemeProjection(
-                resultSet.getLong("id"),
-                resultSet.getString("name"),
-                resultSet.getString("description"),
-                resultSet.getString("img_url"),
-                resultSet.getLong("theme_rank"),
-                resultSet.getLong("reservation_count")
-        );
-        return popularThemeProjection;
-    };
 }

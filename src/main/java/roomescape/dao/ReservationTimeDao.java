@@ -1,8 +1,8 @@
 package roomescape.dao;
 
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
@@ -29,7 +29,7 @@ public class ReservationTimeDao {
         String sql = "select id, start_at from reservation_time";
         List<ReservationTime> reservationTimeList = jdbcTemplate.query(
                 sql,
-                getReservationTimeRowMapper());
+                new DataClassRowMapper<>(ReservationTime.class));
         return reservationTimeList;
     }
 
@@ -37,7 +37,7 @@ public class ReservationTimeDao {
         String sql = "select id, start_at from reservation_time where id = ?";
         ReservationTime reservationTime = jdbcTemplate.queryForObject(
                 sql,
-                getReservationTimeRowMapper(),
+                new DataClassRowMapper<>(ReservationTime.class),
                 id
         );
         return reservationTime;
@@ -81,16 +81,6 @@ public class ReservationTimeDao {
         Map<ReservationTime, Boolean> reservationTimeBooleanMap = jdbcTemplate.query(sql, getMapResultSetExtractor(),
                 id, date);
         return reservationTimeBooleanMap;
-    }
-
-    private RowMapper<ReservationTime> getReservationTimeRowMapper() {
-        return (resultSet, rowNum) -> {
-            ReservationTime reservationTime = new ReservationTime(
-                    resultSet.getLong("id"),
-                    LocalTime.parse(resultSet.getString("start_at"))
-            );
-            return reservationTime;
-        };
     }
 
     private ResultSetExtractor<Map<ReservationTime, Boolean>> getMapResultSetExtractor() {

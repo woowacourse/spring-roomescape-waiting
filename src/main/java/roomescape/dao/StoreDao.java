@@ -1,7 +1,7 @@
 package roomescape.dao;
 
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Store;
 
@@ -18,14 +18,11 @@ public class StoreDao {
 
     public List<Store> findAllStores() {
         String sql = "SELECT id, name FROM store";
-        return jdbcTemplate.query(sql, storeRowMapper);
+        return jdbcTemplate.query(sql, new DataClassRowMapper<>(Store.class));
     }
 
     public Store findById(Long id) {
         String sql = "SELECT id, name FROM store WHERE id = ?";
-        return jdbcTemplate.queryForObject(sql, storeRowMapper, id);
+        return jdbcTemplate.queryForObject(sql, new DataClassRowMapper<>(Store.class), id);
     }
-
-    private final RowMapper<Store> storeRowMapper = (rs, rowNum) ->
-            new Store(rs.getLong("id"), rs.getString("name"));
 }
