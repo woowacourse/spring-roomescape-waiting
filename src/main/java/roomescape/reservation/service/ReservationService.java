@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
+import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.domain.Reservation;
@@ -33,12 +34,12 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
-    public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
+    public ReservationResponse addReservation(CreateReservationCommand command) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
 
         validateUniqueReservation(command.date(), command.timeId(), command.themeId());
-        validatePastDatetime(command.date(), reservationTime, now);
+        validatePastDatetime(command.date(), reservationTime);
 
         Reservation reservation = Reservation.createWithoutId(command.name(), command.date(), reservationTime, theme);
         Reservation savedReservation = reservationDao.insert(reservation);
@@ -52,13 +53,13 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationResponse update(Long reservationId, UpdateReservationCommand command, LocalDateTime now) {
+    public ReservationResponse update(Long reservationId, UpdateReservationCommand command) {
         getReservation(reservationId);
 
         ReservationTime time = getTime(command.timeId());
         validateUniqueExcludingSelf(command.date(), command.timeId(),
                 getReservation(reservationId).getTheme().getId(), reservationId);
-        validatePastDatetime(command.date(), time, now);
+        validatePastDatetime(command.date(), time);
 
         Reservation updateReservation = reservationDao.update(reservationId, command.date(), command.timeId());
         return ReservationResponse.from(updateReservation);
@@ -95,10 +96,9 @@ public class ReservationService {
         }
     }
 
-    private void validatePastDatetime(LocalDate date, ReservationTime reservationTime, LocalDateTime now) {
-        LocalDateTime reservationDateAndTime = LocalDateTime.of(date, reservationTime.getStartAt());
-        if (reservationDateAndTime.isBefore(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_DATETIME);
+    private void validatePastDatetime(LocalDate date, ReservationTime reservationTime) {
+        if (reservationTime.isPast(date, LocalDateTime.now())) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.PAST_DATETIME);
         }
     }
 

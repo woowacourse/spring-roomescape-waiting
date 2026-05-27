@@ -1,5 +1,7 @@
 package roomescape.reservationtime.domain;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Objects;
@@ -30,6 +32,10 @@ public class ReservationTime {
     public boolean isNotReserved(List<Reservation> reservations) {
         return reservations.stream()
                 .noneMatch(reservation -> reservation.getTime().equals(this));
+    }
+
+    public boolean isPast(LocalDate date, LocalDateTime now) {
+        return LocalDateTime.of(date, startAt).isBefore(now);
     }
 
     @Override
