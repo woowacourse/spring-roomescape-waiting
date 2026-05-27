@@ -1,10 +1,7 @@
 package roomescape.reservation.service;
 
 import java.util.List;
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
@@ -54,4 +51,8 @@ public class ReservationFacade {
     public ReservationResponse findReservationById(Long id) {
         return reservationService.findById(id);
     }
+
+  public void deleteReservationWithName(Long id, String name) {
+        reservationService.deleteByIdAndName(id, name);
+  }
 }

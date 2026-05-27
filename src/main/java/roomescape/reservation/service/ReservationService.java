@@ -67,4 +67,8 @@ public class ReservationService {
     public boolean existsByTimeId(Long timeId) {
         return reservationDAO.existsByTimeId(timeId);
     }
+
+  public void deleteByIdAndName(Long id, String name) {
+        reservationDAO.deleteByIdAndName(id, name);
+  }
 }

@@ -93,6 +93,11 @@ public class ReservationDAO {
     jdbcTemplate.update(sql, id);
   }
 
+  public void deleteByIdAndName(Long id, String name) {
+    String sql = "delete from reservation where id = ? and name = ?";
+    jdbcTemplate.update(sql, id, name);
+  }
+
   public boolean existsByTimeId(Long timeId) {
     String sql = "select count(*) from reservation where time_id = ?";
     Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
