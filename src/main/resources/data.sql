@@ -136,3 +136,29 @@ VALUES ('예약자1', '2026-04-20', 1, 12),
        ('예약자7', '2026-04-20', 7, 12),
        ('예약자8', '2026-04-20', 8, 12),
        ('예약자9', '2026-04-20', 9, 12);
+
+-- reservation_waiting
+-- theme_id 1, date 2026-06-10, time_id 1 → 예약자1이 예약한 슬롯에 대기
+INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
+VALUES ('대기자1', '2026-05-27 10:00:00', '2026-06-10', 1, 1),
+       ('대기자2', '2026-05-27 11:00:00', '2026-06-10', 1, 1),
+       ('대기자3', '2026-05-27 12:00:00', '2026-06-10', 1, 1);
+
+-- theme_id 1, date 2026-06-11, time_id 1 → 예약자6이 예약한 슬롯에 대기
+INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
+VALUES ('대기자4', '2026-05-27 10:00:00', '2026-06-11', 1, 1),
+       ('대기자5', '2026-05-27 11:00:00', '2026-06-11', 1, 1);
+
+-- theme_id 2, date 2026-05-12, time_id 1 → 예약자1이 예약한 슬롯에 대기
+INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
+VALUES ('대기자6', '2026-05-27 10:00:00', '2026-05-12', 1, 2),
+       ('대기자7', '2026-05-27 11:00:00', '2026-05-12', 1, 2);
+
+-- 내 예약/대기 조회 테스트용 - 브라운이 예약도 있고 대기도 있는 케이스
+-- 브라운 예약 (theme_id 3, date 2026-06-15, time_id 1)
+INSERT INTO reservation (name, `date`, time_id, theme_id)
+VALUES ('브라운', '2026-06-15', 1, 3);
+
+-- 브라운 대기 (이미 예약자1이 예약한 슬롯 - theme_id 1, date 2026-06-10, time_id 1)
+INSERT INTO reservation_waiting (name, created_at, reservation_date, time_id, theme_id)
+VALUES ('브라운', '2026-05-27 13:00:00', '2026-06-10', 1, 1);

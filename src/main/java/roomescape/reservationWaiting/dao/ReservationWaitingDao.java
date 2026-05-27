@@ -97,7 +97,16 @@ public class ReservationWaitingDao {
     }
 
     public List<ReservationWaiting> select() {
-        String sql = """
+        return jdbcTemplate.query(baseSelectSql(), ROW_MAPPER);
+    }
+
+    public List<ReservationWaiting> selectByName(String name) {
+        String sql = baseSelectSql() + "WHERE rw.name = ?";
+        return jdbcTemplate.query(sql, ROW_MAPPER, name);
+    }
+
+    private String baseSelectSql() {
+        return """
                 SELECT rw.id, 
                        rw.name as waiting_name, 
                        rw.created_at, 
@@ -114,7 +123,5 @@ public class ReservationWaitingDao {
                 INNER JOIN theme as t 
                 ON rw.theme_id = t.id 
                 """;
-
-        return jdbcTemplate.query(sql, ROW_MAPPER);
     }
 }
