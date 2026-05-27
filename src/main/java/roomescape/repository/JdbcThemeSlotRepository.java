@@ -71,7 +71,7 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
         );
 
         List<Long> keys = keyHolder.getKeyList().stream()
-                .map(m -> ((Number) m.get("GENERATED_KEY")).longValue())
+                .map(m -> ((Number) m.values().iterator().next()).longValue())
                 .toList();
 
         List<ThemeSlot> results = new ArrayList<>();

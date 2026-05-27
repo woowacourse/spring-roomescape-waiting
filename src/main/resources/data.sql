@@ -38,6 +38,7 @@ CREATE TABLE reservation_seed
     PRIMARY KEY (id)
 );
 
+
 -- [Theme 1: 폐병원 탈출]
 INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
                                                                     ('게스트', '2026-05-07', 'CONFIRMED', 1, 1), ('게스트', '2026-05-07', 'CONFIRMED', 4, 1), ('게스트', '2026-05-07', 'CONFIRMED', 8, 1), ('게스트', '2026-05-08', 'CONFIRMED', 2, 1), ('게스트', '2026-05-08', 'CONFIRMED', 6, 1), ('게스트', '2026-05-08', 'CONFIRMED', 10, 1),
