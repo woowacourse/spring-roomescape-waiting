@@ -28,6 +28,9 @@
         .search-row { display: flex; gap: 10px; }
         .search-row input { flex: 1; }
         .search-row button { width: auto; padding: 11px 20px; }
+        .update-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+        .update-row select { flex: 1; }
+        .update-row button { width: auto; padding: 8px 16px; background: #0ea5e9; }
     </style>
 </head>
 <body>
@@ -84,9 +87,22 @@
                     <form class="inline-form" method="post"
                           th:action="@{|/page/reservations/${r.id()}/cancel|}">
                         <input type="hidden" name="name" th:value="${name}">
+                        <input type="hidden" name="status" th:value="${r.status().name()}">
                         <button type="submit" class="danger">취소</button>
                     </form>
                 </div>
+                <form class="update-row" method="post"
+                      th:action="@{|/page/reservations/${r.id()}/update|}">
+                    <input type="hidden" name="name" th:value="${name}">
+                    <select name="timeId" required>
+                        <option value="">시간 선택</option>
+                        <option th:each="time : ${times}"
+                                th:value="${time.id()}"
+                                th:text="|${time.startAt()} ~ ${time.endAt()}|"
+                                th:selected="${time.id() == r.time().id()}"></option>
+                    </select>
+                    <button type="submit">시간 변경</button>
+                </form>
             </li>
         </ul>
     </section>

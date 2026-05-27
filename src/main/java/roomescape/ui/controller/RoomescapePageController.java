@@ -22,6 +22,8 @@ import roomescape.holiday.service.HolidayService;
 import roomescape.holiday.service.dto.HolidaySaveServiceDto;
 import roomescape.reservation.controller.dto.ReservationResponseDto;
 import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
@@ -141,11 +143,37 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.create(new ReservationSaveServiceDto(name, themeId, timeId));
-            addSuccessMessage(redirectAttributes, "예약을 생성했습니다.");
+            Reservation created = reservationService.create(new ReservationSaveServiceDto(name, themeId, timeId));
+            if (created.getStatus() == Status.WAITING) {
+                addSuccessMessage(redirectAttributes, "이미 예약된 슬롯이라 예약 대기로 등록되었습니다.");
+            } else {
+                addSuccessMessage(redirectAttributes, "예약이 완료되었습니다.");
+            }
         } catch (PastReservationException | DuplicateReservationException |
                  IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "예약 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
+        }
+        return "redirect:/page/reservations?name=" + name;
+    }
+
+    @PostMapping("/reservations/{id}/update")
+    public String updateUserReservation(
+            @PathVariable Long id,
+            @RequestParam String name,
+            @RequestParam Long timeId,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            reservationService.update(id, timeId);
+            addSuccessMessage(redirectAttributes, "예약 시간을 변경했습니다.");
+        } catch (ReservationNotFoundException e) {
+            addExpectedErrorMessage(redirectAttributes, "수정할 예약을 찾지 못했습니다.", e);
+        } catch (PastReservationException e) {
+            addExpectedErrorMessage(redirectAttributes, "이미 지난 예약은 수정할 수 없습니다.", e);
+        } catch (DuplicateReservationException e) {
+            addExpectedErrorMessage(redirectAttributes, "해당 시간 슬롯은 이미 예약되어 있습니다.", e);
+        } catch (IllegalArgumentException | TimeNotFoundException e) {
+            addExpectedErrorMessage(redirectAttributes, "예약 시간 변경에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
         }
         return "redirect:/page/reservations?name=" + name;
     }
@@ -154,11 +182,16 @@ public class RoomescapePageController {
     public String cancelUserReservation(
             @PathVariable Long id,
             @RequestParam String name,
+            @RequestParam(required = false) Status status,
             RedirectAttributes redirectAttributes
     ) {
         try {
             reservationService.cancelForUser(id, name);
-            addSuccessMessage(redirectAttributes, "예약을 취소했습니다.");
+            if (status == Status.WAITING) {
+                addSuccessMessage(redirectAttributes, "예약 대기를 취소했습니다.");
+            } else {
+                addSuccessMessage(redirectAttributes, "예약을 취소했습니다.");
+            }
         } catch (ReservationNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "취소할 예약을 찾지 못했습니다.", e);
         } catch (PastReservationException e) {
