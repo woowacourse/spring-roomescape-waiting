@@ -42,6 +42,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public Optional<Waiting> findFirstBySlot(ReservationSlot slot) {
+        return jdbcTemplate.query("""
+                                SELECT w.id, w.name
+                                    FROM waiting w
+                                    WHERE w.date = ?
+                                AND w.theme_id = ?
+                                AND w.time_id = ?
+                                ORDER BY w.id ASC
+                                LIMIT 1
+                                """,
+                        (rs, rowNum) ->
+                                Waiting.builder()
+                                        .id(rs.getLong("id"))
+                                        .name(rs.getString("name"))
+                                        .slot(slot)
+                                        .build(),
+                        slot.date(),
+                        slot.themeId(),
+                        slot.timeId())
+                .stream().findFirst();
+    }
+
+    @Override
     public Waiting save(Waiting waiting) {
         ReservationSlot slot = waiting.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()

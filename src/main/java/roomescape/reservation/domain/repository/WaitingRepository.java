@@ -7,6 +7,8 @@ import roomescape.reservation.domain.Waiting;
 public interface WaitingRepository {
     Optional<ReservationSlot> findSlotById(Long id);
 
+    Optional<Waiting> findFirstBySlot(ReservationSlot slot);
+
     Waiting save(Waiting waiting);
 
     Long getRank(Waiting waiting);

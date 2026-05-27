@@ -6,6 +6,8 @@ import java.util.Map;
 import org.springframework.boot.test.context.TestComponent;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.theme.application.dto.ThemeCreateCommand;
 
 @TestComponent
@@ -65,5 +67,29 @@ public class TestDataHelper {
                 "theme_id", themeId,
                 "time_id", timeId
         )).longValue();
+    }
+
+    public Reservation findReservationBySlot(ReservationSlot slot) {
+        return jdbcTemplate.queryForObject("""
+                        SELECT r.id, r.name, r.date, r.theme_id, r.time_id, rt.start_at
+                        FROM reservation r
+                        JOIN reservation_time rt ON r.time_id = rt.id
+                        WHERE r.date = ?
+                          AND r.theme_id = ?
+                          AND r.time_id = ?
+                        """,
+                (rs, rowNum) -> Reservation.builder()
+                        .id(rs.getLong("id"))
+                        .name(rs.getString("name"))
+                        .slot(ReservationSlot.builder()
+                                .date(rs.getDate("date").toLocalDate())
+                                .themeId(rs.getLong("theme_id"))
+                                .timeId(rs.getLong("time_id"))
+                                .startAt(rs.getObject("start_at", LocalTime.class))
+                                .build())
+                        .build(),
+                slot.date(),
+                slot.themeId(),
+                slot.timeId());
     }
 }

@@ -21,6 +21,8 @@ import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationResult.Status;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.support.ServiceTest;
 import roomescape.support.TestDataHelper;
@@ -256,5 +258,31 @@ class ReservationCommandServiceTest {
         Long waitingId = testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
 
         assertThatNoException().isThrownBy(() -> reservationCommandService.deleteWaiting(waitingId, NOW));
+    }
+
+    @DisplayName("확정 예약 삭제 시 예약 대기의 확정 예약으로의 승격을 테스트합니다.")
+    @Test
+    void delete_confirmed_reservation_and_waiting_to_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long reservationId = testHelper.insertReservation("피노", ReservationFixture.futureReservationDate(), themeId,
+                timeId);
+        Long waitingId = testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+
+        reservationCommandService.deleteReservation(reservationId, NOW);
+
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(ReservationFixture.futureReservationDate())
+                .themeId(themeId)
+                .timeId(timeId)
+                .startAt(LocalTime.of(10, 0))
+                .build();
+        Reservation upReservation = testHelper.findReservationBySlot(slot);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(upReservation.getName()).isEqualTo("스타크");
+            softly.assertThatThrownBy(() -> reservationCommandService.deleteWaiting(waitingId, NOW))
+                    .isInstanceOf(NotFoundException.class);
+        });
     }
 }

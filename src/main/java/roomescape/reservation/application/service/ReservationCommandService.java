@@ -1,6 +1,7 @@
 package roomescape.reservation.application.service;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
@@ -106,6 +107,17 @@ public class ReservationCommandService {
         if (reservationRepository.delete(reservationId) == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
         }
+
+        Optional<Waiting> firstWaitingBySlot = waitingRepository.findFirstBySlot(slot);
+        firstWaitingBySlot.ifPresent(waiting -> {
+            waitingRepository.delete(waiting.getId());
+
+            Reservation reservation = Reservation.builder()
+                    .name(waiting.getName())
+                    .slot(waiting.getSlot())
+                    .build();
+            reservationRepository.save(reservation);
+        });
     }
 
     public void deleteWaiting(Long waitingId, LocalDateTime now) {
