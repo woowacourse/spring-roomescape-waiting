@@ -49,7 +49,7 @@ public class JdbcWaitRepository implements WaitRepository {
     @Override
     public Optional<Wait> findById(Long id) {
         String sql =
-                "SELECT w.id, w.name, w.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
+                "SELECT w.id, w.created_at, w.name, w.reservation_date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
                         + "FROM `wait` w "
                         + "INNER JOIN `reservation_time` t ON w.time_id = t.id "
                         + "INNER JOIN `theme` th ON w.theme_id = th.id "
@@ -141,7 +141,7 @@ public class JdbcWaitRepository implements WaitRepository {
             Long id = resultSet.getLong("id");
             LocalDateTime createdAt = resultSet.getObject("created_at", LocalDateTime.class);
             String name = resultSet.getString("name");
-            LocalDate date = resultSet.getDate("date").toLocalDate();
+            LocalDate date = resultSet.getDate("reservation_date").toLocalDate();
             Long timeId = resultSet.getLong("time_id");
             LocalTime timeValue = resultSet.getTime("time_value").toLocalTime();
             Long themeId = resultSet.getLong("theme_id");

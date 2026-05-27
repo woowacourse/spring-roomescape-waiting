@@ -6,45 +6,71 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 
-public class ReservationTimeRepositoryTest extends RepositoryTest {
+@JdbcTest
+public class JdbcReservationTimeRepositoryTest {
 
-    @Autowired
+
     private ReservationTimeRepository reservationTimeRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void beforeEach() {
+        reservationTimeRepository = new JdbcReservationTimeRepository(jdbcTemplate);
+    }
+
+    @AfterEach
+    void afterEach() {
+        String sql = "SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA = 'PUBLIC'";
+        List<String> tableNames = jdbcTemplate.queryForList(sql, String.class);
+
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        for (String tableName : tableNames) {
+            jdbcTemplate.execute("TRUNCATE TABLE " + tableName);
+            jdbcTemplate.execute("ALTER TABLE " + tableName + " ALTER COLUMN ID RESTART WITH 1");
+        }
+        jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
+    }
+
     @Test
-    void createTest() {
+    void saveTest() {
         ReservationTime reservationTimeWithoutId = new ReservationTime(LocalTime.of(10, 0));
-        ReservationTime reservationTime = reservationTimeRepository.create(reservationTimeWithoutId);
+        ReservationTime reservationTime = reservationTimeRepository.save(reservationTimeWithoutId);
 
         assertThat(reservationTime.getId()).isEqualTo(1L);
     }
 
     @Test
-    void readTest() {
+    void findByIdTest() {
         String sql = "INSERT INTO `reservation_time` (`start_at`) VALUES (?)";
         jdbcTemplate.update(sql, "10:00");
 
-        Optional<ReservationTime> reservationTime = reservationTimeRepository.read(1L);
+        Optional<ReservationTime> reservationTime = reservationTimeRepository.findById(1L);
 
         assertThat(reservationTime.orElseThrow().getId()).isEqualTo(1L);
     }
 
     @Test
-    void readAllTest() {
+    void findAllTest() {
         String sql = "INSERT INTO `reservation_time` (`start_at`) VALUES (?)";
         jdbcTemplate.update(sql, "10:00");
         jdbcTemplate.update(sql, "11:00");
 
-        List<ReservationTime> reservationTimes = reservationTimeRepository.readAll();
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         assertThat(reservationTimes.size()).isEqualTo(2);
     }
 
     @Test
-    void reservedTimeIdByDateAndThemeTest() {
+    void findReservedTimeIdByDateAndThemeTest() {
         String insertReservationTimeSql = "INSERT INTO `reservation_time` (`start_at`) VALUES (?)";
         jdbcTemplate.update(insertReservationTimeSql, "10:00");
         jdbcTemplate.update(insertReservationTimeSql, "11:00");
@@ -57,7 +83,8 @@ public class ReservationTimeRepositoryTest extends RepositoryTest {
         jdbcTemplate.update(insertReservationSql, "fizz", "2026-05-02", 1L, 1L);
         jdbcTemplate.update(insertReservationSql, "fizz", "2026-05-02", 2L, 1L);
 
-        List<Long> reservedTimeIds = reservationTimeRepository.reservedTimeIdByDateAndTheme(LocalDate.of(2026, 5, 2),
+        List<Long> reservedTimeIds = reservationTimeRepository.findReservedTimeIdByDateAndTheme(
+                LocalDate.of(2026, 5, 2),
                 1L);
 
         assertThat(reservedTimeIds.get(0)).isEqualTo(1L);
@@ -75,5 +102,14 @@ public class ReservationTimeRepositoryTest extends RepositoryTest {
         int count = jdbcTemplate.queryForObject(readAllReservationTimeCountSql, Integer.class);
 
         assertThat(count).isEqualTo(0);
+    }
+
+    @Test
+    void existsByStartAt() {
+        String insertReservationTimeSql = "INSERT INTO `reservation_time` (`start_at`) VALUES (?)";
+        jdbcTemplate.update(insertReservationTimeSql, "10:00");
+
+        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).isTrue();
+        assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(11, 0))).isFalse();
     }
 }

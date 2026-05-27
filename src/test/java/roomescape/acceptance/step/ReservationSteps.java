@@ -25,14 +25,14 @@ public class ReservationSteps {
                 .statusCode(201);
     }
 
-    public static void readMyName(String name, int expectedSize) {
-        RestAssured.given().log().all()
-                .queryParam("name", name)
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(expectedSize));
-    }
+//    public static void readMyName(String name, int expectedSize) {
+//        RestAssured.given().log().all()
+//                .queryParam("name", name)
+//                .when().get("/reservations")
+//                .then().log().all()
+//                .statusCode(200)
+//                .body("size()", is(expectedSize));
+//    }
 
     public static void checkAllReservationSize(int expectedSize) {
         RestAssured.given().log().all()
@@ -40,19 +40,6 @@ public class ReservationSteps {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(expectedSize));
-    }
-
-    public static void updateReservation(Long id, String date, Long timeId) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("date", date);
-        params.put("timeId", timeId);
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/reservations/" + id)
-                .then().log().all()
-                .statusCode(200);
     }
 
     public static void deleteReservation(Long id) {

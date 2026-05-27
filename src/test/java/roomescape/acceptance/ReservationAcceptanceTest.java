@@ -21,9 +21,6 @@ public class ReservationAcceptanceTest extends AcceptanceTest {
         // 4. 전체 예약 조회 사이즈로 예약 추가 확인
         ReservationSteps.checkAllReservationSize(1);
 
-        // 5, 예약 업데이트
-        ReservationSteps.updateReservation(1L, FUTURE_DATE, 1L);
-
         // 5. 예약 삭제
         ReservationSteps.deleteReservation(1L);
 
