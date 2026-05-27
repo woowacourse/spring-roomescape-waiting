@@ -3,7 +3,9 @@ package roomescape.reservation.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +17,8 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
+import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
@@ -27,14 +31,17 @@ import roomescape.time.repository.ReservationTimeRepository;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository,
+                              ReservationWaitingRepository reservationWaitingRepository,
                               ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
                               Clock clock) {
         this.reservationRepository = reservationRepository;
+        this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
@@ -87,8 +94,42 @@ public class ReservationService {
         }
     }
 
-    public List<Reservation> findReservationsByName(String name) {
-        return reservationRepository.findAllByName(name);
+    public List<ReservationWithStatusResult> findReservationsByName(String name) {
+
+        List<ReservationWithStatusResult> results = new ArrayList<>();
+
+        List<ReservationWithStatusResult> reserved = reservationRepository.findAllByName(name)
+                .stream()
+                .map(
+                        reservation -> new ReservationWithStatusResult(
+                                reservation.getId(),
+                                reservation.getName(),
+                                reservation.getDate(),
+                                reservation.getTime(),
+                                reservation.getTheme(),
+                                "reserved",
+                                0L
+                        )
+                )
+                .toList();
+
+        AtomicReference<Long> idx = new AtomicReference<>(1L);
+        List<ReservationWithStatusResult> waiting = reservationWaitingRepository.findAllByName(name)
+                .stream()
+                .map(
+                        reservationWaiting -> new ReservationWithStatusResult(
+                                reservationWaiting.getId(),
+                                reservationWaiting.getName(),
+                                reservationWaiting.getDate(),
+                                reservationWaiting.getTime(),
+                                reservationWaiting.getTheme(),
+                                "waiting",
+                                idx.getAndSet(idx.get() + 1)
+                        )).toList();
+
+        results.addAll(reserved);
+        results.addAll(waiting);
+        return results;
     }
 
     public List<Reservation> findReservations() {

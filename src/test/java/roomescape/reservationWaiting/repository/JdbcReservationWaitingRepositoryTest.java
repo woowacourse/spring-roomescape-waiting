@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -174,6 +175,24 @@ class JdbcReservationWaitingRepositoryTest {
 
         // then
         assertTrue(found.isPresent());
+    }
+
+    @Test
+    @DisplayName("이름을 기반으로 예약 대기 전부 찾아 온다")
+    void findAllByName() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        ReservationWaiting saved1 = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting saved2 = saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting saved3 = saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
+
+        // when
+        List<ReservationWaiting> result = reservationWaitingRepository.findAllByName("브라운");
+
+        // then
+        assertThat(result).containsExactly(saved1);
     }
 
     private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {

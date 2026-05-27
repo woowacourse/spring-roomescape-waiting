@@ -3,6 +3,7 @@ package roomescape.reservationWaiting.repository;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -95,6 +96,29 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, id)
                 .stream().findFirst();
+    }
+
+    @Override
+    public List<ReservationWaiting> findAllByName(String name) {
+        String sql = """
+                SELECT r.id AS reservation_waiting_id,
+                               r.name AS reservation_waiting_name,
+                               r.reservation_date AS reservation_waiting_date,
+                               r.time_id,
+                               t.start_at AS time_start_at,
+                               h.id AS theme_id,
+                               h.name AS theme_name,
+                               h.description AS theme_description,
+                               h.thumbnail_url AS theme_thumbnail_url
+                        FROM reservation_waiting r
+                        INNER JOIN reservation_time t
+                          ON r.time_id = t.id
+                        INNER JOIN theme h
+                          ON r.theme_id = h.id
+                WHERE r.name = ?
+                """;
+
+        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, name);
     }
 
     @Override

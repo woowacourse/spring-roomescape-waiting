@@ -7,7 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
@@ -28,6 +27,7 @@ import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -41,6 +41,9 @@ class ReservationServiceTest {
 
     @Mock
     ReservationTimeRepository reservationTimeRepository;
+
+    @Mock
+    ReservationWaitingRepository reservationWaitingRepository;
 
     @Mock
     ThemeRepository themeRepository;
@@ -136,17 +139,12 @@ class ReservationServiceTest {
     @Test
     void updateReservation_duplicate() {
         //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 8)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
         );
-
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(10, 0))));
@@ -159,7 +157,7 @@ class ReservationServiceTest {
                                 LocalDate.of(2026, 5, 15),
                                 new ReservationTime(1L, LocalTime.of(10, 0)),
                                 new Theme(1L, "이름", "설명", "thumbnailUrl")
-                                )
+                        )
                 ));
 
         when(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
