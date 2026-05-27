@@ -196,7 +196,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean cancelById(Long id) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET delete_token = ?, status = 'CANCELED'
+                SET cancel_token = ?, status = 'CANCELED'
                 WHERE id = ?
                 """, id, id);
 

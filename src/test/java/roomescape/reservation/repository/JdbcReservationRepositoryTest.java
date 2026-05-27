@@ -18,7 +18,6 @@ import roomescape.theme.domain.Theme;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -445,15 +444,6 @@ class JdbcReservationRepositoryTest {
                 SELECT
                     r.date,
                     time_id
-                FROM reservation r
-                WHERE r.id = ?
-                """, id);
-    }
-
-    private Map<String, Object> findDeleteAtAndDeleteToken(Long id) {
-        return jdbcTemplate.queryForMap("""
-                SELECT
-                    deleted_at, delete_token
                 FROM reservation r
                 WHERE r.id = ?
                 """, id);
