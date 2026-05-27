@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
@@ -77,16 +78,17 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Reservation save(final Reservation reservation) {
-        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status, created_at) "
-                + "VALUES(:name, :date, :timeId, :themeId, :status, :createdAt)";
-
+        String sql = "INSERT INTO reservation(name, date, time_id, theme_id, status, created_at, uniqueness_token) "
+                + "VALUES(:name, :date, :timeId, :themeId, :status, :createdAt, :uniquenessToken)";
+        long uniquenessToken = reservation.getStatus().equals(Status.ACTIVE) ? 0L : System.nanoTime();
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
                 .addValue("date", reservation.getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("themeId", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
-                .addValue("createdAt", reservation.getCreatedAt());
+                .addValue("createdAt", reservation.getCreatedAt())
+                .addValue("uniquenessToken", uniquenessToken);
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -98,14 +100,17 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void updateById(final Long id, final Reservation reservation) {
         String sql = "UPDATE reservation "
-                + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status "
+                + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status, uniqueness_token = :uniquenessToken "
                 + "WHERE id = :id AND is_deleted = 0";
+
+        long uniquenessToken = reservation.getStatus().equals(Status.ACTIVE) ? 0L : System.nanoTime();
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", reservation.getDate())
                 .addValue("timeId", reservation.getTime().getId())
                 .addValue("themeId", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
+                .addValue("uniquenessToken", uniquenessToken)
                 .addValue("id", id);
 
         jdbcTemplate.update(sql, params);
@@ -213,7 +218,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByIdAndUsernameAndActiveOrPending(final Long reservationId, final String username) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND status='ACTIVE' OR status='PENDING' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND (status='ACTIVE' OR status='PENDING') AND is_deleted = 0)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("reservationId", reservationId, "username", username),
                         Boolean.class));

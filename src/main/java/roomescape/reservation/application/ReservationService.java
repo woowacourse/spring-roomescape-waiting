@@ -61,21 +61,15 @@ public class ReservationService {
         ReservationTime time = timeRepository.getById(command.timeId());
         time.checkValidDateTime(command.date(), clock);
         Theme theme = themeRepository.getById(command.themeId());
-        Reservation reservation = command.toEntity(time, theme, clock);
-        if (reservationRepository.existsByReservationTimeAndThemeAndDate(time.getId(), theme.getId(), command.date())) {
-            checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
-            reservation = reservation.pending(
-                    command.name(),
-                    command.date(),
-                    time,
-                    theme,
-                    clock
-            );
+
+        if(reservationRepository.existsByReservationTimeAndThemeAndDate(time.getId(), theme.getId(), command.date())) {
+            return savePendingReservation(command, time, theme);
         }
         try {
+            Reservation reservation = command.toEntity(time, theme, clock);
             return ReservationInfo.from(reservationRepository.save(reservation));
         } catch (DataIntegrityViolationException e) {
-            throw new ReservationInUseException("이미 예약이 존재합니다.");
+            return savePendingReservation(command, time, theme);
         }
     }
 
@@ -132,6 +126,17 @@ public class ReservationService {
     private void checkDuplicatePendingReservation(final LocalDate date, final String username, final ReservationTime time, final Theme theme) {
         if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), date, username)) {
             throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
+        }
+    }
+
+    private ReservationInfo savePendingReservation(ReservationCreateCommand command, ReservationTime time, Theme theme) {
+        checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
+        Reservation pendingReservation = command.toEntity(time, theme, clock)
+                .pending(command.name(), command.date(), time, theme, clock);
+        try {
+            return ReservationInfo.from(reservationRepository.save(pendingReservation));
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("예약 처리 중 일시적인 문제가 발생했습니다. 다시 시도해주세요.");
         }
     }
 }
