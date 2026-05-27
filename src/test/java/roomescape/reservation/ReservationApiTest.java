@@ -249,7 +249,6 @@ class ReservationApiTest {
                 .statusCode(404);
     }
 
-    // TODO: 조회 시 CONFIRM, WAITING 여부 추가 처리 후 테스트 수정 필요
     @DisplayName("사용자 이름 없이 예약 전체 조회 API를 테스트합니다.")
     @Test
     void find_all_reservations() {
@@ -289,6 +288,7 @@ class ReservationApiTest {
                 .body("[0].time.startAt", equalTo("09:00"))
                 .body("[0].theme.id", equalTo(themeId.intValue()))
                 .body("[0].theme.name", equalTo("공포 테마"))
+                .body("[0].status", equalTo("CONFIRM"))
 
                 .body("[1].id", greaterThan(0))
                 .body("[1].name", equalTo("비밥"))
@@ -297,6 +297,7 @@ class ReservationApiTest {
                 .body("[1].time.startAt", equalTo("09:00"))
                 .body("[1].theme.id", equalTo(themeId.intValue()))
                 .body("[1].theme.name", equalTo("공포 테마"))
+                .body("[1].status", equalTo("CONFIRM"))
 
                 .body("[2].id", greaterThan(0))
                 .body("[2].name", equalTo("스타크"))
@@ -304,10 +305,10 @@ class ReservationApiTest {
                 .body("[2].time.id", equalTo(tenTimeId.intValue()))
                 .body("[2].time.startAt", equalTo("10:00"))
                 .body("[2].theme.id", equalTo(themeId.intValue()))
-                .body("[2].theme.name", equalTo("공포 테마"));
+                .body("[2].theme.name", equalTo("공포 테마"))
+                .body("[2].status", equalTo("CONFIRM"));
     }
 
-    // TODO: 조회 시 CONFIRM, WAITING 여부 추가 처리 후 테스트 수정 필요
     @DisplayName("사용자 이름으로 예약 목록 조회 API를 테스트합니다.")
     @Test
     void find_reservations_by_name() {
@@ -348,6 +349,7 @@ class ReservationApiTest {
                 .body("[0].time.startAt", equalTo("09:00"))
                 .body("[0].theme.id", equalTo(themeId.intValue()))
                 .body("[0].theme.name", equalTo("공포 테마"))
+                .body("[0].status", equalTo("CONFIRM"))
 
                 .body("[1].id", greaterThan(0))
                 .body("[1].name", equalTo("스타크"))
@@ -355,7 +357,8 @@ class ReservationApiTest {
                 .body("[1].time.id", equalTo(tenTimeId.intValue()))
                 .body("[1].time.startAt", equalTo("10:00"))
                 .body("[1].theme.id", equalTo(themeId.intValue()))
-                .body("[1].theme.name", equalTo("공포 테마"));
+                .body("[1].theme.name", equalTo("공포 테마"))
+                .body("[1].status", equalTo("CONFIRM"));
     }
 
     @DisplayName("이미 지나간 시간의 예약을 삭제 시 422 응답 반환을 테스트합니다.")
