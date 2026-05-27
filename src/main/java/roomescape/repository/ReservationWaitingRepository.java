@@ -1,8 +1,5 @@
 package roomescape.repository;
 
-import java.sql.PreparedStatement;
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -10,10 +7,13 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
 
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-import roomescape.domain.Theme;
 
 @Repository
 public class ReservationWaitingRepository {
@@ -49,21 +49,21 @@ public class ReservationWaitingRepository {
 
     public Long countEarlierWaitings(Long id) {
         String sql = """
-            SELECT COUNT(*)
-            FROM reservation_waiting AS earlier
-            INNER JOIN reservation_waiting AS target
-                ON target.id = ?
-            WHERE earlier.date = target.date
-                AND earlier.time_id = target.time_id
-                AND earlier.theme_id = target.theme_id
-                AND (
-                    earlier.created_at < target.created_at
-                    OR (
-                        earlier.created_at = target.created_at
-                        AND earlier.id < target.id
-                    )
-                );
-            """;
+                SELECT COUNT(*)
+                FROM reservation_waiting AS earlier
+                INNER JOIN reservation_waiting AS target
+                    ON target.id = ?
+                WHERE earlier.date = target.date
+                    AND earlier.time_id = target.time_id
+                    AND earlier.theme_id = target.theme_id
+                    AND (
+                        earlier.created_at < target.created_at
+                        OR (
+                            earlier.created_at = target.created_at
+                            AND earlier.id < target.id
+                        )
+                    );
+                """;
 
         Long count = jdbcTemplate.queryForObject(sql, Long.class, id);
 

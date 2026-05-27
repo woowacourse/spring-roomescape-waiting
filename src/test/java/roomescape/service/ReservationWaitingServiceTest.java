@@ -6,13 +6,7 @@ import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.ForbiddenReservationException;
-import roomescape.exception.InvalidInputException;
-import roomescape.exception.NotFoundException;
-import roomescape.exception.PastReservationException;
-import roomescape.exception.PastReservationLockedException;
-import roomescape.exception.WaitingNotAllowedForOwnReservationException;
+import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
@@ -28,10 +22,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 class ReservationWaitingServiceTest {
 

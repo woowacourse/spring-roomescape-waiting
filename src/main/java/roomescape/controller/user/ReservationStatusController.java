@@ -2,7 +2,6 @@ package roomescape.controller.user;
 
 
 import jakarta.validation.constraints.NotBlank;
-import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.ReservationStatusResponse;
 import roomescape.service.ReservationLookupService;
+
+import java.util.List;
 
 @Validated
 @RestController

@@ -1,10 +1,11 @@
 package roomescape.service.dto;
 
-import java.time.LocalDate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.result.WaitingResult;
+
+import java.time.LocalDate;
 
 public record ReservationStatus(
         Long id,
@@ -15,7 +16,7 @@ public record ReservationStatus(
         Status status,
         Long turn
 ) {
-        public static ReservationStatus reserved(Reservation reservation) {
+    public static ReservationStatus reserved(Reservation reservation) {
         return new ReservationStatus(
                 reservation.getId(),
                 reservation.getName(),
@@ -27,7 +28,7 @@ public record ReservationStatus(
         );
     }
 
-        public static ReservationStatus waiting(WaitingResult waiting) {
+    public static ReservationStatus waiting(WaitingResult waiting) {
         return new ReservationStatus(
                 waiting.id(),
                 waiting.name(),

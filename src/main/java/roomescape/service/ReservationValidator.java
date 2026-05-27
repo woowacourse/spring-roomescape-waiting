@@ -3,12 +3,7 @@ package roomescape.service;
 import org.springframework.stereotype.Component;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
-import roomescape.exception.DuplicateReservationException;
-import roomescape.exception.ForbiddenReservationException;
-import roomescape.exception.InvalidInputException;
-import roomescape.exception.PastReservationException;
-import roomescape.exception.PastReservationLockedException;
-import roomescape.exception.UnchangedReservationException;
+import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;

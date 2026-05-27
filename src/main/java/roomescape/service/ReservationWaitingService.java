@@ -41,12 +41,12 @@ public class ReservationWaitingService {
     public List<WaitingResult> findByName(String name) {
         return reservationWaitingRepository.findByName(name).stream()
                 .map(waiting -> new WaitingResult(
-                            waiting.getId(),
-                            waiting.getName(),
-                            waiting.getDate(),
-                            waiting.getTime(),
-                            waiting.getTheme(),
-                            calculateTurn(waiting)))
+                        waiting.getId(),
+                        waiting.getName(),
+                        waiting.getDate(),
+                        waiting.getTime(),
+                        waiting.getTheme(),
+                        calculateTurn(waiting)))
                 .toList();
     }
 
