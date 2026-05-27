@@ -167,14 +167,14 @@ function renderWaitingList(waitings) {
     <tr>
       <td>${idx + 1}</td>
       <td>${w.date}</td>
-      <td>${formatTime(w.time.startAt)}</td>
+      <td>${formatTime(w.startAt)}</td>
       <td>${w.theme.name}</td>
       <td>
         <span class="waiting-rank-badge">${w.rank}번째</span>
       </td>
       <td>
         <button class="btn-delete"
-          onclick="openCancelWaitingModal(${w.id},'${escStr(w.date)}','${escStr(formatTime(w.time.startAt))}','${escStr(w.theme.name)}',${w.rank})">
+          onclick="openCancelWaitingModal(${w.id},'${escStr(w.date)}','${escStr(formatTime(w.startAt))}','${escStr(w.theme.name)}',${w.rank})">
           취소
         </button>
       </td>
