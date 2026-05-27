@@ -1,6 +1,7 @@
 package roomescape.reservation.repository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
@@ -16,7 +17,7 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    boolean update(Long id, Long timeId);
+    boolean update(Long id, Long timeId, LocalDateTime now);
 
     List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date);
 
@@ -31,4 +32,6 @@ public interface ReservationRepository {
     boolean promoteToReserved(Long waitingId);
 
     List<ReservationWithWaitingOrder> findAllByName(String name);
+
+    boolean isDuplicatedWithName(String name, Long themeId, ReservationTime time);
 }

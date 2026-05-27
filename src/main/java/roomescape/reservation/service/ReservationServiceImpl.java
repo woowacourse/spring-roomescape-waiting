@@ -52,6 +52,9 @@ public class ReservationServiceImpl implements ReservationService {
         validateNotHoliday(time);
         Theme theme = themeRepository.findById(themeId);
         Status status = Status.RESERVED;
+        if (reservationRepository.isDuplicatedWithName(request.name(), themeId, time)) {
+            throw new DuplicateReservationException();
+        }
         if (isDuplicatedReservation(themeId, time)) {
             status = Status.WAITING;
         }
@@ -62,6 +65,7 @@ public class ReservationServiceImpl implements ReservationService {
                 LocalDateTime.now());
         return reservationRepository.save(newReservation);
     }
+
 
     private void validateThemeId(Long themeId) {
         if (themeId == null) {
@@ -138,7 +142,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (isDuplicatedReservation(reservation.getTheme().getId(), newTime)) {
             throw new DuplicateReservationException();
         }
-        boolean updated = reservationRepository.update(id, timeId);
+        boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now());
         if (!updated) {
             throw new IllegalStateException("예약 수정에 실패했습니다. id: " + id);
 

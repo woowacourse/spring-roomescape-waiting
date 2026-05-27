@@ -371,14 +371,14 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
         when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
-        when(reservationRepository.update(any(), any())).thenReturn(true);
+        when(reservationRepository.update(any(), any(), LocalDateTime.now())).thenReturn(true);
 
         // when
         Reservation result = reservationService.update(1L, 2L);
 
         // then
         assertThat(result.getTime().getId()).isEqualTo(2L);
-        verify(reservationRepository).update(1L, 2L);
+        verify(reservationRepository).update(1L, 2L, LocalDateTime.now());
     }
 
     @DisplayName("존재하지 않는 예약을 변경하는 경우, ReservationNotFoundException이 발생한다.")

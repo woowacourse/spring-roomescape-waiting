@@ -75,10 +75,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean update(Long id, Long timeId) {
+    public boolean update(Long id, Long timeId, LocalDateTime now) {
         int affected = jdbcTemplate.update(
-                "UPDATE reservation SET time_id = ? WHERE id = ?",
-                timeId, id
+                "UPDATE reservation SET time_id = ?, created_at = ? WHERE id = ?",
+                timeId, id, now
         );
         return affected > 0;
     }
@@ -242,5 +242,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                     rs.getInt("orderWaiting")
             );
         }, name);
+    }
+
+    @Override
+    public boolean isDuplicatedWithName(String name, Long themeId, ReservationTime time) {
+        Integer exists = jdbcTemplate.queryForObject(
+                "SELECT EXISTS(SELECT 1 FROM reservation WHERE name = ? AND theme_id = ? AND time_id = ?)",
+                Integer.class,
+                name,
+                themeId,
+                time.getId()
+        );
+        return exists != null && exists == 1;
     }
 }
