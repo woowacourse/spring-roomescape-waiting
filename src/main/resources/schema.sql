@@ -18,9 +18,15 @@ CREATE TABLE IF NOT EXISTS reservation (
     date    DATE NOT NULL,
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
+
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+
+    CONSTRAINT fk_reservation_time
+        FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    CONSTRAINT fk_reservation_theme
+        FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uq_reservation
+        UNIQUE (date, time_id, theme_id)
 );
 
 CREATE TABLE IF NOT EXISTS reservation_waiting (
@@ -30,7 +36,13 @@ CREATE TABLE IF NOT EXISTS reservation_waiting (
     time_id BIGINT NOT NULL,
     theme_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+
+    CONSTRAINT fk_reservation_waiting_time
+        FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    CONSTRAINT fk_reservation_waiting_theme
+        FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uq_reservation_waiting_name_slot
+        UNIQUE (name, date, time_id, theme_id)
 );
