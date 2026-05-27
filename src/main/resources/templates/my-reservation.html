@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>내 예약 조회</title>
+    <title>내 예약·대기 조회</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@400;600&family=Noto+Sans+KR:wght@300;400;500&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/app.css">
 </head>
@@ -23,9 +23,9 @@
     </div>
 
     <div class="section-header">
-        <div class="section-title">예약 목록</div>
+        <div class="section-title">예약·대기 목록</div>
     </div>
-    <div class="result-meta" id="result-meta">이름을 입력하면 예약 목록이 표시됩니다.</div>
+    <div class="result-meta" id="result-meta">이름을 입력하면 예약·대기 목록이 표시됩니다.</div>
     <div class="table-wrap">
         <table>
             <thead>
@@ -34,12 +34,14 @@
                 <th data-sort="date">날짜<span class="sort-indicator"></span></th>
                 <th data-sort="time">시간<span class="sort-indicator"></span></th>
                 <th data-sort="theme">테마<span class="sort-indicator"></span></th>
+                <th data-sort="status">상태<span class="sort-indicator"></span></th>
+                <th data-sort="turn">대기 순번<span class="sort-indicator"></span></th>
                 <th class="right">관리</th>
             </tr>
             </thead>
             <tbody id="reservation-body">
             <tr>
-                <td colspan="5" class="empty">조회된 예약이 없습니다</td>
+                <td colspan="7" class="empty">조회된 예약이 없습니다</td>
             </tr>
             </tbody>
         </table>
@@ -86,10 +88,10 @@
             return;
         }
 
-        resultMeta.textContent = '예약 목록을 불러오는 중입니다.';
-        reservationBody.innerHTML = `<tr><td colspan="5" class="empty">조회 중입니다</td></tr>`;
+        resultMeta.textContent = '예약·대기 목록을 불러오는 중입니다.';
+        reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회 중입니다</td></tr>`;
 
-        fetch(`/reservations?name=${encodeURIComponent(name)}`)
+        fetch(`/reservation-statuses?name=${encodeURIComponent(name)}`)
             .then(handleResponse)
             .then(rows => {
                 reservations = rows;
@@ -104,27 +106,31 @@
     function renderReservations(name, rows) {
         updateSortIndicators();
         const sortedRows = [...rows].sort(compareReservation);
-        resultMeta.textContent = `${name}님의 예약 ${rows.length}건`;
+        resultMeta.textContent = `${name}님의 예약·대기 ${rows.length}건`;
         if (sortedRows.length === 0) {
-            reservationBody.innerHTML = `<tr><td colspan="5" class="empty">조회된 예약이 없습니다</td></tr>`;
+            reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회된 예약이 없습니다</td></tr>`;
             return;
         }
 
         reservationBody.innerHTML = sortedRows.map(reservation => {
+            const waiting = reservation.status === 'WAITING';
+            const editing = editingReservationId === reservation.id && reservation.status === 'RESERVED';
             let row = `
-            <tr class="${editingReservationId === reservation.id ? 'editing' : ''}">
+            <tr class="${editing ? 'editing' : ''}">
                 <td class="muted">${reservation.id}</td>
                 <td>${reservation.date}</td>
                 <td class="accent">${formatTime(reservation.time?.startAt)}</td>
                 <td class="theme-name">${escapeHtml(reservation.theme?.name || '')}</td>
+                <td>${renderStatusBadge(reservation.status)}</td>
+                <td>${waiting ? `${reservation.turn}번째` : '-'}</td>
                 <td class="right">
                     <div class="action-buttons">
-                        <button type="button" class="btn-text" onclick="openEditForm(${reservation.id})">변경</button>
-                        <button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id})">취소</button>
+                        ${waiting ? '' : `<button type="button" class="btn-text" onclick="openEditForm(${reservation.id}, '${reservation.status}')">변경</button>`}
+                        <button type="button" class="btn-text danger" onclick="cancelReservation(${reservation.id}, '${reservation.status}')">취소</button>
                     </div>
                 </td>
             </tr>`;
-            if (editingReservationId === reservation.id) {
+            if (editing) {
                 row += renderEditRow(reservation);
             }
             return row;
@@ -134,7 +140,7 @@
     function renderEditRow(reservation) {
         return `
             <tr class="edit-row">
-                <td colspan="5">
+                <td colspan="7">
                     <div class="edit-panel">
                         <div class="edit-current">
                             현재 예약: ${reservation.date} ${formatTime(reservation.time?.startAt)} · ${escapeHtml(reservation.theme?.name || '')}
@@ -188,7 +194,12 @@
         }).join('');
     }
 
-    function openEditForm(id) {
+    function openEditForm(id, status) {
+        const reservation = findReservation(id, status);
+        if (!reservation || reservation.status === 'WAITING') {
+            showToast('대기는 변경할 수 없습니다', 'error');
+            return;
+        }
         editingReservationId = id;
         editingTimeId = null;
         editingTimes = null;
@@ -204,7 +215,7 @@
     }
 
     function loadEditTimes(id) {
-        const reservation = findReservation(id);
+        const reservation = findReservation(id, 'RESERVED');
         if (!reservation) {
             showToast('예약 정보를 찾을 수 없습니다', 'error');
             return;
@@ -266,25 +277,33 @@
             .catch(error => showToast(error.message, 'error'));
     }
 
-    function cancelReservation(id) {
+    function cancelReservation(id, status) {
         const name = nameInput.value.trim();
-        if (!confirm('예약을 취소하시겠습니까?')) {
+        const reservation = findReservation(id, status);
+        if (!reservation) {
+            showToast('예약 정보를 찾을 수 없습니다', 'error');
+            return;
+        }
+        const waiting = reservation.status === 'WAITING';
+        if (!confirm(waiting ? '예약 대기를 취소하시겠습니까?' : '예약을 취소하시겠습니까?')) {
             return;
         }
 
-        fetch(`/reservations/${id}?name=${encodeURIComponent(name)}`, {
+        const path = waiting ? `/waitings/${id}` : `/reservations/${id}`;
+
+        fetch(`${path}?name=${encodeURIComponent(name)}`, {
             method: 'DELETE'
         })
             .then(handleEmptyResponse)
             .then(() => {
-                showToast('예약이 취소되었습니다', 'success');
+                showToast(waiting ? '예약 대기가 취소되었습니다' : '예약이 취소되었습니다', 'success');
                 loadMyReservations();
             })
             .catch(error => showToast(error.message, 'error'));
     }
 
-    function findReservation(id) {
-        return reservations.find(reservation => reservation.id === id);
+    function findReservation(id, status) {
+        return reservations.find(reservation => reservation.id === id && reservation.status === status);
     }
 
     function compareReservation(a, b) {
@@ -318,7 +337,9 @@
             id: reservation.id,
             date: reservation.date,
             time: reservation.time?.startAt,
-            theme: reservation.theme?.name
+            theme: reservation.theme?.name,
+            status: reservation.status,
+            turn: reservation.turn ?? 0
         }[key] || '';
     }
 
@@ -350,6 +371,13 @@
 
     function formatTime(value) {
         return value ? value.slice(0, 5) : '';
+    }
+
+    function renderStatusBadge(status) {
+        if (status === 'WAITING') {
+            return '<span class="status-badge waiting">대기</span>';
+        }
+        return '<span class="status-badge reserved">예약</span>';
     }
 
     function escapeHtml(value) {
@@ -388,8 +416,8 @@
     }
 
     function showError(error) {
-        resultMeta.textContent = '예약 목록을 불러오지 못했습니다.';
-        reservationBody.innerHTML = `<tr><td colspan="5" class="empty">조회된 예약이 없습니다</td></tr>`;
+        resultMeta.textContent = '예약·대기 목록을 불러오지 못했습니다.';
+        reservationBody.innerHTML = `<tr><td colspan="7" class="empty">조회된 예약이 없습니다</td></tr>`;
         showToast(error.message, 'error');
     }
 

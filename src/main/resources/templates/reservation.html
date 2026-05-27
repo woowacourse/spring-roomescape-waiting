@@ -11,7 +11,7 @@
 
 <header>
     <a href="/" class="escape-logo">ESC<span>A</span>PE</a>
-    <a href="/reservation/me" class="header-link">내 예약 조회</a>
+    <a href="/reservation/me" class="header-link">내 예약·대기 조회</a>
 </header>
 
 <main>
@@ -62,30 +62,30 @@
 
     <div class="divider"></div>
 
-    <!-- 3. 예약 가능 시간 -->
-    <div class="section">
+    <!-- 3. 예약/대기 가능 시간 -->
+    <div class="section" id="time-section">
         <div class="section-header">
             <div class="section-num">3</div>
-            <span class="section-title">예약 가능 시간</span>
+            <span class="section-title">예약·대기 가능 시간</span>
         </div>
         <div id="time-container">
-            <div class="placeholder-msg">테마와 날짜를 선택하면 예약 가능한 시간이 표시됩니다</div>
+            <div class="placeholder-msg">테마와 날짜를 선택하면 예약·대기 가능한 시간이 표시됩니다</div>
         </div>
     </div>
 
     <div class="divider"></div>
 
-    <!-- 4. 예약 확정 -->
+    <!-- 4. 예약/대기 신청 -->
     <div class="section" id="booking-section" style="display: none;">
         <div class="section-header">
             <div class="section-num">4</div>
-            <span class="section-title">예약 확정</span>
+            <span class="section-title">예약·대기 신청</span>
         </div>
-        <div class="booking-form">
+        <form class="booking-form" onsubmit="submitReservation(event)">
             <div class="booking-summary" id="booking-summary"></div>
-            <input type="text" id="user-name" placeholder="예약자 성함을 입력하세요">
-            <button class="btn-reserve" onclick="makeReservation()" id="btn-reserve">예약하기</button>
-        </div>
+            <input type="text" id="user-name" placeholder="신청자 성함을 입력하세요">
+            <button type="submit" class="btn-reserve" id="btn-reserve">예약하기</button>
+        </form>
     </div>
 
 </main>
@@ -97,6 +97,7 @@
     let selectedThemeId = null;
     let selectedTimeId = null;
     let selectedTimeLabel = null;
+    let selectedSlotAvailable = true;
 
     const themeGrid = document.getElementById('theme-grid');
     const dateSelect = document.getElementById('date-select');
@@ -161,6 +162,7 @@
         });
         updateStepIndicator();
         fetchAvailableTimes();
+        document.getElementById('time-section').scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
 
     dateSelect.onchange = function () {
@@ -174,6 +176,7 @@
 
         timeContainer.innerHTML = '<div class="loading-dots"><span></span><span></span><span></span></div>';
         selectedTimeId = null;
+        selectedSlotAvailable = true;
         bookingSection.style.display = 'none';
         updateStepIndicator();
 
@@ -181,7 +184,7 @@
             .then(handleResponse)
             .then(times => renderTimes(times))
             .catch(error => {
-                timeContainer.innerHTML = '<div class="placeholder-msg">예약 가능 시간을 불러오지 못했습니다</div>';
+                timeContainer.innerHTML = '<div class="placeholder-msg">예약·대기 가능 시간을 불러오지 못했습니다</div>';
                 showToast(error.message, 'error');
             });
     }
@@ -189,7 +192,7 @@
     function renderTimes(times) {
         timeContainer.innerHTML = '';
         if (times.length === 0) {
-            timeContainer.innerHTML = '<div class="placeholder-msg">선택하신 날짜에 예약 가능한 시간이 없습니다</div>';
+            timeContainer.innerHTML = '<div class="placeholder-msg">선택 가능한 시간이 없습니다</div>';
             return;
         }
         const grid = document.createElement('div');
@@ -203,13 +206,14 @@
             const available = item.available !== undefined ? item.available : true;
 
             const slot = document.createElement('div');
-            slot.className = 'time-slot' + (available ? '' : ' unavailable');
+            slot.className = 'time-slot' + (available ? '' : ' waiting');
             slot.textContent = startAt;
 
             if (available) {
-                slot.onclick = () => selectTime(id, startAt, slot);
+                slot.onclick = () => selectTime(id, startAt, slot, true);
             } else {
-                slot.title = '이미 예약된 시간입니다';
+                slot.title = '이미 예약된 시간입니다. 대기를 신청할 수 있습니다';
+                slot.onclick = () => selectTime(id, startAt, slot, false);
             }
             grid.appendChild(slot);
         });
@@ -217,9 +221,10 @@
         updateStepIndicator();
     }
 
-    function selectTime(timeId, timeLabel, element) {
+    function selectTime(timeId, timeLabel, element, available) {
         selectedTimeId = timeId;
         selectedTimeLabel = timeLabel;
+        selectedSlotAvailable = available;
         document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
         element.classList.add('selected');
         showBookingSection();
@@ -232,7 +237,7 @@
         summary.innerHTML = `
             <div class="summary-row">
                 <span class="summary-label">테마</span>
-                <span class="summary-value">${theme ? theme.name : ''}</span>
+                <span class="summary-value">${theme ? escapeHtml(theme.name) : ''}</span>
             </div>
             <div class="summary-row">
                 <span class="summary-label">날짜</span>
@@ -242,10 +247,20 @@
                 <span class="summary-label">시간</span>
                 <span class="summary-value accent">${selectedTimeLabel}</span>
             </div>
+            <div class="summary-row">
+                <span class="summary-label">신청 구분</span>
+                <span class="summary-value">${selectedSlotAvailable ? '예약' : '대기'}</span>
+            </div>
         `;
+        document.getElementById('btn-reserve').textContent = selectedSlotAvailable ? '예약하기' : '대기 신청하기';
         bookingSection.style.display = 'block';
         bookingSection.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         setTimeout(() => document.getElementById('user-name').focus(), 300);
+    }
+
+    function submitReservation(event) {
+        event.preventDefault();
+        makeReservation();
     }
 
     function makeReservation() {
@@ -257,7 +272,7 @@
 
         const btn = document.getElementById('btn-reserve');
         btn.disabled = true;
-        btn.textContent = '예약 중...';
+        btn.textContent = selectedSlotAvailable ? '예약 중...' : '대기 신청 중...';
 
         const body = {
             themeId: parseInt(selectedThemeId),
@@ -266,26 +281,28 @@
             name: name
         };
 
-        fetch('/reservations', {
+        const path = selectedSlotAvailable ? '/reservations' : '/waitings';
+
+        fetch(path, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
         })
             .then(res => {
                 if (res.ok) {
-                    showToast('예약이 완료되었습니다', 'success');
+                    showToast(selectedSlotAvailable ? '예약이 완료되었습니다' : '대기 신청이 완료되었습니다', 'success');
                     setTimeout(() => window.location.href = `/reservation/me?name=${encodeURIComponent(name)}`, 1500);
                     return;
                 }
                 return res.json()
                     .then(error => {
-                        throw new Error(error.detail || '예약 중 오류가 발생했습니다');
+                        throw new Error(error.detail || '신청 중 오류가 발생했습니다');
                     });
             })
             .catch(error => {
-                showToast(error.message || '예약 중 오류가 발생했습니다', 'error');
+                showToast(error.message || '신청 중 오류가 발생했습니다', 'error');
                 btn.disabled = false;
-                btn.textContent = '예약하기';
+                btn.textContent = selectedSlotAvailable ? '예약하기' : '대기 신청하기';
             });
     }
 

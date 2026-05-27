@@ -322,6 +322,27 @@ input[type="date"]::-webkit-calendar-picker-indicator {
     background: transparent;
 }
 
+.time-slot.waiting {
+    border-color: rgba(200,169,110,0.35);
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: rgba(200,169,110,0.05);
+}
+
+.time-slot.waiting::after {
+    content: '대기';
+    margin-left: 0.45rem;
+    color: var(--accent);
+    font-size: 0.68rem;
+}
+
+.time-slot.waiting:hover,
+.time-slot.waiting.selected {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-dim);
+}
+
 /* 플레이스홀더 메시지 */
 .placeholder-msg {
     padding: 2rem;
@@ -698,6 +719,30 @@ tbody tr.edit-row:hover {
 .theme-name {
     color: var(--text-primary);
     font-weight: 400;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 0.22rem 0.55rem;
+    font-size: 0.72rem;
+    line-height: 1;
+}
+
+.status-badge.reserved {
+    border-color: rgba(76,175,125,0.45);
+    color: var(--success);
+    background: rgba(76,175,125,0.08);
+}
+
+.status-badge.waiting {
+    border-color: rgba(200,169,110,0.45);
+    color: var(--accent);
+    background: var(--accent-dim);
 }
 
 .action-buttons {
