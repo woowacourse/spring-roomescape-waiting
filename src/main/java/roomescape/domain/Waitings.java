@@ -27,4 +27,11 @@ public class Waitings {
     public int nextOrderIndex() {
         return waitings.size() + 1;
     }
+
+    public List<Waiting> reorderAfterRemoval(int removedOrder) {
+        return waitings.stream()
+                .filter(w -> w.getOrderIndex() > removedOrder)
+                .map(w -> w.withOrderIndex(w.getOrderIndex() - 1))
+                .toList();
+    }
 }

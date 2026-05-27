@@ -34,6 +34,10 @@ public class Waiting {
         return new Waiting(id, name, date, time, theme, order);
     }
 
+    public Waiting withOrderIndex(int newOrderIndex) {
+        return new Waiting(this.id, this.name, this.date, this.time, this.theme, newOrderIndex);
+    }
+
     private static void validate(String name, LocalDate date,
                                  ReservationTime time, Theme theme, int order) {
         if (name == null || name.isBlank()) {
@@ -60,7 +64,6 @@ public class Waiting {
     public boolean isOwnedBy(String name) {
         return this.name.equals(name);
     }
-
 
     public int getOrderIndex() {
         return orderIndex;

@@ -63,5 +63,24 @@ public class WaitingService {
         Waiting saved = waitingRepository.save(newWaiting);
         return WaitingResult.from(saved);
     }
+
+    //TODO @Transactional은 사이클 2에서 다루는 내용이므로 사이클 1에서는 다루지 않음.
+    public void cancelByOwner(Long id, String name) {
+        Waiting waiting = waitingRepository.findById(id)
+                .filter(w -> w.isOwnedBy(name))
+                .orElseThrow(() -> new ResourceNotFoundException("존재하지 않는 대기입니다."));//남의 대기
+
+        waitingRepository.deleteById(id);
+
+        Waitings remaining = new Waitings(
+                waitingRepository.findBySlot(
+                        waiting.getDate(),
+                        waiting.getTime().getId(),
+                        waiting.getTheme().getId())
+        );
+        for (Waiting w : remaining.reorderAfterRemoval(waiting.getOrderIndex())) {
+            waitingRepository.updateOrderIndex(w.getId(), w.getOrderIndex());
+        }
+    }
 }
 

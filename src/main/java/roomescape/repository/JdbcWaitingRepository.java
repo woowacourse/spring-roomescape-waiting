@@ -4,6 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -78,5 +79,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
                  ORDER BY w.wait_order ASC
                 """;
         return jdbcTemplate.query(sql, rowMapper, date.toString(), timeId, themeId);
+    }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        String sql = """
+                SELECT w.id, w.name, w.date, w.wait_order,
+                       t.id AS time_id, t.start_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description, th.thumbnail_url
+                  FROM waiting w
+                  JOIN reservation_time t ON w.time_id = t.id
+                  JOIN theme th ON w.theme_id = th.id
+                 WHERE w.id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper, id).stream().findFirst();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    }
+
+    @Override
+    public void updateOrderIndex(Long id, int newOrderIndex) {
+        jdbcTemplate.update("UPDATE waiting SET wait_order = ? WHERE id = ?", newOrderIndex, id);
     }
 }
