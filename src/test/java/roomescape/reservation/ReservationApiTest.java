@@ -42,7 +42,8 @@ class ReservationApiTest {
                 .body("time.id", equalTo(timeId.intValue()))
                 .body("time.startAt", equalTo("09:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("공포 테마"));
+                .body("theme.name", equalTo("공포 테마"))
+                .body("status", equalTo("CONFIRM"));
     }
 
     @DisplayName("방탈출 예약 삭제 API를 테스트합니다.")
@@ -132,7 +133,8 @@ class ReservationApiTest {
                 .body("time.id", equalTo(timeId.intValue()))
                 .body("time.startAt", equalTo("09:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("공포 테마"));
+                .body("theme.name", equalTo("공포 테마"))
+                .body("status", equalTo("WAITING"));
     }
 
     @DisplayName("방탈출 예약 날짜와 시간 변경 API를 테스트합니다.")
@@ -162,7 +164,8 @@ class ReservationApiTest {
                 .body("time.id", equalTo(updateTimeId.intValue()))
                 .body("time.startAt", equalTo("10:00"))
                 .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("공포 테마"));
+                .body("theme.name", equalTo("공포 테마"))
+                .body("status", equalTo("CONFIRM"));
     }
 
     @DisplayName("존재하지 않는 예약을 변경 시 404 응답 반환을 테스트합니다.")
@@ -238,6 +241,7 @@ class ReservationApiTest {
                 .statusCode(404);
     }
 
+    // TODO: 조회 시 CONFIRM, WAITING 여부 추가 처리 후 테스트 수정 필요
     @DisplayName("사용자 이름 없이 예약 전체 조회 API를 테스트합니다.")
     @Test
     void find_all_reservations() {
@@ -280,6 +284,7 @@ class ReservationApiTest {
                 .body("[2].theme.name", equalTo("공포 테마"));
     }
 
+    // TODO: 조회 시 CONFIRM, WAITING 여부 추가 처리 후 테스트 수정 필요
     @DisplayName("사용자 이름으로 예약 목록 조회 API를 테스트합니다.")
     @Test
     void find_reservations_by_name() {
