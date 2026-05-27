@@ -1,8 +1,6 @@
 package roomescape.controller.dto.response;
 
 import java.time.LocalDate;
-
-import roomescape.domain.reservation.Rank;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationResult;
 
@@ -15,7 +13,8 @@ public class ReservationResponse {
     private final ReservationTimeResponse time;
     private final ThemeResponse theme;
 
-    public ReservationResponse(long id, String name, LocalDate date, String state, int rank, ReservationTimeResponse time,
+    public ReservationResponse(long id, String name, LocalDate date, String state, int rank,
+                               ReservationTimeResponse time,
                                ThemeResponse theme) {
         this.id = id;
         this.name = name;
@@ -30,7 +29,7 @@ public class ReservationResponse {
         Reservation reservation = reservationResult.getReservation();
         return new ReservationResponse(reservation.getId(), reservation.getName().getValue(),
                 reservation.getDate().getDate(),
-                reservationResult.status().toString(),
+                reservationResult.status().getKoreanName(),
                 reservationResult.getRank().getValue(),
                 ReservationTimeResponse.toDto(reservation.getTime()),
                 ThemeResponse.toDto(reservation.getTheme()));
