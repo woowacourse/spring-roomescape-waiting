@@ -30,7 +30,7 @@ public class ReservationResponse {
         Reservation reservation = reservationResult.getReservation();
         return new ReservationResponse(reservation.getId(), reservation.getName().getValue(),
                 reservation.getDate().getDate(),
-                reservationResult.status(),
+                reservationResult.status().toString(),
                 reservationResult.getRank().getValue(),
                 ReservationTimeResponse.toDto(reservation.getTime()),
                 ThemeResponse.toDto(reservation.getTheme()));

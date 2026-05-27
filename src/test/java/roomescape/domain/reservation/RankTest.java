@@ -27,4 +27,21 @@ class RankTest {
 
         assertThat(rank.isFirst()).isFalse();
     }
+
+    @Test
+    void 값이_1이면_상태는_승인이다() {
+        int input = 1;
+
+        Rank rank = new Rank(1);
+
+        assertThat(rank.decideStatus()).isEqualTo(Status.APPROVED);
+    }
+
+    @ValueSource(ints = {0, 2})
+    @ParameterizedTest
+    void 값이_1이면_상태는_승인이다(int value) {
+        Rank rank = new Rank(value);
+
+        assertThat(rank.decideStatus()).isEqualTo(Status.WAITING);
+    }
 }

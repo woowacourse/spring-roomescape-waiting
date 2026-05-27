@@ -14,6 +14,14 @@ public class Rank {
         return value == 1;
     }
 
+    public Status decideStatus() {
+        if(isFirst()) {
+            return Status.APPROVED;
+        }
+
+        return Status.WAITING;
+    }
+
     public int getValue() {
         return value;
     }

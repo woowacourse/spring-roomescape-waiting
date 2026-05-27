@@ -11,12 +11,8 @@ public class ReservationResult {
         this.reservation = reservation;
     }
 
-    public String status(){
-        if (rank.isFirst()){
-            return "승인";
-        }
-
-        return "대기";
+    public Status status(){
+        return rank.decideStatus();
     }
 
     public Rank getRank() {
