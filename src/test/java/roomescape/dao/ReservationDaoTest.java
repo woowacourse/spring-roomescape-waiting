@@ -82,7 +82,6 @@ class ReservationDaoTest {
         assertThat(secondWaiting.getOrder()).isEqualTo(1);
     }
 
-
     @Test
     void 예약_존재_여부_확인_존재하는_경우() {
         ReservationTime time = reservationTimeDao.findTimeById(1L);

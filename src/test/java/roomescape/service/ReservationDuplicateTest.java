@@ -8,8 +8,10 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.request.ReservationRequest;
+import roomescape.dto.request.UserReservationUpdateRequest;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -36,5 +38,31 @@ class ReservationDuplicateTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 5, 30), 1L, 1L);
 
         assertDoesNotThrow(() -> reservationService.save(request));
+    }
+
+    @Test
+    void 예약_변경시_이미_예약이_존재하면_대기_불가() {
+
+        ReservationRequest firstRequest = new ReservationRequest("그해", LocalDate.of(2026, 6, 1), 1L, 1L);
+        ReservationRequest secondRequest = new ReservationRequest("그해", LocalDate.of(2026, 6, 1), 2L, 1L);
+
+        long id = reservationService.save(firstRequest).id();
+        reservationService.save(secondRequest);
+
+        UserReservationUpdateRequest updateRequest = new UserReservationUpdateRequest(LocalDate.of(2026,6,1), 2L, 1L);
+
+        assertThatThrownBy(() -> reservationService.update(id, updateRequest))
+                .isInstanceOf(IllegalArgumentException.class);
+    }
+
+    @Test
+    void 같은_사용자_중복_예약_및_대기_불가() {
+
+        ReservationRequest firstRequest = new ReservationRequest("그해", LocalDate.of(2026, 6, 1), 1L, 1L);
+        reservationService.save(firstRequest);
+
+        ReservationRequest secondRequest = new ReservationRequest("그해", LocalDate.of(2026, 6, 1), 1L, 1L);
+        assertThatThrownBy(() -> reservationService.save(secondRequest))
+                .isInstanceOf(DuplicateKeyException.class);
     }
 }
