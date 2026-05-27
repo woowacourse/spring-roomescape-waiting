@@ -162,7 +162,8 @@ public class ReservationJdbcDao implements ReservationDao {
     @Override
     public boolean existsById(Long id) {
         String sql = "SELECT EXISTS(SELECT 1 FROM reservations WHERE id = :id)";
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("id", id), Boolean.class));
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("id", id), Boolean.class));
     }
 
     @Override
@@ -219,15 +220,32 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
+    public Optional<Reservation> findByThemeIdAndTimeIdAndDate(Long themeId, Long timeId, LocalDate date) {
+        String sql = BASE_SELECT + """
+                WHERE r.theme_id = :themeId AND r.time_id = :timeId AND r.date = :date
+                AND r.deleted_at = :sentinel
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("themeId", themeId)
+                .addValue("timeId", timeId)
+                .addValue("date", date)
+                .addValue("sentinel", SENTINEL);
+        return jdbcTemplate.query(sql, params, ROW_MAPPER).stream().findFirst();
+    }
+
+    @Override
     public boolean existsByThemeId(Long themeId) {
         String sql = "SELECT EXISTS(SELECT 1 FROM reservations WHERE theme_id = :themeId)";
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("themeId", themeId), Boolean.class));
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("themeId", themeId), Boolean.class));
     }
 
     @Override
     public boolean existsByTimeId(Long timeId) {
         String sql = "SELECT EXISTS(SELECT 1 FROM reservations WHERE time_id = :timeId)";
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("timeId", timeId), Boolean.class));
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, new MapSqlParameterSource("timeId", timeId), Boolean.class));
     }
 
 }

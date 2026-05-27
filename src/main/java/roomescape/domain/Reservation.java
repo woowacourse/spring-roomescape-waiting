@@ -86,6 +86,10 @@ public class Reservation {
         return status == ReservationStatus.BOOKED;
     }
 
+    public boolean isSameMember(Member member) {
+        return Objects.equals(this.member.getId(), member.getId());
+    }
+
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof Reservation that)) {
