@@ -197,8 +197,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 대기 상태로 들어간다.")
-    void updateScheduleByManager_duplicated() {
+    @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
+    void updateScheduleByManager_fail_duplicated() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer alreadyReservedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
         Integer timeId = createReservationTime(managerToken, startAt);
@@ -217,7 +217,8 @@ class ReservationAdminControllerTest extends AcceptanceTest {
                 .body(params)
                 .when().patch("/admin/reservations/" + reservationId + "/schedule")
                 .then().log().all()
-                .statusCode(HttpStatus.OK.value());
+                .statusCode(RESERVATION_ALREADY_BOOKED.getHttpStatus().value())
+                .body("message", is(RESERVATION_ALREADY_BOOKED.getMessage()));
     }
 
     @Test
