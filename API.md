@@ -36,7 +36,7 @@
 | 분류 | API |
 | --- | --- |
 | **공개** | `POST /api/v1/auth/login`, `POST /api/v1/auth/login/token`, `POST /api/v1/auth/logout`, `GET /api/v1/themes`, `GET /api/v1/themes/popular`, `GET /api/v1/stores`, `GET /api/v1/reservation-times`, `GET /api/v1/reservation-times/availability` |
-| **인증 필요 (모든 역할)** | `GET /api/v1/auth/me`, `GET /api/v1/reservations`, `POST /api/v1/reservations`, `PATCH /api/v1/reservations/{id}`, `DELETE /api/v1/reservations/{id}` |
+| **인증 필요 (모든 역할)** | `GET /api/v1/auth/me`, `GET /api/v1/reservations`, `POST /api/v1/reservations`, `PATCH /api/v1/reservations/{id}`, `DELETE /api/v1/reservations/{id}`, `POST /api/v1/reservations/{id}/waits`, `DELETE /api/v1/reservations/{reservationId}/waits/mine` |
 | **MANAGER 권한 필요** | `POST /api/v1/admin/themes`, `DELETE /api/v1/admin/themes/{id}`, `POST /api/v1/admin/reservation-times`, `DELETE /api/v1/admin/reservation-times/{id}`, `GET /api/v1/admin/store/reservations`, `PATCH /api/v1/admin/store/reservations/{id}`, `DELETE /api/v1/admin/store/reservations/{id}` |
 
 > 실제 인증 적용은 `AuthenticationConfig`의 인터셉터 등록 규칙(`addPathPatterns` + `excludePathPatterns`)을 따른다. 역할 기반 인가는 `LoginMemberArgumentResolver`가 `@LoginMember(role = ...)`를 읽어 처리한다.
@@ -200,39 +200,67 @@
 
 > 모든 예약 API는 **인증 필요**. 비로그인 시 `401 Unauthorized` (`AUTH401_002`).
 
-### 1-1. 내 예약 목록 조회
+### 1-1. 내 예약·대기 목록 조회
 
 - `GET /api/v1/reservations`
 - 인증 필요
 
 #### 조회 규칙
 
-- 로그인한 사용자가 만든 예약만 반환한다.
+- 로그인한 사용자의 **확정된 예약(`reservations`)** 과 **대기 중인 예약(`waitings`)** 을 한 번에 반환한다.
+- 대기 항목은 *같은 슬롯 안에서의 신청 순서*인 `order` 를 함께 내려준다. (1 = 첫 번째 대기자)
 - 쿼리 파라미터 없음.
 
 #### 응답 예시
 
 ```json
-[
-  {
-    "id": 1,
-    "memberId": 1,
-    "date": "2026-05-14",
-    "time": {
+{
+  "reservations": [
+    {
       "id": 1,
-      "startAt": "10:00"
+      "memberId": 1,
+      "date": "2026-05-27",
+      "time": {
+        "id": 1,
+        "startAt": "10:00"
+      },
+      "themeId": 1,
+      "storeId": 1
+    }
+  ],
+  "waitings": [
+    {
+      "order": 1,
+      "reservationId": 1,
+      "memberId": 1,
+      "createdAt": "2026-05-27T12:00:01"
     },
-    "themeId": 1,
-    "storeId": 1
-  }
-]
+    {
+      "order": 2,
+      "reservationId": 3,
+      "memberId": 1,
+      "createdAt": "2026-05-27T12:00:05"
+    }
+  ]
+}
 ```
+
+#### 응답 필드
+
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| `reservations[]` | `Array<ReservationResponse>` | 확정된 예약 목록 |
+| `waitings[]` | `Array<WaitingResponse>` | 대기 중인 예약 목록 |
+| `waitings[].order` | `Long` | 같은 슬롯 안에서의 대기 순번 (1부터 시작) |
+| `waitings[].reservationId` | `Long` | 대기 중인 원본 예약 ID |
+| `waitings[].memberId` | `Long` | 회원 ID |
+| `waitings[].createdAt` | `String` | 대기 신청 시각 (ISO-8601) |
 
 #### 응답 코드
 
 | 상태 코드 | 설명 |
 | --- | --- |
-| `200 OK` | 예약 목록 조회 성공 |
+| `200 OK` | 예약·대기 목록 조회 성공 |
 | `401 Unauthorized` | 비로그인 |
 
 ### 1-2. 예약 생성
@@ -406,6 +434,106 @@
 | `RESERVATION404_001` | 존재하지 않는 예약 |
 | `RESERVATION_TIME404_001` | 존재하지 않는 예약 시간 |
 | `AUTH401_002` | 비로그인 |
+
+### 1-5. 예약 대기 신청
+
+- `POST /api/v1/reservations/{id}/waits`
+- 인증 필요. 신청자(`memberId`)는 **JWT(쿠키 또는 `Authorization` 헤더)에서 추출**되어 서버가 주입한다.
+
+#### 경로 변수
+
+| 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | `Long` | 대기 신청 대상 예약 ID |
+
+#### 요청 본문
+
+- 없음
+
+#### 검증 규칙
+
+- 대상 예약이 존재해야 한다.
+- 대상 예약은 *다른 사용자가* 한 예약이어야 한다 (본인 예약에는 대기 불가).
+- 대상 예약 슬롯이 *지나간 시간*이면 신청 불가.
+- 같은 회원이 *같은 슬롯*에 대기 신청은 1회만 가능 (중복 신청 불가).
+
+#### 응답 예시
+
+```json
+{
+  "id": 1,
+  "reservationId": 1,
+  "memberId": 1,
+  "createdAt": "2026-05-27T12:00:01"
+}
+```
+
+#### 응답 필드
+
+| 필드 | 타입 | 설명 |
+| --- | --- | --- |
+| `id` | `Long` | 생성된 예약 대기 ID |
+| `reservationId` | `Long` | 대기 대상 예약 ID |
+| `memberId` | `Long` | 신청 회원 ID |
+| `createdAt` | `String` | 신청 시각 (ISO-8601) |
+
+#### 응답 코드
+
+| 상태 코드 | 설명 |
+| --- | --- |
+| `201 Created` | 예약 대기 신청 성공 |
+| `401 Unauthorized` | 비로그인 |
+| `404 Not Found` | 존재하지 않는 예약 |
+| `409 Conflict` | 같은 슬롯에 본인 대기가 이미 존재 |
+| `422 Unprocessable Entity` | 지난 시간 슬롯에 대한 대기 신청 / 본인 예약에 대기 시도 |
+
+#### 주요 에러 코드
+
+| 에러 코드 | 설명 |
+| --- | --- |
+| `AUTH401_002` | 비로그인 |
+| `RESERVATION404_001` | 존재하지 않는 예약 |
+| `RESERVATION_WAIT409_001` | 같은 슬롯에 본인 대기가 이미 존재함 |
+| `RESERVATION_WAIT422_001` | 지난 시간 슬롯의 대기 신청 |
+| `RESERVATION_WAIT422_002` | 본인 예약에 대기 시도 |
+
+### 1-6. 예약 대기 취소
+
+- `DELETE /api/v1/reservations/{reservationId}/waits/mine`
+- 인증 필요. 본인의 대기만 취소 가능.
+
+#### 설계 메모
+
+대상 대기는 `(reservationId, memberId)` 조합으로 *유일하게 식별*된다 (도메인 unique key). 따라서 URL에 `waitId`를 노출할 필요가 없고, `memberId`는 인증 토큰에서 추출한다.
+
+#### 경로 변수
+
+| 이름 | 타입 | 설명 |
+| --- | --- | --- |
+| `reservationId` | `Long` | 대기를 걸어둔 예약 ID |
+
+#### 요청 본문
+
+- 없음
+
+#### 응답
+
+- 본문 없음
+
+#### 응답 코드
+
+| 상태 코드 | 설명 |
+| --- | --- |
+| `204 No Content` | 예약 대기 취소 성공 |
+| `401 Unauthorized` | 비로그인 |
+| `404 Not Found` | 본인 대기가 존재하지 않음 |
+
+#### 주요 에러 코드
+
+| 에러 코드 | 설명 |
+| --- | --- |
+| `AUTH401_002` | 비로그인 |
+| `RESERVATION_WAIT404_001` | 존재하지 않는 예약 대기 |
 
 ---
 
@@ -898,10 +1026,12 @@
 | `POST` | `/api/v1/auth/login/token` | ❌ | 모바일 토큰 로그인 (JSON 응답에 JWT 발급) |
 | `GET` | `/api/v1/auth/me` | ✅ | 현재 사용자 조회 |
 | `POST` | `/api/v1/auth/logout` | ❌ | 로그아웃 (쿠키 폐기) |
-| `GET` | `/api/v1/reservations` | ✅ | 내 예약 목록 조회 |
+| `GET` | `/api/v1/reservations` | ✅ | 내 예약·대기 목록 조회 |
 | `POST` | `/api/v1/reservations` | ✅ | 예약 생성 |
 | `PATCH` | `/api/v1/reservations/{id}` | ✅ | 예약 날짜·시간 변경 |
 | `DELETE` | `/api/v1/reservations/{id}` | ✅ | 예약 삭제 |
+| `POST` | `/api/v1/reservations/{id}/waits` | ✅ | 예약 대기 신청 |
+| `DELETE` | `/api/v1/reservations/{reservationId}/waits/mine` | ✅ | 내 예약 대기 취소 |
 | `GET` | `/api/v1/reservation-times` | ❌ | 예약 시간 목록 조회 |
 | `GET` | `/api/v1/reservation-times/availability?date=&themeId=` | ❌ | 예약 가능 시간 조회 |
 | `GET` | `/api/v1/themes` | ❌ | 테마 목록 조회 |
