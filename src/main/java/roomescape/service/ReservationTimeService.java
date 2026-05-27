@@ -4,32 +4,25 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceReservationTimeCreateRequest;
 import roomescape.service.dto.response.ServiceReservationTimeAvailabilityResponse;
 import roomescape.service.dto.response.ServiceReservationTimeResponse;
 
-@Service
+@Component
 @Transactional(readOnly = true)
 public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
     private final Clock clock;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                                  ReservationRepository reservationRepository, Clock clock) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, Clock clock) {
         this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
         this.clock = clock;
     }
 
@@ -56,7 +49,6 @@ public class ReservationTimeService {
 
     public List<ServiceReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(
             LocalDate date, Long themeId) {
-        validateExistTheme(themeId);
         validateNotPastDate(date);
 
         List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
@@ -72,12 +64,6 @@ public class ReservationTimeService {
                 }).toList();
     }
 
-    private void validateExistTheme(Long themeId) {
-        if (!themeRepository.existById(themeId)) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME);
-        }
-    }
-
     private void validateNotPastDate(LocalDate date) {
         if (date.isBefore(LocalDate.now(clock))) {
             throw new CustomInvalidRequestException(ErrorCode.PAST_RESERVATION_TIME_READ);
@@ -86,14 +72,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void delete(Long id) {
-        validateReferencedTime(id);
         reservationTimeRepository.delete(id);
-    }
-
-    private void validateReferencedTime(Long id) {
-        if (reservationRepository.existByTimeId(id)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
-        }
     }
 
     public ReservationTime findReservationTime(Long timeId) {

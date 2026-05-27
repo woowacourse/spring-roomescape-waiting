@@ -3,17 +3,16 @@ package roomescape.service;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceThemeCreateRequest;
 import roomescape.service.dto.response.ServiceThemeResponse;
 
-@Service
+@Component
 @Transactional(readOnly = true)
 public class ThemeService {
 
@@ -21,11 +20,9 @@ public class ThemeService {
     public static final int MAX_RANKING_PERIOD = 366;
 
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository) {
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
@@ -42,14 +39,7 @@ public class ThemeService {
 
     @Transactional
     public void delete(Long id) {
-        validateReferencedTheme(id);
         themeRepository.delete(id);
-    }
-
-    private void validateReferencedTheme(Long id) {
-        if (reservationRepository.existByThemeId(id)) {
-            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
-        }
     }
 
     public List<ServiceThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
@@ -58,6 +48,17 @@ public class ThemeService {
         return themeRepository.findRanking(startDate, endDate, RANKING_LIMIT).stream()
                 .map(ServiceThemeResponse::from)
                 .toList();
+    }
+
+    public Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
+                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
+    }
+
+    public void validateExistTheme(Long themeId) {
+        if (!themeRepository.existById(themeId)) {
+            throw new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME);
+        }
     }
 
     private void validateRankingPeriod(LocalDate startDate, LocalDate endDate) {
@@ -72,10 +73,5 @@ public class ThemeService {
         if (ChronoUnit.DAYS.between(startDate, endDate) > MAX_RANKING_PERIOD) {
             throw new CustomInvalidRequestException(ErrorCode.LONG_RANKING_PERIOD);
         }
-    }
-
-    public Theme findTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
     }
 }

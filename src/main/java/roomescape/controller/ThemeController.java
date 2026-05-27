@@ -8,22 +8,22 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.response.ControllerThemeResponse;
-import roomescape.service.ThemeService;
+import roomescape.facade.ThemeFacade;
 import roomescape.service.dto.response.ServiceThemeResponse;
 
 @RestController
 @RequestMapping("/themes")
 public class ThemeController {
 
-    private final ThemeService themeService;
+    private final ThemeFacade themeFacade;
 
-    public ThemeController(ThemeService themeService) {
-        this.themeService = themeService;
+    public ThemeController(ThemeFacade themeFacade) {
+        this.themeFacade = themeFacade;
     }
 
     @GetMapping
     public ResponseEntity<List<ControllerThemeResponse>> findAll() {
-        List<ServiceThemeResponse> serviceResponses = themeService.findAll();
+        List<ServiceThemeResponse> serviceResponses = themeFacade.findAll();
         List<ControllerThemeResponse> controllerResponses = serviceResponses.stream()
                 .map(ControllerThemeResponse::from)
                 .toList();
@@ -35,7 +35,7 @@ public class ThemeController {
             @RequestParam("start-date") LocalDate startDate,
             @RequestParam("end-date") LocalDate endDate
     ) {
-        List<ServiceThemeResponse> serviceResponses = themeService.findRanking(startDate, endDate);
+        List<ServiceThemeResponse> serviceResponses = themeFacade.findRanking(startDate, endDate);
         List<ControllerThemeResponse> controllerResponses = serviceResponses.stream()
                 .map(ControllerThemeResponse::from)
                 .toList();

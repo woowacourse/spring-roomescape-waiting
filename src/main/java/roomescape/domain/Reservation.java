@@ -1,8 +1,6 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
 import roomescape.exception.CustomInvalidDomainException;
 import roomescape.exception.ErrorCode;
 
@@ -49,19 +47,6 @@ public class Reservation {
         if (theme == null) {
             throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
         }
-    }
-
-    public boolean isPast(LocalDateTime now) {
-        LocalDate nowDate = now.toLocalDate();
-        LocalTime nowTime = now.toLocalTime();
-
-        if (date.isBefore(nowDate)) {
-            return true;
-        }
-        if (date.isAfter(nowDate)) {
-            return false;
-        }
-        return time.isPast(nowTime);
     }
 
     public Long getId() {

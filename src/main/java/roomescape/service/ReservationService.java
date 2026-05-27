@@ -1,10 +1,9 @@
 package roomescape.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
@@ -13,46 +12,23 @@ import roomescape.domain.Theme;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
-import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 import roomescape.service.dto.response.ServiceReceptionResponse;
 
-@Service
+@Component
 @Transactional(readOnly = true)
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
-    private final ThemeRepository themeRepository;
-    private final Clock clock;
 
-    public ReservationService(ReservationRepository reservationRepository,
-                              ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                              Clock clock) {
+    public ReservationService(ReservationRepository reservationRepository) {
         this.reservationRepository = reservationRepository;
-        this.reservationTimeRepository = reservationTimeRepository;
-        this.themeRepository = themeRepository;
-        this.clock = clock;
     }
 
     @Transactional
-    public Reservation save(ServiceReservationCreateRequest request) {
-        ReservationTime reservationTime = findReservationTime(request.timeId());
-        Theme theme = findTheme(request.themeId());
-
+    public Reservation save(ServiceReservationCreateRequest request, ReservationTime reservationTime, Theme theme) {
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
         return reservationRepository.save(reservationWithoutId);
-    }
-
-    private ReservationTime findReservationTime(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
-    }
-
-    private Theme findTheme(Long themeId) {
-        return themeRepository.findById(themeId)
-                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
     }
 
     public List<ServiceReceptionResponse> findByName(String name) {
@@ -83,5 +59,17 @@ public class ReservationService {
 
     public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
         return reservationRepository.findBySlot(date, timeId, themeId);
+    }
+
+    public void validateReferencedTheme(Long themeId) {
+        if (reservationRepository.existByThemeId(themeId)) {
+            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
+        }
+    }
+
+    public void validateReferencedTime(Long id) {
+        if (reservationRepository.existByTimeId(id)) {
+            throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
+        }
     }
 }

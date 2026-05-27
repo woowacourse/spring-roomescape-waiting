@@ -13,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ControllerReservationCreateRequest;
 import roomescape.controller.dto.response.ControllerReservationResponse;
-import roomescape.service.ReceptionFacade;
+import roomescape.facade.ReceptionFacade;
 import roomescape.service.dto.response.ServiceReceptionResponse;
 
 @RestController

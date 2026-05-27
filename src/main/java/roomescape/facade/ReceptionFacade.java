@@ -1,4 +1,4 @@
-package roomescape.service;
+package roomescape.facade;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -12,9 +12,14 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
+import roomescape.service.ReservationService;
+import roomescape.service.ReservationTimeService;
+import roomescape.service.ThemeService;
+import roomescape.service.WaitService;
 import roomescape.service.dto.request.ServiceReservationCreateRequest;
 import roomescape.service.dto.response.ServiceReceptionResponse;
 
@@ -40,23 +45,13 @@ public class ReceptionFacade {
     @Transactional
     public ServiceReceptionResponse save(ServiceReservationCreateRequest request) {
         ReservationTime reservationTime = reservationTimeService.findReservationTime(request.timeId());
+        Theme theme = themeService.findTheme(request.themeId());
+
         if (isPast(request.reservationDate(), reservationTime)) {
             throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE);
         }
 
-        Optional<Reservation> reservation = reservationService.findBySlot(request.reservationDate(), request.timeId(),
-                request.themeId());
-        if (reservation.isEmpty()) {
-            Reservation newReservation = reservationService.save(request);
-            return ServiceReceptionResponse.of(newReservation, 0L, ReservationStatus.CONFIRMED.name());
-        }
-        if (reservation.get().getName().equals(request.name())) {
-            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION);
-        }
-
-        return waitService.save(request.toWait(LocalDateTime.now(clock),
-                reservationTime,
-                themeService.findTheme(request.themeId())));
+        return saveReservationOrWait(request, reservationTime, theme);
     }
 
     public List<ServiceReceptionResponse> findByName(String name) {
@@ -87,19 +82,14 @@ public class ReceptionFacade {
         if (waits.isEmpty()) {
             return;
         }
-        Wait firstOrder = waits.getFirst();
-
-        ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.getName(),
-                firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
-        reservationService.save(request);
-        deleteWait(firstOrder.getId());
+        confirmFirstWait(waits.getFirst());
     }
 
     @Transactional
     public void deleteWait(Long id) {
         Wait wait = waitService.findWait(id);
         validateDelete(wait.getReservationDate(), wait.getTime());
-        
+
         waitService.delete(id);
     }
 
@@ -121,5 +111,28 @@ public class ReceptionFacade {
             return false;
         }
         return reservationTime.isPast(nowTime);
+    }
+
+    private ServiceReceptionResponse saveReservationOrWait(ServiceReservationCreateRequest request,
+                                                           ReservationTime reservationTime, Theme theme) {
+        Optional<Reservation> reservation = reservationService.findBySlot(request.reservationDate(), request.timeId(),
+                request.themeId());
+        if (reservation.isEmpty()) {
+            Reservation newReservation = reservationService.save(request, reservationTime, theme);
+            return ServiceReceptionResponse.of(newReservation, 0L, ReservationStatus.CONFIRMED.name());
+        }
+        if (reservation.get().getName().equals(request.name())) {
+            throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION);
+        }
+
+        return waitService.save(request.toWait(LocalDateTime.now(clock), reservationTime, theme));
+    }
+
+    private void confirmFirstWait(Wait firstOrder) {
+        ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.getName(),
+                firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
+
+        reservationService.save(request, firstOrder.getTime(), firstOrder.getTheme());
+        deleteWait(firstOrder.getId());
     }
 }
