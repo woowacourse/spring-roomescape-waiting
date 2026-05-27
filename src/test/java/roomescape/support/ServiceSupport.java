@@ -55,6 +55,10 @@ public abstract class ServiceSupport {
         return reservationRepository.save(ReservationFixture.reservation(name, date, time, theme));
     }
 
+    protected Reservation saveReservation(Reservation reservation) {
+        return reservationRepository.save(reservation);
+    }
+
     protected Reservation saveWaitReservation(String name, ReservationDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(ReservationFixture.waitReservation(name, date, time, theme));
     }
