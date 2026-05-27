@@ -86,10 +86,13 @@
         return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
     }
 
-    function statusBadge(status) {
+    function statusBadge(status, waitRank) {
+        if (status === 'WAITING') {
+            const rankText = waitRank != null ? ` (${waitRank}번째)` : '';
+            return `<span class="badge badge-waiting">대기 중${rankText}</span>`;
+        }
         const map = {
             RESERVED: ['reserved', '예약 확정'],
-            WAITING:  ['waiting',  '대기 중'],
             CANCELED: ['canceled', '취소됨'],
         };
         const [cls, label] = map[status] ?? ['canceled', status];
@@ -120,7 +123,7 @@
                 <td>${escapeHtml(r.date)}</td>
                 <td>${escapeHtml(timeLabel)}</td>
                 <td>${escapeHtml(themeName)}</td>
-                <td>${statusBadge(r.status)}</td>
+                <td>${statusBadge(r.status, r.waitRank)}</td>
                 <td><button class="btn btn-danger cancel-btn" data-id="${r.id}">취소</button></td>
             `;
             reservationBody.appendChild(tr);

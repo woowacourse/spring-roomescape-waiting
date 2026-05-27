@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ReservationTimeCreateResponse;
@@ -61,7 +62,7 @@ public class ReservationFacade {
         reservationService.updateMyReservation(updateMyReservation, name, reservationId);
     }
 
-    public List<ReservationResponse> findReservationsByName(String name) {
+    public List<MyReservationResponse> findReservationsByName(String name) {
         return reservationService.findAllByName(name);
     }
 }

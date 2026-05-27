@@ -10,6 +10,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.dto.response.ThemeSimpleResponse;
@@ -91,12 +92,8 @@ public class ReservationService {
         reservationDAO.updateReservation(updateMyReservation.date(), updateMyReservation.timeId(), name, reservationId);
     }
 
-    public List<ReservationResponse> findAllByName(String name) {
-        return reservationDAO.findAllByName(name).stream()
-            .map(r -> ReservationResponse.of(r.getId(), r.getName(), r.getDate(),
-                TimeResponse.from(r.getTime()), ThemeSimpleResponse.from(r.getTheme()),
-                r.getStatus()))
-            .toList();
+    public List<MyReservationResponse> findAllByName(String name) {
+        return reservationDAO.findAllByName(name);
     }
 
     private static void validateReservationAuthority(String name, Reservation reservation) {

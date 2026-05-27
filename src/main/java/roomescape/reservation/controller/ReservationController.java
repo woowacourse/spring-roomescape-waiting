@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.request.UpdateMyReservation;
+import roomescape.reservation.dto.response.MyReservationResponse;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
 import roomescape.reservation.service.ReservationFacade;
@@ -49,7 +50,7 @@ public class ReservationController {
     }
 
     @GetMapping("/reservations/my")
-    public ResponseEntity<List<ReservationResponse>> findByName(@RequestParam String name) {
+    public ResponseEntity<List<MyReservationResponse>> findByName(@RequestParam String name) {
         return ResponseEntity.ok(reservationFacade.findReservationsByName(name));
     }
 

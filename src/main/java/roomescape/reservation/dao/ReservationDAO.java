@@ -12,6 +12,9 @@ import org.springframework.stereotype.Component;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
+import roomescape.reservation.dto.response.MyReservationResponse;
+import roomescape.reservation.dto.response.ThemeSimpleResponse;
+import roomescape.reservation.dto.response.TimeResponse;
 import roomescape.theme.domain.Theme;
 
 @Component
@@ -180,37 +183,30 @@ public class ReservationDAO {
     return count != null && count > 0;
   }
 
-  public List<Reservation> findAllByName(String name) {
-    String sql = "select r.id, r.name, r.date, r.status, "
-        + "t.id as time_id, t.start_at, "
-        + "th.id as theme_id, th.name as theme_name, "
-        + "th.description as theme_description, th.image_url as theme_image_url "
+  public List<MyReservationResponse> findAllByName(String name) {
+    String sql = "with waiting_rank as ( "
+        + "  select id, rank() over (partition by date, time_id, theme_id order by id) as wait_rank "
+        + "  from reservation "
+        + "  where status = 'WAITING' "
+        + ") "
+        + "select r.id, r.name, r.date, r.status, "
+        + "       t.id as time_id, t.start_at, "
+        + "       th.id as theme_id, th.name as theme_name, "
+        + "       wr.wait_rank "
         + "from reservation r "
         + "inner join reservation_time t on r.time_id = t.id "
-        + "inner join theme th on r.theme_id = th.id "
+        + "inner join theme th           on r.theme_id = th.id "
+        + "left  join waiting_rank wr    on r.id = wr.id "
         + "where r.name = ?";
 
-    RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
-      ReservationTime time = ReservationTime.of(
-          resultSet.getLong("time_id"),
-          LocalTime.parse(resultSet.getString("start_at"))
-      );
-      Theme theme = Theme.of(
-          resultSet.getLong("theme_id"),
-          resultSet.getString("theme_name"),
-          resultSet.getString("theme_description"),
-          resultSet.getString("theme_image_url")
-      );
-      return Reservation.of(
-          resultSet.getLong("id"),
-          resultSet.getString("name"),
-          LocalDate.parse(resultSet.getString("date")),
-          time,
-          theme,
-          ReservationStatus.valueOf(resultSet.getString("status"))
-      );
-    };
-
-    return jdbcTemplate.query(sql, rowMapper, name);
+    return jdbcTemplate.query(sql, (rs, rowNum) -> new MyReservationResponse(
+        rs.getLong("id"),
+        rs.getString("name"),
+        LocalDate.parse(rs.getString("date")),
+        new TimeResponse(rs.getLong("time_id"), LocalTime.parse(rs.getString("start_at"))),
+        new ThemeSimpleResponse(rs.getLong("theme_id"), rs.getString("theme_name")),
+        ReservationStatus.valueOf(rs.getString("status")),
+        rs.getObject("wait_rank", Long.class)
+    ), name);
   }
 }
