@@ -1,6 +1,7 @@
-package roomescape.waiting;
+package roomescape.waiting.infrastructure;
 
-import roomescape.waiting.infra.projection.WaitingDetailProjection;
+import roomescape.waiting.Waiting;
+import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.util.List;
 import java.util.Optional;

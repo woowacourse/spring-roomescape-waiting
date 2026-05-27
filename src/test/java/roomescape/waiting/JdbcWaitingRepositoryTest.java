@@ -7,7 +7,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.waiting.infra.JdbcWaitingRepository;
+import roomescape.waiting.infrastructure.JdbcWaitingRepository;
 
 import static org.assertj.core.api.Assertions.assertThat;
 

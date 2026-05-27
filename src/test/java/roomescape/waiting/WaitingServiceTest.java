@@ -12,6 +12,7 @@ import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
+import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;

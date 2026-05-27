@@ -1,4 +1,4 @@
-package roomescape.waiting.infra;
+package roomescape.waiting.infrastructure;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowMapper;
@@ -8,8 +8,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.Waiting;
-import roomescape.waiting.WaitingRepository;
-import roomescape.waiting.infra.projection.WaitingDetailProjection;
+import roomescape.waiting.infrastructure.projection.WaitingDetailProjection;
 
 import java.util.List;
 import java.util.Optional;

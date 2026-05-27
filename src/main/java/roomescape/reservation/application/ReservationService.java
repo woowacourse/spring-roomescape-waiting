@@ -12,7 +12,7 @@ import roomescape.reservation.dto.response.ReservationSaveResponse;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservation.infrastructure.projection.ReservationDetailProjection;
 import roomescape.schedule.application.ScheduleService;
-import roomescape.waiting.WaitingRepository;
+import roomescape.waiting.infrastructure.WaitingRepository;
 
 import java.time.LocalDate;
 import java.util.List;

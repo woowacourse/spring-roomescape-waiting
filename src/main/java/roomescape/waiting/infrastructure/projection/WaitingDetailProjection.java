@@ -1,4 +1,4 @@
-package roomescape.waiting.infra.projection;
+package roomescape.waiting.infrastructure.projection;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

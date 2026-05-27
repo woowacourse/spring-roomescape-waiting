@@ -8,7 +8,7 @@ import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
-import roomescape.waiting.WaitingRepository;
+import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
 
