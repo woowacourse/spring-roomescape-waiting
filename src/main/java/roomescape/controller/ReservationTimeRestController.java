@@ -43,7 +43,7 @@ public class ReservationTimeRestController {
     @PostMapping("/admin/times")
     public ResponseEntity<ReservationTimeResponse> create(@RequestBody ReservationTimeRequest reservationTimeReq) {
         ReservationTimeResponse newReservationTime = reservationTimeService.create(reservationTimeReq);
-        URI uri = URI.create("/times/" + newReservationTime.getId());
+        URI uri = URI.create("/times/" + newReservationTime.id());
         return ResponseEntity.created(uri).body(newReservationTime);
     }
 
