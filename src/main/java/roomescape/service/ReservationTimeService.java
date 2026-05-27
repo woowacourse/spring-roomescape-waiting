@@ -70,7 +70,7 @@ public class ReservationTimeService {
             throw new ThemeNotFoundException("존재하지 않는 테마입니다: themeId=" + themeId);
         }
         LocalDateTime now = LocalDateTime.now();
-        return reservationTimeRepository.findAvailable(date, themeId).stream()
+        return reservationTimeRepository.findAll().stream()
                 .filter(time -> !LocalDateTime.of(date, time.getStartAt()).isBefore(now))
                 .map(ReservationTimeResult::from)
                 .toList();

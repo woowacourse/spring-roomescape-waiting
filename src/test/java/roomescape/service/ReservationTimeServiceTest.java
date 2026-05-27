@@ -112,7 +112,7 @@ class ReservationTimeServiceTest {
     @DisplayName("가용 시간 조회 시 존재하는 테마이면 정상적으로 결과를 반환한다")
     void 가용_시간_조회시_존재하는_테마이면_정상_반환한다() {
         given(themeRepository.existsById(1L)).willReturn(true);
-        given(reservationTimeRepository.findAvailable(any(), any())).willReturn(List.of());
+        given(reservationTimeRepository.findAll()).willReturn(List.of());
 
         assertDoesNotThrow(() -> reservationTimeService.findAvailable(LocalDate.of(2026, 5, 9), 1L));
     }
@@ -121,7 +121,7 @@ class ReservationTimeServiceTest {
     @DisplayName("과거 날짜로 가용 시간을 조회하면 모두 제외되어 빈 결과를 반환한다")
     void 과거_날짜_가용_시간은_모두_제외된다() {
         given(themeRepository.existsById(1L)).willReturn(true);
-        given(reservationTimeRepository.findAvailable(any(), any())).willReturn(List.of(
+        given(reservationTimeRepository.findAll()).willReturn(List.of(
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 new ReservationTime(2L, LocalTime.of(15, 0))
         ));
@@ -135,7 +135,7 @@ class ReservationTimeServiceTest {
     @DisplayName("당일 조회 시 현재 시각보다 이른 시간은 제외된다")
     void 당일_조회시_현재보다_이른_시간은_제외된다() {
         given(themeRepository.existsById(1L)).willReturn(true);
-        given(reservationTimeRepository.findAvailable(any(), any())).willReturn(List.of(
+        given(reservationTimeRepository.findAll()).willReturn(List.of(
                 new ReservationTime(1L, LocalTime.of(0, 0)),
                 new ReservationTime(2L, LocalTime.of(23, 59))
         ));
@@ -149,7 +149,7 @@ class ReservationTimeServiceTest {
     @DisplayName("미래 날짜의 가용 시간은 시각과 무관하게 모두 반환된다")
     void 미래_날짜_가용_시간은_모두_반환된다() {
         given(themeRepository.existsById(1L)).willReturn(true);
-        given(reservationTimeRepository.findAvailable(any(), any())).willReturn(List.of(
+        given(reservationTimeRepository.findAll()).willReturn(List.of(
                 new ReservationTime(1L, LocalTime.of(0, 0)),
                 new ReservationTime(2L, LocalTime.of(23, 59))
         ));

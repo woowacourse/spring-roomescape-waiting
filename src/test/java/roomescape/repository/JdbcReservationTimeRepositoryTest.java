@@ -32,14 +32,18 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("모든 시간을 조회한다")
+    @DisplayName("예약된 시간도 포함해 모든 가용 시간을 반환한다")
     void findAll() {
-        insertTime(LocalTime.of(10, 0));
-        insertTime(LocalTime.of(11, 0));
+        long bookedTimeId = insertTime(LocalTime.of(10, 0));
+        long freeTimeId = insertTime(LocalTime.of(11, 0));
+        long themeId = insertTheme("무인도 탈출");
+        LocalDate date = LocalDate.of(2099, 12, 31);
+        insertReservation("브라운", date, bookedTimeId, themeId);
 
-        List<ReservationTime> times = reservationTimeRepository.findAll();
+        List<ReservationTime> available = reservationTimeRepository.findAll();
 
-        assertThat(times).hasSize(2);
+        assertThat(available).extracting(ReservationTime::getId)
+                .containsExactlyInAnyOrder(bookedTimeId, freeTimeId);
     }
 
     @Test
@@ -77,21 +81,6 @@ class JdbcReservationTimeRepositoryTest {
 
         assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0))).isTrue();
         assertThat(reservationTimeRepository.existsByStartAt(LocalTime.of(11, 0))).isFalse();
-    }
-
-    @Test
-    @DisplayName("예약된 시간도 포함해 모든 가용 시간을 반환한다")
-    void findAvailable() {
-        long bookedTimeId = insertTime(LocalTime.of(10, 0));
-        long freeTimeId = insertTime(LocalTime.of(11, 0));
-        long themeId = insertTheme("무인도 탈출");
-        LocalDate date = LocalDate.of(2099, 12, 31);
-        insertReservation("브라운", date, bookedTimeId, themeId);
-
-        List<ReservationTime> available = reservationTimeRepository.findAvailable(date, themeId);
-
-        assertThat(available).extracting(ReservationTime::getId)
-                .containsExactlyInAnyOrder(bookedTimeId, freeTimeId);
     }
 
     private long insertTime(LocalTime startAt) {
