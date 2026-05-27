@@ -21,10 +21,9 @@ public class ReservationWaitingService {
         validateDuplicatedWaiting(name, themeId, date, timeId);
 
         Long nextWaitingNumber = reservationWaitingDao.findNextWaitingNumber(themeId, date, timeId);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, timeId, nextWaitingNumber);
 
-        ReservationWaiting reservationsWaiting = new ReservationWaiting(name, themeId, date, timeId, nextWaitingNumber);
-
-        return reservationWaitingDao.insert(reservationsWaiting);
+        return reservationWaitingDao.insert(reservationWaiting);
     }
 
     private void validateDuplicatedWaiting(String name, Long themeId, LocalDate date, Long timeId) {

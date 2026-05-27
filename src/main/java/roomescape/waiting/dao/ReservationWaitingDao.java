@@ -1,15 +1,24 @@
 package roomescape.waiting.dao;
 
+import java.time.LocalDate;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.waiting.ReservationWaiting;
 
-import java.time.LocalDate;
-
 @Repository
 public class ReservationWaitingDao {
+    private static final RowMapper<ReservationWaiting> rowMapper = (rs, rowNum) ->
+        new ReservationWaiting(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getLong("theme_id"),
+                rs.getDate("date").toLocalDate(),
+                rs.getLong("time_id"),
+                rs.getLong("waiting_number")
+        );
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -19,6 +28,14 @@ public class ReservationWaitingDao {
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_waiting")
                 .usingGeneratedKeyColumns("id");
+    }
+
+    public ReservationWaiting selectById(Long id) {
+        String sql = """
+                select * from reservation_waiting where id = ?;
+                """;
+
+        return jdbcTemplate.queryForObject(sql, rowMapper, id);
     }
 
     public boolean existsByNameAndDateAndThemeIdAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {
