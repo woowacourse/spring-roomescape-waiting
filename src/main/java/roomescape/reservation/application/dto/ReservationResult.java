@@ -6,6 +6,7 @@ import roomescape.reservation.domain.Waiting;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.theme.application.dto.ThemeResult;
 
+// TODO: ReservationResult라는 이름은 수정 검토
 public record ReservationResult(
         Long id,
         String name,
@@ -58,8 +59,28 @@ public record ReservationResult(
                         reservationDetail.timeId(),
                         reservationDetail.startAt()
                 ),
-                Status.WAITING, // TODO: 이건 나중에 조회한게 예약인지, 대기인지 구분하는 로직이 추가 필요 반드시 수정 ✅
-                null // TODO: 이건 나중에 조회한게 예약인지, 대기인지 구분하는 로직이 추가 후 수정 ✅
+                Status.CONFIRM,
+                null
+        );
+    }
+
+    public static ReservationResult from(WaitingDetail waitingDetail) {
+        return new ReservationResult(
+                waitingDetail.waitingId(),
+                waitingDetail.username(),
+                waitingDetail.date(),
+                ThemeResult.from(
+                        waitingDetail.themeId(),
+                        waitingDetail.themeName(),
+                        waitingDetail.themeDescription(),
+                        waitingDetail.thumbnailImgUrl()
+                ),
+                ReservationTimeResult.from(
+                        waitingDetail.timeId(),
+                        waitingDetail.startAt()
+                ),
+                Status.WAITING,
+                waitingDetail.rank()
         );
     }
 

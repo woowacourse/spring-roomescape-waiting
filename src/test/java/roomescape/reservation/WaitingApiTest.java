@@ -135,6 +135,57 @@ class WaitingApiTest {
                 .body("errorMessage", equalTo("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다."));
     }
 
+    @DisplayName("사용자 이름으로 대기 예약 목록 조회 API를 테스트합니다.")
+    @Test
+    void find_waitings_by_name() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long nineTimeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long tenTimeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        testHelper.insertWaiting(
+                "비밥",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                nineTimeId
+        );
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                tenTimeId
+        );
+
+        RestAssured.given()
+                .param("username", "스타크")
+                .when().get("/waitings")
+                .then().log().all()
+                .statusCode(200)
+                .body("[0].id", greaterThan(0))
+                .body("[0].name", equalTo("스타크"))
+                .body("[0].date", equalTo("2099-12-31"))
+                .body("[0].time.id", equalTo(nineTimeId.intValue()))
+                .body("[0].time.startAt", equalTo("09:00"))
+                .body("[0].theme.id", equalTo(themeId.intValue()))
+                .body("[0].theme.name", equalTo("공포 테마"))
+                .body("[0].status", equalTo("WAITING"))
+                .body("[0].rank", equalTo(2))
+
+                .body("[1].id", greaterThan(0))
+                .body("[1].name", equalTo("스타크"))
+                .body("[1].date", equalTo("2099-12-31"))
+                .body("[1].time.id", equalTo(tenTimeId.intValue()))
+                .body("[1].time.startAt", equalTo("10:00"))
+                .body("[1].theme.id", equalTo(themeId.intValue()))
+                .body("[1].theme.name", equalTo("공포 테마"))
+                .body("[1].status", equalTo("WAITING"))
+                .body("[1].rank", equalTo(1));
+    }
+
     @DisplayName("방탈출 예약 대기 삭제 API를 테스트합니다.")
     @Test
     void delete_waiting_reservation() {
