@@ -51,6 +51,10 @@ public abstract class ServiceSupport {
         return themeRepository.save(ThemeFixture.activeTheme(themeName));
     }
 
+    protected Theme saveTheme(Theme theme) {
+        return themeRepository.save(theme);
+    }
+
     protected Reservation saveReservation(String name, ReservationDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(ReservationFixture.reservation(name, date, time, theme));
     }
