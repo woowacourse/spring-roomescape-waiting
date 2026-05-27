@@ -4,7 +4,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
@@ -15,29 +14,35 @@ import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
+import roomescape.dao.WaitingDao;
+import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.service.dto.result.ReservationDetailResults;
+import roomescape.service.dto.result.ReservationResult;
+import roomescape.service.dto.result.WaitingDetailResult;
 
 @Service
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final WaitingDao waitingDao;
     private final Clock clock;
 
     public ReservationService(
             ReservationDao reservationDao,
             ReservationTimeDao reservationTimeDao,
             ThemeDao themeDao,
+            WaitingDao waitingDao,
             Clock clock
     ) {
         this.reservationDao = reservationDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
+        this.waitingDao = waitingDao;
         this.clock = clock;
     }
 
@@ -49,12 +54,18 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> findAllByUserName(String userName) {
+    public ReservationDetailResults findAllByUserName(String userName) {
         List<Reservation> reservations = reservationDao.findAllByUserName(userName);
+        List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
 
-        return reservations.stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return new ReservationDetailResults(
+                reservations.stream()
+                        .map(ReservationResult::from)
+                        .toList(),
+                waitings.stream()
+                        .map(WaitingDetailResult::from)
+                        .toList()
+        );
     }
 
     public ReservationResponse save(ReservationRequest request) {
@@ -134,7 +145,7 @@ public class ReservationService {
         }
 
         validatePastTime(origin.getDate(), origin.getTime());
-        
+
         reservationDao.delete(id);
     }
 }

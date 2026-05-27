@@ -8,10 +8,12 @@ import static roomescape.config.FixedClockConfig.TODAY;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.dao.dto.WaitingQueryResult;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.reservation.Waiting;
 import roomescape.domain.reservation.theme.Description;
@@ -56,9 +58,18 @@ public class WaitingDaoTest {
     }
 
     @Test
-    void 예약_삭제_정상_테스트() {
+    void 예약_대기_삭제_정상_테스트() {
         Long id = 1L;
 
         assertDoesNotThrow(() -> waitingDao.delete(id));
+    }
+
+    @Test
+    void 예약_대기_사용자_이름_조회_정상_테스트() {
+        String userName = "토리";
+
+        List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
+
+        assertThat(waitings.size()).isEqualTo(1);
     }
 }

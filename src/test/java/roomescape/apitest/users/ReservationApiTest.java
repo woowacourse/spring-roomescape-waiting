@@ -1,7 +1,6 @@
 package roomescape.apitest.users;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.hamcrest.Matchers.is;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
 import io.restassured.RestAssured;
@@ -69,8 +68,8 @@ class ReservationApiTest {
                 .statusCode(200)
                 .extract().jsonPath();
 
-        List<Long> idsByUserName = jsonPath.getList("id", Long.class);
-        List<String> names = jsonPath.getList("name", String.class);
+        List<Long> idsByUserName = jsonPath.getList("reservationResponses.id", Long.class);
+        List<String> names = jsonPath.getList("reservationResponses.name", String.class);
 
         assertThat(idsByUserName)
                 .hasSize(initialReservationSize + 1)
@@ -133,6 +132,14 @@ class ReservationApiTest {
                 .extract().jsonPath().getString("date");
 
         assertThat(updatedDate).isEqualTo(date);
+    }
+
+    @Test
+    void 예약과_예약_대기_조회_API() {
+        RestAssured.given().log().all()
+                .when().get("/reservations?userName=" + "토리")
+                .then().log().all()
+                .statusCode(200);
     }
 
     @Test

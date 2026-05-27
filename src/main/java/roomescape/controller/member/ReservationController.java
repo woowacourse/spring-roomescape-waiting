@@ -15,8 +15,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.controller.dto.request.ReservationRequest;
+import roomescape.controller.dto.response.ReservationDetailResponses;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.result.ReservationDetailResults;
 
 @RestController
 @RequestMapping("/reservations")
@@ -36,8 +38,11 @@ public class ReservationController {
     }
 
     @GetMapping(params = "userName")
-    public ResponseEntity<List<ReservationResponse>> readAllByUserName(@RequestParam("userName") String userName) {
-        List<ReservationResponse> response = reservationService.findAllByUserName(userName);
+    public ResponseEntity<ReservationDetailResponses> readAllByUserName(
+            @RequestParam("userName") String userName) {
+        ReservationDetailResults result = reservationService.findAllByUserName(userName);
+
+        ReservationDetailResponses response = ReservationDetailResponses.from(result);
 
         return ResponseEntity.ok().body(response);
     }
