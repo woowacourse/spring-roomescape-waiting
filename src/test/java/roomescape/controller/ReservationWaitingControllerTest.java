@@ -32,7 +32,7 @@ import roomescape.service.ReservationWaitingService;
 import org.springframework.http.MediaType;
 
 @WebMvcTest(ReservationRestController.class)
-public class ReservationWaitingTest {
+public class ReservationWaitingControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -170,7 +170,7 @@ public class ReservationWaitingTest {
     void 에약_대기열_조회가_정상적으로_반환된다() throws Exception{
         ReservationWaitingResponse reservationWaitingResponse = new ReservationWaitingResponse(1L, "테스트", now, ReservationTimeResponse.from(reservationTime), ThemeResponse.from(theme), 1L, nowDateTime);
 
-        given(reservationWaitingService.readByName(reservationWaitingResponse.getName())).willReturn(List.of(reservationWaitingResponse));
+        given(reservationWaitingService.readByName(reservationWaitingResponse.name())).willReturn(List.of(reservationWaitingResponse));
         mockMvc.perform(get("/reservations/waitings/mine")
                         .param("name", "테스트"))
                 .andExpect(status().isOk())
