@@ -7,13 +7,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.exception.RoomEscapeException;
 
 public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findByName(String name);
+    List<ReservationWithStatus> findByName(String name);
 
     Optional<Reservation> findById(Long id);
 
