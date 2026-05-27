@@ -1,11 +1,10 @@
 package roomescape.domain;
 
-import roomescape.common.exception.InvalidInputException;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
+import roomescape.common.exception.InvalidInputException;
 
 public class Time {
     private final Long id;

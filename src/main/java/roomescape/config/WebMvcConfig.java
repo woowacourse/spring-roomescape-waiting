@@ -6,9 +6,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import roomescape.auth.LoginMemberArgumentResolver;
 import roomescape.auth.filter.AdminFilter;
 import roomescape.auth.filter.AuthFilter;
-import roomescape.auth.LoginMemberArgumentResolver;
 import roomescape.auth.filter.ManagerFilter;
 
 @Configuration
