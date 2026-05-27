@@ -13,8 +13,11 @@ import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationDetail;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.WaitingDetail;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
 import roomescape.reservationtime.application.service.ReservationTimeService;
 import roomescape.theme.application.dto.ThemeQueryResult;
@@ -26,6 +29,7 @@ import roomescape.theme.application.service.ThemeService;
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
+    private final WaitingRepository waitingRepository;
     private final ThemeService themeService;
     private final ReservationTimeService timeService;
 
@@ -52,6 +56,17 @@ public class ReservationService {
         validateDuplicateReservation(request);
 
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
+
+        if(reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
+            WaitingDetail save = waitingRepository.save(Waiting.of(
+                    null,
+                    reservation.getName(),
+                    reservation.getDate(),
+                    reservation.getThemeId(),
+                    reservation.getTimeId()));
+            return ReservationQueryResult.from()
+        }
+
         return ReservationQueryResult.from(reservationRepository.save(reservation), themeQueryResult, timeQueryResult);
     }
 

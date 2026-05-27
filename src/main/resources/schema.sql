@@ -24,3 +24,14 @@ CREATE TABLE reservation
     PRIMARY KEY (id),
     CONSTRAINT uq_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
 );
+
+CREATE TABLE waiting
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    name     VARCHAR(255) NOT NULL,
+    date     DATE         NOT NULL,
+    theme_id BIGINT       NOT NULL,
+    time_id  BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    CONSTRAINT uq_waiting_date_theme_time UNIQUE (name, date, theme_id, time_id)
+);
