@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -17,6 +18,7 @@ import roomescape.domain.Waiting;
 
 @Repository
 public class JdbcWaitingRepository implements WaitingRepository {
+
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
@@ -64,7 +66,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme) {
+    public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
+            Theme theme) {
         String sql = """
                     SELECT MAX(waiting_number)
                     FROM waiting
@@ -82,7 +85,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time, Theme theme) {
+    public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
+            ReservationTime time, Theme theme) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -103,5 +107,15 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, params, Boolean.class)
         );
+    }
+
+    @Override
+    public void delete(Long id) {
+        String sql = """
+                DELETE FROM waiting 
+                WHERE id = :id
+                """;
+        Map<String, Object> params = Map.of("id", id);
+        jdbcTemplate.update(sql, params);
     }
 }

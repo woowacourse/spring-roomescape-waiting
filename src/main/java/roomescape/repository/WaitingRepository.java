@@ -12,4 +12,6 @@ public interface WaitingRepository {
     boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date, ReservationTime time, Theme theme);
 
     Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme);
+
+    void delete(Long id);
 }

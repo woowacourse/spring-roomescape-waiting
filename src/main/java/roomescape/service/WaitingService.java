@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -8,6 +9,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.dto.WaitingRequestDTO;
 import roomescape.dto.WaitingResponseDTO;
+import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.ThemeErrorCode;
@@ -82,5 +84,9 @@ public class WaitingService {
         Waiting savedWaiting = waitingRepository.save(newWaiting);
 
         return WaitingResponseDTO.from(savedWaiting);
+    }
+    @Transactional
+    public void deleteWaiting(Long id) {
+        waitingRepository.delete(id);
     }
 }
