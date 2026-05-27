@@ -158,6 +158,46 @@ public class MissionStepTest {
         assertThat(count).isZero();
     }
 
+    @Test
+    void 내_예약_목록에서_예약과_대기를_함께_조회한다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "테마1", "설명1", "theme1.jpg");
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "테마2", "설명2", "theme2.jpg");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "브라운",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, DATEADD('SECOND', -1, CURRENT_TIMESTAMP))",
+                "리오",
+                TODAY.plusDays(2).toString(),
+                2,
+                2
+        );
+        jdbcTemplate.update(
+                "INSERT INTO waiting (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "브라운",
+                TODAY.plusDays(2).toString(),
+                2,
+                2
+        );
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/reservations/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("브라운"))
+                .body("waitings.size()", is(1))
+                .body("waitings[0].name", is("브라운"))
+                .body("waitings[0].rank", is(2));
+    }
+
     @Autowired
     private ReservationController reservationController;
 
