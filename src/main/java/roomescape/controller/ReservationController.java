@@ -16,7 +16,7 @@ import roomescape.dto.reservation.CancelReservationCommand;
 import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.CreateReservationRequest;
 import roomescape.dto.reservation.ReservationResponse;
-import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.dto.reservation.UpdateReservationRequest;
 import roomescape.infrastructure.LoginUserId;
@@ -33,7 +33,7 @@ public class ReservationController {
     }
 
     @GetMapping("/mine")
-    public ResponseEntity<ReservationResponses> readMyReservations(@LoginUserId Long userId) {
+    public ResponseEntity<ReservationWithStatusResponses> readMyReservations(@LoginUserId Long userId) {
         return ResponseEntity.ok(reservationService.getMyReservations(userId));
     }
 

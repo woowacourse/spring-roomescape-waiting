@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import java.util.List;
+import java.util.Map;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -12,6 +13,7 @@ import roomescape.domain.User;
 import roomescape.dto.reservation.CancelReservationCommand;
 import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
@@ -77,9 +79,16 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("예약", id));
     }
 
-    public ReservationResponses getMyReservations(Long userId) {
-        List<Reservation> reservations = reservationRepository.findAllByUserId(userId);
-        return ReservationResponses.of(reservations, false);
+    @Transactional(readOnly = true)
+    public ReservationWithStatusResponses getMyReservations(Long userId) {
+        List<Reservation> reservations = reservationRepository.findAllByUserId(userId).stream()
+                .filter(Reservation::isReserved)
+                .toList();
+
+        Map<Reservation, Integer> waitingReservations =
+                reservationRepository.findWaitingReservationsWithOrderByUserId(userId);
+
+        return ReservationWithStatusResponses.of(reservations, waitingReservations, false);
     }
 
     @Transactional

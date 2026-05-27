@@ -5,7 +5,9 @@ import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -112,8 +114,54 @@ public class ReservationJdbcRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByUserId(Long userId) {
-        String sql = SELECT_BASE + " where u.id = ? order by r.id";
+        String sql = SELECT_BASE
+                + """
+                 where u.id = ?
+                 order by case r.status
+                              when 'RESERVED' then 0
+                              when 'WAITING' then 1
+                              else 2
+                          end,
+                          r.date,
+                          t.start_at,
+                          r.created_at,
+                          r.id
+                """;
         return jdbcTemplate.query(sql, rowMapper, userId);
+    }
+
+    @Override
+    public Map<Reservation, Integer> findWaitingReservationsWithOrderByUserId(Long userId) {
+        String sql = """
+                select *
+                from (
+                    select r.id, r.date, r.status,
+                           u.id as u_id, u.username as u_username, u.password as u_password,
+                           u.name as u_name, u.role as u_role,
+                           t.id as time_id, t.start_at,
+                           th.id as theme_id, th.name as theme_name, th.description, th.thumbnail_image_url,
+                           s.id as store_id, s.name as store_name,
+                           row_number() over (
+                               partition by r.date, r.time_id, r.theme_id, r.store_id
+                               order by r.created_at, r.id
+                           ) as waiting_order
+                    from reservation r
+                    join users u on r.user_id = u.id
+                    join reservation_time t on r.time_id = t.id
+                    join theme th on r.theme_id = th.id
+                    join store s on r.store_id = s.id
+                    where r.status = ?
+                ) waiting_reservation
+                where u_id = ?
+                order by date, start_at, waiting_order
+                """;
+
+        Map<Reservation, Integer> waitingReservations = new LinkedHashMap<>();
+        jdbcTemplate.query(sql, resultSet -> {
+            Reservation reservation = rowMapper.mapRow(resultSet, resultSet.getRow());
+            waitingReservations.put(reservation, resultSet.getInt("waiting_order"));
+        }, ReservationStatus.WAITING.name(), userId);
+        return waitingReservations;
     }
 
     @Override
