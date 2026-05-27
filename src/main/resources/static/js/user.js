@@ -19,6 +19,8 @@
   const nameInput = document.getElementById("name-input");
   const reserveForm = document.getElementById("reserve-form");
   const reserveMessage = document.getElementById("reserve-message");
+  const slotStatusHint = document.getElementById("slot-status-hint");
+  const reserveSubmitBtn = document.getElementById("reserve-submit-btn");
   const btnBackThemes = document.getElementById("btn-back-to-themes");
   const btnBackCalendar = document.getElementById("btn-back-to-calendar");
   const stepIndicators = document.querySelectorAll(".steps__item");
@@ -35,6 +37,7 @@
     selectedDate: null,
     availableDates: new Set(),
     calendarMonth: new Date(),
+    currentSlots: [],
   };
 
   function formatYmd(d) {
@@ -69,7 +72,12 @@
     return res.json();
   }
 
-  // 인기 테마 조회 (서버 데이터만 사용)[cite: 13]
+  // 백엔드: GET /times/available-times?themeId=&date=
+  function availableTimesUrl(themeId, date) {
+    return `/times/available-times?themeId=${themeId}&date=${date}`;
+  }
+
+  // 인기 테마 조회
   async function loadPopular() {
     try {
       const themes = await fetchJson(`/themes/popular?limit=${POPULAR_LIMIT}`);
@@ -98,7 +106,7 @@
     }
   }
 
-  // 예약용 테마 목록 (서버 데이터만 사용)[cite: 13]
+  // 예약용 테마 목록
   async function loadThemesForBooking() {
     themeGrid.innerHTML = '<p class="panel-hint">테마 목록을 불러오는 중…</p>';
     try {
@@ -137,7 +145,6 @@
     }
   }
 
-  // ... 나머지 예약 관련 함수 (collectAvailableDates, renderCalendar 등 기존 유지)[cite: 13]
   async function collectAvailableDates(themeId) {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
@@ -147,15 +154,14 @@
       d.setDate(start.getDate() + i);
       dates.push(formatYmd(d));
     }
+    // 대기 신청까지 허용하므로 시간 슬롯이 하나라도 있으면(=시간 자체가 정의되어 있으면) 선택 가능한 날짜로 간주
     const available = new Set();
     for (let i = 0; i < dates.length; i += CHUNK) {
       const chunk = dates.slice(i, i + CHUNK);
       const results = await Promise.all(
           chunk.map(async (dateStr) => {
             try {
-              const slots = await fetchJson(
-                  `/themes/${themeId}/available-times?date=${dateStr}`
-              );
+              const slots = await fetchJson(availableTimesUrl(themeId, dateStr));
               return Array.isArray(slots) && slots.length > 0 ? dateStr : null;
             } catch {
               return null;
@@ -168,6 +174,7 @@
     }
     return available;
   }
+
   async function onSelectTheme(theme) {
     state.selectedTheme = theme;
     state.selectedDate = null;
@@ -265,6 +272,30 @@
     return `${parts[0]}:${parts[1] || "00"}`;
   }
 
+  function updateSlotHint() {
+    const currentId = Number(timeSelect.value);
+    const slot = state.currentSlots.find((s) => s.id === currentId);
+    if (!slot) {
+      slotStatusHint.textContent = "";
+      slotStatusHint.className = "slot-status-hint";
+      reserveSubmitBtn.textContent = "예약 완료";
+      reserveSubmitBtn.classList.remove("btn--waiting");
+      return;
+    }
+    if (slot.status === "CONFIRMED") {
+      slotStatusHint.textContent =
+          "이미 다른 사용자가 예약한 시간대입니다. 신청하시면 대기 명단에 등록됩니다.";
+      slotStatusHint.className = "slot-status-hint is-waiting";
+      reserveSubmitBtn.textContent = "대기 신청";
+      reserveSubmitBtn.classList.add("btn--waiting");
+    } else {
+      slotStatusHint.textContent = "선택하신 시간은 바로 예약할 수 있습니다.";
+      slotStatusHint.className = "slot-status-hint is-available";
+      reserveSubmitBtn.textContent = "예약 완료";
+      reserveSubmitBtn.classList.remove("btn--waiting");
+    }
+  }
+
   async function onSelectDate(dateStr) {
     state.selectedDate = dateStr;
     if (!state.selectedTheme) return;
@@ -275,30 +306,40 @@
     reserveMessage.className = "message";
     nameInput.value = "";
     timeSelect.innerHTML = "";
+    slotStatusHint.textContent = "";
+    slotStatusHint.className = "slot-status-hint";
+    reserveSubmitBtn.textContent = "예약 완료";
+    reserveSubmitBtn.classList.remove("btn--waiting");
+
     try {
       const slots = await fetchJson(
-          `/themes/${state.selectedTheme.id}/available-times?date=${dateStr}`
+          availableTimesUrl(state.selectedTheme.id, dateStr)
       );
-      if (!slots.length) {
+      state.currentSlots = Array.isArray(slots) ? slots : [];
+      if (!state.currentSlots.length) {
         timeSelect.disabled = true;
         reserveMessage.textContent =
-            "선택한 날짜에 예약 가능한 시간이 없습니다. 날짜를 다시 선택해 주세요.";
+            "선택한 날짜에 사용 가능한 시간이 없습니다. 날짜를 다시 선택해 주세요.";
         reserveMessage.classList.add("message--err");
         return;
       }
       timeSelect.disabled = false;
-      slots.forEach((s) => {
+      state.currentSlots.forEach((s) => {
         const opt = document.createElement("option");
         opt.value = String(s.id);
-        opt.textContent = formatTimeLabel(s.startAt);
+        const tag = s.status === "CONFIRMED" ? " (대기 신청)" : "";
+        opt.textContent = formatTimeLabel(s.startAt) + tag;
         timeSelect.appendChild(opt);
       });
+      updateSlotHint();
     } catch (e) {
       timeSelect.disabled = true;
       reserveMessage.textContent = "시간 목록을 불러오지 못했습니다.";
       reserveMessage.classList.add("message--err");
     }
   }
+
+  timeSelect.addEventListener("change", updateSlotHint);
 
   btnBackThemes.addEventListener("click", () => {
     state.selectedTheme = null;
@@ -320,8 +361,11 @@
     const timeId = Number(timeSelect.value, 10);
     const name = nameInput.value.trim();
     if (!timeId || !name) return;
+    const currentSlot = state.currentSlots.find((s) => s.id === timeId);
+    const willBeWaiting = currentSlot && currentSlot.status === "CONFIRMED";
+
     try {
-      await fetchJson("/reservations", {
+      const saved = await fetchJson("/reservations", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -331,15 +375,19 @@
           themeId: state.selectedTheme.id,
         }),
       });
-      reserveMessage.textContent = "예약이 완료되었습니다.";
+      const isWaiting = (saved && saved.status === "WAITING") || willBeWaiting;
+      reserveMessage.textContent = isWaiting
+          ? "대기 신청이 완료되었습니다. ‘내 예약’에서 대기 순번을 확인할 수 있어요."
+          : "예약이 완료되었습니다.";
       reserveMessage.classList.add("message--ok");
       loadPopular();
       state.availableDates = await collectAvailableDates(state.selectedTheme.id);
       renderCalendar();
       setStep(2);
     } catch (e) {
-      reserveMessage.textContent =
-          "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
+      reserveMessage.textContent = willBeWaiting
+          ? "대기 신청에 실패했습니다. 이미 같은 슬롯에 대기 중이거나 입력값을 확인해 주세요."
+          : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
       reserveMessage.classList.add("message--err");
     }
   });
@@ -378,12 +426,7 @@
   const myNameInput = document.getElementById("my-name-input");
   const mySearchMsg = document.getElementById("my-search-msg");
   const myResultArea = document.getElementById("my-result-area");
-  const myResName = document.getElementById("my-res-name");
-  const myResTheme = document.getElementById("my-res-theme");
-  const myResDate = document.getElementById("my-res-date");
-  const myResTime = document.getElementById("my-res-time");
-  const myBtnEdit = document.getElementById("my-btn-edit");
-  const myBtnCancel = document.getElementById("my-btn-cancel");
+  const myList = document.getElementById("my-list");
   const myEditPanel = document.getElementById("my-edit-panel");
   const myEditForm = document.getElementById("my-edit-form");
   const myEditDate = document.getElementById("my-edit-date");
@@ -391,58 +434,148 @@
   const myEditMsg = document.getElementById("my-edit-msg");
   const myBtnEditCancel = document.getElementById("my-btn-edit-cancel");
 
-  let currentReservation = null;
+  let myReservations = [];
+  let editingReservation = null;
+  let currentSearchName = "";
 
   function setMyMsg(el, text, ok) {
     el.textContent = text;
     el.className = "message " + (text ? (ok ? "message--ok" : "message--err") : "");
   }
 
-  function renderMyCard(r) {
-    myResName.textContent = r.name || "—";
-    myResTheme.textContent = r.themeResponse?.name || "—";
-    myResDate.textContent = r.date || "—";
-    const timeVal = r.timeResponse?.startAt ?? r.timeResponse;
-    myResTime.textContent = timeVal ? String(timeVal).slice(0, 5) : "—";
-    myResultArea.classList.remove("is-hidden");
+  function renderMyList() {
+    myList.innerHTML = "";
+    if (!myReservations.length) {
+      const empty = document.createElement("li");
+      empty.className = "my-empty";
+      empty.textContent = "조회된 예약 내역이 없습니다.";
+      myList.appendChild(empty);
+      return;
+    }
+
+    myReservations.forEach((r) => {
+      const isWaiting = r.status === "WAITING";
+      const themeName = r.themeResponse?.name ?? "—";
+      const timeVal = r.timeResponse?.startAt ?? null;
+      const timeText = timeVal ? String(timeVal).slice(0, 5) : "—";
+
+      const li = document.createElement("li");
+      li.className = "my-card";
+      if (isWaiting) li.classList.add("my-card--waiting");
+
+      const badge = document.createElement("div");
+      badge.className = "my-card__badge " + (isWaiting ? "my-card__badge--waiting" : "my-card__badge--confirmed");
+      badge.textContent = isWaiting
+          ? `대기 ${r.order ?? "?"}번`
+          : "예약 확정";
+
+      const grid = document.createElement("div");
+      grid.className = "my-card__grid";
+      grid.innerHTML = `
+        <div class="my-card__field">
+          <span class="my-card__label">예약자</span>
+          <span class="my-card__value">${escapeHtml(r.name || "—")}</span>
+        </div>
+        <div class="my-card__field">
+          <span class="my-card__label">테마</span>
+          <span class="my-card__value">${escapeHtml(themeName)}</span>
+        </div>
+        <div class="my-card__field">
+          <span class="my-card__label">날짜</span>
+          <span class="my-card__value">${escapeHtml(r.date || "—")}</span>
+        </div>
+        <div class="my-card__field">
+          <span class="my-card__label">시간</span>
+          <span class="my-card__value">${escapeHtml(timeText)}</span>
+        </div>
+      `;
+
+      const actions = document.createElement("div");
+      actions.className = "my-card__actions";
+
+      if (!isWaiting) {
+        const editBtn = document.createElement("button");
+        editBtn.type = "button";
+        editBtn.className = "btn btn--ghost";
+        editBtn.textContent = "날짜·시간 변경";
+        editBtn.addEventListener("click", () => openEditPanel(r));
+        actions.appendChild(editBtn);
+      }
+
+      const cancelBtn = document.createElement("button");
+      cancelBtn.type = "button";
+      cancelBtn.className = "btn my-btn-danger";
+      cancelBtn.textContent = isWaiting ? "대기 취소" : "예약 취소";
+      cancelBtn.addEventListener("click", () => onCancel(r));
+      actions.appendChild(cancelBtn);
+
+      li.append(badge, grid, actions);
+      myList.appendChild(li);
+    });
   }
 
-  // 1. 조회
-  mySearchForm.addEventListener("submit", async (ev) => {
-    ev.preventDefault();
+  function escapeHtml(s) {
+    return String(s)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+  }
+
+  async function loadMyReservations(name) {
+    currentSearchName = name;
     setMyMsg(mySearchMsg, "", true);
-    myResultArea.classList.add("is-hidden");
     myEditPanel.classList.add("is-hidden");
-    const name = myNameInput.value.trim();
-    if (!name) return;
+    editingReservation = null;
     try {
       const data = await fetchJson(`/reservations/my-reservation?name=${encodeURIComponent(name)}`);
-      currentReservation = data;
-      renderMyCard(data);
+      myReservations = Array.isArray(data) ? data : (data ? [data] : []);
+      myResultArea.classList.remove("is-hidden");
+      renderMyList();
+      if (!myReservations.length) {
+        setMyMsg(mySearchMsg, "조회된 예약 내역이 없습니다.", false);
+      }
     } catch (e) {
-      setMyMsg(mySearchMsg, "예약 내역을 찾을 수 없습니다.", false);
+      myReservations = [];
+      myResultArea.classList.add("is-hidden");
+      setMyMsg(mySearchMsg, "예약 내역을 조회하지 못했습니다.", false);
     }
+  }
+
+  mySearchForm.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    const name = myNameInput.value.trim();
+    if (!name) return;
+    await loadMyReservations(name);
   });
 
-  // 2. 취소
-  myBtnCancel.addEventListener("click", async () => {
-    if (!currentReservation || !confirm("예약을 취소하시겠습니까?")) return;
+  async function onCancel(r) {
+    const isWaiting = r.status === "WAITING";
+    const confirmMsg = isWaiting
+        ? "대기 신청을 취소하시겠습니까?"
+        : "예약을 취소하시겠습니까?";
+    if (!confirm(confirmMsg)) return;
     try {
-      await fetchJson(`/reservations/${currentReservation.id}`, { method: "DELETE" });
-      myResultArea.classList.add("is-hidden");
-      myEditPanel.classList.add("is-hidden");
-      currentReservation = null;
-      setMyMsg(mySearchMsg, "예약이 취소되었습니다.", true);
+      await fetchJson(`/reservations/${r.id}`, { method: "DELETE" });
+      setMyMsg(
+          mySearchMsg,
+          isWaiting ? "대기 신청이 취소되었습니다." : "예약이 취소되었습니다.",
+          true
+      );
+      // 재조회 (대기 순번이 당겨질 수 있으므로 항상 새로 받아옴)
+      if (currentSearchName) {
+        await loadMyReservations(currentSearchName);
+      }
     } catch (e) {
       setMyMsg(mySearchMsg, "취소에 실패했습니다.", false);
     }
-  });
+  }
 
-  // 3. 수정 패널 열기
-  myBtnEdit.addEventListener("click", async () => {
-    if (!currentReservation) return;
+  async function openEditPanel(r) {
+    editingReservation = r;
     myEditPanel.classList.remove("is-hidden");
-    myEditDate.value = currentReservation.date || "";
+    myEditDate.value = r.date || "";
     setMyMsg(myEditMsg, "", true);
     myEditTime.innerHTML = '<option value="">로딩 중…</option>';
     try {
@@ -452,33 +585,39 @@
         const opt = document.createElement("option");
         opt.value = String(t.id);
         opt.textContent = String(t.startAt).slice(0, 5);
-        if (t.id === currentReservation.timeResponse?.id) opt.selected = true;
+        if (t.id === r.timeResponse?.id) opt.selected = true;
         myEditTime.appendChild(opt);
       });
     } catch (e) {
       setMyMsg(myEditMsg, "시간 목록을 불러오지 못했습니다.", false);
     }
-  });
+  }
 
   myBtnEditCancel.addEventListener("click", () => {
     myEditPanel.classList.add("is-hidden");
+    editingReservation = null;
   });
 
-  // 4. 수정 제출
   myEditForm.addEventListener("submit", async (ev) => {
     ev.preventDefault();
-    if (!currentReservation) return;
+    if (!editingReservation) return;
     setMyMsg(myEditMsg, "", true);
     try {
-      const updated = await fetchJson(`/reservations/${currentReservation.id}`, {
+      await fetchJson(`/reservations/${editingReservation.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ date: myEditDate.value, timeId: Number(myEditTime.value) }),
+        body: JSON.stringify({
+          date: myEditDate.value,
+          timeId: Number(myEditTime.value),
+          themeId: editingReservation.themeResponse?.id,
+        }),
       });
-      currentReservation = updated;
-      renderMyCard(updated);
       myEditPanel.classList.add("is-hidden");
+      editingReservation = null;
       setMyMsg(mySearchMsg, "예약이 변경되었습니다.", true);
+      if (currentSearchName) {
+        await loadMyReservations(currentSearchName);
+      }
     } catch (e) {
       setMyMsg(myEditMsg, "변경에 실패했습니다. 입력값을 확인해 주세요.", false);
     }

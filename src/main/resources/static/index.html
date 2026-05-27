@@ -65,7 +65,8 @@
             <span class="field__label">예약자 이름</span>
             <input type="text" id="name-input" name="name" required autocomplete="name" />
           </label>
-          <button type="submit" class="btn btn--primary">예약 완료</button>
+          <p id="slot-status-hint" class="slot-status-hint" role="status"></p>
+          <button type="submit" id="reserve-submit-btn" class="btn btn--primary">예약 완료</button>
         </form>
         <p id="reserve-message" class="message" role="status"></p>
       </div>
@@ -74,7 +75,7 @@
     <!-- 내 예약 섹션 -->
     <section id="my-reservation-section" class="my-reservation-section is-hidden" aria-labelledby="my-res-title">
       <h2 id="my-res-title" class="section-title">내 예약</h2>
-      <p class="section-desc">예약자 이름으로 예약 내역을 확인하고 변경하거나 취소할 수 있습니다.</p>
+      <p class="section-desc">예약자 이름으로 예약 및 대기 내역을 확인하고, 본인 예약은 변경하거나 취소할 수 있습니다.</p>
 
       <form id="my-search-form" class="my-search-form">
         <div class="my-search-row">
@@ -88,31 +89,7 @@
       </form>
 
       <div id="my-result-area" class="my-result-area is-hidden">
-        <div class="my-card">
-          <div class="my-card__badge">예약 확인됨</div>
-          <div class="my-card__grid">
-            <div class="my-card__field">
-              <span class="my-card__label">예약자</span>
-              <span class="my-card__value" id="my-res-name">—</span>
-            </div>
-            <div class="my-card__field">
-              <span class="my-card__label">테마</span>
-              <span class="my-card__value" id="my-res-theme">—</span>
-            </div>
-            <div class="my-card__field">
-              <span class="my-card__label">날짜</span>
-              <span class="my-card__value" id="my-res-date">—</span>
-            </div>
-            <div class="my-card__field">
-              <span class="my-card__label">시간</span>
-              <span class="my-card__value" id="my-res-time">—</span>
-            </div>
-          </div>
-          <div class="my-card__actions">
-            <button type="button" class="btn btn--ghost" id="my-btn-edit">날짜·시간 변경</button>
-            <button type="button" class="btn my-btn-danger" id="my-btn-cancel">예약 취소</button>
-          </div>
-        </div>
+        <ul id="my-list" class="my-list"></ul>
 
         <div id="my-edit-panel" class="my-edit-panel is-hidden">
           <h3 class="my-edit-title">날짜·시간 변경</h3>
