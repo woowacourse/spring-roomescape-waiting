@@ -1,6 +1,6 @@
 # 🚀 방탈출 사용자 예약 설계
 
-### [🖥️ 프론트 페이지 주소](https://github.com/nn98/react-roomescape)
+### [🖥️ 프론트 페이지 주소](https://github.com/minzzun99/react-roomescape)
 
 ### 📄 방탈출 통합 API 명세
 
