@@ -132,6 +132,37 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("취소 대상 상태가 CONFIRM이고 대기중인 예약이 있는 경우, 대상 reservation의 status가 CANCEL되고, 대기중인 예약이 CONFIRM으로 변경된다.")
+    void reservationStatusCancelWhenReservationIsConfirmAndExistsPendingReservation(){
+        // given
+        Reservation confirmReservation = reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        Reservation pendingReservation = reservationService.saveReservation("김대기", savedThemeSlot.getId());
+
+        //when
+        reservationService.cancelReservation(confirmReservation.getId());
+
+        //then
+        Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
+        assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
+        assertThat(pendingReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+    }
+
+    @Test
+    @DisplayName("취소 대상 상태가 CONFIRM이고 대기중인 예약이 없는 경우, 대상 reservation의 status가 CANCEL되고, themeSlot is_reserved가 false로 변경된다.")
+    void reservationStatusCancelWhenReservationIsConfirmAndNotExistsPendingReservation(){
+        // given
+        Reservation confirmReservation = reservationService.saveReservation("브라운", savedThemeSlot.getId());
+
+        //when
+        reservationService.cancelReservation(confirmReservation.getId());
+
+        //then
+        Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
+        assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
+        assertThat(confirmReservation.getThemeSlot().isReserved()).isFalse();
+    }
+
+    @Test
     @DisplayName("취소 대상 예약이 PENDING이면 해당 ThemeSlot은 변경되지 않는다.")
     void ThemeSlotNotChangeWhenCancelStatusIsPending() {
 
