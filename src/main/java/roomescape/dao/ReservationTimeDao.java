@@ -37,15 +37,14 @@ public class ReservationTimeDao {
     }
 
     public boolean existsByTimeId(Long timeId) {
-        Boolean result = jdbcTemplate.queryForObject(
-                """
-                SELECT EXISTS(
-                    SELECT *
-                    FROM reservation_time rt
-                    JOIN reservation r ON r.time_id = rt.id
-                    WHERE rt.id = ?
-                )
-                """,
+        Boolean result = jdbcTemplate.queryForObject("""
+                        SELECT EXISTS(
+                            SELECT *
+                            FROM reservation_time rt
+                            JOIN reservation r ON r.time_id = rt.id
+                            WHERE rt.id = ?
+                        )
+                        """,
                 Boolean.class,
                 timeId
         );
@@ -53,14 +52,13 @@ public class ReservationTimeDao {
     }
 
     public boolean existsByStartAt(LocalTime time) {
-        Boolean result = jdbcTemplate.queryForObject(
-                """
-                SELECT EXISTS(
-                    SELECT *
-                    FROM reservation_time
-                    WHERE start_at = ?
-                )
-                """,
+        Boolean result = jdbcTemplate.queryForObject("""
+                        SELECT EXISTS(
+                            SELECT *
+                            FROM reservation_time
+                            WHERE start_at = ?
+                        )
+                        """,
                 Boolean.class,
                 time
         );
@@ -94,21 +92,20 @@ public class ReservationTimeDao {
     }
 
     public List<ReservationTimeStatus> findAvailableTime(Long id, String date) {
-        return jdbcTemplate.query(
-                """
-                    SELECT t.id AS time_id, t.start_at,
-                           CASE WHEN r.id IS NULL THEN 'AVAILABLE' ELSE 'CONFIRMED' END AS status
-                    FROM reservation_time t
-                    LEFT JOIN reservation r ON t.id = r.time_id
-                        AND r.theme_id = ?
-                        AND r.date = ?
-                        AND r.status = 'CONFIRMED'
-                    ORDER BY t.start_at
-                    """,
+        return jdbcTemplate.query("""
+                               SELECT t.id AS time_id, t.start_at,
+                                      CASE WHEN r.id IS NULL THEN 'AVAILABLE' ELSE 'CONFIRMED' END AS status
+                               FROM reservation_time t
+                               LEFT JOIN reservation r ON t.id = r.time_id
+                                   AND r.theme_id = ?
+                                   AND r.date = ?
+                                   AND r.status = 'CONFIRMED'
+                               ORDER BY t.start_at
+                        """,
                 (rs, rowNum) -> {
                     ReservationTime time = new ReservationTime(
-                        rs.getLong("time_id"),
-                        rs.getTime("start_at").toLocalTime());
+                            rs.getLong("time_id"),
+                            rs.getTime("start_at").toLocalTime());
 
                     return new ReservationTimeStatus(time, ReservationStatus.valueOf(rs.getString("status")));
 

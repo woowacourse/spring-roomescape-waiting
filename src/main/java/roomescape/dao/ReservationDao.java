@@ -96,23 +96,22 @@ public class ReservationDao {
     }
 
     public List<ReservationOrder> findByName(String name) {
-        return jdbcTemplate.query(
-                """
-                SELECT *
-                FROM (
-                    SELECT
-                        r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                        t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                        r.status,
-                        CASE WHEN r.status = 'WAITING'
-                             THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
-                        END AS waiting_order
-                    FROM reservation r
-                    INNER JOIN reservation_time rt ON r.time_id = rt.id
-                    INNER JOIN theme t ON r.theme_id = t.id
-                ) sub
-                WHERE sub.name = ?
-            """,
+        return jdbcTemplate.query("""
+                            SELECT *
+                            FROM (
+                                SELECT
+                                    r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                                    r.status,
+                                    CASE WHEN r.status = 'WAITING'
+                                         THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
+                                    END AS waiting_order
+                                FROM reservation r
+                                INNER JOIN reservation_time rt ON r.time_id = rt.id
+                                INNER JOIN theme t ON r.theme_id = t.id
+                            ) sub
+                            WHERE sub.name = ?
+                        """,
                 (rs, rowNum) -> {
                     ReservationTime time = new ReservationTime(
                             rs.getLong("time_id"),

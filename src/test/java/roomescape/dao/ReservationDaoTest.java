@@ -33,7 +33,7 @@ class ReservationDaoTest {
     void 전체_예약_조회() {
         List<Reservation> reservations = reservationDao.findAll();
 
-        assertThat(reservations).hasSize(19);
+        assertThat(reservations).hasSize(21);
     }
 
     @Test
@@ -81,7 +81,6 @@ class ReservationDaoTest {
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
                 .findFirst()
                 .orElseThrow();
-
 
         assertThat(secondWaiting.getOrder()).isEqualTo(1);
     }

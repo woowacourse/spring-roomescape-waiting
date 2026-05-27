@@ -13,7 +13,7 @@ import roomescape.dto.response.ThemeResponse;
 
 @Service
 public class ThemeService {
-    private final String uploadDir = System.getProperty("user.dir") +"/src/main/resources/static/images/";
+    private final String uploadDir = System.getProperty("user.dir") + "/src/main/resources/static/images/";
     private final ThemeDao themeDao;
 
     public ThemeService(ThemeDao themeDao) {
