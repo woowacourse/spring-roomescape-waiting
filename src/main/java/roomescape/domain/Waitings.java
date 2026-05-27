@@ -2,6 +2,7 @@ package roomescape.domain;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import roomescape.exception.client.BusinessRuleViolationException;
 
 public class Waitings {
@@ -27,6 +28,12 @@ public class Waitings {
     public int nextOrderIndex() {
         return waitings.size() + 1;
     }
+
+    public Optional<Waiting> firstWaiting() {
+        return waitings.stream()
+                .min(Comparator.comparingInt(Waiting::getOrderIndex));
+    }
+
 
     public List<Waiting> reorderAfterRemoval(int removedOrder) {
         return waitings.stream()

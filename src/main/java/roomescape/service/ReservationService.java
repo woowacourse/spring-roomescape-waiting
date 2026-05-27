@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
+import roomescape.domain.Waitings;
 import roomescape.domain.policy.ReservationPolicy;
 import roomescape.exception.client.BusinessRuleViolationException;
 import roomescape.exception.client.ResourceNotFoundException;
@@ -99,6 +101,26 @@ public class ReservationService {
         );
 
         reservationRepository.deleteById(id);
+        promoteFirstWaitingIfExists(reservation);
+    }
+
+    private void promoteFirstWaitingIfExists(Reservation canceled) {
+        Waitings waitings = new Waitings(waitingRepository.findBySlot(
+                canceled.getDate(),
+                canceled.getTime().getId(),
+                canceled.getTheme().getId()
+        ));
+
+        waitings.firstWaiting().ifPresent(first -> {
+            Reservation promoted = Reservation.promote(first);
+            reservationRepository.save(promoted);
+
+            waitingRepository.deleteById(first.getId());
+
+            for (Waiting w : waitings.reorderAfterRemoval(first.getOrderIndex())) {
+                waitingRepository.updateOrderIndex(w.getId(), w.getOrderIndex());
+            }
+        });
     }
 
     public ReservationResult updateByOwner(ReservationUpdateCommand command) {

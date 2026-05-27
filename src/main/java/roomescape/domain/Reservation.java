@@ -34,6 +34,10 @@ public class Reservation {
         return new Reservation(id, name, date, time, theme);
     }
 
+    public static Reservation promote(Waiting w) {
+        return new Reservation(null, w.getName(), w.getDate(), w.getTime(), w.getTheme());
+    }
+
     private static void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateName(name);
         validateDate(date);
