@@ -60,10 +60,22 @@ public class Reservation {
         return this.date.isEqual(date) && this.time.equals(time);
     }
 
-    public void reserve(String name) {
+    public ReservationEntry reserve(String name) {
         validateNotPast();
-        validateDuplicateReserve();
-        entries.addReserved(name, this);
+        validateDuplicateEntry(name);
+        if (entries.hasReservedEntry()) {
+            throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", date, time.getStartAt());
+        }
+        return entries.addReserved(name, this);
+    }
+
+    public ReservationEntry joinWaitingList(String name) {
+        validateNotPast();
+        validateDuplicateEntry(name);
+        if (entries.hasReservedEntry()) {
+            return entries.addWaiting(name, this);
+        }
+        return entries.addReserved(name, this);
     }
 
     public List<ReservationEntry> getEntries() {
@@ -76,9 +88,9 @@ public class Reservation {
         }
     }
 
-    private void validateDuplicateReserve() {
-        if (entries.hasReservedEntry()) {
-            throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", date, time.getStartAt());
+    private void validateDuplicateEntry(String name) {
+        if (entries.hasActiveEntryByName(name)) {
+            throw new DuplicateEntityException("이미 예약 또는 대기가 존재합니다. (%s)", name);
         }
     }
 

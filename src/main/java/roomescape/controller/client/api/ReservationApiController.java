@@ -43,6 +43,13 @@ public class ReservationApiController {
                 .body(ReservationResponse.from(result));
     }
 
+    @PostMapping("/waiting")
+    public ResponseEntity<ReservationResponse> joinWaitingList(@Valid @RequestBody ReservationRequest request) {
+        ReservationResult result = reservationService.addWaiting(request.toCommand());
+        return ResponseEntity.created(URI.create("/api/reservations/entries/" + result.entry().id()))
+                .body(ReservationResponse.from(result));
+    }
+
     @PatchMapping("/entries/{entryId}")
     public ResponseEntity<ReservationResponse> changeReservation(
             @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId,

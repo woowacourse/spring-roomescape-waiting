@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.EntityNotFoundException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -53,12 +54,26 @@ public class ReservationService {
         ReservationCondition condition = command.toCondition(theme.getId());
         Reservation newReservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
                 .orElseGet(() -> Reservation.createSlot(command.date(), theme, time));
-        newReservation.reserve(entry.getName());
+        ReservationEntry added = newReservation.reserve(entry.getName());
 
         currentReservation.cancelEntry(entryId);
         reservationRepository.save(currentReservation);
 
-        return ReservationResult.from(reservationRepository.save(newReservation));
+        Reservation savedNew = reservationRepository.save(newReservation);
+        return ReservationResult.from(savedNew, findSavedEntryId(savedNew, entry.getName(), added.getStatus()));
+    }
+
+    @Transactional
+    public ReservationResult addWaiting(ReservationCommand command) {
+        Reservation reservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(command.toCondition())
+                .orElseGet(() -> {
+                    Theme theme = findThemeWithThrow(command.themeId());
+                    ReservationTime time = findTimeWithThrow(command.timeId());
+                    return Reservation.createSlot(command.date(), theme, time);
+                });
+        ReservationEntry added = reservation.joinWaitingList(command.name());
+        Reservation saved = reservationRepository.save(reservation);
+        return ReservationResult.from(saved, findSavedEntryId(saved, command.name(), added.getStatus()));
     }
 
     @Transactional
@@ -75,6 +90,14 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResult::from)
                 .toList();
+    }
+
+    private long findSavedEntryId(Reservation saved, String name, ReservationStatus status) {
+        return saved.getEntries().stream()
+                .filter(e -> e.getName().equals(name) && e.getStatus() == status)
+                .mapToLong(ReservationEntry::getId)
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 엔트리를 찾을 수 없습니다."));
     }
 
     private Reservation findReservationByEntryIdWithThrow(long entryId) {

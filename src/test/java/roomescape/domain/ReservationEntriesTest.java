@@ -93,6 +93,30 @@ class ReservationEntriesTest {
     }
 
     @Test
+    void 활성_상태의_이름이_존재하면_true를_반환한다() {
+        // given
+        ReservationEntries entries = new ReservationEntries(List.of(
+                entry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now()),
+                entry(2L, "라텔", ReservationStatus.DELETED, LocalDateTime.now())
+        ));
+
+        // when & then
+        assertThat(entries.hasActiveEntryByName("이프")).isTrue();
+        assertThat(entries.hasActiveEntryByName("라텔")).isFalse();
+    }
+
+    @Test
+    void 대기_상태도_활성으로_간주한다() {
+        // given
+        ReservationEntries entries = new ReservationEntries(List.of(
+                entry(1L, "이프", ReservationStatus.WAITING, LocalDateTime.now())
+        ));
+
+        // when & then
+        assertThat(entries.hasActiveEntryByName("이프")).isTrue();
+    }
+
+    @Test
     void 가장_먼저_등록된_대기_엔트리를_예약으로_승격한다() {
         // given
         ReservationEntry reserved = entry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());

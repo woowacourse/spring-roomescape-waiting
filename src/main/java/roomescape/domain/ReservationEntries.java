@@ -15,12 +15,22 @@ public class ReservationEntries {
         this.entries = new ArrayList<>(entries);
     }
 
-    public void addReserved(String name, Reservation reservation) {
-        entries.add(ReservationEntry.reserve(name, reservation));
+    public ReservationEntry addReserved(String name, Reservation reservation) {
+        ReservationEntry entry = ReservationEntry.reserve(name, reservation);
+        entries.add(entry);
+        return entry;
     }
 
-    public void addWaiting(String name, Reservation reservation) {
-        entries.add(ReservationEntry.waiting(name, reservation));
+    public ReservationEntry addWaiting(String name, Reservation reservation) {
+        ReservationEntry entry = ReservationEntry.waiting(name, reservation);
+        entries.add(entry);
+        return entry;
+    }
+
+    public boolean hasActiveEntryByName(String name) {
+        return entries.stream()
+                .filter(entry -> !entry.isDeleted())
+                .anyMatch(entry -> entry.getName().equals(name));
     }
 
     public boolean hasReservedEntry() {
