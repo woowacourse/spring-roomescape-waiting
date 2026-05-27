@@ -16,6 +16,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -26,7 +27,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.dto.reservation.CreateReservationCommand;
-import roomescape.dto.reservation.ReservationResponses;
 import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
@@ -72,6 +72,25 @@ class ReservationControllerTest {
 
         verify(reservationService).getMyReservations(1L);
     }
+
+    @Disabled("TODO: 예약 상태별 내 예약 조회 응답 구현 후 작성")
+    @Test
+    void GET_reservations_mine_예약_확정과_예약_대기_목록을_구분해서_응답한다() throws Exception {
+        given(reservationService.getMyReservations(1L))
+                .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
+                        Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
+
+        mockMvc.perform(get("/reservations/mine"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.waitingReservations.size()").value(1))
+                .andExpect(jsonPath("$.reservations.size()").value(1))
+                .andExpect(jsonPath("$.waitingReservations[0].name").value("브라운"))
+                .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
+                .andExpect(jsonPath("$.waitingReservations[0].waitingOrder").value(1));
+
+        verify(reservationService).getMyReservations(1L);
+    }
+
 
     @Test
     void GET_reservations_id_단건을_응답한다() throws Exception {

@@ -81,6 +81,13 @@ public final class DbFixtures {
                 "store_id", storeId, "status", status));
     }
 
+    public static long insertReservation(JdbcTemplate jdbc, long userId, long themeId, String date, long timeId,
+                                         String status) {
+        return insertAndReturnKey(jdbc, "reservation", Map.of(
+                "user_id", userId, "theme_id", themeId, "date", LocalDate.parse(date), "time_id", timeId,
+                "store_id", defaultStoreId(jdbc), "status", status));
+    }
+
     public static long insertReservationInStore(
             JdbcTemplate jdbc, long userId, long themeId, String date, long timeId, long storeId) {
         return insertAndReturnKey(jdbc, "reservation", Map.of(
