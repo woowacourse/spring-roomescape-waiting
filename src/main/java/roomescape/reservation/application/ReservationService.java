@@ -115,18 +115,15 @@ public class ReservationService {
         return ReservationInfo.from(changedReservation);
     }
 
-    public ReservationInfo changeReservationPendingStatus(final Long id, final ReservationChangeCommand command) {
+    public ReservationInfo changeReservationStatusToPending(final Long id, final ReservationChangeCommand command) {
         Reservation reservation = reservationRepository.getById(id);
         ReservationTime time = timeRepository.getById(command.timeId());
         Theme theme = themeRepository.getById(command.themeId());
-
         if (!reservationRepository.existsActiveReservationByThemeAndTime(time.getId(), theme.getId(),
                 command.date())) {
             throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
         }
-
         checkDuplicatePendingReservation(command.date(), command.username(), time, theme);
-
         Reservation pendingReservation = reservation.pending(command.username(), command.date(), time, theme, clock);
         reservationRepository.updateById(id, pendingReservation);
         return ReservationInfo.from(pendingReservation);

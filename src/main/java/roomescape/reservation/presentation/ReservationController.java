@@ -48,15 +48,15 @@ public class ReservationController {
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{id}/active")
+    @PatchMapping("/{id}")
     public ResponseEntity<ReservationResponse> changeReservation(@PathVariable final Long id, @Valid @RequestBody final ReservationChangeRequest request) {
         ReservationResponse response = ReservationResponse.from(reservationService.changeReservation(id, request.toCommand()));
         return ResponseEntity.ok(response);
     }
 
-    @PatchMapping("/{id}/pending")
+    @PatchMapping("/{id}/status")
     public ResponseEntity<ReservationResponse> pendingReservation(@PathVariable final Long id, @Valid @RequestBody final ReservationChangeRequest request){
-        ReservationResponse response = ReservationResponse.from(reservationService.changeReservationPendingStatus(id, request.toCommand()));
+        ReservationResponse response = ReservationResponse.from(reservationService.changeReservationStatusToPending(id, request.toCommand()));
         return ResponseEntity.ok(response);
     }
 }
