@@ -60,4 +60,8 @@ public class ReservationFacade {
     public void updateMyReservation(UpdateMyReservation updateMyReservation, String name, Long reservationId) {
         reservationService.updateMyReservation(updateMyReservation, name, reservationId);
     }
+
+    public List<ReservationResponse> findReservationsByName(String name) {
+        return reservationService.findAllByName(name);
+    }
 }

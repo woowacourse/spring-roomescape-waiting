@@ -45,4 +45,9 @@ public class WebViewController {
     public String userPopular() {
         return "user/popular";
     }
+
+    @GetMapping("/user/my-reservations")
+    public String userMyReservations() {
+        return "user/my-reservations";
+    }
 }

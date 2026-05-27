@@ -179,4 +179,38 @@ public class ReservationDAO {
 
     return count != null && count > 0;
   }
+
+  public List<Reservation> findAllByName(String name) {
+    String sql = "select r.id, r.name, r.date, r.status, "
+        + "t.id as time_id, t.start_at, "
+        + "th.id as theme_id, th.name as theme_name, "
+        + "th.description as theme_description, th.image_url as theme_image_url "
+        + "from reservation r "
+        + "inner join reservation_time t on r.time_id = t.id "
+        + "inner join theme th on r.theme_id = th.id "
+        + "where r.name = ?";
+
+    RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> {
+      ReservationTime time = ReservationTime.of(
+          resultSet.getLong("time_id"),
+          LocalTime.parse(resultSet.getString("start_at"))
+      );
+      Theme theme = Theme.of(
+          resultSet.getLong("theme_id"),
+          resultSet.getString("theme_name"),
+          resultSet.getString("theme_description"),
+          resultSet.getString("theme_image_url")
+      );
+      return Reservation.of(
+          resultSet.getLong("id"),
+          resultSet.getString("name"),
+          LocalDate.parse(resultSet.getString("date")),
+          time,
+          theme,
+          ReservationStatus.valueOf(resultSet.getString("status"))
+      );
+    };
+
+    return jdbcTemplate.query(sql, rowMapper, name);
+  }
 }

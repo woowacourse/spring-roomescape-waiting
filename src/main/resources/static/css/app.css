@@ -273,6 +273,23 @@ tbody tr:hover {
     cursor: not-allowed;
 }
 
+.time-chip.booked {
+    border-color: rgba(224, 169, 108, 0.5);
+    color: #e0a96c;
+}
+
+.time-chip.booked:hover {
+    border-color: #e0a96c;
+    background: rgba(224, 169, 108, 0.08);
+}
+
+.time-chip.booked.selected {
+    background: rgba(224, 169, 108, 0.2);
+    border-color: #e0a96c;
+    color: #e0a96c;
+    font-weight: 600;
+}
+
 .theme-pick {
     display: grid;
     gap: 0.75rem;

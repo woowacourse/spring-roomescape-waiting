@@ -56,6 +56,7 @@
     let reservations = [];
     let selectedThemeId = null;
     let selectedTimeId = null;
+    let selectedTimeBooked = false;
 
     function localYmd(d) {
         const y = d.getFullYear();
@@ -82,10 +83,10 @@
         reservations = await res.json();
     }
 
-    function bookedTimeIds(dateStr, themeId) {
+    function reservedTimeIds(dateStr, themeId) {
         return new Set(
             reservations
-                .filter(r => r.date === dateStr && r.theme.id === themeId)
+                .filter(r => r.date === dateStr && r.theme.id === themeId && r.status === 'RESERVED')
                 .map(r => r.time.id)
         );
     }
@@ -93,31 +94,37 @@
     function renderTimes() {
         timeChips.innerHTML = '';
         selectedTimeId = null;
+        selectedTimeBooked = false;
         submitBtn.disabled = true;
+        submitBtn.textContent = '예약 요청';
         const dateStr = gameDate.value;
         if (!dateStr || selectedThemeId == null) {
             timeHint.textContent = '날짜와 테마를 먼저 선택하세요.';
             return;
         }
-        const taken = bookedTimeIds(dateStr, selectedThemeId);
-        const available = times.filter(t => !taken.has(t.id));
-        timeHint.textContent = available.length
-            ? '시간을 선택하세요.'
-            : '이 날짜·테마에 예약 가능한 시간이 없습니다. (관리자에게 시간 등록을 요청하세요)';
+        const taken = reservedTimeIds(dateStr, selectedThemeId);
+        if (!times.length) {
+            timeHint.textContent = '이 날짜·테마에 예약 가능한 시간이 없습니다. (관리자에게 시간 등록을 요청하세요)';
+            return;
+        }
+        const hasBooked = times.some(t => taken.has(t.id));
+        timeHint.textContent = hasBooked
+            ? '시간을 선택하세요. (주황색 시간은 이미 예약됨 — 대기 신청 가능)'
+            : '시간을 선택하세요.';
         for (const t of times) {
             const btn = document.createElement('button');
             btn.type = 'button';
-            btn.className = 'time-chip';
+            const isBooked = taken.has(t.id);
+            btn.className = 'time-chip' + (isBooked ? ' booked' : '');
             const label = typeof t.startAt === 'string' ? t.startAt.slice(0, 5) : String(t.startAt).slice(0, 5);
-            btn.textContent = label;
-            const dis = taken.has(t.id);
-            btn.disabled = dis;
-            if (dis) btn.title = '이미 예약됨';
+            btn.textContent = isBooked ? `${label} (대기)` : label;
+            if (isBooked) btn.title = '이미 예약됨 — 대기 신청으로 처리됩니다';
             btn.addEventListener('click', () => {
-                if (btn.disabled) return;
                 selectedTimeId = t.id;
+                selectedTimeBooked = isBooked;
                 timeChips.querySelectorAll('.time-chip').forEach(b => b.classList.remove('selected'));
                 btn.classList.add('selected');
+                submitBtn.textContent = isBooked ? '대기 신청' : '예약 요청';
                 submitBtn.disabled = !memberName.value.trim();
             });
             timeChips.appendChild(btn);
@@ -173,8 +180,11 @@
                 headers: {'Content-Type': 'application/json'},
                 body: JSON.stringify(body)
             });
-            if (!res.ok) throw new Error('예약에 실패했습니다.');
-            showStatus('예약이 완료되었습니다.', true);
+            if (!res.ok) {
+                const errBody = await res.json().catch(() => ({}));
+                throw new Error(errBody.message || '요청에 실패했습니다.');
+            }
+            showStatus(selectedTimeBooked ? '대기 신청이 완료되었습니다.' : '예약이 완료되었습니다.', true);
             await refreshReservations();
             renderTimes();
             memberName.value = '';

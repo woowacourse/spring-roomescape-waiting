@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    <title>사용자 — 내 예약</title>
+    <link rel="stylesheet" th:href="@{/css/app.css}"/>
+    <style>
+        .badge {
+            display: inline-block;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 600;
+            letter-spacing: 0.03em;
+        }
+        .badge-reserved  { background: rgba(107, 207, 142, 0.15); color: var(--success); border: 1px solid rgba(107, 207, 142, 0.35); }
+        .badge-waiting   { background: rgba(92, 157, 237, 0.15);  color: var(--accent);  border: 1px solid rgba(92, 157, 237, 0.35); }
+        .badge-canceled  { background: rgba(139,156,179, 0.12);   color: var(--muted);   border: 1px solid rgba(139,156,179, 0.25); }
+
+        .search-row {
+            display: flex;
+            gap: 0.75rem;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 1.5rem;
+        }
+        .search-row label {
+            flex: 1;
+            min-width: 180px;
+        }
+        .search-row input { width: 100%; }
+
+        #resultPanel { display: none; }
+
+        .cancel-btn {
+            padding: 0.3rem 0.65rem;
+            font-size: 0.8rem;
+        }
+    </style>
+</head>
+<body>
+<header th:replace="~{fragments/site :: siteHeader}"></header>
+<main>
+    <h1>내 예약 현황</h1>
+    <p class="muted"><a th:href="@{/user}">← 사용자 홈</a></p>
+
+    <div class="panel">
+        <div class="search-row">
+            <label>예약자 이름
+                <input type="text" id="nameInput" placeholder="이름을 입력하세요" maxlength="255"/>
+            </label>
+            <button class="btn btn-primary" id="searchBtn">조회</button>
+        </div>
+        <p id="searchStatus" class="status-msg" style="display:none;"></p>
+    </div>
+
+    <div id="resultPanel" class="panel">
+        <h2>예약 목록 — <span id="resultName"></span></h2>
+        <p id="emptyMsg" class="muted" style="display:none;">예약 또는 대기 내역이 없습니다.</p>
+        <table id="reservationTable" style="display:none;">
+            <thead>
+            <tr>
+                <th>날짜</th>
+                <th>시간</th>
+                <th>테마</th>
+                <th>상태</th>
+                <th></th>
+            </tr>
+            </thead>
+            <tbody id="reservationBody"></tbody>
+        </table>
+    </div>
+</main>
+<script>
+    const nameInput   = document.getElementById('nameInput');
+    const searchBtn   = document.getElementById('searchBtn');
+    const searchStatus = document.getElementById('searchStatus');
+    const resultPanel = document.getElementById('resultPanel');
+    const resultName  = document.getElementById('resultName');
+    const emptyMsg    = document.getElementById('emptyMsg');
+    const reservationTable = document.getElementById('reservationTable');
+    const reservationBody  = document.getElementById('reservationBody');
+
+    function escapeHtml(s) {
+        return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+    }
+
+    function statusBadge(status) {
+        const map = {
+            RESERVED: ['reserved', '예약 확정'],
+            WAITING:  ['waiting',  '대기 중'],
+            CANCELED: ['canceled', '취소됨'],
+        };
+        const [cls, label] = map[status] ?? ['canceled', status];
+        return `<span class="badge badge-${cls}">${label}</span>`;
+    }
+
+    function showMsg(el, text, ok) {
+        el.textContent = text;
+        el.className = 'status-msg ' + (ok ? 'ok' : 'err');
+        el.style.display = 'block';
+    }
+
+    function renderRows(list, name) {
+        reservationBody.innerHTML = '';
+        const active = list.filter(r => r.status !== 'CANCELED');
+        if (!active.length) {
+            emptyMsg.style.display = 'block';
+            reservationTable.style.display = 'none';
+            return;
+        }
+        emptyMsg.style.display = 'none';
+        reservationTable.style.display = 'table';
+        for (const r of active) {
+            const tr = document.createElement('tr');
+            const timeLabel = r.time?.startAt ? String(r.time.startAt).slice(0, 5) : '-';
+            const themeName = r.theme?.name ?? '-';
+            tr.innerHTML = `
+                <td>${escapeHtml(r.date)}</td>
+                <td>${escapeHtml(timeLabel)}</td>
+                <td>${escapeHtml(themeName)}</td>
+                <td>${statusBadge(r.status)}</td>
+                <td><button class="btn btn-danger cancel-btn" data-id="${r.id}">취소</button></td>
+            `;
+            reservationBody.appendChild(tr);
+        }
+
+        reservationBody.querySelectorAll('.cancel-btn').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                if (!confirm('이 예약을 취소하시겠습니까?')) return;
+                const id = btn.dataset.id;
+                try {
+                    const res = await fetch(`/reservations/my?name=${encodeURIComponent(name)}&reservationId=${id}`, {
+                        method: 'DELETE'
+                    });
+                    if (!res.ok) {
+                        const body = await res.json().catch(() => ({}));
+                        throw new Error(body.message || '취소에 실패했습니다.');
+                    }
+                    await load(name);
+                } catch (e) {
+                    showMsg(searchStatus, e.message, false);
+                }
+            });
+        });
+    }
+
+    async function load(name) {
+        searchStatus.style.display = 'none';
+        try {
+            const res = await fetch(`/reservations/my?name=${encodeURIComponent(name)}`);
+            if (!res.ok) {
+                const body = await res.json().catch(() => ({}));
+                throw new Error(body.message || '조회에 실패했습니다.');
+            }
+            const list = await res.json();
+            resultName.textContent = name;
+            resultPanel.style.display = 'block';
+            renderRows(list, name);
+        } catch (e) {
+            showMsg(searchStatus, e.message, false);
+            resultPanel.style.display = 'none';
+        }
+    }
+
+    searchBtn.addEventListener('click', () => {
+        const name = nameInput.value.trim();
+        if (!name) {
+            showMsg(searchStatus, '이름을 입력해주세요.', false);
+            return;
+        }
+        load(name);
+    });
+
+    nameInput.addEventListener('keydown', e => {
+        if (e.key === 'Enter') searchBtn.click();
+    });
+</script>
+</body>
+</html>

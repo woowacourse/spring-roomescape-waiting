@@ -48,6 +48,11 @@ public class ReservationController {
         return ResponseEntity.ok().build();
     }
 
+    @GetMapping("/reservations/my")
+    public ResponseEntity<List<ReservationResponse>> findByName(@RequestParam String name) {
+        return ResponseEntity.ok(reservationFacade.findReservationsByName(name));
+    }
+
     @DeleteMapping("/reservations/my")
     public ResponseEntity<Void> deleteMyReservationById(@RequestParam String name,
         @RequestParam Long reservationId) {

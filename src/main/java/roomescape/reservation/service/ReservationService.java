@@ -53,13 +53,18 @@ public class ReservationService {
                         reservation.getName(),
                         reservation.getDate(),
                         TimeResponse.from(reservation.getTime()),
-                        ThemeSimpleResponse.from(reservation.getTheme())
+                        ThemeSimpleResponse.from(reservation.getTheme()),
+                    reservation.getStatus()
+
                 )).toList();
     }
 
     public ReservationResponse findById(Long id) {
         Reservation reservation = reservationDAO.findById(id);
-        return ReservationResponse.of(reservation.getId(), reservation.getName(), reservation.getDate(), TimeResponse.from(reservation.getTime()), ThemeSimpleResponse.from(reservation.getTheme()));
+        return ReservationResponse.of(reservation.getId(), reservation.getName(),
+            reservation.getDate(), TimeResponse.from(reservation.getTime()),
+            ThemeSimpleResponse.from(reservation.getTheme()),
+            reservation.getStatus());
     }
 
     public void delete(Long id) {
@@ -69,10 +74,6 @@ public class ReservationService {
     public boolean existsByTimeId(Long timeId) {
         return reservationDAO.existsByTimeId(timeId);
     }
-
-  public void deleteByIdAndName(Long id, String name) {
-        reservationDAO.deleteByIdAndName(id, name);
-  }
 
     public void deleteByNameAndReservationId(String name, Long reservationId) {
         boolean isExistReservation = reservationDAO.existsByNameAndReservationId(name, reservationId);
@@ -88,6 +89,14 @@ public class ReservationService {
         validateReservationAuthority(name, reservation);
         isReservationExists(updateMyReservation.date(), updateMyReservation.timeId(), reservation.getTheme().getId());
         reservationDAO.updateReservation(updateMyReservation.date(), updateMyReservation.timeId(), name, reservationId);
+    }
+
+    public List<ReservationResponse> findAllByName(String name) {
+        return reservationDAO.findAllByName(name).stream()
+            .map(r -> ReservationResponse.of(r.getId(), r.getName(), r.getDate(),
+                TimeResponse.from(r.getTime()), ThemeSimpleResponse.from(r.getTheme()),
+                r.getStatus()))
+            .toList();
     }
 
     private static void validateReservationAuthority(String name, Reservation reservation) {
