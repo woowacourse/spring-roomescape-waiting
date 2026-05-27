@@ -49,6 +49,16 @@ public class ReservationController {
                 .body(response);
     }
 
+//    @PostMapping("/waitings")
+//    public ResponseEntity<WaitingResponse> createReservation(@Valid @RequestBody WaitingRequest request) {
+//        LocalDateTime now = LocalDateTime.now();
+//        WaitingResponse response = waitingService.save(now, request);
+//        URI location = URI.create("/waiting/" + response.id());
+//        return ResponseEntity
+//                .created(location)
+//                .body(response);
+//    }
+
     @GetMapping("/{id}")
     public ReservationResponse getReservation(
             @PathVariable long id
@@ -62,8 +72,17 @@ public class ReservationController {
         return reservationService.findAllByName(username);
     }
 
+
+
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    @DeleteMapping("/{id}")
+    public void deleteReservation(@PathVariable Long id) {
+        LocalDateTime now = LocalDateTime.now();
+        reservationService.delete(now, id);
+    }
+
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/{waitingId}")
+    @PatchMapping("/waitings/{waitingId}")
     public void updateReservation(
             @PathVariable long waitingId,
             @Valid @RequestBody ReservationUpdateRequest request
@@ -73,26 +92,9 @@ public class ReservationController {
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void deleteReservation(@PathVariable Long id) {
-        LocalDateTime now = LocalDateTime.now();
-        reservationService.delete(now, id);
-    }
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/waitings/{id}")
     public void deleteWaiting(@PathVariable Long id) {
         LocalDateTime now = LocalDateTime.now();
         waitingService.delete(now, id);
-    }
-
-    @PostMapping("/waitings")
-    public ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request) {
-        LocalDateTime now = LocalDateTime.now();
-        WaitingResponse response = waitingService.save(now, request);
-        URI location = URI.create("/waiting/" + response.id());
-        return ResponseEntity
-                .created(location)
-                .body(response);
     }
 }

@@ -1,9 +1,9 @@
 package roomescape.dto;
 
-import roomescape.domain.Waiting;
+import roomescape.domain.Reservation;
 
 public record WaitingResponse(long id, String name, int order) {
-    public static WaitingResponse from(Waiting waiting, int order) {
-        return new WaitingResponse(waiting.getId(), waiting.getName(), order);
+    public static WaitingResponse from(Reservation reservation, int order) {
+        return new WaitingResponse(reservation.getId(), reservation.getName(), order);
     }
 }

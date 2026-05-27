@@ -6,28 +6,29 @@ import java.util.Optional;
 
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationSlot;
 import roomescape.domain.Time;
-import roomescape.domain.Waiting;
 import roomescape.dto.ReservationResponse;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.WaitingResponse;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
-import roomescape.repository.ReservationDao;
+import roomescape.repository.ReservationSlotDao;
 import roomescape.dto.ReservationRequest;
 import roomescape.repository.TimeDao;
-import roomescape.repository.WaitingDao;
+import roomescape.repository.ReservationDao;
 
 @Service
 public class ReservationService {
+    private final ReservationSlotDao reservationSlotDao;
     private final ReservationDao reservationDao;
-    private final WaitingDao waitingDao;
     private final TimeDao timeDao;
 
-    public ReservationService(ReservationDao reservationDao, WaitingDao waitingDao, TimeDao timeDao) {
+    public ReservationService(ReservationSlotDao reservationSlotDao, ReservationDao reservationDao, TimeDao timeDao) {
+        this.reservationSlotDao = reservationSlotDao;
         this.reservationDao = reservationDao;
-        this.waitingDao = waitingDao;
         this.timeDao = timeDao;
     }
 
@@ -37,11 +38,11 @@ public class ReservationService {
         validateDateAndTimeNotPast(now,time);
 
         try{
-            Long reservationId = reservationDao.save(request.date(), request.timeId(), request.themeId());
-            Reservation reservation = reservationDao.findById(reservationId);
-            Long waitingId = waitingDao.save(request.name(), reservationId);
-            Waiting waiting = waitingDao.findById(waitingId);
-            return ReservationResponse.from(reservation, WaitingResponse.from(waiting, waitingDao.findOrderByReservationId(waitingId, reservationId)));
+            Long reservationId = reservationSlotDao.save(request.date(), request.timeId(), request.themeId());
+            ReservationSlot reservationSlot = reservationSlotDao.findById(reservationId);
+            Long waitingId = reservationDao.save(request.name(), reservationId);
+            Reservation reservation = reservationDao.findById(waitingId);
+            return ReservationResponse.from(reservationSlot, WaitingResponse.from(reservation, reservationDao.findOrderByReservationId(waitingId, reservationId)));
         } catch (DuplicateKeyException e){
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION);
         }
@@ -52,35 +53,35 @@ public class ReservationService {
             Time time = timeDao.findById(request.timeId());
             LocalDateTime targetDateTime = LocalDateTime.of(request.targetDate(), time.getStartAt());
             validateDateAndTimeNotPast(now, targetDateTime);
-            Waiting waiting = waitingDao.findById(waitingId);
-            waitingDao.delete(waitingId);
+            Reservation reservation = reservationDao.findById(waitingId);
+            reservationDao.delete(waitingId);
 
-            if (!waitingDao.existByReservationId(waiting.getReservationId())){
-                reservationDao.delete(waiting.getReservationId());
+            if (!reservationDao.existByReservationId(reservation.getReservationId())){
+                reservationSlotDao.delete(reservation.getReservationId());
             }
 
-            Reservation reservation = reservationDao.findById(waiting.getReservationId());
-            Optional<Long> reservationId = reservationDao.findIdByDateAndTimeIdAndThemeId(request.targetDate(), request.timeId(), reservation.getTheme().getId());
+            ReservationSlot reservationSlot = reservationSlotDao.findById(reservation.getReservationId());
+            Optional<Long> reservationId = reservationSlotDao.findIdByDateAndTimeIdAndThemeId(request.targetDate(), request.timeId(), reservationSlot.getTheme().getId());
             if (reservationId.isEmpty()) {
-                reservationId = Optional.of(reservationDao.save(request.targetDate(), request.timeId(), reservation.getTheme().getId()));
+                reservationId = Optional.of(reservationSlotDao.save(request.targetDate(), request.timeId(), reservationSlot.getTheme().getId()));
             }
-            waitingDao.save(request.name(), reservationId.get());
+            reservationDao.save(request.name(), reservationId.get());
         } catch (DuplicateKeyException e) {
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
     public void delete(LocalDateTime now, Long id) {
-        Reservation reservation = reservationDao.findById(id);
-        LocalDateTime localDateTime = LocalDateTime.of(reservation.getDate(), reservation.getTime().getStartAt());
+        ReservationSlot reservationSlot = reservationSlotDao.findById(id);
+        LocalDateTime localDateTime = LocalDateTime.of(reservationSlot.getDate(), reservationSlot.getTime().getStartAt());
         if (now.isAfter(localDateTime )) {
             throw new CustomException(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
         }
-        reservationDao.delete(id);
+        reservationSlotDao.delete(id);
     }
 
     public List<ReservationResponse> findAllByName(String username) {
-        return reservationDao.findByUserName(username);
+        return reservationSlotDao.findByUserName(username);
     }
 
     private void validateDateAndTimeNotPast(LocalDateTime now, LocalDateTime reservationTime) {

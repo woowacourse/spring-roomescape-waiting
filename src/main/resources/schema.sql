@@ -15,7 +15,7 @@ CREATE TABLE IF NOT EXISTS theme
 );
 
 
-CREATE TABLE IF NOT EXISTS reservation
+CREATE TABLE IF NOT EXISTS reservation_slot
 (
     id       BIGINT       NOT NULL AUTO_INCREMENT,
     date     DATE NOT NULL,
@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 
-CREATE TABLE IF NOT EXISTS waiting
+CREATE TABLE IF NOT EXISTS reservation
 (
     id              BIGINT       NOT NULL AUTO_INCREMENT,
     name            VARCHAR(255) NOT NULL,
@@ -40,5 +40,5 @@ CREATE TABLE IF NOT EXISTS waiting
     CONSTRAINT unique_waiting
     UNIQUE(name, reservation_id),
 
-    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
+    FOREIGN KEY (reservation_id) REFERENCES reservation_slot (id)
     );

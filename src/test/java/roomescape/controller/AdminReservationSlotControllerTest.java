@@ -13,7 +13,7 @@ import org.springframework.test.annotation.DirtiesContext.ClassMode;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-class AdminReservationControllerTest {
+class AdminReservationSlotControllerTest {
 
     @DisplayName("모든 사용자의 예약 내역이 모두 조회되어야한다.")
     @Test

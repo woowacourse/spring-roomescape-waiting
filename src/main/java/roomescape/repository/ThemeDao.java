@@ -55,7 +55,7 @@ public class ThemeDao {
                     th.name,
                     th.description,
                     th.thumbnail_url
-                FROM reservation AS r
+                FROM reservationSlot AS r
                 INNER JOIN theme AS th ON r.theme_id = th.id
                 WHERE r.date BETWEEN ? AND ?
                 GROUP BY
@@ -79,12 +79,12 @@ public class ThemeDao {
                       CASE WHEN r.id IS NULL THEN 0
                           ELSE (
                               SELECT COUNT(*) - 1
-                              FROM waiting w
+                              FROM reservation w
                               WHERE w.reservation_id = r.id
                           )
                       END AS waiting_count
                   FROM reservation_time rt                                                                                                                                                                                       \s
-                  LEFT JOIN reservation r                                                                                                                                                                                      \s
+                  LEFT JOIN reservationSlot r                                                                                                                                                                                      \s
                       ON rt.id = r.time_id
                        AND r.theme_id = ?
                        AND r.date = ?
