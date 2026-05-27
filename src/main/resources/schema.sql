@@ -31,7 +31,6 @@ CREATE TABLE reservation
 
     PRIMARY KEY (id),
     UNIQUE (date, time_id, theme_id, confirmed_token),
-    UNIQUE (guest_name, date, time_id, theme_id, status),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );

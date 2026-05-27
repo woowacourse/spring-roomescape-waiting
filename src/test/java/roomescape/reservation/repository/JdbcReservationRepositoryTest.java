@@ -272,6 +272,25 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("같은 게스트의 같은 슬롯 취소 이력은 여러 개 저장할 수 있다.")
+    public void allowDuplicateCanceledReservationsForSameGuestAndSlot() {
+        // given
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2023, 8, 5);
+
+        insertDeletedReservation("브라운", date, time, theme);
+        Reservation reservation = insertReservation("브라운", date, time, theme, Status.WAITING);
+
+        // when
+        boolean result = reservationRepository.cancelById(reservation.getId());
+
+        // then
+        assertThat(result).isTrue();
+        assertThat(countReservationsByGuestName("브라운")).isEqualTo(2);
+    }
+
+    @Test
     @DisplayName("특정 예약 시간 id를 가진 예약이 존재하는지 확인한다.")
     public void existByTimeId() {
         // given
@@ -461,6 +480,14 @@ class JdbcReservationRepositoryTest {
                 FROM reservation r
                 WHERE r.id = ?
                 """, id);
+    }
+
+    private Integer countReservationsByGuestName(String guestName) {
+        return jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE guest_name = ?
+                """, Integer.class, guestName);
     }
 
 

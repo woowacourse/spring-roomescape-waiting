@@ -298,7 +298,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 SELECT id
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
-                ORDER BY id
+                ORDER BY created_at, id
                 LIMIT 1
                 """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId, Status.WAITING.toString()).stream().findFirst();
     }
