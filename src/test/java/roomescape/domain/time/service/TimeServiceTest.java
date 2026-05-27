@@ -36,6 +36,7 @@ class TimeServiceTest {
     private TimeRepository timeRepository;
     private ThemeRepository themeRepository;
     private ReservationRepository reservationRepository;
+    private TimeMapper timeMapper;
 
     @BeforeEach
     void setUp() {
@@ -51,7 +52,8 @@ class TimeServiceTest {
         themeRepository = new JdbcThemeRepository(dataSource);
         timeRepository = new JdbcTimeRepository(dataSource);
         reservationRepository = new JdbcReservationRepository(dataSource);
-        timeService = new TimeService(reservationRepository, timeRepository, themeRepository);
+        timeMapper = new TimeMapper();
+        timeService = new TimeService(reservationRepository, timeRepository, themeRepository, timeMapper);
     }
 
     @Nested
@@ -202,10 +204,10 @@ class TimeServiceTest {
                 LocalDate date = LocalDate.of(2026, 5, 10);
                 Long themeId = 1L;
                 List<TimeAvailabilityResponseDto> expected = List.of(
-                    TimeMapper.toAvailabilityResponseDto(time1, false),
-                    TimeMapper.toAvailabilityResponseDto(time2, true),
-                    TimeMapper.toAvailabilityResponseDto(time3, true),
-                    TimeMapper.toAvailabilityResponseDto(time4, true));
+                    timeMapper.toAvailabilityResponseDto(time1, false),
+                    timeMapper.toAvailabilityResponseDto(time2, true),
+                    timeMapper.toAvailabilityResponseDto(time3, true),
+                    timeMapper.toAvailabilityResponseDto(time4, true));
 
                 // when
                 List<TimeAvailabilityResponseDto> actual = timeService.getTimeAvailabilities(date, themeId);

@@ -18,10 +18,12 @@ import roomescape.global.error.exception.GeneralException;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
+    private final ThemeMapper themeMapper;
     private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository, Clock clock) {
+    public ThemeService(ThemeRepository themeRepository, ThemeMapper themeMapper, Clock clock) {
         this.themeRepository = themeRepository;
+        this.themeMapper = themeMapper;
         this.clock = clock;
     }
 
@@ -40,7 +42,7 @@ public class ThemeService {
 
     private List<ThemeResponseDto> convertThemesToDto(List<Theme> themes) {
         return themes.stream()
-            .map(ThemeMapper::toResponseDto)
+            .map(themeMapper::toResponseDto)
             .toList();
     }
 
@@ -52,7 +54,7 @@ public class ThemeService {
 
         try {
             Theme theme = Theme.create(requestDto.name(), requestDto.description(), requestDto.imageUrl());
-            return ThemeMapper.toResponseDto(themeRepository.save(theme));
+            return themeMapper.toResponseDto(themeRepository.save(theme));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME);
         }

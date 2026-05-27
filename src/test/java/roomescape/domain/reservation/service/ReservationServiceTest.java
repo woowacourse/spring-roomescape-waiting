@@ -24,6 +24,7 @@ import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
+import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.dto.response.ReservationThemeResponseDto;
@@ -46,6 +47,8 @@ class ReservationServiceTest {
     private ReservationRepository reservationRepository;
     private TimeRepository timeRepository;
     private ThemeRepository themeRepository;
+    private TimeMapper timeMapper;
+    private ThemeMapper themeMapper;
     private final Clock fixedClock = Clock.fixed(
         Instant.parse("2026-05-08T00:00:00Z"),
         ZoneId.of("Asia/Seoul")
@@ -65,8 +68,11 @@ class ReservationServiceTest {
         reservationRepository = new JdbcReservationRepository(dataSource);
         timeRepository = new JdbcTimeRepository(dataSource);
         themeRepository = new JdbcThemeRepository(dataSource);
+        timeMapper = new TimeMapper();
+        themeMapper = new ThemeMapper();
+        ReservationMapper reservationMapper = new ReservationMapper(timeMapper, themeMapper, fixedClock);
         reservationService = new ReservationService(reservationRepository, timeRepository, themeRepository,
-            fixedClock);
+            reservationMapper, fixedClock);
     }
 
     @Nested
@@ -94,12 +100,12 @@ class ReservationServiceTest {
             String message = status.getMessage();
 
             assertThat(actual).containsExactly(
-                new ReservationResponseDto(1L, "제이콥", date, TimeMapper.toReservationResponseDto(time1),
-                    ThemeMapper.toReservationResponseDto(theme), status, message, null),
-                new ReservationResponseDto(2L, "라이", date.plusDays(1), TimeMapper.toReservationResponseDto(time2),
-                    ThemeMapper.toReservationResponseDto(theme), status, message, null),
-                new ReservationResponseDto(3L, "티모", date.plusDays(2), TimeMapper.toReservationResponseDto(time3),
-                    ThemeMapper.toReservationResponseDto(theme), status, message, null)
+                new ReservationResponseDto(1L, "제이콥", date, timeMapper.toReservationResponseDto(time1),
+                    themeMapper.toReservationResponseDto(theme), status, message, null),
+                new ReservationResponseDto(2L, "라이", date.plusDays(1), timeMapper.toReservationResponseDto(time2),
+                    themeMapper.toReservationResponseDto(theme), status, message, null),
+                new ReservationResponseDto(3L, "티모", date.plusDays(2), timeMapper.toReservationResponseDto(time3),
+                    themeMapper.toReservationResponseDto(theme), status, message, null)
             );
         }
 
@@ -122,8 +128,8 @@ class ReservationServiceTest {
 
             assertThat(actual).containsExactly(
                     new ReservationResponseDto(reservation.getId(), "제이콥", date,
-                            TimeMapper.toReservationResponseDto(time),
-                            ThemeMapper.toReservationResponseDto(theme), canceledStatus, canceledMessage, null)
+                            timeMapper.toReservationResponseDto(time),
+                            themeMapper.toReservationResponseDto(theme), canceledStatus, canceledMessage, null)
             );
         }
 

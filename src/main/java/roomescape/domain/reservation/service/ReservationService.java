@@ -9,10 +9,9 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
-import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
@@ -32,13 +31,15 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationMapper reservationMapper;
     private final Clock clock;
 
     public ReservationService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository, Clock clock) {
+        ThemeRepository themeRepository, ReservationMapper reservationMapper, Clock clock) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
+        this.reservationMapper = reservationMapper;
         this.clock = clock;
     }
 
@@ -50,29 +51,8 @@ public class ReservationService {
     public List<ReservationResponseDto> getReservationsByName(String name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
         return reservations.stream()
-            .map(reservation -> ReservationMapper.toResponseDto(reservation, getStatus(reservation),
-                getWaitingNumber(reservation)))
+            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
             .toList();
-    }
-
-    private ReservationEditableStatus getStatus(Reservation reservation) {
-        if (reservation.getStatus() == ReservationStatus.CANCELED) {
-            return ReservationEditableStatus.CANCELED;
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            return ReservationEditableStatus.LOCKED;
-        }
-
-        if (reservation.getStatus() == ReservationStatus.WAITING) {
-            return ReservationEditableStatus.WAITING;
-        }
-
-        if (reservation.getTime().getDeletedAt() != null || reservation.getTheme().getDeletedAt() != null) {
-            return ReservationEditableStatus.EDIT_RECOMMENDED;
-        }
-
-        return ReservationEditableStatus.EDITABLE;
     }
 
     private Integer getWaitingNumber(Reservation reservation) {
@@ -86,8 +66,7 @@ public class ReservationService {
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
         return reservations.stream()
-            .map(reservation -> ReservationMapper.toResponseDto(reservation, getStatus(reservation),
-                    getWaitingNumber(reservation)))
+            .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
             .toList();
     }
 
@@ -102,7 +81,7 @@ public class ReservationService {
         }
 
         try {
-            return ReservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
+            return reservationMapper.toCreateResponseDto(reservationRepository.save(reservation));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
@@ -132,7 +111,7 @@ public class ReservationService {
         }
 
         try {
-            return ReservationMapper.toCreateResponseDto(reservationRepository.update(updateReservation));
+            return reservationMapper.toCreateResponseDto(reservationRepository.update(updateReservation));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
@@ -155,7 +134,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
         }
 
-        return ReservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
     }
 
     private Reservation createReservation(ReservationCreateRequestDto requestDto) {
@@ -252,7 +231,7 @@ public class ReservationService {
         }
 
         try {
-            return ReservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
+            return reservationMapper.toCreateResponseDto(reservationRepository.save(waitingReservation));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
         }
@@ -275,6 +254,6 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
         }
 
-        return ReservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
+        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
     }
 }

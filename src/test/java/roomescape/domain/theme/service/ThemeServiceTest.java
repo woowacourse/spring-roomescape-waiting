@@ -23,6 +23,7 @@ import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.dto.request.ThemeCreateRequestDto;
 import roomescape.domain.theme.dto.response.ThemeResponseDto;
 import roomescape.domain.theme.entity.Theme;
+import roomescape.domain.theme.mapper.ThemeMapper;
 import roomescape.domain.theme.repository.JdbcThemeRepository;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.entity.Time;
@@ -56,7 +57,7 @@ class ThemeServiceTest {
         themeRepository = new JdbcThemeRepository(dataSource);
         timeRepository = new JdbcTimeRepository(dataSource);
         reservationRepository = new JdbcReservationRepository(dataSource);
-        themeService = new ThemeService(themeRepository, fixedClock);
+        themeService = new ThemeService(themeRepository, new ThemeMapper(), fixedClock);
         timeSequence = 0;
     }
 

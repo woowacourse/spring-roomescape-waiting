@@ -24,18 +24,20 @@ public class TimeService {
     private final ReservationRepository reservationRepository;
     private final TimeRepository timeRepository;
     private final ThemeRepository themeRepository;
+    private final TimeMapper timeMapper;
 
     public TimeService(ReservationRepository reservationRepository, TimeRepository timeRepository,
-        ThemeRepository themeRepository) {
+        ThemeRepository themeRepository, TimeMapper timeMapper) {
         this.reservationRepository = reservationRepository;
         this.timeRepository = timeRepository;
         this.themeRepository = themeRepository;
+        this.timeMapper = timeMapper;
     }
 
     public List<TimeResponseDto> getTimes() {
         return timeRepository.findAllByDeletedAtIsNull()
             .stream()
-            .map(TimeMapper::toResponseDto)
+            .map(timeMapper::toResponseDto)
             .toList();
     }
 
@@ -49,7 +51,7 @@ public class TimeService {
 
         return timeRepository.findAllByDeletedAtIsNull()
             .stream()
-            .map(time -> TimeMapper.toAvailabilityResponseDto(time, !reservedTimeIds.contains(time.getId())))
+            .map(time -> timeMapper.toAvailabilityResponseDto(time, !reservedTimeIds.contains(time.getId())))
             .toList();
     }
 
@@ -61,7 +63,7 @@ public class TimeService {
 
         try {
             Time time = Time.create(requestDto.startAt());
-            return TimeMapper.toResponseDto(timeRepository.save(time));
+            return timeMapper.toResponseDto(timeRepository.save(time));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(TimeErrorType.ALREADY_EXIST_TIME);
         }
