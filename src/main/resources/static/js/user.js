@@ -269,13 +269,6 @@
     reserveSubmitBtn.textContent = reserved ? "대기 신청" : "예약 완료";
   }
 
-  function nowIsoLocal() {
-    const d = new Date();
-    const pad = (n) => String(n).padStart(2, "0");
-    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
-        + `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
-  }
-
   async function onSelectDate(dateStr) {
     state.selectedDate = dateStr;
     if (!state.selectedTheme) return;
@@ -349,7 +342,6 @@
             date: state.selectedDate,
             timeId,
             themeId: state.selectedTheme.id,
-            createdAt: nowIsoLocal(),
           }),
         });
         reserveMessage.textContent = "대기 신청이 완료되었습니다.";

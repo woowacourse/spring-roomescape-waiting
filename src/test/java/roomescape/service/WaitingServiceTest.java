@@ -4,9 +4,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static roomescape.config.FixedClockConfig.NOW_TIME;
 import static roomescape.config.FixedClockConfig.TODAY;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.config.FixedClockConfig;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -46,7 +47,8 @@ class WaitingServiceTest {
     private final ThumbnailUrl url = ThumbnailUrl.parse("/images/cursed-mansion");
     private final Theme theme = new Theme(themeId, themeName, description, url);
 
-    private final LocalDateTime createAt = LocalDateTime.parse(TODAY + "T" + NOW_TIME);
+    private final Clock fixedClock = new FixedClockConfig().testClock();
+    private final LocalDateTime createAt = LocalDateTime.now(fixedClock);
 
     private final Long waitingId = 1L;
 
@@ -65,7 +67,7 @@ class WaitingServiceTest {
     @BeforeEach
     public void setUp() {
         waitingService = new WaitingService(this.reservationDao, this.waitingDao, this.reservationTimeDao,
-                this.themeDao);
+                this.themeDao, this.fixedClock);
     }
 
     @Test
@@ -74,8 +76,7 @@ class WaitingServiceTest {
                 userName,
                 date,
                 timeId,
-                themeId,
-                createAt
+                themeId
         );
         Waiting saved = new Waiting(
                 waitingId,

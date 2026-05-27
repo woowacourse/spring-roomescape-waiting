@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
@@ -21,17 +23,20 @@ public class WaitingService {
     private final WaitingDao waitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
+    private final Clock clock;
 
     public WaitingService(
             ReservationDao reservationDao,
             WaitingDao waitingDao,
             ReservationTimeDao reservationTimeDao,
-            ThemeDao themeDao
+            ThemeDao themeDao,
+            Clock clock
     ) {
         this.reservationDao = reservationDao;
         this.waitingDao = waitingDao;
         this.reservationTimeDao = reservationTimeDao;
         this.themeDao = themeDao;
+        this.clock = clock;
     }
 
     public WaitingResult save(WaitingCommand command) {
@@ -54,7 +59,7 @@ public class WaitingService {
                 command.date(),
                 time,
                 theme,
-                command.createAt()
+                LocalDateTime.now(clock)
         );
 
         if (waitingDao.existsBy(waiting)) {
