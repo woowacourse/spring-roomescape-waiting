@@ -1,5 +1,6 @@
 package roomescape.waiting.dto;
 
+import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
 
 import java.time.LocalDate;
@@ -9,7 +10,7 @@ public record ReservationWaitingResponse(
         String name,
         Long themeId,
         LocalDate date,
-        Long timeId,
+        ReservationTime reservationTime,
         Long waitingNumber
 ) {
 
@@ -19,7 +20,7 @@ public record ReservationWaitingResponse(
                 reservationWaiting.getName(),
                 reservationWaiting.getThemeId(),
                 reservationWaiting.getDate(),
-                reservationWaiting.getTimeId(),
+                reservationWaiting.getReservationTime(),
                 reservationWaiting.getWaitingNumber()
         );
     }

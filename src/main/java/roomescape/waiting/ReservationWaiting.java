@@ -1,6 +1,11 @@
 package roomescape.waiting;
 
+import roomescape.global.exception.RoomescapeException;
+import roomescape.time.ReservationTime;
+
 import java.time.LocalDate;
+
+import static roomescape.global.exception.ErrorCode.UNAUTHORIZED_RESERVATION_WAITING_ACCESS;
 
 public class ReservationWaiting {
 
@@ -8,24 +13,24 @@ public class ReservationWaiting {
     private final String name;
     private final Long themeId;
     private final LocalDate date;
-    private final Long timeId;
+    private final ReservationTime reservationTime;
     private final Long waitingNumber;
 
-    public ReservationWaiting(Long id, String name, Long themeId, LocalDate date, Long timeId, Long waitingNumber) {
+    public ReservationWaiting(Long id, String name, Long themeId, LocalDate date, ReservationTime reservationTime, Long waitingNumber) {
         this.id = id;
         this.name = name;
         this.themeId = themeId;
         this.date = date;
-        this.timeId = timeId;
+        this.reservationTime = reservationTime;
         this.waitingNumber = waitingNumber;
     }
 
-    public ReservationWaiting(String name, Long themeId, LocalDate date, Long timeId, Long waitingNumber) {
+    public ReservationWaiting(String name, Long themeId, LocalDate date, ReservationTime reservationTime, Long waitingNumber) {
         this.id = null;
         this.name = name;
         this.themeId = themeId;
         this.date = date;
-        this.timeId = timeId;
+        this.reservationTime = reservationTime;
         this.waitingNumber = waitingNumber;
     }
 
@@ -45,11 +50,17 @@ public class ReservationWaiting {
         return date;
     }
 
-    public Long getTimeId() {
-        return timeId;
+    public ReservationTime getReservationTime() {
+        return reservationTime;
     }
 
     public Long getWaitingNumber() {
         return waitingNumber;
+    }
+
+    public void validateSameName(String name){
+        if (!this.name.equals(name)) {
+            throw new RoomescapeException(UNAUTHORIZED_RESERVATION_WAITING_ACCESS);
+        }
     }
 }

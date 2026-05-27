@@ -3,10 +3,14 @@ package roomescape.waiting.dao;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
+
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.data.jdbc.DataJdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.time.ReservationTime;
 import roomescape.waiting.ReservationWaiting;
 
 @DataJdbcTest
@@ -34,9 +38,10 @@ class ReservationWaitingDaoTest {
         Long themeId = 1L;
         LocalDate date = LocalDate.now();
         Long timeId = 1L;
+        ReservationTime reservationTime = new ReservationTime(LocalTime.now().plusHours(1));
         Long waitingNumber = 1L;
 
-        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, timeId, waitingNumber);
+        ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, waitingNumber);
         reservationWaitingDao.insert(reservationWaiting);
         Boolean actual = reservationWaitingDao.existsByNameAndDateAndThemeIdAndTimeId(name, themeId, date, timeId);
 
@@ -49,17 +54,17 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                1L,
+                new ReservationTime(LocalTime.now().plusHours(1)),
                 2L
         );
 
         ReservationWaiting expected =  reservationWaitingDao.insert(reservationWaiting);
-        ReservationWaiting actual = reservationWaitingDao.selectById(expected.getId());
+        ReservationWaiting actual = reservationWaitingDao.selectById(expected.getId()).get();
 
         assertThat(actual.getName()).isEqualTo(expected.getName());
         assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
         assertThat(actual.getDate()).isEqualTo(expected.getDate());
-        assertThat(actual.getTimeId()).isEqualTo(expected.getTimeId());
+        assertThat(actual.getReservationTime().getId()).isEqualTo(expected.getReservationTime().getId());
         assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
     }
 
@@ -69,18 +74,18 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                1L,
+                new ReservationTime(LocalTime.now().plusHours(1)),
                 2L
         );
 
         ReservationWaiting expected = reservationWaitingDao.insert(reservationWaiting);
 
-        ReservationWaiting actual = reservationWaitingDao.selectById(expected.getId());
+        ReservationWaiting actual = reservationWaitingDao.selectById(expected.getId()).get();
 
         assertThat(actual.getName()).isEqualTo(expected.getName());
         assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
         assertThat(actual.getDate()).isEqualTo(expected.getDate());
-        assertThat(actual.getTimeId()).isEqualTo(expected.getTimeId());
+        assertThat(actual.getReservationTime().getId()).isEqualTo(expected.getReservationTime().getId());
         assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
     }
 
@@ -102,7 +107,7 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                1L,
+                new ReservationTime(LocalTime.now().plusHours(1)),
                 1L
         );
         reservationWaitingDao.insert(reservationWaiting);
@@ -115,5 +120,23 @@ class ReservationWaitingDaoTest {
         );
 
         assertThat(actual).isEqualTo(expected);
+    }
+
+    @Test
+    void 예약_대기_삭제_성공() {
+        ReservationWaiting reservationWaiting = new ReservationWaiting(
+                "티버",
+                1L,
+                LocalDate.now(),
+                new ReservationTime(1L, LocalTime.now().plusHours(1)),
+                1L
+        );
+
+        ReservationWaiting inserted = reservationWaitingDao.insert(reservationWaiting);
+        reservationWaitingDao.deleteById(inserted.getId());
+
+        Optional<ReservationWaiting> actual = reservationWaitingDao.selectById(inserted.getId());
+
+        assertThat(actual).isEmpty();
     }
 }
