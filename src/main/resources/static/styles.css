@@ -1096,6 +1096,41 @@ input:focus-visible {
     text-decoration: line-through;
 }
 
+.time-slot.is-full {
+    color: var(--subtle);
+    background: #202020;
+}
+
+.time-slot.is-full::after {
+    content: "대기";
+    display: block;
+    font-size: 0.6rem;
+    font-weight: 600;
+    opacity: 0.6;
+}
+
+.time-slot.is-full:hover,
+.time-slot.is-full.is-active {
+    border-color: var(--primary);
+    color: #fff;
+    background: var(--primary);
+    opacity: 1;
+}
+
+.time-slot.is-full.is-active::after {
+    opacity: 1;
+}
+
+.waiting-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 99px;
+    background: rgba(229, 9, 20, 0.15);
+    color: var(--primary);
+    font-size: 0.75rem;
+    font-weight: 700;
+}
+
 .booking-summary {
     display: grid;
     gap: 10px;

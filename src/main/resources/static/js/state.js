@@ -7,6 +7,7 @@ export const state = {
     popularThemes: [],
     adminTimes: [],
     myReservations: [],
+    myWaitings: [],
     availableTimes: [],
     selectedThemeId: null,
     selectedDate: tomorrowString(),

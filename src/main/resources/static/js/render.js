@@ -114,7 +114,9 @@ function renderReserve() {
               ${renderTimeSlots()}
               ${renderBookingSummary(theme)}
               <button class="primary-button submit-button" type="submit" ${canSubmitReservation() ? "" : "disabled"}>
-                ${state.submitting ? (state.editingReservationId ? "변경 중" : "예약 중") : (state.editingReservationId ? "변경하기" : "예약하기")}
+                ${state.submitting
+                    ? (state.editingReservationId ? "변경 중" : selectedTime()?.available === false ? "대기 신청 중" : "예약 중")
+                    : (state.editingReservationId ? "변경하기" : selectedTime()?.available === false ? "대기 신청" : "예약하기")}
               </button>
             </form>
           </aside>
@@ -154,6 +156,7 @@ function renderReservationLookupPage() {
         </div>
         <div class="metric-row" aria-label="내 예약 현황">
           ${renderMetric(state.myReservations.length, "내 예약")}
+          ${renderMetric(state.myWaitings.length, "대기 중")}
           ${renderMetric(editingReservation ? 1 : 0, "변경 중")}
         </div>
       </section>
@@ -162,6 +165,7 @@ function renderReservationLookupPage() {
         <section class="theme-section" aria-labelledby="reservation-lookup-title">
           ${renderReservationLookup()}
           ${renderMyReservations()}
+          ${renderMyWaitings()}
         </section>
 
         ${editingReservation ? `
@@ -322,7 +326,7 @@ function renderTimeSlots() {
       </div>
       <div class="time-grid">
         ${state.availableTimes.map((time) => `
-          <button class="time-slot ${Number(state.selectedTimeId) === Number(time.id) ? "is-active" : ""}" type="button" data-time-slot-id="${time.id}" ${time.available ? "" : "disabled"}>
+          <button class="time-slot ${Number(state.selectedTimeId) === Number(time.id) ? "is-active" : ""} ${time.available ? "" : "is-full"}" type="button" data-time-slot-id="${time.id}">
             ${escapeHtml(time.startAt)}
           </button>
         `).join("")}
@@ -418,6 +422,55 @@ function renderMyReservationsContent(hasName) {
           <span class="table-actions">
             <button class="secondary-button" type="button" data-action="edit-reservation" data-reservation-id="${reservation.id}">변경</button>
             <button class="danger-button" type="button" data-action="delete-reservation" data-reservation-id="${reservation.id}">취소</button>
+          </span>
+        </div>
+      `).join("")}
+    </div>
+  `;
+}
+
+function renderMyWaitings() {
+    const hasName = Boolean(state.guestName.trim());
+
+    return `
+    <section class="my-reservations-section" aria-labelledby="my-waitings-title">
+      <div class="admin-panel-header">
+        <div>
+          <p class="section-kicker">My Waiting</p>
+          <h2 id="my-waitings-title">내 대기</h2>
+        </div>
+      </div>
+      ${renderMyWaitingsContent(hasName)}
+    </section>
+  `;
+}
+
+function renderMyWaitingsContent(hasName) {
+    if (!hasName) {
+        return renderEmpty("예약자 이름을 입력하면 내 대기를 확인할 수 있습니다.");
+    }
+
+    if (state.myWaitings.length === 0) {
+        return renderEmpty("대기 중인 항목이 없습니다.");
+    }
+
+    return `
+    <div class="reservation-table" role="table" aria-label="내 대기 목록">
+      <div class="table-head" role="row">
+        <span>예약자</span>
+        <span>테마</span>
+        <span>일정</span>
+        <span>대기 순번</span>
+        <span>관리</span>
+      </div>
+      ${state.myWaitings.map((waiting) => `
+        <div class="table-row" role="row">
+          <span>${escapeHtml(waiting.name)}</span>
+          <span>${escapeHtml(waiting.theme.name)}</span>
+          <span>${escapeHtml(waiting.date)} ${escapeHtml(waiting.time.startAt)}</span>
+          <span><span class="waiting-badge">${waiting.order}번째</span></span>
+          <span class="table-actions">
+            <button class="danger-button" type="button" data-action="delete-waiting" data-waiting-id="${waiting.id}">취소</button>
           </span>
         </div>
       `).join("")}

@@ -122,6 +122,11 @@ async function handleClick(event) {
             return;
         }
 
+        if (action === "delete-waiting") {
+            openConfirm("대기를 취소할까요?", "취소한 대기는 되돌릴 수 없습니다.", () => deleteWaiting(Number(actionTarget.dataset.waitingId)));
+            return;
+        }
+
         if (action === "edit-reservation") {
             await startReservationEdit(Number(actionTarget.dataset.reservationId));
             return;
@@ -331,12 +336,13 @@ async function submitReservation(form) {
             });
         }
 
+        const wasWaiting = !selectedTime()?.available;
         state.selectedThemeId = null;
         state.selectedTimeId = null;
         state.availableTimes = [];
         state.editingReservationId = null;
         await loadAllData({silent: true});
-        showToast(isEditing ? "예약을 변경했습니다." : "예약이 완료되었습니다.", "success");
+        showToast(isEditing ? "예약을 변경했습니다." : wasWaiting ? "대기 신청이 완료되었습니다." : "예약이 완료되었습니다.", "success");
         submitted = true;
     } catch (error) {
         showToast(error.message, "error");
@@ -418,6 +424,18 @@ async function deleteTheme(themeId) {
 
 async function deleteTime(timeId) {
     await mutateWithReload(() => api(`/admin/times/${timeId}`, {method: "DELETE"}), "시간을 삭제했습니다.");
+}
+
+async function deleteWaiting(waitingId) {
+    const name = state.guestName.trim();
+
+    if (!name) {
+        showToast("예약자를 입력한 뒤 취소해 주세요.", "error");
+        return;
+    }
+
+    const params = new URLSearchParams({name});
+    await mutateWithReload(() => api(`/waitings/${waitingId}?${params.toString()}`, {method: "DELETE"}), "대기를 취소했습니다.");
 }
 
 async function deleteReservation(reservationId) {
@@ -540,6 +558,7 @@ async function loadReservations(options = {}) {
 
     if (!name) {
         state.myReservations = [];
+        state.myWaitings = [];
         if (!options.silent) {
             render();
         }
@@ -548,9 +567,13 @@ async function loadReservations(options = {}) {
 
     try {
         const params = new URLSearchParams({name});
-        state.myReservations = await api(`/reservations?${params.toString()}`);
+        [state.myReservations, state.myWaitings] = await Promise.all([
+            api(`/reservations?${params.toString()}`),
+            api(`/waitings?${params.toString()}`)
+        ]);
     } catch (error) {
         state.myReservations = [];
+        state.myWaitings = [];
         showToast(error.message, "error");
     } finally {
         if (!options.silent) {
