@@ -1,5 +1,6 @@
 package roomescape.reservation.infra;
 
+import java.util.Optional;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -10,6 +11,7 @@ import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
+import roomescape.reservation.domain.repository.dto.WaitingDetail;
 
 @Repository
 public class JdbcWaitingRepository implements WaitingRepository {
@@ -22,6 +24,30 @@ public class JdbcWaitingRepository implements WaitingRepository {
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
+    }
+
+    @Override
+    public Optional<WaitingDetail> findDetailById(Long id) {
+        return jdbcTemplate.query(
+                """
+                        SELECT w.id, w.name, w.date, w.theme_id, t.name as theme_name, t.description, t.thumbnail_img_url, w.time_id, rt.start_at
+                        FROM waiting w
+                        JOIN theme t ON w.theme_id = t.id
+                        JOIN reservation_time rt ON w.time_id = rt.id
+                        WHERE w.id = ?
+                        """,
+                (rs, rowNum) ->
+                        new WaitingDetail(rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getDate("date").toLocalDate(),
+                                rs.getLong("theme_id"),
+                                rs.getString("theme_name"),
+                                rs.getString("description"),
+                                rs.getString("thumbnail_img_url"),
+                                rs.getLong("time_id"),
+                                rs.getTime("start_at").toLocalTime()),
+                id
+        ).stream().findFirst();
     }
 
     @Override
