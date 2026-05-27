@@ -333,7 +333,7 @@ async function doReserve() {
     if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
     if (!r.ok) {
       let msg = '예약에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       closeModal();
       toast('err', msg);
       return;
@@ -358,7 +358,6 @@ async function doWait() {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        memberId: me.id,
         date: selDate,
         timeId: selTimeId,
         themeId: Number(themeId),
@@ -368,7 +367,7 @@ async function doWait() {
     if (r.status === 401) { location.href = `/login?redirect=${encodeURIComponent(location.href)}`; return; }
     if (!r.ok) {
       let msg = '대기 신청에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       closeModal();
       toast('err', msg);
       return;

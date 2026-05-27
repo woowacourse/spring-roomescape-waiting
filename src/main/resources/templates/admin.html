@@ -506,7 +506,7 @@ async function addReservation() {
     });
     if (!r.ok) {
       let msg = '예약 추가에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       errEl.textContent = msg;
       return;
     }
@@ -593,7 +593,7 @@ async function addTheme() {
     });
     if (!r.ok) {
       let msg = '테마 추가에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       errEl.textContent = msg;
       return;
     }
@@ -614,7 +614,7 @@ function delTheme(id, name) {
       const r = await fetch(`/admin/themes/${id}`, { method: 'DELETE' });
       if (!r.ok) {
         let msg = '삭제에 실패했습니다';
-        try { const e = await r.json(); msg = e.message || msg; } catch {}
+        try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
         toast('err', msg);
         return;
       }
@@ -664,7 +664,7 @@ function delWaiting(id, name) {
       const r = await fetch(`/admin/waitings/${id}`, { method: 'DELETE' });
       if (!r.ok) {
         let msg = '삭제에 실패했습니다';
-        try { const e = await r.json(); msg = e.message || msg; } catch {}
+        try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
         toast('err', msg);
         return;
       }
@@ -716,7 +716,7 @@ async function addTime() {
     });
     if (!r.ok) {
       let msg = '시간 추가에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       errEl.textContent = msg;
       return;
     }
@@ -734,7 +734,7 @@ function delTime(id, label) {
       const r = await fetch(`/admin/times/${id}`, { method: 'DELETE' });
       if (!r.ok) {
         let msg = '삭제에 실패했습니다';
-        try { const e = await r.json(); msg = e.message || msg; } catch {}
+        try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
         toast('err', msg);
         return;
       }
