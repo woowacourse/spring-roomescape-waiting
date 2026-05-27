@@ -266,6 +266,9 @@ Content-Type: application/json
       "description": "설명",
       "thumbnailImageUrl": "썸네일이미지url"
    }
+   "status": "RESERVED", // 대기일 시 "WAITING"
+   "waitingOrder": null, // 대기일 시 2
+   "createdAt": "2026-05-26T12:30:00"
 }
 ]
 ```
@@ -327,8 +330,15 @@ HTTP/1.1 204 No Content
 
 ```json
 {
-  "message": "사용자가 이해할 수 있는 에러 메시지"
+  "type": "about:blank",
+  "title": "잘못된 입력",
+  "status": 400,
+  "detail": "사용자가 이해할 수 있는 에러 메시지",
+  "instance": "/요청/경로",
+  "code": "INVALID_INPUT"
 }
 ```
+
+`code`는 도메인 예외와 입력값 검증 실패 응답에 포함된다. 예상하지 못한 서버 오류 응답에는 `code`가 포함되지 않을 수 있다.
 
 ---
