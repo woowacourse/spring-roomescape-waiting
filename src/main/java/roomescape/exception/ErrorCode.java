@@ -19,6 +19,7 @@ public enum ErrorCode {
     // Waiting
     WAITING_ALREADY_EXIST(HttpStatus.CONFLICT, "WAITING_409", "이미 신청한 대기가 존재합니다."),
     WAITING_NOT_OWNED_BY_MEMBER(HttpStatus.FORBIDDEN, "WAITING_403_OWNER", "본인 대기(%d번)만 처리할 수 있습니다."),
+    WAITING_TARGET_BAD_REQUEST(HttpStatus.BAD_REQUEST, "WAITING_400_TARGET_BAD_REQUEST", "예약 또는 대기가 존재하는 스케줄에만 대기를 신청할 수 있습니다."),
 
     // Schedule
     SCHEDULE_NOT_FOUND_WITH_CONDITION(HttpStatus.NOT_FOUND, "SCHEDULE_404_WITH_CONDITION", "해당 조건의 스케줄 id가 존재하지 않습니다. date=%s, timeId=%d, themeId=%d"),
