@@ -78,6 +78,10 @@ public class Waiting {
         return this.customerName.equals(new CustomerName(customerName));
     }
 
+    public boolean isCancelable(final LocalDateTime now) {
+        return !isPastReservation(now);
+    }
+
     private void validateNotNull(
             final CustomerName customerName,
             final LocalDate reservationDate,
@@ -95,12 +99,12 @@ public class Waiting {
     }
 
     private void validateNotPast(final LocalDateTime now) {
-        if (isPast(now)) {
+        if (isPastReservation(now)) {
             throw new PastDateTimeWaitingException();
         }
     }
 
-    private boolean isPast(final LocalDateTime now) {
+    private boolean isPastReservation(final LocalDateTime now) {
         return reservationDateTime().isBefore(now);
     }
 

@@ -17,11 +17,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
+import roomescape.wating.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 
@@ -192,7 +192,7 @@ class WaitingControllerTest {
         response.then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
     }
-    
+
     @Test
     void 본인_이름으로_등록되지_않은_대기를_삭제하려_하면_404를_반환한다() {
         //given
@@ -231,6 +231,28 @@ class WaitingControllerTest {
         final Exception expectedException = new WaitingNotFoundException();
         response.then().log().all()
                 .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("message", is(expectedException.getMessage()));
+    }
+
+    @Test
+    void 과거_날짜의_대기를_삭제하는_경우_422를_반환한다() {
+        //given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+
+        final String customerName = "재키";
+        final LocalDate yesterday = NOW.minusDays(1).toLocalDate();
+        final long savedWaitingId = insertWaiting(customerName, yesterday, time.getId(), theme.getId());
+
+        //when
+        final Response response = RestAssured.given().log().all()
+                .queryParam("customer-name", customerName)
+                .when().delete("/waitings/{id}", savedWaitingId);
+
+        //then
+        final Exception expectedException = new PastReservationWaitingCancellationException();
+        response.then().log().all()
+                .statusCode(HttpStatus.UNPROCESSABLE_ENTITY.value())
                 .body("message", is(expectedException.getMessage()));
     }
 
