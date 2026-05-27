@@ -56,19 +56,18 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
 
-        ReservationSlot reservation = getOrCreateReservation(reservationDate, reservationTime, theme);
-        validateUserReservationNotDuplicated(user, reservation);
-        Long reservationCount = reservationRepository.countByReservationId(reservation.getId());
+        ReservationSlot reservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
+        validateUserReservationNotDuplicated(user, reservationSlot);
+        Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
         WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
-        LocalDateTime now = LocalDateTime.now(clock);
-        Reservation userReservation = Reservation.createWithoutId(
-            reservation,
+        Reservation reservation = Reservation.createWithoutId(
+            reservationSlot,
             user,
             reservationCount,
             waitingStatus,
             clock
         );
-        reservationRepository.save(userReservation);
+        reservationRepository.save(reservation);
 
         return CreateReservationResponse.from(reservation);
     }
