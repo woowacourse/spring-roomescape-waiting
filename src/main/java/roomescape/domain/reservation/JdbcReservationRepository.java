@@ -240,8 +240,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Long countByReservationSlotId(Long reservationId) {
-        Long count = jdbcTemplate.queryForObject(COUNT_BY_RESERVATION_SLOT_ID_SQL, Long.class, reservationId);
+    public Long countByReservationSlotId(Long reservationSlotId) {
+        Long count = jdbcTemplate.queryForObject(COUNT_BY_RESERVATION_SLOT_ID_SQL, Long.class, reservationSlotId);
         if (count == null) {
             return 0L;
         }

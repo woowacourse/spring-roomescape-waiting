@@ -56,7 +56,7 @@ public class ReservationService {
         Theme theme = themeRepository.findById(request.themeId())
             .orElseThrow(() -> new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
 
-        ReservationSlot reservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
+        ReservationSlot reservationSlot = getOrCreateReservationSlot(reservationDate, reservationTime, theme);
         validateUserReservationNotDuplicated(user, reservationSlot);
         Long reservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
         ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
@@ -117,7 +117,7 @@ public class ReservationService {
         Theme theme = reservationSlot.getTheme();
         User user = reservation.getUser();
 
-        ReservationSlot updatedReservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
+        ReservationSlot updatedReservationSlot = getOrCreateReservationSlot(reservationDate, reservationTime, theme);
         boolean sameReservationSlot = reservationSlot.getId().equals(updatedReservationSlot.getId());
         if (!sameReservationSlot) {
             validateUserReservationNotDuplicated(user, updatedReservationSlot);
@@ -241,7 +241,7 @@ public class ReservationService {
             .orElseGet(() -> userRepository.save(User.createWithoutId(request.name())));
     }
 
-    private ReservationSlot getOrCreateReservation(
+    private ReservationSlot getOrCreateReservationSlot(
         ReservationDate reservationDate,
         ReservationTime reservationTime,
         Theme theme
