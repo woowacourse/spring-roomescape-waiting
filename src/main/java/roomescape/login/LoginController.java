@@ -27,7 +27,7 @@ public class LoginController {
     public ResponseEntity<ApiResponse<LoginResponse>> login(@RequestBody @Valid LoginRequest body) {
         AuthenticatedMember member = loginService.login(body.name(), body.password());
         String accessToken = jwtTokenProvider.generateAccessToken(member);
-        return ResponseEntity.status(HttpStatus.OK)
+        return ResponseEntity.status(HttpStatus.CREATED)
                 .body(ApiResponse.success(LoginResponse.bearer(accessToken)));
     }
 
