@@ -11,15 +11,13 @@ public interface ReservationRepository {
 
     Optional<Reservation> readById(Long id);
 
+    Optional<Reservation> readBySlot(LocalDate date, Long timeId, Long themeId);
+
     List<Reservation> readByName(String name);
 
     List<Reservation> readAll();
 
-    void update(Long id, LocalDate date, Long timeId);
-
     void delete(Long id);
-
-    boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     boolean existByTimeId(Long timeId);
 

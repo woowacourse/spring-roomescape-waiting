@@ -5,10 +5,13 @@ import static roomescape.service.ThemeService.MAX_RANKING_PERIOD;
 public enum ErrorCode {
 
     NOT_FOUND_RESERVATION("[ERROR] 해당 ID의 예약을 찾을 수 없습니다."),
-    DUPLICATED_RESERVATION("[ERROR] 해당 시간에 예약이 이미 존재합니다. 예약 가능한 시간으로 다시 시도해 주세요."),
+    DUPLICATED_RESERVATION("[ERROR] 해당 시간에 본인의 예약이 이미 존재합니다. 예약 가능한 시간으로 다시 시도해 주세요."),
     NOT_ALLOW_PAST_TIME_RESERVATION_CREATE("[ERROR] 지나간 시간에는 예약할 수 없습니다. 예약 시간을 변경해 주세요."),
     NOT_ALLOW_PAST_TIME_RESERVATION_UPDATE("[ERROR] 지나간 시간의 예약은 수정할 수 없습니다."),
     NOT_ALLOW_PAST_TIME_RESERVATION_DELETE("[ERROR] 지나간 시간의 예약은 삭제할 수 없습니다."),
+
+    DUPLICATED_WAIT("[ERROR] 해당 시간에 이미 예약 대기를 신청했습니다. 다시 시도해 주세요."),
+    WAIT_IS_FULL("[ERROR] 해당 시간에 이미 예약 대기가 가득 찼습니다. 다른 시간으로 예약해 주세요."),
 
     NOT_FOUND_RESERVATION_TIME("[ERROR] 해당 ID의 예약 시간을 찾을 수 없습니다."),
     DUPLICATED_RESERVATION_TIME("[ERROR] 동일한 예약 시간이 이미 존재합니다. 시간을 변경해 다시 시도해 주세요."),
@@ -29,6 +32,8 @@ public enum ErrorCode {
 
     INTERNAL_SERVER_ERROR("[ERROR] 서버 내부에서 에러가 발생했습니다."),
 
+    NOT_ALLOW_DATE_TIME_NULL("[ERROR] 생성 날짜와 시간은 비어 있을 수 없습니다."),
+    NOT_ALLOW_RESERVATION_NULL("[ERROR] 생성 날짜와 시간은 비어 있을 수 없습니다."),
     NOT_ALLOW_NAME_NULL("[ERROR] 이름은 비어 있을 수 없습니다."),
     NOT_ALLOW_DATE_NULL("[ERROR] 날짜는 비어 있을 수 없습니다."),
     NOT_ALLOW_TIME_NULL("[ERROR] 예약 시간은 비어 있을 수 없습니다."),

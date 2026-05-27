@@ -64,6 +64,23 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> readBySlot(LocalDate date, Long timeId, Long themeId) {
+        String sql =
+                "SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
+                        + "FROM `reservation` r "
+                        + "INNER JOIN `reservation_time` t ON r.time_id = t.id "
+                        + "INNER JOIN `theme` th ON r.theme_id = th.id "
+                        + "WHERE r.date = (?) AND r.time_id = (?) AND r.theme_id = (?)";
+
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql, reservationRowMapper(), date, timeId, themeId));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
     public List<Reservation> readByName(String name) {
         String sql =
                 "SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
@@ -84,13 +101,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                         + "INNER JOIN `theme` th ON r.theme_id = th.id";
 
         return jdbcTemplate.query(sql, reservationRowMapper());
-    }
-
-    @Override
-    public void update(Long id, LocalDate date, Long timeId) {
-        String sql = "UPDATE `reservation` SET `date` = (?), `time_id` = (?) WHERE `id` = (?)";
-
-        jdbcTemplate.update(sql, date, timeId, id);
     }
 
     private static RowMapper<Reservation> reservationRowMapper() {
@@ -116,15 +126,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = "DELETE FROM `reservation` WHERE `id` = (?)";
 
         jdbcTemplate.update(sql, id);
-    }
-
-    @Override
-    public boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String sql = "SELECT EXISTS ("
-                + "SELECT 1 FROM `reservation` WHERE `date` = (?) AND `time_id` = (?) AND `theme_id` = (?)"
-                + ") AS exist";
-
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId));
     }
 
     @Override

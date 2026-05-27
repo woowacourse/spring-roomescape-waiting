@@ -73,4 +73,9 @@ public class ThemeService {
             throw new CustomInvalidRequestException(ErrorCode.LONG_RANKING_PERIOD);
         }
     }
+
+    public Theme readTheme(Long themeId) {
+        return themeRepository.read(themeId)
+                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
+    }
 }

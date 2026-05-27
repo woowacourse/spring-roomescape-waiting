@@ -2,6 +2,7 @@ DROP TABLE IF EXISTS reservation;
 DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
 
+
 CREATE TABLE reservation_time
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
@@ -32,3 +33,16 @@ CREATE TABLE reservation
     CONSTRAINT uk_reservation_date_time_theme UNIQUE (date, time_id, theme_id)
 );
 
+CREATE TABLE wait
+(
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    name     VARCHAR(255) NOT NULL,
+    reservation_date     DATE         NOT NULL,
+    time_id  BIGINT       NOT NULL,
+    theme_id BIGINT       NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id),
+    CONSTRAINT uk_wait_name_reservation_date_time_theme UNIQUE (name, reservation_date, time_id, theme_id)
+);

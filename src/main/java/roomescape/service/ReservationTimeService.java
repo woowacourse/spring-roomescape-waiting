@@ -94,4 +94,9 @@ public class ReservationTimeService {
             throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
         }
     }
+
+    public ReservationTime readReservationTime(Long timeId) {
+        return reservationTimeRepository.read(timeId)
+                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
+    }
 }
