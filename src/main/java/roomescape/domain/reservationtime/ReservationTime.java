@@ -2,16 +2,14 @@ package roomescape.domain.reservationtime;
 
 import java.time.LocalTime;
 
-public class AvailableReservationTime {
+public class ReservationTime {
 
     private final Long id;
     private final LocalTime startAt;
-    private final boolean isAvailable;
 
-    public AvailableReservationTime(Long id, LocalTime startAt, boolean isAvailable) {
+    public ReservationTime(Long id, LocalTime startAt) {
         this.id = id;
         this.startAt = startAt;
-        this.isAvailable = isAvailable;
     }
 
     public Long getId() {
@@ -22,7 +20,4 @@ public class AvailableReservationTime {
         return startAt;
     }
 
-    public boolean isAvailable() {
-        return isAvailable;
-    }
 }
