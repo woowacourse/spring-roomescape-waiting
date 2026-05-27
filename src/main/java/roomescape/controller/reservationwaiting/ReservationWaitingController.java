@@ -12,10 +12,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.reservationwaiting.dto.ReservationWaitingCreateRequest;
 import roomescape.controller.reservationwaiting.dto.ReservationWaitingResponse;
+import roomescape.service.reservationwaiting.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/waitings")
 public class ReservationWaitingController {
+
+    private final ReservationWaitingService reservationWaitingService;
+
+    public ReservationWaitingController(ReservationWaitingService reservationWaitingService) {
+        this.reservationWaitingService = reservationWaitingService;
+    }
+
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(@Valid @RequestBody ReservationWaitingCreateRequest reservationWaitingRequest) {
 

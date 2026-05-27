@@ -2,11 +2,13 @@ package roomescape.service.reservationwaiting;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 
+@Service
 public class ReservationWaitingService {
     public ReservationWaitingService(ReservationRepository reservationRepository,
                                      ReservationWaitingRepository reservationWaitingRepository) {
