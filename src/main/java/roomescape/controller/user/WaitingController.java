@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.auth.LoginMember;
+import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.domain.Member;
 import roomescape.domain.Waiting;
 import roomescape.dto.request.WaitingRequestDto;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.service.WaitingAuthorizationService;
 import roomescape.service.WaitingService;
 
 @RestController

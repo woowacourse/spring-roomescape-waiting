@@ -32,7 +32,7 @@ import roomescape.domain.Waiting;
 import roomescape.domain.vo.Name;
 import roomescape.dto.request.WaitingRequestDto;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.service.WaitingAuthorizationService;
+import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.service.WaitingService;
 
 @WebMvcTest(WaitingController.class)
