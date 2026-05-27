@@ -22,7 +22,7 @@ public class WaitingListRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
-    public Optional<WaitingList> findById(Long id) {
+    public Optional<WaitingList> findById(final Long id) {
         final String sql = """
                 SELECT
                     w.id AS waiting_list_id,
@@ -53,7 +53,27 @@ public class WaitingListRepository {
         }
     }
 
-    public boolean existsByNameAndThemeAndDateAndTime(String name, Long themeId, LocalDate date, Long timeId) {
+    public int findWaitingOrderByIdAndThemeAndDateAndTime(final WaitingList waitingList) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE theme_id = ? AND date = ? AND time_id = ? AND created_at <= ?;
+                """;
+
+        Integer waitingOrder = jdbcTemplate.queryForObject(sql, Integer.class,
+                waitingList.getTheme().getId(),
+                waitingList.getReservationDate().getDate(),
+                waitingList.getReservationTime().getId(),
+                Timestamp.valueOf(waitingList.getCreatedAt()
+                ));
+
+        if (waitingOrder != null) {
+            return waitingOrder;
+        }
+        return 0;
+    }
+
+    public boolean existsByNameAndThemeAndDateAndTime(final String name, final Long themeId, final LocalDate date, final Long timeId) {
         final String sql = """
                 SELECT COUNT(*)
                 FROM waiting_list

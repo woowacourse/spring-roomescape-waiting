@@ -9,14 +9,17 @@ public record WaitingListResult(
         String name,
         LocalDate date,
         Long timeId,
-        Long themeId
+        Long themeId,
+        int waitingOrder
 ) {
-    public static WaitingListResult from(WaitingList waitingList) {
+    public static WaitingListResult from(WaitingList waitingList, int waitingOrder) {
         return new WaitingListResult(
                 waitingList.getId(),
                 waitingList.getName(),
                 waitingList.getReservationDate().getDate(),
                 waitingList.getReservationTime().getId(),
-                waitingList.getTheme().getId());
+                waitingList.getTheme().getId(),
+                waitingOrder
+        );
     }
 }

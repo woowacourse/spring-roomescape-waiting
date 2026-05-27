@@ -66,11 +66,13 @@ class WaitingListServiceTest {
 
         WaitingList waitingList = WaitingList.create(name, date, theme, reservationTime);
         given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
+        given(waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(any(WaitingList.class))).willReturn(1);
 
         // when
         WaitingListResult result = waitingListService.create(createCommand);
 
         // then
+        Assertions.assertThat(result.waitingOrder()).isEqualTo(1);
         Assertions.assertThat(result.name()).isEqualTo(name);
         Assertions.assertThat(result.date()).isEqualTo(date);
         Assertions.assertThat(result.timeId()).isEqualTo(timeId);

@@ -50,7 +50,8 @@ public class WaitingListService {
 
         try {
             WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-            return WaitingListResult.from(savedWaitingList);
+            int waitingOrder = waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(savedWaitingList);
+            return WaitingListResult.from(savedWaitingList, waitingOrder);
         } catch (DataAccessException e) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
         }

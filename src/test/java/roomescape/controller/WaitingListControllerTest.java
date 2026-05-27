@@ -32,6 +32,7 @@ class WaitingListControllerTest {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, end_at) VALUES (?, ?)", "10:00", "10:30");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "브라운", STRING_TOMORROW, "1", "1");
+        jdbcTemplate.update("INSERT INTO waiting_list (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)", "류시", STRING_TOMORROW, "1", "1", LocalDateTime.now().minusDays(1));
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "검프");
@@ -47,14 +48,15 @@ class WaitingListControllerTest {
                 .statusCode(201).extract()
                 .jsonPath().getObject(".", WaitingListResult.class);
 
-        assertThat(response.id()).isEqualTo(1);
+        assertThat(response.id()).isEqualTo(2);
+        assertThat(response.waitingOrder()).isEqualTo(2);
         assertThat(response.name()).isEqualTo("검프");
         assertThat(response.date()).isEqualTo(TOMORROW);
         assertThat(response.timeId()).isEqualTo(1);
         assertThat(response.themeId()).isEqualTo(1);
 
         Integer count = jdbcTemplate.queryForObject("SELECT count(*) from waiting_list", Integer.class);
-        assertThat(count).isEqualTo(1);
+        assertThat(count).isEqualTo(2);
     }
 
     @Test
