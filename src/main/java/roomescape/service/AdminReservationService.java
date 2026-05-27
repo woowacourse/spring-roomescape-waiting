@@ -12,6 +12,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -61,9 +62,9 @@ public class AdminReservationService {
         validateNoConflict(command);
 
         Reservation reservation = new Reservation(null, command.name(), command.date(), time, theme);
-        Reservation saved = reservationRepository.save(reservation);
+        ReservationWithWaitingOrder saved = reservationRepository.save(reservation);
         log.info("예약 생성 완료: reservationId={}, name={}, date={}, timeId={}, themeId={}",
-                saved.getId(), saved.getName(), saved.getDate(), command.timeId(), command.themeId());
+                saved.id(), saved.name(), saved.date(), command.timeId(), command.themeId());
         return ReservationResult.from(saved);
     }
 

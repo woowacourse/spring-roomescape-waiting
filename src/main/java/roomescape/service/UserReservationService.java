@@ -55,7 +55,6 @@ public class UserReservationService {
                 .map(ReservationResult::from)
                 .toList();
     }
-
     public void cancel(Long id, String name) {
         Reservation reservation = findReservation(id);
         validateOwner(reservation, name);

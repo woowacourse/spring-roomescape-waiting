@@ -24,6 +24,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -73,8 +74,8 @@ class ReservationServiceTest {
     @Test
     @DisplayName("충돌이 없으면 정상적으로 예약을 생성한다")
     void 충돌이_없으면_정상적으로_예약을_생성한다() {
-        Reservation saved = new Reservation(
-                1L, "브라운", VALID_COMMAND.date(), VALID_TIME, VALID_THEME);
+        ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
+                1L, "브라운", VALID_COMMAND.date(), VALID_TIME, VALID_THEME, 0L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
         given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(VALID_COMMAND.date(), 1L, 1L))

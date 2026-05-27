@@ -27,6 +27,7 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.PastReservationException;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -105,13 +106,15 @@ class UserReservationServiceTest {
     @Test
     @DisplayName("이름으로 예약 목록을 조회한다")
     void 이름으로_예약_목록을_조회한다() {
-        Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
+        ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
+                1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME, 2L);
         given(reservationRepository.findByName(OWNER)).willReturn(List.of(reservation));
 
         List<ReservationResult> results = userReservationService.findByName(OWNER);
 
         assertThat(results).hasSize(1);
         assertThat(results.get(0).name()).isEqualTo(OWNER);
+        assertThat(results.get(0).waitingOrder()).isEqualTo(2L);
         verify(reservationRepository, times(1)).findByName(OWNER);
         verifyNoInteractions(reservationService, reservationTimeRepository);
     }
@@ -182,7 +185,11 @@ class UserReservationServiceTest {
         given(reservationTimeRepository.findById(2L)).willReturn(Optional.of(ANOTHER_TIME));
         given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
                 ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L)).willReturn(false);
-        given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> inv.getArgument(0));
+        given(reservationRepository.update(any(Reservation.class))).willAnswer(inv -> {
+            Reservation r = inv.getArgument(0);
+            return new ReservationWithWaitingOrder(
+                    r.getId(), r.getName(), r.getDate(), r.getTime(), r.getTheme(), 0L);
+        });
 
         ReservationResult result = userReservationService.update(command);
 

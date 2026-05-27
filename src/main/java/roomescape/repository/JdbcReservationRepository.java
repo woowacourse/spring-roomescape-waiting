@@ -14,6 +14,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -29,6 +30,28 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.name AS theme_name,
                 th.description AS theme_description,
                 th.thumbnail_url AS theme_thumbnail
+            FROM reservation r
+            INNER JOIN reservation_time t ON r.time_id = t.id
+            INNER JOIN theme th ON r.theme_id = th.id
+            """;
+
+    private static final String SELECT_BASE_WITH_WAITING_ORDER = """
+            SELECT
+                r.id           AS reservation_id,
+                r.name         AS reservation_name,
+                r.date         AS reservation_date,
+                t.id           AS time_id,
+                t.start_at     AS time_start_at,
+                th.id          AS theme_id,
+                th.name        AS theme_name,
+                th.description AS theme_description,
+                th.thumbnail_url AS theme_thumbnail,
+                (SELECT COUNT(*)
+                   FROM reservation r2
+                  WHERE r2.date = r.date
+                    AND r2.time_id = r.time_id
+                    AND r2.theme_id = r.theme_id
+                    AND r2.created_at < r.created_at) AS waiting_order
             FROM reservation r
             INNER JOIN reservation_time t ON r.time_id = t.id
             INNER JOIN theme th ON r.theme_id = th.id
@@ -50,6 +73,23 @@ public class JdbcReservationRepository implements ReservationRepository {
             )
     );
 
+    private static final RowMapper<ReservationWithWaitingOrder> RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER = (rs, rowNum) -> new ReservationWithWaitingOrder(
+            rs.getLong("reservation_id"),
+            rs.getString("reservation_name"),
+            rs.getDate("reservation_date").toLocalDate(),
+            new ReservationTime(
+                    rs.getLong("time_id"),
+                    rs.getTime("time_start_at").toLocalTime()
+            ),
+            new Theme(
+                    rs.getLong("theme_id"),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail")
+            ),
+            rs.getLong("waiting_order")
+    );
+
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
@@ -57,14 +97,14 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return jdbcTemplate.query(SELECT_BASE, RESERVATION_ROW_MAPPER);
+    public List<ReservationWithWaitingOrder> findAll() {
+        return jdbcTemplate.query(SELECT_BASE_WITH_WAITING_ORDER, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER);
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
-        String sql = SELECT_BASE + " WHERE r.name = ?";
-        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, name);
+    public List<ReservationWithWaitingOrder> findByName(String name) {
+        String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.name = ?";
+        return jdbcTemplate.query(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, name);
     }
 
     @Override
@@ -79,7 +119,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Reservation save(Reservation reservation) {
+    public ReservationWithWaitingOrder save(Reservation reservation) {
         String sql = "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)";
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -93,12 +133,11 @@ public class JdbcReservationRepository implements ReservationRepository {
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-        return new Reservation(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme());
+        return findWithWaitingOrderById(id);
     }
 
     @Override
-    public Reservation update(Reservation reservation) {
+    public ReservationWithWaitingOrder update(Reservation reservation) {
         String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
         jdbcTemplate.update(
                 sql,
@@ -108,7 +147,12 @@ public class JdbcReservationRepository implements ReservationRepository {
                 reservation.getTheme().getId(),
                 reservation.getId()
         );
-        return reservation;
+        return findWithWaitingOrderById(reservation.getId());
+    }
+
+    private ReservationWithWaitingOrder findWithWaitingOrderById(Long id) {
+        String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.id = ?";
+        return jdbcTemplate.queryForObject(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, id);
     }
 
     @Override

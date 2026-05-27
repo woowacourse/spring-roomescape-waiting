@@ -9,7 +9,8 @@ public record ReservationResponse(
         String name,
         @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date,
         ReservationTimeResponse time,
-        ThemeResponse theme
+        ThemeResponse theme,
+        Long waitingOrder
 ) {
     public static ReservationResponse from(ReservationResult result) {
         return new ReservationResponse(
@@ -17,7 +18,8 @@ public record ReservationResponse(
                 result.name(),
                 result.date(),
                 ReservationTimeResponse.from(result.time()),
-                ThemeResponse.from(result.theme())
+                ThemeResponse.from(result.theme()),
+                result.waitingOrder()
         );
     }
 }

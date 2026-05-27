@@ -4,17 +4,18 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.service.dto.ReservationWithWaitingOrder;
 
 public interface ReservationRepository {
-    List<Reservation> findAll();
+    List<ReservationWithWaitingOrder> findAll();
 
-    List<Reservation> findByName(String name);
+    List<ReservationWithWaitingOrder> findByName(String name);
 
     Optional<Reservation> findById(Long id);
 
-    Reservation save(Reservation reservation);
+    ReservationWithWaitingOrder save(Reservation reservation);
 
-    Reservation update(Reservation reservation);
+    ReservationWithWaitingOrder update(Reservation reservation);
 
     void deleteById(Long id);
 
