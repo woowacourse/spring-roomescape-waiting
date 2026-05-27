@@ -155,7 +155,7 @@ class ReservationServiceMockTest {
                 changeCommand.username()))
                 .thenReturn(false);
 
-        ReservationInfo reservationInfo = reservationService.changeReservationPendingStatus(
+        ReservationInfo reservationInfo = reservationService.changeReservationStatusToPending(
                 mockReservation.getId(),
                 changeCommand);
         Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.PENDING);
@@ -204,7 +204,7 @@ class ReservationServiceMockTest {
                 changeCommand.date()))
                 .thenReturn(false);
 
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
+        Assertions.assertThatThrownBy(() -> reservationService.changeReservationStatusToPending(mockReservation.getId(), changeCommand))
                 .isInstanceOf(IllegalStateReservationException.class);
     }
 
@@ -258,7 +258,7 @@ class ReservationServiceMockTest {
                 changeCommand.username()))
                 .thenReturn(true);
 
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationPendingStatus(mockReservation.getId(), changeCommand))
+        Assertions.assertThatThrownBy(() -> reservationService.changeReservationStatusToPending(mockReservation.getId(), changeCommand))
                 .isInstanceOf(DuplicatedReservationException.class);
     }
 }
