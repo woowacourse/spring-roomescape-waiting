@@ -94,7 +94,6 @@ class WaitingServiceTest extends ServiceTest {
             softly.assertThat(response.getFirst().rank()).isEqualTo(1);
             softly.assertThat(response.getFirst().name()).isEqualTo(testUser);
         });
-
     }
 
     private Theme saveTheme(String name) {

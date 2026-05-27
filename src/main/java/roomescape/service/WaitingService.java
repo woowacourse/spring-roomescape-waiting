@@ -47,7 +47,7 @@ public class WaitingService {
     }
 
     private void validateUniqueWaiting(Waiting waiting) {
-        if (waitingDao.existsByCreatedAtAndSlotAndName(waiting.getCreatedAt(), waiting.getSlotId(), waiting.getName())) {
+        if (waitingDao.existsByCreatedAtAndSlotAndName(waiting.getSlotId(), waiting.getName())) {
             throw new WaitingException(WaitingErrorCode.WAITING_ALREADY_EXISTS);
         }
     }

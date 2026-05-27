@@ -72,17 +72,16 @@ public class WaitingDao {
         return jdbcTemplate.query(sql, RANK_MAPPER, name);
     }
 
-    public boolean existsByCreatedAtAndSlotAndName(LocalDateTime createdAt, long slotId, String name) {
+    public boolean existsByCreatedAtAndSlotAndName(long slotId, String name) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
                     FROM waiting
-                    WHERE created_at = ?
-                        AND slot_id = ?
+                    WHERE slot_id = ?
                         AND name = ?
                 )
                 """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, createdAt, slotId, name));
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, slotId, name));
     }
 
     public int delete(long waitingId) {
