@@ -135,15 +135,26 @@ document.addEventListener("DOMContentLoaded", () => {
         reservationsList.innerHTML = reservations.map((reservation) => `
             <article class="admin-item reservation-item-admin">
                 <div class="item-main">
-                    <h3 class="item-title">${reservation.name}</h3>
+                    <h3 class="item-title">${reservation.userName}</h3>
                     <p class="item-subtext">${reservation.theme.name}</p>
                     <p class="item-subtext">${reservation.date} · ${reservation.time.startAt}</p>
+                    <p class="item-subtext">${formatReservationStatus(reservation.reservationStatus, reservation.waitingNumber)}</p>
                 </div>
                 <div class="item-actions">
                     <button type="button" class="danger-button" data-delete-type="reservation" data-id="${reservation.id}">삭제</button>
                 </div>
             </article>
         `).join("");
+    }
+
+    function formatReservationStatus(status, waitingNumber) {
+        if (status === "CONFIRMED") {
+            return "예약 확정";
+        }
+        if (status === "WAITING") {
+            return waitingNumber ? `대기 ${waitingNumber}번` : "예약 대기";
+        }
+        return status;
     }
 
     async function refreshAll() {

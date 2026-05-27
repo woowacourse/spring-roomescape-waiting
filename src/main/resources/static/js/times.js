@@ -151,13 +151,30 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function renderTimes() {
         timeList.innerHTML = state.times.map((time) => `
-            <label class="time-card time-card-refined ${time.available ? "available" : "unavailable"}">
-                <input type="radio" name="timeId" value="${time.timeId}" form="reservation-form" ${time.available ? "" : "disabled"}>
-                <span class="card-pill">${time.available ? "OPEN" : "CLOSED"}</span>
+            <label class="time-card time-card-refined available">
+                <input type="radio" name="timeId" value="${time.timeId}" form="reservation-form">
+                <span class="card-pill">${time.waitingNumber === 0 ? "CONFIRMED" : "WAITING"}</span>
                 <span class="time-value">${time.startAt}</span>
-                <span class="time-status">${time.available ? "예약 가능" : "마감"}</span>
+                <span class="time-status">${formatWaitingStatus(time.waitingNumber)}</span>
             </label>
         `).join("");
+    }
+
+    function formatWaitingStatus(waitingNumber) {
+        if (waitingNumber === 0) {
+            return "바로 예약 확정";
+        }
+        return `현재 대기 ${waitingNumber}명`;
+    }
+
+    function formatReservationStatus(status, waitingNumber) {
+        if (status === "CONFIRMED") {
+            return "예약 확정";
+        }
+        if (status === "WAITING") {
+            return waitingNumber ? `대기 ${waitingNumber}번` : "예약 대기";
+        }
+        return status;
     }
 
     function renderUserReservations() {
@@ -176,9 +193,11 @@ document.addEventListener("DOMContentLoaded", () => {
         }
 
         userReservationList.innerHTML = state.userReservations.map((reservation) => {
-            const isEditing = state.editingReservationId === reservation.reservationId;
-            const selectedStartWhen = state.editDateByReservationId[reservation.reservationId] || reservation.date.startWhen;
-            const editTimes = state.editTimesByReservationId[reservation.reservationId] || [];
+            const reservationSlot = reservation.reservationSlot;
+            const reservationId = reservation.id;
+            const isEditing = state.editingReservationId === reservationId;
+            const selectedStartWhen = state.editDateByReservationId[reservationId] || reservationSlot.date.startWhen;
+            const editTimes = state.editTimesByReservationId[reservationId] || [];
             const dateOptions = state.dates.map((date) => `
                 <option value="${date.reservationDate}" data-date-id="${date.id}" ${date.reservationDate === selectedStartWhen ? "selected" : ""}>
                     ${date.reservationDate}
@@ -190,20 +209,21 @@ document.addEventListener("DOMContentLoaded", () => {
                 <article class="user-reservation-card">
                     <div class="user-reservation-main">
                         <div>
-                            <span class="card-pill">예약 번호 ${reservation.reservationId}</span>
-                            <h3>${escapeHtml(reservation.theme.name)}</h3>
-                            <p>${escapeHtml(reservation.theme.content)}</p>
+                            <span class="card-pill">예약 번호 ${reservationId}</span>
+                            <h3>${escapeHtml(reservationSlot.theme.name)}</h3>
+                            <p>${escapeHtml(reservationSlot.theme.content)}</p>
                         </div>
                         <div class="reservation-date-time">
-                            <strong>${reservation.date.startWhen}</strong>
-                            <span>${reservation.time.startAt}</span>
+                            <strong>${reservationSlot.date.startWhen}</strong>
+                            <span>${reservationSlot.time.startAt}</span>
+                            <span>${formatReservationStatus(reservation.status, reservation.waitingNumber)}</span>
                         </div>
                     </div>
                     ${isEditing ? `
-                        <form class="reservation-edit-form" data-edit-form data-id="${reservation.reservationId}">
+                        <form class="reservation-edit-form" data-edit-form data-id="${reservationId}">
                             <label>
                                 날짜
-                                <select name="startWhen" data-edit-date data-id="${reservation.reservationId}">
+                                <select name="startWhen" data-edit-date data-id="${reservationId}">
                                     ${dateOptions}
                                 </select>
                             </label>
@@ -220,8 +240,8 @@ document.addEventListener("DOMContentLoaded", () => {
                         </form>
                     ` : `
                         <div class="reservation-card-actions">
-                            <button type="button" class="secondary-button" data-edit-id="${reservation.reservationId}">변경</button>
-                            <button type="button" class="danger-button" data-cancel-id="${reservation.reservationId}">예약 취소</button>
+                            <button type="button" class="secondary-button" data-edit-id="${reservationId}">변경</button>
+                            <button type="button" class="danger-button" data-cancel-id="${reservationId}">예약 취소</button>
                         </div>
                     `}
                 </article>
@@ -233,13 +253,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function buildEditTimeOptions(reservation, times) {
         const options = new Map();
-        options.set(reservation.time.startAt, reservation.time.startAt);
+        options.set(reservation.reservationSlot.time.startAt, reservation.reservationSlot.time.startAt);
         times
-            .filter((time) => time.available || time.startAt === reservation.time.startAt)
             .forEach((time) => options.set(time.startAt, time.startAt));
 
         return [...options.values()].map((startAt) => `
-            <option value="${startAt}" ${startAt === reservation.time.startAt ? "selected" : ""}>${startAt}</option>
+            <option value="${startAt}" ${startAt === reservation.reservationSlot.time.startAt ? "selected" : ""}>${startAt}</option>
         `).join("");
     }
 
@@ -253,10 +272,10 @@ document.addEventListener("DOMContentLoaded", () => {
         userReservationList.querySelectorAll("[data-edit-id]").forEach((button) => {
             button.addEventListener("click", async () => {
                 const reservation = findUserReservation(Number(button.dataset.editId));
-                state.editingReservationId = reservation.reservationId;
-                state.editDateByReservationId[reservation.reservationId] = reservation.date.startWhen;
+                state.editingReservationId = reservation.id;
+                state.editDateByReservationId[reservation.id] = reservation.reservationSlot.date.startWhen;
                 renderUserReservations();
-                await loadEditTimes(reservation, reservation.date.id);
+                await loadEditTimes(reservation, reservation.reservationSlot.date.id);
             });
         });
 
@@ -271,7 +290,7 @@ document.addEventListener("DOMContentLoaded", () => {
             select.addEventListener("change", async () => {
                 const reservation = findUserReservation(Number(select.dataset.id));
                 const selectedOption = select.options[select.selectedIndex];
-                state.editDateByReservationId[reservation.reservationId] = selectedOption.value;
+                state.editDateByReservationId[reservation.id] = selectedOption.value;
                 await loadEditTimes(reservation, Number(selectedOption.dataset.dateId));
             });
         });
@@ -289,7 +308,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function findUserReservation(id) {
-        return state.userReservations.find((reservation) => reservation.reservationId === id);
+        return state.userReservations.find((reservation) => reservation.id === id);
     }
 
     function setUserReservationMessage(text, type = "") {
@@ -326,8 +345,8 @@ document.addEventListener("DOMContentLoaded", () => {
             throw new Error(result?.message || "예약 목록을 불러오지 못했습니다.");
         }
 
-        state.userReservationName = result.name;
-        state.userReservations = result.reservation;
+        state.userReservationName = result.username;
+        state.userReservations = result.reservations;
         state.editingReservationId = null;
         state.editDateByReservationId = {};
         state.editTimesByReservationId = {};
@@ -377,9 +396,9 @@ document.addEventListener("DOMContentLoaded", () => {
     async function loadEditTimes(reservation, dateId) {
         try {
             const times = await fetchJson(
-                `/reservation-times/availability?themeId=${reservation.theme.id}&dateId=${dateId}`
+                `/reservation-slots?themeId=${reservation.reservationSlot.theme.id}&dateId=${dateId}`
             );
-            state.editTimesByReservationId[reservation.reservationId] = times;
+            state.editTimesByReservationId[reservation.id] = times;
             renderUserReservations();
         } catch (error) {
             setUserReservationMessage("변경 가능한 시간을 불러오지 못했습니다.", "error");
@@ -412,7 +431,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const selectedDate = findDate();
 
         state.times = await fetchJson(
-            `/reservation-times/availability?themeId=${state.selectedThemeId}&dateId=${state.selectedDateId}`
+            `/reservation-slots?themeId=${state.selectedThemeId}&dateId=${state.selectedDateId}`
         );
         renderTimes();
         selectedThemeInput.value = String(state.selectedThemeId);
@@ -461,19 +480,20 @@ document.addEventListener("DOMContentLoaded", () => {
                 body: JSON.stringify(payload)
             });
 
-            const result = await response.json();
+            const result = await parseResponse(response);
 
             if (!response.ok) {
-                message.textContent = result.message || "예약 요청 중 문제가 발생했습니다.";
+                message.textContent = result?.message || "예약 요청 중 문제가 발생했습니다.";
                 message.classList.add("error");
                 return;
             }
 
-            message.textContent = result.name + "님의 예약이 완료되었습니다.";
+            const reservationName = String(payload.name);
+            message.textContent = reservationName + "님의 예약 요청이 완료되었습니다.";
             message.classList.add("success");
 
-            userReservationNameInput.value = result.name;
-            await loadUserReservations(result.name);
+            userReservationNameInput.value = reservationName;
+            await loadUserReservations(reservationName);
 
             window.setTimeout(() => {
                 window.location.reload();
