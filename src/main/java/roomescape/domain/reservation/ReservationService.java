@@ -85,7 +85,10 @@ public class ReservationService {
 
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
-        Reservation reservation = reservationRepository.findByIdForUpdate(id)
+        if (!reservationRepository.existsByIdForUpdate(id)) {
+            throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
+        }
+        Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         validateFixRequest(reservation.getTheme(), fixRequest);
         reservationTimeRepository.findById(fixRequest.timeId())

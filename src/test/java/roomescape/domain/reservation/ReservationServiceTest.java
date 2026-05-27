@@ -212,7 +212,8 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationTimeRepository.existsById(1L)).thenReturn(true);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
@@ -225,7 +226,7 @@ class ReservationServiceTest {
         @Test
         void 존재하지_않는_예약이면_예외() {
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
-            when(reservationRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
+            when(reservationRepository.existsByIdForUpdate(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(99L, request))
                     .isInstanceOf(RoomescapeException.class)
@@ -237,7 +238,8 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 99L);
 
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationTimeRepository.existsById(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
@@ -250,7 +252,8 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("다른유저", LocalDate.of(2099, 12, 31), 1L);
 
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationTimeRepository.existsById(1L)).thenReturn(true);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
@@ -265,7 +268,8 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2000, 1, 1), 1L);
 
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationTimeRepository.existsById(1L)).thenReturn(true);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
 
@@ -279,7 +283,8 @@ class ReservationServiceTest {
             Reservation reservation = Reservation.of(1L, "유저1", LocalDate.of(2099, 12, 30), time, theme);
             ReservationFixRequest request = new ReservationFixRequest("유저1", LocalDate.of(2099, 12, 31), 1L);
 
-            when(reservationRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(reservation));
+            when(reservationRepository.existsByIdForUpdate(1L)).thenReturn(true);
+            when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
             when(reservationTimeRepository.existsById(1L)).thenReturn(true);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
