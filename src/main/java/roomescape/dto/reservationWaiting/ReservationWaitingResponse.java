@@ -53,12 +53,4 @@ public class ReservationWaitingResponse {
     public ThemeResponse getTheme() {
         return theme;
     }
-
-    public Long getSequence() {
-        return sequence;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
 }
