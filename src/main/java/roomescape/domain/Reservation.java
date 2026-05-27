@@ -3,7 +3,6 @@ package roomescape.domain;
 import lombok.RequiredArgsConstructor;
 import roomescape.exception.PastReservationException;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RequiredArgsConstructor
@@ -11,16 +10,14 @@ public class Reservation {
 
     private final Long id;
     private final String username;
-    private final LocalDate reservationDate;
-    private final ReservationTime reservationTime;
-    private final Theme reservationTheme;
+    private final Slot slot;
 
-    public static Reservation create(long id, String username, LocalDate date, ReservationTime time, Theme theme) {
-        return new Reservation(id, username, date, time, theme);
+    public static Reservation create(long id, String username, Slot slot) {
+        return new Reservation(id, username, slot);
     }
 
     public boolean isPast(LocalDateTime now) {
-        return reservationTime.isPast(reservationDate, now);
+        return slot.isPast(now);
     }
 
     public boolean isOwnedBy(String name) {
@@ -37,16 +34,8 @@ public class Reservation {
         return username;
     }
 
-    public LocalDate reservationDate() {
-        return reservationDate;
-    }
-
-    public ReservationTime reservationTime() {
-        return reservationTime;
-    }
-
-    public Theme reservationTheme() {
-        return reservationTheme;
+    public Slot slot() {
+        return slot;
     }
 
     public long id() {

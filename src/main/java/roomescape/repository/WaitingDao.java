@@ -1,5 +1,7 @@
 package roomescape.repository;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
 import java.time.LocalDate;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -9,6 +11,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
@@ -24,7 +27,21 @@ public class WaitingDao {
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
 
-    private final RowMapper<Waiting> rowMapper = (rs, rowNum) -> {
+    private final RowMapper<Waiting> rowMapper = (rs, rowNum) -> Waiting.create(
+            rs.getLong("waiting_id"),
+            rs.getString("name"),
+            mapSlot(rs),
+            rs.getObject("created_at", LocalDateTime.class)
+    );
+
+    private final RowMapper<WaitingWithRank> withRankRowMapper = (rs, rowNum) -> new WaitingWithRank(
+            rs.getLong("waiting_id"),
+            rs.getString("name"),
+            mapSlot(rs),
+            rs.getInt("waiting_rank")
+    );
+
+    private static Slot mapSlot(ResultSet rs) throws SQLException {
         Theme theme = Theme.create(
                 rs.getLong("theme_id"),
                 rs.getString("theme_name"),
@@ -37,38 +54,8 @@ public class WaitingDao {
                 rs.getObject("time_value", LocalTime.class)
         );
 
-        return Waiting.create(
-                rs.getLong("waiting_id"),
-                rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                reservationTime,
-                theme,
-                rs.getObject("created_at", LocalDateTime.class)
-        );
-    };
-
-    private final RowMapper<WaitingWithRank> withRankRowMapper = (rs, rowNum) -> {
-        Theme theme = Theme.create(
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("thumbnail_url"),
-                rs.getString("theme_description")
-        );
-
-        ReservationTime reservationTime = ReservationTime.create(
-                rs.getLong("time_id"),
-                rs.getObject("time_value", LocalTime.class)
-        );
-
-        return new WaitingWithRank(
-                rs.getLong("waiting_id"),
-                rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                reservationTime,
-                theme,
-                rs.getInt("waiting_rank")
-        );
-    };
+        return new Slot(rs.getObject("date", LocalDate.class), reservationTime, theme);
+    }
 
     public WaitingDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -127,7 +114,7 @@ public class WaitingDao {
                 .orElseThrow(() -> new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다."));
     }
 
-    public List<Waiting> findAllByDateAndTimeIdAndThemeId(LocalDate date, long timeId, long themeId) {
+    public List<Waiting> findAllBySlot(Slot slot) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,
@@ -148,7 +135,7 @@ public class WaitingDao {
                 WHERE waiting.date = ? AND time_id = ? AND theme_id = ?
                 ORDER BY created_at;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId);
+        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id());
     }
 
     public List<WaitingWithRank> findAllByName(String name) {

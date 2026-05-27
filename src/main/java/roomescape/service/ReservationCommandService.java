@@ -4,6 +4,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
+import roomescape.domain.Theme;
 import roomescape.exception.DuplicateException;
 import roomescape.exception.InvalidReferenceException;
 import roomescape.exception.ResourceNotFoundException;
@@ -32,9 +34,9 @@ public class ReservationCommandService {
         }
     }
 
-    private void findThemeReference(long themeId) {
+    private Theme findThemeReference(long themeId) {
         try {
-            themeDao.findById(themeId);
+            return themeDao.findById(themeId);
         } catch (ResourceNotFoundException e) {
             throw new InvalidReferenceException("존재하지 않는 테마입니다.");
         }
@@ -42,9 +44,11 @@ public class ReservationCommandService {
 
     public Reservation create(String name, LocalDate date, long timeId, long themeId) {
         ReservationTime time = findTimeReference(timeId);
-        findThemeReference(themeId);
-        time.validateNotPast(date, LocalDateTime.now(clock));
-        if (reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isPresent()) {
+        Theme theme = findThemeReference(themeId);
+        Slot slot = new Slot(date, time, theme);
+
+        slot.validateNotPast(LocalDateTime.now(clock));
+        if (reservationDao.findBySlot(slot).isPresent()) {
             throw new DuplicateException("해당 날짜와 시간에 이미 예약이 존재합니다.");
         }
         return reservationDao.save(name, date, timeId, themeId);
@@ -62,10 +66,11 @@ public class ReservationCommandService {
 
     public Reservation update(long reservationId, LocalDate newDate, long newTimeId) {
         ReservationTime newTime = findTimeReference(newTimeId);
-        newTime.validateNotPast(newDate, LocalDateTime.now(clock));
         Reservation current = reservationDao.findById(reservationId);
-        long themeId = current.reservationTheme().id();
-        boolean isDuplicate = reservationDao.findByDateAndTimeIdAndThemeId(newDate, newTimeId, themeId)
+        Slot newSlot = new Slot(newDate, newTime, current.slot().theme());
+
+        newSlot.validateNotPast(LocalDateTime.now(clock));
+        boolean isDuplicate = reservationDao.findBySlot(newSlot)
                 .filter(existing -> existing.id() != reservationId)
                 .isPresent();
         if (isDuplicate) {

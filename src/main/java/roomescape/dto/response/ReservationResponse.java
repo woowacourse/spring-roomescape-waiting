@@ -2,6 +2,7 @@ package roomescape.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
+import roomescape.domain.Slot;
 import roomescape.domain.WaitingWithRank;
 
 import java.time.LocalDate;
@@ -21,32 +22,34 @@ public record ReservationResponse(
         Integer rank
 ) {
     public static ReservationResponse from(Reservation reservation) {
+        Slot slot = reservation.slot();
         return new ReservationResponse(
                 reservation.id(),
                 reservation.username(),
-                reservation.reservationDate(),
-                new TimeInfo(reservation.reservationTime().id(), reservation.reservationTime().startAt()),
+                slot.date(),
+                new TimeInfo(slot.time().id(), slot.time().startAt()),
                 new ThemeInfo(
-                        reservation.reservationTheme().id(),
-                        reservation.reservationTheme().name(),
-                        reservation.reservationTheme().thumbnailUrl(),
-                        reservation.reservationTheme().description()),
+                        slot.theme().id(),
+                        slot.theme().name(),
+                        slot.theme().thumbnailUrl(),
+                        slot.theme().description()),
                 "예약",
                 null
         );
     }
 
     public static ReservationResponse from(WaitingWithRank waiting) {
+        Slot slot = waiting.slot();
         return new ReservationResponse(
                 waiting.id(),
                 waiting.name(),
-                waiting.reservationDate(),
-                new TimeInfo(waiting.reservationTime().id(), waiting.reservationTime().startAt()),
+                slot.date(),
+                new TimeInfo(slot.time().id(), slot.time().startAt()),
                 new ThemeInfo(
-                        waiting.reservationTheme().id(),
-                        waiting.reservationTheme().name(),
-                        waiting.reservationTheme().thumbnailUrl(),
-                        waiting.reservationTheme().description()),
+                        slot.theme().id(),
+                        slot.theme().name(),
+                        slot.theme().thumbnailUrl(),
+                        slot.theme().description()),
                 "예약대기",
                 waiting.rank()
         );

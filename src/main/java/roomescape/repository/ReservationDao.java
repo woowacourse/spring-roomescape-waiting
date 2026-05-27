@@ -8,6 +8,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
@@ -34,12 +35,12 @@ public class ReservationDao {
                 rs.getObject("time_value", LocalTime.class)
         );
 
+        Slot slot = new Slot(rs.getObject("date", LocalDate.class), reservationTime, theme);
+
         return Reservation.create(
                 rs.getLong("reservation_id"),
                 rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                reservationTime,
-                theme
+                slot
         );
     };
 
@@ -162,7 +163,7 @@ public class ReservationDao {
         return findById(reservationId);
     }
 
-    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findBySlot(Slot slot) {
         String sql = """
                 SELECT
                             reservation.id as reservation_id,
@@ -179,7 +180,9 @@ public class ReservationDao {
                         INNER JOIN theme as theme ON reservation.theme_id = theme.id
                         WHERE date = ? AND time_id = ? AND theme_id = ?;
                 """;
-        return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId).stream().findFirst();
+        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id())
+                .stream()
+                .findFirst();
     }
 
 }
