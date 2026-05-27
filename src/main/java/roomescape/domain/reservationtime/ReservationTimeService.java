@@ -2,6 +2,7 @@ package roomescape.domain.reservationtime;
 
 import java.time.LocalTime;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservationtime.dto.TimeRequest;
@@ -41,7 +42,11 @@ public class ReservationTimeService {
     @Transactional
     public void deleteById(Long id) {
         validateReservationTimeId(id);
-        timeRepository.deleteById(id);
+        try {
+            timeRepository.deleteById(id);
+        } catch (DataIntegrityViolationException e) {
+            throw new RoomescapeException(ErrorCode.TIME_DELETE_NOT_ALLOWED);
+        }
     }
 
     private void validateDuplicateTime(LocalTime newTime) {

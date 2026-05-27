@@ -38,7 +38,7 @@ public class WaitingService {
 
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
-        ReservationTime reservationTime = reservationTimeRepository.findById(waitingRequest.timeId())
+        ReservationTime reservationTime = reservationTimeRepository.findByIdForUpdate(waitingRequest.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
@@ -90,22 +90,13 @@ public class WaitingService {
     }
 
     private void validateWaitingIsAvailable(WaitingRequest waitingRequest) {
-        boolean isExistReservation = reservationRepository.existsByDateAndTimeIdAndThemeId(waitingRequest.date(),
-                waitingRequest.timeId(),
-                waitingRequest.themeId());
-
-        if (!isExistReservation) {
-            throw new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND);
-        }
-
-        String reservationName = reservationRepository.findNameByDateAndTimeIdAndThemeId(waitingRequest.date(),
-                        waitingRequest.timeId(), waitingRequest.themeId())
+        String reservationName = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
+                        waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
 
         if (reservationName.equals(waitingRequest.name())) {
             throw new RoomescapeException(ErrorCode.WAITING_NOT_AVAILABLE);
         }
-
     }
 
 }

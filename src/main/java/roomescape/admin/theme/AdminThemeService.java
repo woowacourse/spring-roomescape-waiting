@@ -1,6 +1,7 @@
 package roomescape.admin.theme;
 
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.theme.dto.AdminThemeRequest;
@@ -49,7 +50,11 @@ public class AdminThemeService {
     public void deleteTheme(Long themeId) {
         validateThemeId(themeId);
         validateTimeDeletable(themeId);
-        adminThemeRepository.deleteById(themeId);
+        try {
+            adminThemeRepository.deleteById(themeId);
+        } catch (DataIntegrityViolationException e) {
+            throw new RoomescapeException(ErrorCode.TIME_DELETE_NOT_ALLOWED);
+        }
     }
 
     private void validateThemeId(Long themeId) {

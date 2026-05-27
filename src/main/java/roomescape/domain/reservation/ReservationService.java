@@ -37,7 +37,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationResponse createReservation(ReservationRequest request) {
-        ReservationTime time = reservationTimeRepository.findById(request.timeId())
+        ReservationTime time = reservationTimeRepository.findByIdForUpdate(request.timeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
@@ -85,7 +85,7 @@ public class ReservationService {
 
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
-        Reservation reservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findByIdForUpdate(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         validateFixRequest(reservation.getTheme(), fixRequest);
         reservationTimeRepository.findById(fixRequest.timeId())
