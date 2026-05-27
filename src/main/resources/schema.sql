@@ -36,6 +36,7 @@ CREATE TABLE IF NOT EXISTS waiting
     theme_id   BIGINT       NOT NULL,
     created_at DATETIME NOT NULL,
     PRIMARY KEY (id),
+    CONSTRAINT uq_waiting_name_date_time_theme UNIQUE (name, date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 )
