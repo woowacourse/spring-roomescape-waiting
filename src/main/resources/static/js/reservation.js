@@ -1,4 +1,5 @@
 const API = '/reservations';
+const WAITINGS_API = '/waitings';
 const TIMES_API = '/times';
 const THEMES_API = '/themes';
 
@@ -81,14 +82,6 @@ function startAdd() {
     appendPlaceholder(timeSelect, '날짜와 테마를 먼저 선택해주세요.');
     timeSelect.disabled = true;
 
-    dateInput.addEventListener('change', () => {
-        refreshAvailableTimes(dateInput.value, themeSelect.value, timeSelect);
-    });
-
-    themeSelect.addEventListener('change', () => {
-        refreshAvailableTimes(dateInput.value, themeSelect.value, timeSelect);
-    });
-
     row.insertCell().appendChild(nameInput);
     row.insertCell().appendChild(themeSelect);
     row.insertCell().appendChild(dateInput);
@@ -97,7 +90,7 @@ function startAdd() {
     const actions = row.insertCell();
     actions.className = 'actions';
 
-    actions.appendChild(createButton('저장', 'btn-primary', async () => {
+    const saveButton = createButton('예약 등록', 'btn-primary', async () => {
         await saveRow(
             nameInput.value,
             dateInput.value,
@@ -105,13 +98,23 @@ function startAdd() {
             timeSelect.value,
             timeSelect
         );
-    }));
+    });
+    actions.appendChild(saveButton);
 
     actions.appendChild(createButton('취소', 'btn-ghost', () => {
         row.remove();
         isEditing = false;
         refresh();
     }));
+
+    const refreshTimesAndButton = async () => {
+        await refreshAvailableTimes(dateInput.value, themeSelect.value, timeSelect);
+        updateSaveButtonLabel(timeSelect, saveButton);
+    };
+
+    dateInput.addEventListener('change', refreshTimesAndButton);
+    themeSelect.addEventListener('change', refreshTimesAndButton);
+    timeSelect.addEventListener('change', () => updateSaveButtonLabel(timeSelect, saveButton));
 }
 
 async function refreshAvailableTimes(date, themeId, timeSelect) {
@@ -137,7 +140,7 @@ async function refreshAvailableTimes(date, themeId, timeSelect) {
             return;
         }
 
-        let hasAvailableTime = false;
+        let hasSelectedTime = false;
 
         times.forEach(time => {
             const option = document.createElement('option');
@@ -145,23 +148,23 @@ async function refreshAvailableTimes(date, themeId, timeSelect) {
             const reserved = isReserved(time);
 
             option.value = time.id;
-            option.textContent = reserved ? `${time.startAt} (예약 불가)` : time.startAt;
-            option.disabled = reserved;
+            option.dataset.reserved = String(reserved);
+            option.textContent = reserved ? `${time.startAt} (대기 가능)` : time.startAt;
             option.className = reserved ? 'time-option-unavailable' : 'time-option-available';
 
-            if (!reserved && !hasAvailableTime) {
+            if (!reserved && !hasSelectedTime) {
                 option.selected = true;
-                hasAvailableTime = true;
+                hasSelectedTime = true;
             }
 
             timeSelect.appendChild(option);
         });
 
-        timeSelect.disabled = !hasAvailableTime;
-
-        if (!hasAvailableTime) {
-            alert('선택한 날짜와 테마에 예약 가능한 시간이 없습니다.');
+        if (!hasSelectedTime) {
+            timeSelect.options[0].selected = true;
         }
+
+        timeSelect.disabled = false;
     } catch (error) {
         console.error('예약 가능 시간 조회 실패:', error);
         clearSelect(timeSelect);
@@ -174,6 +177,12 @@ function isReserved(time) {
     return time.reserved === true;
 }
 
+function updateSaveButtonLabel(timeSelect, saveButton) {
+    const selectedOption = timeSelect.options[timeSelect.selectedIndex];
+    const isWaiting = selectedOption && selectedOption.dataset.reserved === 'true';
+    saveButton.textContent = isWaiting ? '대기 신청' : '예약 등록';
+}
+
 async function saveRow(name, date, themeId, timeId, timeSelect) {
     if (!name.trim() || !date || !themeId || !timeId) {
         alert('모든 항목을 입력해주세요.');
@@ -181,13 +190,11 @@ async function saveRow(name, date, themeId, timeId, timeSelect) {
     }
 
     const selectedOption = timeSelect.options[timeSelect.selectedIndex];
-    if (selectedOption && selectedOption.disabled) {
-        alert('이미 예약된 시간은 선택할 수 없습니다.');
-        return;
-    }
+    const isWaiting = selectedOption && selectedOption.dataset.reserved === 'true';
+    const endpoint = isWaiting ? WAITINGS_API : API;
 
     try {
-        await fetchJson(API, {
+        await fetchJson(endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -199,10 +206,13 @@ async function saveRow(name, date, themeId, timeId, timeSelect) {
         });
 
         isEditing = false;
+        if (isWaiting) {
+            alert('대기 신청이 완료되었습니다. 내 예약에서 대기 순번을 확인할 수 있습니다.');
+        }
         refresh();
     } catch (error) {
-        console.error('예약 추가 실패:', error);
-        alert(getErrorMessage(error, '예약 추가에 실패했습니다.'));
+        console.error(isWaiting ? '대기 신청 실패:' : '예약 추가 실패:', error);
+        alert(getErrorMessage(error, isWaiting ? '대기 신청에 실패했습니다.' : '예약 추가에 실패했습니다.'));
     }
 }
 

@@ -240,6 +240,28 @@ table.data .actions {
     color: var(--text-muted);
 }
 
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 54px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 0.8rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.status-reservation {
+    background: var(--brand-soft);
+    color: var(--brand);
+}
+
+.status-waiting {
+    background: #fff3d7;
+    color: #8a5a00;
+}
+
 .hero {
     text-align: center;
     padding: 72px 24px;

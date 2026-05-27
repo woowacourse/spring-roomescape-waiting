@@ -1,4 +1,5 @@
 const API = '/reservations/me';
+const WAITINGS_API = '/waitings/me';
 const TIMES_API = '/times';
 
 let currentName = '';
@@ -23,40 +24,100 @@ async function handleSubmit(event) {
 
 async function refresh() {
     try {
-        const data = await fetchJson(`${API}?name=${encodeURIComponent(currentName)}`);
-        render(data.reservations);
+        const [reservationData, waitingData] = await Promise.all([
+            fetchJson(`${API}?name=${encodeURIComponent(currentName)}`),
+            fetchJson(`${WAITINGS_API}?name=${encodeURIComponent(currentName)}`)
+        ]);
+
+        render(toRows(
+            getResponseItems(reservationData, 'reservations'),
+            getResponseItems(waitingData, 'waitings')
+        ));
     } catch (error) {
         console.error('내 예약 조회 실패:', error);
         alert(getErrorMessage(error, '내 예약 조회에 실패했습니다.'));
     }
 }
 
-function render(reservations) {
+function getResponseItems(data, key) {
+    if (!data) return [];
+    if (Array.isArray(data)) return data;
+    return Array.isArray(data[key]) ? data[key] : [];
+}
+
+function toRows(reservations = [], waitings = []) {
+    const reservationRows = reservations.map(reservation => ({
+        type: 'reservation',
+        status: '예약',
+        data: reservation
+    }));
+
+    const waitingRows = waitings.map(waiting => ({
+        type: 'waiting',
+        status: '대기',
+        data: waiting
+    }));
+
+    return [...reservationRows, ...waitingRows].sort(compareRows);
+}
+
+function compareRows(first, second) {
+    const firstDate = first.data.date || '';
+    const secondDate = second.data.date || '';
+    if (firstDate !== secondDate) {
+        return secondDate.localeCompare(firstDate);
+    }
+
+    const firstTime = first.data.time ? first.data.time.startAt : '';
+    const secondTime = second.data.time ? second.data.time.startAt : '';
+    if (firstTime !== secondTime) {
+        return firstTime.localeCompare(secondTime);
+    }
+
+    return first.type.localeCompare(second.type);
+}
+
+function render(rows) {
     const tbody = document.getElementById('table-body');
     tbody.innerHTML = '';
     isEditing = false;
 
-    if (reservations.length === 0) {
-        showEmptyState(tbody, 5, '예약 내역이 없습니다.');
+    if (rows.length === 0) {
+        showEmptyState(tbody, 6, '예약 및 대기 내역이 없습니다.');
         return;
     }
 
-    reservations.forEach((reservation, index) => {
-        renderRow(tbody, reservation, index);
+    rows.forEach(row => {
+        renderRow(tbody, row);
     });
 }
 
-function renderRow(tbody, reservation, index) {
+function renderRow(tbody, item) {
+    const reservation = item.data;
     const row = tbody.insertRow();
-    row.insertCell().textContent = index + 1;
+    row.insertCell().appendChild(createStatusBadge(item.status, item.type));
     row.insertCell().textContent = reservation.theme ? reservation.theme.name : '-';
     row.insertCell().textContent = reservation.date;
     row.insertCell().textContent = reservation.time ? reservation.time.startAt : '-';
+    row.insertCell().textContent = item.type === 'waiting' ? reservation.order : '-';
 
     const actions = row.insertCell();
     actions.className = 'actions';
-    actions.appendChild(createButton('변경', 'btn-primary', () => startEdit(row, reservation)));
-    actions.appendChild(createButton('취소', 'btn-ghost', () => cancelReservation(reservation.id)));
+
+    if (item.type === 'reservation') {
+        actions.appendChild(createButton('변경', 'btn-primary', () => startEdit(row, reservation)));
+        actions.appendChild(createButton('취소', 'btn-ghost', () => cancelReservation(reservation.id)));
+        return;
+    }
+
+    actions.appendChild(createButton('취소', 'btn-ghost', () => cancelWaiting(reservation.id)));
+}
+
+function createStatusBadge(label, type) {
+    const badge = document.createElement('span');
+    badge.className = `status-badge status-${type}`;
+    badge.textContent = label;
+    return badge;
 }
 
 function startEdit(row, reservation) {
@@ -70,7 +131,7 @@ function startEdit(row, reservation) {
 
     const dateCell = row.cells[2];
     const timeCell = row.cells[3];
-    const actions = row.cells[4];
+    const actions = row.cells[5];
 
     const dateInput = createInput('date');
     dateInput.value = reservation.date;
@@ -179,6 +240,18 @@ async function cancelReservation(id) {
     } catch (error) {
         console.error('예약 취소 실패:', error);
         alert(getErrorMessage(error, '예약 취소에 실패했습니다.'));
+    }
+}
+
+async function cancelWaiting(id) {
+    if (!confirm('대기 신청을 취소하시겠습니까?')) return;
+
+    try {
+        await fetchJson(`${WAITINGS_API}/${id}?name=${encodeURIComponent(currentName)}`, { method: 'DELETE' });
+        await refresh();
+    } catch (error) {
+        console.error('대기 취소 실패:', error);
+        alert(getErrorMessage(error, '대기 취소에 실패했습니다.'));
     }
 }
 

@@ -22,7 +22,7 @@
     <div class="page-header">
         <div>
             <h1>내 예약</h1>
-            <p class="subtitle">본인 이름을 입력해 예약 목록을 조회하세요.</p>
+            <p class="subtitle">본인 이름을 입력해 예약과 대기 목록을 조회하세요.</p>
         </div>
     </div>
 
@@ -35,10 +35,11 @@
         <table class="data">
             <thead>
             <tr>
-                <th style="width: 60px;">#</th>
+                <th>상태</th>
                 <th>테마</th>
                 <th>날짜</th>
                 <th>시간</th>
+                <th>대기 순번</th>
                 <th class="actions"></th>
             </tr>
             </thead>
@@ -48,6 +49,6 @@
 </main>
 
 <script th:src="@{/js/common.js}"></script>
-<script th:src="@{/js/my-reservation.js}"></script>
+<script th:src="@{/js/my-reservation.js(v=2)}"></script>
 </body>
 </html>
