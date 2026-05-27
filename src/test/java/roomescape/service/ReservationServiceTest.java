@@ -17,12 +17,12 @@ import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
 import roomescape.exception.reservationwait.ReservationWaitAlreadyExistsException;
+import roomescape.exception.reservationwait.SelfReservationWaitNotAllowedException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
-import roomescape.exception.reservationwait.SelfReservationWaitNotAllowedException;
 
 import static org.assertj.core.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyLong;

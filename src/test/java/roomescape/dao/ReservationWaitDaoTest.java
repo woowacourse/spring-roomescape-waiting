@@ -1,11 +1,5 @@
 package roomescape.dao;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.tuple;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -15,6 +9,13 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationWait;
 import roomescape.dto.WaitingResponseProjection;
+
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @Import(ReservationWaitDao.class)
 @ActiveProfiles("test")
@@ -167,10 +168,10 @@ class ReservationWaitDaoTest {
             INSERT_DEFAULT_STORE_SQL,
             INSERT_TWO_RESERVATIONS_SQL,
             """
-            INSERT INTO reservation_wait (id, reservation_id, member_id)
-            VALUES (1, 1, 1),
-                   (2, 1, 2);
-            """
+                    INSERT INTO reservation_wait (id, reservation_id, member_id)
+                    VALUES (1, 1, 1),
+                           (2, 1, 2);
+                    """
     })
     void 가장_먼저_예약대기한_memberId를_반환한다() {
         Optional<Long> earliestMemberId = dao.findEarliestMemberId(1L);

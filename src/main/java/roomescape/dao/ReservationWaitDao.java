@@ -1,6 +1,5 @@
 package roomescape.dao;
 
-import java.util.List;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,12 +7,12 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationWait;
+import roomescape.dto.WaitingResponseProjection;
 
 import java.sql.PreparedStatement;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import roomescape.dto.WaitingResponseProjection;
-import roomescape.dto.response.WaitingResponse;
 
 @Repository
 public class ReservationWaitDao {
@@ -50,25 +49,25 @@ public class ReservationWaitDao {
 
     public List<WaitingResponseProjection> findWaitingsByMemberId(Long memberId) {
         String sql = """
-              SELECT
-                  ranked.order_num,
-                  ranked.reservation_id,
-                  ranked.member_id,
-                  ranked.created_at
-              FROM (
-                  SELECT
-                      reservation_id,
-                      member_id,
-                      created_at,
-                      ROW_NUMBER() OVER (
-                          PARTITION BY reservation_id
-                          ORDER BY created_at
-                      ) AS order_num
-                  FROM reservation_wait
-              ) AS ranked
-              WHERE ranked.member_id = ?
-              ORDER BY ranked.created_at
-              """;
+                SELECT
+                    ranked.order_num,
+                    ranked.reservation_id,
+                    ranked.member_id,
+                    ranked.created_at
+                FROM (
+                    SELECT
+                        reservation_id,
+                        member_id,
+                        created_at,
+                        ROW_NUMBER() OVER (
+                            PARTITION BY reservation_id
+                            ORDER BY created_at
+                        ) AS order_num
+                    FROM reservation_wait
+                ) AS ranked
+                WHERE ranked.member_id = ?
+                ORDER BY ranked.created_at
+                """;
 
         return jdbcTemplate.query(sql, (rs, rowNum) -> new WaitingResponseProjection(
                 rs.getLong("order_num"),

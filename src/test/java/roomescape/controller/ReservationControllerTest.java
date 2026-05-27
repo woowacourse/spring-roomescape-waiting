@@ -1,14 +1,7 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.containsInAnyOrder;
-import static org.hamcrest.Matchers.everyItem;
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,6 +13,12 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.TokenResponse;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.*;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -42,8 +41,8 @@ public class ReservationControllerTest {
     private static final String PASSWORD = "password";
     private static final String MANAGER_EMAIL = "manager-gangnam@email.com";
     public static final String INSERT_INTO_RESERVATION_WAIT_RESERVATION_ID_MEMBER_ID = """
-    INSERT INTO reservation_wait (reservation_id, member_id, created_at) VALUES (%d, %d, %s)
-    """;
+            INSERT INTO reservation_wait (reservation_id, member_id, created_at) VALUES (%d, %d, %s)
+            """;
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
@@ -402,17 +401,17 @@ public class ReservationControllerTest {
                 INSERT_DEFAULT_STORE_SQL,
                 INSERT_DEFAULT_MEMBER_SQL,
                 """
-                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
-                """,
+                        INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                        """,
                 """
-                INSERT INTO theme (id, name, description, img_url)
-                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
-                        'https://images.example.com/themes/horror-house.jpg');
-                """,
+                        INSERT INTO theme (id, name, description, img_url)
+                        VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                                'https://images.example.com/themes/horror-house.jpg');
+                        """,
                 """
-                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-                VALUES (1, 2, '2026-12-01', 1, 1, 1);
-                """
+                        INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                        VALUES (1, 2, '2026-12-01', 1, 1, 1);
+                        """
         })
         void 예약대기_생성에_성공하면_201을_반환한다() {
             String cookie = authenticate();
@@ -471,17 +470,17 @@ public class ReservationControllerTest {
                 INSERT_DEFAULT_STORE_SQL,
                 INSERT_DEFAULT_MEMBER_SQL,
                 """
-                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
-                """,
+                        INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                        """,
                 """
-                INSERT INTO theme (id, name, description, img_url)
-                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
-                        'https://images.example.com/themes/horror-house.jpg');
-                """,
+                        INSERT INTO theme (id, name, description, img_url)
+                        VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                                'https://images.example.com/themes/horror-house.jpg');
+                        """,
                 """
-                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-                VALUES (1, 2, '2026-12-01', 1, 1, 1);
-                """
+                        INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                        VALUES (1, 2, '2026-12-01', 1, 1, 1);
+                        """
         })
         void 같은_사용자가_같은_슬롯에_중복_대기하면_409를_반환한다() {
             String cookie = authenticate();
@@ -528,17 +527,17 @@ public class ReservationControllerTest {
                 INSERT_DEFAULT_STORE_SQL,
                 INSERT_DEFAULT_MEMBER_SQL,
                 """
-                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
-                """,
+                        INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                        """,
                 """
-                INSERT INTO theme (id, name, description, img_url)
-                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
-                        'https://images.example.com/themes/horror-house.jpg');
-                """,
+                        INSERT INTO theme (id, name, description, img_url)
+                        VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                                'https://images.example.com/themes/horror-house.jpg');
+                        """,
                 """
-                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-                VALUES (1, 1, '2026-12-01', 1, 1, 1);
-                """
+                        INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                        VALUES (1, 1, '2026-12-01', 1, 1, 1);
+                        """
         })
         void 본인_예약에_대기_신청시_422를_반환한다() {
             String cookie = authenticate();
@@ -560,24 +559,24 @@ public class ReservationControllerTest {
                 INSERT_DEFAULT_STORE_SQL,
                 INSERT_DEFAULT_MEMBER_SQL,
                 """
-                INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
-                """,
+                        INSERT INTO reservation_time (id, start_at) VALUES (1, '10:00');
+                        """,
                 """
-                INSERT INTO theme (id, name, description, img_url)
-                VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
-                        'https://images.example.com/themes/horror-house.jpg');
-                """,
+                        INSERT INTO theme (id, name, description, img_url)
+                        VALUES (1, '이든의 공포 하우스', '이든이 귀신으로 나옴',
+                                'https://images.example.com/themes/horror-house.jpg');
+                        """,
                 """
-                INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-                VALUES (1, 1, '2026-12-01', 1, 1, 1),
-                       (2, 1, '2026-12-02', 1, 1, 1),
-                       (3, 2, '2026-12-03', 1, 1, 1);
-                """,
+                        INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
+                        VALUES (1, 1, '2026-12-01', 1, 1, 1),
+                               (2, 1, '2026-12-02', 1, 1, 1),
+                               (3, 2, '2026-12-03', 1, 1, 1);
+                        """,
                 """
-                INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
-                VALUES (1, 3, 2, '2026-05-27 12:00:01'),
-                       (2, 3, 1, '2026-05-27 12:00:05');
-                """
+                        INSERT INTO reservation_wait (id, reservation_id, member_id, created_at)
+                        VALUES (1, 3, 2, '2026-05-27 12:00:01'),
+                               (2, 3, 1, '2026-05-27 12:00:05');
+                        """
         })
         void 내_확정예약과_내_대기를_순번과_함께_반환한다() {
             String cookie = authenticate();

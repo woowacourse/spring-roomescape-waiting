@@ -9,8 +9,8 @@ import roomescape.dto.WaitingResponseResult;
 import roomescape.dto.request.ReservationCreateRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.MyReservationsAndWaitsResponse;
-import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.PostReservationWaitResponse;
+import roomescape.dto.response.ReservationResponse;
 import roomescape.dto.response.WaitingResponse;
 import roomescape.service.ReservationService;
 
