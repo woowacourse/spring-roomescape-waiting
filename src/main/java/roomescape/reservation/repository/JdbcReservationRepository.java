@@ -103,11 +103,11 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.date,
                     r.status AS status,
                     r.last_modified_at AS last_modified_at,
-    
+                    
                     t.id AS time_id,
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
-    
+                    
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
@@ -159,7 +159,43 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findBySlotAndStatusWaitingAndWaitingNumberIsOne(LocalDate date, Long timeId, Long themeId) {
-        return Optional.empty();
+        return jdbcTemplate.query("""
+                        SELECT *
+                        FROM (
+                            SELECT
+                                r.id AS reservation_id,
+                                r.guest_name,
+                                r.date,
+                                r.status AS status,
+                                r.last_modified_at AS last_modified_at,
+                                        
+                                t.id AS time_id,
+                                t.start_at,
+                                t.deleted_at AS time_deleted_at,
+                                        
+                                th.id AS theme_id,
+                                th.name AS theme_name,
+                                th.description AS theme_description,
+                                th.thumbnail AS theme_thumbnail,
+                                th.deleted_at AS theme_deleted_at,
+                                        
+                                ROW_NUMBER() OVER (
+                                    PARTITION BY r.date, t.id, th.id, r.status
+                                    ORDER BY r.last_modified_at
+                                ) AS wait_number
+                            FROM reservation r
+                            INNER JOIN reservation_time t
+                                ON r.time_id = t.id
+                            INNER JOIN theme th
+                                ON r.theme_id = th.id
+                        ) x
+                        WHERE date = ?
+                          AND time_id = ?
+                          AND theme_id = ?
+                          AND status = 'WAITING'
+                          AND wait_number = 1
+                        """, reservationRowMapper, date, timeId, themeId)
+                .stream().findFirst();
     }
 
     @Override

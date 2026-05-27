@@ -116,6 +116,27 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("특정 날짜/시간/테마의 대기 중인 예약 중 가장 우선순위가 높은 컬럼을 반환한다.")
+    public void findBySlotAndStatusWaitingAndWaitingNumberIsOne() {
+        // given
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2023, 8, 5);
+
+        Reservation first = sqlFixtureGenerator.insertReservation("토비", date, time, theme, Status.WAITING);
+        Reservation second = sqlFixtureGenerator.insertReservation("브라운", date, time, theme, Status.WAITING);
+
+        // when
+        Optional<Reservation> result = reservationRepository.findBySlotAndStatusWaitingAndWaitingNumberIsOne(date, time.getId(), theme.getId());
+
+        // then
+        assertThat(result).isPresent();
+        Reservation get = result.get();
+        assertThat(get.getId()).isEqualTo(first.getId());
+    }
+
+
+    @Test
     @DisplayName("예약을 저장한다.")
     public void save() {
         // given
