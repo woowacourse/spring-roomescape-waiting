@@ -63,7 +63,7 @@ class ReservationControllerTest {
         mockMvc.perform(delete("/reservations/{id}", 1L))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(reservationService).cancelForUser(1L);
+        Mockito.verify(reservationService).cancelForUser(1L, "name");
     }
 
     @DisplayName("존재하지 않는 예약을 취소하는 경우, 404를 반환한다.")
@@ -71,7 +71,7 @@ class ReservationControllerTest {
     void 존재하지_않는_예약_취소_404_반환_테스트() throws Exception {
         // given
         Mockito.doThrow(new ReservationNotFoundException(999L))
-                .when(reservationService).cancelForUser(999L);
+                .when(reservationService).cancelForUser(999L, "name");
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}", 999L))
@@ -83,7 +83,7 @@ class ReservationControllerTest {
     void 지난_예약_취소_400_반환_테스트() throws Exception {
         // given
         Mockito.doThrow(PastReservationException.pastCancel())
-                .when(reservationService).cancelForUser(1L);
+                .when(reservationService).cancelForUser(1L, "name");
 
         // when & then
         mockMvc.perform(delete("/reservations/{id}", 1L))

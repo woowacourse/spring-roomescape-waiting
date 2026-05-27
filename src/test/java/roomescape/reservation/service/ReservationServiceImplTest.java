@@ -4,23 +4,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-
 import roomescape.holiday.service.HolidayService;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
@@ -29,10 +28,9 @@ import roomescape.reservation.service.dto.ReservationSaveServiceDto;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
+import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.TimeService;
-
-import java.util.Optional;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceImplTest {
@@ -269,19 +267,22 @@ class ReservationServiceImplTest {
         assertThat(result).allMatch(r -> r.getName().equals("라이"));
     }
 
+    @DisplayName("예약 대기가 없는 경우, RESERVED인 예약이 정상 취소된다.")
     @Test
     void cancelForUser_정상_취소() {
         // given
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
-        Reservation future = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        when(reservationRepository.findById(1L)).thenReturn(Optional.of(future));
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findEarliestWaiting(any(), any())).thenReturn(Optional.empty());
 
         // when
-        reservationService.cancelForUser(1L);
+        reservationService.cancelForUser(1L, "라이");
 
         // then
         verify(reservationRepository).deleteById(1L);
+        verify(reservationRepository, never()).updateStatus(any());
     }
 
     @DisplayName("존재하지 않는 예약을 사용자가 취소하는 경우, ReservationNotFoundException이 발생한다.")
@@ -291,7 +292,7 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(999L)).thenReturn(Optional.empty());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelForUser(999L))
+        assertThatThrownBy(() -> reservationService.cancelForUser(999L, "name"))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -304,8 +305,30 @@ class ReservationServiceImplTest {
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(past));
 
         // when & then
-        assertThatThrownBy(() -> reservationService.cancelForUser(1L))
+        assertThatThrownBy(() -> reservationService.cancelForUser(1L, "라이"))
                 .isInstanceOf(PastReservationException.class);
+    }
+
+    @DisplayName("예약을 취소할 때, 예약 대기가 존재하는 경우, 해당 예약을 삭제하고, 가장 오래된 대기를 예약으로 올린다.")
+    @Test
+    void cancelForUser_예약_취소_대기_존재_테스트() {
+        // given
+        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        when(reservationRepository.findById(any())).thenReturn(Optional.of(reservation));
+        when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
+        when(reservationRepository.updateStatus(2L)).thenReturn(true);
+        when(reservationRepository.deleteById(1L)).thenReturn(true);
+
+        // when
+        reservationService.cancelForUser(1L, "라이");
+
+        // then
+        verify(reservationRepository).findById(any());
+        verify(reservationRepository).findEarliestWaiting(1L, 1L);
+        verify(reservationRepository).updateStatus(2L);
+        verify(reservationRepository).deleteById(1L);
     }
 
     @Test
