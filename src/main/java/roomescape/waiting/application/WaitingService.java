@@ -16,6 +16,7 @@ import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
@@ -32,6 +33,7 @@ public class WaitingService {
         this.themeRepository = themeRepository;
     }
 
+    @Transactional
     public Waiting save(WaitingCreateCommand command) {
         ReservationTime time = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> new BusinessException(WaitingErrorCode.WAITING_TIME_INVALID));
