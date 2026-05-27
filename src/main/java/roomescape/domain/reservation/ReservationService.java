@@ -143,6 +143,8 @@ public class ReservationService {
         if (!sameReservationSlot) {
             reorderWaitingNumbers(reservationSlot);
         }
+
+        deleteEmptyReservationSlot(reservation);
     }
 
     private void deleteEmptyReservationSlot(Reservation reservation) {
