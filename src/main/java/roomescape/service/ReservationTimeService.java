@@ -2,7 +2,6 @@ package roomescape.service;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
-import roomescape.domain.reservationtime.AvailableReservationTime;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.dto.reservationtime.AvailableReservationTimeResponse;
 import roomescape.exception.ReferencedDataException;

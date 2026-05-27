@@ -16,7 +16,6 @@ import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.service.ReservationService;
 
-import java.net.URI;
 import java.util.List;
 import roomescape.service.ReservationWaitingService;
 
@@ -88,4 +87,5 @@ public class ReservationRestController {
     @GetMapping("/reservations/waitings/mine")
     public List<ReservationWaitingResponse> waitingReadMine(@RequestParam String name) {
         return reservationWaitingService.readByName(name);
-    }}
+    }
+}

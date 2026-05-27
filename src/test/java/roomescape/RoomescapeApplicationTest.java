@@ -98,5 +98,4 @@ class RoomescapeApplicationTest {
                         .andExpect(status().isOk())
                         .andExpect(jsonPath("$[0].name").value("테스트"));
         }
-
 }

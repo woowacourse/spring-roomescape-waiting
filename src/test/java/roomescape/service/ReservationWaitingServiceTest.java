@@ -171,7 +171,5 @@ public class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest)).isInstanceOf(
                 InvalidInputException.class);
-
     }
-
 }
