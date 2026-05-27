@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.auth.LoginMember;
+import roomescape.auth.service.WaitingAuthorizationService;
 import roomescape.domain.Member;
 import roomescape.dto.response.WaitingResponse;
-import roomescape.service.WaitingAuthorizationService;
 import roomescape.service.WaitingService;
 
 @RestController
