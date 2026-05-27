@@ -6,6 +6,8 @@ import static org.hamcrest.Matchers.notNullValue;
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
+import java.sql.Date;
+import java.sql.PreparedStatement;
 import java.sql.Time;
 import java.time.Clock;
 import java.time.LocalDate;
@@ -24,6 +26,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
@@ -31,6 +36,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 
+@Sql("/clear.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
 class WaitingControllerTest {
 
@@ -172,6 +178,26 @@ class WaitingControllerTest {
                 .body("message", is(expectedException.getMessage()));
     }
 
+    @Test
+    void 대기_아이디와_본인의_이름으로_대기를_삭제할_수_있다() {
+        //given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+
+        final String customerName = "재키";
+        final LocalDate nowDate = NOW.toLocalDate();
+        final long savedWaitingId = insertWaiting(customerName, nowDate, time.getId(), theme.getId());
+
+        //when
+        final Response response = RestAssured.given().log().all()
+                .queryParam("customer-name", customerName)
+                .when().delete("/waitings/{id}", savedWaitingId);
+
+        //then
+        response.then().log().all()
+                .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+
     private ReservationTime insertReservationTime(final String startAt) {
         jdbcTemplate.update(
                 "INSERT INTO reservation_time (start_at) VALUES (?)",
@@ -191,20 +217,31 @@ class WaitingControllerTest {
         return Theme.of(1L, name, description, thumbnailUrl);
     }
 
-    private void insertWaiting(
+    private long insertWaiting(
             final String name,
             final LocalDate reservationDate,
             final long timeId,
             final long themeId
     ) {
-        jdbcTemplate.update("""
-                        INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
-                        VALUES (?, ?, ?, ?)
-                        """,
-                name,
-                reservationDate,
-                timeId,
-                themeId
-        );
+        final String sql = """
+                INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
+                VALUES (?, ?, ?, ?)
+                """;
+
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(con -> {
+            PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
+            ps.setString(1, name);
+            ps.setDate(2, Date.valueOf(reservationDate));
+            ps.setLong(3, timeId);
+            ps.setLong(4, themeId);
+            return ps;
+        }, keyHolder);
+
+        Number key = keyHolder.getKey();
+        if (key == null) {
+            throw new IllegalStateException("대기 생성에 실패했습니다.");
+        }
+        return key.longValue();
     }
 }

@@ -45,4 +45,12 @@ public class WaitingService {
             throw new WaitingSlotDuplicateException();
         }
     }
+
+    public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
+        // 아이디로 조회
+        waitingRepository.findById(waitingId);
+
+        // 본인의 대기인지 확인
+        // 삭제
+    }
 }

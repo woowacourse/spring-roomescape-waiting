@@ -2,17 +2,39 @@ package roomescape.wating.repository.jdbc;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
 import roomescape.wating.repository.WaitingRepository;
 
 @Repository
 @RequiredArgsConstructor
 public class JdbcWaitingRepository implements WaitingRepository {
+
+    private final static RowMapper<Waiting> WAITING_ROW_MAPPER = ((rs, rowNum) ->
+            Waiting.of(
+                    rs.getLong("id"),
+                    rs.getString("customer_name"),
+                    rs.getDate("reservation_date"),
+                    rs.getTimestamp("created_at").toLocalDateTime(),
+                    ReservationTime.of(
+                            rs.getLong("t_id"),
+                            rs.getTime("t_time").toLocalTime()
+                    ),
+                    Theme.of(
+                            rs.getLong("th_id"),
+                            rs.getString("th_name"),
+                            rs.getString("th_description"),
+                            rs.getString("th_thumbnail_url")
+                    )
+            ));
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -41,14 +63,28 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public boolean deleteById(final long waitingId) {
+    public boolean deleteById(final long id) {
         final String sql = """
                 DELETE FROM waiting
                 WHERE id = ?
                 """;
 
-        final int updateCount = jdbcTemplate.update(sql, waitingId);
+        final int updateCount = jdbcTemplate.update(sql, id);
         return updateCount > 0;
     }
 
+    @Override
+    public Optional<Waiting> findById(final long id) {
+        final String sql = """
+                SELECT w.id, w.customer_name, w.reservation_date, w.created_at,
+                       t.id AS t_id, t.start_at AS t_time,
+                       th.id AS th_id, th.name AS th_name, th.description AS th_description, th.thumbnail_url AS th_thumbnail_url
+                FROM waiting w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme th ON w.theme_id = th.id
+                WHERE w.id = ?
+        """;
+        return jdbcTemplate.query(sql, WAITING_ROW_MAPPER, id).stream()
+                .findFirst();
+    }
 }

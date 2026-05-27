@@ -1,7 +1,18 @@
 package roomescape.wating.repository.jdbc;
 
-import org.apache.http.HttpStatus;
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Time;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -12,16 +23,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Time;
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @Sql("/clear.sql")
@@ -77,6 +78,38 @@ class JdbcWaitingRepositoryTest {
 
         //then
         assertThat(deleted).isTrue();
+    }
+
+    @Nested
+    @DisplayName("id로 대기를 조회한다")
+    class FindById {
+
+        @Test
+        void 존재하지_않는_대기를_조회하면_empty가_반환된다() {
+            //given
+            final long unsavedId = 99L;
+
+            //when
+            final Optional<Waiting> find = jdbcWaitingRepository.findById(unsavedId);
+
+            //then
+            assertThat(find).isEmpty();
+        }
+
+        @Test
+        void 존재하는_대기를_조회하면_해당_대기가_반환된다() {
+            //given
+            ReservationTime time = insertReservationTime("11:00:00");
+            Theme theme = insertTheme("링", "공포 테마", "http:~");
+            final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
+
+            //when
+            final Optional<Waiting> find = jdbcWaitingRepository.findById(savedId);
+
+            //then
+            assertThat(find).isPresent();
+        }
+
     }
 
 

@@ -1,5 +1,6 @@
 package roomescape.wating.domain;
 
+import java.sql.Date;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
@@ -53,6 +54,24 @@ public class Waiting {
 
         waiting.validateNotPast(now);
         return waiting;
+    }
+
+    public static Waiting of(
+            final Long id,
+            final String customerName,
+            final Date date,
+            final LocalDateTime createdAt,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        return new Waiting(
+                id,
+                CustomerName.from(customerName),
+                date.toLocalDate(),
+                createdAt,
+                time,
+                theme
+        );
     }
 
     private void validateNotNull(
