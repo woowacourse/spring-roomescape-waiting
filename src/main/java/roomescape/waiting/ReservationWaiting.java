@@ -13,7 +13,7 @@ public class ReservationWaiting {
     private final String name;
     private final Long themeId;
     private final LocalDate date;
-    private final ReservationTime reservationTime;
+    private final ReservationTime time;
     private final Long waitingNumber;
 
     public ReservationWaiting(Long id, String name, Long themeId, LocalDate date, ReservationTime reservationTime, Long waitingNumber) {
@@ -21,7 +21,7 @@ public class ReservationWaiting {
         this.name = name;
         this.themeId = themeId;
         this.date = date;
-        this.reservationTime = reservationTime;
+        this.time = reservationTime;
         this.waitingNumber = waitingNumber;
     }
 
@@ -30,7 +30,7 @@ public class ReservationWaiting {
         this.name = name;
         this.themeId = themeId;
         this.date = date;
-        this.reservationTime = reservationTime;
+        this.time = reservationTime;
         this.waitingNumber = waitingNumber;
     }
 
@@ -50,8 +50,8 @@ public class ReservationWaiting {
         return date;
     }
 
-    public ReservationTime getReservationTime() {
-        return reservationTime;
+    public ReservationTime getTime() {
+        return time;
     }
 
     public Long getWaitingNumber() {

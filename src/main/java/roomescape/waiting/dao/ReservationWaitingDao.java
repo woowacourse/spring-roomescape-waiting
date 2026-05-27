@@ -47,6 +47,18 @@ public class ReservationWaitingDao {
         return results.stream().findFirst();
     }
 
+    public List<ReservationWaiting> selectByName(String name) {
+        String sql = """
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at, w.waiting_number
+                from reservation_waiting w
+                join reservation_time t
+                on w.time_id = t.id
+                where w.name = ?
+                """;
+
+        return jdbcTemplate.query(sql, rowMapper, name);
+    }
+
     public boolean existsByNameAndDateAndThemeIdAndTimeId(String name, Long themeId, LocalDate date, Long timeId) {
         String sql = """
                 SELECT EXISTS (
@@ -64,13 +76,13 @@ public class ReservationWaitingDao {
                 .addValue("name", reservationsWaiting.getName())
                 .addValue("theme_id", reservationsWaiting.getThemeId())
                 .addValue("date", reservationsWaiting.getDate())
-                .addValue("time_id", reservationsWaiting.getReservationTime().getId())
+                .addValue("time_id", reservationsWaiting.getTime().getId())
                 .addValue("waiting_number", reservationsWaiting.getWaitingNumber());
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
         return new ReservationWaiting(id, reservationsWaiting.getName(), reservationsWaiting.getThemeId(),
                 reservationsWaiting.getDate(),
-                reservationsWaiting.getReservationTime(), reservationsWaiting.getWaitingNumber());
+                reservationsWaiting.getTime(), reservationsWaiting.getWaitingNumber());
     }
 
     public Long findNextWaitingNumber(Long themeId, LocalDate date, Long timeId) {

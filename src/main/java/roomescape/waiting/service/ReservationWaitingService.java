@@ -43,7 +43,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
 
         originReservationWaiting.validateSameName(name);
-        validateDateTime(originReservationWaiting.getDate(), originReservationWaiting.getReservationTime());
+        validateDateTime(originReservationWaiting.getDate(), originReservationWaiting.getTime());
         reservationWaitingDao.deleteById(id);
     }
 

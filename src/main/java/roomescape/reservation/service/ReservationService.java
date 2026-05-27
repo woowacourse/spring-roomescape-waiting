@@ -1,27 +1,35 @@
 package roomescape.reservation.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.TotalReservation;
 import roomescape.reservation.dao.ReservationDao;
+import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
+import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.dao.ReservationWaitingDao;
 
 @Service
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ThemeDao themeDao;
     private final TimeDao timeDao;
+    private final ReservationWaitingDao waitingDao;
 
-    public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao) {
+    public ReservationService(ReservationDao reservationDao, ThemeDao themeDao, TimeDao timeDao,
+                              ReservationWaitingDao waitingDao) {
         this.reservationDao = reservationDao;
         this.themeDao = themeDao;
         this.timeDao = timeDao;
+        this.waitingDao = waitingDao;
     }
 
     public List<Reservation> findAll() {
@@ -33,8 +41,23 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
     }
 
-    public List<Reservation> findByName(String name) {
-        return reservationDao.selectByName(name);
+    @Transactional
+    public List<TotalReservation> findAllByName(String name) {
+        List<TotalReservation> totalReservations = new ArrayList<>();
+        List<Reservation> reservations = reservationDao.selectByName(name);
+        for (Reservation reservation : reservations) {
+            Theme theme = themeDao.selectById(reservation.getThemeId())
+                    .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+            totalReservations.add(new TotalReservation(reservation, theme));
+        }
+
+        List<ReservationWaiting> reservationWaitings = waitingDao.selectByName(name);
+        for (ReservationWaiting reservationWaiting : reservationWaitings) {
+            Theme theme = themeDao.selectById(reservationWaiting.getThemeId())
+                    .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_NOT_FOUND));
+            totalReservations.add(new TotalReservation(reservationWaiting, theme));
+        }
+        return totalReservations;
     }
 
     @Transactional

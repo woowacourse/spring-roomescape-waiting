@@ -22,12 +22,15 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.reservation.Reservation;
+import roomescape.reservation.TotalReservation;
 import roomescape.reservation.dao.ReservationDao;
 import roomescape.reservation.dto.ReservationChangeRequest;
 import roomescape.theme.Theme;
 import roomescape.theme.dao.ThemeDao;
 import roomescape.time.ReservationTime;
 import roomescape.time.dao.TimeDao;
+import roomescape.waiting.ReservationWaiting;
+import roomescape.waiting.dao.ReservationWaitingDao;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationServiceTest {
@@ -41,18 +44,56 @@ public class ReservationServiceTest {
     @Mock
     private TimeDao timeDao;
 
+    @Mock
+    private ReservationWaitingDao waitingDao;
+
     @InjectMocks
     private ReservationService reservationService;
 
     @Test
-    void 이름으로_예약_조회_성공() {
+    void 이름으로_예약만_조회_성공() {
+        String name = "초록";
+        Long themeId = 1L;
         ReservationTime time = new ReservationTime(22L, LocalTime.now().plusMinutes(3));
-        List<Reservation> reservations = new ArrayList<>();
-        reservations.add(new Reservation("초록", 1L, LocalDate.now(), time));
-        reservations.add(new Reservation("초록", 1L, LocalDate.now(), time));
-        when(reservationDao.selectByName(any(String.class))).thenReturn(reservations);
+        List<Reservation> reservations = List.of(
+                new Reservation(name, themeId, LocalDate.now(), time),
+                new Reservation(name, themeId, LocalDate.now(), time)
+        );
+        when(reservationDao.selectByName(name)).thenReturn(reservations);
+        when(waitingDao.selectByName(name)).thenReturn(List.of());
+        when(themeDao.selectById(themeId))
+                .thenReturn(Optional.of(new Theme(themeId, "테마", "설명", "image")));
 
-        assertThat(reservationService.findByName("초록").size()).isEqualTo(2);
+        List<TotalReservation> actual = reservationService.findAllByName(name);
+
+        assertThat(actual).hasSize(2)
+                .allSatisfy(totalReservation -> assertThat(totalReservation.getWaitingNumber()).isNull());
+    }
+
+    @Test
+    void 이름으로_전체_예약_조회_성공() {
+        String name = "초록";
+        Long reservationThemeId = 1L;
+        Long waitingThemeId = 2L;
+        ReservationTime time = new ReservationTime(22L, LocalTime.now().plusMinutes(3));
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = new Reservation(1L, name, reservationThemeId, date, time);
+        ReservationWaiting waiting = new ReservationWaiting(1L, name, waitingThemeId, date, time, 1L);
+
+        when(reservationDao.selectByName(name)).thenReturn(List.of(reservation));
+        when(waitingDao.selectByName(name)).thenReturn(List.of(waiting));
+        when(themeDao.selectById(reservationThemeId))
+                .thenReturn(Optional.of(new Theme(reservationThemeId, "예약 테마", "설명", "image")));
+        when(themeDao.selectById(waitingThemeId))
+                .thenReturn(Optional.of(new Theme(waitingThemeId, "대기 테마", "설명", "image")));
+
+        List<TotalReservation> actual = reservationService.findAllByName(name);
+
+        assertThat(actual).hasSize(2);
+        assertThat(actual.get(0).getThemeName()).isEqualTo("예약 테마");
+        assertThat(actual.get(0).getWaitingNumber()).isNull();
+        assertThat(actual.get(1).getThemeName()).isEqualTo("대기 테마");
+        assertThat(actual.get(1).getWaitingNumber()).isEqualTo(1L);
     }
 
     @Test
@@ -73,16 +114,17 @@ public class ReservationServiceTest {
     void 이미_예약이_존재하는_경우_예외발생() {
         Long themeId = 1L;
         ReservationTime mockTime = new ReservationTime(1L, LocalTime.parse("10:00"));
+        LocalDate date = LocalDate.now().plusDays(1);
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(mockTime));
         when(themeDao.selectById(themeId))
                 .thenReturn(Optional.of(new Theme(themeId, "테마", "설명", "image")));
 
         List<Reservation> reservations = new ArrayList<>();
-        Reservation reservation = new Reservation("초록", themeId, LocalDate.of(2026, 5, 20), mockTime);
+        Reservation reservation = new Reservation("초록", themeId, date, mockTime);
         reservations.add(reservation);
         when(reservationDao.selectByThemeIdAndDate(anyLong(), any(LocalDate.class))).thenReturn(reservations);
 
-        assertThatThrownBy(() -> reservationService.add("브라운", themeId, LocalDate.of(2026, 5, 20), mockTime.getId()))
+        assertThatThrownBy(() -> reservationService.add("브라운", themeId, date, mockTime.getId()))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.RESERVATION_ALREADY_EXISTS.getMessage());
     }
@@ -92,7 +134,7 @@ public class ReservationServiceTest {
         Long reservationId = 1L;
         String name = "로치";
         Long themeId = 1L;
-        LocalDate date = LocalDate.of(2026, 5, 20);
+        LocalDate date = LocalDate.now().plusDays(1);
         Long timeId = 2L;
         ReservationTime time = new ReservationTime(timeId, LocalTime.of(12, 0));
 
@@ -100,7 +142,7 @@ public class ReservationServiceTest {
                 reservationId,
                 name,
                 themeId,
-                LocalDate.of(2026, 5, 23),
+                LocalDate.now().plusDays(2),
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
 
@@ -183,15 +225,12 @@ public class ReservationServiceTest {
         Long reservationId = 1L;
         String name = "로치";
         Long themeId = 1L;
-        LocalDate date = LocalDate.of(2026, 5, 20);
-        Long timeId = 2L;
-        ReservationTime time = new ReservationTime(timeId, LocalTime.of(12, 0));
 
         Reservation originReservation = new Reservation(
                 reservationId,
                 name,
                 themeId,
-                LocalDate.of(2026, 5, 23),
+                LocalDate.now().plusDays(1),
                 new ReservationTime(3L, LocalTime.of(10, 0))
         );
 

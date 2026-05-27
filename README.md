@@ -9,4 +9,5 @@
     - [x] 이미 지난 과거의 예약인지 검증
 
 ## 2단계 - 내 예약 목록 조회 (상태 구분)
-- [] 
+- [x] 예약과 예약 대기 리스트 반환
+  - ReservationResponse(ReservationWaitingResponse)

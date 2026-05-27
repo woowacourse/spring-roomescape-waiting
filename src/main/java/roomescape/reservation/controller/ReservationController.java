@@ -18,6 +18,7 @@ import roomescape.reservation.Reservation;
 import roomescape.reservation.dto.ReservationChangeRequest;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
+import roomescape.reservation.dto.TotalReservationResponse;
 import roomescape.reservation.service.ReservationService;
 
 @Validated
@@ -45,11 +46,11 @@ public class ReservationController {
     }
 
     @GetMapping(value = "/reservations/list", params = "name")
-    public ResponseEntity<List<ReservationResponse>> readByName(@RequestParam String name) {
-        List<ReservationResponse> reservations = reservationService.findByName(name).stream()
-                .map(ReservationResponse::from)
+    public ResponseEntity<List<TotalReservationResponse>> readAllByName(@RequestParam String name) {
+        List<TotalReservationResponse> totalReservations = reservationService.findAllByName(name).stream()
+                .map(TotalReservationResponse::from)
                 .toList();
-        return ResponseEntity.ok().body(reservations);
+        return ResponseEntity.ok().body(totalReservations);
     }
 
     @PostMapping("/reservations")

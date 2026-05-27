@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
@@ -64,8 +65,29 @@ class ReservationWaitingDaoTest {
         assertThat(actual.getName()).isEqualTo(expected.getName());
         assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
         assertThat(actual.getDate()).isEqualTo(expected.getDate());
-        assertThat(actual.getReservationTime().getId()).isEqualTo(expected.getReservationTime().getId());
+        assertThat(actual.getTime().getId()).isEqualTo(expected.getTime().getId());
         assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
+    }
+
+    @Test
+    void 이름으로_예약_대기_목록_조회_성공() {
+        LocalDate date = LocalDate.now();
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        ReservationWaiting first = new ReservationWaiting("티버", 1L, date, reservationTime, 1L);
+        ReservationWaiting second = new ReservationWaiting("티버", 1L, date, reservationTime, 2L);
+        ReservationWaiting other = new ReservationWaiting("로치", 1L, date, reservationTime, 3L);
+        reservationWaitingDao.insert(first);
+        reservationWaitingDao.insert(second);
+        reservationWaitingDao.insert(other);
+
+        List<ReservationWaiting> actual = reservationWaitingDao.selectByName("티버");
+
+        assertThat(actual).hasSize(2)
+                .extracting(ReservationWaiting::getName)
+                .containsOnly("티버");
+        assertThat(actual)
+                .extracting(ReservationWaiting::getWaitingNumber)
+                .containsExactly(1L, 2L);
     }
 
     @Test
@@ -85,7 +107,7 @@ class ReservationWaitingDaoTest {
         assertThat(actual.getName()).isEqualTo(expected.getName());
         assertThat(actual.getThemeId()).isEqualTo(expected.getThemeId());
         assertThat(actual.getDate()).isEqualTo(expected.getDate());
-        assertThat(actual.getReservationTime().getId()).isEqualTo(expected.getReservationTime().getId());
+        assertThat(actual.getTime().getId()).isEqualTo(expected.getTime().getId());
         assertThat(actual.getWaitingNumber()).isEqualTo(expected.getWaitingNumber());
     }
 
