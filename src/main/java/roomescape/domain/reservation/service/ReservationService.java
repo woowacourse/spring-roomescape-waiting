@@ -9,11 +9,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
-import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
-import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
@@ -48,10 +47,10 @@ public class ReservationService {
         return convertReservationsToDto(reservations);
     }
 
-    public List<ReservationByNameResponseDto> getReservationsByName(String name) {
+    public List<ReservationResponseDto> getReservationsByName(String name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
         return reservations.stream()
-            .map(reservation -> ReservationMapper.toByNameResponseDto(reservation, getStatus(reservation),
+            .map(reservation -> ReservationMapper.toResponseDto(reservation, getStatus(reservation),
                 getWaitingNumber(reservation)))
             .toList();
     }
@@ -87,7 +86,8 @@ public class ReservationService {
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
         return reservations.stream()
-            .map(ReservationMapper::toResponseDto)
+            .map(reservation -> ReservationMapper.toResponseDto(reservation, getStatus(reservation),
+                    getWaitingNumber(reservation)))
             .toList();
     }
 

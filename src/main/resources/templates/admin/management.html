@@ -465,10 +465,21 @@
   }
 
   function renderReservationStatusBadge(reservation) {
-    if (reservation.canceled) {
+    const { status, waitingNumber } = reservation;
+
+    if (status === 'CANCELED') {
       return '<span class="badge bg-secondary">취소됨</span>';
     }
-
+    if (status === 'WAITING') {
+      const suffix = waitingNumber != null ? ` (${waitingNumber}번째)` : '';
+      return `<span class="badge bg-info text-dark">대기 중${escapeHtml(suffix)}</span>`;
+    }
+    if (status === 'LOCKED') {
+      return '<span class="badge bg-secondary">지난 예약</span>';
+    }
+    if (status === 'EDIT_RECOMMENDED') {
+      return '<span class="badge bg-warning text-dark">수정 권장</span>';
+    }
     return '<span class="badge bg-success">예약됨</span>';
   }
 

@@ -181,7 +181,7 @@
 1. 등록된 전체 예약 목록을 조회합니다.
 2. 삭제되지 않은 예약만 조회합니다.
 3. 예약이 삭제되지 않았다면 연결된 예약 시간 또는 테마가 삭제되어 있어도 예약 이력으로 조회합니다.
-4. 예약 취소 여부를 함께 반환합니다.
+4. 각 예약에 상태(status), 상태 메시지(message), 대기 순번(waitingNumber)을 함께 반환합니다.
 5. 조회 가능한 예약이 없으면 빈 목록을 반환합니다.
 ```
 
@@ -208,15 +208,19 @@
     "date": "2026-05-04",
     "time": {
       "id": 2,
-      "startAt": "12:00"
+      "startAt": "12:00",
+      "deleted": false
     },
     "theme": {
       "id": 1,
       "name": "피온피온",
       "description": "설명",
-      "imageUrl": "https://roomescape.com/images/themes/ring-banner.png"
+      "imageUrl": "https://roomescape.com/images/themes/ring-banner.png",
+      "deleted": false
     },
-    "canceled": false
+    "status": "EDITABLE",
+    "message": "",
+    "waitingNumber": null
   }
 ]
 ```

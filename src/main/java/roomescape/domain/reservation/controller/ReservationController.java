@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
-import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.service.ReservationService;
@@ -35,7 +35,7 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationByNameResponseDto>> getReservationsByName(
+    public ResponseEntity<List<ReservationResponseDto>> getReservationsByName(
         @RequestParam
         @NotBlank(message = "예약자명은 필수입니다.")
         @Size(max = 20, message = "예약자명의 길이는 1이상 20이하 입니다.")

@@ -18,11 +18,10 @@ import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
-import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
-import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
@@ -76,7 +75,7 @@ class ReservationServiceTest {
         @Test
         void 성공() {
             // given
-            LocalDate date = LocalDate.of(2026, 4, 30);
+            LocalDate date = LocalDate.now(fixedClock).plusDays(1);
             Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
             Time time3 = timeRepository.save(Time.create(LocalTime.of(12, 0)));
@@ -91,13 +90,16 @@ class ReservationServiceTest {
             List<ReservationResponseDto> actual = reservationService.getReservations();
 
             // then
+            ReservationEditableStatus status = ReservationEditableStatus.EDITABLE;
+            String message = status.getMessage();
+
             assertThat(actual).containsExactly(
-                new ReservationResponseDto(1L, "제이콥", date, TimeMapper.toResponseDto(time1),
-                    ThemeMapper.toResponseDto(theme), false),
-                new ReservationResponseDto(2L, "라이", date.plusDays(1), TimeMapper.toResponseDto(time2),
-                    ThemeMapper.toResponseDto(theme), false),
-                new ReservationResponseDto(3L, "티모", date.plusDays(2), TimeMapper.toResponseDto(time3),
-                    ThemeMapper.toResponseDto(theme), false)
+                new ReservationResponseDto(1L, "제이콥", date, TimeMapper.toReservationResponseDto(time1),
+                    ThemeMapper.toReservationResponseDto(theme), status, message, null),
+                new ReservationResponseDto(2L, "라이", date.plusDays(1), TimeMapper.toReservationResponseDto(time2),
+                    ThemeMapper.toReservationResponseDto(theme), status, message, null),
+                new ReservationResponseDto(3L, "티모", date.plusDays(2), TimeMapper.toReservationResponseDto(time3),
+                    ThemeMapper.toReservationResponseDto(theme), status, message, null)
             );
         }
 
@@ -115,9 +117,13 @@ class ReservationServiceTest {
             List<ReservationResponseDto> actual = reservationService.getReservations();
 
             // then
+            ReservationEditableStatus canceledStatus = ReservationEditableStatus.CANCELED;
+            String canceledMessage = canceledStatus.getMessage();
+
             assertThat(actual).containsExactly(
-                new ReservationResponseDto(reservation.getId(), "제이콥", date, TimeMapper.toResponseDto(time),
-                    ThemeMapper.toResponseDto(theme), true)
+                    new ReservationResponseDto(reservation.getId(), "제이콥", date,
+                            TimeMapper.toReservationResponseDto(time),
+                            ThemeMapper.toReservationResponseDto(theme), canceledStatus, canceledMessage, null)
             );
         }
 
@@ -150,15 +156,15 @@ class ReservationServiceTest {
             reservationRepository.save(Reservation.create("제이슨", date.plusDays(2), time3, theme));
 
             // when
-            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+            List<ReservationResponseDto> actual = reservationService.getReservationsByName("브라운");
 
             // then
             assertThat(actual).containsExactly(
-                new ReservationByNameResponseDto(savedReservation1.getId(), "브라운", date,
+                new ReservationResponseDto(savedReservation1.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time1.getId(), time1.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
                         theme.getImageUrl(), false), ReservationEditableStatus.EDITABLE, "", null),
-                new ReservationByNameResponseDto(savedReservation2.getId(), "브라운", date.plusDays(1),
+                new ReservationResponseDto(savedReservation2.getId(), "브라운", date.plusDays(1),
                     new ReservationTimeResponseDto(time2.getId(), time2.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
                         theme.getImageUrl(), false), ReservationEditableStatus.EDITABLE, "", null)
@@ -168,7 +174,7 @@ class ReservationServiceTest {
         @Test
         void 이름으로_조회된_예약이_없으면_빈_목록을_반환한다() {
             // when
-            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+            List<ReservationResponseDto> actual = reservationService.getReservationsByName("브라운");
 
             // then
             assertThat(actual).isEmpty();
@@ -186,11 +192,11 @@ class ReservationServiceTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+            List<ReservationResponseDto> actual = reservationService.getReservationsByName("브라운");
 
             // then
             assertThat(actual).containsExactly(
-                new ReservationByNameResponseDto(savedReservation.getId(), "브라운", date,
+                new ReservationResponseDto(savedReservation.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), true),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
                         theme.getImageUrl(), true), ReservationEditableStatus.EDIT_RECOMMENDED,
@@ -208,11 +214,11 @@ class ReservationServiceTest {
             Reservation savedReservation = reservationRepository.save(Reservation.create("브라운", date, time, theme));
 
             // when
-            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+            List<ReservationResponseDto> actual = reservationService.getReservationsByName("브라운");
 
             // then
             assertThat(actual).containsExactly(
-                new ReservationByNameResponseDto(savedReservation.getId(), "브라운", date,
+                new ReservationResponseDto(savedReservation.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
                         theme.getImageUrl(), false), ReservationEditableStatus.LOCKED, "지난 예약은 수정하거나 취소할 수 없습니다.", null)
@@ -229,11 +235,11 @@ class ReservationServiceTest {
             Reservation savedReservation = reservationRepository.save(Reservation.create("브라운", date, time, theme));
             reservationRepository.update(savedReservation.cancel());
             // when
-            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+            List<ReservationResponseDto> actual = reservationService.getReservationsByName("브라운");
 
             // then
             assertThat(actual).containsExactly(
-                new ReservationByNameResponseDto(savedReservation.getId(), "브라운", date,
+                new ReservationResponseDto(savedReservation.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
                         theme.getImageUrl(), false), ReservationEditableStatus.CANCELED, "취소된 예약입니다.", null)
@@ -251,11 +257,11 @@ class ReservationServiceTest {
             Reservation waiting = reservationRepository.save(Reservation.create("브라운", date, time, theme).toWaiting());
 
             // when
-            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+            List<ReservationResponseDto> actual = reservationService.getReservationsByName("브라운");
 
             // then
             assertThat(actual).containsExactly(
-                new ReservationByNameResponseDto(waiting.getId(), "브라운", date,
+                new ReservationResponseDto(waiting.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
                         theme.getImageUrl(), false), ReservationEditableStatus.WAITING, "대기 중인 예약입니다.", 2)
