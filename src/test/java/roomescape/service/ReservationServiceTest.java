@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -174,11 +175,6 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.reserveOrWait(waitlistRequest))
                 .isInstanceOf(RoomEscapeException.class);
-    }
-
-    @Test
-    void 동일한_예약을_생성할_때_대기_순번에_생성된다() {
-
     }
 
     @Test

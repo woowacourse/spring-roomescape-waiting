@@ -17,6 +17,8 @@ public interface WaitlistRepository {
 
     Long save(Reservation reservation);
 
+    void deleteById(Long id);
+
     default Waitlist getById(Long id, String message) {
         return findById(id).orElseThrow(() -> new RoomEscapeException(RESERVATION_NOT_FOUND, message));
     }

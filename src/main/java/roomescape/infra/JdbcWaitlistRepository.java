@@ -123,4 +123,8 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
         return keyHolder.getKey().longValue();
     }
 
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update("DELETE FROM waitlist WHERE id = ?", id);
+    }
 }
