@@ -123,6 +123,47 @@
   </div>
 </div>
 
+<!-- 예약 대기 신청 모달 -->
+<div class="modal-overlay" id="waiting-list-modal" role="dialog" aria-modal="true" aria-labelledby="waiting-list-modal-title-text">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="waiting-list-modal-title-text">예약 대기 신청</h2>
+      <button class="modal-close" id="waiting-list-modal-close-btn" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body">
+      <div class="booking-summary">
+        <div><div class="summary-item-label">날짜</div><div class="summary-item-value" id="waiting-modal-date">—</div></div>
+        <div><div class="summary-item-label">테마</div><div class="summary-item-value" id="waiting-modal-theme">—</div></div>
+        <div><div class="summary-item-label">시간</div><div class="summary-item-value" id="waiting-modal-time">—</div></div>
+      </div>
+      <div class="form-group">
+        <label class="form-label" for="waiting-name">예약자 이름</label>
+        <input class="form-input" type="text" id="waiting-name" placeholder="홍길동" autocomplete="name" />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-ghost" id="waiting-list-modal-cancel-btn">취소</button>
+      <button class="btn-primary" id="confirm-waiting-btn">예약 대기 신청</button>
+    </div>
+  </div>
+</div>
+
+<!-- 예약 대기 결과 모달 -->
+<div class="modal-overlay" id="waiting-result-modal" role="dialog" aria-modal="true" aria-labelledby="waiting-result-modal-title-text">
+  <div class="modal">
+    <div class="modal-header">
+      <h2 class="modal-title" id="waiting-result-modal-title-text">신청 완료</h2>
+      <button class="modal-close" id="waiting-result-modal-close-btn" aria-label="닫기">&times;</button>
+    </div>
+    <div class="modal-body">
+      <p class="align-center" id="waiting-result-message"></p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn-primary" id="waiting-result-confirm-btn">확인</button>
+    </div>
+  </div>
+</div>
+
 <div class="toast-container" id="toast-container" aria-live="polite"></div>
 <script src="/reservations.js"></script>
 </body>

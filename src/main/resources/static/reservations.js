@@ -20,6 +20,9 @@ const ERROR_MESSAGES = {
   'DATE_ALREADY_PASSED': '지난 날짜는 예약할 수 없습니다. 오늘 이후의 날짜를 선택해 주세요.',
   'INVALID_INPUT_VALUE': '입력 정보가 올바르지 않습니다. 날짜, 시간, 이름 형식을 다시 확인해 주세요.',
   'PERSON_NAME_NULL_OR_BLANK': '예약자 이름을 입력해 주세요.',
+  'WAITING_LIST_NOT_REQUIRED': '해당 시간에 예약이 존재하지 않기 때문에 예약 대기 불가합니다.',
+  'ALREADY_ON_WAITING_LIST': '이미 해당 조건의 예약 대기 신청이 존재합니다.',
+  'TIME_ALREADY_PASSED': '이미 지난 시간입니다.',
   'DEFAULT': '알 수 없는 오류가 발생했습니다. 문제가 지속되면 관리자에게 문의해주세요.'
 };
 
@@ -201,8 +204,21 @@ async function loadTimeSlots() {
       const slot = document.createElement('div');
       slot.className = 'time-slot' + (t.reserved ? ' reserved' : '');
       const label = formatTime(t.startAt);
-      slot.innerHTML = `<div>${label}</div><div class="time-slot-badge">${t.reserved ? 'RESERVED' : 'AVAILABLE'}</div>`;
-      if (!t.reserved) slot.addEventListener('click', () => selectTime(t.id, label, slot));
+      
+      if (t.reserved) {
+        slot.innerHTML = `
+          <div>${label}</div>
+          <button class="btn-secondary" style="font-size: 12px; padding: 4px 8px; margin-top: 4px; pointer-events: auto;">예약 대기</button>
+        `;
+        const btn = slot.querySelector('button');
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          openWaitingListModal(t.id, label);
+        });
+      } else {
+        slot.innerHTML = `<div>${label}</div><div class="time-slot-badge">AVAILABLE</div>`;
+        slot.addEventListener('click', () => selectTime(t.id, label, slot));
+      }
       grid.appendChild(slot);
     });
 
@@ -277,6 +293,52 @@ async function submitBooking() {
   }
 }
 
+// ===== Waiting List Modal =====
+let waitingTimeId = null;
+
+function openWaitingListModal(timeId, timeLabel) {
+  waitingTimeId = timeId;
+  $('waiting-modal-date').textContent  = state.selectedDate;
+  $('waiting-modal-theme').textContent = state.selectedThemeName;
+  $('waiting-modal-time').textContent  = timeLabel;
+  $('waiting-name').value = '';
+  $('waiting-list-modal').classList.add('open');
+  setTimeout(() => $('waiting-name').focus(), 50);
+}
+
+function closeWaitingListModal() { 
+  $('waiting-list-modal').classList.remove('open'); 
+  waitingTimeId = null;
+}
+
+function closeWaitingResultModal() {
+  $('waiting-result-modal').classList.remove('open');
+}
+
+async function submitWaitingList() {
+  const name = $('waiting-name').value.trim();
+  if (!name) {
+    showToast(ERROR_MESSAGES['PERSON_NAME_NULL_OR_BLANK'], 'error');
+    return;
+  }
+
+  const btn = $('confirm-waiting-btn');
+  btn.disabled = true; btn.textContent = '신청 중...';
+  try {
+    const result = await api.post('/waiting-list', {
+      name, date: state.selectedDate,
+      timeId: waitingTimeId, themeId: state.selectedThemeId,
+    });
+    closeWaitingListModal();
+    $('waiting-result-message').innerHTML = `예약 대기가 완료되었습니다.<br><br>대기 순번은 <strong>${result.waitingOrder}번</strong> 입니다.`;
+    $('waiting-result-modal').classList.add('open');
+  } catch (e) {
+    showToast(e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '예약 대기 신청';
+  }
+}
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
   // Calendar nav
@@ -291,12 +353,23 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
   });
 
-  // Modal
+  // Booking Modal
   $('book-btn').addEventListener('click', openModal);
   $('modal-close-btn').addEventListener('click', closeModal);
   $('modal-cancel-btn').addEventListener('click', closeModal);
   $('booking-modal').addEventListener('click', e => { if (e.target === $('booking-modal')) closeModal(); });
   $('confirm-booking-btn').addEventListener('click', submitBooking);
+  
+  // Waiting List Modal
+  $('waiting-list-modal-close-btn').addEventListener('click', closeWaitingListModal);
+  $('waiting-list-modal-cancel-btn').addEventListener('click', closeWaitingListModal);
+  $('waiting-list-modal').addEventListener('click', e => { if (e.target === $('waiting-list-modal')) closeWaitingListModal(); });
+  $('confirm-waiting-btn').addEventListener('click', submitWaitingList);
+
+  // Waiting Result Modal
+  $('waiting-result-modal-close-btn').addEventListener('click', closeWaitingResultModal);
+  $('waiting-result-confirm-btn').addEventListener('click', closeWaitingResultModal);
+  $('waiting-result-modal').addEventListener('click', e => { if (e.target === $('waiting-result-modal')) closeWaitingResultModal(); });
 
   loadThemes();
   updateCTAInfo();
