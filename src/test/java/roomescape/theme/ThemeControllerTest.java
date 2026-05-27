@@ -53,6 +53,21 @@ public class ThemeControllerTest {
                 .path("data.accessToken");
     }
 
+    private String loginManager() {
+        Map<String, Object> loginRequest = new HashMap<>();
+        loginRequest.put("name", "d");
+        loginRequest.put("password", "test4");
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/api/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("data.accessToken");
+    }
+
     @Test
     void 각_날짜에_존재하는_모든_테마_조회_API_테스트() {
         String accessToken = login();
@@ -89,5 +104,65 @@ public class ThemeControllerTest {
                 .body("data[0].id", is(2))
                 .body("data[1].id", is(1))
                 .body("data[2].id", is(3));
+    }
+
+    @Test
+    void 매니저_테마_저장_API_테스트() {
+        String accessToken = loginManager();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "무서운게 딱 좋아");
+        params.put("description", "무서운 분위기의 방탈출");
+        params.put("thumbnailUrl", "https://example.com/theme.jpg");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/api/manager/themes")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true));
+    }
+
+    @Test
+    void 매니저_테마_전체_조회_API_테스트() {
+        String accessToken = loginManager();
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/manager/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(4))
+                .body("data[0].id", is(1))
+                .body("data[1].id", is(2))
+                .body("data[2].id", is(3))
+                .body("data[3].id", is(4));
+    }
+
+    @Test
+    void 매니저_테마_추가_및_삭제_API_테스트() {
+        String accessToken = loginManager();
+        Map<String, String> params = new HashMap<>();
+        params.put("name", "무서운게 딱 좋아");
+        params.put("description", "무서운 분위기의 방탈출");
+        params.put("thumbnailUrl", "https://example.com/theme.jpg");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/api/manager/themes")
+                .then().log().all()
+                .statusCode(201)
+                .body("success", is(true))
+                .body("data.id", is(5));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().delete("/api/manager/themes/5")
+                .then().log().all()
+                .statusCode(204);
     }
 }
