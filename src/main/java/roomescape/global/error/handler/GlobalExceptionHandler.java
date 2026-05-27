@@ -18,7 +18,7 @@ import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponsesDto;
 import roomescape.global.error.exception.GeneralException;
-import roomescape.global.error.exception.GeneralNotFoundException;
+import roomescape.global.error.exception.GeneralParametersException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -107,8 +107,8 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(e.getStatus()).body(new ErrorResponseDto(e.getMessage()));
     }
 
-    @ExceptionHandler(GeneralNotFoundException.class)
-    public ResponseEntity<ParameterErrorResponsesDto> handleReservationNotFoundException(GeneralNotFoundException e) {
+    @ExceptionHandler(GeneralParametersException.class)
+    public ResponseEntity<ParameterErrorResponsesDto> handleReservationNotFoundException(GeneralParametersException e) {
         return ResponseEntity.status(e.getStatus())
             .body(new ParameterErrorResponsesDto(e.getMessage(), e.getParameterErrors()));
     }

@@ -16,10 +16,11 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
 import roomescape.domain.reservation.repository.ReservationRepository;
+import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.JdbcThemeRepository;
 import roomescape.domain.theme.repository.ThemeRepository;
-import roomescape.domain.time.dto.request.TimeCreateRequestDto;
+import roomescape.domain.time.dto.command.TimeCreateCommand;
 import roomescape.domain.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.domain.time.dto.response.TimeResponseDto;
 import roomescape.domain.time.entity.Time;
@@ -28,7 +29,7 @@ import roomescape.domain.time.repository.JdbcTimeRepository;
 import roomescape.domain.time.repository.TimeRepository;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralException;
-import roomescape.global.error.exception.GeneralNotFoundException;
+import roomescape.global.error.exception.GeneralParametersException;
 
 class TimeServiceTest {
 
@@ -98,7 +99,7 @@ class TimeServiceTest {
             @Test
             void 성공() {
                 // given
-                TimeCreateRequestDto request = new TimeCreateRequestDto(LocalTime.of(15, 30));
+                TimeCreateCommand request = new TimeCreateCommand(LocalTime.of(15, 30));
 
                 // when
                 TimeResponseDto actual = timeService.saveTime(request);
@@ -117,7 +118,7 @@ class TimeServiceTest {
                 // given
                 LocalTime startAt = LocalTime.of(15, 30);
                 timeRepository.save(Time.create(startAt));
-                TimeCreateRequestDto request = new TimeCreateRequestDto(startAt);
+                TimeCreateCommand request = new TimeCreateCommand(startAt);
 
                 // when & then
                 assertThatThrownBy(() -> timeService.saveTime(request))
@@ -196,10 +197,14 @@ class TimeServiceTest {
                     "https://images.unsplash.com/photo-1582139329536-e7284fece509?auto=format&fit=crop&q=80&w=800"
                 ));
 
-                reservationRepository.save(Reservation.create("브라이언", LocalDate.of(2026, 5, 10), time1, theme1));
-                reservationRepository.save(Reservation.create("제이슨", LocalDate.of(2026, 5, 10), time2, theme2));
-                reservationRepository.save(Reservation.create("앨리스", LocalDate.of(2026, 5, 11), time3, theme3));
-                reservationRepository.save(Reservation.create("데이브", LocalDate.of(2026, 5, 11), time4, theme1));
+                reservationRepository.save(
+                    Reservation.create(new ReserverName("브라이언"), LocalDate.of(2026, 5, 10), time1, theme1));
+                reservationRepository.save(
+                    Reservation.create(new ReserverName("제이슨"), LocalDate.of(2026, 5, 10), time2, theme2));
+                reservationRepository.save(
+                    Reservation.create(new ReserverName("앨리스"), LocalDate.of(2026, 5, 11), time3, theme3));
+                reservationRepository.save(
+                    Reservation.create(new ReserverName("데이브"), LocalDate.of(2026, 5, 11), time4, theme1));
 
                 LocalDate date = LocalDate.of(2026, 5, 10);
                 Long themeId = 1L;
@@ -228,7 +233,7 @@ class TimeServiceTest {
 
                 // when & then
                 assertThatThrownBy(() -> timeService.getTimeAvailabilities(date, themeId))
-                    .isInstanceOfSatisfying(GeneralNotFoundException.class, exception -> {
+                    .isInstanceOfSatisfying(GeneralParametersException.class, exception -> {
                         assertThat(exception).hasMessage("조회할 자원이 존재하지 않습니다.");
                         assertThat(exception.getParameterErrors())
                             .extracting(ParameterErrorResponseDto::parameter)

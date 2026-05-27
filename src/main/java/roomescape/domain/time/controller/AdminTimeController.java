@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.time.dto.request.TimeCreateRequestDto;
 import roomescape.domain.time.dto.response.TimeResponseDto;
+import roomescape.domain.time.mapper.TimeMapper;
 import roomescape.domain.time.service.TimeService;
 
 @RestController
@@ -23,9 +24,11 @@ import roomescape.domain.time.service.TimeService;
 public class AdminTimeController {
 
     private final TimeService timeService;
+    private final TimeMapper timeMapper;
 
-    public AdminTimeController(TimeService timeService) {
+    public AdminTimeController(TimeService timeService, TimeMapper timeMapper) {
         this.timeService = timeService;
+        this.timeMapper = timeMapper;
     }
 
     @GetMapping
@@ -35,7 +38,8 @@ public class AdminTimeController {
 
     @PostMapping
     public ResponseEntity<TimeResponseDto> saveTime(@Valid @RequestBody TimeCreateRequestDto requestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(timeService.saveTime(requestDto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(timeService.saveTime(timeMapper.toCreateCommand(requestDto)));
     }
 
     @DeleteMapping("/{id}")

@@ -14,7 +14,7 @@ import org.springframework.core.MethodParameter;
 import roomescape.global.error.dto.ErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.dto.ParameterErrorResponsesDto;
-import roomescape.global.error.exception.GeneralNotFoundException;
+import roomescape.global.error.exception.GeneralParametersException;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 
 class GlobalExceptionHandlerTest {
@@ -26,7 +26,7 @@ class GlobalExceptionHandlerTest {
         // given
         Object target = new Object();
         BeanPropertyBindingResult bindingResult = new BeanPropertyBindingResult(target, "request");
-        bindingResult.addError(new FieldError("request", "name", "예약자명은 필수입니다."));
+        bindingResult.addError(new FieldError("request", "value", "예약자명은 필수입니다."));
         bindingResult.addError(new FieldError("request", "date", "예약 날짜가 현재보다 과거입니다."));
         MethodArgumentNotValidException exception = new MethodArgumentNotValidException(
             createMethodParameter(), bindingResult);
@@ -39,7 +39,7 @@ class GlobalExceptionHandlerTest {
         assertThat(response.getBody().message()).isEqualTo("요청 값이 올바르지 않습니다.");
         assertThat(response.getBody().parameterErrors())
             .containsExactly(
-                new ParameterErrorResponseDto("name", "예약자명은 필수입니다."),
+                new ParameterErrorResponseDto("value", "예약자명은 필수입니다."),
                 new ParameterErrorResponseDto("date", "예약 날짜가 현재보다 과거입니다.")
             );
     }
@@ -47,7 +47,7 @@ class GlobalExceptionHandlerTest {
     @Test
     void 참조_자원_필드_오류는_parameterErrors로_함께_내려준다() {
         // given
-        GeneralNotFoundException exception = new GeneralNotFoundException(
+        GeneralParametersException exception = new GeneralParametersException(
             ReservationErrorType.FIELD_RESOURCE_NOT_FOUND,
             List.of(
                 new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."),
@@ -72,7 +72,7 @@ class GlobalExceptionHandlerTest {
     void 필수_Query_Parameter_누락은_message만_내려준다() {
         // given
         MissingServletRequestParameterException exception = new MissingServletRequestParameterException(
-            "name", "String");
+            "value", "String");
 
         // when
         ResponseEntity<ErrorResponseDto> response = handler.handleMissingServletRequestParameterException(exception);

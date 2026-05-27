@@ -5,12 +5,12 @@ import org.springframework.http.HttpStatus;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.type.ErrorType;
 
-public class GeneralNotFoundException extends RuntimeException {
+public class GeneralParametersException extends RuntimeException {
 
     private final HttpStatus status;
     private final List<ParameterErrorResponseDto> parameterErrors;
 
-    public GeneralNotFoundException(ErrorType errorType, List<ParameterErrorResponseDto> parameterErrors) {
+    public GeneralParametersException(ErrorType errorType, List<ParameterErrorResponseDto> parameterErrors) {
         super(errorType.message());
         this.status = errorType.status();
         this.parameterErrors = parameterErrors;

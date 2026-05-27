@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
+import roomescape.domain.reservation.vo.ReserverName;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
@@ -125,7 +126,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         Map<String, Object> args = Map.of(
-            "name", reservation.getName(),
+            "name", reservation.getName().value(),
             "date", reservation.getDate(),
             "time_id", reservation.getTime().getId(),
             "theme_id", reservation.getTheme().getId(),
@@ -150,7 +151,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             """;
         SqlParameterSource parameters = new MapSqlParameterSource()
             .addValue("id", reservation.getId())
-            .addValue("name", reservation.getName())
+            .addValue("name", reservation.getName().value())
             .addValue("date", reservation.getDate())
             .addValue("timeId", reservation.getTime().getId())
             .addValue("themeId", reservation.getTheme().getId())
@@ -189,7 +190,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     private Reservation mapReservation(ResultSet rs) throws SQLException {
         return Reservation.reconstruct(
             rs.getLong("id"),
-            rs.getString("name"),
+            new ReserverName(rs.getString("name")),
             rs.getDate("date").toLocalDate(),
             Time.reconstruct(
                 rs.getLong("time_id"),
@@ -281,7 +282,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         SqlParameterSource parameters = new MapSqlParameterSource(Map.of(
             "date", reservation.getDate(),
-            "name", reservation.getName(),
+            "name", reservation.getName().value(),
             "timeId", reservation.getTime().getId(),
             "themeId", reservation.getTheme().getId(),
             "status", status.name()

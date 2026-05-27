@@ -7,7 +7,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.repository.ThemeRepository;
-import roomescape.domain.time.dto.request.TimeCreateRequestDto;
+import roomescape.domain.time.dto.command.TimeCreateCommand;
 import roomescape.domain.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.domain.time.dto.response.TimeResponseDto;
 import roomescape.domain.time.entity.Time;
@@ -16,7 +16,7 @@ import roomescape.domain.time.mapper.TimeMapper;
 import roomescape.domain.time.repository.TimeRepository;
 import roomescape.global.error.dto.ParameterErrorResponseDto;
 import roomescape.global.error.exception.GeneralException;
-import roomescape.global.error.exception.GeneralNotFoundException;
+import roomescape.global.error.exception.GeneralParametersException;
 
 @Service
 public class TimeService {
@@ -43,7 +43,7 @@ public class TimeService {
 
     public List<TimeAvailabilityResponseDto> getTimeAvailabilities(LocalDate date, Long themeId) {
         if (!themeRepository.existsThemeByIdAndDeletedAtIsNull(themeId)) {
-            throw new GeneralNotFoundException(TimeErrorType.FIELD_RESOURCE_NOT_FOUND,
+            throw new GeneralParametersException(TimeErrorType.FIELD_RESOURCE_NOT_FOUND,
                 List.of(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다.")));
         }
 
@@ -56,13 +56,13 @@ public class TimeService {
     }
 
     @Transactional
-    public TimeResponseDto saveTime(TimeCreateRequestDto requestDto) {
-        if (timeRepository.existsTimeByStartAtAndDeletedAtIsNull(requestDto.startAt())) {
+    public TimeResponseDto saveTime(TimeCreateCommand command) {
+        if (timeRepository.existsTimeByStartAtAndDeletedAtIsNull(command.startAt())) {
             throw new GeneralException(TimeErrorType.ALREADY_EXIST_TIME);
         }
 
         try {
-            Time time = Time.create(requestDto.startAt());
+            Time time = Time.create(command.startAt());
             return timeMapper.toResponseDto(timeRepository.save(time));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(TimeErrorType.ALREADY_EXIST_TIME);

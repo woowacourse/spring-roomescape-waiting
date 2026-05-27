@@ -18,9 +18,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
-import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
+import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.service.ReservationService;
 
 @RestController
@@ -29,9 +30,11 @@ import roomescape.domain.reservation.service.ReservationService;
 public class ReservationController {
 
     private final ReservationService reservationService;
+    private final ReservationMapper reservationMapper;
 
-    public ReservationController(ReservationService reservationService) {
+    public ReservationController(ReservationService reservationService, ReservationMapper reservationMapper) {
         this.reservationService = reservationService;
+        this.reservationMapper = reservationMapper;
     }
 
     @GetMapping
@@ -47,14 +50,15 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationCreateResponseDto> saveReservation(
         @Valid @RequestBody ReservationCreateRequestDto requestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.saveReservation(requestDto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(reservationService.saveReservation(reservationMapper.toCreateCommand(requestDto)));
     }
 
     @PatchMapping("/{id}")
     public ResponseEntity<ReservationCreateResponseDto> updateReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
         @Valid @RequestBody ReservationUpdateRequestDto requestDto) {
-        return ResponseEntity.ok(reservationService.updateReservation(id, requestDto));
+        return ResponseEntity.ok(reservationService.updateReservation(id, reservationMapper.toUpdateCommand(requestDto)));
     }
 
     @PatchMapping("/{id}/cancel")
@@ -71,7 +75,8 @@ public class ReservationController {
     @PostMapping("/waitings")
     public ResponseEntity<ReservationCreateResponseDto> saveWaitingReservation(
         @Valid @RequestBody ReservationCreateRequestDto requestDto) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(reservationService.saveWaitingReservation(requestDto));
+        return ResponseEntity.status(HttpStatus.CREATED)
+            .body(reservationService.saveWaitingReservation(reservationMapper.toCreateCommand(requestDto)));
     }
 
     @PatchMapping("/{id}/waitings/cancel")

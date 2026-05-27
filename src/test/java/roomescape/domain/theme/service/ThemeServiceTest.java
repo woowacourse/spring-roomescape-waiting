@@ -20,7 +20,8 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
 import roomescape.domain.reservation.repository.ReservationRepository;
-import roomescape.domain.theme.dto.request.ThemeCreateRequestDto;
+import roomescape.domain.reservation.vo.ReserverName;
+import roomescape.domain.theme.dto.command.ThemeCreateCommand;
 import roomescape.domain.theme.dto.response.ThemeResponseDto;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.mapper.ThemeMapper;
@@ -187,7 +188,7 @@ class ThemeServiceTest {
             @Test
             void 성공() {
                 // given
-                ThemeCreateRequestDto request = new ThemeCreateRequestDto(
+                ThemeCreateCommand request = new ThemeCreateCommand(
                     "피온",
                     "테마 설명",
                     "https://roomescape.com/images/themes/prison-room.png"
@@ -211,7 +212,7 @@ class ThemeServiceTest {
                 Theme deletedTheme = themeRepository.save(Theme.create("피온", "기존 테마 설명",
                     "https://roomescape.com/images/themes/existing.png"));
                 themeRepository.deleteThemeById(deletedTheme.getId());
-                ThemeCreateRequestDto request = new ThemeCreateRequestDto(
+                ThemeCreateCommand request = new ThemeCreateCommand(
                     "피온",
                     "테마 설명",
                     "https://roomescape.com/images/themes/prison-room.png"
@@ -238,7 +239,7 @@ class ThemeServiceTest {
                 // given
                 themeRepository.save(Theme.create("피온", "기존 테마 설명",
                     "https://roomescape.com/images/themes/existing.png"));
-                ThemeCreateRequestDto request = new ThemeCreateRequestDto(
+                ThemeCreateCommand request = new ThemeCreateCommand(
                     "피온",
                     "테마 설명",
                     "https://roomescape.com/images/themes/prison-room.png"
@@ -325,6 +326,7 @@ class ThemeServiceTest {
 
     private Reservation saveReservation(Theme theme, LocalDate date, int index) {
         Time time = timeRepository.save(Time.create(LocalTime.of(10, 0).plusMinutes(timeSequence++)));
-        return reservationRepository.save(Reservation.create("예약자" + theme.getId() + "-" + index, date, time, theme));
+        return reservationRepository.save(
+            Reservation.create(new ReserverName("예약자" + theme.getId() + "-" + index), date, time, theme));
     }
 }

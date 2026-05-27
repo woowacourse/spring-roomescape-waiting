@@ -6,7 +6,7 @@ import java.util.List;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.theme.dto.request.ThemeCreateRequestDto;
+import roomescape.domain.theme.dto.command.ThemeCreateCommand;
 import roomescape.domain.theme.dto.response.ThemeResponseDto;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.error.type.ThemeErrorType;
@@ -47,13 +47,13 @@ public class ThemeService {
     }
 
     @Transactional
-    public ThemeResponseDto saveTheme(ThemeCreateRequestDto requestDto) {
-        if (themeRepository.existsThemeByNameAndDeletedAtIsNull(requestDto.name())) {
+    public ThemeResponseDto saveTheme(ThemeCreateCommand command) {
+        if (themeRepository.existsThemeByNameAndDeletedAtIsNull(command.name())) {
             throw new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME);
         }
 
         try {
-            Theme theme = Theme.create(requestDto.name(), requestDto.description(), requestDto.imageUrl());
+            Theme theme = Theme.create(command.name(), command.description(), command.imageUrl());
             return themeMapper.toResponseDto(themeRepository.save(theme));
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ThemeErrorType.ALREADY_EXIST_THEME);
