@@ -89,6 +89,16 @@ class ReservationApiTest {
     }
 
     @Test
+    void 존재하지_않는_예약_삭제_시_404를_반환한다() {
+        RestAssured.given().log().all()
+                .when().delete("/reservations/999")
+                .then().log().all()
+                .statusCode(404)
+                .body("code", is("RESERVATION_NOT_FOUND"))
+                .body("status", is(404));
+    }
+
+    @Test
     void DB_조회_API_전환() {
         jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail_url) VALUES (?, ?, ?, ?)",
                 1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");

@@ -86,12 +86,23 @@ class JdbcReservationTimeRepositoryTest {
         int beforeSize = jdbcReservationTimeRepository.findAll().size();
 
         // when
-        jdbcReservationTimeRepository.deleteById(reservationTime.getId());
+        int affectedRowCount = jdbcReservationTimeRepository.deleteById(reservationTime.getId());
 
         // then
         int afterSize = jdbcReservationTimeRepository.findAll().size();
 
+        assertThat(affectedRowCount).isOne();
         assertThat(afterSize).isEqualTo(beforeSize - 1);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 시간 ID는 삭제 건수가 0이다")
+    void reservationTime_delete_not_found_test() {
+        // when
+        int affectedRowCount = jdbcReservationTimeRepository.deleteById(999L);
+
+        // then
+        assertThat(affectedRowCount).isZero();
     }
 
     private void clearTables() {

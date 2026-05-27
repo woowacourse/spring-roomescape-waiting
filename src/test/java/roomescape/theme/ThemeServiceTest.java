@@ -97,9 +97,23 @@ class ThemeServiceTest {
         ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
 
         when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
+        when(themeRepository.deleteById(1L)).thenReturn(1);
 
         themeService.deleteById(1L);
 
         verify(themeRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마는 삭제할 수 없다")
+    void deleteByIdNotFound() {
+        ThemeRepository themeRepository = mock(ThemeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+
+        when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
+        when(themeRepository.deleteById(1L)).thenReturn(0);
+
+        assertThrows(ResourceNotFoundException.class, () -> themeService.deleteById(1L));
     }
 }

@@ -160,13 +160,15 @@ class ReservationWaitingApiTest {
     }
 
     @Test
-    @DisplayName("이름이 다르면 예약 대기를 삭제하지 않는다")
+    @DisplayName("이름이 다르면 예약 대기를 삭제할 수 없다")
     void deleteReservationWaitingWithDifferentName() throws Exception {
         createReservationWaiting(1L, 1L, "아루");
 
         mockMvc.perform(delete("/waitings/1")
                         .param("name", "다른이름"))
-                .andExpect(status().isNoContent());
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESERVATION_WAITING_NOT_FOUND"))
+                .andExpect(jsonPath("$.status").value(404));
 
         Integer waitingCount = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = 1",
@@ -174,6 +176,16 @@ class ReservationWaitingApiTest {
         );
         assert waitingCount != null;
         assertThat(waitingCount).isOne();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 대기는 삭제할 수 없다")
+    void deleteReservationWaitingNotFound() throws Exception {
+        mockMvc.perform(delete("/waitings/999")
+                        .param("name", "아루"))
+                .andExpect(status().isNotFound())
+                .andExpect(jsonPath("$.code").value("RESERVATION_WAITING_NOT_FOUND"))
+                .andExpect(jsonPath("$.status").value(404));
     }
 
     private void clearTables() {

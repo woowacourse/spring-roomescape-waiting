@@ -61,7 +61,11 @@ public class ReservationTimeService {
         if (reservationRepository.existsByTimeId(timeId)) {
             throw new ConflictException(ErrorCode.RESERVATION_TIME_IN_USE, "이미 예약된 시간은 삭제할 수 없습니다.");
         }
-        reservationTimeRepository.deleteById(timeId);
+        int affectedRowCount = reservationTimeRepository.deleteById(timeId);
+
+        if(affectedRowCount <= 0) {
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "삭제된 시간 데이터가 없습니다.");
+        }
     }
 
     public List<ReservationTime> getAll() {

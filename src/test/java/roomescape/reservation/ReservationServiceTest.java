@@ -17,6 +17,7 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
+import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.ReservationValidator;
@@ -101,10 +102,20 @@ class ReservationServiceTest {
     @DisplayName("예약을 삭제한다")
     void deleteById() {
         Fixture fixture = new Fixture();
+        when(fixture.reservationRepository.deleteById(1L)).thenReturn(1);
 
         fixture.reservationService.deleteById(1L);
 
         verify(fixture.reservationRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약은 삭제할 수 없다")
+    void deleteByIdNotFound() {
+        Fixture fixture = new Fixture();
+        when(fixture.reservationRepository.deleteById(1L)).thenReturn(0);
+
+        assertThrows(ResourceNotFoundException.class, () -> fixture.reservationService.deleteById(1L));
     }
 
     @Test

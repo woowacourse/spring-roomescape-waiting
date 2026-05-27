@@ -10,7 +10,7 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(long id);
 
-    void deleteById(long id);
+    int deleteById(long id);
 
     Theme save(Theme theme);
 

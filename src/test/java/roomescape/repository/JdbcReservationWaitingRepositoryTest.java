@@ -95,7 +95,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalTime.parse("12:00")
         ));
 
-        jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "아루");
+        int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "아루");
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = ?",
@@ -103,6 +103,7 @@ class JdbcReservationWaitingRepositoryTest {
                 saved.getId()
         );
 
+        assertThat(affectedRowCount).isOne();
         assertThat(count).isZero();
     }
 
@@ -116,7 +117,7 @@ class JdbcReservationWaitingRepositoryTest {
                 LocalTime.parse("12:00")
         ));
 
-        jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "다른이름");
+        int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "다른이름");
 
         Integer count = jdbcTemplate.queryForObject(
                 "SELECT count(1) FROM reservation_waiting WHERE id = ?",
@@ -124,6 +125,29 @@ class JdbcReservationWaitingRepositoryTest {
                 saved.getId()
         );
 
+        assertThat(affectedRowCount).isZero();
+        assertThat(count).isOne();
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 대기 ID는 삭제 건수가 0이다")
+    void deleteByNotFoundId() {
+        Reservation reservation = createReservation();
+        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalTime.parse("12:00")
+        ));
+
+        int affectedRowCount = jdbcReservationWaitingRepository.deleteByIdAndName(999L, "아루");
+
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE id = ?",
+                Integer.class,
+                saved.getId()
+        );
+
+        assertThat(affectedRowCount).isZero();
         assertThat(count).isOne();
     }
 

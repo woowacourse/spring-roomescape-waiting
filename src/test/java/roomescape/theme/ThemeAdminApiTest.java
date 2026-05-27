@@ -78,6 +78,16 @@ class ThemeAdminApiTest {
                 .body("status", is(400));
     }
 
+    @Test
+    void 존재하지_않는_테마_삭제_시_404를_반환한다() {
+        RestAssured.given().log().all()
+                .when().delete("/admin/themes/999")
+                .then().log().all()
+                .statusCode(404)
+                .body("code", is("THEME_NOT_FOUND"))
+                .body("status", is(404));
+    }
+
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");

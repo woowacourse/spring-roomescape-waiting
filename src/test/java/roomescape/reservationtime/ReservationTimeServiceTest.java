@@ -175,10 +175,29 @@ class ReservationTimeServiceTest {
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
+        when(reservationTimeRepository.deleteById(1L)).thenReturn(1);
 
         reservationTimeService.deleteById(1L);
 
         verify(reservationTimeRepository).deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 예약 시간은 삭제할 수 없다")
+    void deleteByIdNotFound() {
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
+
+        when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
+        when(reservationTimeRepository.deleteById(1L)).thenReturn(0);
+
+        assertThrows(ResourceNotFoundException.class, () -> reservationTimeService.deleteById(1L));
     }
 
     @Test

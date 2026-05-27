@@ -88,11 +88,22 @@ class JdbcThemeRepositoryTest {
         int beforeSize = jdbcThemeRepository.findAll().size();
 
         // when
-        jdbcThemeRepository.deleteById(saved.getId());
+        int affectedRowCount = jdbcThemeRepository.deleteById(saved.getId());
 
         // then
         int afterSize = jdbcThemeRepository.findAll().size();
+        assertThat(affectedRowCount).isOne();
         assertThat(afterSize).isEqualTo(beforeSize - 1);
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 테마 ID는 삭제 건수가 0이다")
+    void theme_delete_not_found_test() {
+        // when
+        int affectedRowCount = jdbcThemeRepository.deleteById(999L);
+
+        // then
+        assertThat(affectedRowCount).isZero();
     }
 
     @Test

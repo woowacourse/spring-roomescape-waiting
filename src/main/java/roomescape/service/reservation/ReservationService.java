@@ -52,7 +52,11 @@ public class ReservationService {
     }
 
     public void deleteById(final long id) {
-        reservationRepository.deleteById(id);
+        int affectedRowCount = reservationRepository.deleteById(id);
+
+        if(affectedRowCount <= 0) {
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
+        }
     }
 
     public void deleteByIdAndName(final long id, final String name) {
@@ -66,7 +70,11 @@ public class ReservationService {
 
         reservationValidator.validateCancelable(reservation);
 
-        reservationRepository.deleteById(reservation.getId());
+        int affectedRowCount = reservationRepository.deleteById(reservation.getId());
+
+        if(affectedRowCount <= 0) {
+            throw new ResourceNotFoundException(ErrorCode.RESERVATION_NOT_FOUND, "삭제된 예약 데이터가 없습니다.");
+        }
     }
 
     public Reservation updateByIdAndName(

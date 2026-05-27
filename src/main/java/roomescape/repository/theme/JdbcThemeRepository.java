@@ -48,10 +48,10 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public void deleteById(final long id) {
+    public int deleteById(final long id) {
         String sql = "DELETE FROM theme WHERE id = ?";
         try {
-            jdbcTemplate.update(sql, id);
+            return jdbcTemplate.update(sql, id);
         } catch (DataIntegrityViolationException exception) {
             throw new ConflictException(ErrorCode.THEME_IN_USE, "이미 예약된 테마는 삭제할 수 없습니다.");
         }
