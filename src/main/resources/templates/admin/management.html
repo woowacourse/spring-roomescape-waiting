@@ -601,14 +601,15 @@
     try {
       const params = new URLSearchParams({ date, themeId });
       const times = await requestJson(`/api/times?${params.toString()}`);
+      const availableTimes = times.filter(time => time.available);
 
-      if (times.length === 0) {
+      if (availableTimes.length === 0) {
         timeSelect.innerHTML = '<option value="">예약 가능한 시간이 없습니다</option>';
         return;
       }
 
       timeSelect.innerHTML = '<option value="">시간을 선택하세요</option>' +
-          times.map(time => `<option value="${time.id}">${escapeHtml(time.startAt)}</option>`).join('');
+          availableTimes.map(time => `<option value="${time.id}">${escapeHtml(time.startAt)}</option>`).join('');
     } catch (error) {
       timeSelect.innerHTML = '<option value="">시간을 불러오지 못했습니다</option>';
       showFormError(error.data, 'reservationFormError', {
