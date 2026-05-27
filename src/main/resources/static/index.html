@@ -756,14 +756,30 @@
 
     <section class="card">
         <div class="card-header">
-            <h2 class="card-title">내 예약</h2>
-            <p class="card-subtitle">현재 내가 만든 예약 목록입니다.</p>
+            <h2 class="card-title">내 예약 / 대기</h2>
+            <p class="card-subtitle">내가 만든 예약과 신청한 대기를 함께 확인합니다.</p>
         </div>
         <div class="button-row" style="margin-bottom: 16px;">
-            <button id="loadMyReservationsButton" class="btn btn-secondary" type="button">내 예약 불러오기</button>
+            <button id="loadMyReservationsButton" class="btn btn-secondary" type="button">새로 고침</button>
         </div>
+
+        <div class="field" style="margin-bottom: 24px;">
+            <label class="field-label" for="waitReservationIdInput">예약 대기 신청</label>
+            <div class="button-row">
+                <input id="waitReservationIdInput" type="number" min="1" placeholder="대기 신청할 예약 ID"
+                       style="flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db;">
+                <button id="submitWaitButton" class="btn btn-primary" type="button">대기 신청</button>
+            </div>
+            <p class="card-subtitle" style="margin-top: 6px;">이미 다른 사용자에 의해 예약된 슬롯의 예약 ID를 입력하세요.</p>
+        </div>
+
+        <h3 class="card-title" style="font-size: 16px; margin-bottom: 8px;">예약</h3>
         <div id="myReservationsList" class="reservation-list"></div>
         <p id="myReservationsEmpty" class="empty">예약 목록을 불러와 주세요.</p>
+
+        <h3 class="card-title" style="font-size: 16px; margin: 24px 0 8px;">대기</h3>
+        <div id="myWaitingsList" class="reservation-list"></div>
+        <p id="myWaitingsEmpty" class="empty">대기 목록을 불러와 주세요.</p>
     </section>
 </main>
 
@@ -877,6 +893,10 @@
     const loadMyReservationsButton = document.getElementById("loadMyReservationsButton");
     const myReservationsList = document.getElementById("myReservationsList");
     const myReservationsEmpty = document.getElementById("myReservationsEmpty");
+    const myWaitingsList = document.getElementById("myWaitingsList");
+    const myWaitingsEmpty = document.getElementById("myWaitingsEmpty");
+    const waitReservationIdInput = document.getElementById("waitReservationIdInput");
+    const submitWaitButton = document.getElementById("submitWaitButton");
 
     // Manager view
     const managerName = document.getElementById("managerName");
@@ -910,6 +930,9 @@
         RESERVATION400_003: "본인 예약만 변경/취소할 수 있습니다.",
         RESERVATION_TIME404_001: "선택한 예약 시간을 찾을 수 없습니다.",
         RESERVATION_TIME409_001: "이미 예약이 존재하는 시간입니다.",
+        RESERVATION_WAIT404_001: "요청한 예약 대기를 찾을 수 없습니다.",
+        RESERVATION_WAIT409_001: "이미 해당 슬롯에 대기 중입니다.",
+        RESERVATION_WAIT422_001: "이미 지난 슬롯에는 대기를 신청할 수 없습니다.",
         THEME404_001: "선택한 테마를 찾을 수 없습니다.",
         THEME409_001: "이미 예약이 존재하는 테마는 삭제할 수 없습니다.",
         COMMON400_001: "입력값이 올바르지 않습니다.",
@@ -1233,41 +1256,95 @@
 
     async function loadMyReservations() {
         try {
-            const reservations = await getJson("/api/v1/reservations");
+            const data = await getJson("/api/v1/reservations");
+            const reservations = data.reservations || [];
+            const waitings = data.waitings || [];
+
             if (!reservations.length) {
                 myReservationsList.innerHTML = "";
                 myReservationsEmpty.classList.remove("hidden");
                 myReservationsEmpty.textContent = "현재 예약된 항목이 없습니다.";
-                return;
-            }
-            myReservationsEmpty.classList.add("hidden");
-            myReservationsList.innerHTML = reservations.map(r => `
-                <div class="reservation-row">
-                    <div class="info">
-                        <div class="info-line">
-                            <span class="info-main">${r.date}</span>
-                            <span class="info-main">${r.time.startAt.slice(0, 5)}</span>
+            } else {
+                myReservationsEmpty.classList.add("hidden");
+                myReservationsList.innerHTML = reservations.map(r => `
+                    <div class="reservation-row">
+                        <div class="info">
+                            <div class="info-line">
+                                <span class="info-main">${r.date}</span>
+                                <span class="info-main">${r.time.startAt.slice(0, 5)}</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="info-sub">테마 #${r.themeId} · 예약 ID ${r.id}</span>
+                            </div>
                         </div>
-                        <div class="info-line">
-                            <span class="info-sub">테마 #${r.themeId} · 예약 ID ${r.id}</span>
-                        </div>
+                        <button type="button" class="btn btn-sm btn-danger" data-cancel-id="${r.id}">예약 취소</button>
                     </div>
-                    <button type="button" class="btn btn-sm btn-danger" data-cancel-id="${r.id}">예약 취소</button>
-                </div>
-            `).join("");
+                `).join("");
 
-            myReservationsList.querySelectorAll("[data-cancel-id]").forEach(el => {
-                el.addEventListener("click", async () => {
-                    if (!confirm("이 예약을 취소하시겠습니까?")) return;
-                    try {
-                        await deleteResource(`/api/v1/reservations/${el.dataset.cancelId}`);
-                        setStatus(userStatus, "success", "예약을 취소했습니다.");
-                        await loadMyReservations();
-                    } catch (e) {
-                        setStatus(userStatus, "error", e.message);
-                    }
+                myReservationsList.querySelectorAll("[data-cancel-id]").forEach(el => {
+                    el.addEventListener("click", async () => {
+                        if (!confirm("이 예약을 취소하시겠습니까?")) return;
+                        try {
+                            await deleteResource(`/api/v1/reservations/${el.dataset.cancelId}`);
+                            setStatus(userStatus, "success", "예약을 취소했습니다.");
+                            await loadMyReservations();
+                        } catch (e) {
+                            setStatus(userStatus, "error", e.message);
+                        }
+                    });
                 });
-            });
+            }
+
+            if (!waitings.length) {
+                myWaitingsList.innerHTML = "";
+                myWaitingsEmpty.classList.remove("hidden");
+                myWaitingsEmpty.textContent = "신청한 대기가 없습니다.";
+            } else {
+                myWaitingsEmpty.classList.add("hidden");
+                myWaitingsList.innerHTML = waitings.map(w => `
+                    <div class="reservation-row">
+                        <div class="info">
+                            <div class="info-line">
+                                <span class="info-main">예약 #${w.reservationId}</span>
+                                <span class="info-main">대기 ${w.order}순위</span>
+                            </div>
+                            <div class="info-line">
+                                <span class="info-sub">신청 ${w.createdAt}</span>
+                            </div>
+                        </div>
+                        <button type="button" class="btn btn-sm btn-danger" data-cancel-wait="${w.reservationId}">대기 취소</button>
+                    </div>
+                `).join("");
+
+                myWaitingsList.querySelectorAll("[data-cancel-wait]").forEach(el => {
+                    el.addEventListener("click", async () => {
+                        if (!confirm("이 대기를 취소하시겠습니까?")) return;
+                        try {
+                            await deleteResource(`/api/v1/reservations/${el.dataset.cancelWait}/waits/mine`);
+                            setStatus(userStatus, "success", "대기를 취소했습니다.");
+                            await loadMyReservations();
+                        } catch (e) {
+                            setStatus(userStatus, "error", e.message);
+                        }
+                    });
+                });
+            }
+        } catch (e) {
+            setStatus(userStatus, "error", e.message);
+        }
+    }
+
+    async function submitWait() {
+        const reservationId = waitReservationIdInput.value;
+        if (!reservationId) {
+            setStatus(userStatus, "error", "대기 신청할 예약 ID를 입력해 주세요.");
+            return;
+        }
+        try {
+            await postJson(`/api/v1/reservations/${reservationId}/waits`, {});
+            setStatus(userStatus, "success", "대기 신청이 완료되었습니다.");
+            waitReservationIdInput.value = "";
+            await loadMyReservations();
         } catch (e) {
             setStatus(userStatus, "error", e.message);
         }
@@ -1392,6 +1469,7 @@
     });
     userReserveButton.addEventListener("click", reserve);
     loadMyReservationsButton.addEventListener("click", loadMyReservations);
+    submitWaitButton.addEventListener("click", submitWait);
 
     refreshManagerButton.addEventListener("click", loadManagerReservations);
     editModalCancelButton.addEventListener("click", closeEditModal);
