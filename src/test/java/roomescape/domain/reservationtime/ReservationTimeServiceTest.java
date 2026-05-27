@@ -11,33 +11,25 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationdate.ReservationDate;
+import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeRequest;
 import roomescape.domain.reservationtime.admin.dto.CreateTimeResponse;
-import roomescape.domain.reservationtime.dto.ReservationTimeAvailabilityResponse;
 import roomescape.domain.reservationtime.admin.dto.ReservationTimeResponse;
 import roomescape.domain.theme.Theme;
-import roomescape.support.exception.NotFoundException;
 import roomescape.support.exception.RoomescapeException;
-import roomescape.support.fake.FakeReservationDateRepository;
 import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeReservationTimeRepository;
-import roomescape.support.fake.FakeThemeRepository;
 
 class ReservationTimeServiceTest {
 
     private FakeReservationSlotRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
-    private FakeThemeRepository themeRepository;
-    private FakeReservationDateRepository reservationDateRepository;
 
     @BeforeEach
     void setUp() {
         reservationRepository = new FakeReservationSlotRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
-        themeRepository = new FakeThemeRepository();
-        reservationDateRepository = new FakeReservationDateRepository();
     }
 
     @Test
@@ -120,78 +112,10 @@ class ReservationTimeServiceTest {
         assertThat(reservationTimeRepository.findById(reservationTime.getId())).isEmpty();
     }
 
-    @Test
-    @DisplayName("예약 가능 시간을 조회한다.")
-    void getReservationTimeAvailability() {
-        // given
-        ReservationTime firstReservationTime = reservationTimeRepository.save(
-            ReservationTime.createWithoutId(LocalTime.of(10, 0))
-        );
-        ReservationTime secondReservationTime = reservationTimeRepository.save(
-            ReservationTime.createWithoutId(LocalTime.of(11, 0))
-        );
-        ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 16))
-        );
-        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        reservationRepository.save(
-            ReservationSlot.createWithoutId(reservationDate, firstReservationTime, theme)
-        );
-        ReservationTimeService reservationTimeService = createReservationTimeService();
-
-        // when
-        List<ReservationTimeAvailabilityResponse> responses = reservationTimeService.getReservationTimeAvailability(
-            theme.getId(),
-            reservationDate.getId()
-        );
-
-        // then
-        assertThat(responses)
-            .extracting(
-                ReservationTimeAvailabilityResponse::timeId,
-                ReservationTimeAvailabilityResponse::startAt,
-                ReservationTimeAvailabilityResponse::available
-            )
-            .containsExactly(
-                tuple(firstReservationTime.getId(), LocalTime.of(10, 0), false),
-                tuple(secondReservationTime.getId(), LocalTime.of(11, 0), true)
-            );
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 테마로 예약 가능 시간을 조회할 수 없다.")
-    void throwExceptionWhenThemeDoesNotExistForAvailability() {
-        // given
-        ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 16))
-        );
-        ReservationTimeService reservationTimeService = createReservationTimeService();
-
-        // when & then
-        assertThatThrownBy(() -> reservationTimeService.getReservationTimeAvailability(1L, reservationDate.getId()))
-            .isInstanceOf(NotFoundException.class)
-            .hasMessage("존재하지 않는 테마 입니다.");
-    }
-
-    @Test
-    @DisplayName("존재하지 않는 날짜로 예약 가능 시간을 조회할 수 없다.")
-    void throwExceptionWhenDateDoesNotExistForAvailability() {
-        // given
-        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationTimeService reservationTimeService = createReservationTimeService();
-
-        // when & then
-        assertThatThrownBy(() -> reservationTimeService.getReservationTimeAvailability(theme.getId(), 1L))
-            .isInstanceOf(NotFoundException.class)
-            .hasMessage("존재하지 않는 날짜 입니다.");
-    }
-
     private ReservationTimeService createReservationTimeService() {
         return new ReservationTimeService(
             reservationTimeRepository,
-            reservationRepository,
-            themeRepository,
-            reservationDateRepository
+            reservationRepository
         );
     }
 }

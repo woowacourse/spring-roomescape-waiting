@@ -58,7 +58,7 @@ public class ReservationService {
 
         ReservationSlot reservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
         validateUserReservationNotDuplicated(user, reservationSlot);
-        Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
+        Long reservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
         ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
         Reservation reservation = Reservation.createWithoutId(
             reservationSlot,
@@ -89,6 +89,7 @@ public class ReservationService {
             .orElseThrow(() -> new NotFoundException(ReservationErrors.RESERVATION_NOT_FOUND));
         reservationRepository.deleteById(id);
         reorderWaitingNumbers(reservation.getReservationSlot());
+        deleteEmptyReservationSlot(reservation);
     }
 
     @Transactional
@@ -98,6 +99,7 @@ public class ReservationService {
         validateUserCanDeleteReservation(reservation);
         reservationRepository.deleteById(id);
         reorderWaitingNumbers(reservation.getReservationSlot());
+        deleteEmptyReservationSlot(reservation);
     }
 
     @Transactional
@@ -116,10 +118,17 @@ public class ReservationService {
         User user = reservation.getUser();
 
         ReservationSlot updatedReservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
-        validateUserReservationNotDuplicated(user, updatedReservationSlot);
+        boolean sameReservationSlot = reservationSlot.getId().equals(updatedReservationSlot.getId());
+        if (!sameReservationSlot) {
+            validateUserReservationNotDuplicated(user, updatedReservationSlot);
+        }
 
-        Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
-        ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
+        Long reservationCount = reservation.getWaitingNumber();
+        ReservationStatus reservationStatus = reservation.getStatus();
+        if (!sameReservationSlot) {
+            reservationCount = reservationRepository.countByReservationSlotId(updatedReservationSlot.getId());
+            reservationStatus = decideWaitingStatus(reservationCount);
+        }
 
         Reservation updatedReservation = reservation.update(
             updatedReservationSlot,
@@ -131,7 +140,17 @@ public class ReservationService {
         reservationRepository.update(reservation.getId(), updatedReservation)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
 
-        reorderWaitingNumbers(reservationSlot);
+        if (!sameReservationSlot) {
+            reorderWaitingNumbers(reservationSlot);
+        }
+    }
+
+    private void deleteEmptyReservationSlot(Reservation reservation) {
+        Long remainReservationCount = reservationRepository
+            .countByReservationSlotId(reservation.getReservationSlot().getId());
+        if (remainReservationCount == 0) {
+            reservationSlotRepository.deleteById(reservation.getReservationSlot().getId());
+        }
     }
 
     private void reorderWaitingNumbers(ReservationSlot reservationSlot) {

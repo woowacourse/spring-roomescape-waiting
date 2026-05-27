@@ -64,7 +64,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             from reservation_slot rs
             join reservation r on r.reservation_slot_id = rs.id
             where rs.theme_id = ? and rs.date_id = ?
-              and r.status <> 'CANCELED'
             """;
 
     private static final String FIND_POPULAR_THEME_SQL =

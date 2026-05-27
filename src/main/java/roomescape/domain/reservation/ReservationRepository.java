@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import java.util.List;
 import java.util.Optional;
+import roomescape.domain.reservation.dto.ReservationCountResult;
 
 public interface ReservationRepository {
 
@@ -13,7 +14,7 @@ public interface ReservationRepository {
 
     List<Reservation> findReservations(String username);
 
-    Long countByReservationId(Long reservationId);
+    Long countByReservationSlotId(Long reservationId);
 
     List<Reservation> findAllByReservationIdOrder(Long reservationId);
 
@@ -28,4 +29,6 @@ public interface ReservationRepository {
     void updateAllStatus(List<Reservation> userReservations);
 
     void deleteById(Long id);
+
+    List<ReservationCountResult> countReservation(Long themeId, Long dateId);
 }

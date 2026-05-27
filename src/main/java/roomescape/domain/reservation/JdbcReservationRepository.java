@@ -11,6 +11,7 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.reservation.dto.ReservationCountResult;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationslot.ReservationSlot;
 import roomescape.domain.reservationtime.ReservationTime;
@@ -149,7 +150,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             where r.reservation_slot_id = ?
             order by r.updated_at, r.id
             """;
-    private static final String COUNT_BY_RESERVATION_ID_SQL =
+    private static final String COUNT_BY_RESERVATION_SLOT_ID_SQL =
         """
             select count(*)
             from reservation
@@ -162,7 +163,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 from reservation
                 where user_id = ?
                   and reservation_slot_id = ?
-                  and status <> 'CANCELED'
             )
             """;
     private static final String UPDATE_SQL =
@@ -184,6 +184,21 @@ public class JdbcReservationRepository implements ReservationRepository {
             where id = ?
             """;
     private static final String DELETE_BY_ID_SQL = "delete from reservation where id = ?";
+    private static final String COUNT_RESERVATION_BY_THEME_AND_DATE =
+        """
+            select rt.id as time_id,
+            rt.start_at,
+            count(r.id) as reservation_count
+            from reservation_time rt
+            left join reservation_slot rs
+            on rs.time_id = rt.id
+            and rs.date_id = ?
+            and rs.theme_id = ?
+            left join reservation r
+            on r.reservation_slot_id = rs.id
+            group by rt.id, rt.start_at
+            order by rt.start_at;
+            """;
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -225,8 +240,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Long countByReservationId(Long reservationId) {
-        Long count = jdbcTemplate.queryForObject(COUNT_BY_RESERVATION_ID_SQL, Long.class, reservationId);
+    public Long countByReservationSlotId(Long reservationId) {
+        Long count = jdbcTemplate.queryForObject(COUNT_BY_RESERVATION_SLOT_ID_SQL, Long.class, reservationId);
         if (count == null) {
             return 0L;
         }
@@ -302,6 +317,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void deleteById(Long id) {
         jdbcTemplate.update(DELETE_BY_ID_SQL, id);
+    }
+
+    @Override
+    public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
+        return jdbcTemplate.query(
+            COUNT_RESERVATION_BY_THEME_AND_DATE,
+            reservationCountResultRowMapper(),
+            dateId,
+            themeId
+        );
+    }
+
+    private RowMapper<ReservationCountResult> reservationCountResultRowMapper() {
+        return (rs, rowNum) -> ReservationCountResult.of(
+            rs.getLong(COLUMN_TIME_ID),
+            rs.getTime(COLUMN_START_AT).toLocalTime(),
+            rs.getLong("reservation_count")
+        );
     }
 
     private RowMapper<Reservation> userReservationRowMapper() {

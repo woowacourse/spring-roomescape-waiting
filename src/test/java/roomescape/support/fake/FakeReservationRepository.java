@@ -9,6 +9,7 @@ import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservation.ReservationStatus;
+import roomescape.domain.reservation.dto.ReservationCountResult;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -47,7 +48,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Long countByReservationId(Long reservationId) {
+    public Long countByReservationSlotId(Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
             .count();
@@ -95,7 +96,8 @@ public class FakeReservationRepository implements ReservationRepository {
         return storage.values().stream()
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
-            .anyMatch(userReservation -> userReservation.getStatus() != ReservationStatus.CANCELED);
+            .findAny()
+            .isPresent();
     }
 
     @Override
@@ -134,5 +136,29 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public void deleteById(Long id) {
         storage.remove(id);
+    }
+
+    @Override
+    public List<ReservationCountResult> countReservation(Long themeId, Long dateId) {
+        return storage.values().stream()
+            .filter(reservation -> themeId.equals(reservation.getReservationSlot().getTheme().getId()))
+            .filter(reservation -> dateId.equals(reservation.getReservationSlot().getDate().getId()))
+            .collect(java.util.stream.Collectors.groupingBy(
+                reservation -> reservation.getReservationSlot().getTime().getId(),
+                LinkedHashMap::new,
+                java.util.stream.Collectors.toList()
+            ))
+            .values()
+            .stream()
+            .map(reservations -> {
+                Reservation firstReservation = reservations.getFirst();
+                return ReservationCountResult.of(
+                    firstReservation.getReservationSlot().getTime().getId(),
+                    firstReservation.getReservationSlot().getTime().getStartAt(),
+                    reservations.size()
+                );
+            })
+            .sorted(Comparator.comparing(ReservationCountResult::startAt))
+            .toList();
     }
 }
