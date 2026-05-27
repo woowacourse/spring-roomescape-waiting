@@ -7,9 +7,10 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.request.UpdateReservationRequest;
 import roomescape.controller.dto.response.ReservationResponse;
-import roomescape.controller.dto.response.ReservationResponses;
+import roomescape.controller.dto.response.UserReservationsResponse;
 import roomescape.domain.Reservation;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.UserReservation;
 
 import java.util.List;
 
@@ -24,13 +25,13 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<ReservationResponses> findUserReservations(
+    public ResponseEntity<UserReservationsResponse> findMyReservations(
             @RequestParam String name,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        List<Reservation> reservations = reservationService.findUserReservations(name, page, size);
-        ReservationResponses response = ReservationResponses.from(reservations);
+        List<UserReservation> userReservations = reservationService.findUserReservations(name, page, size);
+        UserReservationsResponse response = UserReservationsResponse.from(userReservations);
         return ResponseEntity.status(HttpStatus.OK).body(response);
     }
 

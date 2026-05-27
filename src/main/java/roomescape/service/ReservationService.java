@@ -8,6 +8,7 @@ import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.service.dto.UserReservation;
 import roomescape.service.exception.BusinessConflictException;
 import roomescape.service.exception.ErrorCode;
 import roomescape.service.exception.ResourceNotFoundException;
@@ -42,8 +43,8 @@ public class ReservationService {
         return reservationRepository.findAll(page, size);
     }
 
-    public List<Reservation> findUserReservations(String name, int page, int size) {
-        return reservationRepository.findByName(name, page, size);
+    public List<UserReservation> findUserReservations(String name, int page, int size) {
+        return reservationRepository.findUserReservations(name, page, size);
     }
 
     @Transactional
