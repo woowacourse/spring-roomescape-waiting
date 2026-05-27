@@ -10,7 +10,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.reservation.application.service.WaitingService;
-import roomescape.reservation.presentation.dto.ReservationResponse;
 import roomescape.reservation.presentation.dto.WaitingResponse;
 
 @RequiredArgsConstructor

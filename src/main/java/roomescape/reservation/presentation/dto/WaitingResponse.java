@@ -13,6 +13,11 @@ public record WaitingResponse(
 ) {
 
     public static WaitingResponse from(WaitingQueryResult waitingQueryResult) {
-        return new WaitingResponse(waitingQueryResult.id(), waitingQueryResult.name(), waitingQueryResult.date(), waitingQueryResult.theme(), waitingQueryResult.time(), waitingQueryResult.order());
+        return new WaitingResponse(waitingQueryResult.id(),
+                waitingQueryResult.name(),
+                waitingQueryResult.date(),
+                waitingQueryResult.theme(),
+                waitingQueryResult.time(),
+                waitingQueryResult.order());
     }
 }
