@@ -45,6 +45,10 @@ public class WaitingService {
             throw new UnprocessableEntityException("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다.");
         }
 
+        if (reservationDao.existsByUserNameAndSlot(command.name(), command.date(), theme, time)) {
+            throw new UnprocessableEntityException("본인이 이미 예약한 시간에는 대기를 신청할 수 없습니다.");
+        }
+
         Waiting waiting = new Waiting(
                 UserName.parse(command.name()),
                 command.date(),

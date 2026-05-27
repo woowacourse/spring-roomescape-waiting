@@ -19,6 +19,7 @@
   const nameInput = document.getElementById("name-input");
   const reserveForm = document.getElementById("reserve-form");
   const reserveMessage = document.getElementById("reserve-message");
+  const reserveSubmitBtn = reserveForm.querySelector('button[type="submit"]');
   const btnBackThemes = document.getElementById("btn-back-to-themes");
   const btnBackCalendar = document.getElementById("btn-back-to-calendar");
   const stepIndicators = document.querySelectorAll(".steps__item");
@@ -153,7 +154,7 @@
       const results = await Promise.all(
           chunk.map(async (dateStr) => {
             const slots = await fetchJson(
-                `/themes/${themeId}/available-time?date=${dateStr}`
+                `/themes/${themeId}/schedule?date=${dateStr}`
             );
             return Array.isArray(slots) && slots.length > 0 ? dateStr : null;
           })
@@ -262,6 +263,19 @@
     return `${parts[0]}:${parts[1] || "00"}`;
   }
 
+  function updateSubmitButtonLabel() {
+    const opt = timeSelect.options[timeSelect.selectedIndex];
+    const reserved = opt && opt.dataset.reserved === "true";
+    reserveSubmitBtn.textContent = reserved ? "대기 신청" : "예약 완료";
+  }
+
+  function nowIsoLocal() {
+    const d = new Date();
+    const pad = (n) => String(n).padStart(2, "0");
+    return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`
+        + `T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+  }
+
   async function onSelectDate(dateStr) {
     state.selectedDate = dateStr;
     if (!state.selectedTheme) return;
@@ -274,28 +288,34 @@
     timeSelect.innerHTML = "";
     try {
       const slots = await fetchJson(
-          `/themes/${state.selectedTheme.id}/available-time?date=${dateStr}`
+          `/themes/${state.selectedTheme.id}/schedule?date=${dateStr}`
       );
       if (!slots.length) {
         timeSelect.disabled = true;
         reserveMessage.textContent =
-            "선택한 날짜에 예약 가능한 시간이 없습니다. 날짜를 다시 선택해 주세요.";
+            "선택한 날짜에 예약 또는 대기 가능한 시간이 없습니다. 날짜를 다시 선택해 주세요.";
         reserveMessage.classList.add("message--err");
+        updateSubmitButtonLabel();
         return;
       }
       timeSelect.disabled = false;
       slots.forEach((s) => {
         const opt = document.createElement("option");
-        opt.value = String(s.id);
-        opt.textContent = formatTimeLabel(s.startAt);
+        opt.value = String(s.timeResponse.id);
+        const statusLabel = s.isReserved ? "대기 가능" : "예약 가능";
+        opt.textContent = `${formatTimeLabel(s.timeResponse.startAt)} (${statusLabel})`;
+        opt.dataset.reserved = s.isReserved ? "true" : "false";
         timeSelect.appendChild(opt);
       });
+      updateSubmitButtonLabel();
     } catch (e) {
       timeSelect.disabled = true;
       reserveMessage.textContent = "시간 목록을 불러오지 못했습니다.";
       reserveMessage.classList.add("message--err");
     }
   }
+
+  timeSelect.addEventListener("change", updateSubmitButtonLabel);
 
   btnBackThemes.addEventListener("click", () => {
     state.selectedTheme = null;
@@ -317,26 +337,44 @@
     const timeId = Number(timeSelect.value, 10);
     const name = nameInput.value.trim();
     if (!timeId || !name) return;
+    const selectedOpt = timeSelect.options[timeSelect.selectedIndex];
+    const isReserved = selectedOpt && selectedOpt.dataset.reserved === "true";
     try {
-      await fetchJson("/reservations", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name,
-          date: state.selectedDate,
-          timeId,
-          themeId: state.selectedTheme.id,
-        }),
-      });
-      reserveMessage.textContent = "예약이 완료되었습니다.";
+      if (isReserved) {
+        await fetchJson("/waitings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            date: state.selectedDate,
+            timeId,
+            themeId: state.selectedTheme.id,
+            createdAt: nowIsoLocal(),
+          }),
+        });
+        reserveMessage.textContent = "대기 신청이 완료되었습니다.";
+      } else {
+        await fetchJson("/reservations", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            date: state.selectedDate,
+            timeId,
+            themeId: state.selectedTheme.id,
+          }),
+        });
+        reserveMessage.textContent = "예약이 완료되었습니다.";
+      }
       reserveMessage.classList.add("message--ok");
       loadPopular();
       state.availableDates = await collectAvailableDates(state.selectedTheme.id);
       renderCalendar();
       setStep(2);
     } catch (e) {
-      reserveMessage.textContent =
-          "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
+      reserveMessage.textContent = isReserved
+          ? "대기 신청에 실패했습니다. 입력값을 확인해 주세요."
+          : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
       reserveMessage.classList.add("message--err");
     }
   });

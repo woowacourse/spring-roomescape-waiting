@@ -130,6 +130,28 @@ public class ReservationDao {
         return Boolean.TRUE.equals(result);
     }
 
+    public boolean existsByUserNameAndSlot(String userName, LocalDate date, Theme theme, ReservationTime time) {
+        String sql = """
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM reservation
+                    WHERE name = ?
+                        AND date = ?
+                        AND time_id = ?
+                        AND theme_id = ?
+                )
+                """;
+        Boolean result = jdbcTemplate.queryForObject(
+                sql,
+                Boolean.class,
+                userName,
+                date,
+                time.getId(),
+                theme.getId()
+        );
+        return Boolean.TRUE.equals(result);
+    }
+
     public boolean existsByTimeId(Long timeId) {
         String sql = """
                 SELECT EXISTS(
