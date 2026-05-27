@@ -70,15 +70,7 @@ public class ReservationController {
     public ResponseEntity<Void> deleteReservation(
             @PathVariable Long id
     ) {
-        reservationCommandService.deleteReservation(id, LocalDateTime.now());
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/waitings/{id}")
-    public ResponseEntity<Void> deleteWaiting(
-            @PathVariable Long id
-    ) {
-        reservationCommandService.deleteWaiting(id, LocalDateTime.now());
+        reservationCommandService.delete(id, LocalDateTime.now());
         return ResponseEntity.noContent().build();
     }
 }

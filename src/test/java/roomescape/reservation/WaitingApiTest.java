@@ -1,0 +1,184 @@
+package roomescape.reservation;
+
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.greaterThan;
+
+import io.restassured.RestAssured;
+import io.restassured.http.ContentType;
+import java.time.LocalTime;
+import java.util.Map;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import roomescape.fixture.ReservationFixture;
+import roomescape.fixture.ThemeFixture;
+import roomescape.support.ApiTest;
+import roomescape.support.TestDataHelper;
+
+@ApiTest
+class WaitingApiTest {
+
+    @Autowired
+    private TestDataHelper testHelper;
+
+    @DisplayName("이미 예약된 날짜와 시간으로 대기 예약 생성을 테스트합니다.")
+    @Test
+    void save_waiting_if_reservation_exists() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        testHelper.insertReservation(
+                "비밥",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", greaterThan(0))
+                .body("name", equalTo("스타크"))
+                .body("date", equalTo("2099-12-31"))
+                .body("time.id", equalTo(timeId.intValue()))
+                .body("time.startAt", equalTo("09:00"))
+                .body("theme.id", equalTo(themeId.intValue()))
+                .body("theme.name", equalTo("공포 테마"))
+                .body("status", equalTo("WAITING"))
+                .body("rank", equalTo(1));
+    }
+
+    @DisplayName("대기 예약 순번 반환을 테스트합니다.")
+    @Test
+    void save_waiting_with_rank() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        testHelper.insertReservation(
+                "네오",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "피노",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        params.put("name", "카야");
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", equalTo("WAITING"))
+                .body("rank", equalTo(3));
+    }
+
+    @DisplayName("예약이 존재하지 않는 날짜와 시간으로 대기 예약 생성 시 422 응답 반환을 테스트합니다.")
+    @Test
+    void save_waiting_without_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+
+        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(422)
+                .body("errorMessage", equalTo("예약이 존재하지 않는 경우, 대기를 신청할 수 없습니다."));
+    }
+
+    @DisplayName("같은 사람이 이미 대기한 날짜와 시간으로 대기 예약 생성 시 409 응답 반환을 테스트합니다.")
+    @Test
+    void save_duplicated_waiting() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        testHelper.insertReservation(
+                "비밥",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+        testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(409)
+                .body("errorMessage", equalTo("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다."));
+    }
+
+    @DisplayName("방탈출 예약 대기 삭제 API를 테스트합니다.")
+    @Test
+    void delete_waiting_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.futureReservationDate(),
+                themeId,
+                timeId
+        );
+
+        RestAssured.given()
+                .when().delete("/waitings/{id}", waitingId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @DisplayName("존재하지 않는 대기 예약을 삭제 시 404 응답 반환을 테스트합니다.")
+    @Test
+    void delete_not_existing_waiting_reservation() {
+        RestAssured.given()
+                .when().delete("/waitings/{id}", 999L)
+                .then().log().all()
+                .statusCode(404)
+                .body("errorMessage", equalTo("존재하지 않는 대기입니다."));
+    }
+
+    @DisplayName("이미 지나간 시간의 대기 예약을 삭제 시 422 응답 반환을 테스트합니다.")
+    @Test
+    void delete_past_waiting_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        Long waitingId = testHelper.insertWaiting(
+                "스타크",
+                ReservationFixture.pastReservationDate(),
+                themeId,
+                timeId
+        );
+
+        RestAssured.given()
+                .when().delete("/waitings/{id}", waitingId)
+                .then().log().all()
+                .statusCode(422)
+                .body("errorMessage", equalTo("이미 지나간 예약은 삭제할 수 없습니다."));
+    }
+}

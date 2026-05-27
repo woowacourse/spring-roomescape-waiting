@@ -1,6 +1,5 @@
 package roomescape.reservation.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 
@@ -83,13 +82,13 @@ class ReservationCommandServiceTest {
                 timeId
         );
 
-        assertThatNoException().isThrownBy(() -> reservationCommandService.deleteReservation(reservationId, NOW));
+        assertThatNoException().isThrownBy(() -> reservationCommandService.delete(reservationId, NOW));
     }
 
     @DisplayName("삭제할 예약이 없을 시 예외 발생을 테스트합니다.")
     @Test
     void delete_not_found_reservation_exception() {
-        assertThatThrownBy(() -> reservationCommandService.deleteReservation(1L, NOW))
+        assertThatThrownBy(() -> reservationCommandService.delete(1L, NOW))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage("존재하지 않는 예약입니다.");
     }
@@ -106,7 +105,7 @@ class ReservationCommandServiceTest {
                 timeId
         );
 
-        assertThatThrownBy(() -> reservationCommandService.deleteReservation(reservationId, NOW))
+        assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지나간 예약은 삭제할 수 없습니다.");
     }
@@ -215,9 +214,9 @@ class ReservationCommandServiceTest {
                 .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
     }
 
-    @DisplayName("이미 확정된 예약이 존재할 경우, 예약이 대기로 생성되는 것을 테스트합니다.")
+    @DisplayName("이미 확정된 예약이 존재할 경우, 예약 생성 예외를 테스트합니다.")
     @Test
-    void save_waiting_if_reservation_exists() {
+    void save_duplicated_reservation_exception() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         testHelper.insertReservation(
@@ -228,61 +227,10 @@ class ReservationCommandServiceTest {
         );
 
         ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
-        ReservationResult savedWaiting = reservationCommandService.save(request);
 
-        SoftAssertions.assertSoftly(softly -> {
-            softly.assertThat(savedWaiting.id()).isPositive();
-            softly.assertThat(savedWaiting.name()).isEqualTo(request.name());
-            softly.assertThat(savedWaiting.date()).isEqualTo(request.date());
-            softly.assertThat(savedWaiting.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
-            softly.assertThat(savedWaiting.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
-            softly.assertThat(savedWaiting.status()).isEqualTo(Status.WAITING);
-        });
-    }
-
-    @DisplayName("예약 대기의 순번을 테스트합니다.")
-    @Test
-    void check_waiting_rank() {
-        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
-        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        testHelper.insertReservation(
-                "네오",
-                ReservationFixture.futureReservationDate(),
-                themeId,
-                timeId
-        );
-        testHelper.insertWaiting(
-                "스타크",
-                ReservationFixture.futureReservationDate(),
-                themeId,
-                timeId
-        );
-        testHelper.insertWaiting(
-                "피노",
-                ReservationFixture.futureReservationDate(),
-                themeId,
-                timeId
-        );
-
-        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
-        ReservationResult savedWaiting = reservationCommandService.save(request);
-
-        assertThat(savedWaiting.rank()).isEqualTo(3L);
-    }
-
-    @DisplayName("예약 대기 삭제를 테스트합니다.")
-    @Test
-    void delete_waiting_reservation() {
-        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
-        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        Long waitingId = testHelper.insertWaiting(
-                "스타크",
-                ReservationFixture.futureReservationDate(),
-                themeId,
-                timeId
-        );
-
-        assertThatNoException().isThrownBy(() -> reservationCommandService.deleteWaiting(waitingId, NOW));
+        assertThatThrownBy(() -> reservationCommandService.save(request))
+                .isInstanceOf(ConflictException.class)
+                .hasMessage("이미 해당 날짜와 시간에 예약이 존재합니다.");
     }
 
     @DisplayName("확정 예약 삭제 시 예약 대기의 확정 예약으로의 승격을 테스트합니다.")
@@ -296,14 +244,14 @@ class ReservationCommandServiceTest {
                 themeId,
                 timeId
         );
-        Long waitingId = testHelper.insertWaiting(
+        testHelper.insertWaiting(
                 "스타크",
                 ReservationFixture.futureReservationDate(),
                 themeId,
                 timeId
         );
 
-        reservationCommandService.deleteReservation(reservationId, NOW);
+        reservationCommandService.delete(reservationId, NOW);
 
         ReservationSlot slot = ReservationSlot.builder()
                 .date(ReservationFixture.futureReservationDate())
@@ -315,7 +263,7 @@ class ReservationCommandServiceTest {
 
         SoftAssertions.assertSoftly(softly -> {
             softly.assertThat(promoteReservation.getName()).isEqualTo("스타크");
-            softly.assertThatThrownBy(() -> reservationCommandService.deleteWaiting(waitingId, NOW))
+            softly.assertThatThrownBy(() -> reservationCommandService.delete(reservationId, NOW))
                     .isInstanceOf(NotFoundException.class);
         });
     }

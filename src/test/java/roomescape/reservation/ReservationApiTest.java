@@ -117,9 +117,9 @@ class ReservationApiTest {
                 .body("errorMessage", equalTo("날짜 형식은 yyyy-MM-dd 이어야 합니다."));
     }
 
-    @DisplayName("이미 예약된 날짜와 시간으로 예약 시 대기 예약 생성을 테스트합니다.")
+    @DisplayName("이미 예약된 날짜와 시간으로 예약 시 409 응답 반환을 테스트합니다.")
     @Test
-    void save_waiting_if_reservation_exists() {
+    void save_duplicated_reservation() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
         testHelper.insertReservation(
@@ -136,15 +136,8 @@ class ReservationApiTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201)
-                .body("id", greaterThan(0))
-                .body("name", equalTo("스타크"))
-                .body("date", equalTo("2099-12-31"))
-                .body("time.id", equalTo(timeId.intValue()))
-                .body("time.startAt", equalTo("09:00"))
-                .body("theme.id", equalTo(themeId.intValue()))
-                .body("theme.name", equalTo("공포 테마"))
-                .body("status", equalTo("WAITING"));
+                .statusCode(409)
+                .body("errorMessage", equalTo("이미 해당 날짜와 시간에 예약이 존재합니다."));
     }
 
     @DisplayName("방탈출 예약 날짜와 시간 변경 API를 테스트합니다.")
@@ -382,23 +375,5 @@ class ReservationApiTest {
                 .then().log().all()
                 .statusCode(422)
                 .body("errorMessage", equalTo("이미 지나간 예약은 삭제할 수 없습니다."));
-    }
-
-    @DisplayName("방탈출 예약 대기 삭제 API를 테스트합니다.")
-    @Test
-    void delete_waiting_reservation() {
-        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
-        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
-        Long waitingId = testHelper.insertWaiting(
-                "스타크",
-                ReservationFixture.futureReservationDate(),
-                themeId,
-                timeId
-        );
-
-        RestAssured.given()
-                .when().delete("/reservations/waitings/{id}", waitingId)
-                .then().log().all()
-                .statusCode(204);
     }
 }

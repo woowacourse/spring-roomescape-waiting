@@ -45,20 +45,7 @@ public class ReservationCommandService {
         slot.validateReservable(request.now());
 
         if (reservationRepository.existsBySlot(slot)) {
-            Waiting waiting = request.toWaiting(slot);
-            Waiting savedWaiting;
-            try {
-                savedWaiting = waitingRepository.save(waiting);
-            } catch (DataIntegrityViolationException e) {
-                throw new ConflictException("이미 해당 테마의 날짜와 시간에 대기를 신청했습니다.");
-            }
-            Long rank = waitingRepository.getRank(savedWaiting);
-            return ReservationResult.waiting(
-                    savedWaiting,
-                    ThemeResult.from(theme),
-                    ReservationTimeResult.from(time),
-                    rank
-            );
+            throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 
         try {
@@ -94,7 +81,7 @@ public class ReservationCommandService {
         );
     }
 
-    public void deleteReservation(Long reservationId, LocalDateTime now) {
+    public void delete(Long reservationId, LocalDateTime now) {
         ReservationSlot slot = reservationRepository.findSlotById(reservationId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 
@@ -105,17 +92,6 @@ public class ReservationCommandService {
         }
 
         promoteFirstWaitingToReservation(slot);
-    }
-
-    public void deleteWaiting(Long waitingId, LocalDateTime now) {
-        ReservationSlot slot = waitingRepository.findSlotById(waitingId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
-
-        slot.validateDeletable(now);
-
-        if (waitingRepository.delete(waitingId) == 0) {
-            throw new NotFoundException("존재하지 않는 대기입니다.");
-        }
     }
 
     private Reservation updateReservationSlot(ReservationUpdateCommand request, LocalTime startAt,
