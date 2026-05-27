@@ -7,6 +7,7 @@ import static roomescape.theme.fixture.ThemeApiFixture.updateThemeStatus;
 import io.restassured.RestAssured;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import roomescape.common.AcceptanceTest;
 
@@ -15,33 +16,26 @@ class ThemeControllerTest extends AcceptanceTest {
     private final String activeThemeName = "활성 테마";
     private final String inactiveThemeName = "비활성 테마";
 
-    @Test
-    @DisplayName("사용자는 활성화된 테마 목록만 조회한다.")
-    void get_active_themes() {
-        Integer activeThemeId = createTheme(managerToken, activeThemeName);
-        Integer inactiveThemeId = createTheme(managerToken, inactiveThemeName);
 
-        updateThemeStatus(managerToken, activeThemeId, true);
-        updateThemeStatus(managerToken, inactiveThemeId, false);
+    @Nested
+    @DisplayName("getActiveThemes 메서드는")
+    class GetTest {
 
-        RestAssured.given().log().all()
+
+        @Test
+        @DisplayName("모든 활성화된 테마를 조회한다")
+        void 성공() {
+            Integer activeThemeId = createTheme(managerToken, activeThemeName);
+            Integer inactiveThemeId = createTheme(managerToken, inactiveThemeName);
+
+            updateThemeStatus(managerToken, activeThemeId, true);
+            updateThemeStatus(managerToken, inactiveThemeId, false);
+
+            RestAssured.given().log().all()
                 .when().get("/member/themes")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+        }
     }
-
-    @Test
-    @DisplayName("활성화된 테마가 없으면 빈 목록을 반환한다.")
-    void get_active_themes_empty() {
-        Integer themeId = createTheme(managerToken, inactiveThemeName);
-        updateThemeStatus(managerToken, themeId, false);
-
-        RestAssured.given().log().all()
-                .when().get("/member/themes")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
-    }
-
 }

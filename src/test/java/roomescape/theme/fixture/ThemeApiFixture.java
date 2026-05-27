@@ -22,14 +22,14 @@ public class ThemeApiFixture {
         params.put("thumbnailUrl", THUMBNAIL_URL);
 
         return RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/themes")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("id");
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/admin/themes")
+            .then().log().all()
+            .statusCode(200)
+            .extract()
+            .path("id");
     }
 
     public static void updateThemeStatus(String token, Integer themeId, boolean isActive) {
@@ -37,12 +37,12 @@ public class ThemeApiFixture {
         updateActive.put("isActive", isActive);
 
         RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, token)
-                .contentType(ContentType.JSON)
-                .body(updateActive)
-                .when().patch("/admin/themes/" + themeId)
-                .then().log().all()
-                .statusCode(200);
+            .header(HttpHeaders.AUTHORIZATION, token)
+            .contentType(ContentType.JSON)
+            .body(updateActive)
+            .when().patch("/admin/themes/" + themeId)
+            .then().log().all()
+            .statusCode(200);
     }
 
 }

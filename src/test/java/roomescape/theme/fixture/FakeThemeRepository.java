@@ -11,13 +11,15 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.repository.projection.PopularThemeResult;
 
 public class FakeThemeRepository implements ThemeRepository {
+
     private final List<Theme> themes = new ArrayList<>();
     private Long autoIncrement = 0L;
 
     @Override
     public Theme save(Theme theme) {
         autoIncrement();
-        Theme savedTheme = Theme.load(autoIncrement, theme.getName(), theme.getDescription(), theme.getThumbnailUrl(), theme.isActive());
+        Theme savedTheme = Theme.load(autoIncrement, theme.getName(), theme.getDescription(),
+            theme.getThumbnailUrl(), theme.isActive());
         themes.add(savedTheme);
         return savedTheme;
     }
@@ -54,20 +56,21 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(Long id) {
         return themes.stream()
-                .filter(theme -> theme.getId().equals(id))
-                .findFirst();
+            .filter(theme -> theme.getId().equals(id))
+            .findFirst();
     }
 
     @Override
     public List<Theme> findByIsActive(boolean isActive) {
         return themes.stream()
-                .filter(theme -> theme.isActive() == isActive)
-                .sorted(Comparator.comparing(Theme::getName))
-                .toList();
+            .filter(theme -> theme.isActive() == isActive)
+            .sorted(Comparator.comparing(Theme::getName))
+            .toList();
     }
 
     @Override
-    public List<PopularThemeResult> findPopularThemes(LocalDate startDate, LocalDate endDate, int limit) {
+    public List<PopularThemeResult> findPopularThemes(LocalDate startDate, LocalDate endDate,
+        int limit) {
         return List.of();
     }
 }
