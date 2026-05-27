@@ -3,6 +3,8 @@ package roomescape.waiting.controller;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import roomescape.reservation.Reservation;
+import roomescape.reservation.dto.ReservationResponse;
 import roomescape.waiting.ReservationWaiting;
 import roomescape.waiting.dto.ReservationWaitingRequest;
 import roomescape.waiting.dto.ReservationWaitingResponse;
@@ -18,6 +20,12 @@ public class ReservationWaitingController {
 
     public ReservationWaitingController(ReservationWaitingService reservationWaitingService) {
         this.reservationWaitingService = reservationWaitingService;
+    }
+
+    @GetMapping("/reservations/{id}")
+    public ResponseEntity<ReservationWaitingResponse> readById(@PathVariable Long id) {
+        ReservationWaiting reservationWaiting = reservationWaitingService.findById(id);
+        return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservation));
     }
 
     @PostMapping

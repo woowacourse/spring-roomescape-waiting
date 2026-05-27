@@ -5,7 +5,7 @@ import roomescape.time.ReservationTime;
 
 import java.time.LocalDate;
 
-import static roomescape.global.exception.ErrorCode.UNAUTHORIZED_RESERVATION_WAITING_ACCESS;
+import static roomescape.global.exception.ErrorCode.FORBIDDEN_RESERVATION_WAITING_ACCESS;
 
 public class ReservationWaiting {
 
@@ -60,7 +60,7 @@ public class ReservationWaiting {
 
     public void validateSameName(String name){
         if (!this.name.equals(name)) {
-            throw new RoomescapeException(UNAUTHORIZED_RESERVATION_WAITING_ACCESS);
+            throw new RoomescapeException(FORBIDDEN_RESERVATION_WAITING_ACCESS);
         }
     }
 }

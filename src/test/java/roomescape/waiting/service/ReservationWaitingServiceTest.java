@@ -116,7 +116,7 @@ public class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.deleteByIdIfNameMatches(id, name))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(ErrorCode.UNAUTHORIZED_RESERVATION_WAITING_ACCESS.getMessage());
+                .hasMessage(ErrorCode.FORBIDDEN_RESERVATION_WAITING_ACCESS.getMessage());
     }
 
     @Test

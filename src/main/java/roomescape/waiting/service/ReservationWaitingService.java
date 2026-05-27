@@ -21,6 +21,11 @@ public class ReservationWaitingService {
         this.timeDao = timeDao;
     }
 
+    public ReservationWaiting findById(Long id) {
+        return reservationWaitingDao.selectById(id)
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_WAITING_NOT_FOUND));
+    }
+
     public ReservationWaiting add(String name, Long themeId, LocalDate date, Long timeId) {
         validateDuplicatedWaiting(name, themeId, date, timeId);
 

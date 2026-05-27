@@ -2,7 +2,6 @@ package roomescape.waiting;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.global.exception.ErrorCode;
 import roomescape.global.exception.RoomescapeException;
 import roomescape.time.ReservationTime;
 
@@ -11,7 +10,6 @@ import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatNoException;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
 import static roomescape.global.exception.ErrorCode.*;
 
 class ReservationWaitingTest {
@@ -33,6 +31,6 @@ class ReservationWaitingTest {
     void 이름이_다르면_예외_발생() {
         assertThatThrownBy(() -> reservationWaiting.validateSameName("other"))
                 .isInstanceOf(RoomescapeException.class)
-                .hasMessage(UNAUTHORIZED_RESERVATION_WAITING_ACCESS.getMessage());
+                .hasMessage(FORBIDDEN_RESERVATION_WAITING_ACCESS.getMessage());
     }
 }

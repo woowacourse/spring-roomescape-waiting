@@ -20,7 +20,7 @@ public enum ErrorCode {
     CANNOT_DELETE_RESERVED_THEME(CONFLICT, "이미 예약이 존재하는 테마이므로 삭제할 수 없습니다."),
     DUPLICATED_RESERVATION_WAITING(CONFLICT, "이미 해당 예약의 대기가 존재합니다."),
     RESERVATION_WAITING_NOT_FOUND(NOT_FOUND, "예약 대기 정보를 찾을 수 없습니다."),
-    UNAUTHORIZED_RESERVATION_WAITING_ACCESS(UNAUTHORIZED, "본인의 예약 대기 정보만 접근 가능합니다."),
+    FORBIDDEN_RESERVATION_WAITING_ACCESS(FORBIDDEN, "본인의 예약 대기 정보만 접근 가능합니다."),
     CANNOT_CANCEL_PAST_RESERVATION_WAITING(BAD_REQUEST, "이미 지난 시간의 예약 대기를 취소할 수 없습니다."),
     ;
 
