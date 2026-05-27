@@ -278,7 +278,7 @@ Content-Type: application/json
     "description": "우테코 레벨2를 탈출하는 내용입니다.",
     "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
   },
-  "status": "WAITED",
+  "status": "WAITING",
   "waitNumber": 5
 }
 ```
@@ -293,12 +293,12 @@ Content-Type: application/json
 | 이미 해당 날짜, 시간, 테마에 이미 대기를 걸어놓은 경우 | `409` |      |
 | 이미 지난 시간에 예약하려는 경우               | `422` | ✅    |
 
-##### 사용자의 예약 목록 조회 API
+##### 사용자의 활성 예약 목록 조회 API
 
 **Request**
 
 ```http
-GET /reservations?guestName=브라운 HTTP/1.1
+GET /reservations/me/active?guestName=브라운 HTTP/1.1
 ```
 
 **Response**
@@ -323,7 +323,51 @@ Content-Type: application/json
         "description": "우테코 레벨2를 탈출하는 내용입니다.",
         "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
       },
-        "status": 'WAITED',
+        "status": 'WAITING',
+        "waitNumber": 5
+    }
+  ]
+  
+}
+```
+
+에러 상황:
+
+| 에러 상황                     | 상태코드  | 구현여부 |
+|---------------------------|-------|------|
+| 유효하지 않는 입력값(guestName 누락) | `400` | ✅    |
+
+##### 사용자의 모든 예약 목록 조회 API
+
+**Request**
+
+```http
+GET /reservations/me?guestName=브라운 HTTP/1.1
+```
+
+**Response**
+
+```http
+HTTP/1.1 200
+Content-Type: application/json
+
+{
+  "reservations": [
+    {
+      "id": 1,
+      "guestName": "브라운",
+      "date": "2023-08-05",
+      "time": {
+        "id": 1,
+        "startAt": "10:00"
+      },
+      "theme": {
+        "id": 1,
+        "name": "레벨2 탈출",
+        "description": "우테코 레벨2를 탈출하는 내용입니다.",
+        "thumbnail": "https://i.pinimg.com/236x/6e/bc/46/6ebc461a94a49f9ea3b8bbe2204145d4.jpg"
+      },
+        "status": 'CANCELLED',
         "waitNumber": 5
     }
   ]

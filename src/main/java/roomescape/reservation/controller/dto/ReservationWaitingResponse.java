@@ -4,7 +4,7 @@ import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
-public sealed interface ReservationWaitingResponse permits CompleteReservationResponse, WaitingReservationResponse {
+public sealed interface ReservationWaitingResponse permits NonWaitingReservationResponse, WaitingReservationResponse {
 
     Long id();
 
@@ -24,6 +24,6 @@ public sealed interface ReservationWaitingResponse permits CompleteReservationRe
         if (reservationWaitingResult.status().isWaiting()) {
             return WaitingReservationResponse.from(reservationWaitingResult);
         }
-        return CompleteReservationResponse.from(reservationWaitingResult);
+        return NonWaitingReservationResponse.from(reservationWaitingResult);
     }
 }
