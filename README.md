@@ -49,7 +49,7 @@ Java 21
 
 ## 2단계 - 내 예약 목록 조회 (상태 구분)
 
-- [ ] 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다
+- [ ] `GET /reservations?customer-name=` 응답에 예약 목록과 대기 목록이 분리되어 함께 반환된다
 - [ ] 대기에는 본인의 대기 순번도 함께 보여준다
 
 ---
@@ -63,7 +63,7 @@ Java 21
 
 | Method | URL | Request | Success | 설명 |
 |--------|-----|---------|---------|------|
-| `GET` | `/reservations?customerName={customerName}` | Query | `200 OK` | 예약자 이름으로 예약 목록 조회 |
+| `GET` | `/reservations?customer-name={customer-name}` | Query | `200 OK` | 예약자 이름으로 예약·대기 목록 조회 |
 | `GET` | `/reservations/date-and-theme` | - | `200 OK` | 예약 가능 날짜와 테마 조회 |
 | `GET` | `/reservations/available-times?date={date}&themeId={themeId}` | Query | `200 OK` | 날짜와 테마별 예약 가능 시간 조회 |
 | `POST` | `/reservations` | Body | `201 Created` | 예약 생성 |
@@ -71,30 +71,48 @@ Java 21
 | `DELETE` | `/reservations/{reservation-id}` | Path | `204 No Content` | 사용자 예약 취소 |
 
 <details>
-<summary>예약자 이름으로 예약 목록 조회 (<code>GET /reservations?customerName={customerName}</code>)</summary>
+<summary>예약자 이름으로 예약·대기 목록 조회 (<code>GET /reservations?customer-name={customer-name}</code>)</summary>
 
 ```http
-GET /reservations?customerName=홍길동
+GET /reservations?customer-name=홍길동
 ```
 
 ```json
-[
-  {
-    "id": 1,
-    "name": "홍길동",
-    "date": "2026-08-05",
-    "time": {
+{
+  "reservations": [
+    {
       "id": 1,
-      "startAt": "10:00:00"
-    },
-    "theme": {
-      "id": 1,
-      "name": "링",
-      "description": "공포 테마",
-      "thumbnailUrl": "http:~"
+      "name": "홍길동",
+      "date": "2026-08-05",
+      "time": {
+        "id": 1,
+        "startAt": "10:00:00"
+      },
+      "theme": {
+        "id": 1,
+        "name": "링",
+        "description": "공포 테마",
+        "thumbnailUrl": "http:~"
+      }
     }
-  }
-]
+  ],
+  "waitings": [
+    {
+      "id": 1,
+      "customerName": "홍길동",
+      "date": "2026-08-05",
+      "time": {
+        "startAt": "10:00:00"
+      },
+      "theme": {
+        "name": "링",
+        "description": "공포 테마",
+        "thumbnailUrl": "http:~"
+      },
+      "rank": 2
+    }
+  ]
+}
 ```
 
 </details>
@@ -492,7 +510,6 @@ DELETE /themes/1
 
 | Method | URL | Request | Success | 설명 |
 |--------|-----|---------|---------|------|
-| `GET` | `/waitings?customer-name={customer-name}` | Query | `200 OK` | 예약자 이름으로 대기 목록 조회 |
 | `POST` | `/waitings` | Body | `201 Created` | 대기 신청 |
 | `DELETE` | `/waitings/{id}?customer-name={customer-name}` | Path | `204 No Content` | 대기 취소 |
 
