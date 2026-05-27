@@ -5,3 +5,5 @@ spring:
       path: /h2-console
   datasource:
     url: jdbc:h2:mem:database
+
+token: ${ADMIN_TOKEN:local-admin-token}
