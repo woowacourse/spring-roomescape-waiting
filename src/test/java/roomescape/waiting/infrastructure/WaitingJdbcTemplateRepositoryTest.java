@@ -4,6 +4,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -98,12 +99,19 @@ class WaitingJdbcTemplateRepositoryTest {
     @DisplayName("ID로 예약 대기를 조회한다")
     void findById_success() {
         // given
+        waitingRepository.save(
+                Waiting.create("리오", LocalDate.now().plusDays(1), savedTime, savedTheme)
+        );
         Waiting savedWaiting = waitingRepository.save(
                 Waiting.create("브라운", LocalDate.now().plusDays(1), savedTime, savedTheme)
         );
 
-        // when & then
-        assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+        // when
+        Waiting foundWaiting = waitingRepository.findById(savedWaiting.getId()).orElseThrow();
+
+        // then
+        assertThat(foundWaiting).isEqualTo(savedWaiting);
+        assertThat(foundWaiting.getRank()).isEqualTo(2L);
     }
 
     @Test
@@ -141,5 +149,22 @@ class WaitingJdbcTemplateRepositoryTest {
 
         // then
         assertThat(waitingRepository.findById(savedWaiting.getId())).contains(savedWaiting);
+    }
+
+    @Test
+    @DisplayName("이름으로 예약 대기를 조회할 때 같은 슬롯의 대기 순번을 함께 반환한다")
+    void findByName_success_with_rank() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        Waiting savedWaiting = waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+
+        // when
+        List<Waiting> waitings = waitingRepository.findByName("브라운");
+
+        // then
+        assertThat(waitings).hasSize(1);
+        assertThat(waitings.getFirst()).isEqualTo(savedWaiting);
+        assertThat(waitings.getFirst().getRank()).isEqualTo(2L);
     }
 }
