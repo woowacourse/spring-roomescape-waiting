@@ -13,6 +13,7 @@ import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.application.dto.UserReservationResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.fake.FakeReservationRepository;
@@ -22,12 +23,16 @@ import roomescape.reservationTime.fake.FakeReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.fake.FakeWaitingRepository;
 
 class ReservationServiceTest {
 
     private ReservationRepository reservationRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
+    private WaitingRepository waitingRepository;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -35,10 +40,12 @@ class ReservationServiceTest {
         reservationRepository = new FakeReservationRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
+        waitingRepository = new FakeWaitingRepository();
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
+                waitingRepository,
                 new ReservationValidator(reservationRepository)
         );
     }
@@ -196,12 +203,19 @@ class ReservationServiceTest {
                 savedTime,
                 savedTheme
         ));
+        Waiting savedWaiting = waitingRepository.save(Waiting.create(
+                "인직",
+                LocalDate.now().plusDays(1),
+                savedTime,
+                savedTheme
+        ));
 
         // when
-        List<Reservation> reservations = reservationService.getReservationsByName("인직");
+        UserReservationResult result = reservationService.getReservationsByName("인직");
 
         // then
-        assertThat(reservations).containsExactly(savedReservation);
+        assertThat(result.reservations()).containsExactly(savedReservation);
+        assertThat(result.waitings()).containsExactly(savedWaiting);
     }
 
     @Test
