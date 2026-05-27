@@ -103,7 +103,7 @@ class ReservationServiceIntegrationTest {
 
 
         @Test
-        @DisplayName("getMyReservations no waiting turn")
+        @DisplayName("reserved 상태인 예약은 순번을 가지고 있지 않다.")
         void 성공2() {
             // given
             String themeName = "테마1";
@@ -152,12 +152,12 @@ class ReservationServiceIntegrationTest {
     }
 
     @Nested
-    @DisplayName("waiting 메서드는")
-    class WaitingTest {
+    @DisplayName("changeSchedule 메서드는")
+    class ChangeScheduleTest {
 
 
         @Test
-        @DisplayName("waiting reserve not changeable")
+        @DisplayName("대기중인 예약이면 예외가 발생한다.")
         void 실패() {
             // given
             String themeName = "테마1";

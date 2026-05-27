@@ -93,7 +93,7 @@ class ReservationServiceTest {
 
 
         @Test
-        @DisplayName("readAll")
+        @DisplayName("모든 예약을 조회한다")
         void 성공() {
             //given & when
             List<Reservation> reservations = List.of(
@@ -115,7 +115,7 @@ class ReservationServiceTest {
 
 
         @Test
-        @DisplayName("reserve")
+        @DisplayName("예약을 생성한다")
         void 성공() {
             //given & when
             List<Reservation> reservations = List.of();
@@ -129,7 +129,7 @@ class ReservationServiceTest {
 
 
         @Test
-        @DisplayName("reserve does not exist reservation time")
+        @DisplayName("시간이 존재하지 않으면 예외가 발생한다")
         void 실패1() {
             // given
             Long wrongTimeId = Long.MIN_VALUE;
@@ -144,7 +144,7 @@ class ReservationServiceTest {
 
 
         @Test
-        @DisplayName("reserve does not exist theme")
+        @DisplayName("테마가 존재하지 않으면 예외가 발생한다")
         void 실패2() {
             // given
             Long wrongThemeId = Long.MIN_VALUE;

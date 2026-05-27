@@ -69,7 +69,7 @@ class UnitMemberControllerTest {
 
 
         @Test
-        @DisplayName("register null password")
+        @DisplayName("password가 Null이면 400을 반환한다")
         void 실패2() throws Exception {
             String nullPasswordRequest = """
                 {

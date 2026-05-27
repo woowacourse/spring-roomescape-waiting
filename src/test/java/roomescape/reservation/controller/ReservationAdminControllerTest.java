@@ -208,7 +208,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("updateScheduleByManager already canceled")
+        @DisplayName("이미 취소된 예약이면 예외가 발생한다")
         void 실패1() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer changedDateId = createReservationDate(managerToken,
@@ -239,7 +239,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("updateScheduleByManager duplicated")
+        @DisplayName("변경하려는 날짜 및 시간이면 예외가 발생한다")
         void 실패2() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer alreadyReservedDateId = createReservationDate(managerToken,
@@ -268,7 +268,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("updateScheduleByManager pastDateTime")
+        @DisplayName("과거로 변경하려고 하면 예외가 발생한다")
         @Sql(
             scripts = {"classpath:truncate.sql", "classpath:test-member.sql",
                 "classpath:past-reservation-date.sql"},

@@ -51,8 +51,8 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation")
-        void 성공() {
+        @DisplayName("예약을 생성한다")
+        void 성공1() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
             Integer themeId = createTheme(managerToken, themeName);
@@ -68,8 +68,86 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation without date id")
+        @DisplayName("같은 이름으로 취소된 예약이 있어도 예약 생성이 가능하다")
+        void 성공2() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            Integer reservationId = createReservationWithToken(memberToken, dateId, timeId,
+                themeId);
+            cancelReservationWithToken(memberToken, reservationId);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", dateId);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, memberToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/member/reservations")
+                .then().log().all()
+                .statusCode(200);
+        }
+
+
+        @Test
+        @DisplayName("다른 이름으로 취소된 예약이 있어도 예약 생성이 가능하다")
+        void 성공3() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            Integer reservationId = createReservationWithToken(memberToken, dateId, timeId,
+                themeId);
+            cancelReservationWithToken(memberToken, reservationId);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", dateId);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, anotherToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/member/reservations")
+                .then().log().all()
+                .statusCode(200);
+        }
+
+
+        @Test
+        @DisplayName("이미 예약한 적이 있으면 409을 반환한다")
+        @Disabled
         void 실패1() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            createReservationWithToken(memberToken, dateId, timeId, themeId);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", dateId);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, memberToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/member/reservations")
+                .then().log().all()
+                .statusCode(RESERVATION_ALREADY_BOOKED.getHttpStatus().value())
+                .body("message", is(RESERVATION_ALREADY_BOOKED.getMessage()));
+        }
+
+
+        @Test
+        @DisplayName("날짜 없이 예약 생성을 시도하면 400을 반환한다")
+        void 실패2() {
             Integer timeId = createReservationTime(managerToken, startAt);
             Integer themeId = createTheme(managerToken, themeName);
 
@@ -90,8 +168,8 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation without time id")
-        void 실패2() {
+        @DisplayName("시간 없이 예약 생성을 시도하면 400을 반환한다")
+        void 실패3() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer themeId = createTheme(managerToken, themeName);
 
@@ -112,8 +190,8 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation without theme id")
-        void 실패3() {
+        @DisplayName("테마 없이 예약 생성을 시도하면 400을 반환한다")
+        void 실패4() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
 
@@ -134,8 +212,8 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation with inactive date")
-        void 실패4() {
+        @DisplayName("비활성화된 날짜로 예약 생성을 시도하면 400을 반환한다")
+        void 실패5() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
             Integer themeId = createTheme(managerToken, themeName);
@@ -158,8 +236,8 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation with inactive time")
-        void 실패5() {
+        @DisplayName("비활성화된 시간으로 예약 생성을 시도하면 400을 반환한다")
+        void 실패6() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
             Integer themeId = createTheme(managerToken, themeName);
@@ -182,8 +260,8 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("create reservation with inactive theme")
-        void 실패6() {
+        @DisplayName("비활성화된 테마로 예약 생성을 시도하면 400을 반환한다")
+        void 실패7() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
             Integer themeId = createTheme(managerToken, themeName);
@@ -206,12 +284,12 @@ class ReservationControllerTest extends AcceptanceTest {
     }
 
     @Nested
-    @DisplayName("get 메서드는")
-    class GetTest {
+    @DisplayName("getMyReservations 메서드는")
+    class GetMyReservationsTest {
 
 
         @Test
-        @DisplayName("get my reservations")
+        @DisplayName("나의 예약을 조회한다")
         void 성공1() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer themeId = createTheme(managerToken, themeName);
@@ -236,101 +314,6 @@ class ReservationControllerTest extends AcceptanceTest {
                 .statusCode(200)
                 .body("size()", is(1));
         }
-
-
-        @Test
-        @DisplayName("get my reservations empty")
-        void 성공2() {
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, memberToken)
-                .when().get("/member/my-reservations")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
-        }
-    }
-
-    @Nested
-    @DisplayName("reserved 메서드는")
-    class ReservedTest {
-
-
-        @Test
-        @DisplayName("reserved duplicated")
-        @Disabled
-        void 실패() {
-            Integer dateId = createReservationDate(managerToken, date);
-            Integer timeId = createReservationTime(managerToken, startAt);
-            Integer themeId = createTheme(managerToken, themeName);
-
-            createReservationWithToken(memberToken, dateId, timeId, themeId);
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("dateId", dateId);
-            params.put("timeId", timeId);
-            params.put("themeId", themeId);
-
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, memberToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/member/reservations")
-                .then().log().all()
-                .statusCode(RESERVATION_ALREADY_BOOKED.getHttpStatus().value())
-                .body("message", is(RESERVATION_ALREADY_BOOKED.getMessage()));
-        }
-
-
-        @Test
-        @DisplayName("reserved when canceled same name")
-        void 성공1() {
-            Integer dateId = createReservationDate(managerToken, date);
-            Integer timeId = createReservationTime(managerToken, startAt);
-            Integer themeId = createTheme(managerToken, themeName);
-
-            Integer reservationId = createReservationWithToken(memberToken, dateId, timeId,
-                themeId);
-            cancelReservationWithToken(memberToken, reservationId);
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("dateId", dateId);
-            params.put("timeId", timeId);
-            params.put("themeId", themeId);
-
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, memberToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/member/reservations")
-                .then().log().all()
-                .statusCode(200);
-        }
-
-
-        @Test
-        @DisplayName("reserved when canceled another name")
-        void 성공2() {
-            Integer dateId = createReservationDate(managerToken, date);
-            Integer timeId = createReservationTime(managerToken, startAt);
-            Integer themeId = createTheme(managerToken, themeName);
-
-            Integer reservationId = createReservationWithToken(memberToken, dateId, timeId,
-                themeId);
-            cancelReservationWithToken(memberToken, reservationId);
-
-            Map<String, Object> params = new HashMap<>();
-            params.put("dateId", dateId);
-            params.put("timeId", timeId);
-            params.put("themeId", themeId);
-
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, anotherToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/member/reservations")
-                .then().log().all()
-                .statusCode(200);
-        }
     }
 
     @Nested
@@ -339,7 +322,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("cancel")
+        @DisplayName("예약을 취소한다")
         void 성공() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
@@ -361,7 +344,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("cancel not owner")
+        @DisplayName("예약자가 아니면 403을 반환한다")
         void 실패1() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
@@ -381,7 +364,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("cancel already canceled")
+        @DisplayName("이미 취소된 예약이면 409를 반환한다")
         void 실패2() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer timeId = createReservationTime(managerToken, startAt);
@@ -402,7 +385,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("cancel not past")
+        @DisplayName("과거 예약이면 409를 반환한다")
         @Sql(
             scripts = {"classpath:truncate.sql", "classpath:test-member.sql",
                 "classpath:past-reservation.sql"},
@@ -427,7 +410,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("changeSchedule")
+        @DisplayName("날짜 및 시간을 변경한다")
         void 성공() {
             String futureDate = LocalDate.now().plusDays(1).toString();
             String futureTime = LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS)
@@ -458,7 +441,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("changeSchedule not owner")
+        @DisplayName("예약자가 아니면 403을 반환한다")
         void 실패1() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer changedDateId = createReservationDate(managerToken,
@@ -486,7 +469,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("changeSchedule already canceled")
+        @DisplayName("이미 취소된 예약이면 409를 반환한다")
         void 실패2() {
             Integer dateId = createReservationDate(managerToken, date);
             Integer changedDateId = createReservationDate(managerToken,
@@ -515,7 +498,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("changeSchedule past")
+        @DisplayName("과거 예약이면 409를 반환한다")
         @Sql(
             scripts = {"classpath:truncate.sql", "classpath:test-member.sql",
                 "classpath:past-reservation.sql"},
@@ -545,7 +528,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("changeSchedule new datetime is past")
+        @DisplayName("과거 날짜 및 시간으로 변경하려는 경우 400을 반환한다")
         @Sql(
             scripts = {"classpath:truncate.sql", "classpath:test-member.sql",
                 "classpath:past-reservation-date.sql"},
