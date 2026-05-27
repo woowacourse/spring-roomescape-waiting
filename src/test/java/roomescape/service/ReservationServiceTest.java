@@ -10,10 +10,8 @@ import common.exception.RoomEscapeException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.IntStream;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -21,15 +19,12 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.RoomEscapeFixture;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
-import roomescape.domain.reservation.Rank;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationDate;
 import roomescape.domain.reservation.ReservationName;
-import roomescape.domain.reservation.ReservationResult;
 import roomescape.domain.reservation.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeName;
@@ -116,7 +111,7 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.save(any())).willReturn(DUMMY);
-        given(reservationRepository.findBy(any(), any(), any())).willReturn(List.of(DUMMY));
+        given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
         Assertions.assertThatNoException()
                 .isThrownBy(() -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59)));
@@ -144,7 +139,7 @@ class ReservationServiceTest {
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(reservationTime));
         given(themeRepository.findById(1L)).willReturn(Optional.of(theme));
         given(reservationRepository.save(any())).willReturn(DUMMY);
-        given(reservationRepository.findBy(any(), any(), any())).willReturn(List.of(DUMMY));
+        given(reservationRepository.findByTimeAndThemeAndDate(any(), any(), any())).willReturn(List.of(DUMMY));
 
         Assertions.assertThatNoException().isThrownBy(
                 () -> reservationService.reserve(request, LocalDateTime.of(2026, 4, 5, 10, 59, 59)));

@@ -143,7 +143,7 @@ public class ReservationRepository {
                 jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId, themeId, name));
     }
 
-    public List<Reservation> findBy(ReservationTime time, Theme theme, ReservationDate date) {
+    public List<Reservation> findByTimeAndThemeAndDate(ReservationTime time, Theme theme, ReservationDate date) {
         String sql = """
             SELECT r.id   AS reservation_id,
                    r.name,

@@ -48,7 +48,7 @@ public class ReservationService {
         validateIsDuplicateReservation(request.getTimeId(), request.getThemeId(), request.getDate(), request.getName());
         Reservation saved = reservationRepository.save(reservation);
 
-        List<Reservation> by = reservationRepository.findBy(
+        List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
                 saved.getTime(), saved.getTheme(), saved.getDate());
 
         List<Reservation> list = by.stream()
@@ -66,7 +66,7 @@ public class ReservationService {
     public ReservationResult find(long reservationId) {
         Reservation reservation = findReservationById(reservationId);
 
-        List<Reservation> by = reservationRepository.findBy(
+        List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
                 reservation.getTime(), reservation.getTheme(), reservation.getDate());
 
         List<Reservation> list = by.stream()
@@ -86,7 +86,7 @@ public class ReservationService {
         List<ReservationResult> reservationResults = new ArrayList<>();
 
         for (Reservation reservation : reservations) { // reservations는 name으로 검색한 결과들
-            List<Reservation> by = reservationRepository.findBy(
+            List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
                     reservation.getTime(), reservation.getTheme(), reservation.getDate());
 
             List<Reservation> list = by.stream()
@@ -127,7 +127,7 @@ public class ReservationService {
         target.ensureNotPast(now);
         Reservation updated = reservationRepository.update(id, target);
 
-        List<Reservation> by = reservationRepository.findBy(
+        List<Reservation> by = reservationRepository.findByTimeAndThemeAndDate(
                 updated.getTime(), updated.getTheme(), updated.getDate());
 
         List<Reservation> list = by.stream()
