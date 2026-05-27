@@ -303,6 +303,11 @@ table.data .actions {
     color: var(--text);
 }
 
+.time-option-waiting {
+    color: #7a5b13;
+    background: #fff7dc;
+}
+
 /* 인기 테마 페이지 */
 .popular-hero {
     text-align: center;
@@ -562,6 +567,45 @@ table.data .actions {
 }
 
 /* 내 예약 조회 영역 */
+.reservation-form-card {
+    padding: 24px;
+    margin-bottom: 24px;
+}
+
+.reservation-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    align-items: end;
+    gap: 14px;
+}
+
+.form-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+}
+
+.reservation-submit {
+    min-height: 39px;
+    white-space: nowrap;
+}
+
+@media (min-width: 1120px) {
+    .reservation-form {
+        grid-template-columns: minmax(160px, 1.2fr) minmax(150px, 0.9fr) minmax(170px, 1fr) minmax(160px, 1fr) auto;
+    }
+}
+
+.form-message {
+    margin: 14px 0 0;
+    font-size: 0.92rem;
+}
+
+.form-message-error {
+    color: var(--danger);
+}
+
 .lookup-card {
     padding: 24px;
     margin-bottom: 24px;
@@ -575,7 +619,9 @@ table.data .actions {
 }
 
 .field-label {
+    display: block;
     font-weight: 700;
+    line-height: 1.3;
     color: var(--text);
 }
 
@@ -586,6 +632,30 @@ table.data .actions {
 
 .my-reservation-card {
     margin-top: 0;
+}
+
+.status-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 48px;
+    padding: 4px 9px;
+    border-radius: 999px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    border: 1px solid transparent;
+}
+
+.status-reserved {
+    color: var(--brand);
+    background: var(--brand-soft);
+    border-color: #bfd8c5;
+}
+
+.status-waiting {
+    color: #765412;
+    background: #fff4cf;
+    border-color: #ead99a;
 }
 
 .theme-summary {

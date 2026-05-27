@@ -1,5 +1,6 @@
 (() => {
     const RESERVATIONS_API = '/reservations';
+    const WAITLISTS_API = '/waitlists';
     const MY_TIMES_API = '/times';
     const LAST_SEARCH_NAME_KEY = 'roomescape:lastReservationName';
 
@@ -24,7 +25,7 @@
             }
         });
 
-        showEmptyState(tableBody, 6, '예약자 이름을 입력하고 내 예약을 조회해보세요.');
+        showEmptyState(tableBody, 8, '예약자 이름을 입력하고 내 예약을 조회해보세요.');
     });
 
     async function searchMyReservations() {
@@ -47,7 +48,7 @@
             reservations = await fetchJson(`${RESERVATIONS_API}?name=${encodeURIComponent(name)}`);
 
             renderReservations();
-            lookupMessage.textContent = `${name}님의 예약 ${reservations.length}건을 조회했습니다.`;
+            lookupMessage.textContent = buildLookupMessage(name, reservations);
         } catch (error) {
             console.error('내 예약 조회 실패:', error);
             lookupMessage.textContent = '내 예약 조회에 실패했습니다.';
@@ -60,7 +61,7 @@
         tableBody.innerHTML = '';
 
         if (!reservations || reservations.length === 0) {
-            showEmptyState(tableBody, 6, '조회된 예약이 없습니다. 예약자 이름을 다시 확인해주세요.');
+            showEmptyState(tableBody, 8, '조회된 예약이나 대기가 없습니다. 예약자 이름을 다시 확인해주세요.');
             return;
         }
 
@@ -79,14 +80,20 @@
         const row = tableBody.insertRow();
 
         row.insertCell().textContent = index + 1;
+        row.insertCell().appendChild(createStatusBadge(reservation.status));
         row.insertCell().appendChild(createThemeSummary(reservation.theme));
         row.insertCell().textContent = reservation.name;
         row.insertCell().textContent = reservation.date;
         row.insertCell().textContent = reservation.time ? reservation.time.startAt : '-';
+        row.insertCell().textContent = isWaiting(reservation) ? `${reservation.waitingOrder}번` : '-';
 
         const actions = row.insertCell();
         actions.className = 'actions';
-        actions.appendChild(createButton('변경', 'btn-ghost', () => startEdit(reservation.id)));
+
+        if (!isWaiting(reservation)) {
+            actions.appendChild(createButton('변경', 'btn-ghost', () => startEdit(reservation.id)));
+        }
+
         actions.appendChild(createButton('취소', 'btn-danger', () => cancelReservation(reservation)));
     }
 
@@ -95,6 +102,7 @@
         const row = tableBody.insertRow();
 
         row.insertCell().textContent = index + 1;
+        row.insertCell().appendChild(createStatusBadge(reservation.status));
         row.insertCell().appendChild(createThemeSummary(reservation.theme));
         row.insertCell().textContent = reservation.name;
 
@@ -110,6 +118,7 @@
 
         row.insertCell().appendChild(dateInput);
         row.insertCell().appendChild(timeSelect);
+        row.insertCell().textContent = '-';
 
         const actions = row.insertCell();
         actions.className = 'actions';
@@ -122,6 +131,12 @@
     }
 
     function startEdit(reservationId) {
+        const reservation = reservations.find(item => item.id === reservationId);
+        if (reservation && isWaiting(reservation)) {
+            alert('대기 중인 항목은 변경할 수 없습니다. 취소 후 다시 신청해주세요.');
+            return;
+        }
+
         if (editingReservationId !== null && editingReservationId !== reservationId) {
             const confirmed = confirm('작성 중인 변경 내용을 닫고 다른 예약을 변경하시겠습니까?');
             if (!confirmed) return;
@@ -245,21 +260,47 @@
     async function cancelReservation(reservation) {
         const themeName = reservation.theme ? reservation.theme.name : '선택한 테마';
         const time = reservation.time ? reservation.time.startAt : '';
+        const targetLabel = isWaiting(reservation) ? '대기' : '예약';
 
-        const confirmed = confirm(`${themeName} ${reservation.date} ${time} 예약을 취소하시겠습니까?`);
+        const confirmed = confirm(`${themeName} ${reservation.date} ${time} ${targetLabel}를 취소하시겠습니까?`);
         if (!confirmed) return;
 
         try {
-            await fetchJson(
-                    `${RESERVATIONS_API}/${reservation.id}?name=${encodeURIComponent(searchedName)}`,
-                    { method: 'DELETE' }
-            );
+            await fetchJson(`${getCancelApi(reservation)}?name=${encodeURIComponent(searchedName)}`, {
+                method: 'DELETE'
+            });
 
             await searchMyReservations();
         } catch (error) {
-            console.error('내 예약 취소 실패:', error);
+            console.error(`내 ${targetLabel} 취소 실패:`, error);
             alert(error.message);
         }
+    }
+
+    function buildLookupMessage(name, reservations) {
+        const reservedCount = reservations.filter(reservation => !isWaiting(reservation)).length;
+        const waitingCount = reservations.filter(isWaiting).length;
+        return `${name}님의 예약 ${reservedCount}건, 대기 ${waitingCount}건을 조회했습니다.`;
+    }
+
+    function getCancelApi(reservation) {
+        if (isWaiting(reservation)) {
+            return `${WAITLISTS_API}/${reservation.id}`;
+        }
+
+        return `${RESERVATIONS_API}/${reservation.id}`;
+    }
+
+    function createStatusBadge(status) {
+        const badge = document.createElement('span');
+        const waiting = status === 'WAITING';
+        badge.className = waiting ? 'status-badge status-waiting' : 'status-badge status-reserved';
+        badge.textContent = waiting ? '대기' : '예약';
+        return badge;
+    }
+
+    function isWaiting(reservation) {
+        return reservation.status === 'WAITING';
     }
 
     function createThemeSummary(theme) {
