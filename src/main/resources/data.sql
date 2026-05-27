@@ -62,6 +62,28 @@ INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
 INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
                                                                     ('과거게스트', '2026-04-26', 'COMPLETED', 1, 1), ('과거게스트', '2026-04-26', 'COMPLETED', 4, 1), ('과거게스트', '2026-04-26', 'CANCELLED', 7, 2);
 
+-- [Theme 3: 마법사의 서재 — 예약 대기(PENDING) 시연용]
+-- 한 슬롯에 첫 예약자가 CONFIRMED로 자리를 잡고, 뒤이은 신청자들이 삽입 순서(=id)대로 PENDING 대기 줄을 선다.
+-- 대기 순번은 reservation.id 오름차순으로 부여되므로, 아래 INSERT 순서가 곧 대기 순번이 된다.
+INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
+                                                                    -- 슬롯 A (2026-05-28 13:00): 브라운 확정 → 네오(대기 1) → 포비(대기 2)
+                                                                    ('브라운', '2026-05-28', 'CONFIRMED', 5, 3),
+                                                                    ('네오', '2026-05-28', 'PENDING', 5, 3),
+                                                                    ('포비', '2026-05-28', 'PENDING', 5, 3),
+                                                                    -- 슬롯 B (2026-05-29 15:00): 네오 확정 → 브라운(대기 1) → 제이슨(대기 2)
+                                                                    ('네오', '2026-05-29', 'CONFIRMED', 7, 3),
+                                                                    ('브라운', '2026-05-29', 'PENDING', 7, 3),
+                                                                    ('제이슨', '2026-05-29', 'PENDING', 7, 3),
+                                                                    -- 브라운 과거 이력: 완료 1건, 취소 1건 (내 예약 조회에서 모든 상태가 보이도록)
+                                                                    ('브라운', '2026-05-20', 'COMPLETED', 3, 3),
+                                                                    ('브라운', '2026-05-22', 'CANCELLED', 4, 3);
+
+-- [Theme 4: 우주 정거장 조난 — 추가 대기 시연]
+INSERT INTO reservation_seed (name, date, status, time_id, theme_id) VALUES
+                                                                    -- 슬롯 C (2026-05-30 14:00): 포비 확정 → 브라운(대기 1)
+                                                                    ('포비', '2026-05-30', 'CONFIRMED', 6, 4),
+                                                                    ('브라운', '2026-05-30', 'PENDING', 6, 4);
+
 -- 4. 테마 슬롯(Theme_Slot) 생성 후 예약 연결
 INSERT INTO theme_slot (theme_id, date, time_id, is_reserved)
 SELECT
