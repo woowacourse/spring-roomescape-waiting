@@ -1,5 +1,15 @@
 package roomescape.reservation.repository.jdbc;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -8,17 +18,11 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.repository.entity.ReservationEntity;
-
-import java.sql.*;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Repository
 @RequiredArgsConstructor
@@ -51,35 +55,38 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now) {
+    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(
+        final CustomerName customerName,
+        final LocalDateTime now
+    ) {
         final String sql = """
-                SELECT
-                    r.id AS reservation_id,
-                    r.name AS reservation_name,
-                    r.date AS reservation_date,
-                    r.theme_id AS theme_id,
-                    t.id AS time_id,
-                    t.start_at AS time_start_at,
-                    h.name AS theme_name,
-                    h.description AS theme_description,
-                    h.thumbnail_url AS theme_thumbnail_url
-                FROM reservation r
-                JOIN reservation_time t ON r.time_id = t.id
-                JOIN theme h ON r.theme_id = h.id
-                WHERE r.name = ?
-                  AND (r.date > ? OR (r.date = ? AND t.start_at > ?))
-                ORDER BY r.date ASC
-                """;
+            SELECT
+                r.id AS reservation_id,
+                r.name AS reservation_name,
+                r.date AS reservation_date,
+                r.theme_id AS theme_id,
+                t.id AS time_id,
+                t.start_at AS time_start_at,
+                h.name AS theme_name,
+                h.description AS theme_description,
+                h.thumbnail_url AS theme_thumbnail_url
+            FROM reservation r
+            JOIN reservation_time t ON r.time_id = t.id
+            JOIN theme h ON r.theme_id = h.id
+            WHERE r.name = ?
+              AND (r.date > ? OR (r.date = ? AND t.start_at > ?))
+            ORDER BY r.date ASC
+            """;
 
-        return jdbcTemplate.query(sql,
-                        this::mapToDomain,
-                        customerName.name(),
-                        now,
-                        Date.valueOf(now.toLocalDate()),
-                        Time.valueOf(now.toLocalTime())
-                )
-                .stream()
-                .toList();
+        return jdbcTemplate.query(
+                sql,
+                this::mapToDomain,
+                customerName.name(),
+                now,
+                Date.valueOf(now.toLocalDate()),
+                Time.valueOf(now.toLocalTime()))
+            .stream()
+            .toList();
     }
 
     @Override
@@ -212,7 +219,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         if (keyHolder.getKey() == null) {
             throw new IllegalStateException("생성된 id를 가져오지 못했습니다.");
         }
-
         return keyHolder.getKey().longValue();
     }
 
@@ -251,7 +257,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
-    private ReservationTimesWithStatus mapToTimesWithStatus(final ResultSet resultSet, final int rowNum) throws SQLException {
+    private ReservationTimesWithStatus mapToTimesWithStatus(final ResultSet resultSet, final int rowNum)
+            throws SQLException {
         return new ReservationTimesWithStatus(
                 resultSet.getLong("id"),
                 resultSet.getTime("start_at").toLocalTime(),

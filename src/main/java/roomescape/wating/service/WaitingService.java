@@ -2,7 +2,6 @@ package roomescape.wating.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
@@ -18,6 +17,7 @@ import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.service.dto.request.WaitingCreateRequest;
+import roomescape.wating.service.dto.response.WaitingCreateResponse;
 
 @Service
 @RequiredArgsConstructor
@@ -28,21 +28,21 @@ public class WaitingService {
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
-    public long create(final WaitingCreateRequest request) {
+    public WaitingCreateResponse create(final WaitingCreateRequest request) {
         final Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(ThemeNotFoundException::new);
+            .orElseThrow(ThemeNotFoundException::new);
         final ReservationTime reservationTime = reservationTimeRepository.findById(request.timeId())
-                .orElseThrow(ReservationTimeNotFoundException::new);
+            .orElseThrow(ReservationTimeNotFoundException::new);
 
         final Waiting waiting = Waiting.create(
-                request.name(),
-                request.date(),
-                reservationTime,
-                theme,
-                LocalDateTime.now(clock)
+            request.name(),
+            request.date(),
+            reservationTime,
+            theme,
+            LocalDateTime.now(clock)
         );
         try {
-            return waitingRepository.save(waiting);
+            return new WaitingCreateResponse(waitingRepository.save(waiting));
         } catch (DuplicateKeyException exception) {
             throw new WaitingSlotDuplicateException();
         }
@@ -50,7 +50,7 @@ public class WaitingService {
 
     public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
         final Waiting waiting = waitingRepository.findById(waitingId)
-                .orElseThrow(WaitingNotFoundException::new);
+            .orElseThrow(WaitingNotFoundException::new);
 
         if (!waiting.isOwnedBy(customerName)) {
             throw new WaitingNotFoundException();

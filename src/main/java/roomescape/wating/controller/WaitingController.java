@@ -4,7 +4,6 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -25,18 +24,18 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingCreateResponse> create(
-            @Valid @RequestBody WaitingCreateRequest request
+        @Valid @RequestBody WaitingCreateRequest request
     ) {
-        final long savedId = waitingService.create(request);
+        final WaitingCreateResponse response = waitingService.create(request);
         return ResponseEntity
-                .status(HttpStatus.CREATED)
-                .body(new WaitingCreateResponse(savedId));
+            .status(HttpStatus.CREATED)
+            .body(response);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(
-            @PathVariable Long id,
-            @RequestParam("customer-name") String customerName
+        @PathVariable Long id,
+        @RequestParam("customer-name") String customerName
     ) {
         waitingService.deleteByIdAndCustomerName(id, customerName);
         return ResponseEntity.noContent().build();

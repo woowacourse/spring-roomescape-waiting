@@ -18,8 +18,5 @@ public interface WaitingRepository {
 
     int countEarlierWaitingsInSlot(LocalDate date, long timeId, long themeId, LocalDateTime createdAt);
 
-    List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(
-            String customerName,
-            LocalDateTime now
-    );
+    List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(String customerName, LocalDateTime now);
 }

@@ -32,11 +32,11 @@ import roomescape.wating.domain.exception.NoReservationForWaitingException;
 class JdbcWaitingRepositoryTest {
 
     private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
-            LocalDate.of(2026, 5, 8)
-                    .atTime(10, 30)
-                    .atZone(ZoneId.of("Asia/Seoul"))
-                    .toInstant(),
-            ZoneId.of("Asia/Seoul")
+        LocalDate.of(2026, 5, 8)
+            .atTime(10, 30)
+            .atZone(ZoneId.of("Asia/Seoul"))
+            .toInstant(),
+        ZoneId.of("Asia/Seoul")
     ));
 
     @Autowired
@@ -54,14 +54,16 @@ class JdbcWaitingRepositoryTest {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
+
         final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
         insertReservation("브라운", tomorrow, time.getId(), theme.getId());
+
         Waiting waiting = Waiting.create(
-                "코로구",
-                tomorrow,
-                time,
-                theme,
-                NOW
+            "코로구",
+            tomorrow,
+            time,
+            theme,
+            NOW
         );
 
         //when
@@ -77,16 +79,16 @@ class JdbcWaitingRepositoryTest {
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
         Waiting waiting = Waiting.create(
-                "코로구",
-                NOW.plusDays(1).toLocalDate(),
-                time,
-                theme,
-                NOW
+            "코로구",
+            NOW.plusDays(1).toLocalDate(),
+            time,
+            theme,
+            NOW
         );
 
         //when & then
         assertThatThrownBy(() -> jdbcWaitingRepository.save(waiting))
-                .isInstanceOf(NoReservationForWaitingException.class);
+            .isInstanceOf(NoReservationForWaitingException.class);
     }
 
     @Test
@@ -142,62 +144,64 @@ class JdbcWaitingRepositoryTest {
 
         //when
         List<Waiting> waitings = jdbcWaitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(
-                customerName,
-                NOW
+            customerName,
+            NOW
         );
 
         //then
         assertThat(waitings).hasSize(2);
         assertThat(waitings).extracting(waiting ->
-                        LocalDateTime.of(waiting.getReservationDate(), waiting.getTime().getStartAt()))
-                .allMatch(dateTime -> dateTime.isAfter(NOW));
+                LocalDateTime.of(waiting.getReservationDate(), waiting.getTime().getStartAt()))
+            .allMatch(dateTime -> dateTime.isAfter(NOW));
 
     }
 
     private ReservationTime insertReservationTime(final String startAt) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at) VALUES (?)",
-                startAt
+        jdbcTemplate.update("""
+                INSERT INTO reservation_time (start_at) VALUES (?)
+                """,
+            startAt
         );
         return ReservationTime.of(1L, Time.valueOf(startAt).toLocalTime());
     }
 
     private Theme insertTheme(final String name, final String description, final String thumbnailUrl) {
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                name,
-                description,
-                thumbnailUrl
+        jdbcTemplate.update("""
+                INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)
+                """,
+            name,
+            description,
+            thumbnailUrl
         );
-
         return Theme.of(1L, name, description, thumbnailUrl);
     }
 
     private void insertReservation(
-            final String name,
-            final LocalDate date,
-            final long timeId,
-            final long themeId
+        final String name,
+        final LocalDate date,
+        final long timeId,
+        final long themeId
     ) {
-        jdbcTemplate.update(
-                "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name,
-                Date.valueOf(date),
-                timeId,
-                themeId
+        jdbcTemplate.update("""
+                INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?)
+                """,
+            name,
+            Date.valueOf(date),
+            timeId,
+            themeId
         );
     }
 
     private long insertWaiting(
-            final String name,
-            final LocalDate reservationDate,
-            final long timeId,
-            final long themeId
+        final String name,
+        final LocalDate reservationDate,
+        final long timeId,
+        final long themeId
     ) {
         final String sql = """
-                INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
-                """;
+            INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
+            VALUES (?, ?, ?, ?)
+            """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
@@ -208,11 +212,6 @@ class JdbcWaitingRepositoryTest {
             ps.setLong(4, themeId);
             return ps;
         }, keyHolder);
-
-        Number key = keyHolder.getKey();
-        if (key == null) {
-            throw new IllegalStateException("대기 생성에 실패했습니다.");
-        }
-        return key.longValue();
+        return keyHolder.getKey().longValue();
     }
 }

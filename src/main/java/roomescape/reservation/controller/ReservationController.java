@@ -24,11 +24,11 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping(params = "customer-name")
-    public ResponseEntity<ReservationsAndWaitingsResponse> getReservationsByCustomerName(
-            @RequestParam("customer-name") String customerName
+    public ResponseEntity<ReservationsAndWaitingsResponse> findReservationsByCustomerName(
+        @RequestParam("customer-name") String customerName
     ) {
-        final ReservationsAndWaitingsResponse results = reservationService.getReservationsByCustomerName(customerName);
-        return ResponseEntity.ok(results);
+        final ReservationsAndWaitingsResponse response = reservationService.findReservationsByCustomerName(customerName);
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/available-times")

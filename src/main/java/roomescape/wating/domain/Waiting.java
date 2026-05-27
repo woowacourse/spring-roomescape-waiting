@@ -21,12 +21,12 @@ public class Waiting {
     private final Theme theme;
 
     private Waiting(
-            Long id,
-            CustomerName customerName,
-            LocalDate reservationDate,
-            LocalDateTime createdAt,
-            ReservationTime time,
-            Theme theme
+        final Long id,
+        final CustomerName customerName,
+        final LocalDate reservationDate,
+        final LocalDateTime createdAt,
+        final ReservationTime time,
+        final Theme theme
     ) {
         validateNotNull(customerName, reservationDate, time, theme);
         this.id = id;
@@ -38,40 +38,48 @@ public class Waiting {
     }
 
     public static Waiting create(
-            final String customerName,
-            final LocalDate date,
-            final ReservationTime time,
-            final Theme theme,
-            final LocalDateTime now
+        final String customerName,
+        final LocalDate date,
+        final ReservationTime time,
+        final Theme theme,
+        final LocalDateTime now
     ) {
         final Waiting waiting = new Waiting(
-                null,
-                new CustomerName(customerName),
-                date,
-                null,
-                time,
-                theme);
+            null,
+            new CustomerName(customerName),
+            date,
+            null,
+            time,
+            theme);
 
         waiting.validateNotPast(now);
         return waiting;
     }
 
     public static Waiting of(
-            final Long id,
-            final String customerName,
-            final Date date,
-            final LocalDateTime createdAt,
-            final ReservationTime time,
-            final Theme theme
+        final Long id,
+        final String customerName,
+        final Date date,
+        final LocalDateTime createdAt,
+        final ReservationTime time,
+        final Theme theme
     ) {
         return new Waiting(
-                id,
-                new CustomerName(customerName),
-                date.toLocalDate(),
-                createdAt,
-                time,
-                theme
+            id,
+            new CustomerName(customerName),
+            date.toLocalDate(),
+            createdAt,
+            time,
+            theme
         );
+    }
+
+    public long getTimeId() {
+        return time.getId();
+    }
+
+    public long getThemeId() {
+        return theme.getId();
     }
 
     public boolean isOwnedBy(final String customerName) {
@@ -83,10 +91,10 @@ public class Waiting {
     }
 
     private void validateNotNull(
-            final CustomerName customerName,
-            final LocalDate reservationDate,
-            final ReservationTime time,
-            final Theme theme
+        final CustomerName customerName,
+        final LocalDate reservationDate,
+        final ReservationTime time,
+        final Theme theme
     ) {
         try {
             Objects.requireNonNull(customerName);

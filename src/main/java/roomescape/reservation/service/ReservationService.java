@@ -1,5 +1,9 @@
 package roomescape.reservation.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
@@ -28,11 +32,6 @@ import roomescape.wating.domain.Waiting;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.service.dto.response.WaitingResponse;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
@@ -52,23 +51,28 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationsAndWaitingsResponse getReservationsByCustomerName(final String customerName) {
+    public ReservationsAndWaitingsResponse findReservationsByCustomerName(final String customerName) {
         final LocalDateTime now = LocalDateTime.now(clock);
-
-        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(new CustomerName(customerName), now);
-        final List<Waiting> waitings = waitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(customerName, now);
+        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+            new CustomerName(customerName),
+            now
+        );
+        final List<Waiting> waitings = waitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+            customerName,
+            now
+        );
 
         final List<WaitingResponse> waitingsWithRank = waitings.stream()
-                .map(waiting -> {
-                    int rank = waitingRepository.countEarlierWaitingsInSlot(
-                            waiting.getReservationDate(),
-                            waiting.getTime().getId(),
-                            waiting.getTheme().getId(),
-                            waiting.getCreatedAt()
-                    ) + 1;
-                    return WaitingResponse.of(waiting, rank);
-                })
-                .toList();
+            .map(waiting -> {
+                int rank = waitingRepository.countEarlierWaitingsInSlot(
+                    waiting.getReservationDate(),
+                    waiting.getTimeId(),
+                    waiting.getThemeId(),
+                    waiting.getCreatedAt()
+                ) + 1;
+                return WaitingResponse.of(waiting, rank);
+            })
+            .toList();
 
         return ReservationsAndWaitingsResponse.from(reservations, waitingsWithRank);
     }
