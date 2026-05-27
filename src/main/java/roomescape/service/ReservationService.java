@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -47,15 +48,15 @@ public class ReservationService {
         Theme theme = getValidTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
-        validateNoDuplicateReservation(request.date(), theme, time);
+
+        ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
         Reservation reservation = new Reservation(
                 request.name(),
                 request.date(),
                 time,
                 theme,
-                //TODO
-                ReservationStatus.CONFIRMED
+                status
         );
 
         Reservation saved = reservationDao.save(reservation);
@@ -67,7 +68,11 @@ public class ReservationService {
         Theme theme = getValidTheme(request.themeId());
 
         validateReservationDateTime(request.date(), time);
-        validateNoDuplicateReservation(request.date(), theme, time);
+        ReservationStatus status = checkReservationStatus(request.date(), theme, time);
+
+        if(status == ReservationStatus.WAITING) {
+            throw new IllegalArgumentException("요청하신 날짜 및 시간에는 예약이 존재해 변경 불가합니다. 대기를 원하신다면 취소 후 신청해주세요.");
+        }
 
         Reservation newReservation = reservationDao.update(id, request.date(), request.timeId());
         return ReservationResponse.from(newReservation);
@@ -93,16 +98,19 @@ public class ReservationService {
         return theme;
     }
 
-    private void validateReservationDateTime(java.time.LocalDate date, ReservationTime time) {
+    private void validateReservationDateTime(LocalDate date, ReservationTime time) {
         LocalDateTime targetDateTime = LocalDateTime.of(date, time.getStartAt());
         if (targetDateTime.isBefore(LocalDateTime.now())) {
             throw new IllegalArgumentException("이미 지난 시간/날짜는 예약할 수 없습니다.");
         }
     }
 
-    private void validateNoDuplicateReservation(java.time.LocalDate date, Theme theme, ReservationTime time) {
+    private ReservationStatus checkReservationStatus(LocalDate date, Theme theme, ReservationTime time) {
         if (reservationDao.existsBy(date, theme, time)) {
-            throw new IllegalArgumentException("이미 존재하는 예약 건입니다.");
+            return ReservationStatus.WAITING;
         }
+
+        return ReservationStatus.CONFIRMED;
     }
 }
+
