@@ -154,4 +154,25 @@ class WaitingListServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
     }
+
+    @Test
+    void 같은_사용자가_여러번_예약대기_생성_시도시_예외발생() {
+        // given
+        LocalDate tomorrow = LocalDate.now().plusDays(1);
+        String name = "오리";
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(name, tomorrow, 1L, 1L);
+
+        Long themeId = 1L;
+        Long timeId = 1L;
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+        given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, themeId, tomorrow, timeId)).willReturn(true);
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.create(createCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
+    }
 }

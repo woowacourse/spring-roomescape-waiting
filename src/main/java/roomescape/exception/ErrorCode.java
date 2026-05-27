@@ -10,6 +10,7 @@ public enum ErrorCode {
     METHOD_NOT_ALLOWED(HttpStatus.METHOD_NOT_ALLOWED,"지원하지 않는 HTTP 메서드입니다."),
 
     // 비즈니스 에러
+    ALREADY_ON_WAITING_LIST(HttpStatus.UNPROCESSABLE_ENTITY, "이미 해당 조건의 예약 대기 신청이 존재합니다."),
     TIME_ALREADY_RESERVED(HttpStatus.UNPROCESSABLE_ENTITY, "해당 시간대에 이미 예약이 존재합니다."),
     DATE_ALREADY_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 지난 날짜입니다."),
     TIME_ALREADY_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 지난 시간입니다."),

@@ -1,6 +1,7 @@
 package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -21,7 +22,7 @@ public class WaitingListService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
 
-    public WaitingListResult create(WaitingListCreateCommand createCommand) {
+    public WaitingListResult create(final WaitingListCreateCommand createCommand) {
         Theme findTheme = themeRepository.findById(createCommand.themeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.THEME_NOT_FOUND));
         ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
@@ -35,7 +36,18 @@ public class WaitingListService {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
 
-        WaitingList savedWaitingList = waitingListRepository.save(waitingList);
-        return WaitingListResult.from(savedWaitingList);
+        if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
+                waitingList.getName(), findTheme.getId(), waitingList.getReservationDate().getDate(), findReservationTime.getId()
+            )
+        ) {
+            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
+
+        try {
+            WaitingList savedWaitingList = waitingListRepository.save(waitingList);
+            return WaitingListResult.from(savedWaitingList);
+        } catch (DataAccessException e) {
+            throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
     }
 }

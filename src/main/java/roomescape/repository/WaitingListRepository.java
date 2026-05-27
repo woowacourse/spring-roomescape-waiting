@@ -12,12 +12,26 @@ import roomescape.exception.KeyGenerationException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.time.LocalDate;
 
 @RequiredArgsConstructor
 @Repository
 public class WaitingListRepository {
 
     private final JdbcTemplate jdbcTemplate;
+
+
+    public boolean existsByNameAndThemeAndDateAndTime(String name, Long themeId, LocalDate date, Long timeId) {
+        final String sql = """
+                SELECT COUNT(*)
+                FROM waiting_list
+                WHERE name = ? AND theme_id = ? AND date = ? AND time_id = ?
+                """;
+
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, themeId, date, timeId);
+
+        return count != null && count > 0;
+    }
 
     public WaitingList save(final WaitingList waitingListWithoutId) {
         final long waitingListId = insertWaitingList(waitingListWithoutId);
@@ -59,5 +73,4 @@ public class WaitingListRepository {
 
         return generatedKey.longValue();
     }
-
 }
