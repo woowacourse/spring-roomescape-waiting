@@ -90,7 +90,7 @@ class ReservationServiceTest {
     @DisplayName("예약 테이블에 themeSlot에 해당하는 예약이 존재한다면, reservation 상태가 pending이다.")
     void saveReservationByExistsThemeSlot() {
         reservationService.saveReservation("브라운", savedThemeSlot.getId());
-        Reservation reservation2 = reservationService.saveReservation("브라운", savedThemeSlot.getId());
+        Reservation reservation2 = reservationService.saveReservation("브라운1", savedThemeSlot.getId());
         assertThat(reservation2.getReservationStatus()).isEqualTo(PendingStatus.getInstance());
     }
 
@@ -129,6 +129,7 @@ class ReservationServiceTest {
         //then
         Reservation findReservation = reservationService.findReservation(reservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
+        assertThat(findReservation.getThemeSlot().isReserved()).isTrue();
     }
 
     @Test
@@ -160,11 +161,5 @@ class ReservationServiceTest {
         Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
         assertThat(confirmReservation.getThemeSlot().isReserved()).isFalse();
-    }
-
-    @Test
-    @DisplayName("취소 대상 예약이 PENDING이면 해당 ThemeSlot은 변경되지 않는다.")
-    void ThemeSlotNotChangeWhenCancelStatusIsPending() {
-
     }
 }
