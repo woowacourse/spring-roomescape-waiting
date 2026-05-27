@@ -95,8 +95,8 @@ class JdbcThemeRepositoryTest {
         List<PopularTheme> popular = themeRepository.findPopular();
 
         assertThat(popular).hasSize(2);
-        assertThat(popular.get(0).theme().getId()).isEqualTo(popularThemeId);
-        assertThat(popular.get(0).reservationCount()).isEqualTo(2);
+        assertThat(popular.getFirst().theme().getId()).isEqualTo(popularThemeId);
+        assertThat(popular.getFirst().reservationCount()).isEqualTo(2);
     }
 
     private long insertTheme(String name) {

@@ -117,8 +117,8 @@ class UserReservationServiceTest {
         List<ReservationResult> results = userReservationService.findByName(OWNER);
 
         assertThat(results).hasSize(1);
-        assertThat(results.get(0).name()).isEqualTo(OWNER);
-        assertThat(results.get(0).waitingOrder()).isEqualTo(2L);
+        assertThat(results.getFirst().name()).isEqualTo(OWNER);
+        assertThat(results.getFirst().waitingOrder()).isEqualTo(2L);
     }
 
     @Test
