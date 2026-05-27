@@ -44,6 +44,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
+    // 대기 순번은 SQL에서 계산
     public List<ReservationWithWaitingTurn> readAllByName(String name) {
         return reservationRepository.findMyReservationsWithWaitingTurn(name);
     }

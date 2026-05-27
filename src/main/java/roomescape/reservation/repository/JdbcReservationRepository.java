@@ -310,6 +310,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 th.thumbnail_url AS theme_thumbnail_url,
                 r.status,
                 r.reserved_at,
+                -- [대기 순번 계산]
+                -- WAITING 상태일 때만 순번 계산, RESERVED는 NULL 반환
                 CASE 
                     WHEN r.status = 'WAITING' THEN (
                         SELECT COUNT(*) + 1 
