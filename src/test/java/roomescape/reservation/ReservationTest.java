@@ -11,12 +11,12 @@ import roomescape.domain.Time;
 import roomescape.domain.Theme;
 import roomescape.exception.CustomException;
 
-class ReservationSlotTest {
+class ReservationTest {
 
     private final Time time;
     private final Theme theme;
 
-    public ReservationSlotTest() {
+    public ReservationTest() {
         this.time = new Time(1L, LocalTime.of(15, 40));
         this.theme = new Theme(1L, "공포의 저택", "버려진 저택에서 탈출하라! 어둠 속에 숨겨진 비밀을 밝혀야 살 수 있다.",
                 "https://picsum.photos/seed/haunted/400/250");

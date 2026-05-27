@@ -445,6 +445,7 @@
       display: flex;
       gap: 8px;
       flex-shrink: 0;
+      align-items: center;
     }
 
     /* Reservation list */
@@ -458,12 +459,17 @@
     .reservationSlot-item {
       background: var(--card);
       border: 1px solid var(--border);
+      border-left-width: 4px;
       border-radius: var(--radius);
       padding: 16px 20px;
       display: flex;
       align-items: center;
       gap: 16px;
     }
+
+    .reservationSlot-item.status-confirmed { border-left-color: #22c55e; }
+    .reservationSlot-item.status-waiting { border-left-color: #f59e0b; }
+    .reservationSlot-item.status-canceled { border-left-color: var(--danger); }
 
     .reservationSlot-item img {
       width: 56px;
@@ -484,6 +490,30 @@
     .reservationSlot-meta {
       font-size: 13px;
       color: var(--muted);
+    }
+
+    .reservation-status {
+      display: inline-flex;
+      align-items: center;
+      padding: 6px 10px;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .reservation-status.canceled {
+      background: rgba(239, 68, 68, 0.1);
+      color: var(--danger);
+    }
+
+    .reservation-status.confirmed {
+      background: rgba(34, 197, 94, 0.1);
+      color: #86efac;
+    }
+
+    .reservation-status.waiting {
+      background: rgba(245, 158, 11, 0.12);
+      color: #fbbf24;
     }
 
     /* Empty state */
@@ -1192,16 +1222,13 @@
 
       const list = document.getElementById('my-list');
       list.innerHTML = reservations.map(r => `
-        <div class="reservationSlot-item" id="res-${r.reservationId}">
+        <div class="reservationSlot-item status-${reservationState(r)}" id="res-${r.reservationId}">
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
           <div class="reservationSlot-info">
             <div class="reservationSlot-theme">${r.themeName}</div>
             <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
           </div>
-          <div class="reservationSlot-actions">
-            <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
-            <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
-          </div>
+          <div class="reservationSlot-actions">${reservationActions(r)}</div>
         </div>
       `).join('');
       list.style.display = 'flex';
@@ -1247,21 +1274,49 @@
   }
 
   function waitingMeta(r) {
-    return r.order > 1 ? ` &nbsp; 대기 ${r.order - 1}번` : '';
+    const order = Number(r.order ?? 0);
+    return order > 0 ? ` &nbsp; 대기 ${order}번` : '';
+  }
+
+  function isCanceledReservation(r) {
+    return String(r.status ?? '').toUpperCase() === 'CANCELED';
+  }
+
+  function reservationState(r) {
+    if (isCanceledReservation(r)) return 'canceled';
+    return Number(r.order ?? 0) > 0 ? 'waiting' : 'confirmed';
+  }
+
+  function reservationStatusLabel(r) {
+    const state = reservationState(r);
+    if (state === 'canceled') return '예약 취소';
+    if (state === 'waiting') return '대기';
+    return '예약 확정';
+  }
+
+  function reservationStatusBadge(r) {
+    const state = reservationState(r);
+    return `<span class="reservation-status ${state}">${reservationStatusLabel(r)}</span>`;
+  }
+
+  function reservationActions(r) {
+    if (isCanceledReservation(r)) {
+      return reservationStatusBadge(r);
+    }
+
+    return `
+      ${reservationStatusBadge(r)}
+      <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
+      <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
+    `;
   }
 
   async function deleteMyReservation(id) {
     if (!confirm('예약을 삭제하시겠습니까?')) return;
     try {
       await fetchEmpty(`${API}/reservations/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
-      document.getElementById(`res-${id}`)?.remove();
       showToast('예약이 삭제되었습니다.');
-
-      const remaining = document.querySelectorAll('.reservationSlot-item');
-      if (!remaining.length) {
-        document.getElementById('my-list').style.display = 'none';
-        document.getElementById('my-empty').style.display = 'block';
-      }
+      await loadMyReservations();
     } catch (e) {
       showToast(e.message, 'error');
     }

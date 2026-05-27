@@ -19,7 +19,7 @@ import io.restassured.http.ContentType;
 
 @SpringBootTest(webEnvironment = WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = ClassMode.BEFORE_EACH_TEST_METHOD)
-class ReservationSlotControllerTest {
+class ReservationControllerTest {
     @Autowired
     private ReservationController reservationController;
 
