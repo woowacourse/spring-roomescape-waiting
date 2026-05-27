@@ -76,15 +76,10 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
-        if (reservation.getReservationStatus().equals(PendingStatus.getInstance())) {
-            reservation.cancel();
-            reservationRepository.updateStatus(reservation);
-            return;
-        }
+        reservation.cancel();
+        reservationRepository.updateStatus(reservation);
 
         if (reservation.getReservationStatus().equals(ConfirmedStatus.getInstance())) {
-            reservation.cancel();
-            reservationRepository.updateStatus(reservation);
 
             Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
 
@@ -98,6 +93,12 @@ public class ReservationService {
                 themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
             }
         }
+    }
+
+    public void completeReservation(Long reservationId) {
+        Reservation reservation = getReservationOrElseThrow(reservationId);
+        reservation.complete();
+        reservationRepository.updateStatus(reservation);
     }
 
     @Transactional
@@ -168,4 +169,6 @@ public class ReservationService {
             throw new CustomException(RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT);
         }
     }
+
+
 }

@@ -18,12 +18,12 @@ public class CancelledStatus implements ReservationStatus {
 
     @Override
     public void complete(Reservation reservation) {
-        throw new CustomException(ErrorCode.INVALID_CANCELLED_COMMAND);
+        throw new CustomException(ErrorCode.ALREADY_CANCELLED_COMMAND);
     }
 
     @Override
     public void confirm(Reservation reservation) {
-        throw new CustomException(ErrorCode.INVALID_CANCELLED_COMMAND);
+        throw new CustomException(ErrorCode.ALREADY_CANCELLED_COMMAND);
     }
 
     @Override

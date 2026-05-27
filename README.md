@@ -68,30 +68,34 @@ PATCH /reservations/{reservationId}/cancel
 **응답 204 No Content**
 
 
-| 에러 상황             | 상태 코드                |
-| --------------------- | ------------------------ |
-| 예약 없음             | 404 Not Found            |
-| 본인 예약이 아닌 경우 | 403 Forbidden            |
-| 이미 취소된 예약      | 409 Conflict             |
-| 이미 완료된 예약      | 409 Conflict             |
-| 이미 날짜가 지난 예약 | 422 Unprocessable Entity |
+| 에러 상황                                                  | 상태 코드                |
+| ---------------------------------------------------------- | ------------------------ |
+| 예약 없음                                                  | 404 Not Found            |
+| 본인 예약이 아닌 경우                                      | 403 Forbidden            |
+| 취소할 수 없는 예약 (이미 취소되었거나, 완료 처리 된 예약) | 422 Unprocessable Entity |
+|                                                            |                          |
+|                                                            |                          |
 
 ---
 
-
 ### 예약 플로우
+
 취소하고자 하는 예약이 PENDING이라면
-- [x] cancel로 상태 변경
+
+- [X]  cancel로 상태 변경
 
 최소하고자 하는 예약이 CONFIRMNED이라면
-- [x] cancel로 상태 변경
+
+- [X]  cancel로 상태 변경
+
 - 이때 만약 대기하고 있는 PENDING 예약이 존재한다면
-  - [x] 대기중인 PENDING 예약을 CONFIRM으로 변경하고 업데이트 
+  - [X]  대기중인 PENDING 예약을 CONFIRM으로 변경하고 업데이트
 - 대기하고 있는 PENDING 예약이 없다면
-  - [x] themeSlot을 false로 변경후 업데이트 한다.
+  - [X]  themeSlot을 false로 변경후 업데이트 한다.
 
 취소하고자 하는 예약이 COMPLETE, CANCELLED라면
-- [ ] 취소할 수 없다는 예외처리
+
+- [ ]  취소할 수 없다는 예외처리
 
 ### 상태 변환 흐름
 
@@ -103,8 +107,8 @@ PATCH /reservations/{reservationId}/cancel
 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다.
 대기에는 본인의 대기 순번도 함께 보여준다.
 
-
 ### 중요 로직 플로우
+
 ```mermaid
 flowchart TD
     A[예약 취소 요청] --> B[ReservationService.cancelReservation 시작]
@@ -137,9 +141,6 @@ flowchart TD
 
     COMMIT --> R[204 No Content 응답]
 ```
-
-
-
 
 ```mermaid
 flowchart TD
