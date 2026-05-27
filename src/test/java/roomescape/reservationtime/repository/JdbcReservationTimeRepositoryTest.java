@@ -172,6 +172,28 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
+    @DisplayName("같은 시간에 예약과 대기가 여러 개 있어도 이용 가능 시간은 한 번만 조회한다.")
+    public void findAllByDateAndThemeIdWithAvailability_duplicatedWaiting() {
+        // given
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2023, 8, 5);
+        sqlFixtureGenerator.insertReservation("브라운", date, time, theme, Status.CONFIRMED);
+        sqlFixtureGenerator.insertReservation("주디", date, time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("초코칩", date, time, theme, Status.WAITING);
+
+        // when
+        List<ReservationTimeAvailability> availableTimes =
+                reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(date, theme.getId());
+
+        // then
+        assertThat(availableTimes).hasSize(1)
+                .extracting(ReservationTimeAvailability::getReservationTime,
+                        ReservationTimeAvailability::isAvailable)
+                .containsExactly(Tuple.tuple(time, false));
+    }
+
+    @Test
     @DisplayName("삭제된 예약은 이용 가능한 시간 조회에서 제외한다.")
     public void findAllByDateAndThemeIdWithAvailability_softDelete() {
         // given

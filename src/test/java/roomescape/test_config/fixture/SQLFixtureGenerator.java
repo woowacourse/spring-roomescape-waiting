@@ -27,8 +27,20 @@ public class SQLFixtureGenerator {
 
     public Reservation insertReservation(
             String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
         LocalDateTime now = LocalDateTime.now();
+
+        return insertReservation(guestName, date, time, theme, status, now);
+    }
+
+    public Reservation insertReservation(
+            String guestName,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            Status status,
+            LocalDateTime lastModifiedAt
+    ) {
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement("""
@@ -40,11 +52,11 @@ public class SQLFixtureGenerator {
             preparedStatement.setLong(3, time.getId());
             preparedStatement.setLong(4, theme.getId());
             preparedStatement.setString(5, status.toString());
-            preparedStatement.setString(6, now.toString());
+            preparedStatement.setString(6, lastModifiedAt.toString());
             return preparedStatement;
         }, keyHolder);
 
-        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme, status, now);
+        return Reservation.of(getGeneratedId(keyHolder), guestName, date, time, theme, status, lastModifiedAt);
     }
 
     public void insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {

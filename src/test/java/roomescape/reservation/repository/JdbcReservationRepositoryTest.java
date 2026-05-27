@@ -116,6 +116,30 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
+    @DisplayName("예약자 이름으로 예약 정보를 조회할 때 전체 대기열 기준 순번을 반환한다.")
+    public void findByGuest_waitNumber() {
+        // given
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        LocalDate date = LocalDate.of(2023, 8, 5);
+
+        sqlFixtureGenerator.insertReservation(
+                "브라운", date, time, theme, Status.CONFIRMED, LocalDateTime.of(2023, 8, 1, 9, 0));
+        sqlFixtureGenerator.insertReservation(
+                "주디", date, time, theme, Status.WAITING, LocalDateTime.of(2023, 8, 1, 9, 1));
+        Reservation reservation = sqlFixtureGenerator.insertReservation(
+                "초코칩", date, time, theme, Status.WAITING, LocalDateTime.of(2023, 8, 1, 9, 2));
+
+        // when
+        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findWaitingAllByGuestName("초코칩");
+
+        // then
+        assertThat(reservationWaitingDtos)
+                .extracting(ReservationWaitingDto::id, ReservationWaitingDto::waitNumber)
+                .containsExactly(tuple(reservation.getId(), 2L));
+    }
+
+    @Test
     @DisplayName("특정 날짜/시간/테마의 대기 중인 예약 중 가장 우선순위가 높은 컬럼을 반환한다.")
     public void findBySlotAndStatusWaitingAndWaitingNumberIsOne() {
         // given

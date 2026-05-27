@@ -60,7 +60,7 @@
 
           <div class="time-area">
             <div class="area-header">
-              <h2 class="area-title">예약 가능한 시간</h2>
+              <h2 class="area-title">예약/대기 시간</h2>
               <span id="timeCount" class="area-subtitle"></span>
             </div>
             <div id="timeGrid" class="time-grid" aria-label="예약 시간 목록"></div>
@@ -90,6 +90,10 @@
             <div class="summary-row">
               <span class="summary-label">시간</span>
               <span id="summaryTime" class="summary-value">-</span>
+            </div>
+            <div class="summary-row">
+              <span class="summary-label">상태</span>
+              <span id="summaryStatus" class="summary-value">-</span>
             </div>
           </div>
 
@@ -144,6 +148,6 @@
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/js/roomescape.js?v=admin-paging-1" defer></script>
+  <script src="/js/roomescape.js?v=waiting-ui-1" defer></script>
 </body>
 </html>

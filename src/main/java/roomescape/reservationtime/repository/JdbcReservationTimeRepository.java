@@ -57,16 +57,19 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservationTimeAvailability> findAllByDateAndThemeIdWithAvailability(LocalDate date, Long themeId) {
         String sql = """
-                 SELECT rt.id AS id,
-                        rt.start_at AS start_at,
-                        rt.deleted_at AS deleted_at,
-                        r.id IS NULL AS available
-                 FROM reservation_time rt
-                 LEFT JOIN reservation r
-                     ON r.time_id = rt.id
-                    AND r.date = ?
-                    AND r.theme_id = ?
-                    AND r.status != 'CANCELED'
+                SELECT
+                    rt.id AS id,
+                    rt.start_at AS start_at,
+                    rt.deleted_at AS deleted_at,
+                    NOT EXISTS (
+                        SELECT 1
+                        FROM reservation r
+                        WHERE r.time_id = rt.id
+                          AND r.date = ?
+                          AND r.theme_id = ?
+                          AND r.status != 'CANCELED'
+                    ) AS available
+                FROM reservation_time rt
                 WHERE rt.deleted_at IS NULL
                 ORDER BY rt.start_at
                 """;
@@ -122,7 +125,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                 toLocalDateTime(resultSet.getTimestamp("deleted_at"))
         );
 
-        if(resultSet.getBoolean("available")) {
+        if (resultSet.getBoolean("available")) {
             return ReservationTimeAvailability.available(reservationTime);
         }
         return ReservationTimeAvailability.unavailable(reservationTime);

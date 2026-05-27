@@ -441,15 +441,22 @@
     }
 
     .time-button {
-      height: 52px;
+      min-height: 58px;
       border: 1px solid var(--line);
       border-radius: 8px;
       background: var(--surface);
       color: var(--text);
       display: grid;
       place-items: center;
+      gap: 2px;
       font-weight: 850;
       transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
+    }
+
+    .time-button.waitable {
+      border-color: rgba(184, 79, 47, 0.32);
+      background: #fff8f4;
+      color: #5e3427;
     }
 
     .time-button:disabled {
@@ -463,6 +470,19 @@
       border-color: var(--accent);
       background: var(--accent);
       color: white;
+    }
+
+    .time-value {
+      font-size: 15px;
+      line-height: 1.15;
+    }
+
+    .time-state {
+      color: currentColor;
+      opacity: 0.74;
+      font-size: 11px;
+      line-height: 1.2;
+      font-weight: 850;
     }
 
     .summary-panel {
@@ -856,6 +876,11 @@
       font-weight: 900;
       line-height: 1.25;
       word-break: keep-all;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      min-width: 0;
+      flex-wrap: wrap;
     }
 
     .list-meta {
@@ -863,6 +888,38 @@
       font-size: 12px;
       line-height: 1.4;
       word-break: keep-all;
+    }
+
+    .status-badge {
+      min-height: 24px;
+      border-radius: 999px;
+      padding: 4px 8px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 900;
+      line-height: 1;
+      white-space: nowrap;
+    }
+
+    .status-badge.confirmed {
+      background: #e8f2ef;
+      color: #0b6263;
+    }
+
+    .status-badge.waiting {
+      background: #fff0e8;
+      color: #9a4428;
+    }
+
+    .status-badge.canceled {
+      background: #eee9e1;
+      color: #766f66;
+    }
+
+    .reservation-row.canceled {
+      background: #f5f2ec;
     }
 
     .theme-list-row {
