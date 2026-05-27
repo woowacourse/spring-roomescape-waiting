@@ -33,54 +33,14 @@ class ReservationControllerTest {
     private ReservationService reservationService;
 
     @Test
-    void 예약_목록_조회_요청을_Service에_전달하고_결과를_반환한다() throws Exception {
-        List<Reservation> reservations = List.of(
-                new Reservation(1L, "레서",
-                        LocalDate.of(2026, 5, 6),
+    void 내_예약_목록_조회_요청을_Service에_전달하고_예약과_대기를_함께_반환한다() throws Exception {
+        List<UserReservation> reservations = List.of(
+                UserReservation.from(1L, "레서", LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
                         new Theme(1L, "공포방", "무서운방입니다.", "image-url")),
-                new Reservation(2L, "어셔",
-                        LocalDate.of(2026, 5, 7),
+                UserReservation.from(2L, "레서", LocalDate.of(2026, 5, 7),
                         new ReservationTime(2L, LocalTime.of(20, 0)),
-                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"))
-        );
-        when(reservationService.findReservations(0, 10)).thenReturn(reservations);
-
-        mockMvc.perform(get("/reservations"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reservations.length()").value(2))
-                .andExpect(jsonPath("$.reservations[0].id").value(1))
-                .andExpect(jsonPath("$.reservations[0].name").value("레서"))
-                .andExpect(jsonPath("$.reservations[0].date").value("2026-05-06"))
-                .andExpect(jsonPath("$.reservations[0].time.startAt").value("18:00"))
-                .andExpect(jsonPath("$.reservations[0].theme.name").value("공포방"))
-                .andExpect(jsonPath("$.reservations[1].id").value(2))
-                .andExpect(jsonPath("$.reservations[1].name").value("어셔"));
-        verify(reservationService).findReservations(0, 10);
-    }
-
-    @Test
-    void 예약_목록_조회시_페이지_정보를_Service에_전달한다() throws Exception {
-        when(reservationService.findReservations(1, 5)).thenReturn(List.of());
-
-        mockMvc.perform(get("/reservations")
-                        .param("page", "1")
-                        .param("size", "5"))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reservations.length()").value(0));
-
-        verify(reservationService).findReservations(1, 5);
-    }
-
-    @Test
-    void 사용자_예약_목록_조회_요청을_Service에_전달하고_결과를_반환한다() throws Exception {
-        List<UserReservation> reservations = List.of(
-                new UserReservation(
-                        1L,
-                        "레서",
-                        LocalDate.of(2026, 5, 6),
-                        new ReservationTime(1L, LocalTime.of(18, 0)),
-                        new Theme(1L, "공포방", "무서운방입니다.", "image-url"))
+                        new Theme(2L, "추리방", "추리하는방입니다.", "image-url2"), 2L)
         );
         when(reservationService.findUserReservations("레서", 1, 5)).thenReturn(reservations);
 
@@ -89,15 +49,24 @@ class ReservationControllerTest {
                         .param("page", "1")
                         .param("size", "5"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.reservations.length()").value(1))
-                .andExpect(jsonPath("$.reservations[0].id").value(1))
-                .andExpect(jsonPath("$.reservations[0].name").value("레서"))
-                .andExpect(jsonPath("$.reservations[0].date").value("2026-05-06"))
-                .andExpect(jsonPath("$.reservations[0].time.startAt").value("18:00"))
-                .andExpect(jsonPath("$.reservations[0].theme.name").value("공포방"));
+                .andExpect(jsonPath("$.userReservations.length()").value(2))
+                .andExpect(jsonPath("$.userReservations[0].id").value(1))
+                .andExpect(jsonPath("$.userReservations[0].name").value("레서"))
+                .andExpect(jsonPath("$.userReservations[0].date").value("2026-05-06"))
+                .andExpect(jsonPath("$.userReservations[0].time.startAt").value("18:00"))
+                .andExpect(jsonPath("$.userReservations[0].theme.name").value("공포방"))
+                .andExpect(jsonPath("$.userReservations[0].status").value("RESERVED"))
+                .andExpect(jsonPath("$.userReservations[0].rank").value(0))
+                .andExpect(jsonPath("$.userReservations[1].status").value("WAITING"))
+                .andExpect(jsonPath("$.userReservations[1].rank").value(2));
 
         verify(reservationService).findUserReservations("레서", 1, 5);
-        verify(reservationService, never()).findReservations(anyInt(), anyInt());
+    }
+
+    @Test
+    void 내_예약_목록_조회시_이름_파라미터가_없으면_400을_반환한다() throws Exception {
+        mockMvc.perform(get("/reservations"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test

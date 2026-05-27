@@ -43,13 +43,13 @@ class ReservationE2ETest {
     }
 
     @Test
-    @DisplayName("GET /reservations - 예약 목록을 조회한다")
+    @DisplayName("GET /admin/reservations - 전체 예약 목록을 조회한다")
     void getReservations() {
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 "브라운", "2025-12-25", 1L, 1L);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.size()", is(1))
@@ -124,7 +124,7 @@ class ReservationE2ETest {
                 .statusCode(204);
 
         RestAssured.given().log().all()
-                .when().get("/reservations")
+                .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("reservations.size()", is(0));
