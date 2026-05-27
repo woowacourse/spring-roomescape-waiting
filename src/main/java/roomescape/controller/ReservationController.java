@@ -3,6 +3,7 @@ package roomescape.controller;
 import jakarta.validation.Valid;
 import java.net.URI;
 import java.util.List;
+import java.util.stream.Stream;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -34,17 +35,10 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getMyReservations(@RequestParam String name) {
-        List<ReservationResponse> responses = reservationQueryService.getByName(name)
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-
-        List<ReservationResponse> waitingResponses = waitingQueryService.getByName(name)
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
-
-        responses.addAll(waitingResponses);
+        List<ReservationResponse> responses = Stream.concat(
+                reservationQueryService.getByName(name).stream().map(ReservationResponse::from),
+                waitingQueryService.getByName(name).stream().map(ReservationResponse::from)
+        ).toList();
 
         return ResponseEntity.ok(responses);
     }

@@ -153,13 +153,25 @@ public class WaitingDao {
 
     public List<WaitingWithRank> findAllByName(String name) {
         String sql = """
-                SELECT id, name, date, time_id, theme_id, created_at, waiting_rank
+                SELECT
+                    ranked_waiting.id AS waiting_id,
+                    ranked_waiting.name,
+                    ranked_waiting.date,
+                    time.id AS time_id,
+                    time.start_at AS time_value,
+                    theme.id AS theme_id,
+                    theme.name AS theme_name,
+                    theme.thumbnail_url AS thumbnail_url,
+                    theme.description AS theme_description,
+                    ranked_waiting.waiting_rank
                 FROM (
                     SELECT *,
-                           RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC) as waiting_rank
+                           RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC) AS waiting_rank
                     FROM waiting
-                ) as ranked_waiting
-                WHERE name = ?; 
+                ) AS ranked_waiting
+                INNER JOIN reservation_time AS time ON ranked_waiting.time_id = time.id
+                INNER JOIN theme ON ranked_waiting.theme_id = theme.id
+                WHERE ranked_waiting.name = ?
                 """;
         return jdbcTemplate.query(sql, withRankRowMapper, name);
     }
