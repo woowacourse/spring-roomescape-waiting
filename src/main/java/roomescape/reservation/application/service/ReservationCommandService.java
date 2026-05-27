@@ -11,7 +11,9 @@ import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.repository.ReservationTimeRepository;
@@ -27,6 +29,7 @@ public class ReservationCommandService {
     private final ReservationRepository reservationRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository timeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationResult save(ReservationCreateCommand request) {
         Theme theme = themeRepository.findById(request.themeId())
@@ -37,7 +40,22 @@ public class ReservationCommandService {
 
         Reservation reservation = request.toEntity(theme.getId(), time.getId(), time.getStartAt());
         reservation.validateReservable(request.now());
-        validateDuplicateReservation(reservation);
+
+        // 예약이 존재하는지 확인하는 메서드
+        // 현재는 예약이 있으면 예외
+        // TODO: 그런데 이제는 예약이 있으면 예외가 아니라 Waiting을 만들고 Reservation은 만들면 안됨
+        if (reservationRepository.existsDuplicate(reservation)) {
+            Waiting waiting = request.toWaiting(theme.getId(), time.getId(), time.getStartAt());
+            // 위에서 예약에 대해서 이전 시간 예약인지 검증했지만, 대기도 명시적으로 일단 검증 추가
+            waiting.validateReservable(request.now());
+            Waiting savedWaiting = waitingRepository.save(waiting);
+
+            return ReservationResult.waiting(
+                    savedWaiting,
+                    ThemeResult.from(theme),
+                    ReservationTimeResult.from(time)
+            );
+        }
 
         Reservation savedReservation;
         try {
@@ -46,7 +64,7 @@ public class ReservationCommandService {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 
-        return ReservationResult.from(
+        return ReservationResult.confirmed(
                 savedReservation,
                 ThemeResult.from(theme),
                 ReservationTimeResult.from(time)
@@ -68,7 +86,7 @@ public class ReservationCommandService {
         Theme theme = themeRepository.findById(reservation.getThemeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
-        return ReservationResult.from(
+        return ReservationResult.confirmed(
                 updatedReservation,
                 ThemeResult.from(theme),
                 ReservationTimeResult.from(time)
@@ -101,6 +119,9 @@ public class ReservationCommandService {
     }
 
     private void validateDuplicateReservation(Reservation reservation) {
+        // 예약이 존재하는지 확인하는 메서드
+        // 현재는 예약이 있으면 예외
+        // TODO: 그런데 이제는 예약이 있으면 예외가 아니라 Waiting을 만들고 Reservation은 만들면 안됨
         if (reservationRepository.existsDuplicate(reservation)) {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }

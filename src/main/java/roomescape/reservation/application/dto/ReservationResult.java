@@ -2,6 +2,7 @@ package roomescape.reservation.application.dto;
 
 import java.time.LocalDate;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Waiting;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
 import roomescape.theme.application.dto.ThemeResult;
 
@@ -10,17 +11,31 @@ public record ReservationResult(
         String name,
         LocalDate date,
         ThemeResult theme,
-        ReservationTimeResult time
+        ReservationTimeResult time,
+        Status status
 ) {
 
-    public static ReservationResult from(Reservation reservation, ThemeResult themeResult,
-                                         ReservationTimeResult timeResult) {
+    public static ReservationResult confirmed(Reservation reservation, ThemeResult themeResult,
+                                              ReservationTimeResult timeResult) {
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),
                 themeResult,
-                timeResult
+                timeResult,
+                Status.CONFIRM
+        );
+    }
+
+    public static ReservationResult waiting(Waiting waiting, ThemeResult themeResult,
+                                            ReservationTimeResult timeResult) {
+        return new ReservationResult(
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getDate(),
+                themeResult,
+                timeResult,
+                Status.WAITING
         );
     }
 
@@ -38,7 +53,12 @@ public record ReservationResult(
                 ReservationTimeResult.from(
                         reservationDetail.timeId(),
                         reservationDetail.startAt()
-                )
+                ),
+                Status.WAITING // TODO: 이건 나중에 조회한게 예약인지, 대기인지 구분하는 로직이 추가 필요 반드시 수정 ✅
         );
+    }
+
+    public enum Status {
+        CONFIRM, WAITING
     }
 }

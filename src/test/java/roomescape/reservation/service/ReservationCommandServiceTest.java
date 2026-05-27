@@ -20,6 +20,7 @@ import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.RoomEscapeException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
+import roomescape.reservation.application.dto.ReservationResult.Status;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationCommandService;
 import roomescape.reservationtime.application.dto.ReservationTimeResult;
@@ -59,20 +60,8 @@ class ReservationCommandServiceTest {
             softly.assertThat(result.date()).isEqualTo(request.date());
             softly.assertThat(result.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
             softly.assertThat(result.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
+            softly.assertThat(result.status()).isEqualTo(Status.CONFIRM);
         });
-    }
-
-    @DisplayName("중복된 날짜와 테마와 시간의 예약 생성 예외를 테스트합니다.")
-    @Test
-    void save_duplicated_reservation_exception() {
-        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
-        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
-        testHelper.insertReservation("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
-
-        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
-        assertThatThrownBy(() -> reservationCommandService.save(request))
-                .isInstanceOf(ConflictException.class)
-                .hasMessage("이미 해당 날짜와 시간에 예약이 존재합니다.");
     }
 
     @DisplayName("현재 시간보다 이전 시간의 예약 생성 예외를 테스트합니다.")
@@ -230,5 +219,26 @@ class ReservationCommandServiceTest {
                 ))
                 .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
+    }
+
+    // 예약이 이미 존재할 경우 예외 발생이 아닌 대기로 생성되는지 확인.
+    @DisplayName("중복된 날짜와 테마와 시간의 예약 생성 예외를 테스트합니다.")
+    @Test
+    void save_duplicated_reservation_exception() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        testHelper.insertReservation("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+
+        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
+        ReservationResult savedWaiting = reservationCommandService.save(request);
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(savedWaiting.id()).isPositive();
+            softly.assertThat(savedWaiting.name()).isEqualTo(request.name());
+            softly.assertThat(savedWaiting.date()).isEqualTo(request.date());
+            softly.assertThat(savedWaiting.theme()).isEqualTo(ThemeFixture.horrorThemeQueryResult(themeId));
+            softly.assertThat(savedWaiting.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
+            softly.assertThat(savedWaiting.status()).isEqualTo(Status.WAITING);
+        });
     }
 }
