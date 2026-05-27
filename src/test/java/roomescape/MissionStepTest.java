@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -27,6 +28,18 @@ public class MissionStepTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.update("DELETE FROM waiting");
+        jdbcTemplate.update("DELETE FROM reservation");
+        jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("DELETE FROM reservation_time");
+        jdbcTemplate.execute("ALTER TABLE waiting ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
+    }
 
     @Test
     void 예약_조회() {
@@ -97,6 +110,30 @@ public class MissionStepTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+    }
+
+    @Test
+    void 예약_대기_저장() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
+
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("name", "브라운");
+        waiting.put("date", TODAY.plusDays(1).toString());
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(waiting)
+                .when().post("/waiting")
+                .then().log().all()
+                .statusCode(201)
+                .body("id", is(1))
+                .body("name", is("브라운"))
+                .body("date", is(TODAY.plusDays(1).toString()))
+                .body("time.id", is(1))
+                .body("theme.id", is(1));
     }
 
     @Autowired
