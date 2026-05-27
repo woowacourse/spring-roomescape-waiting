@@ -109,11 +109,10 @@ public class ReservationTimeDaoTest {
 
     @Test
     void 예약시간을_추가한다() {
-        Long id = reservationTimeDao.insertWithKeyHolder(LocalTime.of(10, 0));
+        long id = reservationTimeDao.insertWithKeyHolder(LocalTime.of(10, 0));
 
         ReservationTime reservationTime = reservationTimeDao.findReservationTimeById(id);
 
-        assertThat(id).isNotNull();
         assertThat(id).isPositive();
         assertThat(reservationTime)
                 .extracting(

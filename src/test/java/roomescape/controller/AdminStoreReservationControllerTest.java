@@ -325,7 +325,7 @@ public class AdminStoreReservationControllerTest {
         }
     }
 
-    private Map<String, Object> updateParams(String date, Long timeId) {
+    private Map<String, Object> updateParams(String date, long timeId) {
         Map<String, Object> params = new HashMap<>();
         params.put("date", date);
         params.put("timeId", timeId);

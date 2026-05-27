@@ -35,7 +35,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ReservationControllerWebMvcTest {
 
     private static final String VALID_TOKEN = "valid.jwt.token";
-    private static final Long LOGIN_MEMBER_ID = 1L;
+    private static final long LOGIN_MEMBER_ID = 1L;
 
     @Autowired
     private MockMvc mockMvc;

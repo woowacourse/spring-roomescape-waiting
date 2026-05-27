@@ -42,7 +42,7 @@ public class ThemeDaoTest {
     @Test
     @Sql(statements = INSERT_SINGLE_THEME_SQL)
     void ID에_해당하는_테마를_조회한다() {
-        Long themeId = 1L;
+        long themeId = 1L;
         Theme theme = themeDao.findById(themeId);
 
         assertThat(theme).isNotNull();
@@ -81,7 +81,7 @@ public class ThemeDaoTest {
 
     @Test
     void 테마를_추가한다() {
-        Long id = themeDao.insertTheme(
+        long id = themeDao.insertTheme(
                 "심해 탈출",
                 "가라앉는 잠수함에서 탈출하는 테마",
                 "https://images.example.com/themes/deep-sea.jpg"
@@ -89,7 +89,6 @@ public class ThemeDaoTest {
 
         Theme theme = themeDao.findById(id);
 
-        assertThat(id).isNotNull();
         assertThat(id).isPositive();
         assertThat(theme)
                 .extracting(

@@ -79,7 +79,7 @@ class ReservationWaitDaoTest {
             INSERT_DEFAULT_STORE_SQL,
             INSERT_TWO_RESERVATIONS_SQL,
     })
-    void 예약_대기_생성() {
+    void 예약대기를_생성한다() {
         long reservationId = 1L;
         long memberId = 2L;
 
@@ -107,7 +107,7 @@ class ReservationWaitDaoTest {
             INSERT_TWO_RESERVATIONS_SQL,
             INSERT_TWO_RESERVATION_WAITS_SQL
     })
-    void 예약대기_단건_조회성공() {
+    void id로_예약대기를_조회한다() {
         long waitId = 1L;
 
         Optional<ReservationWait> wait = dao.findReservationWaitById(waitId);
@@ -130,7 +130,7 @@ class ReservationWaitDaoTest {
             INSERT_TWO_RESERVATIONS_SQL,
             INSERT_TWO_RESERVATION_WAITS_SQL
     })
-    void 예약대기_단건_조회실패() {
+    void 존재하지_않는_id면_빈_Optional을_반환한다() {
         long waitId = 3L;
 
         Optional<ReservationWait> wait = dao.findReservationWaitById(waitId);

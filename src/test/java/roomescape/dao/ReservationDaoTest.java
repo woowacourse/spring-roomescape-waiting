@@ -188,7 +188,7 @@ public class ReservationDaoTest {
             INSERT_DEFAULT_STORE_SQL
     })
     void 예약을_추가한다() {
-        Long id = reservationDao.insertWithKeyHolder(
+        long id = reservationDao.insertWithKeyHolder(
                 1L,
                 LocalDate.of(2026, 5, 1),
                 1L,
@@ -198,7 +198,6 @@ public class ReservationDaoTest {
 
         Reservation reservation = reservationDao.findReservationById(id);
 
-        assertThat(id).isNotNull();
         assertThat(id).isPositive();
         assertThat(reservation)
                 .extracting(

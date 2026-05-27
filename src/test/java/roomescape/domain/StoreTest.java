@@ -14,23 +14,24 @@ public class StoreTest {
     }
 
     @Test
-    void 이름이_null이면_예외() {
+    void 이름이_null이면_매장을_생성할_수_없다() {
         assertThatThrownBy(() -> new Store(1L, null))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("매장 이름");
+                .hasMessage("매장 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
-    void 이름이_공백이면_예외() {
+    void 이름이_공백이면_매장을_생성할_수_없다() {
         assertThatThrownBy(() -> new Store(1L, "   "))
                 .isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("매장 이름");
+                .hasMessage("매장 이름은 비어 있을 수 없습니다.");
     }
 
     @Test
-    void 이름이_50자_초과면_예외() {
+    void 이름이_50자_초과면_매장을_생성할_수_없다() {
         String tooLong = "a".repeat(51);
         assertThatThrownBy(() -> new Store(1L, tooLong))
-                .isInstanceOf(IllegalArgumentException.class);
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("매장 이름은 50자 이하여야 합니다.");
     }
 }
