@@ -50,8 +50,4 @@ public class ReservationResponse {
     public ThemeResponse getTheme() {
         return theme;
     }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
-    }
 }
