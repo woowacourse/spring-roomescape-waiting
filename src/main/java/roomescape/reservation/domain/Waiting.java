@@ -15,7 +15,7 @@ public class Waiting {
     private final LocalDate date;
     private final Long themeId;
     private final Long timeId;
-    
+
     public static Waiting of(Long id, String name, LocalDate date, Long themeId, Long timeId) {
         return new Waiting(id, name, date, themeId, timeId);
     }

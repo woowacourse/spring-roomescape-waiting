@@ -115,8 +115,8 @@ function renderReserve() {
               ${renderBookingSummary(theme)}
               <button class="primary-button submit-button" type="submit" ${canSubmitReservation() ? "" : "disabled"}>
                 ${state.submitting
-                    ? (state.editingReservationId ? "변경 중" : selectedTime()?.available === false ? "대기 신청 중" : "예약 중")
-                    : (state.editingReservationId ? "변경하기" : selectedTime()?.available === false ? "대기 신청" : "예약하기")}
+        ? (state.editingReservationId ? "변경 중" : selectedTime()?.available === false ? "대기 신청 중" : "예약 중")
+        : (state.editingReservationId ? "변경하기" : selectedTime()?.available === false ? "대기 신청" : "예약하기")}
               </button>
             </form>
           </aside>

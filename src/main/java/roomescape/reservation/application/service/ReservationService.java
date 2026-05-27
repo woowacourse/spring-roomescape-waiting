@@ -56,7 +56,7 @@ public class ReservationService {
 
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
 
-        if(reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
+        if (reservationRepository.existsByDateAndThemeAndTime(request.date(), request.themeId(), request.timeId())) {
             Waiting savedWaitingResult = waitingRepository.save(Waiting.of(
                     null,
                     reservation.getName(),

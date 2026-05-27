@@ -13,7 +13,6 @@ import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
-import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 
 @Repository
@@ -153,12 +152,12 @@ public class JdbcReservationRepository implements ReservationRepository {
     public Boolean existsByDateAndThemeAndTimeExcludingId(LocalDate date, Long themeId, Long timeId, Long id) {
         return jdbcTemplate.queryForObject(
                 """
-                SELECT EXISTS(
-                    SELECT 1
-                    FROM reservation
-                    WHERE date = ? AND theme_id = ? AND time_id = ? AND id <> ?
-                )
-                """,
+                        SELECT EXISTS(
+                            SELECT 1
+                            FROM reservation
+                            WHERE date = ? AND theme_id = ? AND time_id = ? AND id <> ?
+                        )
+                        """,
                 Boolean.class,
                 date,
                 themeId,

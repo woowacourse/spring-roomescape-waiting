@@ -44,13 +44,15 @@ class ReservationServiceTest {
         timeRepository = new FakeReservationTimeRepository();
         reservationRepository = new FakeReservationRepository(themeRepository, timeRepository);
         fakeWaitingRepository = new FakeWaitingRepository();
-        reservationQueryService = new ReservationQueryService(new FakeReservationQueryRepository(reservationRepository));
+        reservationQueryService = new ReservationQueryService(
+                new FakeReservationQueryRepository(reservationRepository));
         themeService = new ThemeService(themeRepository, reservationQueryService);
         FakeAvailableReservationTimeRepository availableReservationTimeRepository =
                 new FakeAvailableReservationTimeRepository(timeRepository, reservationRepository);
         timeService = new ReservationTimeService(timeRepository, availableReservationTimeRepository,
                 reservationQueryService);
-        reservationService = new ReservationService(reservationRepository, fakeWaitingRepository, themeService, timeService);
+        reservationService = new ReservationService(reservationRepository, fakeWaitingRepository, themeService,
+                timeService);
     }
 
     @DisplayName("사용자의 방탈출 예약 시간 추가를 테스트합니다.")

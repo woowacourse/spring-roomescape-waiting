@@ -35,7 +35,8 @@ class ReservationTimeServiceTest {
         timeRepository = new FakeReservationTimeRepository();
         reservationRepository = new FakeReservationRepository(new FakeThemeRepository(), timeRepository);
         availableTimeRepository = new FakeAvailableReservationTimeRepository(timeRepository, reservationRepository);
-        reservationQueryService = new ReservationQueryService(new FakeReservationQueryRepository(reservationRepository));
+        reservationQueryService = new ReservationQueryService(
+                new FakeReservationQueryRepository(reservationRepository));
         timeService = new ReservationTimeService(timeRepository, availableTimeRepository, reservationQueryService);
 
         timeRepository.save(ReservationTime.builder()
