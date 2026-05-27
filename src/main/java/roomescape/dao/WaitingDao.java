@@ -1,14 +1,13 @@
 package roomescape.dao;
 
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Waiting;
-
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.Map;
 
 @Repository
 public class WaitingDao {
@@ -54,5 +53,13 @@ public class WaitingDao {
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, createdAt, slotId, name));
+    }
+
+    public int delete(long waitingId) {
+        String sql = """
+                DELETE FROM theme
+                WHERE id = ?
+                """;
+        return jdbcTemplate.update(sql, waitingId);
     }
 }

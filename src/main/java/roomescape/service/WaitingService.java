@@ -1,5 +1,7 @@
 package roomescape.service;
 
+import java.time.Clock;
+import java.time.LocalDateTime;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.SlotDao;
@@ -12,9 +14,6 @@ import roomescape.exception.code.SlotErrorCode;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.SlotException;
 import roomescape.exception.domain.WaitingException;
-
-import java.time.Clock;
-import java.time.LocalDateTime;
 
 @Service
 public class WaitingService {
@@ -53,5 +52,9 @@ public class WaitingService {
         if (reservationDao.existsBySlotIdAndName(slotId, name)) {
             throw new WaitingException(WaitingErrorCode.CANNOT_WAIT_OWN_RESERVATION);
         }
+    }
+
+    public void delete(long waitingId) {
+        waitingDao.delete(waitingId);
     }
 }

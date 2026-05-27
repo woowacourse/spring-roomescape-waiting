@@ -5,9 +5,8 @@ import roomescape.exception.ErrorCode;
 
 public enum SlotErrorCode implements ErrorCode {
 
-    SLOT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 테마입니다."),
-    SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 테마입니다."),
-    SLOT_HAS_RESERVATION(HttpStatus.CONFLICT, "해당 테마를 지닌 예약이 존재합니다."),
+    SLOT_ALREADY_EXISTS(HttpStatus.CONFLICT, "이미 존재하는 슬롯입니다."),
+    SLOT_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 슬롯입니다."),
     ;
 
     private final HttpStatus httpStatus;
