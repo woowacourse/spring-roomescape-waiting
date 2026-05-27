@@ -63,18 +63,18 @@ class ReservationSlotServiceTest {
                 .hasMessage(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION.getMessage());
     }
 
-    @DisplayName("같은 날짜+시간+테마에 이미 예약이 있으면 중복 예약을 거부한다.")
-    @Test
-    void 중복_예약_예외_테스트() {
-        LocalDateTime today= LocalDateTime.now();
-
-        ReservationRequest request = new ReservationRequest("김철수", today.toLocalDate().plusDays(2), 2L, 1L);
-        reservationService.save(today, request);
-
-        assertThatThrownBy(() -> reservationService.save(today, request))
-                .isInstanceOf(CustomException.class)
-                .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
-    }
+//    @DisplayName("같은 날짜+시간+테마에 이미 예약이 있으면 중복 예약을 거부한다.")
+//    @Test
+//    void 중복_예약_예외_테스트() {
+//        LocalDateTime today= LocalDateTime.now();
+//
+//        ReservationRequest request = new ReservationRequest("김철수", today.toLocalDate().plusDays(2), 2L, 1L);
+//        reservationService.save(today, request);
+//
+//        assertThatThrownBy(() -> reservationService.save(today, request))
+//                .isInstanceOf(CustomException.class)
+//                .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
+//    }
 
 //    @DisplayName("수정하려는 날짜/시간에 이미 예약이 있으면 예외를 던진다.")
 //    @Test

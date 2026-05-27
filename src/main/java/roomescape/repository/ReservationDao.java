@@ -69,21 +69,6 @@ public class ReservationDao {
         return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
     }
 
-    public boolean existByReservationId(long reservationId) {
-        String sql = """
-            SELECT EXISTS(
-                SELECT 1
-                FROM reservation r
-                WHERE r.reservation_slot_id = ?
-            )
-            """;
-
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, reservationId
-                )
-        );
-    }
-
     public int findOrderByReservationId(long reservationId, long slotId) {
         String sql = """
             SELECT COUNT(*)
@@ -130,14 +115,6 @@ public class ReservationDao {
         return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
     }
 
-    public boolean existsByReservation(Long reservationId) {
-        String sql = """
-            SELECT COUNT(*) > 0
-            FROM reservation r
-            WHERE r.reservation_slot_id = ?
-            """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId));
-    }
     public void update(Long reservationId, Long reservationSlotId) {
         jdbcTemplate.update("UPDATE reservation SET reservation_slot_id = ?  WHERE id = ?", reservationSlotId , reservationId);
     }

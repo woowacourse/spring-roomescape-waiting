@@ -13,7 +13,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationSlot;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
-import roomescape.dto.ReservationResponse;
 
 @Repository
 public class ReservationSlotDao {
@@ -97,33 +96,4 @@ public class ReservationSlotDao {
                 """;
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
-
-
-//    public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
-//        jdbcTemplate.update("UPDATE reservationSlot SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
-//    }
-//
-//    public Optional<ReservationSlot> findByDateAndTimeId(LocalDate date, Long timeId) {
-//        String sql = """
-//                SELECT r.id AS reservation_id,
-//                       r.date AS date,
-//                       rt.id AS time_id,
-//                       rt.start_at AS start_at,
-//                       t.id AS theme_id,
-//                       t.name AS theme_name,
-//                       t.description AS description,
-//                       t.thumbnail_url AS thumbnail_url
-//                FROM reservation_slot r
-//                JOIN reservation_time rt ON r.time_id = rt.id
-//                JOIN theme t ON r.theme_id = t.id
-//                WHERE r.date = ? AND r.time_id = ?
-//                """;
-//        return jdbcTemplate.query(sql, reservationRowMapper, date, timeId)
-//                .stream()
-//                .findFirst();
-//    }
-
-//    public void delete(Long id) {
-//        jdbcTemplate.update("DELETE FROM reservationSlot WHERE id = ?", id);
-//    }
 }

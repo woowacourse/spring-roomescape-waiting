@@ -3,7 +3,6 @@ package roomescape.controller;
 import static org.hamcrest.core.Is.is;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -76,7 +75,7 @@ class ReservationSlotControllerTest {
         params.put("timeId", 1);
         params.put("themeId", 1);
 
-        final long waitingId = RestAssured.given().log().all()
+        final long id = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
@@ -84,12 +83,12 @@ class ReservationSlotControllerTest {
                 .statusCode(201)
                 .extract()
                 .jsonPath()
-                .getLong("waitingResponse.id");
+                .getLong("reservationId");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .pathParam("id", waitingId)
-                .when().delete("/reservations/{id}")
+                .pathParam("reservationId", id)
+                .when().delete("/reservations/{reservationId}")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -191,25 +190,39 @@ class ReservationSlotControllerTest {
     @DisplayName("사용자 예약 대기 삭제 API")
     @Test
     void 사용자_예약_대기_삭제_API() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "대기자");
-        params.put("reservationId", 2);
+        LocalDate date = LocalDate.now();
 
-        final long id = RestAssured.given().log().all()
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "브라운");
+        params.put("date", date.plusDays(1));
+        params.put("timeId", 1);
+        params.put("themeId", 1);
+        getReservationId(params);
+
+        params = new HashMap<>();
+        params.put("name", "검프");
+        params.put("date", date.plusDays(1));
+        params.put("timeId", 1);
+        params.put("themeId", 1);
+        final long id = getReservationId(params);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .pathParam("reservationId", id)
+                .when().delete("/reservations/{reservationId}")
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    private long getReservationId(Map<String, Object> params) {
+        return RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().post("/reservations/")
+                .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .extract()
                 .jsonPath()
-                .getLong("id");
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .pathParam("id", id)
-                .when().delete("/reservations/{id}")
-                .then().log().all()
-                .statusCode(204);
+                .getLong("reservationId");
     }
 }

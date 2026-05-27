@@ -77,7 +77,7 @@ public class ReservationService {
         if (now.isAfter(localDateTime )) {
             throw new CustomException(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
         }
-        reservationDao.delete(reservation.getId(), Status.CANCELLED);
+        reservationDao.delete(reservation.getId(), Status.CANCELED);
     }
 
     public List<ReservationResponse> findAllByName(String username) {

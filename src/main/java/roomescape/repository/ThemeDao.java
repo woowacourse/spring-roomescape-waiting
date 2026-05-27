@@ -80,11 +80,11 @@ public class ThemeDao {
                           ELSE (
                               SELECT COUNT(*) - 1
                               FROM reservation w
-                              WHERE w.reservation_id = r.id
+                              WHERE w.id = r.id
                           )
                       END AS waiting_count
                   FROM reservation_time rt                                                                                                                                                                                       \s
-                  LEFT JOIN reservationSlot r                                                                                                                                                                                      \s
+                  LEFT JOIN reservation_slot r                                                                                                                                                                                      \s
                       ON rt.id = r.time_id
                        AND r.theme_id = ?
                        AND r.date = ?
