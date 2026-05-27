@@ -66,10 +66,8 @@ public class Reservation {
         return createdAt;
     }
 
-    public void validateDuplicatedReservationByName(String name) {
-        if(this.name.equals(name)) {
-            throw new InvalidInputException("이미 등록된 예약이 있습니다.");
-        }
+    public boolean isReserved(String name) {
+        return this.name.equals(name);
     }
 
     public void validatePastDateTime() {
