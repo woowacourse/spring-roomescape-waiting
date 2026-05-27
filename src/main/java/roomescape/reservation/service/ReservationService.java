@@ -78,12 +78,12 @@ public class ReservationService {
         updateTopWaitingConfirmed(beforeReservation);
     }
 
-    private void updateTopWaitingConfirmed(Reservation beforeReservation) {
-        if(beforeReservation.isConfirmed()) {
+    private void updateTopWaitingConfirmed(Reservation reservation) {
+        if(reservation.isConfirmed()) {
             Optional<Reservation> topWaiting = reservationRepository.findBySlotAndStatusWaitingAndWaitingNumberIsOne(
-                    beforeReservation.getDate(),
-                    beforeReservation.getTimeId(),
-                    beforeReservation.getThemeId());
+                    reservation.getDate(),
+                    reservation.getTimeId(),
+                    reservation.getThemeId());
 
             if(topWaiting.isPresent()) {
                 Reservation top = topWaiting.get();
@@ -94,18 +94,20 @@ public class ReservationService {
 
     @Transactional
     public void cancel(Long id) {
+        Reservation reservation = getReservation(id);
         cancelReservation(id);
+        updateTopWaitingConfirmed(reservation);
     }
 
     @Transactional
-    public void deleteMine(Long id, String guestName) {
+    public void cancelMine(Long id, String guestName) {
         Reservation reservation = getReservation(id);
         reservationValidator.validateDelete(reservation, guestName);
         cancelReservation(id);
     }
 
     private void cancelReservation(Long id) {
-        if(!reservationRepository.cancelById(id)) { // 위에서 NOT_FOUND를 검증하긴 하지만, 삭제 과정 중에 다른 사람이 변경할 수도 있기에 이중으로 검증
+        if(!reservationRepository.cancelById(id)) {
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
     }
