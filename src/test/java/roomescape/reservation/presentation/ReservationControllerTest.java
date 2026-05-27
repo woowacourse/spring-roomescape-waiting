@@ -153,7 +153,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationChangeRequest)
-                .when().patch("/reservations/" + reservationId + "/pending")
+                .when().patch("/reservations/" + reservationId + "/status")
                 .then().log().all()
                 .statusCode(200);
     }
