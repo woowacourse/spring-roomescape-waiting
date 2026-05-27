@@ -96,14 +96,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 where time_id = ? and date_id = ? and theme_id = ?
             )
             """;
-    private static final String EXISTS_OTHER_RESERVATION_BY_TIME_AND_DATE_AND_THEME_SQL =
-        """
-            select exists(
-                select 1
-                from reservation_slot r
-                where r.id <> ? and time_id = ? and date_id = ? and theme_id = ?
-            )
-            """;
     private static final String FIND_BY_SCHEDULE_SQL =
         """
             select r.id,
@@ -115,22 +107,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             join reservation_time rt on r.time_id = rt.id
             join theme th on r.theme_id = th.id
             where r.time_id = ? and r.date_id = ? and r.theme_id = ?
-            """;
-    private static final String FIND_BY_USER_NAME_SQL =
-        """
-            select rs.id,
-                   rd.id as date_id, rd.date,
-                   rt.id as time_id, rt.start_at,
-                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation r
-            join users u on r.user_id = u.id
-            join reservation_slot rs on r.reservation_slot_id = rs.id
-            join reservation_date rd on rs.date_id = rd.id
-            join reservation_time rt on rs.time_id = rt.id
-            join theme th on rs.theme_id = th.id
-            where u.name = ?
-              and r.status <> 'CANCELED'
-            order by rd.date desc, rt.start_at desc, r.id desc
             """;
     private static final String FIND_BY_ID_SQL =
         """
@@ -232,19 +208,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public boolean existsOtherReservation(Long id, Long timeId, Long dateId, Long themeId) {
-        Boolean exists = jdbcTemplate.queryForObject(
-            EXISTS_OTHER_RESERVATION_BY_TIME_AND_DATE_AND_THEME_SQL,
-            Boolean.class,
-            id,
-            timeId,
-            dateId,
-            themeId
-        );
-        return exists != null && exists;
-    }
-
-    @Override
     public Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId) {
         List<ReservationSlot> result = jdbcTemplate.query(
             FIND_BY_SCHEDULE_SQL,
@@ -254,11 +217,6 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             themeId
         );
         return result.stream().findFirst();
-    }
-
-    @Override
-    public List<ReservationSlot> findByName(String name) {
-        return jdbcTemplate.query(FIND_BY_USER_NAME_SQL, reservationRowMapper(), name);
     }
 
     @Override

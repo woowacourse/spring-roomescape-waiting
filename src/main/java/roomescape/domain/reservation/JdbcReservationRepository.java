@@ -122,33 +122,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             where u.name = ?
             order by ur.id desc
             """;
-    private static final String FIND_BY_USER_ID_SQL =
-        """
-            select ur.id as user_reservation_id,
-                   ur.waiting_number,
-                   ur.status,
-                   u.id as user_id,
-                   u.name as user_name,
-                   r.id as reservation_slot_id,
-                   rd.id as date_id,
-                   rd.date,
-                   rt.id as time_id,
-                   rt.start_at,
-                   th.id as theme_id,
-                   th.name as theme_name,
-                   th.content as theme_content,
-                   th.url as theme_url,
-                   ur.created_at,
-                   ur.updated_at
-            from reservation ur
-            join users u on ur.user_id = u.id
-            join reservation_slot r on ur.reservation_slot_id = r.id
-            join reservation_date rd on r.date_id = rd.id
-            join reservation_time rt on r.time_id = rt.id
-            join theme th on r.theme_id = th.id
-            where ur.user_id = ?
-            order by ur.id desc
-            """;
     private static final String FIND_ALL_BY_RESERVATION_ID_ORDER_SQL =
         """
             select ur.id as user_reservation_id,
@@ -249,11 +222,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findReservations(String username) {
         return jdbcTemplate.query(FIND_ALL_BY_USERNAME_SQL, userReservationRowMapper(), username);
-    }
-
-    @Override
-    public List<Reservation> findByUserId(Long userId) {
-        return jdbcTemplate.query(FIND_BY_USER_ID_SQL, userReservationRowMapper(), userId);
     }
 
     @Override

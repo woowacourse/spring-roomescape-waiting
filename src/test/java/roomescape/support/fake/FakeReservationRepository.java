@@ -47,13 +47,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByUserId(Long userId) {
-        return storage.values().stream()
-            .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
-            .toList();
-    }
-
-    @Override
     public Long countByReservationId(Long reservationId) {
         return storage.values().stream()
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))

@@ -27,11 +27,7 @@ public interface ReservationSlotRepository {
 
     boolean existsBySchedule(Long timeId, Long dateId, Long themeId);
 
-    boolean existsOtherReservation(Long id, Long timeId, Long dateId, Long themeId);
-
     Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId);
-
-    List<ReservationSlot> findByName(String name);
 
     Optional<ReservationSlot> findById(Long id);
 

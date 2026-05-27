@@ -13,8 +13,6 @@ public interface ReservationRepository {
 
     List<Reservation> findReservations(String username);
 
-    List<Reservation> findByUserId(Long userId);
-
     Long countByReservationId(Long reservationId);
 
     List<Reservation> findAllByReservationIdOrder(Long reservationId);

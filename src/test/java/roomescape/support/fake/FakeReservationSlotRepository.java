@@ -114,30 +114,12 @@ public class FakeReservationSlotRepository implements ReservationSlotRepository 
     }
 
     @Override
-    public boolean existsOtherReservation(Long id, Long timeId, Long dateId, Long themeId) {
-        for (ReservationSlot reservation : storage.values()) {
-            if (!id.equals(reservation.getId())
-                && timeId.equals(reservation.getTime().getId())
-                && dateId.equals(reservation.getDate().getId())
-                && themeId.equals(reservation.getTheme().getId())) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public Optional<ReservationSlot> findBySchedule(Long timeId, Long dateId, Long themeId) {
         return storage.values().stream()
             .filter(reservation -> timeId.equals(reservation.getTime().getId()))
             .filter(reservation -> dateId.equals(reservation.getDate().getId()))
             .filter(reservation -> themeId.equals(reservation.getTheme().getId()))
             .findFirst();
-    }
-
-    @Override
-    public List<ReservationSlot> findByName(String name) {
-        return List.of();
     }
 
     @Override
