@@ -71,12 +71,13 @@ public class ReservationService {
         Reservation reservation = getReservation(reservationId);
         ReservationTime changedTime = getReservationTime(timeId);
 
-        Status status = determineState(date, timeId, reservation.getTheme().getId());
+        Status status = determineState(date, timeId, reservation.themeId());
         Reservation changedReservation = reservation.changeDateAndTime(date, changedTime, status);
 
         reservationValidator.validateEdit(reservation, changedReservation, guestName);
 
         updateReservation(changedReservation);
+        promoteWaitingIfNeeded(reservation, changedReservation);
     }
 
     @Transactional
@@ -92,8 +93,14 @@ public class ReservationService {
     }
 
     private void cancelReservation(Long id) {
+        Reservation reservation = getReservation(id);
+
         if(!reservationRepository.cancelById(id)) { // 위에서 NOT_FOUND를 검증하긴 하지만, 삭제 과정 중에 다른 사람이 변경할 수도 있기에 이중으로 검증
             throw new DomainException(RESERVATION_NOT_FOUND);
+        }
+
+        if (reservation.getStatus() == Status.CONFIRMED) {
+            promoteFirstWaiting(reservation.getDate(), reservation.timeId(), reservation.themeId());
         }
     }
 
@@ -121,6 +128,23 @@ public class ReservationService {
         )) {
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
+    }
+
+    private void promoteWaitingIfNeeded(Reservation before, Reservation after) {
+        if (!before.isConfirmed()) {
+            return;
+        }
+
+        if (before.hasSameSlotAs(after)) {
+            return;
+        }
+
+        promoteFirstWaiting(before.getDate(), before.timeId(), before.themeId());
+    }
+
+    private void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId) {
+        reservationRepository.findFirstWaitingIdBySlot(date, timeId, themeId)
+                .ifPresent(waitingId -> reservationRepository.updateStatus(waitingId, Status.CONFIRMED));
     }
 
     private Status determineState(LocalDate date, Long timeId, Long themeId){

@@ -113,6 +113,46 @@ class ReservationServiceTest {
                 .hasMessage(PAST_RESERVATION_NOT_ALLOWED.message());
     }
 
+
+    @Test
+    @DisplayName("확정 예약을 취소하면 같은 슬롯의 첫 번째 대기 예약이 확정된다.")
+    void cancel_promoteWaitingReservation() {
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2023, 8, 10);
+
+        Reservation confirmed = insertReservation("포비", date, time, theme, Status.CONFIRMED);
+        Reservation waiting = insertReservation("브라운", date, time, theme, Status.WAITING);
+
+        reservationService.cancel(confirmed.getId());
+
+        assertThat(reservationRepository.findById(waiting.getId()).orElseThrow().getStatus())
+                .isEqualTo(Status.CONFIRMED);
+    }
+
+    @Test
+    @DisplayName("확정 예약의 날짜/시간을 변경하면 기존 슬롯의 첫 번째 대기 예약이 확정된다.")
+    void editDateTime_promoteWaitingReservation() {
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime beforeTime = insertReservationTime(LocalTime.of(10, 0));
+        ReservationTime afterTime = insertReservationTime(LocalTime.of(11, 0));
+
+        LocalDate beforeDate = LocalDate.of(2023, 8, 10);
+        LocalDate afterDate = LocalDate.of(2023, 8, 11);
+
+        Reservation confirmed = insertReservation("포비", beforeDate, beforeTime, theme, Status.CONFIRMED);
+        Reservation waiting = insertReservation("브라운", beforeDate, beforeTime, theme, Status.WAITING);
+
+        reservationService.editDateTime(confirmed.getId(), afterDate, afterTime.getId(), confirmed.getGuestName());
+
+        assertThat(reservationRepository.findById(waiting.getId()).orElseThrow().getStatus())
+                .isEqualTo(Status.CONFIRMED);
+    }
+
     @Test
     @DisplayName("해당 예약이 존재하지 않으면 취소할 수 없기 때문에 예외가 발생한다.")
     public void cancel_fail() {

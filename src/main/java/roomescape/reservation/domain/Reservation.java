@@ -83,6 +83,28 @@ public class Reservation {
         return Objects.equals(this.guestName, guestName);
     }
 
+
+    public boolean isConfirmed() {
+        return status == Status.CONFIRMED;
+    }
+
+    public Long timeId() {
+        return time.getId();
+    }
+
+    public Long themeId() {
+        return theme.getId();
+    }
+
+    private boolean isSameSlot(LocalDate date, Long timeId, Long themeId) {
+        return this.date.equals(date)
+                && this.timeId().equals(timeId)
+                && this.themeId().equals(themeId);
+    }
+
+    public boolean hasSameSlotAs(Reservation other) {
+        return isSameSlot(other.date, other.timeId(), other.themeId());
+    }
     public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime, Status status) {
         return of(id, guestName, changedDate, changedTime, theme, status);
     }

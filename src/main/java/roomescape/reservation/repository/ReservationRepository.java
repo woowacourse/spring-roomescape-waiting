@@ -26,6 +26,10 @@ public interface ReservationRepository {
 
     boolean cancelById(Long id);
 
+    boolean updateStatus(Long id, Status status);
+
+    Optional<Long> findFirstWaitingIdBySlot(LocalDate date, Long timeId, Long themeId);
+
     boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(LocalDate date, Long timeId, Long themeId, String guestName);
 
     boolean existsReservationBySlot(LocalDate date, Long timeId, Long themeId);

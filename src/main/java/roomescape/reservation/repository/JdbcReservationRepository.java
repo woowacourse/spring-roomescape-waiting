@@ -232,6 +232,28 @@ public class JdbcReservationRepository implements ReservationRepository {
         return rowCount == 1;
     }
 
+
+    @Override
+    public boolean updateStatus(Long id, Status status) {
+        int rowCount = jdbcTemplate.update("""
+                UPDATE reservation
+                SET status = ?
+                WHERE id = ?
+                """, status.toString(), id);
+        return rowCount == 1;
+    }
+
+    @Override
+    public Optional<Long> findFirstWaitingIdBySlot(LocalDate date, Long timeId, Long themeId) {
+        return jdbcTemplate.query("""
+                SELECT id
+                FROM reservation
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'WAITING'
+                ORDER BY id
+                LIMIT 1
+                """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId).stream().findFirst();
+    }
+
     @Override
     public boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
             LocalDate date, Long timeId, Long themeId, String guestName) {
