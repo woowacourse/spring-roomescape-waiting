@@ -301,4 +301,18 @@ public class ReservationDaoTest {
 
         assertThat(reservations).isEmpty();
     }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_TWO_STORES_SQL,
+            INSERT_RESERVATIONS_ACROSS_STORES_SQL
+    })
+    void 예약한_사용자id를_수정한다() {
+        reservationDao.updateMemberId(1L, 2L);
+        Reservation updatedReservation = reservationDao.findReservationById(1L);
+        assertThat(updatedReservation.getMemberId()).isEqualTo(2L);
+    }
 }

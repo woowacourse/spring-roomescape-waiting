@@ -154,4 +154,9 @@ public class ReservationDao {
             return newReservation;
         };
     }
+
+    public void updateMemberId(Long reservationId, Long memberId) {
+        String sql = "update reservation set member_id = ? where id = ?";
+        jdbcTemplate.update(sql, memberId, reservationId);
+    }
 }

@@ -4,11 +4,15 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
+import roomescape.dao.ReservationDao;
+import roomescape.domain.Reservation;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.TokenResponse;
 
@@ -16,6 +20,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.is;
 
 @ActiveProfiles("test")
@@ -38,6 +43,14 @@ public class ReservationControllerTest {
     private static final String EMAIL = "brown@email.com";
     private static final String PASSWORD = "password";
     private static final String MANAGER_EMAIL = "manager-gangnam@email.com";
+    public static final String INSERT_INTO_RESERVATION_WAIT_RESERVATION_ID_MEMBER_ID = """
+    INSERT INTO reservation_wait (reservation_id, member_id, created_at) VALUES (%d, %d, %s)
+    """;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+    @Autowired
+    private ReservationDao reservationDao;
 
     @Nested
     class 예약_생성 {
@@ -269,6 +282,38 @@ public class ReservationControllerTest {
                     .statusCode(400)
                     .body("errorCode", is("RESERVATION400_002"));
         }
+
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 예약대기가_있는_예약삭제하면_최근예약대기자로_바뀐다() {
+            String cookie = authenticate();
+            createDefaultTimes(cookie);
+            createDefaultThemes(cookie);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams())
+                    .when().post("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("id", is(1));
+
+            jdbcTemplate.update(INSERT_INTO_RESERVATION_WAIT_RESERVATION_ID_MEMBER_ID.formatted(1, 2, "'2026-05-27T16:00:00'"));
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().delete("/api/v1/reservations/1")
+                    .then().log().all()
+                    .statusCode(204);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().get("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(0));
+        }
     }
 
     @Nested
@@ -499,6 +544,29 @@ public class ReservationControllerTest {
                     .statusCode(409)
                     .body("errorCode", is("RESERVATION_WAIT409_001"));
         }
+
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 예약대기를_삭제하면_204를_반환한다() {
+            String cookie = authenticate();
+            createDefaultTimes(cookie);
+            createDefaultThemes(cookie);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams())
+                    .when().post("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("id", is(1));
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .when().delete("/api/v1/reservations/1/waits/mine")
+                    .then().log().all()
+                    .statusCode(204);
+        }
     }
 
     private String authenticate() {
@@ -589,6 +657,7 @@ public class ReservationControllerTest {
                 .extract().header("Set-Cookie")
                 .split(";")[0];
     }
+
     private Map<String, Object> reservationParams() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", LocalDate.now().plusDays(1).toString());

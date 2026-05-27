@@ -44,4 +44,22 @@ public class ReservationWaitDao {
             return Optional.empty();
         }
     }
+
+    public void deleteByReservationIdAndMemberId(Long reservationId, Long memberId) {
+        String sql = "DELETE FROM reservation_wait WHERE reservation_id = ? AND member_id = ?";
+        jdbcTemplate.update(sql, reservationId, memberId);
+    }
+
+    public Optional<Long> findEarliestMemberId(Long reservationId) {
+        try {
+            String sql = "SELECT member_id " +
+                    "FROM reservation_wait " +
+                    "WHERE reservation_id = ? " +
+                    "ORDER BY created_at, id " +
+                    "LIMIT 1";
+            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, Long.class, reservationId));
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 }

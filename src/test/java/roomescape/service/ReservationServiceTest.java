@@ -1,17 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DuplicateKeyException;
@@ -24,15 +12,20 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
-import roomescape.exception.reservation.PastReservationCancelNotAllowedException;
-import roomescape.exception.reservation.PastReservationNotAllowedException;
-import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
-import roomescape.exception.reservation.ReservationAlreadyExistsException;
-import roomescape.exception.reservation.ReservationNotFoundException;
-import roomescape.exception.reservation.ReservationOwnerMismatchException;
-import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
-import roomescape.exception.reservationwait.ReservationWaitAlreadyExistsException;
 import roomescape.exception.auth.WrongStoreAccessException;
+import roomescape.exception.reservation.*;
+import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
+import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
+import roomescape.exception.reservationwait.ReservationWaitAlreadyExistsException;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.*;
 
 public class ReservationServiceTest {
 
@@ -101,6 +94,73 @@ public class ReservationServiceTest {
                 ));
         assertThatThrownBy(() -> reservationService.deleteReservation(1L, JEONGKONG_ID))
                 .isInstanceOf(PastReservationCancelNotAllowedException.class);
+    }
+
+    @Test
+    void 예약자가_일치하지_않으면_예약을_삭제할_수_없다() {
+        long reservationId = 1L;
+        when(reservationDao.findReservationById(reservationId))
+                .thenReturn(new Reservation(
+                        reservationId,
+                        BROWN_ID,
+                        LocalDate.now().plusDays(1),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        1L,
+                        1L
+                ));
+
+        assertThatThrownBy(() -> reservationService.deleteReservation(reservationId, JEONGKONG_ID))
+                .isInstanceOf(ReservationOwnerMismatchException.class);
+
+        verify(reservationWaitDao, never()).findEarliestMemberId(anyLong());
+        verify(reservationDao, never()).delete(anyLong());
+        verify(reservationDao, never()).updateMemberId(anyLong(), anyLong());
+    }
+
+    @Test
+    void 대기자가_없으면_예약을_삭제한다() {
+        long reservationId = 1L;
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        when(reservationDao.findReservationById(reservationId))
+                .thenReturn(new Reservation(
+                        reservationId,
+                        BROWN_ID,
+                        futureDate,
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        1L,
+                        1L
+                ));
+        when(reservationWaitDao.findEarliestMemberId(reservationId))
+                .thenReturn(Optional.empty());
+
+        reservationService.deleteReservation(reservationId, BROWN_ID);
+
+        verify(reservationDao).delete(reservationId);
+        verify(reservationDao, never()).updateMemberId(anyLong(), anyLong());
+        verify(reservationWaitDao, never()).deleteByReservationIdAndMemberId(anyLong(), anyLong());
+    }
+
+    @Test
+    void 대기자가_있으면_가장_빠른_대기자에게_예약을_양도한다() {
+        long reservationId = 1L;
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        when(reservationDao.findReservationById(reservationId))
+                .thenReturn(new Reservation(
+                        reservationId,
+                        BROWN_ID,
+                        futureDate,
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        1L,
+                        1L
+                ));
+        when(reservationWaitDao.findEarliestMemberId(reservationId))
+                .thenReturn(Optional.of(JEONGKONG_ID));
+
+        reservationService.deleteReservation(reservationId, BROWN_ID);
+
+        verify(reservationDao).updateMemberId(reservationId, JEONGKONG_ID);
+        verify(reservationWaitDao).deleteByReservationIdAndMemberId(reservationId, JEONGKONG_ID);
+        verify(reservationDao, never()).delete(anyLong());
     }
 
     @Test
@@ -287,24 +347,6 @@ public class ReservationServiceTest {
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
-    @Test
-    void findByStoreId는_DAO에_위임한다() {
-        long storeId = 1L;
-        Reservation reservation = new Reservation(
-                1L,
-                BROWN_ID,
-                LocalDate.now().plusDays(1),
-                new ReservationTime(1L, LocalTime.of(10, 0)),
-                1L,
-                storeId
-        );
-        when(reservationDao.findByStoreId(storeId)).thenReturn(List.of(reservation));
-
-        List<Reservation> result = reservationService.findByStoreId(storeId);
-
-        assertThat(result).hasSize(1);
-        verify(reservationDao).findByStoreId(storeId);
-    }
 
     @Test
     void 매니저가_자기_매장_예약을_변경할_수_있다() {

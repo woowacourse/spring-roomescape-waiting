@@ -11,11 +11,7 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
-import roomescape.exception.reservation.PastReservationCancelNotAllowedException;
-import roomescape.exception.reservation.PastReservationNotAllowedException;
-import roomescape.exception.reservation.ReservationAlreadyExistsException;
-import roomescape.exception.reservation.ReservationNotFoundException;
-import roomescape.exception.reservation.ReservationOwnerMismatchException;
+import roomescape.exception.reservation.*;
 import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
 import roomescape.exception.reservationwait.ReservationWaitAlreadyExistsException;
@@ -99,11 +95,19 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id, Long memberId) {
-        Reservation reservation = findReservation(id);
+    public void deleteReservation(Long reservationId, Long memberId) {
+        Reservation reservation = findReservation(reservationId);
         validateReservationOwner(memberId, reservation);
         validatePastReservationCancel(reservation.getDate(), reservation.getTime().getStartAt());
-        reservationDao.delete(id);
+        reservationWaitDao.findEarliestMemberId(reservationId)
+                .ifPresentOrElse(
+                        m -> changeToRecentWaitingMember(reservationId, m),
+                        () -> reservationDao.delete(reservationId));
+    }
+
+    private void changeToRecentWaitingMember(Long reservationId, Long memberId) {
+        reservationDao.updateMemberId(reservationId, memberId);
+        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
     }
 
     @Transactional
@@ -111,6 +115,11 @@ public class ReservationService {
         Reservation reservation = findReservation(reservationId);
         reservation.validateStoreOwnership(manager);
         reservationDao.delete(reservationId);
+    }
+
+    @Transactional
+    public void deleteReservationWait(Long reservationId, Long memberId) {
+        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
     }
 
     private void validateReservationOwner(Long memberId, Reservation reservation) {
@@ -158,4 +167,6 @@ public class ReservationService {
             throw new PastReservationWaitNotAllowedException();
         }
     }
+
+
 }

@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationWait;
@@ -70,6 +71,8 @@ class ReservationWaitDaoTest {
 
     @Autowired
     ReservationWaitDao dao;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     @Sql(statements = {
@@ -135,5 +138,56 @@ class ReservationWaitDaoTest {
 
         Optional<ReservationWait> wait = dao.findReservationWaitById(waitId);
         assertThat(wait.isEmpty()).isTrue();
+    }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_RESERVATIONS_SQL,
+            INSERT_TWO_RESERVATION_WAITS_SQL
+    })
+    void reservationId와_memberId로_예약대기를_삭제한다() {
+        long reservationId = 1L;
+        long memberId = 2L;
+
+        dao.deleteByReservationIdAndMemberId(reservationId, memberId);
+        Optional<ReservationWait> wait = dao.findReservationWaitById(1L);
+        assertThat(wait.isEmpty()).isTrue();
+    }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_RESERVATIONS_SQL,
+            """
+            INSERT INTO reservation_wait (id, reservation_id, member_id)
+            VALUES (1, 1, 1),
+                   (2, 1, 2);
+            """
+    })
+    void 가장_먼저_예약대기한_memberId를_반환한다() {
+        Optional<Long> earliestMemberId = dao.findEarliestMemberId(1L);
+
+        assertThat(earliestMemberId).isPresent();
+        assertThat(earliestMemberId.get()).isEqualTo(1L);
+    }
+
+    @Test
+    @Sql(statements = {
+            INSERT_THREE_TIMES_SQL,
+            INSERT_SINGLE_THEME_SQL,
+            INSERT_TWO_MEMBERS_SQL,
+            INSERT_DEFAULT_STORE_SQL,
+            INSERT_TWO_RESERVATIONS_SQL
+    })
+    void 예약_대기자가_없으면_먼저_예약대기한_멤버는_없다() {
+        Optional<Long> earliestMemberId = dao.findEarliestMemberId(1L);
+        assertThat(earliestMemberId).isEmpty();
     }
 }
