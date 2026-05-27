@@ -28,7 +28,7 @@ public record ReservationCreateCommand(
                 .build();
     }
 
-    public ReservationSlot toSlot(Long themeId, Long timeId, LocalTime startAt) {
+    public ReservationSlot toSlot(LocalTime startAt) {
         return ReservationSlot.builder()
                 .date(date)
                 .themeId(themeId)

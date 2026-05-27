@@ -39,7 +39,7 @@ public class ReservationCommandService {
         ReservationTime time = timeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        ReservationSlot slot = request.toSlot(theme.getId(), time.getId(), time.getStartAt());
+        ReservationSlot slot = request.toSlot(time.getStartAt());
         slot.validateReservable(request.now());
 
         Reservation reservation = request.toReservation(slot);
