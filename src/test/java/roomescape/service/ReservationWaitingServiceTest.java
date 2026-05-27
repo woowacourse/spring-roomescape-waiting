@@ -69,7 +69,7 @@ public class ReservationWaitingServiceTest {
 
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingRequest);
 
-        assertThat(reservationWaitingResponse.getName()).isEqualTo("테스트");
+        assertThat(reservationWaitingResponse.name()).isEqualTo("테스트");
     }
 
     @Test
