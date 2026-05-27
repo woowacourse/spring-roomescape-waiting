@@ -1,3 +1,14 @@
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#name, #password").forEach(input => {
+        input.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("login-button").click();
+            }
+        });
+    });
+});
+
 async function login() {
     const name = document.getElementById("name").value;
     const password = document.getElementById("password").value;

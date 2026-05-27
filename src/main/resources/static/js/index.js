@@ -1,5 +1,16 @@
 let isLoginMode = true;
 
+document.addEventListener("DOMContentLoaded", () => {
+    document.querySelectorAll("#name, #password").forEach(input => {
+        input.addEventListener("keydown", event => {
+            if (event.key === "Enter") {
+                event.preventDefault();
+                document.getElementById("auth-button").click();
+            }
+        });
+    });
+});
+
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
     const title = document.getElementById("auth-title");

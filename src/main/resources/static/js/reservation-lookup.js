@@ -91,6 +91,10 @@ function renderReservations(reservations) {
         article.className = "reservation-result-card";
 
         const isCanceled = reservation.status === "CANCELED";
+        const isWaiting = reservation.status === "WAITING";
+        const waitingTurnText = isWaiting && reservation.waitingTurn
+            ? `<p>대기 순번: ${reservation.waitingTurn}번째</p>`
+            : "";
 
         article.innerHTML = `
             <div class="reservation-thumbnail-box">
@@ -106,6 +110,7 @@ function renderReservations(reservations) {
                 <p>날짜: ${reservation.date}</p>
                 <p>시간: ${formatTime(reservation.time)}</p>
                 <p>상태: ${formatStatus(reservation.status)}</p>
+                ${waitingTurnText}
 
                 <div class="button-group">
                     <button
@@ -298,6 +303,9 @@ function formatTime(value) {
 function formatStatus(status) {
     if (status === "RESERVED") {
         return "예약 완료";
+    }
+    if (status === "WAITING") {
+        return "예약 대기";
     }
     if (status === "CANCELED") {
         return "예약 취소";
