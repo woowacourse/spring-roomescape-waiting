@@ -2,6 +2,7 @@ package roomescape.reservation.domain.repository;
 
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 
 public interface ReservationRepository {
     Optional<Reservation> findById(Long id);
@@ -19,4 +20,6 @@ public interface ReservationRepository {
     Boolean existsByTheme(Long themeId);
 
     Boolean existsByTime(Long timeId);
+
+    Optional<ReservationSlot> findSlotById(Long id);
 }

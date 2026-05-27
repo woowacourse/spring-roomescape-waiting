@@ -33,10 +33,6 @@ public class Waiting {
         slot.validateReservable(now);
     }
 
-    public void validateDeletable(LocalDateTime now) {
-        slot.validateDeletable(now);
-    }
-
     private static String requireName(String name) {
         if (name == null || name.isBlank()) {
             throw new RoomEscapeException("이름은 비어있을 수 없습니다.");

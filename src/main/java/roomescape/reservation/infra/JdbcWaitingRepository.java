@@ -25,27 +25,19 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findById(Long id) {
+    public Optional<ReservationSlot> findSlotById(Long id) {
         return jdbcTemplate.query("""
-                        SELECT w.id, w.name, w.date, w.theme_id, w.time_id, rt.start_at
+                        SELECT w.date, w.theme_id, w.time_id, rt.start_at
                             FROM waiting w
                             JOIN reservation_time rt ON w.time_id = rt.id
                             WHERE w.id = ?
                         """,
-                (rs, rowNum) -> {
-                    ReservationSlot slot = ReservationSlot.builder()
-                            .date(rs.getDate("date").toLocalDate())
-                            .themeId(rs.getLong("theme_id"))
-                            .timeId(rs.getLong("time_id"))
-                            .startAt(rs.getObject("start_at", LocalTime.class))
-                            .build();
-
-                    return Waiting.builder()
-                            .id(rs.getLong("id"))
-                            .name(rs.getString("name"))
-                            .slot(slot)
-                            .build();
-                }
+                (rs, rowNum) -> ReservationSlot.builder()
+                        .date(rs.getDate("date").toLocalDate())
+                        .themeId(rs.getLong("theme_id"))
+                        .timeId(rs.getLong("time_id"))
+                        .startAt(rs.getObject("start_at", LocalTime.class))
+                        .build()
                 , id).stream().findFirst();
     }
 

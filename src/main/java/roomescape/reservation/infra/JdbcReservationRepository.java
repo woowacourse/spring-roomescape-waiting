@@ -50,6 +50,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<ReservationSlot> findSlotById(Long id) {
+        return jdbcTemplate.query("""
+                            SELECT r.date, r.theme_id, r.time_id, rt.start_at
+                            FROM reservation r
+                            JOIN reservation_time rt ON r.time_id = rt.id
+                            WHERE r.id = ?
+                        """,
+                (rs, rowNum) -> ReservationSlot.builder()
+                        .date(rs.getDate("date").toLocalDate())
+                        .themeId(rs.getLong("theme_id"))
+                        .timeId(rs.getLong("time_id"))
+                        .startAt(rs.getObject("start_at", LocalTime.class))
+                        .build()
+                , id).stream().findFirst();
+    }
+
+
+    @Override
     public Reservation save(Reservation reservation) {
         ReservationSlot slot = reservation.getSlot();
         SqlParameterSource params = new MapSqlParameterSource()

@@ -1,10 +1,11 @@
 package roomescape.reservation.domain.repository;
 
 import java.util.Optional;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 
 public interface WaitingRepository {
-    Optional<Waiting> findById(Long id);
+    Optional<ReservationSlot> findSlotById(Long id);
 
     Waiting save(Waiting waiting);
 

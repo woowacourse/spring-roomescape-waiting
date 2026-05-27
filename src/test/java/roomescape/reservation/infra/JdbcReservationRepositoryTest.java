@@ -177,5 +177,4 @@ class JdbcReservationRepositoryTest {
             assertSoftly.assertThat(updated.getSlot().timeId()).isEqualTo(newTimeId);
         });
     }
-
 }
