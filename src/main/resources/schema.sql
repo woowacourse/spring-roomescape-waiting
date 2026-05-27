@@ -39,3 +39,8 @@ CREATE UNIQUE INDEX unique_theme_name
     ON theme (name, deleted_at);
 CREATE UNIQUE INDEX unique_time_start
     ON reservation_time (start_at, deleted_at);
+
+CREATE INDEX idx_reservation_name_deleted
+    ON reservation (name, is_deleted);
+CREATE INDEX idx_reservation_waitlist
+    ON reservation (date, time_id, theme_id, status, is_deleted, created_at);

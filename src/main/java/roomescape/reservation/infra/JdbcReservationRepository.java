@@ -50,7 +50,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .build();
     };
 
-    private final RowMapper<ReservationQueryResult> queryResultRowMapper = (resultSet, rowNum)->{
+    private final RowMapper<ReservationQueryResult> queryResultRowMapper = (resultSet, rowNum) -> {
         Theme theme = Theme.builder()
                 .id(resultSet.getLong("t_id"))
                 .name(resultSet.getString("t_name"))
@@ -64,7 +64,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .startAt(resultSet.getTime("rt_start_at").toLocalTime())
                 .build();
 
-        return  ReservationQueryResult.builder()
+        return ReservationQueryResult.builder()
                 .id(resultSet.getLong("r_id"))
                 .name(resultSet.getString("r_name"))
                 .date(resultSet.getDate("r_date").toLocalDate())
@@ -179,25 +179,25 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "    t.duration_time AS t_duration_time, "
                 + "    rt.id AS rt_id, "
                 + "    rt.start_at AS rt_start_at, "
-                + "    p.pending_index AS pending_index "
+                + "("
+                + "        SELECT COUNT(*) + 1 "
+                + "        FROM reservation p "
+                + "        WHERE p.date = r.date "
+                + "          AND p.time_id = r.time_id "
+                + "          AND p.theme_id = r.theme_id "
+                + "          AND p.status = 'PENDING' "
+                + "          AND p.is_deleted = 0 "
+                + "          AND ("
+                + "                 p.created_at < r.created_at "
+                + "                 OR (p.created_at = r.created_at AND p.id < r.id) "
+                + "              )"
+                + ") AS pending_index "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "LEFT JOIN ( "
-                + "    SELECT "
-                + "        id, "
-                + "        ROW_NUMBER() OVER ( "
-                + "            PARTITION BY date, time_id, theme_id "
-                + "            ORDER BY created_at ASC "
-                + "        ) AS pending_index "
-                + "    FROM reservation "
-                + "    WHERE status = 'PENDING' "
-                + "      AND is_deleted = 0 "
-                + ") p ON r.id = p.id "
                 + "WHERE r.name = :username "
                 + "  AND r.is_deleted = 0 "
                 + "ORDER BY r.created_at DESC";
-
         return jdbcTemplate.query(sql, Map.of("username", username), queryResultRowMapper);
     }
 
@@ -239,7 +239,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsPendingReservationByName(final Long timeId, final Long themeId, final LocalDate date, final String name) {
+    public boolean existsPendingReservationByName(final Long timeId, final Long themeId, final LocalDate date,
+                                                  final String name) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND time_id=:timeId AND date=:date AND status='PENDING' AND name=:name)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql,
@@ -261,17 +262,18 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId) {
-        String sql = "SELECT r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
-                + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
-                + "t.description AS t_description, t.duration_time AS t_duration_time, "
-                + "rt.id AS rt_id, rt.start_at AS rt_start_at "
-                + "FROM reservation r "
-                + "INNER JOIN theme t ON r.theme_id = t.id "
-                + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.date = :date AND r.time_id = :timeId AND r.theme_id = :themeId "
-                + "AND r.status = 'PENDING' AND r.is_deleted = 0 "
-                + "ORDER BY r.created_at ASC " // 👈 가장 먼저 대기 건 사람 순서대로 줄 세우기
-                + "LIMIT 1";
+        String sql =
+                "SELECT r.id AS r_id, r.name AS r_name, r.date AS r_date, r.status AS r_status, r.created_at AS r_created_at, "
+                        + "t.id AS t_id, t.name AS t_name, t.thumbnail_image_url AS t_thumbnail_image_url, "
+                        + "t.description AS t_description, t.duration_time AS t_duration_time, "
+                        + "rt.id AS rt_id, rt.start_at AS rt_start_at "
+                        + "FROM reservation r "
+                        + "INNER JOIN theme t ON r.theme_id = t.id "
+                        + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
+                        + "WHERE r.date = :date AND r.time_id = :timeId AND r.theme_id = :themeId "
+                        + "AND r.status = 'PENDING' AND r.is_deleted = 0 "
+                        + "ORDER BY r.created_at ASC "
+                        + "LIMIT 1";
         MapSqlParameterSource params = new MapSqlParameterSource()
                 .addValue("date", date)
                 .addValue("timeId", timeId)

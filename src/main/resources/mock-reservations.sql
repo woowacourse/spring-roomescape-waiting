@@ -1,9 +1,9 @@
 -- 🥇 1등 (Theme 1: 버려진 정신병원) - 총 10건 (ACTIVE 7건, PENDING 3건)
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-03', 1, 1, 'ACTIVE', '2026-05-26 10:00:00');
+INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-06-03', 1, 1, 'ACTIVE', '2026-05-26 10:00:00');
 -- 💡 ★ 대기 순번 검증 슬롯 1 (2026-05-03 / Time 1 / Theme 1)
 -- 포비가 이미 ACTIVE인 상태에서 어피치와 네오가 순서대로 대기를 건 상황입니다.
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('어피치', '2026-05-03', 1, 1, 'PENDING', '2026-05-26 10:00:10'); -- 대기 1번 예상
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('네오', '2026-05-03', 1, 1, 'PENDING', '2026-05-26 10:01:15'); -- 대기 2번 예상
+INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('어피치', '2026-06-03', 1, 1, 'PENDING', '2026-05-26 10:00:10', 1); -- 대기 1번 예상
+INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('네오', '2026-06-03', 1, 1, 'PENDING', '2026-05-26 10:01:15', 2); -- 대기 2번 예상
 
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-05-02', 2, 1, 'ACTIVE', '2026-05-26 10:05:00');
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 3, 1, 'ACTIVE', '2026-05-26 10:10:00');
@@ -17,8 +17,8 @@ INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALU
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-02', 3, 7, 'ACTIVE', '2026-05-26 11:00:00');
 -- 💡 ★ 대기 순번 검증 슬롯 2 (2026-05-02 / Time 3 / Theme 7)
 -- 포비가 선점한 자리에 브리인과 제이슨이 순차적으로 대기를 걸었습니다.
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-02', 3, 7, 'PENDING', '2026-05-26 11:01:00'); -- 대기 1번 예상
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-05-02', 3, 7, 'PENDING', '2026-05-26 11:02:30'); -- 대기 2번 예상
+INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('브리', '2026-05-02', 3, 7, 'PENDING', '2026-05-26 11:01:00', 3); -- 대기 1번 예상
+INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('제이슨', '2026-05-02', 3, 7, 'PENDING', '2026-05-26 11:02:30', 4); -- 대기 2번 예상
 
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 5, 7, 'ACTIVE', '2026-05-26 11:05:00');
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('제이슨', '2026-04-30', 2, 7, 'ACTIVE', '2026-05-26 11:10:00');
@@ -41,7 +41,7 @@ INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALU
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('포비', '2026-05-03', 4, 25, 'ACTIVE', '2026-05-26 14:00:00');
 -- 💡 ★ 대기 순번 검증 슬롯 3 (2026-05-03 / Time 4 / Theme 25)
 -- 포비가 예약한 곳에 리사가 단독 대기를 걸었습니다.
-INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-05-03', 4, 25, 'PENDING', '2026-05-26 14:00:45'); -- 대기 1번 예상
+INSERT INTO reservation (name, date, time_id, theme_id, status, created_at, uniqueness_token) VALUES ('리사', '2026-05-03', 4, 25, 'PENDING', '2026-05-26 14:00:45', 5); -- 대기 1번 예상
 
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('브리', '2026-05-01', 2, 25, 'ACTIVE', '2026-05-26 14:05:00');
 INSERT INTO reservation (name, date, time_id, theme_id, status, created_at) VALUES ('리사', '2026-04-29', 7, 25, 'ACTIVE', '2026-05-26 14:10:00');
