@@ -16,16 +16,43 @@ CREATE TABLE reservation_time
     UNIQUE (start_at)
 );
 
+CREATE SEQUENCE reservation_request_order_seq START WITH 1 INCREMENT BY 1;
+
 CREATE TABLE reservation
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    name     VARCHAR(255) NOT NULL,
-    date     DATE         NOT NULL,
-    time_id  BIGINT       NOT NULL,
-    theme_id BIGINT       NOT NULL,
+    id            BIGINT       NOT NULL AUTO_INCREMENT,
+    name          VARCHAR(255) NOT NULL,
+    date          DATE         NOT NULL,
+    time_id       BIGINT       NOT NULL,
+    theme_id      BIGINT       NOT NULL,
+    request_order BIGINT       NOT NULL,
+    created_at    TIMESTAMP    NOT NULL,
 
     PRIMARY KEY (id),
-    UNIQUE (date, theme_id, time_id),
+    UNIQUE (theme_id, date, time_id, name),
+--  데이터베이스 정합성을 위해서 필요하나, insert시 성능 문제가 있어서 제외한다.
+--  UNIQUE (request_order),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
+
+CREATE TABLE reservation_history
+(
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT       NOT NULL,
+    name           VARCHAR(255) NOT NULL,
+    date           DATE         NOT NULL,
+    time_id        BIGINT       NOT NULL,
+    theme_id       BIGINT       NOT NULL,
+    request_order  BIGINT       NOT NULL,
+    created_at     TIMESTAMP    NOT NULL,
+    canceled_at    TIMESTAMP    NOT NULL,
+
+    PRIMARY KEY (id)
+);
+
+CREATE INDEX idx_reservation_slot_request_order
+    ON reservation (theme_id, date, time_id, request_order);
+
+CREATE INDEX idx_reservation_name
+    ON reservation (name);
