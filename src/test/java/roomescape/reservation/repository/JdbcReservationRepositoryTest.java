@@ -140,27 +140,57 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약의 날짜 및 시간을 수정한다.")
-    public void updateDateAndTime() {
+    @DisplayName("예약의 날짜,시간,상태를 수정한다.")
+    public void updateDateAndTimeAndStatus() {
         // given
-        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+
+        ReservationTime beforeTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Status beforeStatus = Status.WAITING;
+        LocalDate beforeDate = LocalDate.of(2023, 8, 5);
+        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", beforeDate, beforeTime, theme, beforeStatus);
 
         LocalDate updatedDate = LocalDate.of(2023, 9, 7);
         ReservationTime updatedTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
+        Status updatedStatus = Status.CONFIRMED;
 
         // when
-        boolean result = reservationRepository.updateDateAndTime(reservation.getId(), updatedDate, updatedTime.getId(), Status.WAITING);
+        boolean result = reservationRepository.updateDateAndTimeAndStatus(reservation.getId(), updatedDate, updatedTime.getId(), updatedStatus);
 
         // then
         assertThat(result).isTrue();
 
-        Map<String, Object> map = findDateAndTimeIdById(reservation.getId());
+        Map<String, Object> map = findReservationById(reservation.getId());
         LocalDate date = ((Date) map.get("date")).toLocalDate();
         Long timeId = ((Number) map.get("time_id")).longValue();
+        Status status = Status.from((String) map.get("status"));
         assertThat(date).isEqualTo(updatedDate);
         assertThat(timeId).isEqualTo(updatedTime.getId());
+        assertThat(status).isEqualTo(updatedStatus);
+    }
+
+    @Test
+    @DisplayName("예약의 상태를 수정한다.")
+    public void updateStatus() {
+        // given
+        Status beforeStatus = Status.WAITING;
+        Status updatedStatus = Status.CONFIRMED;
+
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, beforeStatus);
+
+
+
+        // when
+        boolean result = reservationRepository.updateStatus(reservation.getId(), updatedStatus);
+
+        // then
+        assertThat(result).isTrue();
+
+        Map<String, Object> map = findReservationById(reservation.getId());
+        Status status = Status.from((String) map.get("status"));
+        assertThat(status).isEqualTo(updatedStatus);
     }
 
     @Test
@@ -175,8 +205,8 @@ class JdbcReservationRepositoryTest {
         sqlFixtureGenerator.insertReservation("브라운", targetDate, time, theme, Status.WAITING);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate, time.getId(), theme.getId(), "브라운");
-        boolean notExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate, time2.getId(), theme2.getId(), "브라운");
+        boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(targetDate, time.getId(), theme.getId(), "브라운");
+        boolean notExists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(targetDate, time2.getId(), theme2.getId(), "브라운");
 
         // then
         assertThat(exists).isTrue();
@@ -193,7 +223,7 @@ class JdbcReservationRepositoryTest {
         sqlFixtureGenerator.insertDeletedReservation("브라운", targetDate, time, theme);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+        boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(
                 targetDate, time.getId(), theme.getId(), "브라운");
 
         // then
@@ -228,7 +258,7 @@ class JdbcReservationRepositoryTest {
 
         // when
         boolean exists = reservationRepository
-                .existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+                .existsBySlotAndGuestNameExceptCanceled(
                         targetDate,
                         otherTime.getId(),
                         theme.getId(),
@@ -249,7 +279,7 @@ class JdbcReservationRepositoryTest {
         sqlFixtureGenerator.insertDeletedReservation("브라운", targetDate, time, theme);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+        boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(
                 targetDate, time.getId(), theme.getId(), "브라운");
 
         // then
@@ -355,7 +385,7 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("예약 조회에서 날짜, 시간, 테마가 같고 Confiremd인 것만 조회한다.")
-    public void existsReservationBySlot() {
+    public void existsBySlot() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -364,19 +394,15 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = sqlFixtureGenerator.insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        boolean result = reservationRepository.existsReservationBySlot(reservation.getDate(), time.getId(), theme.getId());
+        boolean result = reservationRepository.existsBySlot(reservation.getDate(), time.getId(), theme.getId());
 
         // then
         assertThat(result).isTrue();
     }
 
-    private Map<String, Object> findDateAndTimeIdById(Long id) {
+    private Map<String, Object> findReservationById(Long id) {
         return jdbcTemplate.queryForMap("""
-                SELECT
-                    r.date,
-                    time_id
-                FROM reservation r
-                WHERE r.id = ?
+                SELECT * FROM reservation r WHERE r.id = ?
                 """, id);
     }
 }

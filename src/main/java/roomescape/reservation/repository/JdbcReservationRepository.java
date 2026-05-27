@@ -158,6 +158,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findBySlotAndStatusWaitingAndWaitingNumberIsOne(LocalDate date, Long timeId, Long themeId) {
+        return Optional.empty();
+    }
+
+    @Override
     public Reservation save(Reservation reservation) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
@@ -182,19 +187,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status) {
+    public boolean updateDateAndTimeAndStatus(Long id, LocalDate date, Long timeId, Status status) {
         String sql = """
                 UPDATE reservation
                 SET date = ?, time_id = ?, status = ?
                 WHERE id = ?
                 """;
-
         int count = jdbcTemplate.update(sql,
                 date,
                 timeId,
                 status.toString(),
                 id);
+        return count == 1;
+    }
 
+    @Override
+    public boolean updateStatus(Long id, Status status) {
+        String sql = "UPDATE reservation SET status = ? WHERE id = ?";
+        int count = jdbcTemplate.update(sql, status.toString(), id);
         return count == 1;
     }
 
@@ -210,7 +220,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+    public boolean existsBySlotAndGuestNameExceptCanceled(
             LocalDate date, Long timeId, Long themeId, String guestName) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
@@ -221,7 +231,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservationBySlot(LocalDate date, Long timeId, Long themeId) {
+    public boolean existsBySlot(LocalDate date, Long timeId, Long themeId) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
