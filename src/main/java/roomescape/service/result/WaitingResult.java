@@ -1,11 +1,11 @@
-package roomescape.service.dto;
+package roomescape.service.result;
 
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 
-public record ReservationWaitingWithTurn(
+public record WaitingResult(
         Long id,
         String name,
         LocalDate date,

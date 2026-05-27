@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import roomescape.controller.dto.ReservationWaitingRequest;
 import roomescape.controller.dto.ReservationWaitingResponse;
 import roomescape.service.ReservationWaitingService;
-import roomescape.service.dto.ReservationWaitingWithTurn;
+import roomescape.service.result.WaitingResult;
 
 import java.net.URI;
 import java.util.List;
@@ -28,7 +28,7 @@ public class ReservationWaitingController {
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
             @Valid @RequestBody ReservationWaitingRequest request) {
-        ReservationWaitingWithTurn waitingWithTurn = service.create(
+        WaitingResult waitingWithTurn = service.create(
                 request.name(),
                 request.date(),
                 request.timeId(),

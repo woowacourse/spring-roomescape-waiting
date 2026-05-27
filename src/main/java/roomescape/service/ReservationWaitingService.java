@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
@@ -10,7 +11,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.service.dto.ReservationWaitingWithTurn;
+import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,52 +37,77 @@ public class ReservationWaitingService {
         this.themeRepository = themeRepository;
     }
 
-    public List<ReservationWaitingWithTurn> findByName(String name) {
+    public List<WaitingResult> findByName(String name) {
         return reservationWaitingRepository.findByName(name).stream()
-                .map(waiting -> {
-                    Long turn = reservationWaitingRepository.countEarlierWaitings(waiting.getId()) + 1;
-                    return new ReservationWaitingWithTurn(
+                .map(waiting -> new WaitingResult(
                             waiting.getId(),
                             waiting.getName(),
                             waiting.getDate(),
                             waiting.getTime(),
                             waiting.getTheme(),
-                            turn);
-                }).toList();
+                            calculateTurn(waiting)))
+                .toList();
     }
 
     @Transactional
-    public ReservationWaitingWithTurn create(String name, LocalDate date, Long timeId, Long themeId) {
-        ReservationTime time = reservationTimeRepository.findBy(timeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
-        Theme theme = themeRepository.findBy(themeId)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+    public WaitingResult create(String name, LocalDate date, Long timeId, Long themeId) {
+        ReservationTime time = findReservationTime(timeId);
+        Theme theme = findTheme(themeId);
         ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
 
-        validateNotOwnReservationSlot(waiting);
-        validateAlreadyReserved(waiting);
-        validateNotPastDateAndTime(waiting);
-        validateNotDuplicateWaiting(waiting);
+        validateWaiting(waiting);
 
-        Long id = reservationWaitingRepository.insert(waiting);
-        ReservationWaiting saved = reservationWaitingRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
-        Long turn = reservationWaitingRepository.countEarlierWaitings(saved.getId()) + 1;
-        return new ReservationWaitingWithTurn(
+        ReservationWaiting saved = save(waiting);
+        return new WaitingResult(
                 saved.getId(),
                 saved.getName(),
                 saved.getDate(),
                 saved.getTime(),
                 saved.getTheme(),
-                turn);
+                calculateTurn(saved));
     }
 
     @Transactional
     public void delete(Long id, String name) {
-        ReservationWaiting waiting = reservationWaitingRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+        ReservationWaiting waiting = findWaiting(id);
         validateUpdatableReservation(waiting, name);
         reservationWaitingRepository.delete(id);
+    }
+
+    private long calculateTurn(ReservationWaiting waiting) {
+        return reservationWaitingRepository.countEarlierWaitings(waiting.getId()) + 1;
+    }
+
+    @NonNull
+    private Theme findTheme(Long themeId) {
+        return themeRepository.findBy(themeId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
+    }
+
+    @NonNull
+    private ReservationTime findReservationTime(Long timeId) {
+        return reservationTimeRepository.findBy(timeId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
+    }
+
+    @NonNull
+    private ReservationWaiting save(ReservationWaiting waiting) {
+        Long id = reservationWaitingRepository.insert(waiting);
+        return reservationWaitingRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("생성된 예약 대기를 찾을 수 없습니다."));
+    }
+
+    @NonNull
+    private ReservationWaiting findWaiting(Long id) {
+        return reservationWaitingRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
+    }
+
+    private void validateWaiting(ReservationWaiting waiting) {
+        validateNotPastDateAndTime(waiting);
+        validateAlreadyReserved(waiting);
+        validateNotOwnReservationSlot(waiting);
+        validateNotDuplicateWaiting(waiting);
     }
 
     private void validateNotOwnReservationSlot(ReservationWaiting waiting) {
@@ -115,6 +141,11 @@ public class ReservationWaitingService {
         }
     }
 
+    private void validateUpdatableReservation(ReservationWaiting waiting, String name) {
+        validateOwner(waiting, name);
+        validateReservationNotLocked(waiting);
+    }
+
     private void validateOwner(ReservationWaiting waiting, String name) {
         if (!waiting.isOwnedBy(name)) {
             throw new ForbiddenReservationException("본인의 예약 대기만 취소할 수 있습니다.");
@@ -125,10 +156,5 @@ public class ReservationWaitingService {
         if (waiting.isPast()) {
             throw new PastReservationLockedException("이미 지난 예약 대기는 취소할 수 없습니다.");
         }
-    }
-
-    private void validateUpdatableReservation(ReservationWaiting waiting, String name) {
-        validateOwner(waiting, name);
-        validateReservationNotLocked(waiting);
     }
 }
