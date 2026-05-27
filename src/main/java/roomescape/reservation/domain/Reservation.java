@@ -68,7 +68,7 @@ public class Reservation {
                 .build();
     }
 
-    public Reservation pending(final String username, final LocalDate date, final ReservationTime time, final Theme theme, final Clock clock) {
+    public Reservation pending(final String username, final Clock clock) {
         checkChangeable(username, clock);
         time.checkValidDateTime(date, clock);
         return Reservation.builder()
@@ -85,6 +85,7 @@ public class Reservation {
 
     public Reservation cancel(String username, Clock clock) {
         checkChangeable(username, clock);
+        time.checkValidDateTime(date, clock);
         return Reservation.builder()
                 .id(id)
                 .name(name)
