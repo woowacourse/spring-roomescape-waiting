@@ -10,6 +10,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -371,5 +372,25 @@ class JdbcReservationRepositoryTest {
         return reservationRepository.save(
                 Reservation.of( name, date, time, theme)
         );
+    }
+
+    @DisplayName("date, themeId, timeId를 기준으로 예약을 조회한다.")
+    @Test
+    void findByDateAndTimeIdAndThemeIdTest() {
+        //given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+
+        //when
+        Optional<Reservation> result = reservationRepository.findByDateAndTimeIdAndThemeId(
+                saved.getDate(),
+                saved.getTime().getId(),
+                saved.getTheme().getId()
+        );
+
+        //then
+        assertThat(result).isPresent();
     }
 }

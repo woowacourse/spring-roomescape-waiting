@@ -4,13 +4,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
-import java.time.Instant;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
@@ -31,21 +30,16 @@ class ReservationTimeServiceTest {
     @Mock
     ReservationTimeRepository reservationTimeRepository;
 
+    @Mock
+    Clock clock;
+
+    @InjectMocks
+    ReservationTimeService reservationTimeService;
+
     @DisplayName("예약 시간 생성 시, 기존에 이미 동일한 시간이 있으면 예외가 발생한다.")
     @Test
     void registerReservationTime_duplicate() {
         //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
-        );
-
-        ReservationTimeService reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
-
         when(reservationTimeRepository.existByStartAt(LocalTime.of(10, 0)))
                 .thenReturn(true);
 
@@ -59,17 +53,6 @@ class ReservationTimeServiceTest {
     @Test
     void removeThemeById_not_found() {
         //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
-        );
-
-        ReservationTimeService reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
-
         when(reservationTimeRepository.findById(1L))
                 .thenReturn(Optional.empty());
 
@@ -82,17 +65,6 @@ class ReservationTimeServiceTest {
     @Test
     void removeThemeById_in_use() {
         //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
-        );
-
-        ReservationTimeService reservationTimeService = new ReservationTimeService(
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
-
         when(reservationTimeRepository.findById(1L))
                 .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(10, 0))));
 

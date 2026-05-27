@@ -5,7 +5,7 @@
 ### 1. 예약 대기 신청 API
 
 #### 구현
-- [ ] 구현 완료
+- [x] 구현 완료
 
 #### 메서드 / URL
 
@@ -27,8 +27,30 @@
 
 - 201 created
 
+- header
+
 ```text
 Location: /themes/{id}
+```
+
+- body
+
+```json
+{
+  "id": 1,
+  "name": "브라운",
+  "date": "2026-05-28",
+  "time": {
+    "id": 1,
+    "startAt": "10:00:00"
+  },
+  "theme": {
+    "id": 1,
+    "name": "우주선 탈출",
+    "description": "고장 난 우주선에서 제한 시간 안에 탈출하세요.",
+    "thumbnailUrl": "https://example.com/themes/space-escape.jpg"
+  }
+}
 ```
 
 ### 2. 예약 대기 취소 API

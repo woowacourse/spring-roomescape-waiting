@@ -124,6 +124,30 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+        SELECT r.id AS reservation_id,
+               r.name AS reservation_name,
+               r.reservation_date,
+               r.time_id,
+               t.start_at AS time_start_at,
+               h.id AS theme_id,
+               h.name AS theme_name,
+               h.description AS theme_description,
+               h.thumbnail_url AS theme_thumbnail_url
+        FROM reservation r
+        INNER JOIN reservation_time t
+          ON r.time_id = t.id
+        INNER JOIN theme h
+          ON r.theme_id = h.id
+        WHERE  r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
+        """;
+
+        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date, timeId, themeId)
+                .stream().findFirst();
+    }
+
+    @Override
     public boolean existByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = """
         SELECT EXISTS (

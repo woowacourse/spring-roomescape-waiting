@@ -25,14 +25,17 @@ import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
+import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
+import roomescape.reservationWaiting.service.ReservationWaitingService;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.theme.exception.DuplicateThemeException;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.time.exception.DuplicateTimeException;
 import roomescape.time.exception.TimeNotFoundException;
-import roomescape.time.service.dto.ReservationTimeCommand;
 import roomescape.time.service.ReservationTimeService;
+import roomescape.time.service.dto.ReservationTimeCommand;
 
 @SpringWebTest
 class ConcurrencyTest {
@@ -42,6 +45,9 @@ class ConcurrencyTest {
 
     @Autowired
     ReservationService reservationService;
+
+    @Autowired
+    ReservationWaitingService reservationWaitingService;
 
     @Autowired
     ReservationTimeService reservationTimeService;
@@ -316,5 +322,32 @@ class ConcurrencyTest {
                 .extract()
                 .jsonPath()
                 .getLong("id");
+    }
+
+    @DisplayName("동일한 예약 대기 신청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
+    @Test
+    void makeReservationWaiting() throws InterruptedException {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+
+        //when
+        List<Integer> result = runConcurrentlyAndCountResults(
+                () -> reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
+                                "name",
+                                LocalDate.of(2026, 5, 15),
+                                1L,
+                                1L
+                        )
+                ),
+                100,
+                DuplicateReservationWaitingException.class
+        );
+
+        //then
+        assertThat(result.get(0)).isEqualTo(1);
+        assertThat(result.get(1)).isEqualTo(99);
+        assertThat(result.get(2)).isEqualTo(0);
     }
 }

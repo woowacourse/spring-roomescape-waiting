@@ -16,14 +16,15 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
-import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
@@ -44,21 +45,22 @@ class ReservationServiceTest {
     @Mock
     ThemeRepository themeRepository;
 
+    @Mock
+    Clock clock;
+
+    @InjectMocks
+    ReservationService reservationService;
+
     @DisplayName("인기 테마 조회 시 period=7이면 오늘 제외 직전 7일 범위로 조회한다.")
     @Test
     void findPopularThemesRange() {
         //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 8)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
         );
-
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(
                 reservationRepository.findPopularThemes(
@@ -99,17 +101,12 @@ class ReservationServiceTest {
     @Test
     void makeReservation_duplicate() {
         //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 8)
+                        .atStartOfDay(ZoneId.systemDefault())
+                        .toInstant()
         );
-
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(10, 0))));
@@ -131,20 +128,6 @@ class ReservationServiceTest {
     @DisplayName("id에 해당하는 예약이 없으면 예외가 발생한다.")
     @Test
     void deleteReservationById_not_found() {
-        //given
-        Clock clock = Clock.fixed(
-                Instant.parse("2026-05-08T00:00:00Z"),
-                ZoneId.of("Asia/Seoul")
-        );
-
-        ReservationService reservationService = new ReservationService(
-                reservationRepository,
-                reservationTimeRepository,
-                themeRepository,
-                clock
-        );
-
-        //when & then
         assertThatThrownBy(() -> reservationService.deleteReservationById(1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }

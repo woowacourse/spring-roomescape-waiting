@@ -1,0 +1,150 @@
+package roomescape.reservationWaiting.repository;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.sql.Time;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
+
+@JdbcTest
+class JdbcReservationWaitingRepositoryTest {
+
+    @Autowired
+    JdbcTemplate jdbcTemplate;
+
+    ReservationWaitingRepository reservationWaitingRepository;
+
+    @Autowired
+    public JdbcReservationWaitingRepositoryTest(JdbcTemplate jdbcTemplate) {
+        this.reservationWaitingRepository = new JdbcReservationWaitingRepository(jdbcTemplate);
+    }
+
+    @Test
+    @DisplayName("예약 대기를 저장하고 반환된 객체의 ID를 확인한다.")
+    void saveTest() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        // when
+        ReservationWaiting saved1 = reservationWaitingRepository.save(
+                ReservationWaiting.of(
+                        "브라운",
+                        LocalDate.of(2024, 5, 1),
+                        time,
+                        theme
+                )
+        );
+
+        ReservationWaiting saved2 = reservationWaitingRepository.save(
+                ReservationWaiting.of(
+                        "포비",
+                        LocalDate.of(2024, 5, 1),
+                        time,
+                        theme
+                )
+        );
+
+        // then
+        assertThat(saved1.getId()).isNotNull();
+        assertThat(saved2.getId()).isNotNull();
+    }
+
+    @Test
+    @DisplayName("기존에 이미 동일한 예약 대기가 있으면 예외가 발생한다.")
+    void saveTest_duplicate() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        reservationWaitingRepository.save(
+                ReservationWaiting.of(
+                        "브라운",
+                        LocalDate.of(2024, 5, 1),
+                        time,
+                        theme
+                )
+        );
+
+        // when & then
+        assertThatThrownBy(() -> reservationWaitingRepository.save(
+                ReservationWaiting.of(
+                        "브라운",
+                        LocalDate.of(2024, 5, 1),
+                        time,
+                        theme
+                )
+        )).isInstanceOf(DataIntegrityViolationException.class);
+    }
+
+    private ReservationTime createTime(LocalTime time) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_time (start_at) VALUES (?)",
+                Time.valueOf(time)
+        );
+
+        long timeId = jdbcTemplate.queryForObject(
+                "SELECT id FROM reservation_time WHERE start_at = ?",
+                Long.class,
+                Time.valueOf(time)
+        );
+
+        return new ReservationTime(timeId, time);
+    }
+
+    private Theme createTheme(String name, String description, String thumbnailUrl) {
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                name, description, thumbnailUrl
+        );
+
+        Long themeId = jdbcTemplate.queryForObject(
+                "SELECT id FROM theme WHERE name = ?",
+                Long.class,
+                name
+        );
+
+        return new Theme(themeId, name, description, thumbnailUrl);
+    }
+
+    @DisplayName("날짜, 시간, 테마, 예약자 이름에 해당하는 예약 대기가 존재하는지 조회한다.")
+    @Test
+    void existByDateAndTimeIdAndThemeIdAndNameTest() {
+        //given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+
+        //when & then
+        assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
+                saved.getDate(),
+                saved.getTime().getId(),
+                saved.getTheme().getId(),
+                "브라운"
+        )).isTrue();
+
+        assertThat(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
+                saved.getDate(),
+                saved.getTime().getId(),
+                saved.getTheme().getId(),
+                "포비"
+        )).isFalse();
+    }
+
+    private ReservationWaiting saveReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
+        return reservationWaitingRepository.save(
+                ReservationWaiting.of( name, date, time, theme)
+        );
+    }
+}
