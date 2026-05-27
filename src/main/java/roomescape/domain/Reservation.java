@@ -78,6 +78,10 @@ public class Reservation {
     }
 
     public void update(LocalDate date, Time time) {
+        LocalDateTime now = LocalDateTime.now();
+        if (time.isReservationBefore(now, date)) {
+            throw new BusinessRuleViolationException("지난 시간에 대한 예약 수정은 불가능합니다.");
+        }
         this.date = date;
         this.time = time;
     }
