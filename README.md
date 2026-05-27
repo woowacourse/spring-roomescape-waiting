@@ -47,7 +47,7 @@
 - [x] 이미 다른 사용자에 의해 예약된 슬롯(날짜+시간+테마)에 대기를 신청할 수 있다.
 - [x] 같은 슬롯에 대한 대기는 신청 순서대로 순번이 부여된다.
 - [x] 같은 사용자가 같은 슬롯에 중복 대기할 수 없다.
-- [ ] 사용자는 본인의 대기를 취소할 수 있다.
+- [x] 사용자는 본인의 대기를 취소할 수 있다.
 
 ## 2단계 - 내 예약 목록 조회 (상태 구분)
 
@@ -83,6 +83,7 @@
 | PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`        |
 | DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                          |
 | POST   | `/waitings`             | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme, order }` |
+| DELETE | `/waitings/me/{id}`     | `{ name }`                        | 204                                          |
 
 ## 에러 응답
 

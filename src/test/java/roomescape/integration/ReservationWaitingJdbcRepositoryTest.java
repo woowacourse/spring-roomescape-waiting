@@ -16,6 +16,7 @@ import roomescape.repository.ReservationWaitingJdbcRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -74,5 +75,45 @@ class ReservationWaitingJdbcRepositoryTest {
                 "브라운", LocalDateTime.of(2026, 8, 1, 10, 0, 1), reservation));
 
         assertThat(second.getOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void existBy는_같은_이름과_예약의_대기가_있으면_true를_반환한다() {
+        repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+
+        assertThat(repository.existBy("민욱", reservation.getId())).isTrue();
+    }
+
+    @Test
+    void existBy는_일치하는_대기가_없으면_false를_반환한다() {
+        assertThat(repository.existBy("민욱", reservation.getId())).isFalse();
+    }
+
+    @Test
+    void findById는_저장된_대기를_반환한다() {
+        ReservationWaiting saved = repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+
+        Optional<ReservationWaiting> found = repository.findById(saved.getId());
+
+        assertThat(found).isPresent();
+        assertThat(found.get().getName()).isEqualTo("민욱");
+        assertThat(found.get().getReservation().getId()).isEqualTo(reservation.getId());
+    }
+
+    @Test
+    void findById는_존재하지_않으면_빈_Optional을_반환한다() {
+        assertThat(repository.findById(999L)).isEmpty();
+    }
+
+    @Test
+    void deleteById_이후_findById는_빈_Optional을_반환한다() {
+        ReservationWaiting saved = repository.save(new ReservationWaiting(
+                "민욱", LocalDateTime.of(2026, 8, 1, 10, 0, 0), reservation));
+
+        repository.deleteById(saved.getId());
+
+        assertThat(repository.findById(saved.getId())).isEmpty();
     }
 }
