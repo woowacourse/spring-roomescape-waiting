@@ -10,6 +10,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
 import roomescape.dto.WaitingListCreateCommand;
+import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
@@ -62,7 +63,7 @@ class WaitingListServiceTest {
 
         given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(true);
 
-        WaitingList waitingList = WaitingList.create(date, name, theme, reservationTime);
+        WaitingList waitingList = WaitingList.create(name, date, theme, reservationTime);
         given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
 
         // when
@@ -208,5 +209,21 @@ class WaitingListServiceTest {
         assertThatThrownBy(() -> waitingListService.create(createCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_REQUIRED);
+    }
+
+    @Test
+    void 예약_대기_삭제() {
+        // given
+        String name = "김민준";
+        Long waitingListId = 1L;
+        WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
+
+        given(waitingListRepository.deleteById(waitingListId)).willReturn(true);
+
+        // when
+        waitingListService.delete(deleteCommand);
+
+        // then
+        verify(waitingListRepository).deleteById(waitingListId);
     }
 }

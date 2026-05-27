@@ -1,19 +1,20 @@
 package roomescape.repository;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.KeyGenerationException;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
-import java.sql.Timestamp;
+import java.sql.*;
 import java.time.LocalDate;
+import java.util.Optional;
 
 @RequiredArgsConstructor
 @Repository
@@ -21,6 +22,36 @@ public class WaitingListRepository {
 
     private final JdbcTemplate jdbcTemplate;
 
+    public Optional<WaitingList> findById(Long id) {
+        final String sql = """
+                SELECT
+                    w.id AS waiting_list_id,
+                    w.name AS waiting_list_name,
+                    w.date AS waiting_list_date,
+                    w.theme_id AS theme_id,
+                    w.created_at,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    t.end_at AS time_end_at,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM waiting_list w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme h ON w.theme_id = h.id 
+                WHERE w.id = ?
+                """;
+        try {
+            final WaitingList waitingList = jdbcTemplate.queryForObject(
+                    sql,
+                    this::mapToDomain,
+                    id
+            );
+            return Optional.of(waitingList);
+        } catch (EmptyResultDataAccessException e) {
+            return Optional.empty();
+        }
+    }
 
     public boolean existsByNameAndThemeAndDateAndTime(String name, Long themeId, LocalDate date, Long timeId) {
         final String sql = """
@@ -74,5 +105,40 @@ public class WaitingListRepository {
         }
 
         return generatedKey.longValue();
+    }
+
+    public boolean deleteById(Long id) {
+        final String sql = """
+                DELETE FROM waiting_list
+                WHERE id = ?
+                """;
+        return jdbcTemplate.update(sql, id) > 0;
+    }
+
+    /**
+     * ResultSet - Domain 매핑 메서드
+     */
+    private WaitingList mapToDomain(final ResultSet resultSet, final int rowNum) throws SQLException {
+        final ReservationTime reservationTime = ReservationTime.createWithId(
+                resultSet.getLong("time_id"),
+                resultSet.getTime("time_start_at").toLocalTime(),
+                resultSet.getTime("time_end_at").toLocalTime()
+        );
+
+        final Theme theme = Theme.createWithId(
+                resultSet.getLong("theme_id"),
+                resultSet.getString("theme_name"),
+                resultSet.getString("theme_description"),
+                resultSet.getString("theme_thumbnail_url")
+        );
+
+        return WaitingList.createWithId(
+                resultSet.getLong("waiting_list_id"),
+                resultSet.getString("waiting_list_name"),
+                resultSet.getDate("waiting_list_date").toLocalDate(),
+                theme,
+                reservationTime,
+                resultSet.getTimestamp("created_at").toLocalDateTime()
+        );
     }
 }

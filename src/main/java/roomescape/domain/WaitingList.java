@@ -27,8 +27,12 @@ public class WaitingList {
         this.createdAt = createdAt;
     }
 
-    public static WaitingList create(LocalDate date, String name, Theme theme, ReservationTime reservationTime) {
+    public static WaitingList create(String name, LocalDate date, Theme theme, ReservationTime reservationTime) {
         return new WaitingList(null, new PersonName(name), new ReservationDate(date), theme, reservationTime, LocalDateTime.now());
+    }
+
+    public static WaitingList createWithId(Long id, String name, LocalDate date, Theme theme, ReservationTime reservationTime, LocalDateTime createdAt) {
+        return new WaitingList(id, new PersonName(name), new ReservationDate(date), theme, reservationTime, createdAt);
     }
 
     public String getName() {

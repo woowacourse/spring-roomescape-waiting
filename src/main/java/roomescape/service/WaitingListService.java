@@ -7,6 +7,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
 import roomescape.dto.WaitingListCreateCommand;
+import roomescape.dto.WaitingListDeleteCommand;
 import roomescape.dto.WaitingListResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
@@ -30,7 +31,7 @@ public class WaitingListService {
         ReservationTime findReservationTime = reservationTimeRepository.findById(createCommand.timeId())
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
 
-        WaitingList waitingList = WaitingList.create(createCommand.date(), createCommand.name(), findTheme, findReservationTime);
+        WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
         if (waitingList.getReservationDate().isPast()) {
             throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
         }
@@ -57,6 +58,14 @@ public class WaitingListService {
             return WaitingListResult.from(savedWaitingList);
         } catch (DataAccessException e) {
             throw new BusinessException(ErrorCode.ALREADY_ON_WAITING_LIST);
+        }
+    }
+
+    public void delete(final WaitingListDeleteCommand deleteCommand) {
+        boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
+
+        if (!deleted) {
+            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
         }
     }
 }
