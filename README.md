@@ -79,6 +79,22 @@ PATCH /reservations/{reservationId}/cancel
 ---
 
 
+예약 플로우
+취소하고자 하는 예약이 PENDING이라면
+- [x] cancel로 상태 변경
+
+최소하고자 하는 예약이 CONFIRMNED이라면
+- [x] cancel로 상태 변경
+- 이때 만약 대기하고 있는 PENDING 예약이 존재한다면
+  - [x] 대기중인 PENDING 예약을 CONFIRM으로 변경하고 업데이트 
+- 대기하고 있는 PENDING 예약이 없다면
+  - [x] themeSlot을 false로 변경후 업데이트 한다.
+
+취소하고자 하는 예약이 COMPLETE, CANCELLED라면
+- [ ] 취소할 수 없다는 예외처리
+
+
+
 ### 2단계 - 내 예약 목록 조회 (상태 구분)
 
 이전 미션의 내 예약 목록 조회를 확장한다.
@@ -86,7 +102,7 @@ PATCH /reservations/{reservationId}/cancel
 대기에는 본인의 대기 순번도 함께 보여준다.
 
 
-
+### 중요 로직 플로우
 ```mermaid
 flowchart TD
     A[예약 취소 요청] --> B[ReservationService.cancelReservation 시작]
