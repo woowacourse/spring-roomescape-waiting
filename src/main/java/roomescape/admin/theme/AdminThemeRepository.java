@@ -1,7 +1,6 @@
 package roomescape.admin.theme;
 
 import java.util.List;
-import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -42,13 +41,6 @@ public class AdminThemeRepository {
     public void deleteById(Long id) {
         String query = "delete from theme where id = ?";
         jdbcTemplate.update(query, id);
-    }
-
-    public Optional<Theme> findById(Long id) {
-        String query = "select * from theme where id = ?";
-        return jdbcTemplate.query(query, rowMapper, id)
-                .stream()
-                .findFirst();
     }
 
     public List<Theme> findAll() {

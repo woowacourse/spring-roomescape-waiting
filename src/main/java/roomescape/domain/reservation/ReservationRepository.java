@@ -77,16 +77,6 @@ public class ReservationRepository {
         return count != null && count > 0;
     }
 
-    public Optional<String> findNameByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String query = """
-                SELECT name
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ?
-                """;
-        String name = jdbcTemplate.queryForObject(query, String.class, date, timeId, themeId);
-        return Optional.ofNullable(name);
-    }
-
     public List<Long> findTimeByDateAndThemeId(LocalDate date, Long themeId) {
         String query = """
                 SELECT r.time_id

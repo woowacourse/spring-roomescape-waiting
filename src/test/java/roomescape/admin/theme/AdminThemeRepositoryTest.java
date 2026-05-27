@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -50,32 +49,6 @@ class AdminThemeRepositoryTest {
             adminThemeRepository.deleteById(saved.getId());
 
             assertThat(adminThemeRepository.existsById(saved.getId())).isFalse();
-        }
-    }
-
-    @Nested
-    @DisplayName("id로 테마 조회")
-    class FindById {
-
-        @Test
-        void 존재하는_id면_테마를_반환한다() {
-            Theme saved = adminThemeRepository.save(Theme.of("테마1", "설명", "https://example.com/image.jpg"));
-
-            Optional<Theme> result = adminThemeRepository.findById(saved.getId());
-
-            assertAll(
-                    () -> assertThat(result).isPresent(),
-                    () -> assertThat(result.get().getName()).isEqualTo("테마1"),
-                    () -> assertThat(result.get().getDescription()).isEqualTo("설명"),
-                    () -> assertThat(result.get().getImageUrl()).isEqualTo("https://example.com/image.jpg")
-            );
-        }
-
-        @Test
-        void 존재하지_않는_id면_빈_Optional을_반환한다() {
-            Optional<Theme> result = adminThemeRepository.findById(999L);
-
-            assertThat(result).isEmpty();
         }
     }
 
