@@ -14,11 +14,13 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.fixture.ReservationDateFixture;
 import roomescape.date.repository.JdbcReservationDateRepository;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.ReservationErrorInformation;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.fixture.ReservationFixture;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
+import roomescape.reservation.service.dto.ReservationChangeCommand;
 import roomescape.reservation.service.dto.ReservationSaveCommand;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.fixture.ThemeFixture;
@@ -30,7 +32,8 @@ import roomescape.time.repository.JdbcReservationTimeRepository;
 import java.util.List;
 
 @JdbcTest
-@Import({JdbcReservationRepository.class, JdbcReservationTimeRepository.class, JdbcReservationDateRepository.class, JdbcThemeRepository.class})
+@Import({ReservationService.class, JdbcReservationRepository.class, JdbcReservationTimeRepository.class,
+    JdbcReservationDateRepository.class, JdbcThemeRepository.class})
 class ReservationServiceIntegrationTest {
 
     @Autowired
@@ -48,11 +51,13 @@ class ReservationServiceIntegrationTest {
     @Autowired
     private JdbcThemeRepository themeRepository;
 
+    @Autowired
     private ReservationService reservationService;
 
     @BeforeEach
     void setUp() {
-        reservationService = new ReservationService(reservationRepository, reservationTimeRepository, reservationDateRepository, themeRepository);
+        reservationService = new ReservationService(reservationRepository,
+            reservationTimeRepository, reservationDateRepository, themeRepository);
     }
 
     @Test
@@ -68,7 +73,6 @@ class ReservationServiceIntegrationTest {
         ReservationDate date = saveDate();
         Theme theme = saveTheme(themeName);
 
-
         reservationRepository.save(ReservationFixture.reservation(name1, date, time, theme));
         reservationRepository.save(ReservationFixture.waitReservation(name2, date, time, theme));
         reservationRepository.save(ReservationFixture.waitReservation(name3, date, time, theme));
@@ -78,7 +82,7 @@ class ReservationServiceIntegrationTest {
 
         // then
         Assertions.assertThat(actual.getFirst().waitingTurn())
-                .isEqualTo(2);
+            .isEqualTo(2);
     }
 
     @Test
@@ -92,7 +96,6 @@ class ReservationServiceIntegrationTest {
         ReservationDate date = saveDate();
         Theme theme = saveTheme(themeName);
 
-
         reservationRepository.save(ReservationFixture.reservation(name1, date, time, theme));
 
         // when
@@ -100,7 +103,7 @@ class ReservationServiceIntegrationTest {
 
         // then
         Assertions.assertThat(actual.getFirst().waitingTurn())
-                .isNull();
+            .isNull();
     }
 
     @Test
@@ -115,12 +118,35 @@ class ReservationServiceIntegrationTest {
         Theme theme = saveTheme(themeName);
 
         reservationRepository.save(ReservationFixture.reservation(name1, date, time, theme));
-        ReservationSaveCommand command = new ReservationSaveCommand(date.getId(), time.getId(), theme.getId());
+        ReservationSaveCommand command = new ReservationSaveCommand(date.getId(), time.getId(),
+            theme.getId());
 
         // when & then
         assertThatThrownBy(() -> reservationService.reserve(name1, command))
             .isInstanceOf(ReservationException.class)
             .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_BOOKED.getMessage());
+    }
+
+    @Test
+    @DisplayName("대기 상태인 예약은 변경할 수 없다.")
+    void waiting_reserve_not_changeable() {
+        // given
+        String themeName = "테마1";
+        String name1 = "사람1";
+
+        ReservationTime time = saveTime();
+        ReservationDate date = saveDate();
+        Theme theme = saveTheme(themeName);
+
+        Reservation savedReservation = reservationRepository.save(
+            ReservationFixture.waitReservation(name1, date, time, theme));
+        ReservationChangeCommand command = new ReservationChangeCommand(savedReservation.getId(),
+            savedReservation.getName(), savedReservation.getDate().getId(),
+            savedReservation.getTime().getId());
+        // when & then
+        assertThatThrownBy(() -> reservationService.changeSchedule(command))
+            .isInstanceOf(ReservationException.class)
+            .hasMessage(ReservationErrorInformation.RESERVATION_ALREADY_WAITING.getMessage());
     }
 
     private ReservationTime saveTime() {
