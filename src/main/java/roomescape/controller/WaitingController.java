@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -42,13 +43,13 @@ public class WaitingController {
         return ResponseEntity.ok().build();
     }
 
-    @DeleteMapping
-    public ResponseEntity<Void> cancel(@RequestParam @NotBlank String name,
-                                       @RequestParam @NotNull LocalDate date,
-                                       @RequestParam @NotNull Long timeId,
-                                       @RequestParam @NotNull Long themeId) {
-        Waiting waiting = Waiting.transientOf(name, date, timeId, themeId);
-        waitingService.removeWaiting(waiting);
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> cancel(
+            @PathVariable
+            long id,
+            @RequestParam @NotBlank
+            String userName) {
+        waitingService.removeWaiting(id, userName);
         return ResponseEntity.noContent().build();
     }
 

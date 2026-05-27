@@ -121,6 +121,7 @@ public class ReservationController {
 
     private ReservationAndWaitingResponse toResponse(ReservationAndWaiting reservationAndWaiting) {
         return new ReservationAndWaitingResponse(
+                reservationAndWaiting.id(),
                 reservationAndWaiting.name(),
                 reservationAndWaiting.date(),
                 TimeResponse.from(reservationAndWaiting.timeSlot()),

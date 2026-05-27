@@ -3,6 +3,8 @@ package roomescape.repository;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import org.springframework.dao.support.DataAccessUtils;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
@@ -49,16 +51,13 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void delete(Waiting waiting) {
+    public void deleteById(Long id) {
         String sql = """
                 DELETE FROM waiting 
-                WHERE name = ? 
-                AND date = ? 
-                AND time_id = ? 
-                AND theme_id = ?
+                WHERE id = ? 
                 """;
 
-        jdbcTemplate.update(sql, waiting.getName(), waiting.getDate(), waiting.getTimeSlotId(), waiting.getThemeId());
+        jdbcTemplate.update(sql, id);
     }
 
     @Override
@@ -112,6 +111,29 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 """;
 
         return jdbcTemplate.query(sql, rowMapper(), name);
+    }
+
+    @Override
+    public Optional<Waiting> findById(long waitingId) {
+        String sql = """
+                SELECT *
+                FROM (
+                    SELECT id,
+                           name,
+                           date,
+                           time_id,
+                           theme_id,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY date, time_id, theme_id
+                               ORDER BY created_at ASC, id ASC
+                           ) AS waiting_number
+                    FROM waiting
+                ) ranked
+                WHERE ranked.id = ?
+                """;
+
+        List<Waiting> waitings = jdbcTemplate.query(sql, rowMapper(), waitingId);
+        return Optional.ofNullable(DataAccessUtils.singleResult(waitings));
     }
 
     private SimpleJdbcInsert createInsert() {

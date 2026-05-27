@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import roomescape.exception.InvalidOwnershipException;
 
 public class Waiting {
 
@@ -53,6 +54,12 @@ public class Waiting {
     private void validateTheme(Long themeId) {
         if (themeId == null) {
             throw new IllegalArgumentException("존재하지 않는 테마입니다.");
+        }
+    }
+
+    public void validateModifiable(String requesterName) {
+        if (!this.name.equals(requesterName)) {
+            throw new InvalidOwnershipException();
         }
     }
 

@@ -34,20 +34,15 @@ public class WaitingService {
     }
 
     @Transactional
-    public void removeWaiting(Waiting waiting) {
-        existsWaiting(waiting);
-        waitingRepository.delete(waiting);
+    public void removeWaiting(Long id, String userName) {
+        Waiting waiting = waitingRepository.findById(id)
+                        .orElseThrow(() -> new WaitingNotFoundException(id));
+        waiting.validateModifiable(userName);
+        waitingRepository.deleteById(id);
     }
 
     public Integer allWaitingOf(LocalDate date, Long timeSlotId, Long themeId) {
         return waitingRepository.countAllBy(date, timeSlotId, themeId);
-    }
-
-    private void existsWaiting(Waiting waiting) {
-        int waitingNumber = waitingNumber(waiting);
-        if (waitingNumber < 1) {
-            throw new WaitingNotFoundException(waiting);
-        }
     }
 
     private void validReservation(Waiting waiting) {

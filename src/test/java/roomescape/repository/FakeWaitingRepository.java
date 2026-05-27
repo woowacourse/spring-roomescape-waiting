@@ -27,8 +27,8 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public void delete(Waiting waiting) {
-        storage.remove(waiting.getId());
+    public void deleteById(Long id) {
+        storage.remove(id);
     }
 
     @Override

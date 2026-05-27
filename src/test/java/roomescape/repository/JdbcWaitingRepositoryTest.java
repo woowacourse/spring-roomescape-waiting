@@ -63,10 +63,10 @@ class JdbcWaitingRepositoryTest {
 
     @Test
     @DisplayName("예약 대기를 삭제한다.")
-    void delete() {
+    void deleteById() {
         Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
-        jdbcWaitingRepository.delete(waiting);
+        jdbcWaitingRepository.deleteById(waiting);
     }
 
     @Test
