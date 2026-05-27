@@ -1,10 +1,11 @@
 package roomescape.dao;
 
-import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Store;
+
+import java.util.List;
 
 @Repository
 public class StoreDao {

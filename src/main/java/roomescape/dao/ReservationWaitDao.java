@@ -1,6 +1,7 @@
 package roomescape.dao;
 
 import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.jdbc.core.DataClassRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
@@ -37,7 +38,8 @@ public class ReservationWaitDao {
     public Optional<ReservationWait> findReservationWaitById(Long waitId) {
         try {
             String sql = "SELECT id, member_id, reservation_id, created_at FROM reservation_wait WHERE id = ?";
-            return Optional.ofNullable(jdbcTemplate.queryForObject(sql, ReservationWait.class, waitId));
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql, new DataClassRowMapper<>(ReservationWait.class), waitId));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }

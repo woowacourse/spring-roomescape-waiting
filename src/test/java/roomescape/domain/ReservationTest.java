@@ -1,13 +1,14 @@
 package roomescape.domain;
 
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import roomescape.auth.Role;
 import roomescape.exception.WrongStoreAccessException;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
+
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class ReservationTest {
 

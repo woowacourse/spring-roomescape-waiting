@@ -1,16 +1,5 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DuplicateKeyException;
@@ -25,9 +14,17 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
 import roomescape.exception.*;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+
 public class ReservationServiceTest {
 
-    private static final LocalDate NOW = LocalDate.of(2026, 5, 26);
     private static final Long BROWN_ID = 1L;
     private static final Long JEONGKONG_ID = 2L;
 
@@ -353,7 +350,7 @@ public class ReservationServiceTest {
     @Test
     void 예약대기를_생성가능() {
         long id = 1L;
-        LocalDate futureDate = NOW.plusDays(1);
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(
                 id,
                 BROWN_ID,
@@ -374,8 +371,9 @@ public class ReservationServiceTest {
                 .thenReturn(id);
         when(reservationWaitDao.findReservationWaitById(id))
                 .thenReturn(Optional.of(reservationWait));
-        assertThatCode(() -> reservationService.createWait(BROWN_ID, 1L))
-                .doesNotThrowAnyException();
+        ReservationWait result = reservationService.createWait(BROWN_ID, 1L);
+        assertThat(reservationWait).usingRecursiveComparison().isEqualTo(result);
+        verify(reservationWaitDao).createReservationWait(BROWN_ID, 1L);
     }
 
     @Test
@@ -386,7 +384,7 @@ public class ReservationServiceTest {
         Reservation reservation = new Reservation(
                 id,
                 BROWN_ID,
-                NOW.minusDays(1),
+                LocalDate.now().minusDays(1),
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 themeId,
                 storeId
@@ -398,9 +396,9 @@ public class ReservationServiceTest {
     }
 
     @Test
-    void 예약대기_시간을_찾을수_없음() {
+    void 예약대기_시간을_찾을수_없으면_예외() {
         long id = 1L;
-        LocalDate futureDate = NOW.plusDays(1);
+        LocalDate futureDate = LocalDate.now().plusDays(1);
         Reservation reservation = new Reservation(
                 id,
                 BROWN_ID,
@@ -408,12 +406,6 @@ public class ReservationServiceTest {
                 new ReservationTime(1L, LocalTime.of(10, 0)),
                 1L,
                 1L
-        );
-        ReservationWait reservationWait = new ReservationWait(
-                id,
-                1L,
-                BROWN_ID,
-                LocalDateTime.of(futureDate, LocalTime.of(10, 0))
         );
 
         when(reservationDao.findReservationById(1L)).thenReturn(reservation);

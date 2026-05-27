@@ -1,7 +1,5 @@
 package roomescape.dao;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -10,15 +8,17 @@ import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Member;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 @JdbcTest
 @ActiveProfiles("test")
 @Import(MemberDao.class)
 public class MemberDaoTest {
 
     private static final String INSERT_SINGLE_MEMBER_SQL = """
-              INSERT INTO member (id, email, password, name)
-              VALUES (1, 'brown@email.com', 'password', '브라운');
-              """;
+            INSERT INTO member (id, email, password, name)
+            VALUES (1, 'brown@email.com', 'password', '브라운');
+            """;
 
     @Autowired
     private MemberDao memberDao;

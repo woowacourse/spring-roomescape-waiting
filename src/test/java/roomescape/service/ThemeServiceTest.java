@@ -1,15 +1,15 @@
 package roomescape.service;
 
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.dao.ThemeDao;
 import roomescape.exception.ThemeInUseException;
 import roomescape.exception.ThemeNotFoundException;
+
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 public class ThemeServiceTest {
 

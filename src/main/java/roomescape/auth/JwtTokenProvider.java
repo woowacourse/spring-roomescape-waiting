@@ -6,13 +6,14 @@ import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
-import java.security.Key;
-import java.util.Base64;
-import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.exception.ExpiredTokenException;
 import roomescape.exception.InvalidTokenException;
+
+import java.security.Key;
+import java.util.Base64;
+import java.util.Date;
 
 @Component
 public class JwtTokenProvider {

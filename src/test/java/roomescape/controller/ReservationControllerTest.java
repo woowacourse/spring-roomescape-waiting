@@ -1,12 +1,7 @@
 package roomescape.controller;
 
-import static org.hamcrest.Matchers.is;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -16,6 +11,12 @@ import org.springframework.test.context.jdbc.SqlMergeMode;
 import org.springframework.test.context.jdbc.SqlMergeMode.MergeMode;
 import roomescape.dto.request.LoginRequest;
 import roomescape.dto.response.TokenResponse;
+
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
 
 @ActiveProfiles("test")
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
@@ -487,5 +488,79 @@ public class ReservationControllerTest {
         Map<String, Object> params = reservationParams();
         params.putAll(overrides);
         return params;
+    }
+
+    @Nested
+    class 예약대기 {
+
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 예약_대기_생성() {
+            String cookie = authenticate();
+            createDefaultTimes(cookie);
+            createDefaultThemes(cookie);
+
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams())
+                    .when().post("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(201);
+
+            Map<String, Object> waitTimeParams = new HashMap<>();
+            waitTimeParams.put("reservationId", 1L);
+            waitTimeParams.put("memberId", 1L);
+
+            RestAssured.given()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(waitTimeParams)
+                    .when().post("/api/v1/reservations/" + 1L + "/waits")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("id", is(1))
+                    .body("reservationId", is(1))
+                    .body("memberId", is(1));
+        }
+
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 없는_예약id로_예약_대기_생성시_404() {
+            String cookie = authenticate();
+            createDefaultTimes(cookie);
+            createDefaultThemes(cookie);
+
+            Map<String, Object> waitTimeParams = new HashMap<>();
+            waitTimeParams.put("reservationId", 1L);
+            waitTimeParams.put("memberId", 1L);
+
+            RestAssured.given()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(waitTimeParams)
+                    .when().post("/api/v1/reservations/" + 1L + "/waits")
+                    .then().log().all()
+                    .statusCode(404);
+        }
+
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 비회원으로_예약_대기_생성시_401() {
+            String cookie = authenticate();
+            createDefaultTimes(cookie);
+            createDefaultThemes(cookie);
+
+            Map<String, Object> waitTimeParams = new HashMap<>();
+            waitTimeParams.put("reservationId", 1L);
+            waitTimeParams.put("memberId", 1L);
+
+            RestAssured.given()
+                    .contentType(ContentType.JSON)
+                    .body(waitTimeParams)
+                    .when().post("/api/v1/reservations/" + 1L + "/waits")
+                    .then().log().all()
+                    .statusCode(401);
+        }
     }
 }

@@ -42,10 +42,9 @@
             min-height: 100vh;
             font-family: "Pretendard", "Apple SD Gothic Neo", "Noto Sans KR", sans-serif;
             color: var(--text);
-            background:
-                radial-gradient(circle at 14% 12%, rgba(159, 47, 36, 0.18), transparent 30%),
-                radial-gradient(circle at 86% 80%, rgba(215, 198, 174, 0.08), transparent 30%),
-                linear-gradient(160deg, var(--bg-darker) 0%, var(--bg-dark) 60%, #211c18 100%);
+            background: radial-gradient(circle at 14% 12%, rgba(159, 47, 36, 0.18), transparent 30%),
+            radial-gradient(circle at 86% 80%, rgba(215, 198, 174, 0.08), transparent 30%),
+            linear-gradient(160deg, var(--bg-darker) 0%, var(--bg-dark) 60%, #211c18 100%);
             line-height: 1.5;
         }
 
@@ -591,13 +590,23 @@
         }
 
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
 
         @keyframes slideUp {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         /* ─── empty/skeleton ─────────────────────── */
@@ -620,8 +629,12 @@
         }
 
         @keyframes shimmer {
-            0% { background-position: 100% 0; }
-            100% { background-position: -100% 0; }
+            0% {
+                background-position: 100% 0;
+            }
+            100% {
+                background-position: -100% 0;
+            }
         }
 
         /* ─── responsive ─────────────────────────── */
@@ -630,14 +643,17 @@
             .page {
                 padding: 24px 16px 48px;
             }
+
             .topbar {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 12px;
             }
+
             .card {
                 padding: 20px;
             }
+
             .reservation-row {
                 flex-direction: column;
                 align-items: flex-start;
@@ -646,177 +662,177 @@
     </style>
 </head>
 <body>
-    <!-- ─── Login view ────────────────────────────── -->
-    <main id="loginView" class="page login-wrap hidden">
-        <div class="login-card card">
-            <div class="card-header">
-                <h1 class="card-title">방탈출 예약</h1>
-                <p class="card-subtitle">로그인 후 예약을 진행하거나 매장을 관리하세요.</p>
-            </div>
-            <div class="field">
-                <label class="field-label" for="loginEmail">이메일</label>
-                <input id="loginEmail" type="email" placeholder="brown@email.com" autocomplete="email">
-            </div>
-            <div class="field">
-                <label class="field-label" for="loginPassword">비밀번호</label>
-                <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password">
-            </div>
-            <div class="button-row">
-                <button id="loginButton" class="btn btn-primary" type="button" style="width: 100%;">로그인</button>
-            </div>
-            <p class="field-hint" style="margin-top: 16px;">
-                테스트 계정 예시: brown@email.com / manager-gangnam@email.com (모두 password)
-            </p>
+<!-- ─── Login view ────────────────────────────── -->
+<main id="loginView" class="page login-wrap hidden">
+    <div class="login-card card">
+        <div class="card-header">
+            <h1 class="card-title">방탈출 예약</h1>
+            <p class="card-subtitle">로그인 후 예약을 진행하거나 매장을 관리하세요.</p>
         </div>
-    </main>
+        <div class="field">
+            <label class="field-label" for="loginEmail">이메일</label>
+            <input id="loginEmail" type="email" placeholder="brown@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+            <label class="field-label" for="loginPassword">비밀번호</label>
+            <input id="loginPassword" type="password" placeholder="비밀번호" autocomplete="current-password">
+        </div>
+        <div class="button-row">
+            <button id="loginButton" class="btn btn-primary" type="button" style="width: 100%;">로그인</button>
+        </div>
+        <p class="field-hint" style="margin-top: 16px;">
+            테스트 계정 예시: brown@email.com / manager-gangnam@email.com (모두 password)
+        </p>
+    </div>
+</main>
 
-    <!-- ─── User view ─────────────────────────────── -->
-    <main id="userView" class="page hidden">
-        <header class="topbar">
-            <div class="brand">
-                <h1 class="brand-title">방탈출 예약</h1>
-                <p class="brand-subtitle">원하는 매장과 테마, 시간을 선택해 예약하세요.</p>
-            </div>
-            <div class="user-chip">
-                <span class="badge user">사용자</span>
-                <strong id="userName">-</strong>
-                <button id="userLogoutButton" class="btn btn-sm btn-ghost" type="button">로그아웃</button>
-            </div>
-        </header>
+<!-- ─── User view ─────────────────────────────── -->
+<main id="userView" class="page hidden">
+    <header class="topbar">
+        <div class="brand">
+            <h1 class="brand-title">방탈출 예약</h1>
+            <p class="brand-subtitle">원하는 매장과 테마, 시간을 선택해 예약하세요.</p>
+        </div>
+        <div class="user-chip">
+            <span class="badge user">사용자</span>
+            <strong id="userName">-</strong>
+            <button id="userLogoutButton" class="btn btn-sm btn-ghost" type="button">로그아웃</button>
+        </div>
+    </header>
 
-        <div id="userStatus" class="status" data-tone="info" hidden></div>
+    <div id="userStatus" class="status" data-tone="info" hidden></div>
 
-        <section class="card">
-            <div class="card-header">
-                <h2 class="card-title">최근 인기 테마</h2>
-                <p class="card-subtitle">지난 7일간 예약이 많았던 테마입니다.</p>
-            </div>
-            <div id="popularRow" class="popular-row">
-                <div class="skeleton" style="min-width: 180px;"></div>
-                <div class="skeleton" style="min-width: 180px;"></div>
-                <div class="skeleton" style="min-width: 180px;"></div>
-            </div>
-            <p id="popularEmpty" class="empty hidden">최근 인기 테마가 없습니다.</p>
-        </section>
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">최근 인기 테마</h2>
+            <p class="card-subtitle">지난 7일간 예약이 많았던 테마입니다.</p>
+        </div>
+        <div id="popularRow" class="popular-row">
+            <div class="skeleton" style="min-width: 180px;"></div>
+            <div class="skeleton" style="min-width: 180px;"></div>
+            <div class="skeleton" style="min-width: 180px;"></div>
+        </div>
+        <p id="popularEmpty" class="empty hidden">최근 인기 테마가 없습니다.</p>
+    </section>
 
-        <section class="card">
-            <div class="card-header">
-                <h2 class="card-title">예약하기</h2>
-                <p class="card-subtitle">매장 → 테마 → 날짜 → 시간 순으로 선택합니다.</p>
-            </div>
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">예약하기</h2>
+            <p class="card-subtitle">매장 → 테마 → 날짜 → 시간 순으로 선택합니다.</p>
+        </div>
 
-            <div class="field">
-                <label class="field-label" for="userStoreSelect">매장</label>
-                <select id="userStoreSelect">
-                    <option value="">매장을 선택하세요</option>
-                </select>
-            </div>
+        <div class="field">
+            <label class="field-label" for="userStoreSelect">매장</label>
+            <select id="userStoreSelect">
+                <option value="">매장을 선택하세요</option>
+            </select>
+        </div>
 
-            <div class="field">
-                <span class="field-label">테마</span>
-                <div id="userThemeGrid" class="theme-grid">
-                    <div class="skeleton"></div>
-                    <div class="skeleton"></div>
-                    <div class="skeleton"></div>
-                </div>
-                <p id="userThemeEmpty" class="empty hidden">등록된 테마가 없습니다.</p>
+        <div class="field">
+            <span class="field-label">테마</span>
+            <div id="userThemeGrid" class="theme-grid">
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
+                <div class="skeleton"></div>
             </div>
+            <p id="userThemeEmpty" class="empty hidden">등록된 테마가 없습니다.</p>
+        </div>
 
-            <div class="field">
-                <label class="field-label" for="userReservationDate">날짜</label>
-                <input id="userReservationDate" type="date">
-            </div>
+        <div class="field">
+            <label class="field-label" for="userReservationDate">날짜</label>
+            <input id="userReservationDate" type="date">
+        </div>
 
-            <div class="field">
-                <span class="field-label">시간</span>
-                <p id="userTimeHint" class="field-hint">매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.</p>
-                <div id="userTimeGrid" class="time-grid"></div>
-            </div>
+        <div class="field">
+            <span class="field-label">시간</span>
+            <p id="userTimeHint" class="field-hint">매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.</p>
+            <div id="userTimeGrid" class="time-grid"></div>
+        </div>
 
-            <div class="button-row">
-                <button id="userReserveButton" class="btn btn-primary" type="button" disabled>예약하기</button>
-            </div>
-        </section>
+        <div class="button-row">
+            <button id="userReserveButton" class="btn btn-primary" type="button" disabled>예약하기</button>
+        </div>
+    </section>
 
-        <section class="card">
-            <div class="card-header">
-                <h2 class="card-title">내 예약</h2>
-                <p class="card-subtitle">현재 내가 만든 예약 목록입니다.</p>
-            </div>
-            <div class="button-row" style="margin-bottom: 16px;">
-                <button id="loadMyReservationsButton" class="btn btn-secondary" type="button">내 예약 불러오기</button>
-            </div>
-            <div id="myReservationsList" class="reservation-list"></div>
-            <p id="myReservationsEmpty" class="empty">예약 목록을 불러와 주세요.</p>
-        </section>
-    </main>
+    <section class="card">
+        <div class="card-header">
+            <h2 class="card-title">내 예약</h2>
+            <p class="card-subtitle">현재 내가 만든 예약 목록입니다.</p>
+        </div>
+        <div class="button-row" style="margin-bottom: 16px;">
+            <button id="loadMyReservationsButton" class="btn btn-secondary" type="button">내 예약 불러오기</button>
+        </div>
+        <div id="myReservationsList" class="reservation-list"></div>
+        <p id="myReservationsEmpty" class="empty">예약 목록을 불러와 주세요.</p>
+    </section>
+</main>
 
-    <!-- ─── Manager view ─────────────────────────── -->
-    <main id="managerView" class="page hidden">
-        <header class="topbar">
-            <div class="brand">
-                <h1 class="brand-title">매장 관리</h1>
-                <p class="brand-subtitle"><span id="managerStoreName">-</span>의 예약을 관리합니다.</p>
-            </div>
-            <div class="user-chip">
-                <span class="badge">매니저</span>
-                <strong id="managerName">-</strong>
-                <button id="managerLogoutButton" class="btn btn-sm btn-ghost" type="button">로그아웃</button>
-            </div>
-        </header>
+<!-- ─── Manager view ─────────────────────────── -->
+<main id="managerView" class="page hidden">
+    <header class="topbar">
+        <div class="brand">
+            <h1 class="brand-title">매장 관리</h1>
+            <p class="brand-subtitle"><span id="managerStoreName">-</span>의 예약을 관리합니다.</p>
+        </div>
+        <div class="user-chip">
+            <span class="badge">매니저</span>
+            <strong id="managerName">-</strong>
+            <button id="managerLogoutButton" class="btn btn-sm btn-ghost" type="button">로그아웃</button>
+        </div>
+    </header>
 
-        <div id="managerStatus" class="status" data-tone="info" hidden></div>
+    <div id="managerStatus" class="status" data-tone="info" hidden></div>
 
-        <section class="card">
-            <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                <div>
-                    <h2 class="card-title">예약 목록</h2>
-                    <p class="card-subtitle">자기 매장의 모든 예약입니다.</p>
-                </div>
-                <button id="refreshManagerButton" class="btn btn-sm btn-secondary" type="button">새로고침</button>
+    <section class="card">
+        <div class="card-header" style="display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+            <div>
+                <h2 class="card-title">예약 목록</h2>
+                <p class="card-subtitle">자기 매장의 모든 예약입니다.</p>
             </div>
-            <div class="table-wrap">
-                <table class="reservation-table">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>날짜</th>
-                            <th>시간</th>
-                            <th>테마</th>
-                            <th style="text-align: right;">관리</th>
-                        </tr>
-                    </thead>
-                    <tbody id="managerTableBody"></tbody>
-                </table>
-            </div>
-            <p id="managerEmpty" class="empty hidden">이 매장에 예약이 없습니다.</p>
-        </section>
-    </main>
+            <button id="refreshManagerButton" class="btn btn-sm btn-secondary" type="button">새로고침</button>
+        </div>
+        <div class="table-wrap">
+            <table class="reservation-table">
+                <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>날짜</th>
+                    <th>시간</th>
+                    <th>테마</th>
+                    <th style="text-align: right;">관리</th>
+                </tr>
+                </thead>
+                <tbody id="managerTableBody"></tbody>
+            </table>
+        </div>
+        <p id="managerEmpty" class="empty hidden">이 매장에 예약이 없습니다.</p>
+    </section>
+</main>
 
-    <!-- ─── Edit modal ───────────────────────────── -->
-    <div id="editModalOverlay" class="modal-overlay hidden">
-        <div class="modal">
-            <h3 class="modal-title">예약 변경</h3>
-            <div class="field">
-                <span class="field-label">예약 ID</span>
-                <div id="editModalReservationId" class="modal-readonly">-</div>
-            </div>
-            <div class="field">
-                <label class="field-label" for="editModalDate">날짜</label>
-                <input id="editModalDate" type="date">
-            </div>
-            <div class="field">
-                <label class="field-label" for="editModalTimeSelect">시간</label>
-                <select id="editModalTimeSelect">
-                    <option value="">시간을 선택하세요</option>
-                </select>
-            </div>
-            <div class="modal-actions">
-                <button id="editModalCancelButton" class="btn btn-secondary" type="button">취소</button>
-                <button id="editModalSubmitButton" class="btn btn-primary" type="button">변경하기</button>
-            </div>
+<!-- ─── Edit modal ───────────────────────────── -->
+<div id="editModalOverlay" class="modal-overlay hidden">
+    <div class="modal">
+        <h3 class="modal-title">예약 변경</h3>
+        <div class="field">
+            <span class="field-label">예약 ID</span>
+            <div id="editModalReservationId" class="modal-readonly">-</div>
+        </div>
+        <div class="field">
+            <label class="field-label" for="editModalDate">날짜</label>
+            <input id="editModalDate" type="date">
+        </div>
+        <div class="field">
+            <label class="field-label" for="editModalTimeSelect">시간</label>
+            <select id="editModalTimeSelect">
+                <option value="">시간을 선택하세요</option>
+            </select>
+        </div>
+        <div class="modal-actions">
+            <button id="editModalCancelButton" class="btn btn-secondary" type="button">취소</button>
+            <button id="editModalSubmitButton" class="btn btn-primary" type="button">변경하기</button>
         </div>
     </div>
+</div>
 
 <script>
     "use strict";
@@ -918,7 +934,7 @@
                 message: friendlyMessage(body.errorCode, body.message || fallbackMessage),
             };
         } catch {
-            return { errorCode: null, message: fallbackMessage || "요청을 처리하지 못했습니다." };
+            return {errorCode: null, message: fallbackMessage || "요청을 처리하지 못했습니다."};
         }
     }
 
@@ -938,7 +954,7 @@
     }
 
     async function getJson(url) {
-        const response = await fetch(url, { credentials: "include" });
+        const response = await fetch(url, {credentials: "include"});
         await ensureOk(response);
         return response.json();
     }
@@ -947,7 +963,7 @@
         const response = await fetch(url, {
             method: "POST",
             credentials: "include",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body),
         });
         await ensureOk(response);
@@ -958,7 +974,7 @@
         const response = await fetch(url, {
             method: "PATCH",
             credentials: "include",
-            headers: { "Content-Type": "application/json" },
+            headers: {"Content-Type": "application/json"},
             body: JSON.stringify(body),
         });
         await ensureOk(response);
@@ -1029,11 +1045,11 @@
         }
 
         try {
-            const formBody = new URLSearchParams({ email, password }).toString();
+            const formBody = new URLSearchParams({email, password}).toString();
             const response = await fetch("/api/v1/auth/login", {
                 method: "POST",
                 credentials: "include",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                headers: {"Content-Type": "application/x-www-form-urlencoded"},
                 body: formBody,
             });
             await ensureOk(response, "로그인에 실패했습니다.");
@@ -1049,8 +1065,9 @@
 
     async function logout() {
         try {
-            await fetch("/api/v1/auth/logout", { method: "POST", credentials: "include" });
-        } catch { /* ignore */ }
+            await fetch("/api/v1/auth/logout", {method: "POST", credentials: "include"});
+        } catch { /* ignore */
+        }
         state.user = null;
         // 상태 초기화
         state.userSelectedStoreId = null;
@@ -1346,7 +1363,8 @@
     async function loadAllTimes() {
         try {
             state.allTimes = await getJson("/api/v1/reservation-times");
-        } catch { /* manager modal will show empty */ }
+        } catch { /* manager modal will show empty */
+        }
     }
 
     // ─── Init ────────────────────────────────
