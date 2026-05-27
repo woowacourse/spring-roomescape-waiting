@@ -91,6 +91,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 .findFirst();
     }
 
+    @Override
     public List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(
             final String customerName,
             final LocalDateTime now
