@@ -27,6 +27,7 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.dto.reservation.CreateReservationCommand;
 import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.dto.reservation.UpdateReservationCommand;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
@@ -60,7 +61,8 @@ class ReservationControllerTest {
     @Test
     void GET_reservations_mine_로그인_사용자의_예약_목록을_응답한다() throws Exception {
         given(reservationService.getMyReservations(1L))
-                .willReturn(ReservationResponses.of(List.of(Fixtures.sampleReservation(1L)), false));
+                .willReturn(ReservationWithStatusResponses.of(List.of(Fixtures.sampleReservation(1L)),
+                        Map.of(Fixtures.sampleWaitingReservation(2L), 1), false));
 
         mockMvc.perform(get("/reservations/mine"))
                 .andExpect(status().isOk())
