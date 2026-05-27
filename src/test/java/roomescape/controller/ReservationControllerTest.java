@@ -88,6 +88,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("reservationId", id)
+                .queryParam("name", "브라운")
                 .when().delete("/reservations/{reservationId}")
                 .then().log().all()
                 .statusCode(204);
@@ -209,6 +210,7 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .pathParam("reservationId", id)
+                .queryParam("name", "검프")
                 .when().delete("/reservations/{reservationId}")
                 .then().log().all()
                 .statusCode(204);

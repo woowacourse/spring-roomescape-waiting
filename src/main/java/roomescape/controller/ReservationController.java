@@ -61,9 +61,12 @@ public class ReservationController {
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{reservationId}")
-    public void deleteReservation(@PathVariable Long reservationId) {
+    public void deleteReservation(
+            @PathVariable Long reservationId,
+            @RequestParam String name
+    ) {
         LocalDateTime now = LocalDateTime.now();
-        reservationService.delete(now, reservationId);
+        reservationService.delete(now, reservationId, name);
     }
 
 }

@@ -4,6 +4,7 @@ import org.springframework.http.HttpStatus;
 
 public enum ErrorCode {
     COMMON_BAD_REQUEST("COMMON_400", "잘못된 요청입니다.", HttpStatus.BAD_REQUEST),
+    COMMON_UNAUTHORIZED("COMMON_401", "권한이 없습니다.", HttpStatus.UNAUTHORIZED),
 
     THEME_NAME_BLANK("THEME_400_1", "테마 이름은 비거나 공백일 수 없습니다.", HttpStatus.BAD_REQUEST),
     THEME_DESCRIPTION_BLANK("THEME_400_2", "테마 설명은 비거나 공백일 수 없습니다.", HttpStatus.BAD_REQUEST),

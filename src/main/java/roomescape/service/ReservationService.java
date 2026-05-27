@@ -77,9 +77,11 @@ public class ReservationService {
         }
     }
 
-    public void delete(LocalDateTime now, Long reservationId) {
+    public void delete(LocalDateTime now, Long reservationId, String name) {
         Reservation reservation = reservationDao.findById(reservationId);
         ReservationSlot reservationSlot = reservationSlotDao.findById(reservation.getReservationSlotId());
+        validateReservationOwner(reservation, name);
+
         LocalDateTime localDateTime = LocalDateTime.of(reservationSlot.getDate(), reservationSlot.getTime().getStartAt());
         if (now.isAfter(localDateTime)) {
             throw new CustomException(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION);
@@ -118,6 +120,12 @@ public class ReservationService {
     private void validateSameReservation(String name, Long reservationSlotId) {
         if (reservationDao.existByNameReservationIdStatus(name, reservationSlotId, Status.RESERVED)) {
             throw new CustomException(ErrorCode.ALREADY_EXISTS_RESERVATION);
+        }
+    }
+
+    private void validateReservationOwner(Reservation reservation, String name) {
+        if (!reservation.getName().equals(name)) {
+            throw new CustomException(ErrorCode.COMMON_UNAUTHORIZED);
         }
     }
 }
