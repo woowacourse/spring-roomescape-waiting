@@ -3,6 +3,7 @@ package roomescape.acceptance_test;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.관리자_예약_목록_조회를_요청하면;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_목록_조회_시_삭제한_예약은_응답받지_않는다;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_목록_조회를_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.특정_사용자의_예약_목록에_대기_순번이_포함된다;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_삭제가_성공한다;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_삭제를_요청하면;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.다른_사용자_이름으로_새로운_예약_생성을_요청하고;
@@ -16,6 +17,8 @@ import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_수정_실패_응답을_받는다;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_수정이_성공한다;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_시간_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_생성_성공_및_대기_상태를_응답받는다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_생성을_요청하면;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.지난_날짜와_시간으로_예약_수정을_요청하면;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.테마_생성을_요청하고;
 import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.특정_사용자_이름으로_예약_생성을_요청하고;
@@ -31,6 +34,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance_test.step.ReservationAcceptanceSteps.ReservationInfo;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
+import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 
@@ -204,5 +208,62 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
         // then
         내_예약_삭제가_성공한다(deleteResponse);
         내_예약_목록_조회_시_삭제한_예약은_응답받지_않는다(내_예약_목록_조회를_요청하면(reservation.guestName()), reservation);
+    }
+
+    @Test
+    @DisplayName("이미 예약된 슬롯 대기 신청")
+    void scenario9() {
+        mutableClock.setFixed(현재_날짜);
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+        예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
+
+        ExtractableResponse<Response> waitingResponse = 예약_생성을_요청하면(
+                new ReservationCreateRequest("jason", 예약일, reservationTimeId.longValue(), themeId.longValue()));
+
+        예약_생성_성공_및_대기_상태를_응답받는다(waitingResponse);
+    }
+
+    @Test
+    @DisplayName("같은 게스트 같은 슬롯 중복 대기 실패")
+    void scenario10() {
+        mutableClock.setFixed(현재_날짜);
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+        예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
+        예약_생성을_요청하고("jason", 예약일, reservationTimeId, themeId);
+
+        ExtractableResponse<Response> duplicatedWaitingResponse = 예약_생성을_요청하면(
+                new ReservationCreateRequest("jason", 예약일, reservationTimeId.longValue(), themeId.longValue()));
+
+        예약_수정_실패_응답을_받는다(duplicatedWaitingResponse, 409);
+    }
+
+    @Test
+    @DisplayName("대기 예약 취소 성공")
+    void scenario11() {
+        mutableClock.setFixed(현재_날짜);
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+        예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
+        ReservationInfo waitingReservation = 예약_생성을_요청하고("jason", 예약일, reservationTimeId, themeId);
+
+        ExtractableResponse<Response> deleteResponse = 내_예약_삭제를_요청하면(waitingReservation);
+
+        내_예약_삭제가_성공한다(deleteResponse);
+    }
+
+    @Test
+    @DisplayName("내 예약 목록 조회 시 대기 순번 포함")
+    void scenario12() {
+        mutableClock.setFixed(현재_날짜);
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+        예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
+        ReservationInfo waitingReservation = 예약_생성을_요청하고("jason", 예약일, reservationTimeId, themeId);
+
+        ExtractableResponse<Response> response = 내_예약_목록_조회를_요청하면("jason");
+
+        특정_사용자의_예약_목록에_대기_순번이_포함된다(response, waitingReservation, 1);
     }
 }

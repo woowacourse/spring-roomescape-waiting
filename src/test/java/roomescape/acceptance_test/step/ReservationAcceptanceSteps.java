@@ -17,6 +17,7 @@ import java.time.LocalTime;
 import java.util.Map;
 import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
+import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.test_config.MutableClock;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
@@ -99,6 +100,10 @@ public final class ReservationAcceptanceSteps {
         return new ReservationInfo(reservationId, request);
     }
 
+    public static ExtractableResponse<Response> 예약_생성을_요청하면(ReservationCreateRequest request) {
+        return post(OBJECT_MAPPER, "/reservations", request);
+    }
+
     public static ReservationInfo 특정_사용자_이름으로_예약_생성을_요청하고(
             String guestName
     ) {
@@ -163,6 +168,17 @@ public final class ReservationAcceptanceSteps {
         assertThat(response.jsonPath().getList("reservations.id", Integer.class)).contains(reservation.id());
         assertThat(response.jsonPath().getList("reservations.guestName", String.class)).contains(
                 reservation.guestName());
+    }
+
+    public static void 특정_사용자의_예약_목록에_대기_순번이_포함된다(
+            ExtractableResponse<Response> response,
+            ReservationInfo waitingReservation,
+            int waitingNumber
+    ) {
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(response.jsonPath().getList("reservations.id", Integer.class)).contains(waitingReservation.id());
+        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains(Status.WAITING.toString());
+        assertThat(response.jsonPath().getList("reservations.waitNumber", Integer.class)).contains(waitingNumber);
     }
 
     public static ExtractableResponse<Response> 예약_날짜와_시간_수정을_요청하면(
@@ -232,12 +248,18 @@ public final class ReservationAcceptanceSteps {
         assertThat(response.statusCode()).isEqualTo(204);
     }
 
+    public static void 예약_생성_성공_및_대기_상태를_응답받는다(ExtractableResponse<Response> response) {
+        assertThat(response.statusCode()).isEqualTo(201);
+        assertThat(response.jsonPath().getString("status")).isEqualTo(Status.WAITING.toString());
+        assertThat(response.jsonPath().getBoolean("isConfirmed")).isFalse();
+    }
+
     public static void 내_예약_목록_조회_시_삭제한_예약은_응답받지_않는다(
             ExtractableResponse<Response> response,
             ReservationInfo reservation
     ) {
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains("CANCELED");
+        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains(Status.CANCELED.toString());
     }
 
     public record ReservationInfo(

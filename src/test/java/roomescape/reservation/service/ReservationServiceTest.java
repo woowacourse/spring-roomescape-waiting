@@ -307,7 +307,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 대기 상태가 된다.")
-    public void editDateTime_fail4() {
+    public void editDateTime_change_waiting_status() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 

@@ -225,8 +225,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.time_id = t.id
                 INNER JOIN theme th
                     ON r.theme_id = th.id
-                WHERE r.guest_name = ? AND r.status != 'CANCELED'
-                """, reservationWaitingDtoRowMapper, guestName);
+                WHERE r.guest_name = ? AND r.status != ?
+                """, reservationWaitingDtoRowMapper, guestName, Status.CANCELED.toString());
     }
 
     @Override
@@ -275,9 +275,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean cancelById(Long id) {
         int rowCount = jdbcTemplate.update("""
                 UPDATE reservation
-                SET status = 'CANCELED', confirmed_token = NULL
+                SET status = ?, confirmed_token = NULL
                 WHERE id = ?
-                """, id);
+                """, Status.CANCELED.toString(), id);
 
         return rowCount == 1;
     }
@@ -297,10 +297,10 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query("""
                 SELECT id
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'WAITING'
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
                 ORDER BY id
                 LIMIT 1
-                """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId).stream().findFirst();
+                """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId, Status.WAITING.toString()).stream().findFirst();
     }
 
     @Override
@@ -309,8 +309,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != 'CANCELED'
-                """, Integer.class, date, timeId, themeId, guestName);
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != ?
+                """, Integer.class, date, timeId, themeId, guestName, Status.CANCELED.toString());
         return count != null && count > 0;
     }
 
@@ -319,8 +319,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'CONFIRMED';
-                """, Integer.class, date, timeId, themeId);
+                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?;
+                """, Integer.class, date, timeId, themeId, Status.CONFIRMED.toString());
         return count != null && count > 0;
     }
 
@@ -329,8 +329,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE time_id = ? AND status != 'CANCELED'
-                """, Integer.class, timeId);
+                WHERE time_id = ? AND status != ?
+                """, Integer.class, timeId, Status.CANCELED.toString());
         return count != null && count > 0;
     }
 
@@ -339,8 +339,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
-                WHERE theme_id = ? AND status != 'CANCELED'
-                """, Integer.class, themeId);
+                WHERE theme_id = ? AND status != ?
+                """, Integer.class, themeId, Status.CANCELED.toString());
         return count != null && count > 0;
     }
 
