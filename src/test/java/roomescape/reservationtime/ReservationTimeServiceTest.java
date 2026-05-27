@@ -8,14 +8,22 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.reservationtime.application.ReservationTimeService;
+import roomescape.reservationtime.dto.request.ReservationTimeSaveRequest;
+import roomescape.reservationtime.dto.response.ReservationTimeFindResponse;
+import roomescape.reservationtime.dto.response.ReservationTimeSaveResponse;
 import roomescape.reservationtime.infrastructure.ReservationTimeRepository;
 import roomescape.schedule.application.ScheduleService;
 
+import java.time.LocalTime;
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class ReservationTimeServiceTest {
@@ -30,6 +38,37 @@ public class ReservationTimeServiceTest {
 
     @InjectMocks
     private ReservationTimeService reservationTimeService;
+
+    @Test
+    @DisplayName("매니저는 시간 슬롯을 저장할 수 있다.")
+    void save_성공_테스트() {
+        ReservationTimeSaveRequest request = new ReservationTimeSaveRequest(LocalTime.of(14, 0));
+        ReservationTime saved = new ReservationTime(5L, LocalTime.of(14, 0));
+
+        when(reservationTimeRepository.existsAlreadyTime(request.startAt())).thenReturn(false);
+        when(reservationTimeRepository.save(request.toDomain())).thenReturn(saved);
+
+        ReservationTimeSaveResponse response = reservationTimeService.save(request);
+
+        assertThat(response.id()).isEqualTo(5L);
+        assertThat(response.startAt()).isEqualTo(LocalTime.of(14, 0));
+    }
+
+    @Test
+    @DisplayName("매니저는 전체 시간 슬롯을 조회할 수 있다.")
+    void findAll_성공_테스트() {
+        List<ReservationTime> reservationTimes = List.of(
+                new ReservationTime(1L, LocalTime.of(10, 0)),
+                new ReservationTime(2L, LocalTime.of(11, 0))
+        );
+        when(reservationTimeRepository.findAll()).thenReturn(reservationTimes);
+
+        List<ReservationTimeFindResponse> response = reservationTimeService.findAll();
+
+        assertThat(response).hasSize(2);
+        assertThat(response.get(0).id()).isEqualTo(1L);
+        assertThat(response.get(1).id()).isEqualTo(2L);
+    }
 
     @Test
     @DisplayName("스케줄에 시간에 대한 참조가 존재하면 시간 삭제에 실패한다.")

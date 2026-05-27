@@ -1,4 +1,4 @@
-package roomescape.reservationtime.presentation.user;
+package roomescape.reservationtime.presentation;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;

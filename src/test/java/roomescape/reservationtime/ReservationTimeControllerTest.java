@@ -42,6 +42,21 @@ public class ReservationTimeControllerTest {
                 .path("data.accessToken");
     }
 
+    private String loginManager() {
+        Map<String, Object> loginRequest = new HashMap<>();
+        loginRequest.put("name", "d");
+        loginRequest.put("password", "test4");
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(loginRequest)
+                .when().post("/api/login")
+                .then().log().all()
+                .statusCode(200)
+                .extract()
+                .path("data.accessToken");
+    }
+
     @Test
     void 특정날짜와_테마에_예약_가능_시간들_조회_API() {
         String accessToken = loginUser();
@@ -110,5 +125,35 @@ public class ReservationTimeControllerTest {
                 .body("data.size()", is(1))
                 .body("data[0].isAvailable", is(false))
                 .statusCode(200);
+    }
+
+    @Test
+    void 매니저_시간_관리_API() {
+        String accessToken = loginManager();
+
+        Map<String, String> params = new HashMap<>();
+        params.put("startAt", "14:00");
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/api/manager/times")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().get("/api/manager/times")
+                .then().log().all()
+                .statusCode(200)
+                .body("success", is(true))
+                .body("data.size()", is(5));
+
+        RestAssured.given().log().all()
+                .header("Authorization", "Bearer " + accessToken)
+                .when().delete("/api/manager/times/5")
+                .then().log().all()
+                .statusCode(204);
     }
 }
