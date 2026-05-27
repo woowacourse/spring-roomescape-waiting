@@ -17,13 +17,13 @@ public class MemberApiFixture {
         params.put("password", password);
 
         return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/member/members")
-                .then().log().all()
-                .statusCode(200)
-                .extract()
-                .path("id");
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/member/members")
+            .then().log().all()
+            .statusCode(200)
+            .extract()
+            .path("id");
     }
 
 }
