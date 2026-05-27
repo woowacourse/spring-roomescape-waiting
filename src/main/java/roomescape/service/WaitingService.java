@@ -1,10 +1,13 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.WaitingRequestDTO;
+import roomescape.dto.WaitingResponseDTO;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
 import roomescape.exception.ThemeErrorCode;
@@ -33,7 +36,8 @@ public class WaitingService {
         this.waitingRepository = waitingRepository;
     }
 
-    public void addWaiting(WaitingRequestDTO request) {
+    @Transactional
+    public WaitingResponseDTO addWaiting(WaitingRequestDTO request) {
         ReservationTime time = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new RoomEscapeException(
                         ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND));
@@ -48,19 +52,35 @@ public class WaitingService {
                 new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE)
         );
 
-        if(existReservation.isSameName(request.name())) {
+        if (existReservation.isSameName(request.name())) {
             throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
         }
 
-        boolean b = waitingRepository.existsByNameAndDateAndTimeAndTheme(
+        boolean isDuplicateWaiting = waitingRepository.existsByNameAndDateAndTimeAndTheme(
                 request.name(),
                 request.date(),
                 time,
                 theme
         );
-
-        if(b) {
+        if (isDuplicateWaiting) {
             throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
         }
+
+        Long currentWaitingNumber = waitingRepository.findMaxWaitingNumberBy(
+                request.date(),
+                time,
+                theme
+        ).orElse(0L) + 1;
+
+        Waiting newWaiting = Waiting.create(
+                request.name(),
+                request.date(),
+                time,
+                theme,
+                currentWaitingNumber
+        );
+        Waiting savedWaiting = waitingRepository.save(newWaiting);
+
+        return WaitingResponseDTO.from(savedWaiting);
     }
 }

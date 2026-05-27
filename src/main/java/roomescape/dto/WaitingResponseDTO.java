@@ -8,7 +8,8 @@ public record WaitingResponseDTO(
         String name,
         LocalDate date,
         ReservationTimeResponseDTO time,
-        ThemeResponseDTO theme
+        ThemeResponseDTO theme,
+        Long waitingNumber
 ) {
 
     public static WaitingResponseDTO from(Waiting waiting) {
@@ -16,10 +17,10 @@ public record WaitingResponseDTO(
                 waiting.getId(),
                 waiting.getName(),
                 waiting.getDate(),
-                ReservationTimeResponseDTO.from(
-                        waiting.getTime()
-                ),
-                ThemeResponseDTO.from(waiting.getTheme())
+                ReservationTimeResponseDTO.from(waiting.getTime()),
+                ThemeResponseDTO.from(waiting.getTheme()),
+                waiting.getWaitingNumber()
         );
     }
+
 }

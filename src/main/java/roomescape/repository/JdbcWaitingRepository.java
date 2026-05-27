@@ -1,7 +1,10 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.BeanPropertySqlParameterSource;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -23,13 +26,59 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 .usingGeneratedKeyColumns("id");
     }
 
+    private static RowMapper<Waiting> getWaitingRowMapper() {
+        return (resultSet, rowNum) -> {
+            ReservationTime time = ReservationTime.of(
+                    resultSet.getLong("reservation_time_id"),
+                    LocalTime.parse(resultSet.getString("time_value"))
+            );
+
+            Theme theme = Theme.of(resultSet.getLong("reservation_theme_id"),
+                    resultSet.getString("reservation_theme_name"),
+                    resultSet.getString("reservation_theme_description"),
+                    resultSet.getString("reservation_theme_image_url")
+            );
+
+            return Waiting.of(
+                    resultSet.getLong("id"),
+                    resultSet.getString("name"),
+                    resultSet.getDate("date").toLocalDate(),
+                    time,
+                    theme,
+                    resultSet.getLong("waiting_number"));
+        };
+    }
+
     @Override
     public Waiting save(Waiting waiting) {
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(
                 new BeanPropertySqlParameterSource(waiting)).longValue();
 
-        return Waiting.of(generatedKey, waiting.getName(), waiting.getDate(),
-                waiting.getTime(), waiting.getTheme(), waiting.getWaitingNumber());
+        return Waiting.of(
+                generatedKey,
+                waiting.getName(),
+                waiting.getDate(),
+                waiting.getTime(),
+                waiting.getTheme(),
+                waiting.getWaitingNumber());
+    }
+
+    @Override
+    public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        String sql = """
+                    SELECT MAX(waiting_number)
+                    FROM waiting
+                    WHERE date = :date
+                      AND time_id = :time_id
+                      AND theme_id = :theme_id
+                """;
+
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("date", date)
+                .addValue("time_id", reservationTime.getId())
+                .addValue("theme_id", theme.getId());
+
+        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, Long.class));
     }
 
     @Override
