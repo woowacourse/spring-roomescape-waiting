@@ -21,6 +21,7 @@ import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservedTimeResponseDTO;
+import roomescape.dto.UserBookingResponseDTO;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -47,9 +48,9 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDTO>> findReservationsByName(
+    public ResponseEntity<UserBookingResponseDTO> findReservationsByName(
             @RequestParam @NotBlank(message = "이름은 한 글자 이상이어야 합니다.") String name) {
-        return ResponseEntity.ok(reservationService.findReservationsByName(name));
+        return ResponseEntity.ok(reservationService.findReservationsAndWaitingByName(name));
     }
 
     @GetMapping("/booked-times")

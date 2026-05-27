@@ -10,10 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.domain.Waiting;
 import roomescape.dto.ReservationRequestDTO;
 import roomescape.dto.ReservationResponseDTO;
 import roomescape.dto.ReservationUpdateRequest;
 import roomescape.dto.ReservedTimeResponseDTO;
+import roomescape.dto.UserBookingResponseDTO;
+import roomescape.dto.WaitingResponseDTO;
 import roomescape.exception.ReservationErrorCode;
 import roomescape.exception.ReservationTimeErrorCode;
 import roomescape.exception.RoomEscapeException;
@@ -21,6 +24,7 @@ import roomescape.exception.ThemeErrorCode;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
 
 @Service
 public class ReservationService {
@@ -29,13 +33,16 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(Clock clock, ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository) {
+            ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+            WaitingRepository waitingRepository) {
         this.clock = clock;
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     @Transactional
@@ -79,6 +86,18 @@ public class ReservationService {
                 .stream()
                 .map(ReservationResponseDTO::from)
                 .toList();
+    }
+
+    @Transactional(readOnly = true)
+    public UserBookingResponseDTO findReservationsAndWaitingByName(String name) {
+        List<ReservationResponseDTO> reservatoins = reservationRepository.findByName(name).stream()
+                .map(ReservationResponseDTO::from)
+                .toList();
+        List<WaitingResponseDTO> waitings = waitingRepository.findByName(name).stream()
+                .map(WaitingResponseDTO::from)
+                .toList();
+
+        return UserBookingResponseDTO.of(reservatoins, waitings);
     }
 
     @Transactional(readOnly = true)

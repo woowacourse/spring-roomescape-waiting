@@ -2,6 +2,7 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -12,6 +13,7 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -84,6 +86,35 @@ public class JdbcWaitingRepository implements WaitingRepository {
         return Optional.ofNullable(jdbcTemplate.queryForObject(sql, params, Long.class));
     }
 
+    @Override
+    public List<Waiting> findByName(String name) {
+        String sql = """
+                    select w.id as id,  
+                    w.name, w.date, w.waiting_number,
+                    
+                    t.id as reservation_time_id,
+                    t.start_at as time_value,
+                    
+                    th.id as reservation_theme_id,
+                    th.name as reservation_theme_name,
+                    th.description as reservation_theme_description,
+                    th.image_url as reservation_theme_image_url
+                    
+                    from waiting as w
+                     
+                    inner join reservation_time as t
+                    on w.time_id = t.id 
+                    
+                    inner join theme as th
+                    on w.theme_id = th.id
+                    
+                    where w.name = :name
+                """;
+
+        Map<String, Object> params = Map.of("name", name);
+
+        return jdbcTemplate.query(sql, params, getWaitingRowMapper());
+    }
     @Override
     public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
             ReservationTime time, Theme theme) {
