@@ -1,12 +1,5 @@
 package roomescape.reservation.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +11,13 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -87,7 +87,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("가장 오래된 WAITING 대기의 id 값을 가져온다.")
     @Test
-    void 예약_대기_id_반환_테스트() {
+    void findEarliestWaiting_예약_대기_id_반환_테스트() {
         // given
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
@@ -106,7 +106,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("예약 대기 상태를 RESERVED로 승격한다.")
     @Test
-    void 예약_대기_승격_테스트() {
+    void promoteToReserved_예약_대기_승격_테스트() {
         // given
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
@@ -123,6 +123,76 @@ class JdbcReservationRepositoryTest {
         assertThat(reservation.get().getStatus()).isEqualTo(Status.RESERVED);
     }
 
+    @DisplayName("특정 날짜와 테마의 예약이 존재한다면 true를 반환한다")
+    @Test
+    void isDuplicated_예약_존재하면_true_반환() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        ReservationTime time = new ReservationTime(timeId, LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(3));
+        insertReservation("어셔1", timeId, themeId, Status.RESERVED, LocalDateTime.now().plusHours(1));
+
+        // when
+        boolean result = reservationRepository.isDuplicated(themeId, time);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("특정 날짜와 테마의 예약이 존재하지 않는다면 false를 반환한다")
+    @Test
+    void isDuplicated_예약_존재하지_않으면_false_반환() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        ReservationTime time = new ReservationTime(timeId, LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(3));
+
+        // when
+        boolean result = reservationRepository.isDuplicated(themeId, time);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
+    @DisplayName("특정 날짜와 테마의 같은 이름의 예약이 존재한다면 true를 반환한다")
+    @Test
+    void isDuplicatedWithName_예약_존재하면_true_반환() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        ReservationTime time = new ReservationTime(timeId, LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(3));
+        insertReservation("어셔", timeId, themeId, Status.RESERVED, LocalDateTime.now().plusHours(1));
+
+        // when
+        boolean result = reservationRepository.isDuplicatedWithName("어셔", themeId, time);
+
+        // then
+        assertThat(result).isTrue();
+    }
+
+    @DisplayName("특정 날짜와 테마의 같은 이름의 예약이 존재하지 않으면 false를 반환한다")
+    @Test
+    void isDuplicatedWithName_예약_존재하지_않으면_false_반환() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        ReservationTime time = new ReservationTime(timeId, LocalDateTime.now().plusHours(1),
+                LocalDateTime.now().plusHours(3));
+
+        // when
+        boolean result = reservationRepository.isDuplicatedWithName("어셔", themeId, time);
+
+        // then
+        assertThat(result).isFalse();
+    }
+
     @DisplayName("대기 순번을 포함한 예약 전체 정보를 조회한다.")
     @Test
     void findAllByName_대기_순번_포함_예약_대기_정보_조회() {
@@ -134,8 +204,8 @@ class JdbcReservationRepositoryTest {
                 LocalDateTime.now().plusHours(5).toString());
         insertReservation("어셔1", timeId, themeId, Status.RESERVED, LocalDateTime.now().plusHours(1));
         insertReservation("어셔2", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(2));
-        insertReservation("어셔3", timeId, themeId, Status.WAITING,  LocalDateTime.now().plusHours(3));
-        insertReservation("어셔3", timeId2, themeId, Status.RESERVED,  LocalDateTime.now().plusHours(3));
+        insertReservation("어셔3", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(3));
+        insertReservation("어셔3", timeId2, themeId, Status.RESERVED, LocalDateTime.now().plusHours(3));
 
         // when
         List<ReservationWithWaitingOrder> reservations = reservationRepository.findAllByName("어셔3");
