@@ -184,7 +184,7 @@
 <script src="app.js"></script>
 <script>
     const R = Roomescape;
-    const state = {selectedTheme: null, selectedDate: null, selectedTime: null, themes: []};
+    const state = {selectedTheme: null, selectedDate: null, selectedTime: null, themes: [], isWaiting: false};
     const themePageState = {page: 0, hasNext: false};
 
     function tokenInfo() {
@@ -254,7 +254,7 @@
     function logoutMember() {
         R.auth.clearMemberToken();
         updateAuthUi();
-        renderMyReservations([]);
+        renderMyReservations([], []);
         R.toast('로그아웃되었습니다.', 'info');
     }
 
@@ -398,12 +398,12 @@
                 grid.appendChild(R.h('button', {
                     className: `time-slot ${time.isReserved ? 'reserved' : 'available'}`,
                     type: 'button',
-                    disabled: time.isReserved,
                     id: `ts-${time.id}`,
-                    on: time.isReserved ? {} : {click: () => selectTime(time)},
+                    style: time.isReserved ? {cursor: 'pointer', opacity: '0.9'} : {},
+                    on: {click: () => selectTime(time, time.isReserved)},
                 }, [
                     R.h('div', {text: time.startAt}),
-                    R.h('div', {className: 'time-slot-label', text: time.isReserved ? '예약됨' : '선택 가능'}),
+                    R.h('div', {className: 'time-slot-label', text: time.isReserved ? '🕐 대기 신청' : '선택 가능'}),
                 ]));
             });
             container.appendChild(grid);
@@ -413,19 +413,44 @@
         }
     }
 
-    function selectTime(time) {
+    function selectTime(time, isWaiting = false) {
+        if (isWaiting && !requireLogin()) return;
         state.selectedTime = time;
-        document.querySelectorAll('.time-slot.available').forEach(el => el.classList.remove('selected'));
+        state.isWaiting = !!isWaiting;
+        document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
         R.byId(`ts-${time.id}`)?.classList.add('selected');
         updateSummary();
         buildConfirmSummary();
+        updateStepThreeButton();
         goToStep(3);
+    }
+
+    function updateStepThreeButton() {
+        const btn = R.byId('submit-reservation-btn');
+        btn.textContent = state.isWaiting ? '🕐 대기 신청' : '🎟 예약 확정';
+        btn.style.background = state.isWaiting ? '#eab308' : '';
+        btn.style.color = state.isWaiting ? '#0d0f1a' : '';
     }
 
     function buildConfirmSummary() {
         const container = R.byId('confirm-summary');
         R.clear(container);
+        const modeBanner = R.h('div', {
+            style: {
+                gridColumn: '1 / -1',
+                padding: '10px 14px',
+                borderRadius: 'var(--radius)',
+                background: state.isWaiting ? 'rgba(234, 179, 8, 0.15)' : 'rgba(34, 197, 94, 0.15)',
+                color: state.isWaiting ? '#facc15' : '#22c55e',
+                fontWeight: '700',
+                fontSize: '13px',
+            },
+            text: state.isWaiting
+                ? '🕐 이미 예약된 슬롯입니다. 대기 신청 모드로 진행합니다.'
+                : '🎟 일반 예약 모드입니다.',
+        });
         container.append(
+            modeBanner,
             R.h('div', {style: {background: 'var(--bg-input)', borderRadius: 'var(--radius)', padding: '16px'}}, [
                 R.h('div', {text: '테마', style: {fontSize: '11px', color: 'var(--text-muted)', fontWeight: '600'}}),
                 R.h('div', {text: state.selectedTheme?.name || '–', style: {fontSize: '16px', fontWeight: '700'}}),
@@ -445,23 +470,38 @@
             R.toast('테마, 날짜, 시간을 모두 선택해주세요.', 'error');
             return;
         }
+        const isWaiting = state.isWaiting;
+        if (isWaiting && !confirm('이미 예약된 슬롯입니다. 대기 등록하시겠습니까?')) return;
+        const endpoint = isWaiting ? '/reservations/waiting' : '/reservations';
         try {
-            await R.api('POST', '/reservations', {
+            await R.api('POST', endpoint, {
                 token: R.auth.getMemberToken(),
-                body: {themeId: state.selectedTheme.id, date: state.selectedDate, timeId: state.selectedTime.id},
+                body: {
+                    themeId: state.selectedTheme.id,
+                    date: state.selectedDate,
+                    timeId: state.selectedTime.id,
+                    storeId: 1,
+                },
             });
-            R.toast(`"${state.selectedTheme.name}" 예약이 완료되었습니다.`, 'success');
+            R.toast(
+                isWaiting
+                    ? `"${state.selectedTheme.name}" 대기 등록이 완료되었습니다.`
+                    : `"${state.selectedTheme.name}" 예약이 완료되었습니다.`,
+                'success',
+            );
             state.selectedTheme = null;
             state.selectedDate = null;
             state.selectedTime = null;
+            state.isWaiting = false;
             updateSummary();
+            updateStepThreeButton();
             goToStep(1);
             await loadThemes(true);
             await loadMyReservations();
         } catch (e) {
             if (e.status === 401) R.auth.clearMemberToken();
             updateAuthUi();
-            R.toast(`예약 실패: ${e.message}`, 'error');
+            R.toast(`${isWaiting ? '대기 신청' : '예약'} 실패: ${e.message}`, 'error');
         }
     }
 
@@ -475,7 +515,7 @@
         section.appendChild(R.loadingState());
         try {
             const data = await R.api('GET', '/reservations/mine', {token: R.auth.getMemberToken()});
-            renderMyReservations(data.reservations);
+            renderMyReservations(data.reservations || [], data.waitingReservations || []);
         } catch (e) {
             if (e.status === 401) R.auth.clearMemberToken();
             updateAuthUi();
@@ -484,33 +524,39 @@
         }
     }
 
-    function renderMyReservations(reservations) {
+    function renderMyReservations(reservations, waitingReservations) {
         const section = R.byId('my-res-section');
         R.clear(section);
         if (!R.auth.getMemberToken()) {
             section.appendChild(R.emptyState('로그인하면 내 예약을 확인할 수 있습니다.', '📋'));
             return;
         }
-        if (!reservations.length) {
+        const reservedRows = reservations || [];
+        const waitingRows = (waitingReservations || []).slice().sort((a, b) => a.waitingOrder - b.waitingOrder);
+        if (!reservedRows.length && !waitingRows.length) {
             section.appendChild(R.emptyState('예약이 없습니다.', '📭'));
             return;
         }
         const tbody = R.h('tbody');
-        reservations.forEach(reservation => tbody.appendChild(renderMyReservationRow(reservation)));
+        reservedRows.forEach(reservation => tbody.appendChild(renderReservedRow(reservation)));
+        waitingRows.forEach(waiting => tbody.appendChild(renderWaitingRow(waiting)));
         section.appendChild(R.h('div', {className: 'table-wrap'}, [
             R.h('table', {}, [
-                R.h('thead', {}, [R.h('tr', {}, ['ID', '테마', '날짜', '시간', '액션'].map(text => R.h('th', {text})))]),
+                R.h('thead', {}, [
+                    R.h('tr', {}, ['ID', '테마', '날짜', '시간', '상태', '액션'].map(text => R.h('th', {text}))),
+                ]),
                 tbody,
             ]),
         ]));
     }
 
-    function renderMyReservationRow(reservation) {
+    function renderReservedRow(reservation) {
         return R.h('tr', {}, [
             R.h('td', {}, [R.badge(`#${reservation.id}`)]),
             R.h('td', {text: reservation.themeName || '–'}),
             R.h('td', {text: reservation.date}),
             R.h('td', {text: reservation.time || '–'}),
+            R.h('td', {}, [R.badge('예약 완료', 'green')]),
             R.h('td', {style: {display: 'flex', gap: '6px'}}, [
                 R.button('btn btn-ghost btn-sm', '✏️ 수정', () => openEditModal(reservation)),
                 R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(reservation.id)),
@@ -518,11 +564,24 @@
         ]);
     }
 
+    function renderWaitingRow(waiting) {
+        return R.h('tr', {}, [
+            R.h('td', {}, [R.badge(`#${waiting.id}`)]),
+            R.h('td', {text: waiting.themeName || '–'}),
+            R.h('td', {text: waiting.date}),
+            R.h('td', {text: waiting.time || '–'}),
+            R.h('td', {}, [R.badge(`대기 ${waiting.waitingOrder}번`, 'yellow')]),
+            R.h('td', {style: {display: 'flex', gap: '6px'}}, [
+                R.button('btn btn-danger btn-sm', '✕ 취소', () => cancelReservation(waiting.id)),
+            ]),
+        ]);
+    }
+
     async function cancelReservation(id) {
-        if (!confirm(`예약 #${id}를 취소할까요?`)) return;
+        if (!confirm(`#${id} 항목을 취소할까요?`)) return;
         try {
             await R.api('DELETE', `/reservations/${id}`, {token: R.auth.getMemberToken()});
-            R.toast('예약이 취소되었습니다.', 'success');
+            R.toast('취소되었습니다.', 'success');
             await loadMyReservations();
             if (state.selectedTheme && state.selectedDate) await loadAvailableTimes();
         } catch (e) {
@@ -597,7 +656,11 @@
         R.byId('theme-refresh-btn').addEventListener('click', () => loadThemes(true));
         R.byId('theme-load-more-btn').addEventListener('click', loadThemeMore);
         R.byId('popular-load-btn').addEventListener('click', loadPopular);
-        R.byId('back-step-1').addEventListener('click', () => goToStep(1));
+        R.byId('back-step-1').addEventListener('click', () => {
+            state.isWaiting = false;
+            updateStepThreeButton();
+            goToStep(1);
+        });
         R.byId('back-step-2').addEventListener('click', () => goToStep(2));
         R.byId('book-date').addEventListener('change', loadAvailableTimes);
         R.byId('submit-reservation-btn').addEventListener('click', submitReservation);
