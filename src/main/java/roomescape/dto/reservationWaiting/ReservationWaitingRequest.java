@@ -1,11 +1,9 @@
 package roomescape.dto.reservationWaiting;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
-import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.InvalidInputException;
