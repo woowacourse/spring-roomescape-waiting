@@ -10,7 +10,6 @@ import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
 import roomescape.exception.InvalidInputException;
-import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ThemeNotFoundException;
@@ -85,6 +84,6 @@ public class ReservationWaitingService {
     private Reservation getReservationByThemeAndDateAndTime(Long themeId, LocalDate date, Long timeId) {
         return reservationQueryingDao.findReservationByThemeAndDateAndTime(themeId, date, timeId).stream()
                 .findFirst()
-                .orElseThrow(ReservationAlreadyExistException::new);
+                .orElseThrow(() -> new ResourceNotFoundException("해당 예약이 존재하지 않습니다."));
     }
 }
