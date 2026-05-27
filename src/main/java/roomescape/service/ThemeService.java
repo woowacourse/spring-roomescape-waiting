@@ -29,13 +29,13 @@ public class ThemeService {
     }
 
     @Transactional
-    public ServiceThemeResponse create(ServiceThemeCreateRequest requestDto) {
+    public ServiceThemeResponse save(ServiceThemeCreateRequest requestDto) {
         Theme theme = requestDto.toEntity();
-        return ServiceThemeResponse.from(themeRepository.create(theme));
+        return ServiceThemeResponse.from(themeRepository.save(theme));
     }
 
-    public List<ServiceThemeResponse> readAll() {
-        return themeRepository.readAll().stream()
+    public List<ServiceThemeResponse> findAll() {
+        return themeRepository.findAll().stream()
                 .map(ServiceThemeResponse::from)
                 .toList();
     }
@@ -52,10 +52,10 @@ public class ThemeService {
         }
     }
 
-    public List<ServiceThemeResponse> readRanking(LocalDate startDate, LocalDate endDate) {
+    public List<ServiceThemeResponse> findRanking(LocalDate startDate, LocalDate endDate) {
         validateRankingPeriod(startDate, endDate);
 
-        return themeRepository.readRanking(startDate, endDate, RANKING_LIMIT).stream()
+        return themeRepository.findRanking(startDate, endDate, RANKING_LIMIT).stream()
                 .map(ServiceThemeResponse::from)
                 .toList();
     }
@@ -74,8 +74,8 @@ public class ThemeService {
         }
     }
 
-    public Theme readTheme(Long themeId) {
-        return themeRepository.read(themeId)
+    public Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
     }
 }

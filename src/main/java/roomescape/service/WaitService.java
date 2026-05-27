@@ -22,8 +22,8 @@ public class WaitService {
     }
 
     @Transactional
-    public ServiceReceptionResponse create(Wait waitWithoutId) {
-        List<Wait> waits = waitRepository.readBySlot(
+    public ServiceReceptionResponse save(Wait waitWithoutId) {
+        List<Wait> waits = waitRepository.findBySlot(
                 waitWithoutId.getReservationDate(),
                 waitWithoutId.getTime().getId(),
                 waitWithoutId.getTheme().getId());
@@ -38,33 +38,38 @@ public class WaitService {
             throw new CustomInvalidRequestException(ErrorCode.WAIT_IS_FULL);
         }
 
-        Wait wait = waitRepository.create(waitWithoutId);
+        Wait wait = waitRepository.save(waitWithoutId);
 
         return ServiceReceptionResponse.of(wait, calculateOrder(wait), ReservationStatus.WAITING.name());
     }
 
-    public List<ServiceReceptionResponse> readByName(String name) {
-        return waitRepository.readByName(name).stream()
+    public List<ServiceReceptionResponse> findByName(String name) {
+        return waitRepository.findByName(name).stream()
                 .map(wait -> ServiceReceptionResponse.of(wait, calculateOrder(wait), ReservationStatus.WAITING.name()))
                 .toList();
     }
 
-    public List<ServiceReceptionResponse> readAll() {
-        return waitRepository.readAll().stream()
+    public List<ServiceReceptionResponse> findAll() {
+        return waitRepository.findAll().stream()
                 .map(wait -> ServiceReceptionResponse.of(wait, calculateOrder(wait), ReservationStatus.WAITING.name()))
                 .toList();
-    }
-
-    private Long calculateOrder(Wait wait) {
-        return waitRepository.readOrderByWait(wait);
     }
 
     public void delete(Long id) {
         waitRepository.delete(id);
     }
 
-    public List<Wait> readByReservation(Reservation reservation) {
-        return waitRepository.readBySlot(reservation.getDate(), reservation.getTime().getId(),
+    public List<Wait> findByReservation(Reservation reservation) {
+        return waitRepository.findBySlot(reservation.getDate(), reservation.getTime().getId(),
                 reservation.getTheme().getId());
+    }
+
+    public Wait findWait(Long waitId) {
+        return waitRepository.findById(waitId)
+                .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_WAIT));
+    }
+
+    private Long calculateOrder(Wait wait) {
+        return waitRepository.findOrderByWait(wait);
     }
 }

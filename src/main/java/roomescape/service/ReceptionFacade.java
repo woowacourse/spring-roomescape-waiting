@@ -1,7 +1,9 @@
 package roomescape.service;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -9,6 +11,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
 import roomescape.exception.ErrorCode;
@@ -35,46 +38,52 @@ public class ReceptionFacade {
     }
 
     @Transactional
-    public ServiceReceptionResponse create(ServiceReservationCreateRequest request) {
-        Optional<Reservation> reservation = reservationService.readBySlot(request.reservationDate(), request.timeId(),
+    public ServiceReceptionResponse save(ServiceReservationCreateRequest request) {
+        ReservationTime reservationTime = reservationTimeService.findReservationTime(request.timeId());
+        if (isPast(request.reservationDate(), reservationTime)) {
+            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE);
+        }
+
+        Optional<Reservation> reservation = reservationService.findBySlot(request.reservationDate(), request.timeId(),
                 request.themeId());
         if (reservation.isEmpty()) {
-            Reservation newReservation = reservationService.create(request);
+            Reservation newReservation = reservationService.save(request);
             return ServiceReceptionResponse.of(newReservation, 0L, ReservationStatus.CONFIRMED.name());
         }
         if (reservation.get().getName().equals(request.name())) {
             throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION);
         }
 
-        return waitService.create(request.toWait(LocalDateTime.now(clock),
-                reservationTimeService.readReservationTime(request.timeId()),
-                themeService.readTheme(request.themeId())));
+        return waitService.save(request.toWait(LocalDateTime.now(clock),
+                reservationTime,
+                themeService.findTheme(request.themeId())));
     }
 
-    public List<ServiceReceptionResponse> readByName(String name) {
+    public List<ServiceReceptionResponse> findByName(String name) {
         List<ServiceReceptionResponse> receptions = new ArrayList<>();
 
-        receptions.addAll(reservationService.readByName(name));
-        receptions.addAll(waitService.readByName(name));
+        receptions.addAll(reservationService.findByName(name));
+        receptions.addAll(waitService.findByName(name));
 
         return receptions;
     }
 
-    public List<ServiceReceptionResponse> readAll() {
+    public List<ServiceReceptionResponse> findAll() {
         List<ServiceReceptionResponse> receptions = new ArrayList<>();
 
-        receptions.addAll(reservationService.readAll());
-        receptions.addAll(waitService.readAll());
+        receptions.addAll(reservationService.findAll());
+        receptions.addAll(waitService.findAll());
 
         return receptions;
     }
 
     @Transactional
     public void deleteReservation(Long id) {
-        Reservation reservation = reservationService.readReservation(id);
+        Reservation reservation = reservationService.findReservation(id);
+        validateDelete(reservation.getDate(), reservation.getTime());
         reservationService.delete(id);
 
-        List<Wait> waits = waitService.readByReservation(reservation);
+        List<Wait> waits = waitService.findByReservation(reservation);
         if (waits.isEmpty()) {
             return;
         }
@@ -82,12 +91,35 @@ public class ReceptionFacade {
 
         ServiceReservationCreateRequest request = new ServiceReservationCreateRequest(firstOrder.getName(),
                 firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
-        reservationService.create(request);
+        reservationService.save(request);
         deleteWait(firstOrder.getId());
     }
 
     @Transactional
     public void deleteWait(Long id) {
+        Wait wait = waitService.findWait(id);
+        validateDelete(wait.getReservationDate(), wait.getTime());
+        
         waitService.delete(id);
+    }
+
+    private void validateDelete(LocalDate reservationDate, ReservationTime reservationTime) {
+        if (isPast(reservationDate, reservationTime)) {
+            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE);
+        }
+    }
+
+    private boolean isPast(LocalDate reservationDate, ReservationTime reservationTime) {
+        LocalDateTime now = LocalDateTime.now(clock);
+        LocalDate nowDate = now.toLocalDate();
+        LocalTime nowTime = now.toLocalTime();
+
+        if (reservationDate.isBefore(nowDate)) {
+            return true;
+        }
+        if (reservationDate.isAfter(nowDate)) {
+            return false;
+        }
+        return reservationTime.isPast(nowTime);
     }
 }

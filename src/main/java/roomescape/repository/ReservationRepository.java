@@ -7,15 +7,15 @@ import roomescape.domain.Reservation;
 
 public interface ReservationRepository {
 
-    Reservation create(Reservation reservationWithoutId);
+    Reservation save(Reservation reservationWithoutId);
 
-    Optional<Reservation> readById(Long id);
+    Optional<Reservation> findById(Long id);
 
-    Optional<Reservation> readBySlot(LocalDate date, Long timeId, Long themeId);
+    Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId);
 
-    List<Reservation> readByName(String name);
+    List<Reservation> findByName(String name);
 
-    List<Reservation> readAll();
+    List<Reservation> findAll();
 
     void delete(Long id);
 

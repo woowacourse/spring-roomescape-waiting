@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -25,7 +27,7 @@ public class JdbcWaitRepository implements WaitRepository {
     }
 
     @Override
-    public Wait create(Wait wait) {
+    public Wait save(Wait wait) {
         String sql = "INSERT INTO `wait`(`created_at`, `name`, `reservation_date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -45,7 +47,24 @@ public class JdbcWaitRepository implements WaitRepository {
     }
 
     @Override
-    public List<Wait> readBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+    public Optional<Wait> findById(Long id) {
+        String sql =
+                "SELECT w.id, w.name, w.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
+                        + "FROM `wait` w "
+                        + "INNER JOIN `reservation_time` t ON w.time_id = t.id "
+                        + "INNER JOIN `theme` th ON w.theme_id = th.id "
+                        + "WHERE w.id = (?)";
+
+        try {
+            return Optional.ofNullable(
+                    jdbcTemplate.queryForObject(sql, waitRowMapper(), id));
+        } catch (EmptyResultDataAccessException exception) {
+            return Optional.empty();
+        }
+    }
+
+    @Override
+    public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
         String sql = "SELECT " +
                 "w.id, w.created_at, w.name, w.reservation_date AS date, " +
                 "rt.id AS time_id, rt.start_at AS time_value, " +
@@ -57,14 +76,14 @@ public class JdbcWaitRepository implements WaitRepository {
                 "WHERE w.reservation_date = ? AND w.time_id = ? AND w.theme_id = ? " +
                 "ORDER BY w.created_at";
 
-        return jdbcTemplate.query(sql, reservationRowMapper(),
+        return jdbcTemplate.query(sql, waitRowMapper(),
                 reservationDate,
                 timeId,
                 themeId);
     }
 
     @Override
-    public List<Wait> readByName(String name) {
+    public List<Wait> findByName(String name) {
         String sql = "SELECT " +
                 "w.id, w.created_at, w.name, w.reservation_date AS date, " +
                 "rt.id AS time_id, rt.start_at AS time_value, " +
@@ -76,11 +95,11 @@ public class JdbcWaitRepository implements WaitRepository {
                 "WHERE w.name = ? " +
                 "ORDER BY w.created_at";
 
-        return jdbcTemplate.query(sql, reservationRowMapper(), name);
+        return jdbcTemplate.query(sql, waitRowMapper(), name);
     }
 
     @Override
-    public List<Wait> readAll() {
+    public List<Wait> findAll() {
         String sql = "SELECT " +
                 "w.id, w.created_at, w.name, w.reservation_date AS date, " +
                 "rt.id AS time_id, rt.start_at AS time_value, " +
@@ -91,11 +110,11 @@ public class JdbcWaitRepository implements WaitRepository {
                 "JOIN theme t ON w.theme_id = t.id " +
                 "ORDER BY w.created_at";
 
-        return jdbcTemplate.query(sql, reservationRowMapper());
+        return jdbcTemplate.query(sql, waitRowMapper());
     }
 
     @Override
-    public Long readOrderByWait(Wait wait) {
+    public Long findOrderByWait(Wait wait) {
         String sql = "WITH slot_waiting_list AS (" +
                 "SELECT `name`, ROW_NUMBER() OVER (ORDER BY created_at ASC) AS `order` " +
                 "FROM wait " +
@@ -117,7 +136,7 @@ public class JdbcWaitRepository implements WaitRepository {
         jdbcTemplate.update(sql, id);
     }
 
-    private static RowMapper<Wait> reservationRowMapper() {
+    private static RowMapper<Wait> waitRowMapper() {
         return (resultSet, rowNum) -> {
             Long id = resultSet.getLong("id");
             LocalDateTime createdAt = resultSet.getObject("created_at", LocalDateTime.class);

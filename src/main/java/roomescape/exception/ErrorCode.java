@@ -10,6 +10,7 @@ public enum ErrorCode {
     NOT_ALLOW_PAST_TIME_RESERVATION_UPDATE("[ERROR] 지나간 시간의 예약은 수정할 수 없습니다."),
     NOT_ALLOW_PAST_TIME_RESERVATION_DELETE("[ERROR] 지나간 시간의 예약은 삭제할 수 없습니다."),
 
+    NOT_FOUND_WAIT("[ERROR] 해당 ID의 예약 대기를 찾을 수 없습니다."),
     DUPLICATED_WAIT("[ERROR] 해당 시간에 이미 예약 대기를 신청했습니다. 다시 시도해 주세요."),
     WAIT_IS_FULL("[ERROR] 해당 시간에 이미 예약 대기가 가득 찼습니다. 다른 시간으로 예약해 주세요."),
 

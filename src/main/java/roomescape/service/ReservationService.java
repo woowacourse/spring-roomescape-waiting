@@ -2,7 +2,6 @@ package roomescape.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.stereotype.Service;
@@ -38,68 +37,51 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation create(ServiceReservationCreateRequest request) {
-        ReservationTime reservationTime = readReservationTime(request.timeId());
-        Theme theme = readTheme(request.themeId());
+    public Reservation save(ServiceReservationCreateRequest request) {
+        ReservationTime reservationTime = findReservationTime(request.timeId());
+        Theme theme = findTheme(request.themeId());
 
         Reservation reservationWithoutId = request.toReservation(reservationTime, theme);
-        validateCreateReservation(reservationWithoutId);
-
-        return reservationRepository.create(reservationWithoutId);
+        return reservationRepository.save(reservationWithoutId);
     }
 
-    private ReservationTime readReservationTime(Long timeId) {
-        return reservationTimeRepository.read(timeId)
+    private ReservationTime findReservationTime(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
     }
 
-    private Theme readTheme(Long themeId) {
-        return themeRepository.read(themeId)
+    private Theme findTheme(Long themeId) {
+        return themeRepository.findById(themeId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME));
     }
 
-    private void validateCreateReservation(Reservation reservation) {
-        validatePastReservation(reservation, ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_CREATE);
-    }
-
-    private void validatePastReservation(Reservation reservation, ErrorCode errorCode) {
-        if (reservation.isPast(LocalDateTime.now(clock))) {
-            throw new CustomInvalidRequestException(errorCode);
-        }
-    }
-
-    public List<ServiceReceptionResponse> readByName(String name) {
-        List<Reservation> reservations = reservationRepository.readByName(name);
+    public List<ServiceReceptionResponse> findByName(String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
 
         return reservations.stream()
                 .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED.name()))
                 .toList();
     }
 
-    public List<ServiceReceptionResponse> readAll() {
-        List<Reservation> reservations = reservationRepository.readAll();
+    public List<ServiceReceptionResponse> findAll() {
+        List<Reservation> reservations = reservationRepository.findAll();
 
         return reservations.stream()
                 .map(reservation -> ServiceReceptionResponse.of(reservation, 0L, ReservationStatus.CONFIRMED.name()))
                 .toList();
     }
 
-    public Reservation readReservation(Long reservationId) {
-        return reservationRepository.readById(reservationId)
+    public Reservation findReservation(Long reservationId) {
+        return reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION));
     }
 
     @Transactional
     public void delete(Long id) {
-        Reservation reservation = readReservation(id);
-        if (reservation.isPast(LocalDateTime.now(clock))) {
-            throw new CustomInvalidRequestException(ErrorCode.NOT_ALLOW_PAST_TIME_RESERVATION_DELETE);
-        }
-
         reservationRepository.delete(id);
     }
 
-    public Optional<Reservation> readBySlot(LocalDate date, Long timeId, Long themeId) {
-        return reservationRepository.readBySlot(date, timeId, themeId);
+    public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
+        return reservationRepository.findBySlot(date, timeId, themeId);
     }
 }

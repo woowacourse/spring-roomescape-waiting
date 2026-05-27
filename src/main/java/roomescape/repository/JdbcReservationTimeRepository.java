@@ -25,7 +25,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public ReservationTime create(ReservationTime reservationTimeWithoutId) {
+    public ReservationTime save(ReservationTime reservationTimeWithoutId) {
         String sql = "INSERT INTO `reservation_time`(`start_at`) VALUES (?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -41,7 +41,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public Optional<ReservationTime> read(Long id) {
+    public Optional<ReservationTime> findById(Long id) {
         String sql = "SELECT * FROM `reservation_time` WHERE `id` = (?)";
 
         try {
@@ -56,7 +56,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservationTime> readAll() {
+    public List<ReservationTime> findAll() {
         String sql = "SELECT * FROM `reservation_time` "
                 + "ORDER BY start_at ASC";
 
@@ -74,7 +74,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<Long> reservedTimeIdByDateAndTheme(LocalDate date, Long themeId) {
+    public List<Long> findReservedTimeIdByDateAndTheme(LocalDate date, Long themeId) {
         String sql = "SELECT t.id as time_id "
                 + "FROM `reservation_time` t "
                 + "INNER JOIN `reservation` r ON r.time_id = t.id "

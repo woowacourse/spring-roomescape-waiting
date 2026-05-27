@@ -7,15 +7,15 @@ import roomescape.domain.Theme;
 
 public interface ThemeRepository {
 
-    Theme create(Theme themeWithoutId);
+    Theme save(Theme themeWithoutId);
 
-    Optional<Theme> read(Long id);
+    Optional<Theme> findById(Long id);
 
-    List<Theme> readAll();
+    List<Theme> findRanking(LocalDate startDate, LocalDate endDate, int limit);
+
+    List<Theme> findAll();
 
     void delete(Long id);
-
-    List<Theme> readRanking(LocalDate startDate, LocalDate endDate, int limit);
 
     boolean existById(Long id);
 }

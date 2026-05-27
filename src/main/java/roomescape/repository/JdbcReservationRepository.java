@@ -28,7 +28,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Reservation create(Reservation reservationWithoutId) {
+    public Reservation save(Reservation reservationWithoutId) {
         String sql = "INSERT INTO `reservation`(`name`, `date`, `time_id`, `theme_id`) VALUES (?, ?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -47,7 +47,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> readById(Long id) {
+    public Optional<Reservation> findById(Long id) {
         String sql =
                 "SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
                         + "FROM `reservation` r "
@@ -64,7 +64,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> readBySlot(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Reservation> findBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql =
                 "SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
                         + "FROM `reservation` r "
@@ -81,7 +81,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> readByName(String name) {
+    public List<Reservation> findByName(String name) {
         String sql =
                 "SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
                         + "FROM `reservation` r "
@@ -93,7 +93,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> readAll() {
+    public List<Reservation> findAll() {
         String sql =
                 "SELECT r.id, r.name, r.date, t.id as time_id, t.start_at as time_value, th.id as theme_id, th.name as theme_name, th.description as theme_description, th.thumbnail_url as theme_thumbnail_url "
                         + "FROM `reservation` r "

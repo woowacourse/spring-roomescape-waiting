@@ -23,7 +23,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Theme create(Theme themeWithoutId) {
+    public Theme save(Theme themeWithoutId) {
         String sql = "INSERT INTO `theme`(`name`, `description`, `thumbnail_url`) VALUES (?, ?, ?)";
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -41,7 +41,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public Optional<Theme> read(Long id) {
+    public Optional<Theme> findById(Long id) {
         String sql = "SELECT * FROM `theme` WHERE `id` = (?)";
 
         try {
@@ -58,7 +58,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> readAll() {
+    public List<Theme> findAll() {
         String sql = "SELECT * FROM `theme`";
 
         return jdbcTemplate.query(
@@ -81,7 +81,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public List<Theme> readRanking(LocalDate startDate, LocalDate endDate, int limit) {
+    public List<Theme> findRanking(LocalDate startDate, LocalDate endDate, int limit) {
         String sql = "SELECT th.id AS theme_id, th.name, th.description, "
                 + "th.thumbnail_url, COUNT(r.id) AS reservation_count "
                 + "FROM theme th "

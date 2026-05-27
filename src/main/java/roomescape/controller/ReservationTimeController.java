@@ -31,9 +31,9 @@ public class ReservationTimeController {
     }
 
     @PostMapping
-    public ResponseEntity<ControllerReservationTimeResponse> create(
+    public ResponseEntity<ControllerReservationTimeResponse> save(
             @Valid @RequestBody ControllerReservationTimeCreateRequest requestDto) {
-        ServiceReservationTimeResponse serviceResponse = reservationTimeService.create(
+        ServiceReservationTimeResponse serviceResponse = reservationTimeService.save(
                 requestDto.toServiceReservationTimeRequest());
         ControllerReservationTimeResponse controllerResponse = ControllerReservationTimeResponse.from(serviceResponse);
         return ResponseEntity.
@@ -42,8 +42,8 @@ public class ReservationTimeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ControllerReservationTimeResponse>> readAll() {
-        List<ServiceReservationTimeResponse> serviceResponses = reservationTimeService.readAll();
+    public ResponseEntity<List<ControllerReservationTimeResponse>> findAll() {
+        List<ServiceReservationTimeResponse> serviceResponses = reservationTimeService.findAll();
         List<ControllerReservationTimeResponse> controllerResponses = serviceResponses.stream()
                 .map(ControllerReservationTimeResponse::from)
                 .toList();
@@ -51,10 +51,10 @@ public class ReservationTimeController {
     }
 
     @GetMapping("/available")
-    public ResponseEntity<List<ControllerReservationTimeAvailabilityResponse>> readAvailabilityByDateAndTheme(
+    public ResponseEntity<List<ControllerReservationTimeAvailabilityResponse>> findAvailabilityByDateAndTheme(
             @RequestParam("date") LocalDate date, @RequestParam("themeId") Long themeId) {
 
-        List<ServiceReservationTimeAvailabilityResponse> serviceResponses = reservationTimeService.readAvailabilityByDateAndTheme(
+        List<ServiceReservationTimeAvailabilityResponse> serviceResponses = reservationTimeService.findAvailabilityByDateAndTheme(
                 date, themeId);
 
         List<ControllerReservationTimeAvailabilityResponse> controllerResponses = serviceResponses.stream()

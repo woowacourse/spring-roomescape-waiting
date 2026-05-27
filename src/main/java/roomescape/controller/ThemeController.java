@@ -22,8 +22,8 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ControllerThemeResponse>> readAll() {
-        List<ServiceThemeResponse> serviceResponses = themeService.readAll();
+    public ResponseEntity<List<ControllerThemeResponse>> findAll() {
+        List<ServiceThemeResponse> serviceResponses = themeService.findAll();
         List<ControllerThemeResponse> controllerResponses = serviceResponses.stream()
                 .map(ControllerThemeResponse::from)
                 .toList();
@@ -31,11 +31,11 @@ public class ThemeController {
     }
 
     @GetMapping("/ranking")
-    public ResponseEntity<List<ControllerThemeResponse>> readRanking(
+    public ResponseEntity<List<ControllerThemeResponse>> findRanking(
             @RequestParam("start-date") LocalDate startDate,
             @RequestParam("end-date") LocalDate endDate
     ) {
-        List<ServiceThemeResponse> serviceResponses = themeService.readRanking(startDate, endDate);
+        List<ServiceThemeResponse> serviceResponses = themeService.findRanking(startDate, endDate);
         List<ControllerThemeResponse> controllerResponses = serviceResponses.stream()
                 .map(ControllerThemeResponse::from)
                 .toList();

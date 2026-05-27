@@ -2,19 +2,22 @@ package roomescape.repository;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import roomescape.domain.Wait;
 
 public interface WaitRepository {
 
-    Wait create(Wait waitWithoutId);
+    Wait save(Wait waitWithoutId);
 
-    List<Wait> readBySlot(LocalDate reservationDate, Long timeId, Long themeId);
+    Optional<Wait> findById(Long id);
 
-    List<Wait> readByName(String name);
+    List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId);
 
-    List<Wait> readAll();
+    List<Wait> findByName(String name);
 
-    Long readOrderByWait(Wait wait);
+    List<Wait> findAll();
+
+    Long findOrderByWait(Wait wait);
 
     void delete(Long id);
 }

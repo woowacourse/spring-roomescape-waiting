@@ -34,15 +34,15 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ServiceReservationTimeResponse create(ServiceReservationTimeCreateRequest request) {
+    public ServiceReservationTimeResponse save(ServiceReservationTimeCreateRequest request) {
         validateDuplicatedReservationTime(request.startAt());
 
-        ReservationTime reservationTime = reservationTimeRepository.create(request.toEntity());
+        ReservationTime reservationTime = reservationTimeRepository.save(request.toEntity());
         return ServiceReservationTimeResponse.from(reservationTime);
     }
 
-    public List<ServiceReservationTimeResponse> readAll() {
-        List<ReservationTime> reservationTimes = reservationTimeRepository.readAll();
+    public List<ServiceReservationTimeResponse> findAll() {
+        List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
         return reservationTimes.stream()
                 .map(ServiceReservationTimeResponse::from)
                 .toList();
@@ -54,13 +54,14 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ServiceReservationTimeAvailabilityResponse> readAvailabilityByDateAndTheme(
+    public List<ServiceReservationTimeAvailabilityResponse> findAvailabilityByDateAndTheme(
             LocalDate date, Long themeId) {
         validateExistTheme(themeId);
         validateNotPastDate(date);
 
-        List<ReservationTime> allReservationTimes = reservationTimeRepository.readAll();
-        List<Long> reservedTimeIdByDateAndTheme = reservationTimeRepository.reservedTimeIdByDateAndTheme(date, themeId);
+        List<ReservationTime> allReservationTimes = reservationTimeRepository.findAll();
+        List<Long> reservedTimeIdByDateAndTheme = reservationTimeRepository.findReservedTimeIdByDateAndTheme(date,
+                themeId);
 
         return allReservationTimes.stream()
                 .map(reservationTime -> {
@@ -95,8 +96,8 @@ public class ReservationTimeService {
         }
     }
 
-    public ReservationTime readReservationTime(Long timeId) {
-        return reservationTimeRepository.read(timeId)
+    public ReservationTime findReservationTime(Long timeId) {
+        return reservationTimeRepository.findById(timeId)
                 .orElseThrow(() -> new CustomInvalidRequestException(ErrorCode.NOT_FOUND_RESERVATION_TIME));
     }
 }

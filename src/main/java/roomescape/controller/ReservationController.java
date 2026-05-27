@@ -27,9 +27,9 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ControllerReservationResponse> create(
+    public ResponseEntity<ControllerReservationResponse> save(
             @RequestBody ControllerReservationCreateRequest request) {
-        ServiceReceptionResponse serviceResponses = receptionFacade.create(
+        ServiceReceptionResponse serviceResponses = receptionFacade.save(
                 request.toServiceReservationRequest());
         ControllerReservationResponse controllerResponse = ControllerReservationResponse.from(serviceResponses);
         return ResponseEntity.
@@ -38,10 +38,10 @@ public class ReservationController {
     }
 
     @GetMapping(params = "name")
-    public ResponseEntity<List<ControllerReservationResponse>> readByName(
+    public ResponseEntity<List<ControllerReservationResponse>> findByName(
             @RequestParam("name") String name
     ) {
-        List<ServiceReceptionResponse> serviceResponses = receptionFacade.readByName(name);
+        List<ServiceReceptionResponse> serviceResponses = receptionFacade.findByName(name);
         List<ControllerReservationResponse> controllerResponses = serviceResponses.stream()
                 .map(ControllerReservationResponse::from)
                 .toList();
@@ -49,8 +49,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ControllerReservationResponse>> readAll() {
-        List<ServiceReceptionResponse> serviceResponses = receptionFacade.readAll();
+    public ResponseEntity<List<ControllerReservationResponse>> findAll() {
+        List<ServiceReceptionResponse> serviceResponses = receptionFacade.findAll();
         List<ControllerReservationResponse> controllerResponse = serviceResponses.stream()
                 .map(ControllerReservationResponse::from)
                 .toList();
