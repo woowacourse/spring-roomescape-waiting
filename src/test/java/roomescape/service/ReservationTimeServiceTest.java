@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
@@ -10,8 +11,11 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTimeStatus;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
+import roomescape.dto.response.ReservationTimeStatusResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -103,5 +107,32 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.delete(timeIdWithReservation))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+    }
+
+
+
+    @Test
+    @DisplayName("theme1의 6일 전 날짜는 time_id 1~5가 예약되어 있어 가용 시간은 4개다")
+    void findAvailableTime_returns4TimesForTheme1() {
+        String date = LocalDate.now().minusDays(6).toString();
+
+        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
+
+        long availableCount = result.stream()
+                .filter(r -> r.status() == ReservationStatus.AVAILABLE)
+                .count();
+
+        assertThat(availableCount).isEqualTo(4);
+    }
+
+    @Test
+    @DisplayName("예약이 전혀 없는 날짜는 모든 시간에 예약할 수 있다")
+    void findAvailableTime_returnsAllTimesWhenNoReservation() {
+
+        String date = LocalDate.now().plusDays(30).toString();
+
+        List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
+
+        assertThat(result).hasSize(9);
     }
 }

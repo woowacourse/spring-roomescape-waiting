@@ -2,7 +2,6 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -11,7 +10,6 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
@@ -61,27 +59,5 @@ class ThemeServiceTest {
         themeService.delete(11L);
 
         assertThat(themeService.findAllThemes()).hasSize(14);
-    }
-
-
-    @Test
-    @DisplayName("theme1의 6일 전 날짜는 time_id 1~5가 예약되어 있어 가용 시간은 4개다")
-    void findAvailableTime_returns4TimesForTheme1() {
-        String date = LocalDate.now().minusDays(6).toString();
-
-        List<ReservationTimeResponse> result = themeService.findAvailableTime(1L, date);
-
-        assertThat(result).hasSize(4);
-    }
-
-    @Test
-    @DisplayName("예약이 전혀 없는 날짜는 모든 시간에 예약할 수 있다")
-    void findAvailableTime_returnsAllTimesWhenNoReservation() {
-
-        String date = LocalDate.now().plusDays(30).toString();
-
-        List<ReservationTimeResponse> result = themeService.findAvailableTime(1L, date);
-
-        assertThat(result).hasSize(9);
     }
 }
