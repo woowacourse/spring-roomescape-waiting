@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -21,32 +22,36 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
-        ReservationTimeRepository reservationTimeRepository,
-        ThemeRepository themeRepository
+                          ReservationTimeRepository reservationTimeRepository,
+                          ThemeRepository themeRepository,
+                          ReservationRepository reservationRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
         ReservationTime reservationTime = reservationTimeRepository.findById(waitingRequest.timeId())
-            .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
-            .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
         validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
-            waitingRequest.name());
+                waitingRequest.name());
         reservationTime.validateIfTimePast(waitingRequest.date());
+        validateWaitingIsAvailable(waitingRequest);
 
         Waiting waiting = Waiting.of(
-            waitingRequest.name(),
-            waitingRequest.date(),
-            reservationTime,
-            theme
+                waitingRequest.name(),
+                waitingRequest.date(),
+                reservationTime,
+                theme
         );
 
         Waiting saved = waitingRepository.save(waiting);
@@ -78,6 +83,25 @@ public class WaitingService {
         if (!waitingRepository.existsById(id)) {
             throw new RoomescapeException(ErrorCode.WAITING_ID_NOT_FOUND);
         }
+    }
+
+    private void validateWaitingIsAvailable(WaitingRequest waitingRequest) {
+        boolean isExistReservation = reservationRepository.existsByDateAndTimeIdAndThemeId(waitingRequest.date(),
+                waitingRequest.timeId(),
+                waitingRequest.themeId());
+
+        if (!isExistReservation) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
+        }
+
+        String reservationName = reservationRepository.findNameByDateAndTimeIdAndThemeId(waitingRequest.date(),
+                        waitingRequest.timeId(), waitingRequest.themeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+
+        if (reservationName.equals(waitingRequest.name())) {
+            throw new RoomescapeException(ErrorCode.WAITING_NOT_AVAILABLE);
+        }
+
     }
 
 }

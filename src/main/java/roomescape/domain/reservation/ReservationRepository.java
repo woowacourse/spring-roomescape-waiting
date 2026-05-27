@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import java.util.Optional;
+import javax.swing.text.html.Option;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -76,6 +77,16 @@ public class ReservationRepository {
             """;
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
         return count != null && count > 0;
+    }
+
+    public Optional<String> findNameByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String query = """
+            SELECT name
+            FROM reservation
+            WHERE date = ? AND time_id = ? AND theme_id = ?
+            """;
+        String name = jdbcTemplate.queryForObject(query, String.class, date, timeId, themeId);
+        return Optional.ofNullable(name);
     }
 
     public List<Long> findTimeByDateAndThemeId(LocalDate date, Long themeId) {
