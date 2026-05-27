@@ -1,10 +1,12 @@
 package roomescape.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
 import static org.mockito.BDDMockito.willThrow;
 
 import io.restassured.module.mockmvc.RestAssuredMockMvc;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -19,6 +21,7 @@ import roomescape.common.exception.InvalidInputException;
 import roomescape.domain.Member;
 import roomescape.domain.MemberRole;
 import roomescape.dto.request.LoginRequestDto;
+import roomescape.dto.response.MemberResponseDto;
 import roomescape.dao.MemberDao;
 import roomescape.service.MemberService;
 
@@ -95,6 +98,35 @@ class LoginControllerTest {
                     .when().post("/logout")
                     .then()
                     .status(HttpStatus.OK);
+        }
+    }
+
+    @Nested
+    class Me {
+
+        @Test
+        @DisplayName("로그인된 멤버 정보를 조회하면 200을 반환한다")
+        void returnsCurrentMember() {
+            given(memberDao.findById(member.getId())).willReturn(Optional.of(member));
+            MemberResponseDto expected = MemberResponseDto.from(member);
+
+            MemberResponseDto actual = RestAssuredMockMvc.given()
+                    .sessionAttr("memberId", String.valueOf(member.getId()))
+                    .when().get("/members/me")
+                    .then()
+                    .status(HttpStatus.OK)
+                    .extract().as(MemberResponseDto.class);
+
+            assertThat(actual).isEqualTo(expected);
+        }
+
+        @Test
+        @DisplayName("세션이 없으면 401을 반환한다")
+        void returnsUnauthorizedWithoutSession() {
+            RestAssuredMockMvc.given()
+                    .when().get("/members/me")
+                    .then()
+                    .status(HttpStatus.UNAUTHORIZED);
         }
     }
 }

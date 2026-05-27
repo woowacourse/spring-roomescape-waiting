@@ -101,4 +101,30 @@ class LoginControllerE2ETest extends BaseE2ETest {
                     .then().statusCode(HttpStatus.OK.value());
         }
     }
+
+    @Nested
+    class Me {
+
+        @Test
+        @DisplayName("로그인 후 /members/me를 조회하면 본인 정보를 반환한다")
+        void returnsCurrentMember() {
+            String sessionId = loginAs("user@test.com");
+
+            RestAssured.given()
+                    .sessionId(sessionId)
+                    .when().get("/members/me")
+                    .then().statusCode(HttpStatus.OK.value())
+                    .body("name", org.hamcrest.Matchers.equalTo("유저"))
+                    .body("email", org.hamcrest.Matchers.equalTo("user@test.com"))
+                    .body("role", org.hamcrest.Matchers.equalTo("USER"));
+        }
+
+        @Test
+        @DisplayName("세션 없이 /members/me를 조회하면 401을 반환한다")
+        void unauthenticated() {
+            RestAssured.given()
+                    .when().get("/members/me")
+                    .then().statusCode(HttpStatus.UNAUTHORIZED.value());
+        }
+    }
 }

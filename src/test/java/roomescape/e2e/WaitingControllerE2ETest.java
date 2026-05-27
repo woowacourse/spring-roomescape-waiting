@@ -16,6 +16,7 @@ class WaitingControllerE2ETest extends BaseE2ETest {
     private String userSession;
     private Long userId;
     private Long otherUserId;
+    private Long reserverId;
     private Long timeId;
     private Long themeId;
     private Long storeId;
@@ -25,6 +26,7 @@ class WaitingControllerE2ETest extends BaseE2ETest {
         storeId = seedStore("강남점");
         userId = seedMember("유저", "user@test.com", "USER");
         otherUserId = seedMember("타인", "other@test.com", "USER");
+        reserverId = seedMember("예약자", "reserver@test.com", "USER");
         timeId = seedTime(LocalTime.of(13, 0));
         themeId = seedTheme("테마A");
         userSession = loginAs("user@test.com");
@@ -34,11 +36,14 @@ class WaitingControllerE2ETest extends BaseE2ETest {
     class Post {
 
         @Test
-        @DisplayName("대기를 생성하면 201을 반환한다")
+        @DisplayName("기존 예약이 있는 슬롯에 대기를 생성하면 201을 반환한다")
         void createsWaiting() {
+            LocalDate date = LocalDate.now().plusDays(1);
+            seedReservation(reserverId, timeId, themeId, storeId, date);
+
             HashMap<String, Object> body = new HashMap<>();
             body.put("memberId", userId);
-            body.put("date", LocalDate.now().plusDays(1).toString());
+            body.put("date", date.toString());
             body.put("timeId", timeId);
             body.put("themeId", themeId);
             body.put("storeId", storeId);
@@ -57,6 +62,7 @@ class WaitingControllerE2ETest extends BaseE2ETest {
         @DisplayName("같은 슬롯에 두 번째로 대기하면 rank가 2로 발급된다")
         void secondWaitingHasRankTwo() {
             LocalDate date = LocalDate.now().plusDays(1);
+            seedReservation(reserverId, timeId, themeId, storeId, date);
             seedWaiting(otherUserId, timeId, themeId, storeId, date);
 
             HashMap<String, Object> body = new HashMap<>();
@@ -73,6 +79,45 @@ class WaitingControllerE2ETest extends BaseE2ETest {
                     .when().post("/waitings")
                     .then().statusCode(HttpStatus.CREATED.value())
                     .body("rank", org.hamcrest.Matchers.equalTo(2));
+        }
+
+        @Test
+        @DisplayName("예약이 없는 슬롯에 대기를 신청하면 404를 반환한다")
+        void rejectsWhenNoReservation() {
+            HashMap<String, Object> body = new HashMap<>();
+            body.put("memberId", userId);
+            body.put("date", LocalDate.now().plusDays(1).toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+            body.put("storeId", storeId);
+
+            RestAssured.given()
+                    .sessionId(userSession)
+                    .contentType(ContentType.JSON)
+                    .body(body)
+                    .when().post("/waitings")
+                    .then().statusCode(HttpStatus.NOT_FOUND.value());
+        }
+
+        @Test
+        @DisplayName("자신의 예약 슬롯에 대기를 신청하면 400을 반환한다")
+        void rejectsWhenOwnReservation() {
+            LocalDate date = LocalDate.now().plusDays(1);
+            seedReservation(userId, timeId, themeId, storeId, date);
+
+            HashMap<String, Object> body = new HashMap<>();
+            body.put("memberId", userId);
+            body.put("date", date.toString());
+            body.put("timeId", timeId);
+            body.put("themeId", themeId);
+            body.put("storeId", storeId);
+
+            RestAssured.given()
+                    .sessionId(userSession)
+                    .contentType(ContentType.JSON)
+                    .body(body)
+                    .when().post("/waitings")
+                    .then().statusCode(HttpStatus.BAD_REQUEST.value());
         }
     }
 
