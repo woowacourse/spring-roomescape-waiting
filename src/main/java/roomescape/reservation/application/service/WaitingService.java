@@ -1,18 +1,31 @@
 package roomescape.reservation.application.service;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.RoomEscapeException;
+import roomescape.reservation.application.dto.WaitingQueryResult;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.WaitingDetail;
+import roomescape.reservation.domain.repository.dto.WaitingOrderDetail;
+import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
+import roomescape.theme.application.dto.ThemeQueryResult;
 
 @RequiredArgsConstructor
 @Service
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+
+    @Transactional(readOnly = true)
+    public List<WaitingQueryResult> findAllByName(String name) {
+        return waitingRepository.findByName(name).stream()
+                .map(this::toQueryResult)
+                .toList();
+    }
 
     public int delete(Long id, String name) {
         WaitingDetail waitingDetail = getWaitingDetail(id);
@@ -43,5 +56,12 @@ public class WaitingService {
         if (!waiting.isOwner(name)) {
             throw new RoomEscapeException(ReservationErrorCode.FORBIDDEN_RESERVATION_ACCESS);
         }
+    }
+
+
+    private WaitingQueryResult toQueryResult(WaitingOrderDetail waitingOrderDetail) {
+        ThemeQueryResult themeQueryResult = themeService.findById(reservation.getThemeId());
+        ReservationTimeQueryResult timeQueryResult = timeService.findById(reservation.getTimeId());
+        return WaitingQueryResult.from(waitingOrderDetail, themeQueryResult, timeQueryResult);
     }
 }
