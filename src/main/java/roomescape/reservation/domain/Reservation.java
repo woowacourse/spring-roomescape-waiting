@@ -4,12 +4,10 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import lombok.Builder;
-import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import roomescape.global.exception.RoomEscapeException;
 
 @Getter
-@EqualsAndHashCode(of = {"name", "slot"})
 public class Reservation {
 
     private final Long id;
@@ -40,6 +38,22 @@ public class Reservation {
                 .name(this.name)
                 .slot(updatedSlot)
                 .build();
+    }
+
+    @Override
+    public boolean equals(Object other) {
+        if (this == other) {
+            return true;
+        }
+        if (!(other instanceof Reservation reservation)) {
+            return false;
+        }
+        return id != null && id.equals(reservation.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 
     private static String requireName(String name) {
