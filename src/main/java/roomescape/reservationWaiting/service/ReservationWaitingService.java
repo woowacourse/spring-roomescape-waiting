@@ -1,28 +1,30 @@
 package roomescape.reservationWaiting.service;
 
 import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalTime;
+import roomescape.theme.exception.ThemeErrorCode;
+import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
+import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.BadRequestException;
+import roomescape.time.exception.TimeErrorCode;
+import roomescape.global.exception.DuplicateException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.AuthorizationException;
-import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
-import roomescape.reservationWaiting.exception.AlreadyReservedException;
-import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
-import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
-import roomescape.reservationWaiting.exception.WaitingTargetReservationNotFoundException;
+
+
+
+
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeNotFoundException;
+
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.InvalidTimeStartAtValueException;
-import roomescape.time.exception.TimeNotFoundException;
+
 import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
@@ -45,73 +47,63 @@ public class ReservationWaitingService {
         this.clock = clock;
     }
 
+    @Transactional
     public ReservationWaiting save(ReservationWaitingCommand command) {
         if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
                 command.date(), command.timeId(), command.themeId(), command.name())
         ) {
-            throw new DuplicateReservationWaitingException();
+            throw new DuplicateException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
         }
 
         ReservationTime time = getReservationTime(command.timeId());
-        validateExpiry(command.date(), time.getStartAt());
-
         Theme theme = themeRepository.findById(command.themeId())
-                .orElseThrow(ThemeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
 
-        Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(
-                command.date(), command.timeId(), command.themeId()
-        ).orElseThrow(WaitingTargetReservationNotFoundException::new);
+        ReservationWaiting reservationWaiting = ReservationWaiting.of(
+                command.name(),
+                command.date(),
+                time,
+                theme
+        );
 
-        if (reservation.getName().equals(command.name())) {
-            throw new AlreadyReservedException();
-        }
+        reservationWaiting.validateExpiry(clock);
+        validateTargetReservation(command);
 
         try {
-            return reservationWaitingRepository.save(
-                    ReservationWaiting.of(
-                            command.name(),
-                            command.date(),
-                            time,
-                            theme
-                    )
-            );
+            return reservationWaitingRepository.save(reservationWaiting);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateReservationWaitingException();
+            throw new DuplicateException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
+        }
+    }
+
+    private void validateTargetReservation(ReservationWaitingCommand command) {
+        Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(
+                command.date(), command.timeId(), command.themeId()
+        ).orElseThrow(() -> new NotFoundException(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND.getMessage()));
+
+        if (reservation.getName().equals(command.name())) {
+            throw new BadRequestException(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
         }
     }
 
     @Transactional
     public void delete(Long id, String userName) {
         ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(id).orElseThrow(
-                ReservationWaitingNotFoundException::new
+                () -> new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage())
         );
 
-        validateExpiry(reservationWaiting.getDate(), reservationWaiting.getTime().getStartAt());
-        if (!reservationWaiting.getName().equals(userName)) {
-            throw new AuthorizationException();
-        }
+        reservationWaiting.validateExpiry(clock);
+        reservationWaiting.validateOwner(userName);
 
         int count = reservationWaitingRepository.deleteById(id);
         if (count == 0) {
-            throw new ReservationWaitingNotFoundException();
+            throw new NotFoundException(ReservationWaitingErrorCode.WAITING_NOT_FOUND.getMessage());
         }
     }
 
     private ReservationTime getReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(TimeNotFoundException::new);
-    }
-
-    private void validateExpiry(LocalDate date, LocalTime startAt) {
-        LocalDate nowDate = LocalDate.now(clock);
-
-        if (nowDate.isAfter(date)) {
-            throw new InvalidReservationDateValueException();
-        }
-
-        if (nowDate.equals(date) && LocalTime.now(clock).isAfter(startAt)) {
-            throw new InvalidTimeStartAtValueException();
-        }
+                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
     }
 
 }

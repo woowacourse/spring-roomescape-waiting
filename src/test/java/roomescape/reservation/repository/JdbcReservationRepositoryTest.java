@@ -1,6 +1,8 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import roomescape.global.exception.NotFoundException;
+import roomescape.reservation.exception.ReservationErrorCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Time;
@@ -18,7 +20,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.ReservationNotFoundException;
+
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -183,7 +185,8 @@ class JdbcReservationRepositoryTest {
                                 theme
                         )
                 )
-        ).isInstanceOf(ReservationNotFoundException.class);
+        ).isInstanceOf(NotFoundException.class)
+                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @Test

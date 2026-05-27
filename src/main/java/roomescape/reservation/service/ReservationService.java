@@ -1,6 +1,14 @@
 package roomescape.reservation.service;
 
+import roomescape.global.exception.InvalidRequestValueException;
+
 import java.time.Clock;
+import roomescape.theme.exception.ThemeErrorCode;
+import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.BadRequestException;
+import roomescape.time.exception.TimeErrorCode;
+import roomescape.global.exception.DuplicateException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
@@ -9,9 +17,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.DuplicateReservationException;
-import roomescape.reservation.exception.InvalidReservationDateValueException;
-import roomescape.reservation.exception.ReservationNotFoundException;
+
+
+
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
@@ -20,11 +28,11 @@ import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.ThemeNotFoundException;
+
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.InvalidTimeStartAtValueException;
-import roomescape.time.exception.TimeNotFoundException;
+
+
 import roomescape.time.repository.ReservationTimeRepository;
 
 @Service
@@ -54,14 +62,14 @@ public class ReservationService {
                 command.timeId(),
                 command.themeId())
         ) {
-            throw new DuplicateReservationException();
+            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
 
         ReservationTime time = getReservationTime(command.timeId());
         validateExpiry(command.date(), time.getStartAt());
 
         Theme theme = themeRepository.findById(command.themeId())
-                .orElseThrow(ThemeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
 
         try {
             return reservationRepository.save(
@@ -73,24 +81,24 @@ public class ReservationService {
                     )
             );
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateReservationException();
+            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
     }
 
     private ReservationTime getReservationTime(Long timeId) {
         return reservationTimeRepository.findById(timeId)
-                .orElseThrow(TimeNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
     }
 
     private void validateExpiry(LocalDate date, LocalTime startAt) {
         LocalDate nowDate = LocalDate.now(clock);
 
         if (nowDate.isAfter(date)) {
-            throw new InvalidReservationDateValueException();
+            throw new InvalidRequestValueException(ReservationErrorCode.INVALID_DATE.getMessage());
         }
 
         if (nowDate.equals(date) && LocalTime.now(clock).isAfter(startAt)) {
-            throw new InvalidTimeStartAtValueException();
+            throw new InvalidRequestValueException(TimeErrorCode.INVALID_START_AT.getMessage());
         }
     }
 
@@ -177,19 +185,19 @@ public class ReservationService {
                 updated.getTheme().getId(),
                 updated.getId()
         )) {
-            throw new DuplicateReservationException();
+            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
 
         try {
             reservationRepository.update(updated);
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateReservationException();
+            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
     }
 
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage()));
     }
 
     private Reservation updateField(ReservationUpdateCommand command, Reservation reservation) {
@@ -214,7 +222,7 @@ public class ReservationService {
         int nonAffected = 0;
 
         if (affectedRow == nonAffected) {
-            throw new ReservationNotFoundException();
+            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
         }
     }
 

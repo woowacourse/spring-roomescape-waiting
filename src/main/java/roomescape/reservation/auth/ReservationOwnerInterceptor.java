@@ -1,6 +1,10 @@
 package roomescape.reservation.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
+import roomescape.global.exception.UnauthorizedException;
+import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.ForbiddenException;
 import jakarta.servlet.http.HttpServletResponse;
 import java.util.Map;
 import org.springframework.stereotype.Component;
@@ -8,9 +12,9 @@ import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.HandlerMapping;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.AuthorizationException;
-import roomescape.reservation.exception.MissingAuthorizationHeaderException;
-import roomescape.reservation.exception.ReservationNotFoundException;
+
+
+
 import roomescape.reservation.repository.ReservationRepository;
 
 @Component
@@ -44,7 +48,7 @@ public class ReservationOwnerInterceptor implements HandlerInterceptor {
         String name = request.getHeader("Authorization");
 
         if (name == null || name.isBlank()) {
-            throw new MissingAuthorizationHeaderException();
+            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER.getMessage());
         }
 
         return name;
@@ -60,10 +64,10 @@ public class ReservationOwnerInterceptor implements HandlerInterceptor {
 
     private void authorize(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(ReservationNotFoundException::new);
+                .orElseThrow(() -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage()));
 
         if (!reservation.hasSameName(name)) {
-            throw new AuthorizationException();
+            throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
         }
     }
 }

@@ -1,13 +1,17 @@
 package roomescape.theme.service;
 
 import java.util.List;
+import roomescape.global.exception.DuplicateException;
+import roomescape.theme.exception.ThemeErrorCode;
+import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.DuplicateThemeException;
-import roomescape.theme.exception.ThemeInUseException;
-import roomescape.theme.exception.ThemeNotFoundException;
+
+
+
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 
@@ -23,7 +27,7 @@ public class ThemeService {
     @Transactional
     public Theme save(ThemeCommand command) {
         if (themeRepository.existsByName(command.name())) {
-            throw new DuplicateThemeException();
+            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
         }
 
         try {
@@ -35,7 +39,7 @@ public class ThemeService {
                     )
             );
         } catch (DataIntegrityViolationException e) {
-            throw new DuplicateThemeException();
+            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
         }
     }
 
@@ -46,7 +50,7 @@ public class ThemeService {
     @Transactional
     public void deleteById(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
-            throw new ThemeNotFoundException();
+            throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
         }
 
         try {
@@ -54,10 +58,10 @@ public class ThemeService {
             int nonAffected = 0;
 
             if (affectedRow == nonAffected) {
-                throw new ThemeNotFoundException();
+                throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
             }
         } catch (DataIntegrityViolationException e) {
-            throw new ThemeInUseException();
+            throw new BadRequestException(ThemeErrorCode.THEME_IN_USE.getMessage());
         }
     }
 }

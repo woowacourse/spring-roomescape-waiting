@@ -1,6 +1,9 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.NotFoundException;
+
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -20,21 +23,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
 import roomescape.integration.support.DatabaseHelper;
 import roomescape.integration.support.SpringWebTest;
-import roomescape.reservation.exception.DuplicateReservationException;
-import roomescape.reservation.exception.ReservationNotFoundException;
+
+
 import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
-import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
-import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
+
+
 import roomescape.reservationWaiting.service.ReservationWaitingService;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
-import roomescape.theme.exception.DuplicateThemeException;
-import roomescape.theme.exception.ThemeNotFoundException;
+
+
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
-import roomescape.time.exception.DuplicateTimeException;
-import roomescape.time.exception.TimeNotFoundException;
+
+
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 
@@ -78,7 +81,7 @@ class ConcurrencyTest {
                         )
                 ),
                 100,
-                DuplicateReservationException.class
+                DuplicateException.class
         );
 
         //then
@@ -160,7 +163,7 @@ class ConcurrencyTest {
                         new ReservationTimeCommand(LocalTime.of(10, 0))
                 ),
                 100,
-                DuplicateTimeException.class
+                DuplicateException.class
         );
 
         //then
@@ -178,7 +181,7 @@ class ConcurrencyTest {
                         new ThemeCommand("테마", "설명", "thumbnailUrl")
                 ),
                 100,
-                DuplicateThemeException.class
+                DuplicateException.class
         );
 
         //then
@@ -200,7 +203,7 @@ class ConcurrencyTest {
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationService.deleteById(1L),
                 100,
-                ReservationNotFoundException.class
+                NotFoundException.class
         );
 
         //then
@@ -219,7 +222,7 @@ class ConcurrencyTest {
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> themeService.deleteById(1L),
                 100,
-                ThemeNotFoundException.class
+                NotFoundException.class
         );
 
         //then
@@ -238,7 +241,7 @@ class ConcurrencyTest {
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationTimeService.deleteById(1L),
                 100,
-                TimeNotFoundException.class
+                NotFoundException.class
         );
 
         //then
@@ -287,7 +290,7 @@ class ConcurrencyTest {
                     startLatch.await();
                     task.run();
                     successCount.incrementAndGet();
-                } catch (DuplicateReservationException e) {
+                } catch (DuplicateException e) {
                     duplicateCount.incrementAndGet();
                 } catch (Throwable throwable) {
                     unexpectedErrorCount.incrementAndGet();
@@ -343,7 +346,7 @@ class ConcurrencyTest {
                         )
                 ),
                 100,
-                DuplicateReservationWaitingException.class
+                DuplicateException.class
         );
 
         //then
@@ -369,7 +372,7 @@ class ConcurrencyTest {
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationWaitingService.delete(1L, "포비"),
                 100,
-                ReservationWaitingNotFoundException.class
+                NotFoundException.class
         );
 
         // then

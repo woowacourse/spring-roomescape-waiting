@@ -1,8 +1,10 @@
 package roomescape.global.exception;
 
-public abstract class NotFoundException extends BusinessException {
+import org.springframework.http.HttpStatus;
+
+public class NotFoundException extends BusinessException {
 
     public NotFoundException(String message) {
-        super(message);
+        super(HttpStatus.NOT_FOUND, message);
     }
 }

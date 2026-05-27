@@ -1,6 +1,10 @@
 package roomescape.theme.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import roomescape.global.exception.DuplicateException;
+import roomescape.theme.exception.ThemeErrorCode;
+import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.BadRequestException;
 import static org.mockito.Mockito.when;
 
 import java.util.Optional;
@@ -11,9 +15,9 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.exception.DuplicateThemeException;
-import roomescape.theme.exception.ThemeInUseException;
-import roomescape.theme.exception.ThemeNotFoundException;
+
+
+
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 
@@ -35,7 +39,8 @@ class ThemeServiceTest {
         //when & then
         assertThatThrownBy(() -> themeService.save(
             new ThemeCommand("브라운", "설명", "url")
-        )).isInstanceOf(DuplicateThemeException.class);
+        )).isInstanceOf(DuplicateException.class)
+                .hasMessage(ThemeErrorCode.DUPLICATE_THEME.getMessage());
     }
 
     @DisplayName("id에 해당하는 테마가 없으면 예외가 발생한다.")
@@ -49,7 +54,8 @@ class ThemeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> themeService.deleteById(1L))
-                .isInstanceOf(ThemeNotFoundException.class);
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
     }
 
     @DisplayName("테마 삭제시, 테마가 사용 중이면 예외가 발생한다.")
@@ -66,6 +72,7 @@ class ThemeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> themeService.deleteById(1L))
-                .isInstanceOf(ThemeInUseException.class);
+                .isInstanceOf(BadRequestException.class)
+                .hasMessage(ThemeErrorCode.THEME_IN_USE.getMessage());
     }
 }

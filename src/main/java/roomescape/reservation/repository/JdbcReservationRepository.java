@@ -1,6 +1,8 @@
 package roomescape.reservation.repository;
 
 import java.sql.Date;
+import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.global.exception.NotFoundException;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
 import java.util.List;
@@ -11,7 +13,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.ReservationNotFoundException;
+
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeMapper;
@@ -262,7 +264,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
 
         if (affectedRow == 0) {
-            throw new ReservationNotFoundException();
+            throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
         }
     }
 

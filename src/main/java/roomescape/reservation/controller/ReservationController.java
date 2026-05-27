@@ -1,6 +1,10 @@
 package roomescape.reservation.controller;
 
+import roomescape.global.exception.InvalidRequestFormatException;
+
 import java.net.URI;
+import roomescape.reservation.exception.ReservationErrorCode;
+import roomescape.global.exception.BadRequestException;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,7 +17,7 @@ import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.InvalidReservationRequestFormatException;
+
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -40,7 +44,7 @@ public class ReservationController {
     @GetMapping
     public ResponseEntity<List<ReservationWithStatusResponse>> getAllReservationsByName(@RequestParam("name") String name) {
         if (name == null || name.isBlank()) {
-            throw new InvalidReservationRequestFormatException();
+            throw new InvalidRequestFormatException(ReservationErrorCode.INVALID_FORMAT.getMessage());
         }
 
         List<ReservationWithStatusResponse> responses = reservationService.findAllByName(name)

@@ -1,9 +1,11 @@
 package roomescape.global.exception;
 
+import org.springframework.http.HttpStatus;
+
 public class InvalidRequestValueException extends BusinessException {
 
     public InvalidRequestValueException(String message) {
-        super(message);
+        super(HttpStatus.UNPROCESSABLE_ENTITY, message);
     }
 
     public InvalidRequestValueException() {

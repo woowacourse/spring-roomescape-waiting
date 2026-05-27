@@ -1,6 +1,10 @@
 package roomescape.time.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import roomescape.global.exception.DuplicateException;
+import roomescape.time.exception.TimeErrorCode;
+import roomescape.global.exception.NotFoundException;
+import roomescape.global.exception.BadRequestException;
 import static org.mockito.Mockito.when;
 
 import java.time.Clock;
@@ -15,9 +19,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.exception.DuplicateTimeException;
-import roomescape.time.exception.TimeInUseException;
-import roomescape.time.exception.TimeNotFoundException;
+
+
+
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
 
@@ -46,7 +50,8 @@ class ReservationTimeServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationTimeService.save(
                 new ReservationTimeCommand(LocalTime.of(10, 0))
-        )).isInstanceOf(DuplicateTimeException.class);
+        )).isInstanceOf(DuplicateException.class)
+                .hasMessage(TimeErrorCode.DUPLICATE_TIME.getMessage());
     }
 
     @DisplayName("id에 해당하는 테마가 없으면 예외가 발생한다.")
@@ -58,7 +63,8 @@ class ReservationTimeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
-                .isInstanceOf(TimeNotFoundException.class);
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(TimeErrorCode.TIME_NOT_FOUND.getMessage());
     }
 
     @DisplayName("예약 시간 삭제시, 예약 시간이 사용 중이면 예외가 발생한다.")
@@ -73,6 +79,7 @@ class ReservationTimeServiceTest {
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
-                .isInstanceOf(TimeInUseException.class);
+                .isInstanceOf(roomescape.global.exception.DeleteFailedException.class)
+                .hasMessage(TimeErrorCode.TIME_IN_USE.getMessage());
     }
 }

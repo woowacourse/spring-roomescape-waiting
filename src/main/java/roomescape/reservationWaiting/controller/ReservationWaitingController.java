@@ -1,6 +1,8 @@
 package roomescape.reservationWaiting.controller;
 
 import jakarta.servlet.http.HttpServletRequest;
+import roomescape.global.exception.UnauthorizedException;
+import roomescape.reservation.exception.ReservationErrorCode;
 import java.net.URI;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -11,7 +13,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.exception.MissingAuthorizationHeaderException;
+
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingResponse;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
@@ -44,7 +46,7 @@ public class ReservationWaitingController {
     public void deleteMyReservationWaiting(HttpServletRequest req, @PathVariable Long id) {
         String userName = req.getHeader("Authorization");
         if (userName == null) {
-            throw new MissingAuthorizationHeaderException();
+            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER.getMessage());
         }
         
         reservationWaitingService.delete(id, userName);

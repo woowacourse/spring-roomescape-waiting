@@ -1,6 +1,9 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.NotFoundException;
+import roomescape.reservation.exception.ReservationErrorCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
@@ -20,8 +23,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.DuplicateReservationException;
-import roomescape.reservation.exception.ReservationNotFoundException;
+
+
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
@@ -127,14 +130,16 @@ class ReservationServiceTest {
                 new ReservationCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
-        )).isInstanceOf(DuplicateReservationException.class);
+        )).isInstanceOf(DuplicateException.class)
+                .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
     @DisplayName("id에 해당하는 예약이 없으면 예외가 발생한다.")
     @Test
     void deleteReservationById_not_found() {
         assertThatThrownBy(() -> reservationService.deleteById(1L))
-                .isInstanceOf(ReservationNotFoundException.class);
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
     @DisplayName("본인 예약 변경 시, 기존에 변경하려는 예약과 동일한 예약이 있으면 예외가 발생한다.")
@@ -171,7 +176,8 @@ class ReservationServiceTest {
                 new ReservationUpdateCommand(
                         LocalDate.of(2026, 5, 15), 1L
                 ), 1L
-        )).isInstanceOf(DuplicateReservationException.class);
+        )).isInstanceOf(DuplicateException.class)
+                .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
     @DisplayName("이름에 해당하는 예약들을 조회한다.")
