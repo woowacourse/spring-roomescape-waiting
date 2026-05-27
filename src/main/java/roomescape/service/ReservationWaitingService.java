@@ -19,4 +19,8 @@ public class ReservationWaitingService {
     public ReservationWaiting addWaiting(ReservationWaiting reservationWaiting) {
         return reservationWaitingRepository.save(reservationWaiting);
     }
+
+    public boolean existBy(String name, Long reservationId) {
+        return reservationWaitingRepository.existBy(name, reservationId);
+    }
 }

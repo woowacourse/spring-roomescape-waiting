@@ -1,12 +1,13 @@
 package roomescape.repository;
 
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationWaiting;
+
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
 
 @Repository
 public class ReservationWaitingJdbcRepository implements ReservationWaitingRepository {
@@ -39,6 +40,13 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 reservationWaiting.getReservation(),
                 waitingOrder
         );
+    }
+
+    @Override
+    public boolean existBy(String name, Long reservationId) {
+        String sql = "SELECT COUNT(*) FROM reservation_waiting WHERE name = ? AND reservation_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, reservationId);
+        return count != null && count > 0;
     }
 
     private int calculateWaitingOrder(ReservationWaiting reservationWaiting) {
