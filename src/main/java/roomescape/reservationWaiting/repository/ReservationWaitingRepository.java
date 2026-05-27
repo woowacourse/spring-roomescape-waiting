@@ -13,9 +13,9 @@ public interface ReservationWaitingRepository {
 
     List<ReservationWaiting> findAllByName(String name);
 
-    boolean existByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name);
+    boolean existsByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name);
 
     int deleteById(Long id);
 
-    long countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id);
+    long countByDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id);
 }

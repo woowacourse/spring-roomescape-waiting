@@ -27,7 +27,7 @@ public class MyReservationController {
             @PathVariable Long id,
             @RequestBody ReservationUpdateRequest request
     ) {
-        reservationService.updateReservation(request.toCommand(), id);
+        reservationService.update(request.toCommand(), id);
         return ResponseEntity.noContent().build();
     }
 
@@ -36,8 +36,8 @@ public class MyReservationController {
     public ResponseEntity<Void> deleteMyReservation(
             @PathVariable Long id
     ) {
-        reservationService.validateReservationNotExpired(id);
-        reservationService.deleteReservationById(id);
+        reservationService.validateNotExpired(id);
+        reservationService.deleteById(id);
 
         return ResponseEntity.noContent().build();
     }

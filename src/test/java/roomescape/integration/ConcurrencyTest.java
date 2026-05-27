@@ -63,14 +63,14 @@ class ConcurrencyTest {
 
     @DisplayName("동일한 예약 요청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
-    void makeReservation() throws InterruptedException {
+    void saveReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.makeReservation(new ReservationCommand(
+                () -> reservationService.save(new ReservationCommand(
                                 "name",
                                 LocalDate.of(2026, 5, 15),
                                 1L,
@@ -156,7 +156,7 @@ class ConcurrencyTest {
     void registerTime() throws InterruptedException {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationTimeService.registerReservationTime(
+                () -> reservationTimeService.save(
                         new ReservationTimeCommand(LocalTime.of(10, 0))
                 ),
                 100,
@@ -171,10 +171,10 @@ class ConcurrencyTest {
 
     @DisplayName("동일한 테마를 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
-    void registerTheme() throws InterruptedException {
+    void saveTheme() throws InterruptedException {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> themeService.registerTheme(
+                () -> themeService.save(
                         new ThemeCommand("테마", "설명", "thumbnailUrl")
                 ),
                 100,
@@ -189,7 +189,7 @@ class ConcurrencyTest {
 
     @DisplayName("예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
-    void deleteReservationById() throws InterruptedException {
+    void deleteReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
@@ -198,7 +198,7 @@ class ConcurrencyTest {
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.deleteReservationById(1L),
+                () -> reservationService.deleteById(1L),
                 100,
                 ReservationNotFoundException.class
         );
@@ -211,13 +211,13 @@ class ConcurrencyTest {
 
     @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
-    void removeThemeById() throws InterruptedException {
+    void deleteTheme() throws InterruptedException {
         //given
         createTheme("테마", "설명", "thumbnailUrl");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> themeService.removeThemeById(1L),
+                () -> themeService.deleteById(1L),
                 100,
                 ThemeNotFoundException.class
         );
@@ -230,13 +230,13 @@ class ConcurrencyTest {
 
     @DisplayName("예약 시간 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
-    void removeReservationTimeById() throws InterruptedException {
+    void deleteTime() throws InterruptedException {
         //given
         createReservationTime("10:00");
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationTimeService.removeReservationTimeById(1L),
+                () -> reservationTimeService.deleteById(1L),
                 100,
                 TimeNotFoundException.class
         );
@@ -270,11 +270,11 @@ class ConcurrencyTest {
 
         //when
         List<Runnable> tasks = List.of(
-                () -> reservationService.updateReservation(
+                () -> reservationService.update(
                         new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 3L),
                         reservationId1
                 ),
-                () -> reservationService.updateReservation(
+                () -> reservationService.update(
                         new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 3L),
                         reservationId2
                 )
@@ -327,7 +327,7 @@ class ConcurrencyTest {
 
     @DisplayName("동일한 예약 대기 신청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
-    void makeReservationWaiting() throws InterruptedException {
+    void saveReservationWaiting() throws InterruptedException {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
@@ -335,7 +335,7 @@ class ConcurrencyTest {
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
+                () -> reservationWaitingService.save(new ReservationWaitingCommand(
                                 "name",
                                 LocalDate.of(2026, 5, 15),
                                 1L,
@@ -353,12 +353,12 @@ class ConcurrencyTest {
     }
 
     @Test
-    void deleteReservationWaiting() throws InterruptedException {
+    void delete() throws InterruptedException {
         // given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
         createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
-        reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
+        reservationWaitingService.save(new ReservationWaitingCommand(
                 "포비",
                 LocalDate.of(2026, 5, 15),
                 1L,
@@ -367,7 +367,7 @@ class ConcurrencyTest {
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.deleteReservationWaiting(1L, "포비"),
+                () -> reservationWaitingService.delete(1L, "포비"),
                 100,
                 ReservationWaitingNotFoundException.class
         );

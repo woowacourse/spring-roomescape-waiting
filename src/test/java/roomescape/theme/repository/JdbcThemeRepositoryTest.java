@@ -92,17 +92,17 @@ class JdbcThemeRepositoryTest {
 
     @DisplayName("테마 이름을 기준으로 조회한다.")
     @Test
-    void existByName() {
+    void existsByName() {
         //given
         themeRepository.save(
                 Theme.of("테마", "테마 설명", "썸네일_url")
         );
 
         //when & then
-        assertThat(themeRepository.existByName("테마"))
+        assertThat(themeRepository.existsByName("테마"))
                 .isTrue();
 
-        assertThat(themeRepository.existByName("없는_것"))
+        assertThat(themeRepository.existsByName("없는_것"))
                 .isFalse();
     }
 

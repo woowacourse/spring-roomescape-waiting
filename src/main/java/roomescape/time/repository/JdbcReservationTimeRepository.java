@@ -65,7 +65,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public boolean existByStartAt(LocalTime localTime) {
+    public boolean existsByStartAt(LocalTime localTime) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1

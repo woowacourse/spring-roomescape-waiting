@@ -21,8 +21,8 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme registerTheme(ThemeCommand command) {
-        if (themeRepository.existByName(command.name())) {
+    public Theme save(ThemeCommand command) {
+        if (themeRepository.existsByName(command.name())) {
             throw new DuplicateThemeException();
         }
 
@@ -39,12 +39,12 @@ public class ThemeService {
         }
     }
 
-    public List<Theme> findAllThemes() {
+    public List<Theme> findAll() {
         return themeRepository.findAll();
     }
 
     @Transactional
-    public void removeThemeById(Long id) {
+    public void deleteById(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
             throw new ThemeNotFoundException();
         }

@@ -48,8 +48,8 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation makeReservation(ReservationCommand command) {
-        if (reservationRepository.existByDateAndTimeIdAndThemeId(
+    public Reservation save(ReservationCommand command) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
                 command.date(),
                 command.timeId(),
                 command.themeId())
@@ -94,7 +94,7 @@ public class ReservationService {
         }
     }
 
-    public List<ReservationWithStatusResult> findReservationsByName(String name) {
+    public List<ReservationWithStatusResult> findAllByName(String name) {
         List<ReservationWithStatusResult> reserved = reservationRepository.findAllByName(name)
                 .stream()
                 .map(
@@ -132,7 +132,7 @@ public class ReservationService {
     }
 
     private long calculateOrder(ReservationWaiting reservationWaiting) {
-        return reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+        return reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
                 reservationWaiting.getDate(),
                 reservationWaiting.getTime().getId(),
                 reservationWaiting.getTheme().getId(),
@@ -140,7 +140,7 @@ public class ReservationService {
         ) + 1;
     }
 
-    public List<Reservation> findReservations() {
+    public List<Reservation> findAll() {
         return reservationRepository.findAll();
     }
 
@@ -156,7 +156,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void updateReservation(ReservationUpdateCommand command, Long id) {
+    public void update(ReservationUpdateCommand command, Long id) {
         Reservation reservation = getReservation(id);
 
         validateExpiry(
@@ -171,7 +171,7 @@ public class ReservationService {
                 updated.getTime().getStartAt()
         );
 
-        if (reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
+        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
                 updated.getDate(),
                 updated.getTime().getId(),
                 updated.getTheme().getId(),
@@ -209,7 +209,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservationById(Long id) {
+    public void deleteById(Long id) {
         int affectedRow = reservationRepository.deleteById(id);
         int nonAffected = 0;
 
@@ -218,7 +218,7 @@ public class ReservationService {
         }
     }
 
-    public void validateReservationNotExpired(Long id) {
+    public void validateNotExpired(Long id) {
         Reservation reservation = getReservation(id);
 
         validateExpiry(

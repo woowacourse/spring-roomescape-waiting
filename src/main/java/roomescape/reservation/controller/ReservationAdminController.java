@@ -22,7 +22,7 @@ public class ReservationAdminController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getAllReservations() {
-        List<ReservationResponse> responses = reservationService.findReservations()
+        List<ReservationResponse> responses = reservationService.findAll()
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -32,7 +32,7 @@ public class ReservationAdminController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id) {
-        reservationService.deleteReservationById(id);
+        reservationService.deleteById(id);
         return ResponseEntity.noContent().build();
     }
 

@@ -23,7 +23,7 @@ public class ReservationTimeController {
 
     @GetMapping
     public ResponseEntity<List<ReservationTimeResponse>> getAllTimes() {
-        List<ReservationTimeResponse> responses = reservationTimeService.findAllReservationTimes()
+        List<ReservationTimeResponse> responses = reservationTimeService.findAll()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .collect(Collectors.toList());
@@ -35,7 +35,7 @@ public class ReservationTimeController {
             @RequestParam("themeId") Long themeId,
             @RequestParam("date") LocalDate date
     ) {
-        List<ReservationTimeResponse> responses = reservationTimeService.findAvailableReservationTimes(themeId, date).availableTimeQueryResults()
+        List<ReservationTimeResponse> responses = reservationTimeService.findAvailableTimes(themeId, date).availableTimeQueryResults()
                 .stream()
                 .map(ReservationTimeResponse::from)
                 .collect(Collectors.toList());

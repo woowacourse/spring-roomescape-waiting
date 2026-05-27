@@ -30,7 +30,7 @@ public class ReservationWaitingController {
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
             @RequestBody ReservationWaitingRequest request) {
-        ReservationWaiting reservationWaiting = reservationWaitingService.makeReservationWaiting(request.toCommand());
+        ReservationWaiting reservationWaiting = reservationWaitingService.save(request.toCommand());
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
         return ResponseEntity
@@ -47,6 +47,6 @@ public class ReservationWaitingController {
             throw new MissingAuthorizationHeaderException();
         }
         
-        reservationWaitingService.deleteReservationWaiting(id, userName);
+        reservationWaitingService.delete(id, userName);
     }
 }

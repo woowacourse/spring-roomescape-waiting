@@ -31,8 +31,8 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public ReservationTime registerReservationTime(ReservationTimeCommand command) {
-        if (reservationTimeRepository.existByStartAt(command.startAt())) {
+    public ReservationTime save(ReservationTimeCommand command) {
+        if (reservationTimeRepository.existsByStartAt(command.startAt())) {
             throw new DuplicateTimeException();
         }
 
@@ -45,11 +45,11 @@ public class ReservationTimeService {
         }
     }
 
-    public List<ReservationTime> findAllReservationTimes() {
+    public List<ReservationTime> findAll() {
         return reservationTimeRepository.findAll();
     }
 
-    public AvailableTimesResult findAvailableReservationTimes(Long themeId, LocalDate date) {
+    public AvailableTimesResult findAvailableTimes(Long themeId, LocalDate date) {
         if (LocalDate.now(clock).isAfter(date)) {
             throw new InvalidReservationDateValueException();
         }
@@ -62,7 +62,7 @@ public class ReservationTimeService {
     }
 
     @Transactional
-    public void removeReservationTimeById(Long id) {
+    public void deleteById(Long id) {
         if (reservationTimeRepository.findById(id).isEmpty()) {
             throw new TimeNotFoundException();
         }

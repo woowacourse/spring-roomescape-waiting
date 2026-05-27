@@ -45,8 +45,8 @@ public class ReservationWaitingService {
         this.clock = clock;
     }
 
-    public ReservationWaiting makeReservationWaiting(ReservationWaitingCommand command) {
-        if (reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
+    public ReservationWaiting save(ReservationWaitingCommand command) {
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
                 command.date(), command.timeId(), command.themeId(), command.name())
         ) {
             throw new DuplicateReservationWaitingException();
@@ -81,7 +81,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void deleteReservationWaiting(Long id, String userName) {
+    public void delete(Long id, String userName) {
         ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(id).orElseThrow(
                 ReservationWaitingNotFoundException::new
         );

@@ -10,7 +10,7 @@ public interface ThemeRepository {
 
     Optional<Theme> findById(Long id);
 
-    boolean existByName(String name);
+    boolean existsByName(String name);
 
     List<Theme> findAll();
 

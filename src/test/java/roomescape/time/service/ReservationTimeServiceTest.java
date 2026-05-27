@@ -40,11 +40,11 @@ class ReservationTimeServiceTest {
     @Test
     void registerReservationTime_duplicate() {
         //given
-        when(reservationTimeRepository.existByStartAt(LocalTime.of(10, 0)))
+        when(reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0)))
                 .thenReturn(true);
 
         //when & then
-        assertThatThrownBy(() -> reservationTimeService.registerReservationTime(
+        assertThatThrownBy(() -> reservationTimeService.save(
                 new ReservationTimeCommand(LocalTime.of(10, 0))
         )).isInstanceOf(DuplicateTimeException.class);
     }
@@ -57,7 +57,7 @@ class ReservationTimeServiceTest {
                 .thenReturn(Optional.empty());
 
         //when & then
-        assertThatThrownBy(() -> reservationTimeService.removeReservationTimeById(1L))
+        assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(TimeNotFoundException.class);
     }
 
@@ -72,7 +72,7 @@ class ReservationTimeServiceTest {
                 .thenThrow(new DataIntegrityViolationException("foreign key"));
 
         //when & then
-        assertThatThrownBy(() -> reservationTimeService.removeReservationTimeById(1L))
+        assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
                 .isInstanceOf(TimeInUseException.class);
     }
 }

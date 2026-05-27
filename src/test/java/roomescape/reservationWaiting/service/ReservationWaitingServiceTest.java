@@ -61,7 +61,7 @@ class ReservationWaitingServiceTest {
     @Test
     void makeReservationWaitingTest() {
         //given
-        when(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .thenReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -89,7 +89,7 @@ class ReservationWaitingServiceTest {
                 .thenReturn(new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme));
 
         //when
-        ReservationWaiting reservationWaiting = reservationWaitingService.makeReservationWaiting(
+        ReservationWaiting reservationWaiting = reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -103,11 +103,11 @@ class ReservationWaitingServiceTest {
     @Test
     void makeReservationWaitingTest_duplicate() {
         //given
-        when(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .thenReturn(true);
 
         //when & then
-        assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
+        assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -118,14 +118,14 @@ class ReservationWaitingServiceTest {
     @Test
     void makeReservationWaitingTest_no_timeId() {
         //given
-        when(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .thenReturn(false);
 
         when(reservationTimeRepository.findById(any()))
                 .thenReturn(Optional.empty());
 
         //when & then
-        assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
+        assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -136,7 +136,7 @@ class ReservationWaitingServiceTest {
     @Test
     void makeReservationWaitingTest_no_themId() {
         //given
-        when(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .thenReturn(false);
 
         when(reservationTimeRepository.findById(any()))
@@ -153,7 +153,7 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.empty());
 
         //when & then
-        assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
+        assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -164,7 +164,7 @@ class ReservationWaitingServiceTest {
     @Test
     void makeReservationWaitingTest_no_reservation() {
         //given
-        when(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .thenReturn(false);
 
         when(reservationTimeRepository.findById(any()))
@@ -185,7 +185,7 @@ class ReservationWaitingServiceTest {
         ).thenReturn(Optional.empty());
 
         //when & then
-        assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
+        assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -196,7 +196,7 @@ class ReservationWaitingServiceTest {
     @Test
     void makeReservationWaitingTest_already_reserved() {
         //given
-        when(reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .thenReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -221,7 +221,7 @@ class ReservationWaitingServiceTest {
         ).thenReturn(Optional.of(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme)));
 
         //when & then
-        assertThatThrownBy(() -> reservationWaitingService.makeReservationWaiting(
+        assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -248,7 +248,7 @@ class ReservationWaitingServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         // when, then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(1L, "브라운")).isInstanceOf(
+        assertThatThrownBy(() -> reservationWaitingService.delete(1L, "브라운")).isInstanceOf(
                 ReservationWaitingNotFoundException.class);
     }
 
@@ -263,7 +263,7 @@ class ReservationWaitingServiceTest {
                 Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(1L, "브라운")).isInstanceOf(
+        assertThatThrownBy(() -> reservationWaitingService.delete(1L, "브라운")).isInstanceOf(
                 ReservationWaitingNotFoundException.class);
     }
 
@@ -286,7 +286,7 @@ class ReservationWaitingServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         // when,then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(1L, "브라운")).isInstanceOf(
+        assertThatThrownBy(() -> reservationWaitingService.delete(1L, "브라운")).isInstanceOf(
                 InvalidReservationDateValueException.class);
     }
 
@@ -311,7 +311,7 @@ class ReservationWaitingServiceTest {
 
         // when,then
         assertDoesNotThrow(
-                () -> reservationWaitingService.deleteReservationWaiting(1L, "브라운")
+                () -> reservationWaitingService.delete(1L, "브라운")
         );
     }
 
@@ -334,7 +334,7 @@ class ReservationWaitingServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         // when,then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaiting(1L, "검프")).isInstanceOf(
+        assertThatThrownBy(() -> reservationWaitingService.delete(1L, "검프")).isInstanceOf(
                 AuthorizationException.class);
     }
 }

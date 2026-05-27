@@ -123,7 +123,7 @@ class ReservationServiceTest {
                 .thenThrow(new DataIntegrityViolationException("duplicate"));
 
         //when & then
-        assertThatThrownBy(() -> reservationService.makeReservation(
+        assertThatThrownBy(() -> reservationService.save(
                 new ReservationCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )
@@ -133,7 +133,7 @@ class ReservationServiceTest {
     @DisplayName("id에 해당하는 예약이 없으면 예외가 발생한다.")
     @Test
     void deleteReservationById_not_found() {
-        assertThatThrownBy(() -> reservationService.deleteReservationById(1L))
+        assertThatThrownBy(() -> reservationService.deleteById(1L))
                 .isInstanceOf(ReservationNotFoundException.class);
     }
 
@@ -162,12 +162,12 @@ class ReservationServiceTest {
                         )
                 ));
 
-        when(reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
+        when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
                 LocalDate.of(2026, 5, 15), 1L, 1L, 1L)
         ).thenReturn(true);
 
         //when & then
-        assertThatThrownBy(() -> reservationService.updateReservation(
+        assertThatThrownBy(() -> reservationService.update(
                 new ReservationUpdateCommand(
                         LocalDate.of(2026, 5, 15), 1L
                 ), 1L
@@ -198,12 +198,12 @@ class ReservationServiceTest {
                         ))
                 );
 
-        when(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+        when(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
                 any(), any(), any(), any()
         )).thenReturn(0L);
 
         //when
-        List<ReservationWithStatusResult> result = reservationService.findReservationsByName("브라운");
+        List<ReservationWithStatusResult> result = reservationService.findAllByName("브라운");
 
         //then
         assertThat(result.size()).isEqualTo(2);

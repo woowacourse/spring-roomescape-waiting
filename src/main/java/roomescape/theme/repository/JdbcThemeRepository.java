@@ -67,7 +67,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean existByName(String name) {
+    public boolean existsByName(String name) {
         String sql = """
                SELECT EXISTS(
                    SELECT 1

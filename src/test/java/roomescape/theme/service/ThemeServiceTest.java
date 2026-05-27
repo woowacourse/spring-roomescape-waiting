@@ -29,11 +29,11 @@ class ThemeServiceTest {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
 
-        when(themeRepository.existByName("브라운"))
+        when(themeRepository.existsByName("브라운"))
                 .thenReturn(true);
 
         //when & then
-        assertThatThrownBy(() -> themeService.registerTheme(
+        assertThatThrownBy(() -> themeService.save(
             new ThemeCommand("브라운", "설명", "url")
         )).isInstanceOf(DuplicateThemeException.class);
     }
@@ -48,7 +48,7 @@ class ThemeServiceTest {
                 .thenReturn(Optional.empty());
 
         //when & then
-        assertThatThrownBy(() -> themeService.removeThemeById(1L))
+        assertThatThrownBy(() -> themeService.deleteById(1L))
                 .isInstanceOf(ThemeNotFoundException.class);
     }
 
@@ -65,7 +65,7 @@ class ThemeServiceTest {
                 .thenThrow(new DataIntegrityViolationException("foreign key"));
 
         //when & then
-        assertThatThrownBy(() -> themeService.removeThemeById(1L))
+        assertThatThrownBy(() -> themeService.deleteById(1L))
                 .isInstanceOf(ThemeInUseException.class);
     }
 }

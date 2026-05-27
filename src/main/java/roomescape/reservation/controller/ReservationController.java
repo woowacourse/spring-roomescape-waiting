@@ -28,7 +28,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest requestDto) {
-        Reservation reservation = reservationService.makeReservation(requestDto.toCommand());
+        Reservation reservation = reservationService.save(requestDto.toCommand());
         ReservationResponse response = ReservationResponse.from(reservation);
 
         return ResponseEntity
@@ -43,7 +43,7 @@ public class ReservationController {
             throw new InvalidReservationRequestFormatException();
         }
 
-        List<ReservationWithStatusResponse> responses = reservationService.findReservationsByName(name)
+        List<ReservationWithStatusResponse> responses = reservationService.findAllByName(name)
                 .stream()
                 .map(ReservationWithStatusResponse::from)
                 .toList();
