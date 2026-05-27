@@ -10,6 +10,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.UserReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -73,8 +74,10 @@ class ReservationControllerTest {
 
     @Test
     void 사용자_예약_목록_조회_요청을_Service에_전달하고_결과를_반환한다() throws Exception {
-        List<Reservation> reservations = List.of(
-                new Reservation(1L, "레서",
+        List<UserReservation> reservations = List.of(
+                new UserReservation(
+                        1L,
+                        "레서",
                         LocalDate.of(2026, 5, 6),
                         new ReservationTime(1L, LocalTime.of(18, 0)),
                         new Theme(1L, "공포방", "무서운방입니다.", "image-url"))

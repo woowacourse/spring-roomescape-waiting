@@ -9,6 +9,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.service.dto.UserReservation;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -32,6 +33,7 @@ class ReservationRepositoryTest {
 
     @BeforeEach
     void setUp() {
+        jdbcTemplate.update("DELETE FROM waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
@@ -195,6 +197,29 @@ class ReservationRepositoryTest {
         assertThat(result).isEmpty();
     }
 
+
+    @Test
+    void 예약과_예약_대기_목록을_함께_조회한다() {
+        reservationRepository.save(new Reservation(
+                null, "브라운", LocalDate.of(2026, 5, 10), time, theme));
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "어셔", LocalDate.of(2026, 5, 11).toString(), time.getId(), theme.getId());
+        jdbcTemplate.update("INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "브라운", LocalDate.of(2026, 5, 11).toString(), time.getId(), theme.getId());
+
+        List<UserReservation> result = reservationRepository.findUserReservations("브라운", 0, 10);
+
+        assertThat(result).hasSize(2);
+        assertThat(result)
+                .extracting(UserReservation::status)
+                .containsExactlyInAnyOrder("RESERVED", "WAITING");
+        UserReservation waiting = result.stream()
+                .filter(it -> "WAITING".equals(it.status()))
+                .findFirst()
+                .orElseThrow();
+        assertThat(waiting.name()).isEqualTo("브라운");
+        assertThat(waiting.rank()).isEqualTo(2L);
+    }
 
     @Test
     void 예약을_삭제한다() {
