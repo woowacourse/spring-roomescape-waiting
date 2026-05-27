@@ -37,13 +37,15 @@
 
 > **사용자 흐름:** 테마를 본다 → 날짜를 고른다 → 그 조건에서 예약 가능한 시간을 본다 → 시간을 골라 예약한다.
 >
+> **참고:** 예약 추가 및 취소 API는 슬롯의 예약 상태에 따라 일반 예약/취소 또는 대기/대기 취소로 자동 처리됩니다.
+>
 
-| 기능          | Method / URL                                                 | 요청 본문                           | 응답                                                            |
-|-------------|--------------------------------------------------------------|---------------------------------|---------------------------------------------------------------|
-| 테마 목록 조회    | `GET /user/themes`                                           | -                               | `[{id, name, description, thumbnail}, ...]`                   |
-| 예약 가능 시간 조회 | `GET /user/themes/{themeId}/available-times?date=YYYY-MM-DD` | -                               | `[{id, startAt}, ...]`                                        |
-| 사용자 예약 추가   | `POST /user/reservations`                                    | `{name, date, timeId, themeId}` | `{id, name, date, time, theme}`                               |
-| 본인 예약 조회    | `GET /user/reservations?name={name}`                         | -                               | `[{id, name, date, time, theme, waitingOrder}, ...]`          |
-| 본인 예약 변경    | `PATCH /user/reservations/{id}`                              | `{name, date, timeId}`          | `{id, name, date, time, theme}`                               |
-| 본인 예약 취소    | `DELETE /user/reservations/{id}?name={name}`                 | -                               | `204 No Content`                                              |
+| 기능            | Method / URL                                                 | 요청 본문                           | 응답                                                            |
+|---------------|--------------------------------------------------------------|---------------------------------|---------------------------------------------------------------|
+| 테마 목록 조회      | `GET /user/themes`                                           | -                               | `[{id, name, description, thumbnail}, ...]`                   |
+| 예약 가능 시간 조회   | `GET /user/themes/{themeId}/available-times?date=YYYY-MM-DD` | -                               | `[{id, startAt}, ...]`                                        |
+| 사용자 예약/대기 추가 | `POST /user/reservations`                                    | `{name, date, timeId, themeId}` | `{id, name, date, time, theme}`                               |
+| 본인 예약 조회      | `GET /user/reservations?name={name}`                         | -                               | `[{id, name, date, time, theme, waitingOrder}, ...]`          |
+| 본인 예약 변경      | `PATCH /user/reservations/{id}`                              | `{name, date, timeId}`          | `{id, name, date, time, theme}`                               |
+| 본인 예약/대기 취소 | `DELETE /user/reservations/{id}?name={name}`                 | -                               | `204 No Content`                                              |
 | 인기 테마 조회    | `GET /user/themes/popular`                                   | -                               | `[{id, name, description, thumbnail, reservationCount}, ...]` |
