@@ -32,27 +32,24 @@ public class ReservationWaitingTest {
 
     @ParameterizedTest
     @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 미래_날짜_시간으로_예약_대기하면_정상_작동한다(int day, int time) {
+    void 미래_날짜_시간의_예약_대기를_검증하면_정상_작동한다(int day, int time) {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(time));
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", LocalDate.now().plusDays(day), reservationTime,
-                theme, 1L,
-                LocalDateTime.now());
+                theme, 1L, LocalDateTime.now());
 
         assertThatCode(reservationWaiting::validatePastDateTime).doesNotThrowAnyException();
     }
 
     @ParameterizedTest
     @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 과거_날짜_시간으로_예약_대기하면_예외가_발생한다(int day, int time) {
+    void 과거_날짜_시간의_예약_대기를_검증하면_예외가_발생한다(int day, int time) {
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().minusHours(time));
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", LocalDate.now().minusDays(day), reservationTime,
-                theme, 1L,
-                LocalDateTime.now());
+                theme, 1L, LocalDateTime.now());
 
         assertThatThrownBy(reservationWaiting::validatePastDateTime)
                 .isExactlyInstanceOf(ExpiredDateTimeException.class);
-
     }
 }
