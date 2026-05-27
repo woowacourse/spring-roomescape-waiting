@@ -56,21 +56,87 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAll() {
-        String sql = selectReservationsWithStatus("");
+        String sql = """
+                SELECT result.reservation_id,
+                       result.name,
+                       result.date,
+                       result.time_id,
+                       result.start_at,
+                       result.theme_id,
+                       result.theme_name,
+                       result.theme_description,
+                       result.theme_thumbnail,
+                       result.status,
+                       result.waiting_rank
+                FROM (
+                """ + selectActiveReservationsWithStatus("") + """
+                ) result
+                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC
+                """;
 
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     @Override
     public List<Reservation> findByName(String name) {
-        String sql = selectReservationsWithStatus("WHERE r.name = ?");
+        String sql = """
+                SELECT result.reservation_id,
+                       result.name,
+                       result.date,
+                       result.time_id,
+                       result.start_at,
+                       result.theme_id,
+                       result.theme_name,
+                       result.theme_description,
+                       result.theme_thumbnail,
+                       result.status,
+                       result.waiting_rank
+                FROM (
+                """ + selectActiveReservationsWithStatus("WHERE r.name = ?") + """
+                    UNION ALL
+                    SELECT h.reservation_id,
+                           h.name,
+                           h.date,
+                           h.time_id,
+                           rt.start_at,
+                           h.theme_id,
+                           t.name AS theme_name,
+                           t.description AS theme_description,
+                           t.thumbnail AS theme_thumbnail,
+                           'CANCELED' AS status,
+                           CAST(NULL AS BIGINT) AS waiting_rank,
+                           h.request_order,
+                           1 AS source_order
+                    FROM reservation_history h
+                    JOIN reservation_time rt ON h.time_id = rt.id
+                    JOIN theme t ON h.theme_id = t.id
+                    WHERE h.name = ?
+                ) result
+                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC, result.source_order ASC
+                """;
 
-        return jdbcTemplate.query(sql, reservationRowMapper, name);
+        return jdbcTemplate.query(sql, reservationRowMapper, name, name);
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        String sql = selectReservationsWithStatus("WHERE r.id = ?");
+        String sql = """
+                SELECT result.reservation_id,
+                       result.name,
+                       result.date,
+                       result.time_id,
+                       result.start_at,
+                       result.theme_id,
+                       result.theme_name,
+                       result.theme_description,
+                       result.theme_thumbnail,
+                       result.status,
+                       result.waiting_rank
+                FROM (
+                """ + selectActiveReservationsWithStatus("WHERE r.id = ?") + """
+                ) result
+                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC
+                """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, id)
                 .stream()
@@ -79,53 +145,70 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
-        String sql = selectReservationsWithStatus("WHERE r.date = ? AND r.theme_id = ?");
+        String sql = """
+                SELECT result.reservation_id,
+                       result.name,
+                       result.date,
+                       result.time_id,
+                       result.start_at,
+                       result.theme_id,
+                       result.theme_name,
+                       result.theme_description,
+                       result.theme_thumbnail,
+                       result.status,
+                       result.waiting_rank
+                FROM (
+                """ + selectActiveReservationsWithStatus("WHERE r.date = ? AND r.theme_id = ?") + """
+                ) result
+                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC
+                """;
 
         return jdbcTemplate.query(sql, reservationRowMapper, date, themeId);
     }
 
-    private String selectReservationsWithStatus(String whereClause) {
+    private String selectActiveReservationsWithStatus(String whereClause) {
         return """
-                SELECT ranked.reservation_id,
-                       ranked.name,
-                       ranked.date,
-                       ranked.time_id,
-                       ranked.start_at,
-                       ranked.theme_id,
-                       ranked.theme_name,
-                       ranked.theme_description,
-                       ranked.theme_thumbnail,
-                       CASE
-                           WHEN ranked.queue_position = 1 THEN 'RESERVED'
-                           ELSE 'WAITING'
-                       END AS status,
-                       ranked.queue_position - 1 AS waiting_rank
-                FROM (
-                    SELECT r.id AS reservation_id,
-                           r.name,
-                           r.date,
-                           r.time_id,
-                           rt.start_at,
-                           r.theme_id,
-                           t.name AS theme_name,
-                           t.description AS theme_description,
-                           t.thumbnail AS theme_thumbnail,
-                           r.request_order,
-                           (
-                               SELECT COUNT(*)
-                               FROM reservation same_slot
-                               WHERE same_slot.date = r.date
-                                 AND same_slot.time_id = r.time_id
-                                 AND same_slot.theme_id = r.theme_id
-                                 AND same_slot.request_order <= r.request_order
-                           ) AS queue_position
-                    FROM reservation r
-                    JOIN reservation_time rt ON r.time_id = rt.id
-                    JOIN theme t ON r.theme_id = t.id
-                    %s
-                ) ranked
-                ORDER BY ranked.date ASC, ranked.start_at ASC, ranked.request_order ASC
-                """.formatted(whereClause);
+                    SELECT ranked.reservation_id,
+                           ranked.name,
+                           ranked.date,
+                           ranked.time_id,
+                           ranked.start_at,
+                           ranked.theme_id,
+                           ranked.theme_name,
+                           ranked.theme_description,
+                           ranked.theme_thumbnail,
+                           CASE
+                               WHEN ranked.queue_position = 1 THEN 'RESERVED'
+                               ELSE 'WAITING'
+                           END AS status,
+                           ranked.queue_position - 1 AS waiting_rank,
+                           ranked.request_order,
+                           0 AS source_order
+                    FROM (
+                        SELECT r.id AS reservation_id,
+                               r.name,
+                               r.date,
+                               r.time_id,
+                               rt.start_at,
+                               r.theme_id,
+                               t.name AS theme_name,
+                               t.description AS theme_description,
+                               t.thumbnail AS theme_thumbnail,
+                               r.request_order,
+                               (
+                                   SELECT COUNT(*)
+                                   FROM reservation same_slot
+                                   WHERE same_slot.date = r.date
+                                     AND same_slot.time_id = r.time_id
+                                     AND same_slot.theme_id = r.theme_id
+                                     AND same_slot.request_order <= r.request_order
+                               ) AS queue_position
+                        FROM reservation r
+                        JOIN reservation_time rt ON r.time_id = rt.id
+                        JOIN theme t ON r.theme_id = t.id
+                """ + whereClause + """
+                    ) ranked
+                """;
     }
 
     @Override

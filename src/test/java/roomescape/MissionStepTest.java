@@ -17,6 +17,7 @@ import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -228,14 +229,16 @@ public class MissionStepTest {
 
         reservation.put("name", "레아");
 
-        RestAssured.given().log().all()
+        int waitingReservationId = RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
                 .body("status", is("WAITING"))
-                .body("waitingRank", is(1));
+                .body("waitingRank", is(1))
+                .extract()
+                .path("id");
 
         RestAssured.given().log().all()
                 .when().get("/reservations?name=레아")
@@ -243,6 +246,18 @@ public class MissionStepTest {
                 .statusCode(200)
                 .body("reservations[0].status", is("WAITING"))
                 .body("reservations[0].waitingRank", is(1));
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + waitingReservationId + "?name=레아")
+                .then().log().all()
+                .statusCode(204);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=레아")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].status", is("CANCELED"))
+                .body("reservations[0].waitingRank", nullValue());
     }
 
     @Test
