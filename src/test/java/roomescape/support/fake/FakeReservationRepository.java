@@ -13,8 +13,18 @@ import roomescape.domain.reservation.dto.ReservationCountResult;
 
 public class FakeReservationRepository implements ReservationRepository {
 
+    private static FakeReservationRepository currentInstance;
+
     private final Map<Long, Reservation> storage = new LinkedHashMap<>();
     private long sequence = 1L;
+
+    public FakeReservationRepository() {
+        currentInstance = this;
+    }
+
+    static FakeReservationRepository current() {
+        return currentInstance;
+    }
 
     @Override
     public Reservation save(Reservation userReservation) {

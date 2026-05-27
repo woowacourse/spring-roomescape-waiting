@@ -3,6 +3,9 @@ package roomescape.domain.theme;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -30,7 +33,7 @@ class ThemeServiceTest {
     void getThemeListForAdmin() {
         // given
         themeRepository.save(Theme.createWithoutId("미스터리", "보예의 미스터리", "theme-url"));
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, fixedClock());
 
         // when
         List<AdminThemeResponse> responses = themeService.getAllThemeForAdmin();
@@ -50,7 +53,7 @@ class ThemeServiceTest {
     void getThemeListForUser() {
         // given
         themeRepository.save(Theme.createWithoutId("미스터리", "보예의 미스터리", "theme-url"));
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, fixedClock());
 
         // when
         List<ThemeResponse> responses = themeService.getAllTheme();
@@ -69,7 +72,7 @@ class ThemeServiceTest {
     @DisplayName("테마를 생성한다.")
     void createTheme() {
         // given
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, fixedClock());
 
         // when
         CreateThemeResponse response = themeService.createTheme(
@@ -96,12 +99,19 @@ class ThemeServiceTest {
         Theme theme = themeRepository.save(
             Theme.createWithoutId("공포", "무섭다", "theme-url")
         );
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, fixedClock());
 
         // when
         themeService.deleteTheme(theme.getId());
 
         // then
         assertThat(themeRepository.findById(theme.getId())).isEmpty();
+    }
+
+    private Clock fixedClock() {
+        return Clock.fixed(
+            Instant.parse("2026-05-27T00:00:00Z"),
+            ZoneId.of("Asia/Seoul")
+        );
     }
 }

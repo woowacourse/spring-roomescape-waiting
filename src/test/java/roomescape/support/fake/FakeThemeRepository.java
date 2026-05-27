@@ -1,5 +1,6 @@
 package roomescape.support.fake;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeRepository;
+import roomescape.domain.theme.dto.ThemeRankResult;
 
 public class FakeThemeRepository implements ThemeRepository {
 
@@ -21,6 +23,11 @@ public class FakeThemeRepository implements ThemeRepository {
     @Override
     public Optional<Theme> findById(Long id) {
         return Optional.ofNullable(storage.get(id));
+    }
+
+    @Override
+    public List<ThemeRankResult> findPopularThemes(int rankLimit, LocalDate startDay, LocalDate today) {
+        return List.of();
     }
 
     @Override

@@ -58,7 +58,8 @@ class ThemeControllerTest {
         ThemeRankResponse response = new ThemeRankResponse(
             1L,
             "공포",
-            "theme-url"
+            "theme-url",
+            1
         );
         given(themeService.getThemeRank())
             .willReturn(List.of(response));
@@ -69,7 +70,8 @@ class ThemeControllerTest {
             .andExpect(status().isOk())
             .andExpect(jsonPath("$[0].id").value(1))
             .andExpect(jsonPath("$[0].themeName").value("공포"))
-            .andExpect(jsonPath("$[0].url").value("theme-url"));
+            .andExpect(jsonPath("$[0].url").value("theme-url"))
+            .andExpect(jsonPath("$[0].rank").value(1));
 
         verify(themeService).getThemeRank();
     }

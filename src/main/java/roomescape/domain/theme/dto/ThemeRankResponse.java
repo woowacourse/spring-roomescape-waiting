@@ -1,18 +1,18 @@
 package roomescape.domain.theme.dto;
 
-import roomescape.domain.theme.Theme;
-
 public record ThemeRankResponse(
-    Long id,
-    String themeName,
-    String url
+        Long id,
+        String themeName,
+        String url,
+        Integer rank
 ) {
 
-    public static ThemeRankResponse from(Theme theme) {
+    public static ThemeRankResponse from(ThemeRankResult themeRankResult) {
         return new ThemeRankResponse(
-            theme.getId(),
-            theme.getName(),
-            theme.getUrl()
+                themeRankResult.id(),
+                themeRankResult.name(),
+                themeRankResult.url(),
+                themeRankResult.rank()
         );
     }
 }
