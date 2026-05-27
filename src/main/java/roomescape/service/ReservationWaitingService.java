@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationWaiting;
@@ -31,7 +32,6 @@ public class ReservationWaitingService {
 
     @Transactional
     public void cancelMyReservationWaiting(Long id, String name) {
-
         ReservationWaiting reservationWaiting = findById(id);
         if (!reservationWaiting.isOwnedBy(name)) {
             throw new UnauthorizedException(NOT_OWNER);
@@ -45,4 +45,7 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new NotFoundException(String.format(RESERVATION_WAITING_NOT_FOUND_FORMAT, id)));
     }
 
+    public List<ReservationWaiting> getMyReservationWaitings(String name) {
+        return reservationWaitingRepository.findByName(name);
+    }
 }

@@ -1,8 +1,8 @@
 package roomescape.repository;
 
-import roomescape.domain.ReservationWaiting;
-
+import java.util.List;
 import java.util.Optional;
+import roomescape.domain.ReservationWaiting;
 
 public interface ReservationWaitingRepository {
 
@@ -11,6 +11,8 @@ public interface ReservationWaitingRepository {
     boolean existBy(String name, Long reservationId);
 
     Optional<ReservationWaiting> findById(Long id);
+
+    List<ReservationWaiting> findByName(String name);
 
     void deleteById(Long id);
 }
