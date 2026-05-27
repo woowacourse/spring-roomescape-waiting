@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class Reservation {
+
     private final Long id;
     private final String name;
     private final LocalDate date;
@@ -41,7 +42,6 @@ public class Reservation {
     public boolean isPast(LocalDateTime now) {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
-
 
     public Long getId() {
         return id;

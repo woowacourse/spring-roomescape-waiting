@@ -1,5 +1,8 @@
 package roomescape.repository;
 
+import java.sql.PreparedStatement;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -7,23 +10,19 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 
-import java.sql.PreparedStatement;
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public class ReservationTimeJdbcRepository implements ReservationTimeRepository {
+
+    private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
+            rs.getLong("id"),
+            rs.getTime("start_at").toLocalTime()
+    );
 
     private final JdbcTemplate jdbcTemplate;
 
     public ReservationTimeJdbcRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
     }
-
-    private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
-            rs.getLong("id"),
-            rs.getTime("start_at").toLocalTime()
-    );
 
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query("SELECT id, start_at FROM reservation_time ORDER BY start_at;", timeRowMapper);

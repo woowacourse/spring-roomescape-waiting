@@ -4,19 +4,18 @@ import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.deser.LocalTimeDeserializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateSerializer;
 import com.fasterxml.jackson.datatype.jsr310.ser.LocalTimeSerializer;
+import java.time.format.DateTimeFormatter;
+import java.time.format.ResolverStyle;
 import org.springframework.boot.autoconfigure.jackson.Jackson2ObjectMapperBuilderCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import java.time.format.DateTimeFormatter;
-import java.time.format.ResolverStyle;
-
 @Configuration
 public class JacksonConfig {
 
+    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("uuuu-MM-dd")
             .withResolverStyle(ResolverStyle.STRICT);
-    private static final DateTimeFormatter TIME_FORMATTER = DateTimeFormatter.ofPattern("HH:mm");
 
     @Bean
     public Jackson2ObjectMapperBuilderCustomizer jacksonCustomizer() {

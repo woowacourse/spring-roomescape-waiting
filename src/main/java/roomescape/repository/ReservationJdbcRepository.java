@@ -1,29 +1,22 @@
 package roomescape.repository;
 
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
-import roomescape.domain.Reservations;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Reservations;
 import roomescape.domain.Theme;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class ReservationJdbcRepository implements ReservationRepository {
-
-    private final JdbcTemplate jdbcTemplate;
-
-    public ReservationJdbcRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     private static final String SELECT_BASE = """
             SELECT r.id as reservation_id, r.name, r.date,
@@ -35,6 +28,12 @@ public class ReservationJdbcRepository implements ReservationRepository {
             INNER JOIN reservation_time as t ON r.time_id = t.id
             INNER JOIN theme as th ON r.theme_id = th.id
             """;
+
+    private final JdbcTemplate jdbcTemplate;
+
+    public ReservationJdbcRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
 
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(

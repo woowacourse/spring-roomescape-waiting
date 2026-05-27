@@ -9,6 +9,11 @@ public record ThemeResponse(
         String thumbnailImageUrl
 ) {
     public static ThemeResponse from(Theme theme) {
-        return new ThemeResponse(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnailImageUrl());
+        return new ThemeResponse(
+                theme.getId(),
+                theme.getName(),
+                theme.getDescription(),
+                theme.getThumbnailImageUrl()
+        );
     }
 }

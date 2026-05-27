@@ -26,28 +26,39 @@ public class ReservationWaitingController {
     private final ReservationFacade reservationFacade;
     private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationWaitingController(ReservationFacade reservationFacade,
-                                        ReservationWaitingService reservationWaitingService) {
+    public ReservationWaitingController(
+            ReservationFacade reservationFacade,
+            ReservationWaitingService reservationWaitingService
+    ) {
         this.reservationFacade = reservationFacade;
         this.reservationWaitingService = reservationWaitingService;
     }
 
     @PostMapping
-    public ResponseEntity<ReservationWaitingResponse> add(@RequestBody @Valid ReservationWaitingRequest request) {
+    public ResponseEntity<ReservationWaitingResponse> add(
+            @RequestBody @Valid ReservationWaitingRequest request
+    ) {
         ReservationWaiting reservationWaiting = reservationFacade.addWaiting(request);
-        ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ReservationWaitingResponse.from(reservationWaiting));
     }
 
     @GetMapping("/me")
-    public ResponseEntity<ReservationWaitingResponses> searchMine(@RequestParam String name) {
+    public ResponseEntity<ReservationWaitingResponses> searchMine(
+            @RequestParam String name
+    ) {
         List<ReservationWaiting> myReservationWaitings = reservationWaitingService.getMyReservationWaitings(name);
-        return ResponseEntity.ok().body(ReservationWaitingResponses.from(myReservationWaitings));
+
+        return ResponseEntity.ok()
+                .body(ReservationWaitingResponses.from(myReservationWaitings));
     }
 
     @DeleteMapping("/me/{id}")
-    public ResponseEntity<Void> cancel(@PathVariable Long id, @RequestParam String name) {
+    public ResponseEntity<Void> cancel(
+            @PathVariable Long id,
+            @RequestParam String name
+    ) {
         reservationWaitingService.cancelMyReservationWaiting(id, name);
 
         return ResponseEntity.noContent().build();

@@ -41,6 +41,10 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
 
     private final JdbcTemplate jdbcTemplate;
 
+    public ReservationWaitingJdbcRepository(JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate;
+    }
+
     private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
         ReservationTime time = new ReservationTime(
                 rs.getLong("time_id"),
@@ -67,10 +71,6 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
                 rs.getInt("waiting_order")
         );
     };
-
-    public ReservationWaitingJdbcRepository(JdbcTemplate jdbcTemplate) {
-        this.jdbcTemplate = jdbcTemplate;
-    }
 
     @Override
     public ReservationWaiting save(ReservationWaiting reservationWaiting) {

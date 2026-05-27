@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class ReservationWaiting {
+
     private final Long id;
     private final String name;
     private final LocalDateTime createdAt;

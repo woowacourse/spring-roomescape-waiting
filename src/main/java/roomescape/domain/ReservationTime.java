@@ -4,12 +4,22 @@ import java.time.LocalTime;
 import java.util.Objects;
 
 public class ReservationTime {
+
     private final Long id;
     private final LocalTime startAt;
 
-    public ReservationTime(Long id, LocalTime startAt) {
+    public ReservationTime(
+            Long id,
+            LocalTime startAt
+    ) {
         this.id = id;
         this.startAt = startAt;
+    }
+
+    public ReservationTime(
+            LocalTime startAt
+    ) {
+        this(null, startAt);
     }
 
     public Long getId() {
@@ -22,7 +32,9 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         ReservationTime that = (ReservationTime) o;
         return Objects.equals(getId(), that.getId()) && Objects.equals(getStartAt(), that.getStartAt());
     }

@@ -7,8 +7,9 @@ public record ReservationWaitingResponses(
         List<ReservationWaitingResponse> waitings
 ) {
     public static ReservationWaitingResponses from(List<ReservationWaiting> waitings) {
-        return new ReservationWaitingResponses(waitings.stream()
+        List<ReservationWaitingResponse> reservationWaitingResponses = waitings.stream()
                 .map(ReservationWaitingResponse::from)
-                .toList());
+                .toList();
+        return new ReservationWaitingResponses(reservationWaitingResponses);
     }
 }

@@ -21,6 +21,14 @@ public class Theme {
         this.thumbnailImageUrl = thumbnailImageUrl;
     }
 
+    public Theme(
+            String name,
+            String description,
+            String thumbnailImageUrl
+    ) {
+        this(null, name, description, thumbnailImageUrl);
+    }
+
     public Long getId() {
         return id;
     }
@@ -39,9 +47,13 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) return false;
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Theme theme = (Theme) o;
-        return Objects.equals(getId(), theme.getId()) && Objects.equals(getName(), theme.getName()) && Objects.equals(getDescription(), theme.getDescription()) && Objects.equals(getThumbnailImageUrl(), theme.getThumbnailImageUrl());
+        return Objects.equals(getId(), theme.getId()) && Objects.equals(getName(), theme.getName()) && Objects.equals(
+                getDescription(), theme.getDescription()) && Objects.equals(getThumbnailImageUrl(),
+                theme.getThumbnailImageUrl());
     }
 
     @Override

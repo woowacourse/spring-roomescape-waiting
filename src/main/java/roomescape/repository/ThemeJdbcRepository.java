@@ -1,16 +1,15 @@
 package roomescape.repository;
 
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Theme;
-
-import java.sql.PreparedStatement;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class ThemeJdbcRepository implements ThemeRepository {
@@ -29,8 +28,7 @@ public class ThemeJdbcRepository implements ThemeRepository {
     );
 
     public List<Theme> findAll() {
-        String sql = "SELECT id, name, description, thumbnail_image_url " +
-                "FROM theme ORDER BY id DESC";
+        String sql = "SELECT id, name, description, thumbnail_image_url FROM theme ORDER BY id DESC";
         return jdbcTemplate.query(sql, themeRowMapper);
     }
 
@@ -63,10 +61,10 @@ public class ThemeJdbcRepository implements ThemeRepository {
     public List<Theme> getPopularThemes(LocalDate start, LocalDate end, Integer limit) {
         String sql = """
                 SELECT
-                t.id, t.name, t.description, t.thumbnail_image_url
+                    t.id, t.name, t.description, t.thumbnail_image_url
                 FROM theme as t
                 JOIN reservation as r
-                ON r.theme_id = t.id
+                    ON r.theme_id = t.id
                 WHERE r.date BETWEEN ? AND ?
                 GROUP BY t.id, t.name, t.description, t.thumbnail_image_url
                 ORDER BY COUNT(*) DESC

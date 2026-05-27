@@ -27,44 +27,23 @@ public class ReservationController {
     private final ReservationService reservationService;
     private final ReservationFacade reservationFacade;
 
-    public ReservationController(ReservationService reservationService, ReservationFacade reservationFacade) {
+    public ReservationController(
+            ReservationService reservationService,
+            ReservationFacade reservationFacade
+    ) {
         this.reservationService = reservationService;
         this.reservationFacade = reservationFacade;
     }
 
-    @GetMapping
-    public ResponseEntity<ReservationResponses> search(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "20") int size
-    ) {
-        return ResponseEntity.ok().body(reservationService.getReservationPage(page, size));
-    }
-
-    @GetMapping("/me")
-    public ResponseEntity<ReservationResponses> searchMine(@RequestParam String name) {
-        return ResponseEntity.ok().body(reservationService.getMyReservations(name));
-    }
-
     @PostMapping
-    public ResponseEntity<ReservationResponse> add(@RequestBody @Valid ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> add(
+            @RequestBody @Valid ReservationRequest request
+    ) {
         Reservation reservation = reservationFacade.addReservation(request);
         ReservationResponse response = ReservationResponse.from(reservation);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(response);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> delete(@PathVariable Long id) {
-        reservationService.deleteReservation(id);
-
-        return ResponseEntity.noContent().build();
-    }
-
-    @DeleteMapping("/me/{id}")
-    public ResponseEntity<Void> cancelMine(@PathVariable Long id, @RequestParam String name) {
-        reservationService.cancelMyReservation(id, name);
-
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PutMapping("/me/{id}")
@@ -75,6 +54,43 @@ public class ReservationController {
     ) {
         Reservation updated = reservationFacade.updateMyReservation(id, name, request);
 
-        return ResponseEntity.ok(ReservationResponse.from(updated));
+        return ResponseEntity.ok()
+                .body(ReservationResponse.from(updated));
+    }
+
+    @GetMapping
+    public ResponseEntity<ReservationResponses> search(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "20") int size
+    ) {
+        return ResponseEntity.ok()
+                .body(reservationService.getReservationPage(page, size));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<ReservationResponses> searchMine(
+            @RequestParam String name
+    ) {
+        return ResponseEntity.ok()
+                .body(reservationService.getMyReservations(name));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> delete(
+            @PathVariable Long id
+    ) {
+        reservationService.deleteReservation(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @DeleteMapping("/me/{id}")
+    public ResponseEntity<Void> cancelMine(
+            @PathVariable Long id,
+            @RequestParam String name
+    ) {
+        reservationService.cancelMyReservation(id, name);
+
+        return ResponseEntity.noContent().build();
     }
 }
