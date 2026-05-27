@@ -192,7 +192,7 @@ async function doCancelWaiting(id) {
     const r = await fetch(`/waitings/${id}`, { method: 'DELETE' });
     if (!r.ok) {
       let msg = '대기 취소에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       toast('err', msg);
       return;
     }
@@ -209,7 +209,7 @@ async function doCancel(id) {
     const r = await fetch(`/reservations/${id}`, { method: 'DELETE' });
     if (!r.ok) {
       let msg = '취소에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       toast('err', msg);
       return;
     }
@@ -292,7 +292,7 @@ async function doUpdate() {
     });
     if (!r.ok) {
       let msg = '수정에 실패했습니다';
-      try { const e = await r.json(); msg = e.message || msg; } catch {}
+      try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
       closeModal();
       toast('err', msg);
       return;
