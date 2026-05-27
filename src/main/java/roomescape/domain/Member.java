@@ -22,6 +22,7 @@ public class Member {
         validateName(name);
         validateRole(role);
         validateStoreId(storeId);
+        validateRoleStoreId(role, storeId);
 
         this.id = id;
         this.email = email;
@@ -91,6 +92,15 @@ public class Member {
     private void validateStoreId(Long storeId) {
         if (storeId != null && storeId <= 0) {
             throw new IllegalArgumentException("매장 ID는 양수여야 합니다.");
+        }
+    }
+
+    private void validateRoleStoreId(Role role, Long storeId) {
+        if (role == Role.MANAGER && storeId == null) {
+            throw new IllegalArgumentException("매니저는 매장에 소속되어야 합니다.");
+        }
+        if (role == Role.USER && storeId != null) {
+            throw new IllegalArgumentException("일반 사용자는 매장을 가질 수 없습니다.");
         }
     }
 }

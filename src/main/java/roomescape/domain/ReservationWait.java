@@ -21,6 +21,22 @@ public class ReservationWait {
         this.createdAt = createdAt;
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public Long getReservationId() {
+        return reservationId;
+    }
+
+    public Long getMemberId() {
+        return memberId;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
     private void validateId(Long id) {
         if (id != null && id <= 0) {
             throw new IllegalArgumentException("Id는 0보다 작거나 같을 수 없습니다.");
@@ -49,21 +65,5 @@ public class ReservationWait {
         if (createdAt == null) {
             throw new IllegalArgumentException("생성 시간은 null일 수 없습니다.");
         }
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public Long getReservationId() {
-        return reservationId;
-    }
-
-    public Long getMemberId() {
-        return memberId;
-    }
-
-    public LocalDateTime getCreatedAt() {
-        return createdAt;
     }
 }

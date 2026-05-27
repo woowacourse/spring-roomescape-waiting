@@ -1,4 +1,7 @@
-package roomescape.exception;
+package roomescape.exception.reservationtime;
+
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorType;
 
 public class ReservationTimeNotFoundException extends BusinessException {
 

@@ -4,8 +4,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.dao.ThemeDao;
-import roomescape.exception.ThemeInUseException;
-import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.theme.ThemeInUseException;
+import roomescape.exception.theme.ThemeNotFoundException;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;

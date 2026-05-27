@@ -1,4 +1,7 @@
-package roomescape.exception;
+package roomescape.exception.theme;
+
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorType;
 
 public class ThemeInUseException extends BusinessException {
 

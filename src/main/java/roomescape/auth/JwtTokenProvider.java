@@ -8,8 +8,8 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
-import roomescape.exception.ExpiredTokenException;
-import roomescape.exception.InvalidTokenException;
+import roomescape.exception.auth.ExpiredTokenException;
+import roomescape.exception.auth.InvalidTokenException;
 
 import java.security.Key;
 import java.util.Base64;

@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Theme;
 import roomescape.dto.PopularThemeResult;
-import roomescape.exception.ThemeInUseException;
-import roomescape.exception.ThemeNotFoundException;
+import roomescape.exception.theme.ThemeInUseException;
+import roomescape.exception.theme.ThemeNotFoundException;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -28,16 +28,6 @@ public class ThemeService {
         return themeDao.findById(id);
     }
 
-    @Transactional
-    public void deleteTheme(Long id) {
-        try {
-            int deleteCount = themeDao.delete(id);
-            validateDeleted(deleteCount);
-        } catch (DataIntegrityViolationException e) {
-            throw new ThemeInUseException();
-        }
-    }
-
     public List<Theme> getThemes() {
         return themeDao.findAllThemes();
     }
@@ -46,6 +36,16 @@ public class ThemeService {
         return themeDao.findPopularThemes(from, to).stream()
                 .map(PopularThemeResult::from)
                 .toList();
+    }
+
+    @Transactional
+    public void deleteTheme(Long id) {
+        try {
+            int deleteCount = themeDao.delete(id);
+            validateDeleted(deleteCount);
+        } catch (DataIntegrityViolationException e) {
+            throw new ThemeInUseException();
+        }
     }
 
     private void validateDeleted(int deleteCount) {

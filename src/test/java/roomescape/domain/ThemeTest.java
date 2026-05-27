@@ -13,7 +13,8 @@ public class ThemeTest {
                 null,
                 "이든이 귀신으로 나옴",
                 "https://images.example.com/themes/horror-house.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -23,7 +24,8 @@ public class ThemeTest {
                 "",
                 "이든이 귀신으로 나옴",
                 "https://images.example.com/themes/horror-house.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -33,7 +35,8 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 null,
                 "https://images.example.com/themes/horror-house.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("설명은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -43,7 +46,8 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 "",
                 "https://images.example.com/themes/horror-house.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("설명은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -53,7 +57,8 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 "이든이 귀신으로 나옴",
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("URL은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -63,7 +68,8 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 "이든이 귀신으로 나옴",
                 ""
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("URL은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -73,7 +79,8 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 "이든이 귀신으로 나옴",
                 "이미지"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("올바른 URL 형식이 아닙니다.");
     }
 
     @Test
@@ -83,7 +90,8 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 "이든이 귀신으로 나옴",
                 "ftp://images.example.com/themes/horror-house.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("올바른 URL 형식이 아닙니다.");
     }
 
     @Test
@@ -93,6 +101,7 @@ public class ThemeTest {
                 "이든의 공포 하우스",
                 "이든이 귀신으로 나옴",
                 "https:///themes/horror-house.jpg"
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("올바른 URL 형식이 아닙니다.");
     }
 }

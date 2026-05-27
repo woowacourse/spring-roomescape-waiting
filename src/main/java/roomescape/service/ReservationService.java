@@ -11,7 +11,14 @@ import roomescape.domain.Member;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWait;
-import roomescape.exception.*;
+import roomescape.exception.reservation.PastReservationCancelNotAllowedException;
+import roomescape.exception.reservation.PastReservationNotAllowedException;
+import roomescape.exception.reservation.ReservationAlreadyExistsException;
+import roomescape.exception.reservation.ReservationNotFoundException;
+import roomescape.exception.reservation.ReservationOwnerMismatchException;
+import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
+import roomescape.exception.reservationwait.PastReservationWaitNotAllowedException;
+import roomescape.exception.reservationwait.ReservationWaitAlreadyExistsException;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -36,6 +43,10 @@ public class ReservationService {
         return reservationDao.findAllReservationsByMemberId(memberId);
     }
 
+    public List<Reservation> findByStoreId(Long storeId) {
+        return reservationDao.findByStoreId(storeId);
+    }
+
     @Transactional
     public Reservation createReservation(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
         LocalTime startAt = reservationTimeDao.findReservationTimeById(timeId).getStartAt();
@@ -49,11 +60,15 @@ public class ReservationService {
     }
 
     @Transactional
-    public void deleteReservation(Long id, Long memberId) {
-        Reservation reservation = findReservation(id);
-        validateReservationOwner(memberId, reservation);
-        validatePastReservationCancel(reservation.getDate(), reservation.getTime().getStartAt());
-        reservationDao.delete(id);
+    public ReservationWait createWait(Long memberId, Long reservationId) {
+        Reservation reservation = findReservation(reservationId);
+        validatePastReservationWaitCreate(reservation.getDate(), reservation.getTime().getStartAt());
+        try {
+            Long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
+            return reservationWaitDao.findReservationWaitById(waitId).get();
+        } catch (DuplicateKeyException e) {
+            throw new ReservationWaitAlreadyExistsException();
+        }
     }
 
     @Transactional
@@ -83,8 +98,12 @@ public class ReservationService {
         return reservationDao.findReservationById(reservationId);
     }
 
-    public List<Reservation> findByStoreId(Long storeId) {
-        return reservationDao.findByStoreId(storeId);
+    @Transactional
+    public void deleteReservation(Long id, Long memberId) {
+        Reservation reservation = findReservation(id);
+        validateReservationOwner(memberId, reservation);
+        validatePastReservationCancel(reservation.getDate(), reservation.getTime().getStartAt());
+        reservationDao.delete(id);
     }
 
     @Transactional
@@ -138,15 +157,5 @@ public class ReservationService {
         if (present.isAfter(request)) {
             throw new PastReservationWaitNotAllowedException();
         }
-    }
-
-    @Transactional
-    public ReservationWait createWait(Long memberId, Long reservationId) {
-        Reservation reservation = findReservation(reservationId);
-        validatePastReservationWaitCreate(reservation.getDate(), reservation.getTime().getStartAt());
-
-        Long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
-        return reservationWaitDao.findReservationWaitById(waitId)
-                .orElseThrow(ReservationWaitNotFoundException::new);
     }
 }

@@ -16,7 +16,8 @@ public class MemberTest {
                 "브라운",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이메일은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -28,7 +29,8 @@ public class MemberTest {
                 "브라운",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이메일은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -40,7 +42,8 @@ public class MemberTest {
                 "브라운",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("올바른 이메일 형식이 아닙니다.");
     }
 
     @Test
@@ -52,7 +55,8 @@ public class MemberTest {
                 "브라운",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("비밀번호는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -64,7 +68,8 @@ public class MemberTest {
                 "브라운",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("비밀번호는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -76,7 +81,8 @@ public class MemberTest {
                 null,
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -88,7 +94,8 @@ public class MemberTest {
                 "",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -100,7 +107,8 @@ public class MemberTest {
                 "브",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 2자 이상 10자 이하여야 합니다.");
     }
 
     @Test
@@ -112,7 +120,8 @@ public class MemberTest {
                 "브".repeat(11),
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 2자 이상 10자 이하여야 합니다.");
     }
 
     @Test
@@ -124,7 +133,8 @@ public class MemberTest {
                 "브라운!",
                 Role.USER,
                 null
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("이름은 한글과 영문만 입력할 수 있습니다.");
     }
 
     @Test
@@ -151,7 +161,7 @@ public class MemberTest {
                 null,
                 null
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("권한");
+                .hasMessage("권한은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -164,7 +174,7 @@ public class MemberTest {
                 Role.MANAGER,
                 0L
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("양수");
+                .hasMessage("매장 ID는 양수여야 합니다.");
     }
 
     @Test
@@ -192,5 +202,31 @@ public class MemberTest {
 
         assertThat(manager.getRole()).isEqualTo(Role.MANAGER);
         assertThat(manager.getStoreId()).isEqualTo(1L);
+    }
+
+    @Test
+    void MANAGER는_storeId가_null이면_회원을_생성할_수_없다() {
+        assertThatThrownBy(() -> new Member(
+                1L,
+                "manager@email.com",
+                "password",
+                "매니저",
+                Role.MANAGER,
+                null
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("매니저는 매장에 소속되어야 합니다.");
+    }
+
+    @Test
+    void USER는_storeId를_가지면_회원을_생성할_수_없다() {
+        assertThatThrownBy(() -> new Member(
+                1L,
+                "brown@email.com",
+                "password",
+                "브라운",
+                Role.USER,
+                1L
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("일반 사용자는 매장을 가질 수 없습니다.");
     }
 }

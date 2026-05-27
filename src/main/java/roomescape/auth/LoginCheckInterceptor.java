@@ -4,7 +4,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
-import roomescape.exception.UnauthorizedException;
+import roomescape.exception.auth.UnauthorizedException;
 
 @Component
 public class LoginCheckInterceptor implements HandlerInterceptor {

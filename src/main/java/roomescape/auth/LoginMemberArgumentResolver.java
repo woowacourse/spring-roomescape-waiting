@@ -9,8 +9,8 @@ import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
-import roomescape.exception.InsufficientRoleException;
-import roomescape.exception.UnauthorizedException;
+import roomescape.exception.auth.InsufficientRoleException;
+import roomescape.exception.auth.UnauthorizedException;
 
 import java.util.Arrays;
 

@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.response.AvailableTimeResponse;
-import roomescape.exception.ReservationTimeInUseException;
-import roomescape.exception.ReservationTimeNotFoundException;
+import roomescape.exception.reservationtime.ReservationTimeInUseException;
+import roomescape.exception.reservationtime.ReservationTimeNotFoundException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,14 +24,19 @@ public class ReservationTimeService {
         this.reservationTimeDao = reservationTimeDao;
     }
 
-    public List<ReservationTime> getReservationTimes() {
-        return reservationTimeDao.findAllReservationTimes();
-    }
-
     @Transactional
     public ReservationTime createReservationTime(LocalTime time) {
         Long id = reservationTimeDao.insertWithKeyHolder(time);
         return new ReservationTime(id, time);
+    }
+
+    public List<ReservationTime> getReservationTimes() {
+        return reservationTimeDao.findAllReservationTimes();
+    }
+
+    public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long id) {
+        Map<ReservationTime, Boolean> reservationTimeBooleanMap = reservationTimeDao.findAvailableTimes(date, id);
+        return AvailableTimeResponse.fromAll(reservationTimeBooleanMap);
     }
 
     @Transactional
@@ -42,11 +47,6 @@ public class ReservationTimeService {
         } catch (DataIntegrityViolationException e) {
             throw new ReservationTimeInUseException();
         }
-    }
-
-    public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long id) {
-        Map<ReservationTime, Boolean> reservationTimeBooleanMap = reservationTimeDao.findAvailableTimes(date, id);
-        return AvailableTimeResponse.fromAll(reservationTimeBooleanMap);
     }
 
     private void validateDeleted(int deleteCount) {

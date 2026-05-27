@@ -1,4 +1,7 @@
-package roomescape.exception;
+package roomescape.exception.auth;
+
+import roomescape.exception.BusinessException;
+import roomescape.exception.ErrorType;
 
 public class ExpiredTokenException extends BusinessException {
 

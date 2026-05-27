@@ -15,7 +15,7 @@ import java.util.Optional;
 @Repository
 public class ReservationWaitDao {
 
-    private JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
 
     public ReservationWaitDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

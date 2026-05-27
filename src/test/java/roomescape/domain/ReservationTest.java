@@ -2,7 +2,7 @@ package roomescape.domain;
 
 import org.junit.jupiter.api.Test;
 import roomescape.auth.Role;
-import roomescape.exception.WrongStoreAccessException;
+import roomescape.exception.auth.WrongStoreAccessException;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -24,7 +24,8 @@ public class ReservationTest {
                 SAMPLE_TIME,
                 1L,
                 1L
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("회원 ID는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -36,7 +37,8 @@ public class ReservationTest {
                 SAMPLE_TIME,
                 1L,
                 1L
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("회원 ID는 양수여야 합니다.");
     }
 
     @Test
@@ -48,7 +50,8 @@ public class ReservationTest {
                 SAMPLE_TIME,
                 1L,
                 1L
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("날짜는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -60,7 +63,8 @@ public class ReservationTest {
                 null,
                 1L,
                 1L
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("예약시간은 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -72,7 +76,8 @@ public class ReservationTest {
                 SAMPLE_TIME,
                 null,
                 1L
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("테마 ID는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -84,7 +89,8 @@ public class ReservationTest {
                 SAMPLE_TIME,
                 -1L,
                 1L
-        )).isInstanceOf(IllegalArgumentException.class);
+        )).isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("테마 ID는 양수여야 합니다.");
     }
 
     @Test
@@ -97,7 +103,7 @@ public class ReservationTest {
                 1L,
                 null
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("매장 ID");
+                .hasMessage("매장 ID는 비어 있을 수 없습니다.");
     }
 
     @Test
@@ -110,7 +116,7 @@ public class ReservationTest {
                 1L,
                 0L
         )).isInstanceOf(IllegalArgumentException.class)
-                .hasMessageContaining("양수");
+                .hasMessage("매장 ID는 양수여야 합니다.");
     }
 
     @Test

@@ -5,8 +5,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.MemberDao;
 import roomescape.domain.Member;
-import roomescape.exception.AuthenticationException;
-import roomescape.exception.UnauthorizedException;
+import roomescape.exception.auth.AuthenticationException;
+import roomescape.exception.auth.UnauthorizedException;
 
 @Service
 @Transactional(readOnly = true)

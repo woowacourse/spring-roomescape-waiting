@@ -1,8 +1,8 @@
 package roomescape.auth;
 
 import org.junit.jupiter.api.Test;
-import roomescape.exception.ExpiredTokenException;
-import roomescape.exception.InvalidTokenException;
+import roomescape.exception.auth.ExpiredTokenException;
+import roomescape.exception.auth.InvalidTokenException;
 
 import static org.assertj.core.api.Assertions.*;
 

@@ -1,6 +1,6 @@
 package roomescape.domain;
 
-import roomescape.exception.WrongStoreAccessException;
+import roomescape.exception.auth.WrongStoreAccessException;
 
 import java.time.LocalDate;
 
