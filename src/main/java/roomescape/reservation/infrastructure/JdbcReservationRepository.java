@@ -229,4 +229,15 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
     }
+
+    @Override
+    public boolean existsByMemberIdAndScheduleId(long memberId, long scheduleId) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE member_id = :memberId AND schedule_id = :scheduleId)";
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("scheduleId", scheduleId);
+
+        return Boolean.TRUE.equals(template.queryForObject(sql, params, Boolean.class));
+    }
 }

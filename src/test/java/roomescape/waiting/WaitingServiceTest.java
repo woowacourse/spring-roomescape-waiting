@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.exception.EscapeRoomException;
+import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.application.WaitingService;
 import roomescape.waiting.dto.request.WaitingRequest;
@@ -34,6 +35,9 @@ class WaitingServiceTest {
     @Mock
     private WaitingRepository waitingRepository;
 
+    @Mock
+    private ReservationRepository reservationRepository;
+
     @InjectMocks
     private WaitingService waitingService;
 
@@ -47,6 +51,8 @@ class WaitingServiceTest {
         when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
                 .thenReturn(scheduleId);
         when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+                .thenReturn(false);
+        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
@@ -77,6 +83,25 @@ class WaitingServiceTest {
                 .isInstanceOf(EscapeRoomException.class);
 
         verify(scheduleService).findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId());
+        verify(waitingRepository, never()).save(any(Waiting.class));
+    }
+
+    @Test
+    @DisplayName("이미 예약한 스케줄이면 대기를 신청할 수 없다.")
+    void save_테스트_3() {
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 1L, 1L);
+        long scheduleId = 1L;
+
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(scheduleId);
+        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+                .thenReturn(false);
+        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+                .thenReturn(true);
+
+        assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
+                .isInstanceOf(EscapeRoomException.class);
+
         verify(waitingRepository, never()).save(any(Waiting.class));
     }
 

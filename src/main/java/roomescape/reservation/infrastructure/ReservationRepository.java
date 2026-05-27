@@ -28,4 +28,6 @@ public interface ReservationRepository {
     Optional<Reservation> findById(long reservationId);
 
     boolean existsByScheduleId(long scheduleId);
+
+    boolean existsByMemberIdAndScheduleId(long memberId, long scheduleId);
 }

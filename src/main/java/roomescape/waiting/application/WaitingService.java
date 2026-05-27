@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
 import roomescape.waiting.WaitingRepository;
@@ -17,10 +18,15 @@ public class WaitingService {
 
     private final ScheduleService scheduleService;
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingResponse save(WaitingRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
+
+        if (reservationRepository.existsByMemberIdAndScheduleId(memberId, scheduleId)) {
+            throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
+        }
 
         if (waitingRepository.existsByScheduleIdAndMemberId(memberId, scheduleId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
