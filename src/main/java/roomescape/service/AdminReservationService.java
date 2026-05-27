@@ -86,7 +86,7 @@ public class AdminReservationService {
     }
 
     private Reservation buildReservation(Member member, AdminReservationRequestDto request) {
-        if (reservationDao.existsByThemeIdAndTimeIdAndDateForUpdate(request.themeId(), request.timeId(), request.date())) {
+        if (reservationDao.existsByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(request.themeId(), request.timeId(), request.date(), request.storeId())) {
             throw new DuplicateEntityException("이미 존재하는 예약이 있습니다.");
         }
         Time time = timeDao.findById(request.timeId())

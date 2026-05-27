@@ -15,9 +15,9 @@ public interface ReservationDao extends CommonDao<Reservation> {
 
     long count();
 
-    boolean existsByThemeIdAndTimeIdAndDateForUpdate(Long themeId, Long timeId, LocalDate date);
+    boolean existsByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId);
 
-    Optional<Reservation> findByThemeIdAndTimeIdAndDateForUpdate(Long themeId, Long timeId, LocalDate date);
+    Optional<Reservation> findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId);
 
     boolean existsByThemeId(Long themeId);
 

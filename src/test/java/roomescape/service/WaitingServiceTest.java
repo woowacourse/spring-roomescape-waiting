@@ -13,10 +13,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.WaitingDao;
 import roomescape.dao.jdbc.MemberJdbcDao;
@@ -31,7 +31,7 @@ import roomescape.dto.request.WaitingRequestDto;
 
 @JdbcTest
 @Import({WaitingService.class, WaitingJdbcDao.class,
-        MemberJdbcDao.class, TimeJdbcDao.class, ThemeJdbcDao.class, ReservationJdbcDao.class})
+        TimeJdbcDao.class, ThemeJdbcDao.class, ReservationJdbcDao.class})
 @ActiveProfiles("test")
 class WaitingServiceTest {
 
@@ -116,7 +116,7 @@ class WaitingServiceTest {
         @Test
         @DisplayName("유효한 요청으로 대기를 생성한다")
         void createsWaiting() {
-            WaitingRequestDto dto = new WaitingRequestDto(memberId, date, timeId, themeId, storeId);
+            WaitingRequestDto dto = new WaitingRequestDto(date, timeId, themeId, storeId);
 
             Waiting saved = waitingService.create(dto, member);
 
@@ -131,18 +131,18 @@ class WaitingServiceTest {
         @Test
         @DisplayName("같은 사용자가 같은 슬롯에 중복 대기하면 예외를 반환한다")
         void throwsWhenDuplicate() {
-            WaitingRequestDto dto = new WaitingRequestDto(memberId, date, timeId, themeId, storeId);
+            WaitingRequestDto dto = new WaitingRequestDto(date, timeId, themeId, storeId);
             waitingService.create(dto, member);
 
             assertThatThrownBy(() -> waitingService.create(dto, member))
-                    .isInstanceOf(DataAccessException.class);
+                    .isInstanceOf(DuplicateEntityException.class);
         }
 
         @Test
         @DisplayName("해당 슬롯에 예약이 없으면 대기 생성 시 예외를 반환한다")
         void throwsWhenNoReservation() {
             LocalDate emptyDate = date.plusDays(7);
-            WaitingRequestDto dto = new WaitingRequestDto(memberId, emptyDate, timeId, themeId, storeId);
+            WaitingRequestDto dto = new WaitingRequestDto(emptyDate, timeId, themeId, storeId);
 
             assertThatThrownBy(() -> waitingService.create(dto, member))
                     .isInstanceOf(EntityNotFoundException.class);
@@ -151,7 +151,7 @@ class WaitingServiceTest {
         @Test
         @DisplayName("자신의 예약 슬롯에 대기를 신청하면 예외를 반환한다")
         void throwsWhenOwnReservation() {
-            WaitingRequestDto dto = new WaitingRequestDto(reserverId, date, timeId, themeId, storeId);
+            WaitingRequestDto dto = new WaitingRequestDto(date, timeId, themeId, storeId);
 
             assertThatThrownBy(() -> waitingService.create(dto, reserver))
                     .isInstanceOf(BusinessRuleViolationException.class);
@@ -165,7 +165,7 @@ class WaitingServiceTest {
         @DisplayName("본인 대기를 삭제한다")
         void deletesWaiting() {
             Waiting saved = waitingService.create(
-                    new WaitingRequestDto(memberId, date, timeId, themeId, storeId), member);
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
 
             waitingService.delete(saved.getId());
 
@@ -193,9 +193,9 @@ class WaitingServiceTest {
         @DisplayName("전체 대기 목록을 반환한다")
         void returnsAllWaitings() {
             Waiting w1 = waitingService.create(
-                    new WaitingRequestDto(memberId, date, timeId, themeId, storeId), member);
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
             Waiting w2 = waitingService.create(
-                    new WaitingRequestDto(otherMemberId, date, timeId, themeId, storeId), otherMember);
+                    new WaitingRequestDto(date, timeId, themeId, storeId), otherMember);
 
             List<Waiting> result = waitingService.findAll();
 
@@ -211,9 +211,9 @@ class WaitingServiceTest {
         @DisplayName("멤버 ID로 본인 대기 목록만 반환한다")
         void returnsWaitingsByMemberId() {
             Waiting mine = waitingService.create(
-                    new WaitingRequestDto(memberId, date, timeId, themeId, storeId), member);
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
             waitingService.create(
-                    new WaitingRequestDto(otherMemberId, date, timeId, themeId, storeId), otherMember);
+                    new WaitingRequestDto(date, timeId, themeId, storeId), otherMember);
 
             List<Waiting> result = waitingService.findAllByMemberId(memberId);
 
@@ -229,8 +229,8 @@ class WaitingServiceTest {
         @Test
         @DisplayName("같은 슬롯의 대기는 신청 순서대로 순번이 부여된다")
         void assignsOrderInSequence() {
-            waitingService.create(new WaitingRequestDto(memberId, date, timeId, themeId, storeId), member);
-            waitingService.create(new WaitingRequestDto(otherMemberId, date, timeId, themeId, storeId), otherMember);
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, storeId), member);
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, storeId), otherMember);
 
             assertThat(waitingService.findAllByMemberId(memberId))
                     .singleElement()
@@ -241,6 +241,22 @@ class WaitingServiceTest {
                     .extracting(Waiting::getRank)
                     .isEqualTo(2L);
         }
+
+        @Test
+        @DisplayName("다른 매장의 대기는 순번에 포함되지 않는다")
+        void rankIsolatedPerStore() {
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, storeId), member);
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, otherStoreId), otherMember);
+
+            assertThat(waitingService.findAllByMemberId(memberId))
+                    .singleElement()
+                    .extracting(Waiting::getRank)
+                    .isEqualTo(1L);
+            assertThat(waitingService.findAllByMemberId(otherMemberId))
+                    .singleElement()
+                    .extracting(Waiting::getRank)
+                    .isEqualTo(1L);
+        }
     }
 
     @Nested
@@ -250,9 +266,9 @@ class WaitingServiceTest {
         @DisplayName("매장 ID로 해당 매장의 대기만 반환한다")
         void returnsWaitingsByStoreId() {
             Waiting mine = waitingService.create(
-                    new WaitingRequestDto(memberId, date, timeId, themeId, storeId), member);
+                    new WaitingRequestDto(date, timeId, themeId, storeId), member);
             waitingService.create(
-                    new WaitingRequestDto(otherMemberId, date, timeId, themeId, otherStoreId), otherMember);
+                    new WaitingRequestDto(date, timeId, themeId, otherStoreId), otherMember);
 
             List<Waiting> result = waitingService.findAllByStoreId(storeId);
 
@@ -262,7 +278,7 @@ class WaitingServiceTest {
         @Test
         @DisplayName("해당 매장의 대기가 없으면 빈 목록을 반환한다")
         void returnsEmptyWhenStoreHasNoWaitings() {
-            waitingService.create(new WaitingRequestDto(memberId, date, timeId, themeId, storeId), member);
+            waitingService.create(new WaitingRequestDto(date, timeId, themeId, storeId), member);
 
             assertThat(waitingService.findAllByStoreId(otherStoreId)).isEmpty();
         }

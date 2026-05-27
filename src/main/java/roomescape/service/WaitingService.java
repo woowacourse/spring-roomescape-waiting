@@ -4,8 +4,8 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.common.exception.DuplicateEntityException;
 import roomescape.common.exception.EntityNotFoundException;
-import roomescape.dao.MemberDao;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.TimeDao;
@@ -21,30 +21,37 @@ import roomescape.dto.request.WaitingRequestDto;
 @Transactional
 public class WaitingService {
     private final WaitingDao waitingDao;
-    private final MemberDao memberDao;
     private final TimeDao timeDao;
     private final ThemeDao themeDao;
     private final ReservationDao reservationDao;
 
-    public WaitingService(WaitingDao waitingDao, MemberDao memberDao, TimeDao timeDao, ThemeDao themeDao,
+    public WaitingService(WaitingDao waitingDao, TimeDao timeDao, ThemeDao themeDao,
                           ReservationDao reservationDao) {
         this.waitingDao = waitingDao;
-        this.memberDao = memberDao;
         this.timeDao = timeDao;
         this.themeDao = themeDao;
         this.reservationDao = reservationDao;
     }
 
     public Waiting create(WaitingRequestDto waitingRequestDto, Member member) {
-        Reservation reservation = reservationDao.findByThemeIdAndTimeIdAndDateForUpdate(waitingRequestDto.themeId(),
-                        waitingRequestDto.timeId(), waitingRequestDto.date())
+        Reservation reservation = reservationDao.findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(waitingRequestDto.themeId(),
+                        waitingRequestDto.timeId(), waitingRequestDto.date(), waitingRequestDto.storeId())
                 .orElseThrow(() -> new EntityNotFoundException("예약이 존재하지 않아 대기가 불가능합니다."));
 
         if (reservation.isSameMember(member)) {
             throw new BusinessRuleViolationException("동일한 사용자의 예약이 존재합니다.");
         }
 
-        return waitingDao.insert(buildWaiting(waitingRequestDto));
+        if (waitingDao.existsByMemberIdAndDateAndTimeIdAndThemeIdAndStoreId(
+                member.getId(),
+                waitingRequestDto.date(),
+                waitingRequestDto.timeId(),
+                waitingRequestDto.themeId(),
+                waitingRequestDto.storeId())) {
+            throw new DuplicateEntityException("이미 대기 신청한 슬롯입니다.");
+        }
+
+        return waitingDao.insert(buildWaiting(waitingRequestDto, member));
     }
 
     public void delete(Long waitingId) {
@@ -68,9 +75,7 @@ public class WaitingService {
         return waitingDao.findAllByStoreId(storeId);
     }
 
-    private Waiting buildWaiting(WaitingRequestDto waitingRequestDto) {
-        Member member = memberDao.findById(waitingRequestDto.memberId())
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 멤버입니다."));
+    private Waiting buildWaiting(WaitingRequestDto waitingRequestDto, Member member) {
         Time time = timeDao.findById(waitingRequestDto.timeId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 시간입니다."));
         Theme theme = themeDao.findById(waitingRequestDto.themeId())

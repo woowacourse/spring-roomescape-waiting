@@ -65,7 +65,7 @@ class WaitingControllerTest {
         @DisplayName("유효한 요청으로 대기를 생성하면 201을 반환한다")
         void createsWaiting() {
             WaitingRequestDto requestDto = new WaitingRequestDto(
-                    member.getId(), LocalDate.of(2026, 5, 10), time.getId(), theme.getId(), 1L);
+                    LocalDate.of(2026, 5, 10), time.getId(), theme.getId(), 1L);
             given(waitingService.create(any(), eq(member))).willReturn(waiting);
             WaitingResponse expected = WaitingResponse.from(waiting);
 
