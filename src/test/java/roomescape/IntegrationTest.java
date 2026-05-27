@@ -29,6 +29,7 @@ public abstract class IntegrationTest {
     @BeforeEach
     void cleanDatabase() {
         // FK 제약 때문에 자식 테이블부터 비움
+        jdbcTemplate.execute("DELETE FROM waiting");
         jdbcTemplate.execute("DELETE FROM reservation");
         jdbcTemplate.execute("DELETE FROM reservation_time");
         jdbcTemplate.execute("DELETE FROM theme");

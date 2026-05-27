@@ -1,6 +1,7 @@
 package roomescape;
 
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -63,6 +64,7 @@ public class MyReservationStepTest extends IntegrationTest {
         timeId11 = helper.insertTime(LocalTime.of(11, 0));
         themeId = helper.insertTheme("테마A", "설명", "https://example.com/a.jpg");
     }
+
 
     @Nested
     @DisplayName("내 예약 조회")
@@ -442,4 +444,27 @@ public class MyReservationStepTest extends IntegrationTest {
                     .body("size()", is(0));
         }
     }
+
+    //TODO 헬퍼 메서드 뿐만 아니라 존재하는 API로 데이터 넣는 방법 비교해보기
+    @Test
+    @DisplayName("내 예약 + 내 대기를 함께 조회한다 (status로 구분)")
+    void 예약과_대기_함께_조회() {
+        // 브라운의 예약 1건
+        helper.insertReservation("브라운", FUTURE_DATE_1, timeId10, themeId);
+        // 브라운의 대기 1건 (다른 슬롯)
+        helper.insertReservation("콘", FUTURE_DATE_2, timeId10, themeId);
+        helper.insertWaiting("브라운", FUTURE_DATE_2, timeId10, themeId, 1);
+
+        RestAssured.given().log().all()
+                .when().get("/user/reservations?name=브라운")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[0].status", is("RESERVED"))      // FUTURE_DATE_1
+                .body("[0].waitingOrder", nullValue())
+                .body("[1].status", is("WAITING"))       // FUTURE_DATE_2
+                .body("[1].waitingOrder", is(1));
+    }
+
+
 }

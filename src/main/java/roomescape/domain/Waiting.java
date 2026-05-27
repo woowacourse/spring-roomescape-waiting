@@ -38,6 +38,12 @@ public class Waiting {
         return new Waiting(this.id, this.name, this.date, this.time, this.theme, newOrderIndex);
     }
 
+    public boolean isSameSlot(LocalDate date, Long timeId, Long themeId) {
+        return this.date.equals(date)
+                && this.time.getId().equals(timeId)
+                && this.theme.getId().equals(themeId);
+    }
+
     private static void validate(String name, LocalDate date,
                                  ReservationTime time, Theme theme, int order) {
         if (name == null || name.isBlank()) {

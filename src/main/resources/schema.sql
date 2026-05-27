@@ -1,3 +1,4 @@
+drop table if exists waiting;
 drop table if exists reservation;
 drop table if exists reservation_time;
 drop table if exists theme;
@@ -28,4 +29,17 @@ CREATE TABLE reservation (
                              FOREIGN KEY (time_id) REFERENCES reservation_time (id),
                              FOREIGN KEY (theme_id) REFERENCES theme (id),
                              UNIQUE (date, time_id, theme_id)
+);
+
+CREATE TABLE waiting (
+                         id         BIGINT       NOT NULL AUTO_INCREMENT,
+                         name       VARCHAR(255) NOT NULL,
+                         date       DATE NOT NULL,
+                         time_id    BIGINT       NOT NULL,
+                         theme_id   BIGINT       NOT NULL,
+                         wait_order INT          NOT NULL,
+                         PRIMARY KEY (id),
+                         FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+                         FOREIGN KEY (theme_id) REFERENCES theme (id),
+                         UNIQUE (date, time_id, theme_id,wait_order)
 );
