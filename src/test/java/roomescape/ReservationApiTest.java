@@ -269,19 +269,6 @@ class ReservationApiTest {
                 .body("theme.id", is(themeId));
     }
 
-    private Integer createTime(String startAt) {
-        Map<String, String> params = new HashMap<>();
-        params.put("startAt", startAt);
-
-        return RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().get("id");
-    }
-
     @Test
     void 예약을_수정할_때_사용자_이름이_일치하지_않으면_403() {
         Integer reservationTimeId = createTime("10:00");
@@ -364,6 +351,19 @@ class ReservationApiTest {
                 .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(409);
+    }
+
+    private Integer createTime(String startAt) {
+        Map<String, String> params = new HashMap<>();
+        params.put("startAt", startAt);
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract().jsonPath().get("id");
     }
 
     private Integer createTheme(String name, String description, String thumbnailImageUrl) {
