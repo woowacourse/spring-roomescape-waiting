@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.SlotDao;
@@ -17,6 +14,10 @@ import roomescape.exception.code.SlotErrorCode;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.SlotException;
 import roomescape.exception.domain.WaitingException;
+
+import java.time.Clock;
+import java.time.LocalDateTime;
+import java.util.List;
 
 
 @Service
@@ -61,9 +62,15 @@ public class WaitingService {
     public List<WaitingWithRankResponse> getWaitingsByName(String name) {
         List<RankedWaiting> allWithRankByName = waitingDao.findAllWithRankByName(name);
         return allWithRankByName.stream()
-                .map(rankedWaiting -> WaitingWithRankResponse.from(
-                        new Waiting(rankedWaiting.id(), rankedWaiting.createdAt(),
-                                rankedWaiting.slotId(), rankedWaiting.name()), rankedWaiting.rank()))
+                .map(rankedWaiting -> new WaitingWithRankResponse(
+                        rankedWaiting.id(),
+                        rankedWaiting.createdAt(),
+                        rankedWaiting.slotId(),
+                        rankedWaiting.name(),
+                        rankedWaiting.rank(),
+                        rankedWaiting.date(),
+                        rankedWaiting.startAt(),
+                        rankedWaiting.themeName()))
                 .toList();
     }
 

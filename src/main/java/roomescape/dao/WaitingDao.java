@@ -1,15 +1,16 @@
 package roomescape.dao;
 
-import java.time.LocalDateTime;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.dao.dto.RankedWaiting;
 import roomescape.domain.Waiting;
+
+import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Repository
 public class WaitingDao {
@@ -28,7 +29,10 @@ public class WaitingDao {
                     resultSet.getObject("created_at", LocalDateTime.class),
                     resultSet.getLong("slot_id"),
                     resultSet.getString("name"),
-                    resultSet.getInt("rank")
+                    resultSet.getInt("rank"),
+                    resultSet.getDate("date").toLocalDate(),
+                    resultSet.getTime("start_at").toLocalTime(),
+                    resultSet.getString("theme_name")
             );
 
     private final JdbcTemplate jdbcTemplate;
@@ -59,6 +63,9 @@ public class WaitingDao {
                     w.created_at,
                     w.slot_id,
                     w.name,
+                    s.date,
+                    rt.start_at,
+                    t.name AS theme_name,
                     (
                         SELECT COUNT(*)
                         FROM waiting w2
@@ -66,6 +73,9 @@ public class WaitingDao {
                           AND w2.created_at < w.created_at
                     ) + 1 AS rank
                 FROM waiting w
+                JOIN slot s ON w.slot_id = s.id
+                JOIN reservation_time rt ON s.time_id = rt.id
+                JOIN theme t ON s.theme_id = t.id
                 WHERE w.name = ?
                 ORDER BY w.created_at;
                 """;
