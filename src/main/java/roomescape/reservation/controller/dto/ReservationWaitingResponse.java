@@ -1,28 +1,29 @@
 package roomescape.reservation.controller.dto;
 
+import roomescape.reservation.domain.Status;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
-public record ReservationWaitingResponse(
-        Long id,
-        String guestName,
-        String date,
-        ReservationTimeResponse time,
-        ThemeResponse theme,
-        String status,
-        long waitNumber
-) {
+public sealed interface ReservationWaitingResponse permits ConfirmedReservationResponse, WaitingReservationResponse {
+    Long id();
 
-    public static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
-        return new ReservationWaitingResponse(
-                reservationWaitingResult.id(),
-                reservationWaitingResult.guestName(),
-                reservationWaitingResult.date().toString(),
-                ReservationTimeResponse.from(reservationWaitingResult.time()),
-                ThemeResponse.from(reservationWaitingResult.theme()),
-                reservationWaitingResult.status().toString(),
-                reservationWaitingResult.waitNumber()
-        );
+    String guestName();
+
+    String date();
+
+    ReservationTimeResponse time();
+
+    ThemeResponse theme();
+
+    String status();
+
+    boolean isConfirmed();
+
+    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
+        if (reservationWaitingResult.status().isConfirmed()) {
+            return ConfirmedReservationResponse.from(reservationWaitingResult);
+        }
+        return WaitingReservationResponse.from(reservationWaitingResult);
     }
 }

@@ -720,7 +720,7 @@ const API_BASE = "";
     }
 
     function waitingBadge(reservation) {
-      return reservation.status === "WAITING" ? ` · 대기 ${Number(reservation.waitNumber || 0)}번` : "";
+      return !reservation.isConfirmed ? ` · 대기 ${Number(reservation.waitNumber || 0)}번` : "";
     }
 
     function renderLookupReservations(reservations) {
@@ -746,8 +746,8 @@ const API_BASE = "";
               <span class="list-meta">${escapeHtml(formatDate(reservation.date))} · ${escapeHtml(theme?.name || "-")} · ${escapeHtml(normalizeTime(time?.startAt || "-"))} · ${escapeHtml(displayStatus(reservation.status))}${escapeHtml(waitingBadge(reservation))}</span>
             </div>
             <div class="row-actions">
-              ${reservation.status === "CONFIRMED" ? `<button class="secondary-button compact-button" type="button" data-edit-reservation-id="${reservation.id}">수정</button>` : ""}
-              <button class="danger-button compact-button" type="button" data-cancel-reservation-id="${reservation.id}">${reservation.status === "WAITING" ? "대기 취소" : "취소"}</button>
+              ${reservation.isConfirmed ? `<button class="secondary-button compact-button" type="button" data-edit-reservation-id="${reservation.id}">수정</button>` : ""}
+              <button class="danger-button compact-button" type="button" data-cancel-reservation-id="${reservation.id}">${reservation.isConfirmed ? "취소" : "대기 취소"}</button>
             </div>
           `;
           elements.lookupList.appendChild(row);
