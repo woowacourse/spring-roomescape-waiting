@@ -76,7 +76,12 @@ public class ReservationService {
         Reservation updatedReservation = createUpdatedReservation(reservation, date, timeId);
         reservationValidator.validateUpdatePolicy(reservation, updatedReservation);
 
-        reservationRepository.update(updatedReservation);
+        try {
+            reservationRepository.update(updatedReservation);
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateReservationException("이미 예약된 시간입니다.");
+        }
+
         return findUpdatedReservation(id);
     }
 
