@@ -20,4 +20,8 @@ public enum Status {
     public boolean isConfirmed() {
         return this == CONFIRMED;
     }
+
+    public boolean isWaiting() {
+        return this == WAITING;
+    }
 }

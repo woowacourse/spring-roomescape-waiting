@@ -5,12 +5,6 @@ import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
 public sealed interface ReservationWaitingResponse permits ConfirmedReservationResponse, WaitingReservationResponse {
-    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
-        if (reservationWaitingResult.status().isConfirmed()) {
-            return ConfirmedReservationResponse.from(reservationWaitingResult);
-        }
-        return WaitingReservationResponse.from(reservationWaitingResult);
-    }
 
     Long id();
 
@@ -25,4 +19,11 @@ public sealed interface ReservationWaitingResponse permits ConfirmedReservationR
     String status();
 
     boolean isConfirmed();
+
+    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
+        if (reservationWaitingResult.status().isWaiting()) {
+            return WaitingReservationResponse.from(reservationWaitingResult);
+        }
+        return ConfirmedReservationResponse.from(reservationWaitingResult);
+    }
 }
