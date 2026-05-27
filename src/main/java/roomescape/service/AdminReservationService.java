@@ -19,7 +19,7 @@ import roomescape.dto.request.ReservationPatchDto;
 import roomescape.dto.response.PageResponse;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class AdminReservationService {
     private final ReservationDao reservationDao;
     private final MemberDao memberDao;
@@ -38,6 +38,7 @@ public class AdminReservationService {
         this.themeDao = themeDao;
     }
 
+    @Transactional(readOnly = true)
     public PageResponse<Reservation> findAll(int page, int size) {
         int offset = page * size;
         List<Reservation> content = reservationDao.findAll(size, offset);
@@ -46,16 +47,17 @@ public class AdminReservationService {
         return new PageResponse<>(content, totalElements, totalPages, page, size);
     }
 
+    @Transactional(readOnly = true)
     public List<Reservation> findAllByStoreId(Long storeId) {
         return reservationDao.findAllByStoreId(storeId);
     }
 
+    @Transactional(readOnly = true)
     public Reservation findById(Long id) {
         return reservationDao.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약입니다."));
     }
 
-    @Transactional
     public Reservation createByAdmin(AdminReservationRequestDto request) {
         Member member = memberDao.findById(request.memberId())
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 멤버입니다."));
@@ -63,7 +65,6 @@ public class AdminReservationService {
         return reservationDao.insert(reservation);
     }
 
-    @Transactional
     public Reservation update(Long id, ReservationPatchDto request) {
         Reservation reservation = findById(id);
         Time time = timeDao.findById(request.timeId())
@@ -72,14 +73,12 @@ public class AdminReservationService {
         return reservationDao.update(reservation);
     }
 
-    @Transactional
     public void cancelByAdmin(Long id) {
         Reservation reservation = findById(id);
         reservation.cancelByAdmin(LocalDateTime.now());
         reservationDao.update(reservation);
     }
 
-    @Transactional
     public void delete(Long id) {
         if (!reservationDao.delete(id)) {
             throw new EntityNotFoundException("존재하지 않는 예약입니다.");
