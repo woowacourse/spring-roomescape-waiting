@@ -21,6 +21,7 @@ public class ReservationDao {
             rs.getLong("id"),
             rs.getString("name"),
             rs.getLong("reservation_slot_id"),
+            Status.valueOf(rs.getString("status")),
             rs.getObject("updated_at", LocalDateTime.class)
     );
 
@@ -45,6 +46,7 @@ public class ReservationDao {
                 SELECT  r.id,
                         r.name AS name,
                         r.reservation_slot_id AS reservation_slot_id,
+                        r.status AS status,
                         r.updated_at AS updated_at
                 FROM reservation AS r
                 where r.id = ?

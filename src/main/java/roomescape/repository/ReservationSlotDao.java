@@ -11,10 +11,9 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
 import roomescape.domain.ReservationSlot;
-import roomescape.domain.Time;
 import roomescape.domain.Theme;
+import roomescape.domain.Time;
 import roomescape.dto.ReservationResponse;
-import roomescape.dto.WaitingResponse;
 
 @Repository
 public class ReservationSlotDao {
@@ -28,13 +27,17 @@ public class ReservationSlotDao {
             new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
     );
 
-    private final RowMapper<ReservationResponse> reservationResponseRowMapper = (rs, rowNum) -> ReservationResponse.from(
-            new ReservationSlot(
-            rs.getLong("id"),
-            rs.getDate("date").toLocalDate(),
-            new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
-            new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))),
-            new WaitingResponse(rs.getLong("waiting_id"), rs.getString("waiting_name"), rs.getInt("waiting_order"))
+    private final RowMapper<ReservationResponse> reservationResponseRowMapper = (rs, rowNum) ->
+            new ReservationResponse(
+                    rs.getLong("reservation_id"),
+                    rs.getString("name"),
+                    rs.getString("status"),
+                    rs.getDate("date").toLocalDate(),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail"),
+                    rs.getTime("time_value").toLocalTime(),
+                    rs.getInt("waiting_order")
             );
 
     public ReservationSlotDao(JdbcTemplate jdbcTemplate) {
@@ -73,12 +76,12 @@ public class ReservationSlotDao {
     public Optional<Long> findIdByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId
     ) {
         String sql = """
-            SELECT r.id
-            FROM reservation_slot r
-            WHERE r.date = ?
-              AND r.time_id = ?
-              AND r.theme_id = ?
-            """;
+                SELECT r.id
+                FROM reservation_slot r
+                WHERE r.date = ?
+                  AND r.time_id = ?
+                  AND r.theme_id = ?
+                """;
 
         List<Long> result = jdbcTemplate.query(
                 sql,
@@ -110,27 +113,26 @@ public class ReservationSlotDao {
 
     public List<ReservationResponse> findByUserName(String username) {
         String sql = """
-                SELECT r.id, 
-                       r.date,
-                       t.id AS time_id, 
-                       t.start_at AS time_value,
-                       th.id AS theme_id, 
-                       th.name AS theme_name, 
-                       th.description AS theme_description, 
+                SELECT rv.id AS reservation_id,
+                       rv.name AS name,
+                       rv.status AS status,
+                       rs.date AS date,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
                        th.thumbnail_url AS theme_thumbnail,
-                      w.id AS waiting_id,
-                      w.name AS waiting_name,
-                      (
-                          SELECT COUNT(*)
-                          FROM reservation w2
-                          WHERE w2.reservation_id = w.reservation_id
-                            AND w2.id < w.id
-                      ) AS waiting_order
-                FROM reservation_slot AS r
-                INNER JOIN reservation_time AS t ON r.time_id = t.id
-                INNER JOIN theme AS th ON r.theme_id = th.id
-                INNER JOIN reservation AS w ON r.id = w.reservation_id
-                WHERE w.name = ?
+                       t.start_at AS time_value,
+                       (
+                           SELECT COUNT(*)
+                           FROM reservation rv2
+                           WHERE rv2.reservation_slot_id = rv.reservation_slot_id
+                             AND rv2.status = 'RESERVED'
+                             AND rv2.id < rv.id
+                       ) AS waiting_order
+                FROM reservation AS rv
+                INNER JOIN reservation_slot AS rs ON rv.reservation_slot_id = rs.id
+                INNER JOIN reservation_time AS t ON rs.time_id = t.id
+                INNER JOIN theme AS th ON rs.theme_id = th.id
+                WHERE rv.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
     }
@@ -141,19 +143,19 @@ public class ReservationSlotDao {
 
     public Optional<ReservationSlot> findByDateAndTimeId(LocalDate date, Long timeId) {
         String sql = """
-            SELECT r.id AS reservation_id,
-                   r.date AS date,
-                   rt.id AS time_id,
-                   rt.start_at AS start_at,
-                   t.id AS theme_id,
-                   t.name AS theme_name,
-                   t.description AS description,
-                   t.thumbnail_url AS thumbnail_url
-            FROM reservation_slot r
-            JOIN reservation_time rt ON r.time_id = rt.id
-            JOIN theme t ON r.theme_id = t.id
-            WHERE r.date = ? AND r.time_id = ?
-            """;
+                SELECT r.id AS reservation_id,
+                       r.date AS date,
+                       rt.id AS time_id,
+                       rt.start_at AS start_at,
+                       t.id AS theme_id,
+                       t.name AS theme_name,
+                       t.description AS description,
+                       t.thumbnail_url AS thumbnail_url
+                FROM reservation_slot r
+                JOIN reservation_time rt ON r.time_id = rt.id
+                JOIN theme t ON r.theme_id = t.id
+                WHERE r.date = ? AND r.time_id = ?
+                """;
         return jdbcTemplate.query(sql, reservationRowMapper, date, timeId)
                 .stream()
                 .findFirst();

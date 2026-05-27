@@ -10,14 +10,16 @@ public class Reservation {
     private final Long id;
     private final String name;
     private final Long reservationSlotId;
+    private final Status status;
     private final LocalDateTime updateAt;
 
-    public Reservation(Long id, String name, Long reservationSlotId, LocalDateTime updateAt) {
+    public Reservation(Long id, String name, Long reservationSlotId, Status status, LocalDateTime updateAt) {
         validateName(name);
 
         this.id = id;
         this.name = name;
         this.reservationSlotId = reservationSlotId;
+        this.status = status;
         this.updateAt = updateAt;
     }
 
@@ -42,5 +44,13 @@ public class Reservation {
 
     public Long getReservationSlotId() {
         return reservationSlotId;
+    }
+
+    public Status getStatus() {
+        return status;
+    }
+
+    public LocalDateTime getUpdateAt() {
+        return updateAt;
     }
 }

@@ -4,7 +4,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -47,7 +46,7 @@ public class ReservationService {
 
             Long reservationId = reservationDao.save(request.name(), reservationSlotId, now);
             Reservation reservation = reservationDao.findById(reservationId);
-            return ReservationResponse.from(reservationSlot, WaitingResponse.from(reservation, reservationDao.findOrderByReservationId(reservationId, reservationId)));
+            return ReservationResponse.from(reservation, reservationSlot, reservationDao.findOrderByReservationId(reservationId, reservationSlotId));
         } catch (DuplicateKeyException e){
             throw new CustomException(ErrorCode.DUPLICATE_RESERVATION);
         }
