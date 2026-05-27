@@ -45,4 +45,3 @@ public class ThemeRestController {
         return ResponseEntity.noContent().build();
     }
 }
-

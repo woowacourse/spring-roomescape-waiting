@@ -1,7 +1,6 @@
 package roomescape.dto.reservationtime;
 
 import roomescape.domain.reservationtime.AvailableReservationTime;
-import roomescape.domain.reservationtime.ReservationTime;
 
 import java.time.LocalTime;
 
@@ -27,9 +26,5 @@ public class AvailableReservationTimeResponse {
 
     public LocalTime getStartAt() {
         return startAt;
-    }
-
-    public Boolean getIsAvailable() {
-        return isAvailable;
     }
 }
