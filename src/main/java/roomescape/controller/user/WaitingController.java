@@ -34,9 +34,10 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> create(
+            @LoginMember Member member,
             @Valid @RequestBody WaitingRequestDto request) {
 
-        Waiting waiting = waitingService.create(request);
+        Waiting waiting = waitingService.create(request, member);
         URI uri = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
                 .buildAndExpand(waiting.getId())
