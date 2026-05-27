@@ -32,12 +32,14 @@ class ReservationDaoTest {
     @Test
     void 전체_예약_조회() {
         List<Reservation> reservations = reservationDao.findAll();
+
         assertThat(reservations).hasSize(19);
     }
 
     @Test
     void ID로_예약_조회() {
         Reservation reservation = reservationDao.findById(1L);
+
         assertThat(reservation).isNotNull();
         assertThat(reservation.getId()).isEqualTo(1L);
     }
@@ -45,12 +47,14 @@ class ReservationDaoTest {
     @Test
     void 이름으로_예약_조회() {
         List<ReservationOrder> reservation = reservationDao.findByName("아나키");
+
         assertThat(reservation).hasSize(2);
     }
 
     @Test
     void 존재하지_않는_이름으로_조회하면_빈값_반환() {
         List<ReservationOrder> reservation = reservationDao.findByName("없는이름");
+
         assertThat(reservation).isEmpty();
     }
 
@@ -70,7 +74,7 @@ class ReservationDaoTest {
     }
 
     @Test
-    void 대기_삭제_시_후순위_대기자_순번_당겨짐() {
+    void 대기_삭제_시_후순위_대기자_순번_재정렬() {
         reservationDao.delete(20L);
 
         ReservationOrder secondWaiting = reservationDao.findByName("아나키").stream()
@@ -89,6 +93,7 @@ class ReservationDaoTest {
         LocalDate date = LocalDate.now().minusDays(6);
 
         boolean exists = reservationDao.existsBy(date, theme, time);
+
         assertThat(exists).isTrue();
     }
 

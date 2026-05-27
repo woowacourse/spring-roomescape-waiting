@@ -3,7 +3,6 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.List;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -20,17 +19,14 @@ class ThemeServiceTest {
     private ThemeService themeService;
 
     @Test
-    @DisplayName("전체 테마를 조회하면 전체 테마를 반환한다")
-    void findAllThemes_returns15Themes() {
+    void 전체_테마_조회() {
         List<ThemeResponse> result = themeService.findAllThemes();
 
         assertThat(result).hasSize(15);
     }
 
-
     @Test
-    @DisplayName("인기 테마 상위 3개는 예약 수 기준으로 출력한다")
-    void findTopTheme_returnsTop3InOrder() {
+    void 인기_테마_상위_3개_조회() {
         List<ThemeResponse> result = themeService.findTopTheme(3L);
 
         assertThat(result).hasSize(3);
@@ -40,8 +36,7 @@ class ThemeServiceTest {
     }
 
     @Test
-    @DisplayName("테마를 생성하면 전체 테마 수가 1 증가한다")
-    void create_increasesThemeCountByOne() {
+    void 테마_생성() {
         MockMultipartFile file = new MockMultipartFile(
                 "file", "test.jpg", "image/jpeg", "fake-image-content".getBytes()
         );
@@ -52,10 +47,8 @@ class ThemeServiceTest {
         assertThat(themeService.findAllThemes()).hasSize(16);
     }
 
-
     @Test
-    @DisplayName("예약이 없는 테마를 삭제할 수 있다")
-    void delete_decreasesThemeCountByOne() {
+    void 예약_없는_테마_삭제() {
         themeService.delete(11L);
 
         assertThat(themeService.findAllThemes()).hasSize(14);

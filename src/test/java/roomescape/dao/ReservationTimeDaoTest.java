@@ -22,12 +22,14 @@ class ReservationTimeDaoTest {
     @Test
     void 전체_시간_조회() {
         List<ReservationTime> times = reservationTimeDao.findAll();
-        assertThat(times).hasSize(9); // data.sql 기준 10:00~18:00 9개
+
+        assertThat(times).hasSize(9);
     }
 
     @Test
     void ID로_시간_조회() {
         ReservationTime time = reservationTimeDao.findTimeById(1L);
+
         assertThat(time).isNotNull();
         assertThat(time.getId()).isEqualTo(1L);
         assertThat(time.getStartAt()).isEqualTo(LocalTime.of(10, 0));
@@ -44,14 +46,16 @@ class ReservationTimeDaoTest {
     }
 
     @Test
-    void 예약에_사용중인_시간_존재_여부_확인_존재하는_경우() {
+    void 예약에_사용중인_시간_존재하는_경우() {
         boolean exists = reservationTimeDao.existsByTimeId(1L);
+
         assertThat(exists).isTrue();
     }
 
     @Test
-    void 예약에_사용중인_시간_존재_여부_확인_존재하지_않는_경우() {
+    void 예약에_사용중인_시간_존재하지_않는_경우() {
         boolean exists = reservationTimeDao.existsByTimeId(9L);
+
         assertThat(exists).isFalse();
     }
 

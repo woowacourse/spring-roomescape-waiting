@@ -39,7 +39,7 @@ public class AdminReservationTimeControllerTest {
     }
 
     @Test
-    void 이미_예약이_존재하는_시간은_삭제할_수_없다() {
+    void 예약이_존재하는_시간_삭제_불가() {
         RestAssured.given().log().all()
                 .when().delete("/admin/times/1")
                 .then().log().all()

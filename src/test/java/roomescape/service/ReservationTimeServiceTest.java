@@ -6,13 +6,11 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.ReservationStatus;
-import roomescape.domain.ReservationTimeStatus;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeStatusResponse;
@@ -25,22 +23,16 @@ class ReservationTimeServiceTest {
     private ReservationTimeService reservationTimeService;
 
     @Test
-    @DisplayName("전체 예약 시간 목록을 반환한다")
-    void findAll() {
-        // when
+    void 전체_예약_시간_목록_조회() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
 
-        // then
         assertThat(result).hasSize(9);
     }
 
     @Test
-    @DisplayName("전체 예약 시간이 10:00부터 18:00까지 순서대로 존재한다")
-    void findAll_containsExpectedTimes() {
-        // when
+    void 전체_예약_시간_순서_확인() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
 
-        // then
         List<LocalTime> startTimes = result.stream()
                 .map(ReservationTimeResponse::startAt)
                 .toList();
@@ -59,61 +51,44 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("이미 존재하지 않는 시간대는 정상적으로 저장된다")
-    void save() {
-        // given
+    void 중복되지_않는_시간_저장() {
         ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(19, 0));
 
-        // when
         ReservationTimeResponse result = reservationTimeService.save(request);
 
-        // then
         assertThat(result.startAt()).isEqualTo(LocalTime.of(19, 0));
         assertThat(reservationTimeService.findAll()).hasSize(10);
     }
 
     @Test
-    @DisplayName("이미 존재하는 시간대를 저장하면 예외를 던진다")
-    void save_throwsException_whenDuplicateStartAt() {
-        // given
+    void 중복_시간_저장_시_예외() {
         ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 0));
 
-        // when & then
         assertThatThrownBy(() -> reservationTimeService.save(request))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 존재하는 시간대이므로 추가할 수 없습니다.");
     }
 
     @Test
-    @DisplayName("예약이 없는 시간대는 삭제할 수 있다")
-    void delete() {
-        // given
+    void 예약_없는_시간_삭제() {
         Long timeIdWithNoReservation = 6L;
 
-        // when
         reservationTimeService.delete(timeIdWithNoReservation);
 
-        // then
         assertThat(reservationTimeService.findAll()).hasSize(8);
     }
 
     @Test
-    @DisplayName("예약이 존재하는 시간대를 삭제하려하면 예외를 던진다")
-    void delete_throwsException_whenReservationExists() {
-        // given
+    void 예약_존재하는_시간_삭제_시_예외() {
         Long timeIdWithReservation = 1L;
 
-        // when & then
         assertThatThrownBy(() -> reservationTimeService.delete(timeIdWithReservation))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
     }
 
-
-
     @Test
-    @DisplayName("theme1의 6일 전 날짜는 time_id 1~5가 예약되어 있어 가용 시간은 4개다")
-    void findAvailableTime_returns4TimesForTheme1() {
+    void 예약된_시간_제외_가용_시간_조회() {
         String date = LocalDate.now().minusDays(6).toString();
 
         List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
@@ -126,9 +101,7 @@ class ReservationTimeServiceTest {
     }
 
     @Test
-    @DisplayName("예약이 전혀 없는 날짜는 모든 시간에 예약할 수 있다")
-    void findAvailableTime_returnsAllTimesWhenNoReservation() {
-
+    void 예약_없는_날짜의_전체_가용_시간_조회() {
         String date = LocalDate.now().plusDays(30).toString();
 
         List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);

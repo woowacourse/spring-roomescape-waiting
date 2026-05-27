@@ -7,7 +7,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 class RoomescapeApplicationTest {
 
         @Test
-        void contextLoads() {
+        void 애플리케이션_컨텍스트_로드() {
         }
 
 }

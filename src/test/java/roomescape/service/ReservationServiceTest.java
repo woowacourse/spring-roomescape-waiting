@@ -5,7 +5,6 @@ import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,43 +30,36 @@ public class ReservationServiceTest {
     private ReservationService reservationService;
 
     @Test
-    @DisplayName("존재하지 않는 timeId로 예약하면 예외가 발생한다")
-    void save_fail_invalid_time_id() {
-        // given
+    void 존재하지_않는_시간_ID로_예약_시_예외() {
         Long invalidTimeId = 999L;
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 5, 4), invalidTimeId, 1L);
 
-        // when & then
         when(reservationTimeDao.findTimeById(invalidTimeId)).thenReturn(null);
+
         assertThatThrownBy(() -> reservationService.save(request))
                 .isInstanceOf(IdNotFoundException.class)
                 .hasMessageContaining("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요.");
     }
 
     @Test
-    @DisplayName("존재하지 않는 themeId로 예약하면 예외가 발생한다")
-    void save_fail_invalid_theme_id() {
-        // given
+    void 존재하지_않는_테마_ID로_예약_시_예외() {
         Long invalidThemeId = 999L;
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 5, 4), 1L, invalidThemeId);
 
-        // when & then
         when(reservationTimeDao.findTimeById(1L)).thenReturn(new ReservationTime(1L, LocalTime.of(10, 0)));
         when(themeDao.findThemeById(invalidThemeId)).thenReturn(null);
+
         assertThatThrownBy(() -> reservationService.save(request))
                 .isInstanceOf(IdNotFoundException.class)
                 .hasMessageContaining("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요.");
     }
 
     @Test
-    @DisplayName("이미 지난 시간/날짜로 예약하면 예외가 발생한다")
-    void avoid_invalid_time_date() {
-        // given
+    void 이미_지난_시간_날짜_예약_시_예외() {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 5, 4), 1L, 1L);
         ReservationTime mockTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme mockTheme = new Theme(1L, "테마1", "설명", "url");
 
-        // when & then
         when(reservationTimeDao.findTimeById(1L)).thenReturn(mockTime);
         when(themeDao.findThemeById(1L)).thenReturn(mockTheme);
 

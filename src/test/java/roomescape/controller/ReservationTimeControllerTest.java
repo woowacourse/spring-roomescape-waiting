@@ -10,6 +10,7 @@ import org.springframework.test.annotation.DirtiesContext;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class ReservationTimeControllerTest {
+
     @Test
     void 전체_시간_조회_API() {
         RestAssured.given().log().all()
