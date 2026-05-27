@@ -66,7 +66,7 @@ public class ReservationTime {
         );
     }
 
-    public boolean isBefore(final LocalTime now) {
-        return startAt.isBefore(now);
+    public boolean isBefore() {
+        return startAt.isBefore(LocalTime.now());
     }
 }

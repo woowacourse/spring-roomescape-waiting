@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalTime;
 import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -152,8 +151,7 @@ public class ReservationService {
 
     private void validateFutureOrPresentTime(final LocalDate date, final ReservationTime reservationTime) {
         final LocalDate today = LocalDate.now();
-        final LocalTime now = LocalTime.now();
-        if (date.equals(today) && reservationTime.isBefore(now)) {
+        if (date.equals(today) && reservationTime.isBefore()) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }

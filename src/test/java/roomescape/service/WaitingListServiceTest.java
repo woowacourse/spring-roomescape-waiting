@@ -6,7 +6,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.stubbing.Answer;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
@@ -22,9 +21,9 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.will;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -115,5 +114,44 @@ class WaitingListServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_NOT_FOUND);
         verify(waitingListRepository, never()).save(any(WaitingList.class));
+    }
+
+    @Test
+    void 과거_날짜로_예약대기_생성_시도시_예외발생() {
+        // given
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", pastDate, 1L, 1L);
+
+        Long themeId = 1L;
+        Long timeId = 1L;
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.create(createCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
+    }
+
+    @Test
+    void 과거_시간으로_예약대기_생성_시도시_예외발생() {
+        // given
+        LocalDate today = LocalDate.now();
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand("오리", today, 1L, 1L);
+
+        Long themeId = 1L;
+        Long timeId = 1L;
+        LocalTime now = LocalTime.now();
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, now.minusHours(1), now.plusHours(2));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.create(createCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
     }
 }

@@ -28,6 +28,13 @@ public class WaitingListService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
 
         WaitingList waitingList = WaitingList.create(createCommand.date(), createCommand.name(), findTheme, findReservationTime);
+        if (waitingList.getReservationDate().isPast()) {
+            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
+        }
+        if (waitingList.getReservationDate().isToday() && findReservationTime.isBefore()) {
+            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
+        }
+
         WaitingList savedWaitingList = waitingListRepository.save(waitingList);
         return WaitingListResult.from(savedWaitingList);
     }

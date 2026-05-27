@@ -15,7 +15,7 @@ public record WaitingListResult(
         return new WaitingListResult(
                 waitingList.getId(),
                 waitingList.getName(),
-                waitingList.getDate(),
+                waitingList.getReservationDate().getDate(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId());
     }

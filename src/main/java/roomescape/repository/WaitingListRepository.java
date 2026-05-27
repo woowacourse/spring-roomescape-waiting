@@ -5,7 +5,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.KeyGenerationException;
@@ -41,7 +40,7 @@ public class WaitingListRepository {
             );
 
             preparedStatement.setString(1, waitingList.getName());
-            preparedStatement.setDate(2, Date.valueOf(waitingList.getDate()));
+            preparedStatement.setDate(2, Date.valueOf(waitingList.getReservationDate().getDate()));
             preparedStatement.setLong(3, waitingList.getTheme().getId());
             preparedStatement.setLong(4, waitingList.getReservationTime().getId());
 
