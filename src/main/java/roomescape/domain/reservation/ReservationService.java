@@ -67,9 +67,9 @@ public class ReservationService {
             waitingStatus,
             clock
         );
-        reservationRepository.save(reservation);
+        Reservation savedReservation = reservationRepository.save(reservation);
 
-        return CreateReservationResponse.from(reservation);
+        return CreateReservationResponse.from(savedReservation);
     }
 
     public List<ReservationResponse> getAllReservations() {
