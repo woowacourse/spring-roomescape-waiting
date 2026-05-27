@@ -408,12 +408,10 @@
     <table>
       <thead>
         <tr>
-          <th>#</th>
-          <th>예약자</th>
+          <th>슬롯 #</th>
           <th>테마</th>
           <th>날짜</th>
           <th>시간</th>
-          <th>삭제</th>
         </tr>
       </thead>
       <tbody id="res-tbody"></tbody>
@@ -562,35 +560,14 @@
       document.getElementById('res-tbody').innerHTML = list.map(r => `
         <tr id="admin-res-${r.id}">
           <td class="muted">${r.id}</td>
-          <td><strong>${r.name}</strong></td>
           <td>${r.themeName}</td>
           <td class="muted">${r.date}</td>
           <td class="muted">${r.time}</td>
-          <td>
-            <button class="btn btn-danger-outline" onclick="deleteReservation(${r.id})">삭제</button>
-          </td>
         </tr>
       `).join('');
       document.getElementById('res-table-wrap').style.display = 'block';
     } catch (e) {
       document.getElementById('res-loading').style.display = 'none';
-      showToast(e.message, 'error');
-    }
-  }
-
-  async function deleteReservation(id) {
-    if (!confirm('이 예약을 삭제하시겠습니까?')) return;
-    try {
-      await fetchEmpty(`${API}/reservations/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
-      document.getElementById(`admin-res-${id}`)?.remove();
-      showToast('예약이 삭제되었습니다.');
-
-      const rows = document.querySelectorAll('#res-tbody tr');
-      if (!rows.length) {
-        document.getElementById('res-table-wrap').style.display = 'none';
-        document.getElementById('res-empty').style.display = 'block';
-      }
-    } catch (e) {
       showToast(e.message, 'error');
     }
   }

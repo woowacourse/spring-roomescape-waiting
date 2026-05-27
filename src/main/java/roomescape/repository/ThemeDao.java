@@ -55,7 +55,7 @@ public class ThemeDao {
                     th.name,
                     th.description,
                     th.thumbnail_url
-                FROM reservationSlot AS r
+                FROM reservation_slot AS r
                 INNER JOIN theme AS th ON r.theme_id = th.id
                 WHERE r.date BETWEEN ? AND ?
                 GROUP BY
@@ -72,23 +72,31 @@ public class ThemeDao {
 
     public List<AvailableTimeResponse> findAvailableTimeById(long themeId, String date) {
         final String sql = """
-                SELECT                                                                                                                                                                                                         \s
-                      rt.id,                                                                                                                                                                                                     \s
-                      rt.start_at,                                                                                                                                                                                               \s
-                      CASE WHEN r.id IS NULL THEN TRUE ELSE FALSE END AS available,
-                      CASE WHEN r.id IS NULL THEN 0
-                          ELSE (
-                              SELECT COUNT(*) - 1
-                              FROM reservation w
-                              WHERE w.id = r.id
-                          )
-                      END AS waiting_count
-                  FROM reservation_time rt                                                                                                                                                                                       \s
-                  LEFT JOIN reservation_slot r                                                                                                                                                                                      \s
-                      ON rt.id = r.time_id
-                       AND r.theme_id = ?
-                       AND r.date = ?
-                """;
+            SELECT
+                rt.id,
+                rt.start_at,
+
+                CASE
+                    WHEN COUNT(res.id) = 0 THEN TRUE
+                    ELSE FALSE
+                END AS available,
+
+                GREATEST(COUNT(res.id) - 1, 0) AS waiting_count
+
+            FROM reservation_time rt
+
+            LEFT JOIN reservation_slot rs
+                ON rt.id = rs.time_id
+                AND rs.theme_id = ?
+                AND rs.date = ?
+
+            LEFT JOIN reservation res
+                ON res.reservation_slot_id = rs.id
+                AND res.status = 'RESERVED'
+
+            GROUP BY rt.id, rt.start_at
+            ORDER BY rt.start_at
+            """;
         return jdbcTemplate.query(sql, availableReservationTimeRowMapper, themeId, date);
     }
 

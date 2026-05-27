@@ -727,7 +727,7 @@
   let selectedDate = null;
   let selectedTime = null;
   let selectedWaitingTarget = null;
-  let editingWaitingId = null;
+  let editingReservationId = null;
   let cachedThemes = null;
   let cachedAdminReservations = null;
 
@@ -957,13 +957,11 @@
   async function renderTimeSlots(times) {
     document.getElementById('times-loading').style.display = 'none';
     const container = document.getElementById('time-slots');
-    const enrichedTimes = await enrichTimesWithWaitingInfo(times);
-    container.innerHTML = enrichedTimes.map(t => {
-      const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
-      const waitLabel = available ? '' : `<small>대기 ${t.waitNumber ?? 0}명</small>`;
+    container.innerHTML = times.map(t => {
+      const waitLabel = !t.isAvailable && t.waitNumber > 0 ? `<small>대기 ${t.waitNumber}명</small>` : '';
       return `
-        <div class="time-slot ${available ? '' : 'unavailable'}"
-             onclick="${available ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime('${encodeURIComponent(JSON.stringify(t))}')`}"
+        <div class="time-slot ${t.isAvailable ? '' : 'unavailable'}"
+             onclick="${t.isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}')`}"
              id="slot-${t.id}">
           <span>${t.startAt}</span>${waitLabel}
         </div>
@@ -986,32 +984,14 @@
     document.getElementById('wait-time-btn').style.display = 'none';
   }
 
-  function pickWaitingTime(encodedTime) {
-    const time = JSON.parse(decodeURIComponent(encodedTime));
-    selectedTime = null;
-    selectedWaitingTarget = time;
+  function pickWaitingTime(id, startAt) {
+    selectedTime = { id, startAt };
+    selectedWaitingTarget = { id, startAt };
     document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
-    document.getElementById(`slot-${time.id}`).classList.add('selected');
+    document.getElementById(`slot-${id}`).classList.add('selected');
     document.getElementById('confirm-time-btn').disabled = true;
     document.getElementById('confirm-time-btn').style.display = 'none';
-    document.getElementById('wait-time-btn').style.display = time.reservationId == null ? 'none' : 'inline-flex';
-  }
-
-  async function enrichTimesWithWaitingInfo(times) {
-    const reservations = await getAdminReservationsSafely();
-    return times.map(t => {
-      const matchedReservation = reservations.find(r =>
-        r.date === selectedDate &&
-        r.themeName === selectedTheme.name &&
-        r.time === t.startAt
-      );
-      const available = t.isAvailable !== undefined ? t.isAvailable : t.available;
-      if (available) return t;
-
-      const reservationId = t.reservationId ?? t.reservationSlot?.id ?? matchedReservation?.id ?? null;
-
-      return { ...t, isAvailable: false, available: false, reservationId };
-    });
+    document.getElementById('wait-time-btn').style.display = 'inline-flex';
   }
 
   async function getAdminReservationsSafely() {
@@ -1026,7 +1006,7 @@
   }
 
   function backFromDateStep() {
-    if (editingWaitingId !== null) {
+    if (editingReservationId !== null) {
       resetBookingState();
       switchSection('my');
       return;
@@ -1068,15 +1048,11 @@
 
   async function submitReservation() {
     try {
-      const isEditing = editingWaitingId !== null;
+      const isEditing = editingReservationId !== null;
       const request = {
         method: isEditing ? 'PATCH' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(isEditing ? {
-          name: username,
-          targetDate: selectedDate || null,
-          timeId: selectedTime?.id || null
-        } : {
+        body: JSON.stringify({
           name: username,
           date: selectedDate || null,
           timeId: selectedTime?.id || null,
@@ -1085,15 +1061,20 @@
       };
 
       if (isEditing) {
-        await fetchEmpty(`${API}/reservations/waitings/${editingWaitingId}`, request, '예약 수정에 실패했습니다.');
+        await fetchEmpty(`${API}/reservations/${editingReservationId}`, request, '예약 수정에 실패했습니다.');
         showToast('예약이 수정되었습니다!');
         resetBookingState();
         switchSection('my');
       } else {
-        const reservationSlot = await fetchJson(`${API}/reservations`, request, '예약에 실패했습니다.');
-        showToast('예약이 완료되었습니다!');
-        showReservationComplete(reservationSlot);
-        resetBookingState();
+        const response = await fetchJson(`${API}/reservations`, request, '예약에 실패했습니다.');
+        cachedAdminReservations = null;
+        if (response.order > 1) {
+          showWaitingComplete(response);
+        } else {
+          showToast('예약이 완료되었습니다!');
+          showReservationComplete(response);
+          resetBookingState();
+        }
       }
     } catch (e) {
       showToast(e.message, 'error');
@@ -1107,12 +1088,12 @@
       return;
     }
 
-    if (error.code === 'RESERVATION_400_4' || !selectedDate) {
+    if (!selectedDate) {
       goToStep(2);
       return;
     }
 
-    if (error.code === 'RESERVATION_400_5' || error.code === 'RESERVATION_409_1' || error.code === 'RESERVATION_400_1') {
+    if (error.code === 'RESERVATION_409_1' || error.code === 'DUPLICATE_RESERVATION') {
       selectedTime = null;
       await reloadTimesForSelection();
       return;
@@ -1158,50 +1139,33 @@
     selectedDate = null;
     selectedTime = null;
     selectedWaitingTarget = null;
-    editingWaitingId = null;
+    editingReservationId = null;
   }
 
   async function submitWaiting() {
-    if (selectedWaitingTarget?.reservationId == null) {
-      showToast('대기할 예약 정보를 찾을 수 없습니다.', 'error');
-      return;
-    }
-
-    try {
-      const reservation = await fetchJson(`${API}/reservations/waitings`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          name: username,
-          reservationId: selectedWaitingTarget.reservationId
-        })
-      }, '예약 대기에 실패했습니다.');
-
-      cachedAdminReservations = null;
-      showWaitingComplete(reservation);
-    } catch (e) {
-      showToast(e.message, 'error');
-    }
+    // 대기도 동일한 POST /reservations 엔드포인트 사용 (order > 1이면 대기)
+    await submitReservation();
   }
 
   function showWaitingComplete(reservation) {
+    const waitingOrder = reservation.order - 1;
     document.getElementById('booking-title').textContent = '예약 대기 완료';
     document.getElementById('booking-desc').textContent = '예약 대기가 정상적으로 등록되었습니다.';
     document.getElementById('confirm-box-title').textContent = '예약 대기 완료';
     document.querySelector('#confirm-id-row span:first-child').textContent = '대기 번호';
-    document.getElementById('confirm-id').textContent = `${reservation.order}번째`;
+    document.getElementById('confirm-id').textContent = `${waitingOrder}번째`;
     document.getElementById('confirm-id-row').style.display = 'flex';
     renderReservationSummary({
-      themeName: selectedTheme.name,
-      date: selectedDate,
-      time: selectedWaitingTarget?.startAt || '-',
+      themeName: reservation.themeName,
+      date: reservation.date,
+      time: reservation.time,
       name: reservation.name || username
     });
     document.getElementById('confirm-actions').innerHTML = `
       <button class="btn btn-accent" onclick="switchSection('my')">내 예약 보기</button>
       <button class="btn btn-ghost" onclick="switchSection('booking')">새 예약하기</button>
     `;
-    showToast(`예약 대기가 등록되었습니다. 대기 번호 ${reservation.order}번`);
+    showToast(`예약 대기가 등록되었습니다. 대기 ${waitingOrder}번`);
     resetBookingState();
     goToStep(4);
   }
@@ -1228,7 +1192,7 @@
 
       const list = document.getElementById('my-list');
       list.innerHTML = reservations.map(r => `
-        <div class="reservationSlot-item" id="res-${r.id}">
+        <div class="reservationSlot-item" id="res-${r.reservationId}">
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
           <div class="reservationSlot-info">
             <div class="reservationSlot-theme">${r.themeName}</div>
@@ -1236,7 +1200,7 @@
           </div>
           <div class="reservationSlot-actions">
             <button class="btn btn-ghost" onclick="startReservationEdit(${JSON.stringify(r).replace(/"/g,'&quot;')})">수정</button>
-            <button class="btn btn-danger" onclick="deleteMyReservation(${r.waitingResponse?.id ?? r.id})">삭제</button>
+            <button class="btn btn-danger" onclick="deleteMyReservation(${r.reservationId})">삭제</button>
           </div>
         </div>
       `).join('');
@@ -1257,12 +1221,7 @@
         return;
       }
 
-      if (reservationSlot.waitingResponse?.id == null) {
-        showToast('수정할 대기 정보를 찾을 수 없습니다.', 'error');
-        return;
-      }
-
-      editingWaitingId = reservationSlot.waitingResponse?.id ?? null;
+      editingReservationId = reservationSlot.reservationId;
       selectedTheme = theme;
       selectedDate = reservationSlot.date;
       selectedTime = null;
@@ -1287,15 +1246,14 @@
     }
   }
 
-  function waitingMeta(reservationSlot) {
-    const order = reservationSlot.waitingResponse?.order;
-    return order > 0 ? ` &nbsp; 대기 ${order}번` : '';
+  function waitingMeta(r) {
+    return r.order > 1 ? ` &nbsp; 대기 ${r.order - 1}번` : '';
   }
 
   async function deleteMyReservation(id) {
     if (!confirm('예약을 삭제하시겠습니까?')) return;
     try {
-      await fetchEmpty(`${API}/reservations/waitings/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
+      await fetchEmpty(`${API}/reservations/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
       document.getElementById(`res-${id}`)?.remove();
       showToast('예약이 삭제되었습니다.');
 
