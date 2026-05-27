@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservatinWaiting.ReservationWaiting;
@@ -10,7 +9,6 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
-import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationAlreadyExistException;
 import roomescape.exception.ResourceNotFoundException;
@@ -45,13 +43,8 @@ public class ReservationWaitingService {
         Theme themeById = themeQueryingDao.findThemeById(reservationWaitingReq.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(reservationWaitingReq.themeId()));
 
-        if (reservationWaitingReq.date().isBefore(LocalDate.now())) {
-            throw new ExpiredDateTimeException();
-        }
-
-        if (reservationWaitingReq.date().isEqual(LocalDate.now()) && reservationTimeById.getStartAt().isBefore(LocalTime.now())) {
-            throw new ExpiredDateTimeException();
-        }
+        ReservationWaiting reservationWaitingCommand = reservationWaitingReq.to(reservationTimeById, themeById);
+        reservationWaitingCommand.validatePastDateTime();
 
         Reservation reservation = getReservationByThemeAndDateAndTime(reservationWaitingReq.themeId(), reservationWaitingReq.date(), reservationWaitingReq.timeId());
         reservation.validateDuplicatedReservationByName(reservationWaitingReq.name());
@@ -70,13 +63,7 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
 
-        if (reservationWaiting.getDate().isBefore(LocalDate.now())) {
-            throw new ExpiredDateTimeException();
-        }
-
-        if (reservationWaiting.getDate().isEqual(LocalDate.now()) && reservationWaiting.getTime().getStartAt().isBefore(LocalTime.now())) {
-            throw new ExpiredDateTimeException();
-        }
+        reservationWaiting.validatePastDateTime();
 
         reservationWaitingUpdatingDao.delete(id);
     }
