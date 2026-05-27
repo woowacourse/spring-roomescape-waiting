@@ -1,6 +1,6 @@
 package roomescape.domain.reservation.entity;
 
-public enum Status {
+public enum ReservationStatus {
     ACTIVE,
     CANCELED,
     DELETED,

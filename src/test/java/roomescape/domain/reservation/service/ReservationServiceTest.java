@@ -22,9 +22,9 @@ import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationStatus;
+import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.entity.Reservation;
-import roomescape.domain.reservation.entity.Status;
+import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.dto.response.ReservationThemeResponseDto;
@@ -157,11 +157,11 @@ class ReservationServiceTest {
                 new ReservationByNameResponseDto(savedReservation1.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time1.getId(), time1.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
-                        theme.getImageUrl(), false), ReservationStatus.EDITABLE, ""),
+                        theme.getImageUrl(), false), ReservationEditableStatus.EDITABLE, "", null),
                 new ReservationByNameResponseDto(savedReservation2.getId(), "브라운", date.plusDays(1),
                     new ReservationTimeResponseDto(time2.getId(), time2.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
-                        theme.getImageUrl(), false), ReservationStatus.EDITABLE, "")
+                        theme.getImageUrl(), false), ReservationEditableStatus.EDITABLE, "", null)
             );
         }
 
@@ -193,8 +193,8 @@ class ReservationServiceTest {
                 new ReservationByNameResponseDto(savedReservation.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), true),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
-                        theme.getImageUrl(), true), ReservationStatus.EDIT_RECOMMENDED,
-                    "현재 예약의 시간 또는 테마가 더 이상 제공되지 않습니다. 다른 예약 정보로 수정해주세요.")
+                        theme.getImageUrl(), true), ReservationEditableStatus.EDIT_RECOMMENDED,
+                    "현재 예약의 시간 또는 테마가 더 이상 제공되지 않습니다. 다른 예약 정보로 수정해주세요.", null)
             );
         }
 
@@ -215,7 +215,7 @@ class ReservationServiceTest {
                 new ReservationByNameResponseDto(savedReservation.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
-                        theme.getImageUrl(), false), ReservationStatus.LOCKED, "지난 예약은 수정하거나 취소할 수 없습니다.")
+                        theme.getImageUrl(), false), ReservationEditableStatus.LOCKED, "지난 예약은 수정하거나 취소할 수 없습니다.", null)
             );
         }
 
@@ -236,7 +236,29 @@ class ReservationServiceTest {
                 new ReservationByNameResponseDto(savedReservation.getId(), "브라운", date,
                     new ReservationTimeResponseDto(time.getId(), time.getStartAt(), false),
                     new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
-                        theme.getImageUrl(), false), ReservationStatus.CANCELED, "취소된 예약입니다.")
+                        theme.getImageUrl(), false), ReservationEditableStatus.CANCELED, "취소된 예약입니다.", null)
+            );
+        }
+
+        @Test
+        void 대기_중인_예약은_순번을_표시한다() {
+            // given
+            LocalDate date = LocalDate.now(fixedClock).plusDays(1);
+            Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
+            Theme theme = themeRepository.save(
+                Theme.create("테마 이름", "테마 설명", "https://roomescape.com/images/themes/ring-banner.png"));
+            reservationRepository.save(Reservation.create("제이슨", date, time, theme).toWaiting());
+            Reservation waiting = reservationRepository.save(Reservation.create("브라운", date, time, theme).toWaiting());
+
+            // when
+            List<ReservationByNameResponseDto> actual = reservationService.getReservationsByName("브라운");
+
+            // then
+            assertThat(actual).containsExactly(
+                new ReservationByNameResponseDto(waiting.getId(), "브라운", date,
+                    new ReservationTimeResponseDto(time.getId(), time.getStartAt(), false),
+                    new ReservationThemeResponseDto(theme.getId(), theme.getName(), theme.getDescription(),
+                        theme.getImageUrl(), false), ReservationEditableStatus.WAITING, "대기 중인 예약입니다.", 2)
             );
         }
     }
@@ -608,7 +630,7 @@ class ReservationServiceTest {
                 assertThat(reservationRepository.findReservationByIdAndDeletedAtIsNull(savedReservation.id()))
                     .get()
                     .extracting(Reservation::getStatus)
-                    .isEqualTo(Status.CANCELED);
+                    .isEqualTo(ReservationStatus.CANCELED);
             }
         }
 

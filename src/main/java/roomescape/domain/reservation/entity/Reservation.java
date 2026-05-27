@@ -11,9 +11,9 @@ public class Reservation {
     private final LocalDate date;
     private final Time time;
     private final Theme theme;
-    private final Status status;
+    private final ReservationStatus status;
 
-    private Reservation(Long id, String name, LocalDate date, Time time, Theme theme, Status status) {
+    private Reservation(Long id, String name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -23,19 +23,19 @@ public class Reservation {
     }
 
     public static Reservation create(String name, LocalDate date, Time time, Theme theme) {
-        return new Reservation(null, name, date, time, theme, Status.ACTIVE);
+        return new Reservation(null, name, date, time, theme, ReservationStatus.ACTIVE);
     }
 
-    public static Reservation reconstruct(Long id, String name, LocalDate date, Time time, Theme theme, Status status) {
+    public static Reservation reconstruct(Long id, String name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
         return new Reservation(id, name, date, time, theme, status);
     }
 
     public Reservation cancel() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, Status.CANCELED);
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.CANCELED);
     }
 
     public Reservation toWaiting() {
-        return new Reservation(this.id, this.name, this.date, this.time, this.theme, Status.WAITING);
+        return new Reservation(this.id, this.name, this.date, this.time, this.theme, ReservationStatus.WAITING);
     }
 
     public Long getId() {
@@ -58,7 +58,7 @@ public class Reservation {
         return theme;
     }
 
-    public Status getStatus() {
+    public ReservationStatus getStatus() {
         return status;
     }
 }

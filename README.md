@@ -334,13 +334,15 @@
 2. 사용자 이름으로 조회된 항목이 없으면 빈 배열을 반환합니다.
 3. 예약 정렬 기준은 날짜순이고, 날짜가 같은 경우엔 시간순 오름차순 정렬입니다.
 4. 삭제되지 않은 예약만 조회합니다.
-5. 각 예약에 수정 가능 여부, 취소 가능 여부, 수정 권장 여부를 나타내는 status 필드를 포함해야 합니다.
+5. 각 예약에 수정 가능 여부, 취소 가능 여부, 대기 여부, 취소 여부, 수정 권장 여부를 나타내는 status 필드를 포함해야 합니다.
 6. 각 예약에 status에 맞는 message 필드를 포함해야 합니다.
 7. time, theme 필드에 삭제 여부를 포함해야 합니다.
 8. status가 EDITABLE이면 수정 가능, 취소 가능, 수정 권장 아님을 의미합니다.
 9. status가 EDIT_RECOMMENDED이면 수정 가능, 취소 가능, 연결된 time 또는 theme가 삭제되어 수정 권장함을 의미합니다.
 10. status가 LOCKED이면 수정 불가, 취소 불가, 이미 지난 예약을 의미합니다.
 11. status가 CANCELED이면 이미 취소된 예약을 의미합니다.
+12. status가 WAITING이면 대기 중인 예약을 의미합니다.
+13. waitingNumber는 대기 순번을 의미합니다.
 ```
 
 ### 상황별 HTTP Code 및 상위 메시지
@@ -392,7 +394,8 @@
       "deleted": false
     },
     "status": "EDITABLE",
-    "message": ""
+    "message": "",
+    "waitingNumber": null
   }
 ]
 ```

@@ -13,9 +13,9 @@ import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationStatus;
+import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
 import roomescape.domain.reservation.entity.Reservation;
-import roomescape.domain.reservation.entity.Status;
+import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.reservation.mapper.ReservationMapper;
 import roomescape.domain.reservation.repository.ReservationRepository;
@@ -51,24 +51,36 @@ public class ReservationService {
     public List<ReservationByNameResponseDto> getReservationsByName(String name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
         return reservations.stream()
-            .map(reservation -> ReservationMapper.toByNameResponseDto(reservation, getStatus(reservation)))
+            .map(reservation -> ReservationMapper.toByNameResponseDto(reservation, getStatus(reservation), getWaitingNumber(reservation)))
             .toList();
     }
 
-    private ReservationStatus getStatus(Reservation reservation) {
-        if (reservation.getStatus() == Status.CANCELED) {
-            return ReservationStatus.CANCELED;
+    private ReservationEditableStatus getStatus(Reservation reservation) {
+        if (reservation.getStatus() == ReservationStatus.CANCELED) {
+            return ReservationEditableStatus.CANCELED;
         }
 
         if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            return ReservationStatus.LOCKED;
+            return ReservationEditableStatus.LOCKED;
+        }
+
+        if (reservation.getStatus() == ReservationStatus.WAITING) {
+            return ReservationEditableStatus.WAITING;
         }
 
         if (reservation.getTime().getDeletedAt() != null || reservation.getTheme().getDeletedAt() != null) {
-            return ReservationStatus.EDIT_RECOMMENDED;
+            return ReservationEditableStatus.EDIT_RECOMMENDED;
         }
 
-        return ReservationStatus.EDITABLE;
+        return ReservationEditableStatus.EDITABLE;
+    }
+
+    private Integer getWaitingNumber(Reservation reservation) {
+        if (reservation.getStatus() != ReservationStatus.WAITING) {
+            return null;
+        }
+
+        return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
@@ -103,7 +115,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
         }
 
-        if (existingReservation.getStatus() != Status.ACTIVE) {
+        if (existingReservation.getStatus() != ReservationStatus.ACTIVE) {
             throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
@@ -133,7 +145,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 
-        if (reservation.getStatus() == Status.CANCELED) {
+        if (reservation.getStatus() == ReservationStatus.CANCELED) {
             throw new GeneralException(ReservationErrorType.ALREADY_CANCELED);
         }
 
@@ -249,7 +261,7 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 
-        if (reservation.getStatus() != Status.WAITING) {
+        if (reservation.getStatus() != ReservationStatus.WAITING) {
             throw new GeneralException(ReservationErrorType.NOT_WAITING_RESERVATION);
         }
 

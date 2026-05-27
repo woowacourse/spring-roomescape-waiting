@@ -21,6 +21,8 @@ public interface ReservationRepository {
 
     Reservation update(Reservation reservation);
 
+    int countByIdLessThanEqualAndDateAndTimeAndTheme(Long id, LocalDate date, Time time, Theme theme);
+
     void deleteReservationById(Long id);
 
     boolean existsReservationByIdAndDeletedAtIsNull(Long id);

@@ -14,11 +14,12 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.reservation.entity.Reservation;
-import roomescape.domain.reservation.entity.Status;
+import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
+import roomescape.global.error.type.ErrorType;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -165,6 +166,26 @@ public class JdbcReservationRepository implements ReservationRepository {
             reservation.getTime(), reservation.getTheme(), reservation.getStatus());
     }
 
+    @Override
+    public int countByIdLessThanEqualAndDateAndTimeAndTheme(Long reservationId, LocalDate date, Time time, Theme theme) {
+        String countSql = """
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE id <= :id
+                  AND date = :date
+                  AND time_id = :timeId
+                  AND theme_id = :themeId
+                  AND status = 'WAITING'
+                """;
+        SqlParameterSource parameters = new MapSqlParameterSource()
+                .addValue("id", reservationId)
+                .addValue("date", date)
+                .addValue("timeId", time.getId())
+                .addValue("themeId", theme.getId());
+
+        return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
+    }
+
     private Reservation mapReservation(ResultSet rs) throws SQLException {
         return Reservation.reconstruct(
             rs.getLong("id"),
@@ -182,7 +203,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString("image_url"),
                 getNullableLocalDateTime(rs, "theme_deleted_at")
             ),
-            Status.valueOf(rs.getString("status"))
+            ReservationStatus.valueOf(rs.getString("status"))
         );
     }
 
