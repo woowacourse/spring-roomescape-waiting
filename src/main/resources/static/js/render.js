@@ -1,50 +1,43 @@
 import {appEl, modalRootEl, toastRootEl} from "./dom.js";
-import {
-  canSubmitReservation,
-  isPastReservation,
-  selectedTheme,
-  selectedTime,
-  state,
-  todayString
-} from "./state.js";
+import {canSubmitReservation, isPastReservation, selectedTheme, selectedTime, state, todayString} from "./state.js";
 
 let enterAnimationTimer = null;
 
 export function render(options = {}) {
-  if (options.animate) {
-    window.clearTimeout(enterAnimationTimer);
-    appEl.classList.add("is-entering");
-    enterAnimationTimer = window.setTimeout(() => {
-      appEl.classList.remove("is-entering");
-    }, 900);
-  } else {
-    appEl.classList.remove("is-entering");
-  }
+    if (options.animate) {
+        window.clearTimeout(enterAnimationTimer);
+        appEl.classList.add("is-entering");
+        enterAnimationTimer = window.setTimeout(() => {
+            appEl.classList.remove("is-entering");
+        }, 900);
+    } else {
+        appEl.classList.remove("is-entering");
+    }
 
-  appEl.innerHTML = `
+    appEl.innerHTML = `
     ${renderHeader()}
     ${state.route === "admin" ? renderAdmin() : renderReserve()}
   `;
-  modalRootEl.innerHTML = renderConfirm();
-  toastRootEl.innerHTML = renderToast();
-  syncThemeFilter();
+    modalRootEl.innerHTML = renderConfirm();
+    toastRootEl.innerHTML = renderToast();
+    syncThemeFilter();
 }
 
 export function syncThemeFilter() {
-  const query = normalize(state.themeQuery);
-  const cards = appEl.querySelectorAll("[data-theme-card]");
+    const query = normalize(state.themeQuery);
+    const cards = appEl.querySelectorAll("[data-theme-card]");
 
-  cards.forEach((card) => {
-    const target = normalize(card.dataset.search || "");
-    card.hidden = Boolean(query) && !target.includes(query);
-  });
+    cards.forEach((card) => {
+        const target = normalize(card.dataset.search || "");
+        card.hidden = Boolean(query) && !target.includes(query);
+    });
 }
 
 function renderHeader() {
-  const reserveActive = state.route === "reserve";
-  const adminActive = state.route === "admin";
+    const reserveActive = state.route === "reserve";
+    const adminActive = state.route === "admin";
 
-  return `
+    return `
     <header class="site-header">
       <div class="site-header-inner">
         <button class="brand-button" type="button" data-route="reserve" aria-label="예약 화면으로 이동">
@@ -64,11 +57,13 @@ function renderHeader() {
 }
 
 function renderReserve() {
-  const theme = selectedTheme();
-  const popular = state.popularThemes;
-  const gridClass = `reservation-grid ${theme ? "has-booking" : ""}`;
+    const theme = selectedTheme();
+    const time = selectedTime();
+    const waitingMode = time && !time.available;
+    const popular = state.popularThemes;
+    const gridClass = `reservation-grid ${theme ? "has-booking" : ""}`;
 
-  return `
+    return `
     <main class="page-shell">
       ${renderMyReservations()}
 
@@ -76,7 +71,7 @@ function renderReserve() {
         <div>
           <p class="section-kicker">Now Booking</p>
           <h1>방탈출 테마 랭킹</h1>
-          <p>테마를 고르고 날짜와 시간을 바로 확정합니다.</p>
+          <p>테마를 고르고 예약하거나, 이미 찬 시간은 대기로 신청합니다.</p>
         </div>
         <div class="metric-row" aria-label="예약 현황">
           ${renderMetric(state.themes.length, "테마")}
@@ -105,7 +100,7 @@ function renderReserve() {
               ${renderTimeSlots()}
               ${renderBookingSummary(theme)}
               <button class="primary-button submit-button" type="submit" ${canSubmitReservation() ? "" : "disabled"}>
-                ${state.submitting ? "예약 중" : "예약하기"}
+                ${state.submitting ? (waitingMode ? "대기 신청 중" : "예약 중") : (waitingMode ? "대기 신청하기" : "예약하기")}
               </button>
             </form>
           </aside>
@@ -133,8 +128,8 @@ function renderReserve() {
 }
 
 function renderPopularThemes(popular) {
-  if (state.loading.boot && popular.length === 0) {
-    return `
+    if (state.loading.boot && popular.length === 0) {
+        return `
       <div class="popular-header">
         <p class="section-kicker">Live Rank</p>
         <h2 id="popular-title">실시간 인기</h2>
@@ -142,19 +137,19 @@ function renderPopularThemes(popular) {
       </div>
       ${renderSkeletonStrip()}
     `;
-  }
+    }
 
-  if (popular.length === 0) {
-    return `
+    if (popular.length === 0) {
+        return `
       <div class="popular-header">
         <p class="section-kicker">Live Rank</p>
         <h2 id="popular-title">실시간 인기</h2>
       </div>
       ${renderEmpty("아직 인기 테마가 없습니다.")}
     `;
-  }
+    }
 
-  return `
+    return `
     <div class="popular-section">
       <div class="popular-header">
         <p class="section-kicker">Live Rank</p>
@@ -175,15 +170,15 @@ function renderPopularThemes(popular) {
 }
 
 function renderThemeGrid() {
-  if (state.loading.boot && state.themes.length === 0) {
-    return `<div class="theme-grid">${Array.from({length: 6}, () => `<div class="theme-card-skeleton"></div>`).join("")}</div>`;
-  }
+    if (state.loading.boot && state.themes.length === 0) {
+        return `<div class="theme-grid">${Array.from({length: 6}, () => `<div class="theme-card-skeleton"></div>`).join("")}</div>`;
+    }
 
-  if (state.themes.length === 0) {
-    return renderEmpty("등록된 테마가 없습니다.");
-  }
+    if (state.themes.length === 0) {
+        return renderEmpty("등록된 테마가 없습니다.");
+    }
 
-  return `
+    return `
     <div class="theme-grid">
       ${state.themes.map(renderThemeCard).join("")}
     </div>
@@ -191,9 +186,9 @@ function renderThemeGrid() {
 }
 
 function renderThemeCard(theme) {
-  const selected = isSelected(theme);
+    const selected = isSelected(theme);
 
-  return `
+    return `
     <button class="theme-card ${selected ? "is-active" : ""}" type="button" data-theme-id="${theme.id}" data-theme-card data-search="${escapeAttr(`${theme.name} ${theme.description}`)}" aria-pressed="${selected}">
       <span class="image-frame">
         <img src="${escapeAttr(theme.thumbnailImgUrl)}" alt="${escapeAttr(theme.name)}" loading="lazy" data-cover>
@@ -208,11 +203,11 @@ function renderThemeCard(theme) {
 }
 
 function renderSelectedTheme(theme) {
-  if (!theme) {
-    return `<div class="selected-theme is-empty">테마를 선택해 주세요.</div>`;
-  }
+    if (!theme) {
+        return `<div class="selected-theme is-empty">테마를 선택해 주세요.</div>`;
+    }
 
-  return `
+    return `
     <div class="selected-theme">
       <div class="selected-copy">
         <span>선택한 테마</span>
@@ -224,7 +219,7 @@ function renderSelectedTheme(theme) {
 }
 
 function renderReservationFields() {
-  return `
+    return `
     <div class="form-row">
       <label for="reservation-date">날짜</label>
       <input id="reservation-date" name="date" type="date" min="${todayString()}" value="${escapeAttr(state.selectedDate)}">
@@ -237,44 +232,51 @@ function renderReservationFields() {
 }
 
 function renderTimeSlots() {
-  if (!state.selectedThemeId) {
-    return renderPanelNotice("테마를 선택하면 시간이 표시됩니다.");
-  }
+    if (!state.selectedThemeId) {
+        return renderPanelNotice("테마를 선택하면 시간이 표시됩니다.");
+    }
 
-  if (state.loading.times) {
-    return `
+    if (state.loading.times) {
+        return `
       <div class="time-section">
         <div class="subsection-heading"><h3>시간 선택</h3></div>
         <div class="time-grid">${Array.from({length: 8}, () => `<span class="time-skeleton"></span>`).join("")}</div>
       </div>
     `;
-  }
+    }
 
-  if (state.availableTimes.length === 0) {
-    return renderPanelNotice("등록된 예약 시간이 없습니다.");
-  }
+    if (state.availableTimes.length === 0) {
+        return renderPanelNotice("등록된 예약 시간이 없습니다.");
+    }
 
-  return `
+    return `
     <div class="time-section">
       <div class="subsection-heading">
         <h3>시간 선택</h3>
-        <span>회색은 마감</span>
+        <span>예약 완료 시간은 대기로 신청할 수 있습니다</span>
       </div>
       <div class="time-grid">
-        ${state.availableTimes.map((time) => `
-          <button class="time-slot ${Number(state.selectedTimeId) === Number(time.id) ? "is-active" : ""}" type="button" data-time-slot-id="${time.id}" ${time.available ? "" : "disabled"}>
-            ${escapeHtml(time.startAt)}
-          </button>
-        `).join("")}
+        ${state.availableTimes.map((time) => {
+        const selected = Number(state.selectedTimeId) === Number(time.id);
+        const waitingTarget = !time.available;
+
+        return `
+            <button class="time-slot ${selected ? "is-active" : ""} ${waitingTarget ? "is-waiting-target" : ""}" type="button" data-time-slot-id="${time.id}" aria-label="${escapeAttr(`${time.startAt} ${waitingTarget ? "대기 신청 가능" : "예약 가능"}`)}">
+              <span>${escapeHtml(time.startAt)}</span>
+              <small>${waitingTarget ? "대기 가능" : "예약 가능"}</small>
+            </button>
+          `;
+    }).join("")}
       </div>
     </div>
   `;
 }
 
 function renderBookingSummary(theme) {
-  const time = selectedTime();
+    const time = selectedTime();
+    const waitingMode = time && !time.available;
 
-  return `
+    return `
     <dl class="booking-summary">
       <div>
         <dt>테마</dt>
@@ -284,15 +286,20 @@ function renderBookingSummary(theme) {
         <dt>일정</dt>
         <dd>${escapeHtml(state.selectedDate || "-")} ${time ? escapeHtml(time.startAt) : ""}</dd>
       </div>
+      <div>
+        <dt>유형</dt>
+        <dd>${time ? (waitingMode ? "예약 대기" : "예약 확정") : "-"}</dd>
+      </div>
     </dl>
+    ${waitingMode ? `<p class="booking-mode-notice">이미 예약된 시간입니다. 신청하면 대기 목록에 등록됩니다.</p>` : ""}
   `;
 }
 
 function renderMyReservations() {
-  const canSearch = Boolean(state.reservationSearchName.trim()) && !state.loading.searchedReservations;
-  const showReset = state.reservationSearchSubmitted || state.reservationSearchName;
+    const canSearch = Boolean(state.reservationSearchName.trim()) && !state.loading.searchedReservations;
+    const showReset = state.reservationSearchSubmitted || state.reservationSearchName;
 
-  return `
+    return `
     <section class="my-reservation-panel" aria-labelledby="my-reservation-title">
       <div class="section-toolbar">
         <div>
@@ -319,30 +326,50 @@ function renderMyReservations() {
 }
 
 function renderMyReservationResults() {
-  if (state.loading.searchedReservations) {
-    return `<div class="my-reservation-list">${Array.from({length: 2}, () => `<span class="my-reservation-skeleton"></span>`).join("")}</div>`;
-  }
+    if (state.loading.searchedReservations) {
+        return `<div class="my-reservation-list">${Array.from({length: 2}, () => `<span class="my-reservation-skeleton"></span>`).join("")}</div>`;
+    }
 
-  if (!state.reservationSearchSubmitted) {
-    return renderEmpty("조회한 예약이 여기에 표시됩니다.");
-  }
+    if (!state.reservationSearchSubmitted) {
+        return renderEmpty("조회한 예약이 여기에 표시됩니다.");
+    }
 
-  if (state.searchedReservations.length === 0) {
-    return renderEmpty("예약 내역이 없습니다.");
-  }
+    if (state.searchedReservations.length === 0 && state.searchedWaitings.length === 0) {
+        return renderEmpty("예약 내역이 없습니다.");
+    }
 
-  return `
-    <div class="my-reservation-list">
-      ${state.searchedReservations.map(renderMyReservationItem).join("")}
+    return `
+    <div class="my-reservation-results">
+      ${renderApplicationGroup("예약 목록", "확정된 예약입니다.", state.searchedReservations, renderMyReservationItem)}
+      ${renderApplicationGroup("대기 목록", "예약 취소가 발생하면 순서대로 확정됩니다.", state.searchedWaitings, renderMyWaitingItem)}
     </div>
   `;
 }
 
-function renderMyReservationItem(reservation) {
-  const editing = Number(state.reservationEdit.id) === Number(reservation.id);
-  const past = isPastReservation(reservation);
+function renderApplicationGroup(title, description, items, renderer) {
+    return `
+    <section class="my-reservation-group">
+      <div class="application-group-header">
+        <div>
+          <h3>${escapeHtml(title)}</h3>
+          <p>${escapeHtml(description)}</p>
+        </div>
+        <strong>${items.length}건</strong>
+      </div>
+      ${items.length > 0 ? `
+        <div class="my-reservation-list">
+          ${items.map(renderer).join("")}
+        </div>
+      ` : renderEmpty(`${title}이 없습니다.`)}
+    </section>
+  `;
+}
 
-  return `
+function renderMyReservationItem(reservation) {
+    const editing = Number(state.reservationEdit.id) === Number(reservation.id);
+    const past = isPastReservation(reservation);
+
+    return `
     <article class="my-reservation-item ${editing ? "is-editing" : ""}">
       <span class="row-thumb"><img src="${escapeAttr(reservation.theme.thumbnailImgUrl)}" alt="" loading="lazy" data-cover></span>
       <span class="row-main">
@@ -365,11 +392,35 @@ function renderMyReservationItem(reservation) {
   `;
 }
 
-function renderReservationEditForm(reservation) {
-  const selectedTimeId = Number(state.reservationEdit.timeId);
-  const canSubmit = Boolean(state.reservationEdit.date && selectedTimeId && !state.submitting && !state.reservationEdit.loading);
+function renderMyWaitingItem(waiting) {
+    const past = isPastReservation(waiting);
+    const rankText = waiting.rank ? `${waiting.rank}번째 대기` : "대기 중";
 
-  return `
+    return `
+    <article class="my-reservation-item is-waiting">
+      <span class="row-thumb"><img src="${escapeAttr(waiting.theme.thumbnailImgUrl)}" alt="" loading="lazy" data-cover></span>
+      <span class="row-main">
+        <span class="reservation-card-heading">
+          <strong>${escapeHtml(waiting.theme.name)}</strong>
+          <em class="waiting-badge">${escapeHtml(rankText)}</em>
+          ${past ? `<em class="lock-badge">지난 대기</em>` : `<em class="open-badge">대기 신청</em>`}
+        </span>
+        <small>${escapeHtml(waiting.date)} ${escapeHtml(waiting.time.startAt)} · ${escapeHtml(waiting.name)} · ${escapeHtml(waiting.status)}</small>
+      </span>
+      <span class="reservation-card-actions">
+        <button class="danger-button" type="button" data-action="delete-waiting" data-waiting-id="${waiting.id}" ${past ? "disabled" : ""}>
+          ${past ? "취소 불가" : "대기 취소"}
+        </button>
+      </span>
+    </article>
+  `;
+}
+
+function renderReservationEditForm(reservation) {
+    const selectedTimeId = Number(state.reservationEdit.timeId);
+    const canSubmit = Boolean(state.reservationEdit.date && selectedTimeId && !state.submitting && !state.reservationEdit.loading);
+
+    return `
     <form id="reservation-edit-form" class="reservation-edit-form" data-reservation-id="${reservation.id}">
       <div class="form-row">
         <label for="reservation-edit-date">변경 날짜</label>
@@ -387,20 +438,20 @@ function renderReservationEditForm(reservation) {
 }
 
 function renderReservationEditTimes(reservation) {
-  if (state.reservationEdit.loading) {
-    return `
+    if (state.reservationEdit.loading) {
+        return `
       <div class="time-section">
         <div class="subsection-heading"><h3>변경 시간</h3></div>
         <div class="time-grid compact">${Array.from({length: 6}, () => `<span class="time-skeleton"></span>`).join("")}</div>
       </div>
     `;
-  }
+    }
 
-  if (state.reservationEdit.times.length === 0) {
-    return renderPanelNotice("선택한 날짜에 등록된 시간이 없습니다.");
-  }
+    if (state.reservationEdit.times.length === 0) {
+        return renderPanelNotice("선택한 날짜에 등록된 시간이 없습니다.");
+    }
 
-  return `
+    return `
     <div class="time-section">
       <div class="subsection-heading">
         <h3>변경 시간</h3>
@@ -408,23 +459,23 @@ function renderReservationEditTimes(reservation) {
       </div>
       <div class="time-grid compact">
         ${state.reservationEdit.times.map((time) => {
-          const current = isCurrentReservationTime(reservation, time);
-          const disabled = !time.available && !current;
-          const selected = Number(state.reservationEdit.timeId) === Number(time.id);
+        const current = isCurrentReservationTime(reservation, time);
+        const disabled = !time.available && !current;
+        const selected = Number(state.reservationEdit.timeId) === Number(time.id);
 
-          return `
+        return `
             <button class="time-slot ${selected ? "is-active" : ""} ${current ? "is-current" : ""}" type="button" data-action="select-edit-time" data-time-id="${time.id}" ${disabled ? "disabled" : ""}>
               ${escapeHtml(time.startAt)}
             </button>
           `;
-        }).join("")}
+    }).join("")}
       </div>
     </div>
   `;
 }
 
 function renderAdmin() {
-  return `
+    return `
     <main class="page-shell">
       <section class="headline-row">
         <div>
@@ -454,7 +505,7 @@ function renderAdmin() {
 }
 
 function renderAdminTab(tab, label) {
-  return `
+    return `
     <button class="${state.adminTab === tab ? "is-active" : ""}" type="button" data-admin-tab="${tab}">
       ${escapeHtml(label)}
     </button>
@@ -462,19 +513,19 @@ function renderAdminTab(tab, label) {
 }
 
 function renderAdminPanel() {
-  if (state.adminTab === "times") {
-    return renderTimesAdmin();
-  }
+    if (state.adminTab === "times") {
+        return renderTimesAdmin();
+    }
 
-  if (state.adminTab === "reservations") {
-    return renderReservationsAdmin();
-  }
+    if (state.adminTab === "reservations") {
+        return renderReservationsAdmin();
+    }
 
-  return renderThemesAdmin();
+    return renderThemesAdmin();
 }
 
 function renderThemesAdmin() {
-  return `
+    return `
     <div class="admin-panel-header">
       <div>
         <p class="section-kicker">Theme</p>
@@ -506,10 +557,10 @@ function renderThemesAdmin() {
 }
 
 function renderThemeAdminRow(theme) {
-  const reservationCount = countReservationsByTheme(theme.id);
-  const locked = reservationCount > 0;
+    const reservationCount = countReservationsByTheme(theme.id);
+    const locked = reservationCount > 0;
 
-  return `
+    return `
     <article class="data-row">
       <span class="row-thumb"><img src="${escapeAttr(theme.thumbnailImgUrl)}" alt="" loading="lazy" data-cover></span>
       <span class="row-main">
@@ -525,7 +576,7 @@ function renderThemeAdminRow(theme) {
 }
 
 function renderTimesAdmin() {
-  return `
+    return `
     <div class="admin-panel-header">
       <div>
         <p class="section-kicker">Time</p>
@@ -549,10 +600,10 @@ function renderTimesAdmin() {
 }
 
 function renderTimeAdminItem(time) {
-  const reservationCount = countReservationsByTime(time.id);
-  const locked = reservationCount > 0;
+    const reservationCount = countReservationsByTime(time.id);
+    const locked = reservationCount > 0;
 
-  return `
+    return `
     <div class="time-admin-item">
       <span class="time-admin-copy">
         <strong>${escapeHtml(time.startAt)}</strong>
@@ -566,7 +617,7 @@ function renderTimeAdminItem(time) {
 }
 
 function renderReservationsAdmin() {
-  return `
+    return `
     <div class="admin-panel-header">
       <div>
         <p class="section-kicker">Reservation</p>
@@ -588,9 +639,9 @@ function renderReservationsAdmin() {
 }
 
 function renderReservationAdminRow(reservation) {
-  const past = isPastReservation(reservation);
+    const past = isPastReservation(reservation);
 
-  return `
+    return `
     <div class="table-row" role="row">
       <span>${escapeHtml(reservation.name)}</span>
       <span>${escapeHtml(reservation.theme.name)}</span>
@@ -605,7 +656,7 @@ function renderReservationAdminRow(reservation) {
 }
 
 function renderMetric(value, label) {
-  return `
+    return `
     <div class="metric">
       <strong>${escapeHtml(value)}</strong>
       <span>${escapeHtml(label)}</span>
@@ -614,7 +665,7 @@ function renderMetric(value, label) {
 }
 
 function renderSkeletonStrip() {
-  return `
+    return `
     <div class="popular-list">
       ${Array.from({length: 5}, () => `<span class="popular-skeleton"></span>`).join("")}
     </div>
@@ -622,26 +673,26 @@ function renderSkeletonStrip() {
 }
 
 function renderPanelNotice(message) {
-  return `<p class="panel-notice">${escapeHtml(message)}</p>`;
+    return `<p class="panel-notice">${escapeHtml(message)}</p>`;
 }
 
 function renderEmpty(message) {
-  return `<p class="empty-state">${escapeHtml(message)}</p>`;
+    return `<p class="empty-state">${escapeHtml(message)}</p>`;
 }
 
 function renderConfirm() {
-  if (!state.confirm) {
-    return "";
-  }
+    if (!state.confirm) {
+        return "";
+    }
 
-  return `
+    return `
     <div class="modal-backdrop" data-action="cancel-confirm">
       <section class="confirm-dialog" role="dialog" aria-modal="true" aria-labelledby="confirm-title">
         <h2 id="confirm-title">${escapeHtml(state.confirm.title)}</h2>
         <p>${escapeHtml(state.confirm.body)}</p>
         <div class="confirm-actions">
           <button class="secondary-button" type="button" data-action="cancel-confirm">취소</button>
-          <button class="danger-button strong" type="button" data-action="confirm-ok">삭제</button>
+          <button class="danger-button strong" type="button" data-action="confirm-ok">${escapeHtml(state.confirm.confirmLabel || "삭제")}</button>
         </div>
       </section>
     </div>
@@ -649,11 +700,11 @@ function renderConfirm() {
 }
 
 function renderToast() {
-  if (!state.toast) {
-    return "";
-  }
+    if (!state.toast) {
+        return "";
+    }
 
-  return `
+    return `
     <button class="toast ${state.toast.type}" type="button" data-action="dismiss-toast">
       ${escapeHtml(state.toast.message)}
     </button>
@@ -661,35 +712,35 @@ function renderToast() {
 }
 
 function isSelected(theme) {
-  return Number(state.selectedThemeId) === Number(theme.id);
+    return Number(state.selectedThemeId) === Number(theme.id);
 }
 
 function normalize(value) {
-  return String(value || "").trim().toLowerCase();
+    return String(value || "").trim().toLowerCase();
 }
 
 function countReservationsByTheme(themeId) {
-  return state.reservations.filter((reservation) => Number(reservation.theme?.id) === Number(themeId)).length;
+    return state.reservations.filter((reservation) => Number(reservation.theme?.id) === Number(themeId)).length;
 }
 
 function countReservationsByTime(timeId) {
-  return state.reservations.filter((reservation) => Number(reservation.time?.id) === Number(timeId)).length;
+    return state.reservations.filter((reservation) => Number(reservation.time?.id) === Number(timeId)).length;
 }
 
 function isCurrentReservationTime(reservation, time) {
-  return reservation.date === state.reservationEdit.date &&
-    Number(reservation.time.id) === Number(time.id);
+    return reservation.date === state.reservationEdit.date &&
+        Number(reservation.time.id) === Number(time.id);
 }
 
 function escapeHtml(value) {
-  return String(value ?? "")
-    .replaceAll("&", "&amp;")
-    .replaceAll("<", "&lt;")
-    .replaceAll(">", "&gt;")
-    .replaceAll("\"", "&quot;")
-    .replaceAll("'", "&#039;");
+    return String(value ?? "")
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll("\"", "&quot;")
+        .replaceAll("'", "&#039;");
 }
 
 function escapeAttr(value) {
-  return escapeHtml(value);
+    return escapeHtml(value);
 }
