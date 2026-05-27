@@ -56,8 +56,7 @@ public class ReservationController {
         var result = reservationService.findByGuestNameExceptCanceled(guestName);
 
         return ResponseEntity.ok(
-                ReservationWaitingListResponse.from(
-                        result.stream()
+                ReservationWaitingListResponse.from(result.stream()
                                 .map(ReservationWaitingResponse::from)
                                 .toList()
                 )
