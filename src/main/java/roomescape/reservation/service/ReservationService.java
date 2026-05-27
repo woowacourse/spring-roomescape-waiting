@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
@@ -31,7 +32,6 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -58,10 +58,17 @@ public class ReservationService {
         final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(new CustomerName(customerName), now);
         final List<Waiting> waitings = waitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(customerName, now);
 
-        final List<WaitingResponse> waitingsWithRank =
-                IntStream.range(0, waitings.size())
-                        .mapToObj(i -> WaitingResponse.of(waitings.get(i), i + 1))
-                        .toList();
+        final List<WaitingResponse> waitingsWithRank = waitings.stream()
+                .map(waiting -> {
+                    int rank = waitingRepository.countEarlierWaitingsInSlot(
+                            waiting.getReservationDate(),
+                            waiting.getTime().getId(),
+                            waiting.getTheme().getId(),
+                            waiting.getCreatedAt()
+                    ) + 1;
+                    return WaitingResponse.of(waiting, rank);
+                })
+                .toList();
 
         return ReservationsAndWaitingsResponse.from(reservations, waitingsWithRank);
     }
@@ -100,16 +107,21 @@ public class ReservationService {
         return updateSchedule(data, originReservation);
     }
 
+    @Transactional
     public void cancel(final Long reservationId) {
         final Reservation reservation = getReservation(reservationId);
-
         reservation.validateCancelableByCustomer(LocalDate.now(clock));
 
         deleteReservation(reservationId);
+        promoteEarliestWaiting(reservation);
     }
 
+    @Transactional
     public void delete(final Long reservationId) {
+        final Reservation reservation = getReservation(reservationId);
+
         deleteReservation(reservationId);
+        promoteEarliestWaiting(reservation);
     }
 
     public ReservationOptionResponse getReservationOptions() {
@@ -161,6 +173,24 @@ public class ReservationService {
         } catch (DataIntegrityViolationException exception) {
             throw new ReservationOptionChangedException(exception);
         }
+    }
+
+    private void promoteEarliestWaiting(final Reservation cancelledReservation) {
+        waitingRepository.findEarliestBySlot(
+                cancelledReservation.getDate(),
+                cancelledReservation.getTime().getId(),
+                cancelledReservation.getTheme().getId()
+        ).ifPresent(waiting -> {
+            waitingRepository.deleteById(waiting.getId());
+            final Reservation promoted = Reservation.of(
+                    null,
+                    waiting.getCustomerName().name(),
+                    waiting.getReservationDate(),
+                    waiting.getTime(),
+                    waiting.getTheme()
+            );
+            saveReservation(promoted);
+        });
     }
 
     private void deleteReservation(final Long reservationId) {

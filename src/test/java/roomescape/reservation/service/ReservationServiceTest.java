@@ -417,4 +417,58 @@ class ReservationServiceTest {
                 .isInstanceOf(NotFoundException.class);
     }
 
+    @Test
+    void 대기_순위는_같은_슬롯_내_createdAt_순서로_계산된다() {
+        // given
+        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+
+        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+        waitingRepository.add(Waiting.of(3L, "브라운", Date.valueOf(futureDate), NOW, time, theme));
+
+        // when
+        ReservationsAndWaitingsResponse response = reservationService.getReservationsByCustomerName("브라운");
+
+        // then
+        assertThat(response.waitings()).hasSize(1);
+        assertThat(response.waitings().getFirst().rank()).isEqualTo(3);
+    }
+
+    @Test
+    void 예약_취소_시_해당_슬롯의_가장_빠른_대기가_예약으로_전환된다() {
+        // given
+        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+
+        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+
+        waitingRepository.add(Waiting.of(1L, "코로구", Date.valueOf(futureDate), NOW.minusMinutes(2), time, theme));
+        waitingRepository.add(Waiting.of(2L, "재키", Date.valueOf(futureDate), NOW.minusMinutes(1), time, theme));
+
+        // when
+        reservationService.cancel(1L);
+
+        // then
+        assertThat(reservationRepository.savedReservation().getCustomerName()).isEqualTo("코로구");
+    }
+
+    @Test
+    void 예약_취소_시_대기가_없으면_예약만_삭제된다() {
+        // given
+        final ReservationTime time = ReservationTime.of(1L, LocalTime.of(11, 0));
+        final Theme theme = Theme.of(1L, "링", "공포 테마", "http:~");
+        final LocalDate futureDate = LocalDate.of(2026, 5, 9);
+
+        reservationRepository.add(Reservation.of(1L, "브라운", futureDate, time, theme));
+
+        // when
+        reservationService.cancel(1L);
+
+        // then
+        assertThat(reservationRepository.findById(1L)).isEmpty();
+    }
+
 }

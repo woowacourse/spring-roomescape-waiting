@@ -6,8 +6,10 @@ import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
 
 import java.sql.Date;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,6 +47,30 @@ public class FakeWaitingRepository implements WaitingRepository {
         return waitings.stream()
                 .filter(waiting -> waiting.getId().equals(id))
                 .findFirst();
+    }
+
+    @Override
+    public Optional<Waiting> findEarliestBySlot(final LocalDate date, final long timeId, final long themeId) {
+        return waitings.stream()
+                .filter(w -> w.getReservationDate().equals(date))
+                .filter(w -> w.getTime().getId().equals(timeId))
+                .filter(w -> w.getTheme().getId().equals(themeId))
+                .min(Comparator.comparing(Waiting::getCreatedAt));
+    }
+
+    @Override
+    public int countEarlierWaitingsInSlot(
+            final LocalDate date,
+            final long timeId,
+            final long themeId,
+            final LocalDateTime createdAt
+    ) {
+        return (int) waitings.stream()
+                .filter(w -> w.getReservationDate().equals(date))
+                .filter(w -> w.getTime().getId().equals(timeId))
+                .filter(w -> w.getTheme().getId().equals(themeId))
+                .filter(w -> w.getCreatedAt().isBefore(createdAt))
+                .count();
     }
 
     @Override
