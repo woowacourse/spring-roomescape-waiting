@@ -85,14 +85,16 @@ public class ReservationService {
 
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
+        ReservationTime newTime = reservationTimeRepository.findByIdForUpdate(fixRequest.timeId())
+                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+        newTime.validateIfTimePast(fixRequest.date());
+
         if (!reservationRepository.existsByIdForUpdate(id)) {
             throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
-        validateFixRequest(reservation.getTheme(), fixRequest);
-        reservationTimeRepository.findById(fixRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+        validateDuplicateReservation(fixRequest.date(), fixRequest.timeId(), reservation.getTheme().getId());
 
         reservation.validateOwner(fixRequest.name());
 
@@ -107,16 +109,6 @@ public class ReservationService {
         if (!reservationRepository.existsById(id)) {
             throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
-    }
-
-    private void validateFixRequest(Theme theme, ReservationFixRequest newRequest) {
-        if (!reservationTimeRepository.existsById(newRequest.timeId())) {
-            throw new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND);
-        }
-        ReservationTime newTime = reservationTimeRepository.findById(newRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
-        newTime.validateIfTimePast(newRequest.date());
-        validateDuplicateReservation(newRequest.date(), newRequest.timeId(), theme.getId());
     }
 
     private void validateDuplicateReservation(LocalDate date, Long timeId, Long themeId) {
