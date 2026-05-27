@@ -13,8 +13,11 @@ import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
+import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
+import roomescape.theme.controller.dto.ThemeResponseDto;
 import roomescape.time.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -191,5 +194,53 @@ public class JdbcReservationRepository implements ReservationRepository {
         }
     }
 
-
+    @Override
+    public List<ReservationWithWaitingOrder> findAllByName(String name) {
+        String sql = """
+                SELECT r.id,
+                       r.name,
+                       r.status,
+                       t.id AS theme_id,
+                       t.name AS theme_name,
+                       t.description AS theme_description,
+                       t.image_url AS theme_image_url,
+                       rt.id AS time_id,
+                       rt.start_time,
+                       rt.end_time,
+                       COALESCE(ranked.rank, 0) AS orderWaiting
+                  FROM reservation r
+                  JOIN theme t ON r.theme_id = t.id
+                  JOIN reservation_time rt ON r.time_id = rt.id
+                  LEFT JOIN (
+                      SELECT id,
+                             ROW_NUMBER() OVER (
+                                 PARTITION BY theme_id, time_id
+                                 ORDER BY created_at ASC
+                             ) AS rank
+                      FROM reservation
+                      WHERE status = 'WAITING'
+                  ) ranked ON r.id = ranked.id
+                  WHERE r.name = ?;
+                """;
+        return jdbcTemplate.query(sql, (rs, rowNum) -> {
+            ReservationTime time = new ReservationTime(
+                    rs.getLong("time_id"),
+                    rs.getObject("start_time", LocalDateTime.class),
+                    rs.getObject("end_time", LocalDateTime.class)
+            );
+            Theme theme = new Theme(
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_image_url")
+            ).withId(rs.getLong("theme_id"));
+            return new ReservationWithWaitingOrder(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    ReservationTimeResponseDto.from(time),
+                    ThemeResponseDto.from(theme),
+                    Status.valueOf(rs.getString("status")),
+                    rs.getInt("orderWaiting")
+            );
+        }, name);
+    }
 }

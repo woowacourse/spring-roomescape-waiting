@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.time.domain.ReservationTime;
 
 public interface ReservationRepository {
@@ -28,4 +29,6 @@ public interface ReservationRepository {
     Optional<Long> findEarliestWaiting(Long timeId, Long themeId);
 
     boolean promoteToReserved(Long waitingId);
+
+    List<ReservationWithWaitingOrder> findAllByName(String name);
 }
