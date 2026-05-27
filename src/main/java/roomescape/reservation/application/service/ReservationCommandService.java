@@ -11,6 +11,7 @@ import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Waiting;
 import roomescape.reservation.domain.repository.ReservationRepository;
 import roomescape.reservation.domain.repository.WaitingRepository;
@@ -38,14 +39,13 @@ public class ReservationCommandService {
         ReservationTime time = timeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        Reservation reservation = request.toEntity(theme.getId(), time.getId(), time.getStartAt());
-        reservation.validateReservable(request.now());
+        ReservationSlot slot = request.toSlot(theme.getId(), time.getId(), time.getStartAt());
+        slot.validateReservable(request.now());
 
-        // TODO : 42번째 줄에서 validateReservable()을 했는데 밑에서 또 하는게 옳은지.
+        Reservation reservation = request.toReservation(slot);
+
         if (reservationRepository.existsBySlot(reservation)) {
-            Waiting waiting = request.toWaiting(theme.getId(), time.getId(), time.getStartAt());
-            // 위에서 예약에 대해서 이전 시간 예약인지 검증했지만, 대기도 명시적으로 일단 검증 추가
-            waiting.validateReservable(request.now());
+            Waiting waiting = request.toWaiting(slot);
             Waiting savedWaiting;
             try {
                 savedWaiting = waitingRepository.save(waiting);

@@ -14,21 +14,21 @@ public record ReservationCreateCommand(
         Long timeId,
         LocalDateTime now
 ) {
-    public Reservation toEntity(Long themeId, Long timeId, LocalTime startAt) {
+    public Reservation toReservation(ReservationSlot slot) {
         return Reservation.builder()
                 .name(name)
-                .slot(createSlot(themeId, timeId, startAt))
+                .slot(slot)
                 .build();
     }
 
-    public Waiting toWaiting(Long themeId, Long timeId, LocalTime startAt) {
+    public Waiting toWaiting(ReservationSlot slot) {
         return Waiting.builder()
                 .name(name)
-                .slot(createSlot(themeId, timeId, startAt))
+                .slot(slot)
                 .build();
     }
 
-    private ReservationSlot createSlot(Long themeId, Long timeId, LocalTime startAt) {
+    public ReservationSlot toSlot(Long themeId, Long timeId, LocalTime startAt) {
         return ReservationSlot.builder()
                 .date(date)
                 .themeId(themeId)
