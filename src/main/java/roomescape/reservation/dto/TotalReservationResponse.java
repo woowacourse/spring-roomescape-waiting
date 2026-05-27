@@ -19,7 +19,7 @@ public record TotalReservationResponse(
         return new TotalReservationResponse(
                 totalReservation.getId(),
                 totalReservation.getName(),
-                totalReservation.getName(),
+                totalReservation.getThemeName(),
                 totalReservation.getDate(),
                 totalReservation.getStartAt(),
                 totalReservation.getWaitingNumber()

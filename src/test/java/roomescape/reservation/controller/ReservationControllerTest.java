@@ -2,6 +2,7 @@ package roomescape.reservation.controller;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -32,6 +33,32 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(13));
+    }
+
+    @Test
+    void 이름으로_예약과_예약_대기_조회_성공() {
+        String name = "초록";
+        String date = LocalDate.now().plusDays(1).toString();
+        Long reservationId = createReservation(name, 1L, date, 1L);
+        Long waitingId = createWaiting(name, 2L, date, 2L);
+
+        RestAssured.given().log().all()
+                .when().get("/reservations/list?name=" + name)
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[0].id", is(reservationId))
+                .body("[0].name", is(name))
+                .body("[0].themeName", is("은하수"))
+                .body("[0].date", is(date))
+                .body("[0].startAt", is("10:00:00"))
+                .body("[0].waitingNumber", nullValue())
+                .body("[1].id", is(waitingId))
+                .body("[1].name", is(name))
+                .body("[1].themeName", is("지구"))
+                .body("[1].date", is(date))
+                .body("[1].startAt", is("11:00:00"))
+                .body("[1].waitingNumber", is(1));
     }
 
     @Test
@@ -116,7 +143,7 @@ public class ReservationControllerTest {
     void 본인_예약_변경_성공() {
         String originDate = LocalDate.now().plusDays(1).toString();
         String changedDate = LocalDate.now().plusDays(2).toString();
-        Integer reservationId = createReservation("로치", 1L, originDate, 1L);
+        Long reservationId = createReservation("로치", 1L, originDate, 1L);
         Map<String, Object> params = Map.of(
                 "name", "로치",
                 "themeId", 1L,
@@ -158,7 +185,7 @@ public class ReservationControllerTest {
     void 이미_예약된_시간으로는_변경할_수_없다() {
         String originDate = LocalDate.now().plusDays(1).toString();
         String duplicatedDate = LocalDate.now().plusDays(2).toString();
-        Integer reservationId = createReservation("로치", 1L, originDate, 1L);
+        Long reservationId = createReservation("로치", 1L, originDate, 1L);
         createReservation("브라운", 1L, duplicatedDate, 3L);
         Map<String, Object> params = Map.of(
                 "name", "로치",
@@ -178,7 +205,7 @@ public class ReservationControllerTest {
 
     @Test
     void 본인_예약_삭제_성공() {
-        Integer reservationId = createReservation("로치", 1L, LocalDate.now().plusDays(1).toString(), 1L);
+        Long reservationId = createReservation("로치", 1L, LocalDate.now().plusDays(1).toString(), 1L);
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/my/" + reservationId + "?name=로치")
@@ -202,7 +229,7 @@ public class ReservationControllerTest {
                 .statusCode(404);
     }
 
-    private Integer createReservation(String name, Long themeId, String date, Long timeId) {
+    private Long createReservation(String name, Long themeId, String date, Long timeId) {
         Map<String, Object> params = Map.of(
                 "name", name,
                 "themeId", themeId,
@@ -214,6 +241,24 @@ public class ReservationControllerTest {
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+    }
+
+    private Long createWaiting(String name, Long themeId, String date, Long timeId) {
+        Map<String, Object> params = Map.of(
+                "name", name,
+                "themeId", themeId,
+                "date", date,
+                "timeId", timeId
+        );
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(201)
                 .extract()

@@ -70,9 +70,24 @@ public class ReservationDaoTest {
 
     @Test
     void 이름으로_예약_조회_성공() {
-        List<Reservation> reservations = reservationDao.selectByName("로치");
+        String name = "에버";
+        LocalDate date = LocalDate.now().plusDays(2);
+        Reservation first = reservationDao.insert(
+                new Reservation(name, 1L, date, new ReservationTime(1L, LocalTime.parse("10:00")))
+        );
+        Reservation second = reservationDao.insert(
+                new Reservation(name, 1L, date, new ReservationTime(2L, LocalTime.parse("11:00")))
+        );
+        reservationDao.insert(new Reservation("워넬", 1L, date, new ReservationTime(3L, LocalTime.parse("12:00"))));
 
-        assertThat(reservations.size()).isEqualTo(13);
+        List<Reservation> reservations = reservationDao.selectByName(name);
+
+        assertThat(reservations).hasSize(2)
+                .extracting(Reservation::getId)
+                .containsExactly(first.getId(), second.getId());
+        assertThat(reservations)
+                .extracting(Reservation::getName)
+                .containsOnly(name);
     }
 
     @Test
