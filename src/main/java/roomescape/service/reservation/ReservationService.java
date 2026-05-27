@@ -36,11 +36,6 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> getAllByName(final String name) {
-        reservationValidator.validateLookupName(name);
-        return reservationRepository.findAllByName(name);
-    }
-
     public Reservation save(final String name, final LocalDate date, final Long themeId, final Long timeId) {
         reservationValidator.validateCreateReferenceIds(themeId, timeId);
 

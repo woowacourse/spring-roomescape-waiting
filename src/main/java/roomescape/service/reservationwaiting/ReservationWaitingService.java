@@ -6,7 +6,9 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
+import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
+import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
 import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
@@ -25,6 +27,7 @@ public class ReservationWaitingService {
     }
 
     public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
+        String waitingName = validateName(name);
         Long reservationId = findReservationId(date, themeId, timeId);
         Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new ResourceNotFoundException(
@@ -32,8 +35,39 @@ public class ReservationWaitingService {
                         "예약 정보가 없으면 대기 생성이 불가능합니다."
                 ));
 
-        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(reservation, name, LocalTime.now());
+        validateWaitableName(reservation, waitingName);
+
+        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(reservation, waitingName, LocalTime.now());
         return reservationWaitingRepository.save(nonIdReservationWaiting);
+    }
+
+    private String validateName(final String name) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 필수입니다.");
+        }
+
+        String trimmedName = name.trim();
+        if (trimmedName.length() >= 10) {
+            throw new InvalidInputException(ErrorCode.INVALID_INPUT, "예약자 이름은 10자 미만이어야 합니다.");
+        }
+
+        return trimmedName;
+    }
+
+    private void validateWaitableName(final Reservation reservation, final String waitingName) {
+        if (reservation.getName().equals(waitingName)) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    "이미 예약한 사람은 같은 예약에 대기할 수 없습니다."
+            );
+        }
+
+        if (reservationWaitingRepository.existsByReservationIdAndName(reservation.getId(), waitingName)) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_WAITING_DUPLICATED,
+                    "이미 같은 예약에 대기 중입니다."
+            );
+        }
     }
 
     private Long findReservationId(final LocalDate date, final Long themeId, final Long timeId) {

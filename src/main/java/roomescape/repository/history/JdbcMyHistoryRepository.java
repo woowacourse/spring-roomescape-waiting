@@ -13,6 +13,8 @@ import roomescape.domain.theme.Theme;
 public class JdbcMyHistoryRepository implements MyHistoryRepository {
 
     private static final RowMapper<MyHistory> historyRowMapper = (resultSet, rowNumber) -> new MyHistory(
+            resultSet.getLong("reservation_id"),
+            getNullableLong(resultSet, "waiting_id"),
             resultSet.getString("status"),
             resultSet.getString("history_name"),
             resultSet.getDate("date").toLocalDate(),
@@ -31,6 +33,8 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
     public List<MyHistory> findByUserName(final String name) {
         String sql = """
                 SELECT 'RESERVATION' AS status,
+                       r.id AS reservation_id,
+                       NULL AS waiting_id,
                        r.name AS history_name,
                        r.date,
                        t.id AS theme_id,
@@ -48,6 +52,8 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                 UNION ALL
 
                 SELECT 'WAITING' AS status,
+                       r.id AS reservation_id,
+                       rw.id AS waiting_id,
                        rw.name AS history_name,
                        r.date,
                        t.id AS theme_id,
@@ -90,5 +96,15 @@ public class JdbcMyHistoryRepository implements MyHistoryRepository {
                 resultSet.getLong("time_id"),
                 resultSet.getTime("start_at").toLocalTime()
         );
+    }
+
+    private static Long getNullableLong(final ResultSet resultSet, final String columnName) throws SQLException {
+        long value = resultSet.getLong(columnName);
+
+        if (resultSet.wasNull()) {
+            return null;
+        }
+
+        return value;
     }
 }

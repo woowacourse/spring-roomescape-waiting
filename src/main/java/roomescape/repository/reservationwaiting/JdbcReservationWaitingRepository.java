@@ -43,4 +43,11 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         String sql = "DELETE FROM reservation_waiting WHERE id = ? AND name = ?";
         jdbcTemplate.update(sql, id, name);
     }
+
+    @Override
+    public boolean existsByReservationIdAndName(final Long reservationId, final String name) {
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation_waiting WHERE reservation_id = ? AND name = ?)";
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, reservationId, name));
+    }
 }

@@ -1,32 +1,37 @@
 package roomescape.controller.reservation;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
-import roomescape.controller.reservation.dto.ReservationResponse;
+import roomescape.controller.history.ReservationHistoryStatus;
+import roomescape.controller.history.dto.HistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
+import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
+import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.exception.ErrorCode;
-import roomescape.service.reservation.ReservationService;
+import roomescape.service.history.MyHistoryService;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
 @Component
 public class ReservationPageModelAssembler {
 
-    private final ReservationService reservationService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final MyHistoryService myHistoryService;
 
     public ReservationPageModelAssembler(
-            final ReservationService reservationService,
             final ReservationTimeService reservationTimeService,
-            final ThemeService themeService
+            final ThemeService themeService,
+            final MyHistoryService myHistoryService
     ) {
-        this.reservationService = reservationService;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.myHistoryService = myHistoryService;
     }
 
     public ThemeResponse resolveSelectedTheme(final Long themeId) {
@@ -63,25 +68,73 @@ public class ReservationPageModelAssembler {
         model.addAttribute("reservationTimes", reservationTimeService.getAll().stream()
                 .map(ReservationTimeResponse::from)
                 .toList());
-        model.addAttribute("availableTimes", getAvailableTimes(selectedThemeId, selectedTheme, selectedDate));
-        model.addAttribute("myReservations", getMyReservations(reservationName, errorCode));
+        List<HistoryResponse> myHistories = getMyHistories(reservationName, errorCode);
+        model.addAttribute("availableTimes", getAvailableTimes(
+                selectedThemeId,
+                selectedTheme,
+                selectedDate,
+                myHistories
+        ));
+        model.addAttribute("myHistories", myHistories);
     }
 
-    private List<ReservationTimeResponse> getAvailableTimes(
+    private List<ReservationTimeSlotResponse> getAvailableTimes(
             final Long selectedThemeId,
             final ThemeResponse selectedTheme,
-            final LocalDate selectedDate
+            final LocalDate selectedDate,
+            final List<HistoryResponse> myHistories
     ) {
         if (selectedTheme == null || selectedDate == null) {
             return List.of();
         }
 
-        return reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
-                .map(ReservationTimeResponse::from)
+        Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
+                .map(reservationTime -> reservationTime.getId())
+                .collect(java.util.stream.Collectors.toSet());
+
+        return reservationTimeService.getAll().stream()
+                .map(reservationTime -> new ReservationTimeSlotResponse(
+                        reservationTime.getId(),
+                        reservationTime.getStartAt(),
+                        resolveSlotStatus(selectedDate, reservationTime.getStartAt(), availableTimeIds.contains(reservationTime.getId())),
+                        findWaitingId(myHistories, selectedDate, selectedThemeId, reservationTime.getId())
+                ))
                 .toList();
     }
 
-    private List<ReservationResponse> getMyReservations(final String reservationName, final String errorCode) {
+    private ReservationTimeSlotStatus resolveSlotStatus(
+            final LocalDate selectedDate,
+            final java.time.LocalTime startAt,
+            final boolean reservable
+    ) {
+        if (LocalDateTime.of(selectedDate, startAt).isBefore(LocalDateTime.now())) {
+            return ReservationTimeSlotStatus.PAST;
+        }
+
+        if (reservable) {
+            return ReservationTimeSlotStatus.RESERVABLE;
+        }
+
+        return ReservationTimeSlotStatus.WAITABLE;
+    }
+
+    private Long findWaitingId(
+            final List<HistoryResponse> myHistories,
+            final LocalDate selectedDate,
+            final Long selectedThemeId,
+            final Long timeId
+    ) {
+        return myHistories.stream()
+                .filter(history -> history.status() == ReservationHistoryStatus.WAITING)
+                .filter(history -> history.date().equals(selectedDate))
+                .filter(history -> history.theme().id().equals(selectedThemeId))
+                .filter(history -> history.time().id().equals(timeId))
+                .map(HistoryResponse::waitingId)
+                .findFirst()
+                .orElse(null);
+    }
+
+    private List<HistoryResponse> getMyHistories(final String reservationName, final String errorCode) {
         if (reservationName == null || reservationName.isBlank()) {
             return List.of();
         }
@@ -90,8 +143,6 @@ public class ReservationPageModelAssembler {
             return List.of();
         }
 
-        return reservationService.getAllByName(reservationName).stream()
-                .map(ReservationResponse::from)
-                .toList();
+        return myHistoryService.getAllByName(reservationName);
     }
 }

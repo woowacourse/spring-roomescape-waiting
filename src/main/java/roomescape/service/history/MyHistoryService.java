@@ -26,6 +26,8 @@ public class MyHistoryService {
 
     private HistoryResponse toResponse(final MyHistory history) {
         return new HistoryResponse(
+                history.reservationId(),
+                history.waitingId(),
                 ReservationHistoryStatus.valueOf(history.status()),
                 history.name(),
                 history.date(),

@@ -134,6 +134,51 @@ class ReservationPageApiTest {
                 .header("Location", containsString("errorCode=RESERVATION_DUPLICATED"));
     }
 
+    @Test
+    void 예약_마감_시간에_다른_이름으로_대기를_신청한다() {
+        createTheme(1L, "미술관의 밤");
+        createReservationTime(1L, "10:00:00");
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        createReservation("brown", reservationDate, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .redirects().follow(false)
+                .formParam("name", "aru")
+                .formParam("date", reservationDate.toString())
+                .formParam("themeId", 1)
+                .formParam("timeId", 1)
+                .when().post("/pages/user/reservations/waitings")
+                .then().log().all()
+                .statusCode(302)
+                .header("Location", containsString("/pages/user/reservations"))
+                .header("Location", containsString("reservationName=aru"));
+
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE reservation_id = 1 AND name = 'aru'",
+                Integer.class
+        );
+        org.assertj.core.api.Assertions.assertThat(count).isOne();
+    }
+
+    @Test
+    void 예약자는_자신의_예약에_대기_신청할_수_없다() {
+        createTheme(1L, "미술관의 밤");
+        createReservationTime(1L, "10:00:00");
+        LocalDate reservationDate = LocalDate.now().plusDays(1);
+        createReservation("brown", reservationDate, 1L, 1L);
+
+        RestAssured.given().log().all()
+                .redirects().follow(false)
+                .formParam("name", "brown")
+                .formParam("date", reservationDate.toString())
+                .formParam("themeId", 1)
+                .formParam("timeId", 1)
+                .when().post("/pages/user/reservations/waitings")
+                .then().log().all()
+                .statusCode(302)
+                .header("Location", containsString("errorCode=RESERVATION_WAITING_DUPLICATED"));
+    }
+
     private void createTheme(final long id, final String name) {
         jdbcTemplate.update(
                 "INSERT INTO theme (id, name, description, thumbnail_url) VALUES (?, ?, ?, ?)",
@@ -168,9 +213,11 @@ class ReservationPageApiTest {
     }
 
     private void clearTables() {
+        jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");

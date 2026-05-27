@@ -87,6 +87,44 @@ class ReservationWaitingApiTest {
     }
 
     @Test
+    @DisplayName("예약자는 자신의 예약에 대기를 생성할 수 없다")
+    void createReservationWaitingByReservationOwner() throws Exception {
+        mockMvc.perform(post("/waitings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "쿠다",
+                                  "date": "2026-08-06",
+                                  "themeId": 1,
+                                  "timeId": 1
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("RESERVATION_WAITING_DUPLICATED"))
+                .andExpect(jsonPath("$.status").value(409));
+    }
+
+    @Test
+    @DisplayName("이미 같은 예약에 대기 중인 이름으로는 다시 대기를 생성할 수 없다")
+    void createReservationWaitingDuplicatedName() throws Exception {
+        createReservationWaiting(1L, 1L, "아루");
+
+        mockMvc.perform(post("/waitings")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {
+                                  "name": "아루",
+                                  "date": "2026-08-06",
+                                  "themeId": 1,
+                                  "timeId": 1
+                                }
+                                """))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.code").value("RESERVATION_WAITING_DUPLICATED"))
+                .andExpect(jsonPath("$.status").value(409));
+    }
+
+    @Test
     @DisplayName("예약 대기 생성 요청값이 유효한지 검증한다")
     void createReservationWaitingInvalidRequest() throws Exception {
         mockMvc.perform(post("/waitings")

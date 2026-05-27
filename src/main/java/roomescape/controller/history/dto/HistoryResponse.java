@@ -6,6 +6,8 @@ import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
 
 public record HistoryResponse(
+        Long reservationId,
+        Long waitingId,
         ReservationHistoryStatus status,
         String name,
         LocalDate date,

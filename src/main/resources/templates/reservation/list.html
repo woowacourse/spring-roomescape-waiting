@@ -185,6 +185,48 @@
             color: var(--point);
             font-weight: 700;
         }
+        .time-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .waiting-form {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: flex-end;
+            align-items: center;
+        }
+        .waiting-form input {
+            width: 132px;
+            padding: 10px 12px;
+        }
+        .waiting-form button {
+            padding: 10px 12px;
+        }
+        .status-chip {
+            display: inline-flex;
+            align-items: center;
+            width: fit-content;
+            border-radius: 999px;
+            padding: 6px 10px;
+            border: 1px solid rgba(47, 36, 24, 0.14);
+            background: rgba(255, 255, 255, 0.78);
+            color: rgba(47, 36, 24, 0.72);
+            font-size: 12px;
+            font-weight: 800;
+        }
+        .status-chip.reservation {
+            color: var(--point);
+            border-color: rgba(14, 116, 144, 0.24);
+            background: rgba(14, 116, 144, 0.08);
+        }
+        .status-chip.waiting {
+            color: #9a5c00;
+            border-color: rgba(239, 179, 102, 0.42);
+            background: var(--accent-soft);
+        }
         .selection-card {
             margin-top: 14px;
             padding: 14px 16px;
@@ -345,28 +387,67 @@
                 </section>
 
                 <section>
-                    <h2>조회된 가능 시간</h2>
+                    <h2>조회된 시간</h2>
                     <div class="list" th:if="${selectedThemeId != null and selectedDate != null}">
                         <div class="item" th:if="${#lists.isEmpty(availableTimes)}">
                             <div>
-                                <strong>예약 가능한 시간이 없습니다.</strong>
-                                <span>다른 날짜를 선택해보세요.</span>
+                                <strong>조회된 시간이 없습니다.</strong>
+                                <span>관리자가 등록한 시간이 아직 없습니다.</span>
                             </div>
                         </div>
                         <div class="item" th:each="time : ${availableTimes}">
                             <button type="button"
                                     class="time-option"
+                                    th:if="${time.reservable}"
                                     th:attr="data-time-id=${time.id},data-date=${selectedDate},data-theme-name=${selectedTheme != null ? selectedTheme.name : ''},data-start-at=${time.startAt}"
                                     onclick="selectTimeSlot(this)">
                                 <div>
                                     <strong th:text="${time.startAt}">10:00</strong>
                                     <span th:text="${selectedTheme != null ? selectedTheme.name : ''}">테마명</span>
                                 </div>
-                                <small>이 시간 선택</small>
+                                <small>예약하기</small>
                             </button>
+                            <div th:if="${!time.reservable}" class="time-option">
+                                <div>
+                                    <strong th:text="${time.startAt}">10:00</strong>
+                                    <span th:if="${time.past}">지난 시간</span>
+                                    <span th:if="${time.waitable and time.waiting}">대기 신청 완료</span>
+                                    <span th:if="${time.waitable and !time.waiting}">예약 마감</span>
+                                </div>
+                                <div class="time-actions">
+                                    <form method="post"
+                                          th:if="${time.waitable and time.waiting}"
+                                          th:action="@{/pages/user/reservations/waitings/{id}/delete(id=${time.waitingId})}">
+                                        <input type="hidden" name="reservationName" th:value="${reservationName}">
+                                        <input type="hidden" name="themeId" th:value="${selectedThemeId}">
+                                        <input type="hidden" name="date" th:value="${selectedDate}">
+                                        <button type="submit" class="delete">대기 취소</button>
+                                    </form>
+                                    <form class="waiting-form"
+                                          method="post"
+                                          th:if="${time.waitable and !time.waiting}"
+                                          th:action="@{/pages/user/reservations/waitings}">
+                                        <input type="text"
+                                               name="name"
+                                               th:value="${reservationName}"
+                                               maxlength="9"
+                                               placeholder="대기자 이름"
+                                               aria-label="대기자 이름"
+                                               required>
+                                        <input type="hidden" name="date" th:value="${selectedDate}">
+                                        <input type="hidden" name="themeId" th:value="${selectedThemeId}">
+                                        <input type="hidden" name="timeId" th:value="${time.id}">
+                                        <button type="submit" class="secondary">대기 신청</button>
+                                    </form>
+                                    <span class="status-chip"
+                                          th:if="${time.past}">
+                                        신청 불가
+                                    </span>
+                                </div>
+                            </div>
                         </div>
                     </div>
-                    <p class="hint" th:if="${selectedThemeId == null or selectedDate == null}">조회 후 원하는 시간대를 클릭하면 바로 오른쪽 예약 폼으로 이어집니다.</p>
+                    <p class="hint" th:if="${selectedThemeId == null or selectedDate == null}">조회 후 예약 가능한 시간은 예약으로, 마감된 시간은 대기 신청으로 이어집니다.</p>
                 </section>
             </div>
         </article>
@@ -387,6 +468,7 @@
                     <select id="reservation-time" name="timeId" required>
                         <option value="">예약 가능한 시간을 먼저 조회하세요</option>
                         <option th:each="time : ${availableTimes}"
+                                th:if="${time.reservable}"
                                 th:value="${time.id}"
                                 th:text="${time.startAt}">
                         </option>
@@ -405,34 +487,47 @@
 
     <section class="bottom-grid">
         <article class="card">
-            <h2>내 예약 조회</h2>
+            <h2>내 예약 및 대기 조회</h2>
             <form id="my-reservations-form" method="get" th:action="@{/pages/user/reservations}">
                 <input type="hidden" name="themeId" th:value="${selectedThemeId}">
                 <input type="hidden" name="date" th:value="${selectedDate}">
                 <input type="hidden" name="period" th:value="${period}">
                 <input type="hidden" name="limit" th:value="${limit}">
                 <label>
-                    예약자 이름
+                    이름
                     <input type="text" name="reservationName" th:value="${reservationName}" maxlength="9" required>
                 </label>
-                <button type="submit">내 예약 찾기</button>
+                <button type="submit">내 기록 찾기</button>
             </form>
-            <div class="list" th:if="${!#lists.isEmpty(myReservations)}">
-                <div class="item" th:each="reservation : ${myReservations}">
+            <div class="list" th:if="${!#lists.isEmpty(myHistories)}">
+                <div class="item" th:each="history : ${myHistories}">
                     <div>
-                        <strong th:text="${reservation.name}">브라운</strong>
-                        <span th:text="${reservation.date + ' / ' + reservation.theme.name + ' / ' + reservation.time.startAt}">내용</span>
+                        <strong th:text="${history.name}">브라운</strong>
+                        <span th:text="${history.date + ' / ' + history.theme.name + ' / ' + history.time.startAt}">내용</span>
+                        <span class="status-chip reservation"
+                              th:if="${history.status.name() == 'RESERVATION'}">예약</span>
+                        <span class="status-chip waiting"
+                              th:if="${history.status.name() == 'WAITING'}"
+                              th:text="${'대기 ' + history.sequence + '번'}">대기 1번</span>
                     </div>
-                    <div class="action-stack">
+                    <div class="action-stack" th:if="${history.status.name() == 'RESERVATION'}">
                         <button type="button"
                                 class="secondary"
-                                th:attr="data-reservation-id=${reservation.id},data-reservation-date=${reservation.date},data-time-id=${reservation.time.id},data-theme-name=${reservation.theme.name},data-start-at=${reservation.time.startAt}"
+                                th:attr="data-reservation-id=${history.reservationId},data-reservation-date=${history.date},data-time-id=${history.time.id},data-theme-name=${history.theme.name},data-start-at=${history.time.startAt}"
                                 onclick="openReservationEditForm(this)">
                             수정
                         </button>
-                        <form class="inline-form" method="post" th:action="@{/pages/user/reservations/{id}/delete(id=${reservation.id})}">
+                        <form class="inline-form" method="post" th:action="@{/pages/user/reservations/{id}/delete(id=${history.reservationId})}">
                             <input type="hidden" name="reservationName" th:value="${reservationName}">
                             <button type="submit" class="delete">삭제</button>
+                        </form>
+                    </div>
+                    <div class="action-stack" th:if="${history.status.name() == 'WAITING'}">
+                        <form class="inline-form" method="post" th:action="@{/pages/user/reservations/waitings/{id}/delete(id=${history.waitingId})}">
+                            <input type="hidden" name="reservationName" th:value="${reservationName}">
+                            <input type="hidden" name="themeId" th:value="${selectedThemeId}">
+                            <input type="hidden" name="date" th:value="${selectedDate}">
+                            <button type="submit" class="delete">대기 취소</button>
                         </form>
                     </div>
                 </div>
@@ -461,8 +556,8 @@
                     </div>
                 </form>
             </div>
-            <p class="hint" th:if="${reservationName == null}">이름으로 조회한 내 예약 목록에서만 취소를 진행할 수 있습니다.</p>
-            <p class="hint" th:if="${reservationName != null and #lists.isEmpty(myReservations)}">조회한 이름으로 등록된 예약이 아직 없습니다.</p>
+            <p class="hint" th:if="${reservationName == null}">이름으로 예약과 대기 내역을 함께 조회할 수 있습니다.</p>
+            <p class="hint" th:if="${reservationName != null and #lists.isEmpty(myHistories)}">조회한 이름으로 등록된 예약이나 대기가 아직 없습니다.</p>
         </article>
 
         <article class="card">
@@ -504,6 +599,11 @@
             title: "그 시간은 방금 사용 중이 되었어요",
             message: "같은 테마의 같은 시간에는 이미 예약이 있어 다른 시간으로 선택해야 해요.",
             hint: "조회된 가능 시간 중 다른 슬롯을 누르면 바로 이어서 예약할 수 있어요."
+        },
+        RESERVATION_WAITING_DUPLICATED: {
+            title: "이 이름으로는 대기할 수 없어요",
+            message: "이미 예약한 사람이나 이미 대기 중인 사람은 같은 예약에 다시 대기할 수 없어요.",
+            hint: "예약자와 다른 이름으로 대기 신청을 진행해 주세요."
         },
         THEME_NOT_FOUND: {
             title: "선택한 테마를 다시 불러올게요",

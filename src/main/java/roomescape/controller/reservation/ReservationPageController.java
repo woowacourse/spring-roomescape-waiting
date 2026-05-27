@@ -12,6 +12,7 @@ import roomescape.exception.ApiException;
 import roomescape.exception.ErrorCode;
 import roomescape.service.reservation.ReservationService;
 import roomescape.controller.theme.dto.ThemeResponse;
+import roomescape.service.reservationwaiting.ReservationWaitingService;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
@@ -19,15 +20,18 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 public class ReservationPageController {
 
     private final ReservationService reservationService;
+    private final ReservationWaitingService reservationWaitingService;
     private final ReservationPageRequestParser reservationPageRequestParser;
     private final ReservationPageModelAssembler reservationPageModelAssembler;
 
     public ReservationPageController(
             final ReservationService reservationService,
+            final ReservationWaitingService reservationWaitingService,
             final ReservationPageRequestParser reservationPageRequestParser,
             final ReservationPageModelAssembler reservationPageModelAssembler
     ) {
         this.reservationService = reservationService;
+        this.reservationWaitingService = reservationWaitingService;
         this.reservationPageRequestParser = reservationPageRequestParser;
         this.reservationPageModelAssembler = reservationPageModelAssembler;
     }
@@ -109,6 +113,101 @@ public class ReservationPageController {
                     parsedThemeId,
                     parsedDate,
                     name,
+                    ErrorCode.INTERNAL_SERVER_ERROR.getCode()
+            );
+        }
+
+        return "redirect:/pages/user/reservations";
+    }
+
+    @PostMapping("/waitings")
+    public String createReservationWaiting(
+            @RequestParam(required = false) final String name,
+            @RequestParam(required = false) final String date,
+            @RequestParam(required = false) final String themeId,
+            @RequestParam(required = false) final String timeId,
+            final RedirectAttributes redirectAttributes
+    ) {
+        Long parsedThemeId = null;
+        LocalDate parsedDate = null;
+
+        try {
+            parsedThemeId = reservationPageRequestParser.parseLongValue(themeId);
+            Long parsedTimeId = reservationPageRequestParser.parseLongValue(timeId);
+            parsedDate = reservationPageRequestParser.parseDate(date);
+            reservationWaitingService.save(name, parsedDate, parsedThemeId, parsedTimeId);
+            addReservationNameAttribute(redirectAttributes, name);
+            addThemeIdAttribute(redirectAttributes, parsedThemeId);
+            addDateAttribute(redirectAttributes, parsedDate);
+        } catch (ApiException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    name,
+                    exception.getCode()
+            );
+        } catch (IllegalArgumentException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    name,
+                    ErrorCode.INVALID_INPUT.getCode()
+            );
+        } catch (Exception exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    name,
+                    ErrorCode.INTERNAL_SERVER_ERROR.getCode()
+            );
+        }
+
+        return "redirect:/pages/user/reservations";
+    }
+
+    @PostMapping("/waitings/{id}/delete")
+    public String deleteReservationWaiting(
+            @PathVariable final Long id,
+            @RequestParam(required = false) final String reservationName,
+            @RequestParam(required = false) final String themeId,
+            @RequestParam(required = false) final String date,
+            final RedirectAttributes redirectAttributes
+    ) {
+        Long parsedThemeId = null;
+        LocalDate parsedDate = null;
+
+        try {
+            parsedThemeId = reservationPageRequestParser.parseLongValue(themeId);
+            parsedDate = reservationPageRequestParser.parseDate(date);
+            reservationWaitingService.deleteByIdAndName(id, reservationName);
+            addReservationNameAttribute(redirectAttributes, reservationName);
+            addThemeIdAttribute(redirectAttributes, parsedThemeId);
+            addDateAttribute(redirectAttributes, parsedDate);
+        } catch (ApiException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    reservationName,
+                    exception.getCode()
+            );
+        } catch (IllegalArgumentException exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    reservationName,
+                    ErrorCode.INVALID_INPUT.getCode()
+            );
+        } catch (Exception exception) {
+            return redirectReservationPageWithError(
+                    redirectAttributes,
+                    parsedThemeId,
+                    parsedDate,
+                    reservationName,
                     ErrorCode.INTERNAL_SERVER_ERROR.getCode()
             );
         }
