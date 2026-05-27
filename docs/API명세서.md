@@ -604,3 +604,146 @@ HTTP/1.1 204 No Content
 
 </div>
 </details>
+
+---
+
+## 예약 대기
+
+### 사용자 - 예약 대기 신청
+
+<details>
+<summary>Request</summary>
+<div markdown="1">
+
+```
+POST /waitings HTTP/1.1
+Content-Type: application/json
+
+{
+    "date": "2026-05-08",
+    "timeId": 1,
+    "themeId": 1,
+    "name": "브라운"
+}
+```
+
+</div>
+</details>
+
+<details>
+<summary>Response</summary>
+<div markdown="1">
+
+```
+HTTP/1.1 201 Created
+Location: /waitings/1
+Content-Type: application/json
+
+{
+    "id": 1,
+    "createdAt": "2026-05-05T09:00:00",
+    "slotId": 1,
+    "name": "브라운"
+}
+```
+
+</div>
+</details>
+
+<details>
+<summary>Exception</summary>
+<div markdown="1">
+
+- [x] 이미 동일한 대기를 신청한 경우 예외가 발생한다.
+    - 상태 코드: 409 Conflict
+    - 에러 코드: WAITING_ALREADY_EXISTS
+    - 메시지: "이미 존재하는 대기입니다."
+
+- [x] 본인이 예약한 슬롯에 대기를 신청할 경우 예외가 발생한다.
+    - 상태 코드: 409 Conflict
+    - 에러 코드: CANNOT_WAIT_OWN_RESERVATION
+    - 메시지: "본인의 예약에는 대기를 신청할 수 없습니다."
+
+- [x] 존재하지 않는 슬롯(날짜, 시간, 테마)일 경우 예외가 발생한다.
+    - 상태 코드: 404 Not Found
+    - 에러 코드: SLOT_NOT_FOUND
+    - 메시지: "존재하지 않는 슬롯입니다."
+
+</div>
+</details>
+
+---
+
+### 사용자 - 예약 대기 목록 조회
+
+<details>
+<summary>Query Parameter</summary>
+<div markdown="1">
+
+- name (필수・string)
+    - 대기자 이름입니다.
+
+</div>
+</details>
+
+<details>
+<summary>Request</summary>
+<div markdown="1">
+
+```
+GET /waitings?name=브라운 HTTP/1.1
+```
+
+</div>
+</details>
+
+<details>
+<summary>Response</summary>
+<div markdown="1">
+
+```
+HTTP/1.1 200 OK
+Content-Type: application/json
+
+[
+    {
+        "id": 1,
+        "createdAt": "2026-05-05T09:00:00",
+        "slotId": 1,
+        "name": "브라운",
+        "rank": 1,
+        "date": "2026-05-08",
+        "startAt": "14:00",
+        "themeName": "블루룸"
+    }
+]
+```
+
+</div>
+</details>
+
+---
+
+### 사용자 - 예약 대기 취소
+
+<details>
+<summary>Request</summary>
+<div markdown="1">
+
+```
+DELETE /waitings/{waitingId} HTTP/1.1
+```
+
+</div>
+</details>
+
+<details>
+<summary>Response</summary>
+<div markdown="1">
+
+```
+HTTP/1.1 204 No Content
+```
+
+</div>
+</details>
