@@ -40,14 +40,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 LocalDate.parse(rs.getString("date")),
                 time,
                 theme,
-                rs.getInt("wait_order")
+                rs.getInt("order_index")
         );
     };
 
     @Override
     public Waiting save(Waiting w) {
         String sql = """
-                INSERT INTO waiting (name, date, time_id, theme_id, wait_order)
+                INSERT INTO waiting (name, date, time_id, theme_id, order_index)
                 VALUES (?, ?, ?, ?, ?)
                 """;
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -69,14 +69,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public List<Waiting> findBySlot(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT w.id, w.name, w.date, w.wait_order,
+                SELECT w.id, w.name, w.date, w.order_index,
                        t.id AS time_id, t.start_at,
                        th.id AS theme_id, th.name AS theme_name, th.description, th.thumbnail_url
                   FROM waiting w
                   JOIN reservation_time t ON w.time_id = t.id
                   JOIN theme th ON w.theme_id = th.id
                  WHERE w.date = ? AND w.time_id = ? AND w.theme_id = ?
-                 ORDER BY w.wait_order ASC
+                 ORDER BY w.order_index ASC
                 """;
         return jdbcTemplate.query(sql, rowMapper, date.toString(), timeId, themeId);
     }
@@ -84,7 +84,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Optional<Waiting> findById(Long id) {
         String sql = """
-                SELECT w.id, w.name, w.date, w.wait_order,
+                SELECT w.id, w.name, w.date, w.order_index,
                        t.id AS time_id, t.start_at,
                        th.id AS theme_id, th.name AS theme_name, th.description, th.thumbnail_url
                   FROM waiting w
@@ -102,13 +102,13 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public void updateOrderIndex(Long id, int newOrderIndex) {
-        jdbcTemplate.update("UPDATE waiting SET wait_order = ? WHERE id = ?", newOrderIndex, id);
+        jdbcTemplate.update("UPDATE waiting SET order_index = ? WHERE id = ?", newOrderIndex, id);
     }
 
     @Override
     public List<Waiting> findByName(String name) {
         String sql = """
-                SELECT w.id, w.name, w.date, w.wait_order,
+                SELECT w.id, w.name, w.date, w.order_index,
                        t.id AS time_id, t.start_at,
                        th.id AS theme_id, th.name AS theme_name, th.description, th.thumbnail_url
                   FROM waiting w

@@ -50,7 +50,7 @@ public class ReservationTestHelper {
     // 미션 3 부터 추가됨
     public Long insertWaiting(String name, LocalDate date, Long timeId, Long themeId, int order) {
         jdbcTemplate.update(
-                "INSERT INTO waiting (name, date, time_id, theme_id, wait_order) VALUES (?, ?, ?, ?, ?)",
+                "INSERT INTO waiting (name, date, time_id, theme_id, order_index) VALUES (?, ?, ?, ?, ?)",
                 name, date.toString(), timeId, themeId, order);
         return jdbcTemplate.queryForObject(
                 "SELECT id FROM waiting WHERE name = ? AND date = ? AND time_id = ? AND theme_id = ?",
@@ -71,7 +71,7 @@ public class ReservationTestHelper {
 
     public int findWaitingOrder(Long waitingId) {
         return jdbcTemplate.queryForObject(
-                "SELECT wait_order FROM waiting WHERE id = ?", Integer.class, waitingId);
+                "SELECT order_index FROM waiting WHERE id = ?", Integer.class, waitingId);
     }
 
     public int findReservationCount(LocalDate date, Long timeId, Long themeId) {
