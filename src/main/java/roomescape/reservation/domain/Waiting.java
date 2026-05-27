@@ -1,6 +1,5 @@
 package roomescape.reservation.domain;
 
-import java.time.LocalDateTime;
 import lombok.Builder;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
@@ -27,10 +26,6 @@ public class Waiting {
                 .name(this.name)
                 .slot(this.slot)
                 .build();
-    }
-
-    public void validateReservable(LocalDateTime now) {
-        slot.validateReservable(now);
     }
 
     private static String requireName(String name) {
