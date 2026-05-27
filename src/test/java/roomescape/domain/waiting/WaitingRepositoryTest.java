@@ -17,7 +17,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.waiting.dto.MyWaitingResult;
-import roomescape.domain.waiting.dto.MyWaitingsResponse;
 
 @JdbcTest
 @Import(WaitingRepository.class)
@@ -154,14 +153,31 @@ class WaitingRepositoryTest {
     class FindByName {
 
         @Test
-        void 이름으로_대기와_순번을_조회할_수_있다() {
-            Waiting waiting = Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme);
-            Waiting saved = waitingRepository.save(waiting);
+        void 이름에_해당하는_대기와_대기_순번을_반환한다() {
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+            waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
 
-            List<MyWaitingResult> myWaitingResults = waitingRepository.findByName(saved.getName());
+            List<MyWaitingResult> result = waitingRepository.findByName("유저1");
 
-            assertThat(myWaitingResults).size().isEqualTo(1);
-            assertThat(myWaitingResults.getFirst().waitingNumber()).isEqualTo(1);
+            assertAll(
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(MyWaitingResult::name)
+                    .containsExactly("유저1", "유저1"),
+                () -> assertThat(result).extracting(MyWaitingResult::themeName)
+                    .containsExactly("테마1", "테마1"),
+                () -> assertThat(result).extracting(MyWaitingResult::waitingNumber)
+                    .containsExactly(1, 3)
+            );
+        }
+
+        @Test
+        void 이름에_해당하는_대기가_없으면_빈_리스트를_반환한다() {
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+
+            List<MyWaitingResult> result = waitingRepository.findByName("없는유저");
+
+            assertThat(result).isEmpty();
         }
     }
 }
