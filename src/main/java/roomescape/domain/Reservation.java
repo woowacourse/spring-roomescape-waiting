@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import roomescape.domain.exception.DomainValidationException;
 
 public class Reservation {
+
     private static final int MAX_NAME_LENGTH = 30;
 
     private final Long id;
     private final String name;
     private final LocalDate date;
     private final ReservationTime time;
-
     private final Theme theme;
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {

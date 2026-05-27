@@ -75,5 +75,4 @@ public class ReservationTimeService {
                 .map(ReservationTimeResult::from)
                 .toList();
     }
-
 }

@@ -8,6 +8,7 @@ public record ThemeResult(
         String description,
         String thumbnailUrl
 ) {
+
     public static ThemeResult from(Theme theme) {
         return new ThemeResult(theme.getId(), theme.getName(), theme.getDescription(), theme.getThumbnailUrl());
     }

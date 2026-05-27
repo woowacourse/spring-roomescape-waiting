@@ -11,18 +11,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
 import roomescape.service.dto.PopularTheme;
 
 @JdbcTest
 @Import(JdbcThemeRepository.class)
-@Sql(scripts = "/schema.sql")
 class JdbcThemeRepositoryTest {
 
     @Autowired
     private JdbcThemeRepository themeRepository;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 

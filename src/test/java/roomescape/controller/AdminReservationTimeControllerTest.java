@@ -27,10 +27,8 @@ class AdminReservationTimeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @MockitoBean
     private ReservationTimeService reservationTimeService;
 

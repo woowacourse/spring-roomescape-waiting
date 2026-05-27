@@ -15,7 +15,7 @@ import org.junit.jupiter.api.Test;
 
 class ReservationUpdateRequestTest {
 
-    private static final String VALID_NAME = "카프카";
+    private static final String VALID_NAME = "매트";
     private static final LocalDate VALID_DATE = LocalDate.of(2026, 5, 9);
     private static final Long VALID_TIME_ID = 1L;
 

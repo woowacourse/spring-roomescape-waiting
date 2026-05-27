@@ -22,9 +22,9 @@ import roomescape.controller.dto.ReservationUpdateRequest;
 import roomescape.service.UserReservationService;
 import roomescape.service.dto.ReservationResult;
 
+@Validated
 @RestController
 @RequestMapping("/user/reservations")
-@Validated
 public class UserReservationController {
 
     private final UserReservationService userReservationService;

@@ -23,6 +23,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationTimeCreateCommand;
+import roomescape.service.dto.ReservationTimeResult;
 import roomescape.service.exception.ReservationTimeConflictException;
 import roomescape.service.exception.ReservationTimeInUseException;
 import roomescape.service.exception.ReservationTimeNotFoundException;
@@ -186,7 +187,7 @@ class ReservationTimeServiceTest {
                 new ReservationTime(2L, LocalTime.of(23, 59))
         ));
 
-        List<?> result = reservationTimeService.findAvailable(LocalDate.of(2099, 12, 31), 1L);
+        List<ReservationTimeResult> result = reservationTimeService.findAvailable(LocalDate.of(2099, 12, 31), 1L);
 
         assertThat(result).hasSize(2);
         verify(themeRepository, times(1)).existsById(1L);

@@ -6,6 +6,7 @@ import roomescape.domain.Theme;
 import roomescape.service.dto.PopularTheme;
 
 public interface ThemeRepository {
+
     List<Theme> findAll();
 
     Optional<Theme> findById(Long id);

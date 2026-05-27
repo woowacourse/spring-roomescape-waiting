@@ -16,9 +16,9 @@ import roomescape.controller.dto.ThemeResponse;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.ThemeService;
 
+@Validated
 @RestController
 @RequestMapping("/user/themes")
-@Validated
 public class UserThemeController {
 
     private final ThemeService themeService;

@@ -26,10 +26,8 @@ class UserThemeControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @MockitoBean
     private ThemeService themeService;
-
     @MockitoBean
     private ReservationTimeService reservationTimeService;
 

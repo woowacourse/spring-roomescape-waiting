@@ -15,15 +15,13 @@ import roomescape.service.dto.PopularTheme;
 public class JdbcThemeRepository implements ThemeRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
-    private static final RowMapper<Theme> ROW_MAPPER = (rs, rowNum) -> new Theme(
+    private final RowMapper<Theme> rowMapper = (rs, rowNum) -> new Theme(
             rs.getLong("id"),
             rs.getString("name"),
             rs.getString("description"),
             rs.getString("thumbnail_url")
     );
-
-    private static final RowMapper<PopularTheme> POPULAR_ROW_MAPPER = (rs, rowNum) -> new PopularTheme(
+    private final RowMapper<PopularTheme> popularThemeRowMapper = (rs, rowNum) -> new PopularTheme(
             new Theme(
                     rs.getLong("id"),
                     rs.getString("name"),
@@ -42,7 +40,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     public List<Theme> findAll() {
         return jdbcTemplate.query(
                 "SELECT id, name, description, thumbnail_url FROM theme",
-                ROW_MAPPER
+                rowMapper
         );
     }
 
@@ -50,7 +48,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     public Optional<Theme> findById(Long id) {
         List<Theme> result = jdbcTemplate.query(
                 "SELECT id, name, description, thumbnail_url FROM theme WHERE id = ?",
-                ROW_MAPPER,
+                rowMapper,
                 id
         );
         return result.stream().findFirst();
@@ -111,7 +109,6 @@ public class JdbcThemeRepository implements ThemeRepository {
                 ORDER BY reservation_count DESC
                 LIMIT 10
                 """;
-        return jdbcTemplate.query(sql, POPULAR_ROW_MAPPER);
+        return jdbcTemplate.query(sql, popularThemeRowMapper);
     }
-
 }

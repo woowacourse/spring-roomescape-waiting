@@ -41,9 +41,6 @@ class ReservationServiceTest {
             "갯벌이 많은 무인도를 탈출하는 흥미진진 대탈출!",
             "https://picsum.photos/seed/roomescape1/800/600.jpg"
     );
-    private static final ReservationCreateCommand VALID_COMMAND = new ReservationCreateCommand(
-            "브라운", LocalDate.of(2026, 5, 9), 1L, 1L
-    );
     private static final ReservationCreateCommand VALID_COMMAND_MOA = new ReservationCreateCommand(
             "모아", LocalDate.of(2026, 5, 9), 1L, 1L
     );
@@ -206,11 +203,12 @@ class ReservationServiceTest {
             @Test
             @DisplayName("기존 예약자와 다른 사용자의 예약 요청이라면 허용한다")
             void 사용자_이름이_다르면_예약_대기_순번을_부여한다() {
-                ReservationWithWaitingOrder saved = new ReservationWithWaitingOrder(
-                        1L, VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L);
                 given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
                 given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
-                given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
+                given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                        "모아",
+                        VALID_COMMAND_MOA.date(),
+                        1L,
                         1L))
                         .willReturn(false);
                 given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
@@ -220,9 +218,11 @@ class ReservationServiceTest {
 
                 verify(reservationTimeRepository, times(1)).findById(1L);
                 verify(themeRepository, times(1)).findById(1L);
-                verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId("모아",
+                verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId(
+                        "모아",
                         VALID_COMMAND_MOA.date(), 1L,
-                        1L);
+                        1L
+                );
                 verify(reservationRepository, times(1)).save(any(Reservation.class));
             }
         }

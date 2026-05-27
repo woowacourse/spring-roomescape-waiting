@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -23,14 +22,12 @@ import roomescape.service.dto.ReservationWithWaitingOrder;
 
 @JdbcTest
 @Import(JdbcReservationRepository.class)
-@Sql(scripts = "/schema.sql")
 class JdbcReservationRepositoryTest {
 
     private static final LocalDate DATE = LocalDate.of(2099, 12, 31);
 
     @Autowired
     private JdbcReservationRepository reservationRepository;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
@@ -244,8 +241,12 @@ class JdbcReservationRepositoryTest {
         return new Reservation(id, name, date, time, theme);
     }
 
-    private Reservation insertReservationWithCreatedAt(String name, LocalDate date, ReservationTime time, Theme theme,
-                                                       Instant createdAt) {
+    private Reservation insertReservationWithCreatedAt(
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme,
+            Instant createdAt) {
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, ?)",
                 name, date.toString(), time.getId(), theme.getId(), Timestamp.from(createdAt)

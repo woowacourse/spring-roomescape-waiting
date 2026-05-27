@@ -16,9 +16,9 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.service.AdminReservationService;
 import roomescape.service.dto.ReservationResult;
 
-@RequestMapping("/admin/reservations")
-@RestController
 @Validated
+@RestController
+@RequestMapping("/admin/reservations")
 public class AdminReservationController {
 
     private final AdminReservationService reservationService;
@@ -47,3 +47,4 @@ public class AdminReservationController {
         reservationService.delete(id);
     }
 }
+

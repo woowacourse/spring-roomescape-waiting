@@ -17,8 +17,7 @@ import roomescape.domain.ReservationTime;
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
-    private static final RowMapper<ReservationTime> ROW_MAPPER = (rs, rowNum) -> new ReservationTime(
+    private final RowMapper<ReservationTime> reservationTimeRowMapper = (rs, rowNum) -> new ReservationTime(
             rs.getLong("id"),
             rs.getTime("start_at").toLocalTime()
     );
@@ -31,7 +30,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     public List<ReservationTime> findAll() {
         return jdbcTemplate.query(
                 "SELECT id, start_at FROM reservation_time",
-                ROW_MAPPER
+                reservationTimeRowMapper
         );
     }
 
@@ -39,7 +38,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     public Optional<ReservationTime> findById(Long id) {
         List<ReservationTime> result = jdbcTemplate.query(
                 "SELECT id, start_at FROM reservation_time WHERE id = ?",
-                ROW_MAPPER,
+                reservationTimeRowMapper,
                 id
         );
         return result.stream().findFirst();
@@ -67,7 +66,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAvailable(LocalDate date, Long themeId) {
-        return jdbcTemplate.query("SELECT id, start_at FROM reservation_time", ROW_MAPPER);
+        return jdbcTemplate.query("SELECT id, start_at FROM reservation_time", reservationTimeRowMapper);
     }
 
     @Override

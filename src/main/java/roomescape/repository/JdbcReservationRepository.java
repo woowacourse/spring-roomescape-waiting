@@ -57,38 +57,40 @@ public class JdbcReservationRepository implements ReservationRepository {
             INNER JOIN theme th ON r.theme_id = th.id
             """;
 
-    private static final RowMapper<Reservation> RESERVATION_ROW_MAPPER = (rs, rowNum) -> new Reservation(
-            rs.getLong("reservation_id"),
-            rs.getString("reservation_name"),
-            rs.getDate("reservation_date").toLocalDate(),
-            new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getTime("time_start_at").toLocalTime()
-            ),
-            new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
-            )
-    );
+    private final RowMapper<Reservation> reservationRowMapper =
+            (rs, rowNum) -> new Reservation(
+                    rs.getLong("reservation_id"),
+                    rs.getString("reservation_name"),
+                    rs.getDate("reservation_date").toLocalDate(),
+                    new ReservationTime(
+                            rs.getLong("time_id"),
+                            rs.getTime("time_start_at").toLocalTime()
+                    ),
+                    new Theme(
+                            rs.getLong("theme_id"),
+                            rs.getString("theme_name"),
+                            rs.getString("theme_description"),
+                            rs.getString("theme_thumbnail")
+                    )
+            );
 
-    private static final RowMapper<ReservationWithWaitingOrder> RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER = (rs, rowNum) -> new ReservationWithWaitingOrder(
-            rs.getLong("reservation_id"),
-            rs.getString("reservation_name"),
-            rs.getDate("reservation_date").toLocalDate(),
-            new ReservationTime(
-                    rs.getLong("time_id"),
-                    rs.getTime("time_start_at").toLocalTime()
-            ),
-            new Theme(
-                    rs.getLong("theme_id"),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail")
-            ),
-            rs.getLong("waiting_order")
-    );
+    private final RowMapper<ReservationWithWaitingOrder> reservationWithWaitingOrderRowMapper =
+            (rs, rowNum) -> new ReservationWithWaitingOrder(
+                    rs.getLong("reservation_id"),
+                    rs.getString("reservation_name"),
+                    rs.getDate("reservation_date").toLocalDate(),
+                    new ReservationTime(
+                            rs.getLong("time_id"),
+                            rs.getTime("time_start_at").toLocalTime()
+                    ),
+                    new Theme(
+                            rs.getLong("theme_id"),
+                            rs.getString("theme_name"),
+                            rs.getString("theme_description"),
+                            rs.getString("theme_thumbnail")
+                    ),
+                    rs.getLong("waiting_order")
+            );
 
     private final JdbcTemplate jdbcTemplate;
 
@@ -98,20 +100,20 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<ReservationWithWaitingOrder> findAll() {
-        return jdbcTemplate.query(SELECT_BASE_WITH_WAITING_ORDER, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER);
+        return jdbcTemplate.query(SELECT_BASE_WITH_WAITING_ORDER, reservationWithWaitingOrderRowMapper);
     }
 
     @Override
     public List<ReservationWithWaitingOrder> findByName(String name) {
         String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.name = ?";
-        return jdbcTemplate.query(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, name);
+        return jdbcTemplate.query(sql, reservationWithWaitingOrderRowMapper, name);
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
         String sql = SELECT_BASE + " WHERE r.id = ?";
         try {
-            Reservation reservation = jdbcTemplate.queryForObject(sql, RESERVATION_ROW_MAPPER, id);
+            Reservation reservation = jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
             return Optional.ofNullable(reservation);
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
@@ -152,7 +154,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private ReservationWithWaitingOrder findWithWaitingOrderById(Long id) {
         String sql = SELECT_BASE_WITH_WAITING_ORDER + " WHERE r.id = ?";
-        return jdbcTemplate.queryForObject(sql, RESERVATION_WITH_WAITING_ORDER_ROW_MAPPER, id);
+        return jdbcTemplate.queryForObject(sql, reservationWithWaitingOrderRowMapper, id);
     }
 
     @Override

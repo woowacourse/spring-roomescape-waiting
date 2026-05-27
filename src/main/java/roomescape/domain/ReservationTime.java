@@ -4,6 +4,7 @@ import java.time.LocalTime;
 import roomescape.domain.exception.DomainValidationException;
 
 public class ReservationTime {
+
     private final Long id;
     private final LocalTime startAt;
 

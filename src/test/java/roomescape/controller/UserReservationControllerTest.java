@@ -32,10 +32,8 @@ class UserReservationControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     @MockitoBean
     private UserReservationService userReservationService;
 
