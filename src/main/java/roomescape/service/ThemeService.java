@@ -14,9 +14,9 @@ import roomescape.domain.reservation.theme.ThemeName;
 import roomescape.domain.reservation.theme.ThumbnailUrl;
 import roomescape.domain.reservation.time.ReservationTime;
 import roomescape.domain.reservation.theme.Theme;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ReservationTimeResponse;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.controller.dto.request.ThemeRequest;
+import roomescape.controller.dto.response.ReservationTimeResponse;
+import roomescape.controller.dto.response.ThemeResponse;
 
 @Service
 public class ThemeService {

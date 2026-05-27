@@ -2,7 +2,7 @@ package roomescape.service.dto.command;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import roomescape.dto.request.WaitingRequest;
+import roomescape.controller.dto.request.WaitingRequest;
 
 public record WaitingCommand(
         String name,
