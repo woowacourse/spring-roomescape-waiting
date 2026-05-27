@@ -121,7 +121,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.id = :id AND r.status='ACTIVE' AND r.is_deleted = 0 ";
+                + "WHERE r.id = :id AND (r.status='ACTIVE' OR r.status='PENDING') AND r.is_deleted = 0 ";
         return jdbcTemplate.query(sql, Map.of("id", id), rowMapper).stream().findFirst();
     }
 
@@ -135,7 +135,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.status = 'ACTIVE' AND r.is_deleted = 0 "
+                + "WHERE (r.status = 'ACTIVE' OR r.status = 'PENDING') AND r.is_deleted = 0 "
                 + "ORDER BY r.date ASC, rt.start_at ASC";
 
         return jdbcTemplate.query(sql, rowMapper);
@@ -151,7 +151,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
-                + "WHERE r.theme_id = :themeId AND r.date = :date AND r.status = 'ACTIVE' AND r.is_deleted = 0";
+                + "WHERE r.theme_id = :themeId AND r.date = :date AND (r.status = 'ACTIVE' OR r.status = 'PENDING') AND r.is_deleted = 0";
 
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("themeId", themeId)
@@ -199,7 +199,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByReservationTime(final Long timeId) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND status='ACTIVE' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND (status = 'ACTIVE' OR status = 'PENDING') AND is_deleted = 0)";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId), Boolean.class));
     }
 
