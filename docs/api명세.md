@@ -153,6 +153,16 @@ Content-Type: application/json
 ]
 ```
 
+### 예약 대기 API
+
+```http request
+### 삭제 요청
+DELETE /waitlists/{id} HTTP/1.1
+
+### 삭제 응답
+HTTP/1.1 204 No Content
+```
+
 ### 테마 API
 
 ```http request
