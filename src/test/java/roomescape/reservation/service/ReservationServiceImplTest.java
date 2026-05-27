@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -18,13 +19,17 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.holiday.service.HolidayService;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
+import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.reservation.service.dto.ReservationSaveServiceDto;
+import roomescape.theme.controller.dto.ThemeResponseDto;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
@@ -265,6 +270,29 @@ class ReservationServiceImplTest {
         // then
         assertThat(result).hasSize(2);
         assertThat(result).allMatch(r -> r.getName().equals("라이"));
+    }
+
+    @DisplayName("대기 순번을 포함한 예약 전체 정보를 조회한다.")
+    @Test
+    void getAllByName_예약_전체_정보_조회_테스트() {
+        // given
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        Theme theme2 = new Theme("테마", "설명", "https://img.test/a.png").withId(2L);
+        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        List<ReservationWithWaitingOrder> reservationWithWaitingOrders = List.of(
+                new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponseDto.from(time),
+                        ThemeResponseDto.from(theme), Status.RESERVED, 0),
+                new ReservationWithWaitingOrder(1L, "라이", ReservationTimeResponseDto.from(time),
+                        ThemeResponseDto.from(theme2), Status.WAITING, 3)
+        );
+        when(reservationRepository.findAllByName("라이")).thenReturn(reservationWithWaitingOrders);
+
+        // when
+        List<ReservationWithWaitingOrderResponseDto> result = reservationService.getAllByName("라이");
+
+        // then
+        assertThat(result).hasSize(2);
+        verify(reservationRepository, times(1)).findAllByName("라이");
     }
 
     @DisplayName("예약 대기가 없는 경우, RESERVED인 예약이 정상 취소된다.")

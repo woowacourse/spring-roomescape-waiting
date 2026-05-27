@@ -11,7 +11,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -20,15 +19,17 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
+import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
+import roomescape.theme.controller.dto.ThemeResponseDto;
 import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
 
 @WebMvcTest(ReservationController.class)
 class ReservationControllerTest {
@@ -40,19 +41,26 @@ class ReservationControllerTest {
     private ReservationService reservationService;
 
     @Test
-    void 이름으로_예약_목록_조회_테스트() throws Exception {
+    void 이름으로_예약_목록_전체_조회_테스트() throws Exception {
         // given
-        ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0), LocalDateTime.of(2030, 6, 1, 12, 0));
+        ReservationTime time = new ReservationTime(1L, LocalDateTime.of(2030, 6, 1, 10, 0),
+                LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
-        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        Mockito.when(reservationService.getByName("라이")).thenReturn(List.of(reservation));
+        Theme theme2 = new Theme("테마", "설명", "https://img.test/a.png").withId(2L);
+        List<ReservationWithWaitingOrderResponseDto> reservationWithWaitingOrders = List.of(
+                new ReservationWithWaitingOrderResponseDto(1L, "라이", ReservationTimeResponseDto.from(time),
+                        ThemeResponseDto.from(theme), Status.RESERVED, 0),
+                new ReservationWithWaitingOrderResponseDto(1L, "라이", ReservationTimeResponseDto.from(time),
+                        ThemeResponseDto.from(theme2), Status.WAITING, 3)
+        );
+        when(reservationService.getAllByName("라이")).thenReturn(reservationWithWaitingOrders);
 
         // when & then
         mockMvc.perform(get("/reservations")
                         .param("name", "라이")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
+                .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(1L))
                 .andExpect(jsonPath("$[0].name").value("라이"));
     }
@@ -60,7 +68,8 @@ class ReservationControllerTest {
     @Test
     void 예약_취소_테스트() throws Exception {
         // when & then
-        mockMvc.perform(delete("/reservations/{id}", 1L))
+        mockMvc.perform(delete("/reservations/{id}", 1L)
+                        .param("name", "name"))
                 .andExpect(status().isNoContent());
 
         Mockito.verify(reservationService).cancelForUser(1L, "name");
@@ -74,7 +83,8 @@ class ReservationControllerTest {
                 .when(reservationService).cancelForUser(999L, "name");
 
         // when & then
-        mockMvc.perform(delete("/reservations/{id}", 999L))
+        mockMvc.perform(delete("/reservations/{id}", 999L)
+                        .param("name", "name"))
                 .andExpect(status().isNotFound());
     }
 
@@ -86,17 +96,19 @@ class ReservationControllerTest {
                 .when(reservationService).cancelForUser(1L, "name");
 
         // when & then
-        mockMvc.perform(delete("/reservations/{id}", 1L))
+        mockMvc.perform(delete("/reservations/{id}", 1L)
+                        .param("name", "name"))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     void 예약_변경_테스트() throws Exception {
         // given
-        ReservationTime newTime = new ReservationTime(2L, LocalDateTime.of(2030, 6, 1, 14, 0), LocalDateTime.of(2030, 6, 1, 16, 0));
+        ReservationTime newTime = new ReservationTime(2L, LocalDateTime.of(2030, 6, 1, 14, 0),
+                LocalDateTime.of(2030, 6, 1, 16, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Reservation updated = new Reservation("라이", newTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
-        Mockito.when(reservationService.update(1L, 2L)).thenReturn(updated);
+        when(reservationService.update(1L, 2L)).thenReturn(updated);
 
         String requestBody = """
                 {
@@ -117,7 +129,7 @@ class ReservationControllerTest {
     @Test
     void 존재하지_않는_예약_변경_404_반환_테스트() throws Exception {
         // given
-        Mockito.when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
+        when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
                 .thenThrow(new ReservationNotFoundException(999L));
 
         String requestBody = """
@@ -137,7 +149,7 @@ class ReservationControllerTest {
     @Test
     void 과거_슬롯으로_예약_변경_400_반환_테스트() throws Exception {
         // given
-        Mockito.when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
+        when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
                 .thenThrow(PastReservationException.pastReservation());
 
         String requestBody = """
@@ -157,7 +169,7 @@ class ReservationControllerTest {
     @Test
     void 이미_찬_시간으로_예약_변경_409_반환_테스트() throws Exception {
         // given
-        Mockito.when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
+        when(reservationService.update(Mockito.anyLong(), Mockito.anyLong()))
                 .thenThrow(new DuplicateReservationException());
 
         String requestBody = """

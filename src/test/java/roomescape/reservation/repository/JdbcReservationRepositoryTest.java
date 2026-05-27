@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -119,6 +121,29 @@ class JdbcReservationRepositoryTest {
         assertThat(affected).isTrue();
         assertThat(reservation).isPresent();
         assertThat(reservation.get().getStatus()).isEqualTo(Status.RESERVED);
+    }
+
+    @DisplayName("대기 순번을 포함한 예약 전체 정보를 조회한다.")
+    @Test
+    void findAllByName_대기_순번_포함_예약_대기_정보_조회() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        Long timeId2 = insertTime(LocalDateTime.now().plusHours(3).toString(),
+                LocalDateTime.now().plusHours(5).toString());
+        insertReservation("어셔1", timeId, themeId, Status.RESERVED, LocalDateTime.now().plusHours(1));
+        insertReservation("어셔2", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(2));
+        insertReservation("어셔3", timeId, themeId, Status.WAITING,  LocalDateTime.now().plusHours(3));
+        insertReservation("어셔3", timeId2, themeId, Status.RESERVED,  LocalDateTime.now().plusHours(3));
+
+        // when
+        List<ReservationWithWaitingOrder> reservations = reservationRepository.findAllByName("어셔3");
+
+        // then
+        assertThat(reservations).hasSize(2);
+        assertThat(reservations.get(0).waitingOrder()).isEqualTo(2);
+        assertThat(reservations.get(1).waitingOrder()).isEqualTo(0);
     }
 
     private Long insertTime(String startAt, String endAt) {
