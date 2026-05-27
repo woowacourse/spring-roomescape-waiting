@@ -70,7 +70,30 @@ function toISODate(date) {
   return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
 }
 
-// ===== 예약 조회 =====
+function escStr(str) {
+  return (str || '').replace(/'/g, "\\'");
+}
+
+// ===== 탭 전환 =====
+function initTabs() {
+  document.querySelectorAll('.my-res-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.my-res-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.my-res-panel').forEach(p => p.classList.remove('active'));
+      tab.classList.add('active');
+      $( tab.dataset.target ).classList.add('active');
+    });
+  });
+}
+
+function switchToTab(tabId) {
+  document.querySelectorAll('.my-res-tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.my-res-panel').forEach(p => p.classList.remove('active'));
+  $(tabId).classList.add('active');
+  $( $(tabId).dataset.target ).classList.add('active');
+}
+
+// ===== 예약 + 대기 조회 =====
 async function searchReservations() {
   const name = $('search-name').value.trim();
   if (!name) { showToast('예약자 이름을 입력해주세요.', 'error'); return; }
@@ -79,9 +102,19 @@ async function searchReservations() {
   btn.disabled = true; btn.textContent = '조회 중...';
 
   try {
-    const data = await api.get(`/reservations?customerName=${encodeURIComponent(name)}`);
-    renderReservationList(data, name);
+    // API: GET /reservations?customer-name={name}
+    // 응답: { reservations: [...], waitings: [...] }
+    const data = await api.get(`/reservations?customer-name=${encodeURIComponent(name)}`);
+    const reservations = data.reservations || [];
+    const waitings = data.waitings || [];
+
+    renderReservationList(reservations);
+    renderWaitingList(waitings);
+    updateTabCountLabel(reservations.length, waitings.length);
+
     $('search-results').style.display = 'block';
+    // 기본으로 예약 탭 표시
+    switchToTab('tab-reservations');
   } catch (e) {
     showToast('조회에 실패했습니다. ' + e.message, 'error');
   } finally {
@@ -89,11 +122,15 @@ async function searchReservations() {
   }
 }
 
-function renderReservationList(reservations, name) {
-  $('search-results-label').textContent = `"${name}" 예약 내역 ${reservations.length}건`;
+function updateTabCountLabel(resCount, waitCount) {
+  $('tab-count-label').textContent = `예약 ${resCount}건 · 대기 ${waitCount}건`;
+}
+
+// ===== 예약 목록 렌더링 =====
+function renderReservationList(reservations) {
   const tbody = $('my-reservations-tbody');
 
-  if (reservations.length === 0) {
+  if (!reservations || reservations.length === 0) {
     tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다.</td></tr>`;
     return;
   }
@@ -117,9 +154,32 @@ function renderReservationList(reservations, name) {
   `).join('');
 }
 
-// HTML 속성 내 특수문자 이스케이프
-function escStr(str) {
-  return (str || '').replace(/'/g, "\\'");
+// ===== 대기 목록 렌더링 =====
+function renderWaitingList(waitings) {
+  const tbody = $('my-waitings-tbody');
+
+  if (!waitings || waitings.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">대기 내역이 없습니다.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = waitings.map((w, idx) => `
+    <tr>
+      <td>${idx + 1}</td>
+      <td>${w.date}</td>
+      <td>${formatTime(w.time.startAt)}</td>
+      <td>${w.theme.name}</td>
+      <td>
+        <span class="waiting-rank-badge">${w.rank}번째</span>
+      </td>
+      <td>
+        <button class="btn-delete"
+          onclick="openCancelWaitingModal(${w.id},'${escStr(w.date)}','${escStr(formatTime(w.time.startAt))}','${escStr(w.theme.name)}',${w.rank})">
+          취소
+        </button>
+      </td>
+    </tr>
+  `).join('');
 }
 
 // ===== 예약 취소 =====
@@ -132,6 +192,46 @@ async function cancelReservation(id) {
     if (name) searchReservations();
   } catch (e) {
     showToast('취소에 실패했습니다. ' + e.message, 'error');
+  }
+}
+
+// ===== 대기 취소 모달 =====
+let pendingCancelWaitingId = null;
+
+function openCancelWaitingModal(waitingId, date, time, themeName, rank) {
+  pendingCancelWaitingId = waitingId;
+  $('cwm-date').textContent   = date;
+  $('cwm-theme').textContent  = themeName;
+  $('cwm-time').textContent   = time;
+  $('cwm-rank').textContent   = `${rank}번째`;
+  $('cancel-waiting-name').value = '';
+  $('cancel-waiting-modal').classList.add('open');
+  setTimeout(() => $('cancel-waiting-name').focus(), 50);
+}
+
+function closeCancelWaitingModal() {
+  $('cancel-waiting-modal').classList.remove('open');
+  pendingCancelWaitingId = null;
+}
+
+async function submitCancelWaiting() {
+  const name = $('cancel-waiting-name').value.trim();
+  if (!name) { showToast('이름을 입력해주세요.', 'error'); return; }
+
+  const btn = $('confirm-cancel-waiting-btn');
+  btn.disabled = true; btn.textContent = '취소 중...';
+
+  try {
+    // DELETE /waitings/{id}?customer-name={name}
+    await api.del(`/waitings/${pendingCancelWaitingId}?customer-name=${encodeURIComponent(name)}`);
+    closeCancelWaitingModal();
+    showToast('대기가 취소되었습니다.', 'success');
+    const searchName = $('search-name').value.trim();
+    if (searchName) searchReservations();
+  } catch (e) {
+    showToast('취소에 실패했습니다. ' + e.message, 'error');
+  } finally {
+    btn.disabled = false; btn.textContent = '대기 취소';
   }
 }
 
@@ -319,6 +419,9 @@ async function submitEdit() {
 
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
+  // 탭 초기화
+  initTabs();
+
   // 검색
   $('search-btn').addEventListener('click', searchReservations);
   $('search-name').addEventListener('keydown', e => { if (e.key === 'Enter') searchReservations(); });
@@ -342,4 +445,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 변경 제출
   $('confirm-edit-btn').addEventListener('click', submitEdit);
+
+  // 대기 취소 모달
+  $('cancel-waiting-close-btn').addEventListener('click', closeCancelWaitingModal);
+  $('cancel-waiting-cancel-btn').addEventListener('click', closeCancelWaitingModal);
+  $('cancel-waiting-modal').addEventListener('click', e => { if (e.target === $('cancel-waiting-modal')) closeCancelWaitingModal(); });
+  $('confirm-cancel-waiting-btn').addEventListener('click', submitCancelWaiting);
+  $('cancel-waiting-name').addEventListener('keydown', e => { if (e.key === 'Enter') submitCancelWaiting(); });
 });

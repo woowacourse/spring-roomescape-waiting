@@ -6,6 +6,7 @@ const state = {
   selectedThemeName: null,
   selectedTimeId: null,
   selectedTimeLabel: null,
+  waitingMode: false,
   themes: [],
   availableDates: [],
   currentCalendarYear: new Date().getFullYear(),
@@ -59,7 +60,9 @@ const api = {
       const msg = await extractErrorMessage(res);
       throw new Error(msg);
     }
-    return res.json();
+    // 201 Created 는 body가 있을 수도 없음
+    const text = await res.text();
+    return text ? JSON.parse(text) : {};
   },
 };
 
@@ -187,10 +190,22 @@ async function loadTimeSlots() {
     grid.className = 'time-grid';
     times.forEach(t => {
       const slot = document.createElement('div');
-      slot.className = 'time-slot' + (t.reserved ? ' reserved' : '');
       const label = formatTime(t.startAt);
-      slot.innerHTML = `<div>${label}</div><div class="time-slot-badge">${t.reserved ? 'RESERVED' : 'AVAILABLE'}</div>`;
-      if (!t.reserved) slot.addEventListener('click', () => selectTime(t.id, label, slot));
+      if (isPastTimeSlot(selectedDate, t.startAt)) {
+        slot.className = 'time-slot unavailable';
+        slot.innerHTML = `<div>${label}</div><div class="time-slot-badge">CLOSED</div>`;
+      } else if (t.reserved) {
+        // 예약된 슬롯: 대기 신청 가능
+        slot.className = 'time-slot reserved waitingable';
+        slot.innerHTML = `<div>${label}</div><div class="time-slot-badge">WAITING</div>`;
+        slot.style.cursor = 'pointer';
+        slot.style.color = 'var(--text-secondary)';
+        slot.addEventListener('click', () => selectWaitingTime(t.id, label, slot));
+      } else {
+        slot.className = 'time-slot';
+        slot.innerHTML = `<div>${label}</div><div class="time-slot-badge">AVAILABLE</div>`;
+        slot.addEventListener('click', () => selectTime(t.id, label, slot));
+      }
       grid.appendChild(slot);
     });
 
@@ -206,7 +221,19 @@ async function loadTimeSlots() {
 function selectTime(id, label, el) {
   state.selectedTimeId = id;
   state.selectedTimeLabel = label;
+  state.waitingMode = false;
   document.querySelectorAll('.time-slot:not(.reserved)').forEach(s => s.classList.remove('selected'));
+  document.querySelectorAll('.time-slot.waitingable').forEach(s => s.classList.remove('selected'));
+  el.classList.add('selected');
+  updateCTAInfo();
+}
+
+function selectWaitingTime(id, label, el) {
+  state.selectedTimeId = id;
+  state.selectedTimeLabel = label;
+  state.waitingMode = true;
+  document.querySelectorAll('.time-slot:not(.reserved)').forEach(s => s.classList.remove('selected'));
+  document.querySelectorAll('.time-slot.waitingable').forEach(s => s.classList.remove('selected'));
   el.classList.add('selected');
   updateCTAInfo();
 }
@@ -215,6 +242,16 @@ function formatTime(t) {
   if (!t) return '';
   if (Array.isArray(t)) return `${String(t[0]).padStart(2,'0')}:${String(t[1]).padStart(2,'0')}`;
   return t.substring(0, 5);
+}
+
+function isPastTimeSlot(date, startAt) {
+  const [year, month, day] = date.split('-').map(Number);
+  const [hours, minutes, seconds = 0] = Array.isArray(startAt)
+    ? startAt
+    : startAt.split(':').map(Number);
+  const slotStartAt = new Date(year, month - 1, day, hours, minutes, seconds);
+
+  return slotStartAt < new Date();
 }
 
 // ===== CTA =====
@@ -226,18 +263,44 @@ function updateCTAInfo() {
   if (state.selectedThemeName) parts.push(`<strong>${state.selectedThemeName}</strong>`);
   if (state.selectedTimeLabel) parts.push(`<strong>${state.selectedTimeLabel}</strong>`);
   info.innerHTML = parts.length ? parts.join(' &mdash; ') : '날짜, 테마, 시간을 선택하세요.';
-  btn.disabled = !(state.selectedDate && state.selectedThemeId && state.selectedTimeId);
+
+  const allSelected = state.selectedDate && state.selectedThemeId && state.selectedTimeId;
+  btn.disabled = !allSelected;
+  if (allSelected && state.waitingMode) {
+    btn.textContent = '대기 신청';
+    btn.style.background = 'var(--accent)';
+    btn.style.color = 'var(--bg)';
+  } else {
+    btn.textContent = '예약하기';
+    btn.style.background = '';
+    btn.style.color = '';
+  }
 }
 
-// ===== Booking Modal =====
+// ===== Booking Modal (예약) =====
 function openModal() {
   $('modal-date').textContent  = state.selectedDate;
   $('modal-theme').textContent = state.selectedThemeName;
   $('modal-time').textContent  = state.selectedTimeLabel;
   $('booking-name').value = '';
+  $('modal-title-text').textContent = '예약 확인';
+  $('confirm-booking-btn').textContent = '예약하기';
   $('booking-modal').classList.add('open');
   setTimeout(() => $('booking-name').focus(), 50);
 }
+
+// ===== Waiting Modal (대기 신청) =====
+function openWaitingModal() {
+  $('modal-date').textContent  = state.selectedDate;
+  $('modal-theme').textContent = state.selectedThemeName;
+  $('modal-time').textContent  = state.selectedTimeLabel;
+  $('booking-name').value = '';
+  $('modal-title-text').textContent = '대기 신청';
+  $('confirm-booking-btn').textContent = '대기 신청하기';
+  $('booking-modal').classList.add('open');
+  setTimeout(() => $('booking-name').focus(), 50);
+}
+
 function closeModal() { $('booking-modal').classList.remove('open'); }
 
 async function submitBooking() {
@@ -245,20 +308,38 @@ async function submitBooking() {
   if (!name) { showToast('이름을 입력해주세요.', 'error'); return; }
 
   const btn = $('confirm-booking-btn');
-  btn.disabled = true; btn.textContent = '예약 중...';
+  const isWaiting = state.waitingMode;
+
+  btn.disabled = true;
+  btn.textContent = isWaiting ? '대기 신청 중...' : '예약 중...';
+
   try {
-    await api.post('/reservations', {
-      name, date: state.selectedDate,
-      timeId: state.selectedTimeId, themeId: state.selectedThemeId,
-    });
-    closeModal();
-    showToast('예약이 완료되었습니다! 🎉', 'success');
-    state.selectedTimeId = null; state.selectedTimeLabel = null;
+    if (isWaiting) {
+      // POST /waitings
+      await api.post('/waitings', {
+        name,
+        date: state.selectedDate,
+        timeId: state.selectedTimeId,
+        themeId: state.selectedThemeId,
+      });
+      closeModal();
+      showToast('대기가 신청되었습니다! 📄', 'success');
+    } else {
+      // POST /reservations
+      await api.post('/reservations', {
+        name, date: state.selectedDate,
+        timeId: state.selectedTimeId, themeId: state.selectedThemeId,
+      });
+      closeModal();
+      showToast('예약이 완료되었습니다! 🎉', 'success');
+    }
+    state.selectedTimeId = null; state.selectedTimeLabel = null; state.waitingMode = false;
     loadTimeSlots(); updateCTAInfo();
   } catch (e) {
-    showToast('예약에 실패했습니다. ' + e.message, 'error');
+    showToast((isWaiting ? '대기 신청' : '예약') + '에 실패했습니다. ' + e.message, 'error');
   } finally {
-    btn.disabled = false; btn.textContent = '예약하기';
+    btn.disabled = false;
+    btn.textContent = isWaiting ? '대기 신청하기' : '예약하기';
   }
 }
 
@@ -275,7 +356,10 @@ document.addEventListener('DOMContentLoaded', () => {
     renderCalendar();
   });
 
-  $('book-btn').addEventListener('click', openModal);
+  $('book-btn').addEventListener('click', () => {
+    if (state.waitingMode) openWaitingModal();
+    else openModal();
+  });
   $('modal-close-btn').addEventListener('click', closeModal);
   $('modal-cancel-btn').addEventListener('click', closeModal);
   $('booking-modal').addEventListener('click', e => { if (e.target === $('booking-modal')) closeModal(); });

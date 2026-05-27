@@ -340,12 +340,23 @@ main { padding: 48px 0 100px; }
   background: var(--surface-2);
   transition: all var(--tr);
 }
-.time-slot:hover:not(.reserved) { border-color: var(--border-hover); background: var(--surface-3); }
+.time-slot:hover:not(.reserved):not(.unavailable) { border-color: var(--border-hover); background: var(--surface-3); }
 .time-slot.selected { border-color: var(--text); background: var(--surface-3); }
-.time-slot.reserved {
+.time-slot.reserved,
+.time-slot.unavailable {
   background: var(--reserved-bg); border-color: var(--border);
   color: var(--reserved-text); cursor: not-allowed;
 }
+/* 대기 신청 가능한 슬롯 */
+.time-slot.waitingable {
+  cursor: pointer !important;
+  border-color: rgba(200, 184, 138, 0.2);
+}
+.time-slot.waitingable:hover { border-color: var(--accent); background: rgba(200, 184, 138, 0.06); }
+.time-slot.waitingable.selected { border-color: var(--accent); background: rgba(200, 184, 138, 0.12); color: var(--accent); }
+.time-slot.waitingable .time-slot-badge { color: rgba(200, 184, 138, 0.5); }
+.time-slot.waitingable:hover .time-slot-badge,
+.time-slot.waitingable.selected .time-slot-badge { color: var(--accent); }
 .time-slot-badge {
   font-size: 9px; font-weight: 700;
   letter-spacing: 0.07em; text-transform: uppercase;
@@ -531,8 +542,49 @@ main { padding: 48px 0 100px; }
 .my-res-search-input { flex: 1; }
 .my-res-search-btn { white-space: nowrap; }
 
-.my-res-result-meta { margin-bottom: 10px; }
-.my-res-result-label { font-size: 13px; color: var(--text-secondary); }
+/* 탭 */
+.my-res-tabs {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--border);
+}
+.my-res-tab {
+  padding: 9px 20px;
+  font-size: 13px; font-weight: 500;
+  color: var(--text-secondary);
+  background: none; border: none;
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: all var(--tr);
+  margin-bottom: -1px;
+}
+.my-res-tab:hover { color: var(--text); }
+.my-res-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+
+.my-res-tab-count {
+  margin-left: auto;
+  font-size: 11px;
+  color: var(--text-muted);
+  padding-right: 4px;
+}
+
+/* 탭 패널 */
+.my-res-panel { display: none; }
+.my-res-panel.active { display: block; }
+
+/* 대기 순번 배지 */
+.waiting-rank-badge {
+  display: inline-block;
+  padding: 2px 10px;
+  background: rgba(200, 184, 138, 0.12);
+  border: 1px solid rgba(200, 184, 138, 0.3);
+  border-radius: 20px;
+  font-size: 11px; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
 
 /* 변경 / 취소 버튼 */
 .btn-edit {
@@ -605,4 +657,3 @@ main { padding: 48px 0 100px; }
   .modal-edit { width: 100%; }
   .edit-fixed-info { flex-direction: column; gap: 12px; }
 }
-
