@@ -4,7 +4,7 @@ import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
-public record ConfirmedReservationResponse(
+public record CompleteReservationResponse(
         Long id,
         String guestName,
         String date,
@@ -14,8 +14,8 @@ public record ConfirmedReservationResponse(
         boolean isConfirmed
 ) implements ReservationWaitingResponse {
 
-    public static ConfirmedReservationResponse from(ReservationWaitingResult reservationWaitingResult) {
-        return new ConfirmedReservationResponse(
+    public static CompleteReservationResponse from(ReservationWaitingResult reservationWaitingResult) {
+        return new CompleteReservationResponse(
                 reservationWaitingResult.id(),
                 reservationWaitingResult.guestName(),
                 reservationWaitingResult.date().toString(),
