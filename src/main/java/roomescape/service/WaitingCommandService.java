@@ -2,6 +2,7 @@ package roomescape.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
@@ -53,13 +54,12 @@ public class WaitingCommandService {
         ReservationTime time = findTimeReference(timeId);
         findThemeReference(themeId);
 
-        if (!reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            throw new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다.");
-        }
+        Reservation reservation = reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId)
+                .orElseThrow(() -> new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다."));
 
         time.validateNotPast(date, LocalDateTime.now(clock));
 
-        if (reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).get().isOwnedBy(name)) {
+        if (reservation.isOwnedBy(name)) {
             throw new DuplicateException("내가 예약한 시간에 예약대기를 생성할 수 없습니다.");
         }
 

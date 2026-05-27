@@ -162,18 +162,6 @@ public class ReservationDao {
         return findById(reservationId);
     }
 
-    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1 FROM reservation
-                    WHERE date = ? AND time_id = ? AND theme_id = ?
-                )
-                """;
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId)
-        );
-    }
-
     public Optional<Reservation> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT
@@ -191,18 +179,7 @@ public class ReservationDao {
                         INNER JOIN theme as theme ON reservation.theme_id = theme.id
                         WHERE date = ? AND time_id = ? AND theme_id = ?;
                 """;
-        return Optional.ofNullable(jdbcTemplate.queryForObject(sql, rowMapper, date, timeId, themeId));
+        return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId).stream().findFirst();
     }
 
-    public boolean existsByDateAndTimeIdAndThemeIdExcluding(LocalDate date, long timeId, long themeId, long excludeId) {
-        String sql = """
-                SELECT EXISTS (
-                    SELECT 1 FROM reservation
-                    WHERE date = ? AND time_id = ? AND theme_id = ? AND id != ?
-                )
-                """;
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, excludeId)
-        );
-    }
 }

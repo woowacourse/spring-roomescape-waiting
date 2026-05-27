@@ -44,7 +44,7 @@ public class ReservationCommandService {
         ReservationTime time = findTimeReference(timeId);
         findThemeReference(themeId);
         time.validateNotPast(date, LocalDateTime.now(clock));
-        if (reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
+        if (reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).isPresent()) {
             throw new DuplicateException("해당 날짜와 시간에 이미 예약이 존재합니다.");
         }
         return reservationDao.save(name, date, timeId, themeId);
@@ -65,7 +65,10 @@ public class ReservationCommandService {
         newTime.validateNotPast(newDate, LocalDateTime.now(clock));
         Reservation current = reservationDao.findById(reservationId);
         long themeId = current.reservationTheme().id();
-        if (reservationDao.existsByDateAndTimeIdAndThemeIdExcluding(newDate, newTimeId, themeId, reservationId)) {
+        boolean isDuplicate = reservationDao.findByDateAndTimeIdAndThemeId(newDate, newTimeId, themeId)
+                .filter(existing -> existing.id() != reservationId)
+                .isPresent();
+        if (isDuplicate) {
             throw new DuplicateException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
         }
         return reservationDao.updateDateAndTime(reservationId, newDate, newTimeId);
