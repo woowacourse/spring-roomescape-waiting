@@ -20,6 +20,7 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Optional;
 
@@ -218,6 +219,10 @@ class WaitingListServiceTest {
         Long waitingListId = 1L;
         WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
 
+        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
+        WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
+        given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
         given(waitingListRepository.deleteById(waitingListId)).willReturn(true);
 
         // when
@@ -225,5 +230,86 @@ class WaitingListServiceTest {
 
         // then
         verify(waitingListRepository).deleteById(waitingListId);
+    }
+
+    @Test
+    void 존재하지_않는_예약대기_삭제_시도시_예외발생() {
+        // given
+        String name = "김민준";
+        Long waitingListId = 1L;
+        WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
+
+        given(waitingListRepository.findById(waitingListId)).willReturn(Optional.empty());
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+                .isInstanceOf(BusinessException.class)
+                        .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_FOUND);
+
+        // then
+        verify(waitingListRepository, never()).deleteById(waitingListId);
+    }
+
+    @Test
+    void 삭제를_시도하는_사용자명과_예약대기자명_불일치시_예외발생() {
+        // given
+        String name = "김민준";
+        Long waitingListId = 1L;
+        WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
+
+        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
+        WaitingList waitingList = WaitingList.createWithId(waitingListId, "검프", LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
+        given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
+
+        // then
+        verify(waitingListRepository, never()).deleteById(waitingListId);
+    }
+
+    @Test
+    void 과거_날짜_예약대기_삭제_시도시_예외발생() {
+        // given
+        String name = "김민준";
+        Long waitingListId = 1L;
+        WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
+
+        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.of(10,0), LocalTime.of(11,0));
+        WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now().minusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
+        given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
+
+        // then
+        verify(waitingListRepository, never()).deleteById(waitingListId);
+    }
+
+    @Test
+    void 과거_시간_예약대기_삭제_시도시_예외발생() {
+        // given
+        String name = "김민준";
+        Long waitingListId = 1L;
+        WaitingListDeleteCommand deleteCommand = new WaitingListDeleteCommand(waitingListId, name);
+
+        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.now().minusHours(1), LocalTime.now());
+        WaitingList waitingList = WaitingList.createWithId(waitingListId, name, LocalDate.now(), theme, reservationTime, LocalDateTime.now().minusDays(1));
+        given(waitingListRepository.findById(waitingListId)).willReturn(Optional.of(waitingList));
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.delete(deleteCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
+
+        // then
+        verify(waitingListRepository, never()).deleteById(waitingListId);
     }
 }

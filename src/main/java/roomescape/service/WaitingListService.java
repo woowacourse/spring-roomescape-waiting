@@ -32,12 +32,7 @@ public class WaitingListService {
                 .orElseThrow(() -> new BusinessException(ErrorCode.TIME_NOT_FOUND));
 
         WaitingList waitingList = WaitingList.create(createCommand.name(), createCommand.date(), findTheme, findReservationTime);
-        if (waitingList.getReservationDate().isPast()) {
-            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
-        }
-        if (waitingList.getReservationDate().isToday() && findReservationTime.isBefore()) {
-            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
-        }
+        validateFuture(waitingList);
 
         if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
                 waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId()
@@ -62,10 +57,27 @@ public class WaitingListService {
     }
 
     public void delete(final WaitingListDeleteCommand deleteCommand) {
-        boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
+        WaitingList findWaitingList = waitingListRepository.findById(deleteCommand.waitingListId())
+                .orElseThrow(() -> new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND));
+        
+        if (!findWaitingList.getName().equals(deleteCommand.name())) {
+            throw new BusinessException(ErrorCode.USER_NAME_NOT_MATCHED);
+        }
 
+        validateFuture(findWaitingList);
+        
+        boolean deleted = waitingListRepository.deleteById(deleteCommand.waitingListId());
         if (!deleted) {
             throw new BusinessException(ErrorCode.WAITING_LIST_NOT_FOUND);
+        }
+    }
+
+    private static void validateFuture(WaitingList waitingList) {
+        if (waitingList.getReservationDate().isPast()) {
+            throw new BusinessException(ErrorCode.DATE_ALREADY_PASSED);
+        }
+        if (waitingList.getReservationDate().isToday() && waitingList.getReservationTime().isBefore()) {
+            throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
         }
     }
 }
