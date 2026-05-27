@@ -6,27 +6,32 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import roomescape.reservation.domain.CustomerName;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
 import roomescape.reservation.domain.exception.ReservationNotFoundException;
 import roomescape.reservation.domain.exception.ReservationOptionChangedException;
-import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
-import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.theme.repository.ThemeRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.dto.request.ReservationCreateRequest;
 import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
+import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.theme.domain.Theme;
+import roomescape.theme.domain.exception.ThemeNotFoundException;
+import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.response.ThemeResponse;
+import roomescape.wating.domain.Waiting;
+import roomescape.wating.repository.WaitingRepository;
+import roomescape.wating.service.dto.response.WaitingResponse;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.IntStream;
 
 @Service
 @RequiredArgsConstructor
@@ -37,6 +42,7 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
     private final Clock clock;
 
     public List<ReservationResponse> getAllReservations() {
@@ -46,11 +52,18 @@ public class ReservationService {
                 .toList();
     }
 
-    public List<ReservationResponse> getReservationsByCustomerName(final String customerName) {
-        return reservationRepository.findAllByCustomerName(new CustomerName(customerName))
-                .stream()
-                .map(ReservationResponse::from)
-                .toList();
+    public ReservationsAndWaitingsResponse getReservationsByCustomerName(final String customerName) {
+        final LocalDateTime now = LocalDateTime.now(clock);
+
+        final List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(new CustomerName(customerName), now);
+        final List<Waiting> waitings = waitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(customerName, now);
+
+        final List<WaitingResponse> waitingsWithRank =
+                IntStream.range(0, waitings.size())
+                        .mapToObj(i -> WaitingResponse.of(waitings.get(i), i + 1))
+                        .toList();
+
+        return ReservationsAndWaitingsResponse.from(reservations, waitingsWithRank);
     }
 
     public List<ReservationTimesWithStatus> getReservationTimeStatuses(final LocalDate date, final Long themeId) {

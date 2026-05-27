@@ -14,12 +14,9 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.repository.entity.ReservationEntity;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,7 +51,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerName(final CustomerName customerName) {
+    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now) {
         final String sql = """
                 SELECT
                     r.id AS reservation_id,
@@ -70,10 +67,17 @@ public class JdbcReservationRepository implements ReservationRepository {
                 JOIN reservation_time t ON r.time_id = t.id
                 JOIN theme h ON r.theme_id = h.id
                 WHERE r.name = ?
-                ORDER BY r.id
+                  AND (r.date > ? OR (r.date = ? AND t.start_at > ?))
+                ORDER BY r.date ASC
                 """;
 
-        return jdbcTemplate.query(sql, this::mapToDomain, customerName.name())
+        return jdbcTemplate.query(sql,
+                        this::mapToDomain,
+                        customerName.name(),
+                        now,
+                        Date.valueOf(now.toLocalDate()),
+                        Time.valueOf(now.toLocalTime())
+                )
                 .stream()
                 .toList();
     }

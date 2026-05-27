@@ -8,6 +8,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -76,9 +77,13 @@ public class FakeReservationRepository implements ReservationRepository  {
     }
 
     @Override
-    public List<Reservation> findAllByCustomerName(final CustomerName customerName) {
+    public List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(final CustomerName customerName, final LocalDateTime now) {
         return reservations.stream()
                 .filter(reservation -> reservation.getCustomerName().equals(customerName.name()))
+                .filter(reservation -> LocalDateTime.of(
+                        reservation.getDate(),
+                        reservation.getTime().getStartAt()).isAfter(now)
+                )
                 .toList();
     }
 

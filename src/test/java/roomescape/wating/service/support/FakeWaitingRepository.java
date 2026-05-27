@@ -1,0 +1,61 @@
+package roomescape.wating.service.support;
+
+import roomescape.wating.domain.Waiting;
+import roomescape.wating.repository.WaitingRepository;
+
+import java.sql.Date;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+
+public class FakeWaitingRepository implements WaitingRepository {
+
+    private final List<Waiting> waitings = new ArrayList<>();
+    private Waiting savedWaiting;
+
+    @Override
+    public Long save(final Waiting waiting) {
+        savedWaiting = waiting;
+        final Waiting savedWaitingWithId = Waiting.of(
+                1L,
+                waiting.getCustomerName().name(),
+                Date.valueOf(waiting.getReservationDate()),
+                waiting.getCreatedAt(),
+                waiting.getTime(),
+                waiting.getTheme()
+        );
+        waitings.add(savedWaitingWithId);
+        return savedWaitingWithId.getId();
+    }
+
+    @Override
+    public boolean deleteById(final long id) {
+        return waitings.removeIf(waiting -> waiting.getId().equals(id));
+    }
+
+    @Override
+    public Optional<Waiting> findById(final long id) {
+        return waitings.stream()
+                .filter(waiting -> waiting.getId().equals(id))
+                .findFirst();
+    }
+
+    @Override
+    public List<Waiting> findAllByCustomerNameAndReservationDateTimeAfter(
+            final String customerName,
+            final LocalDateTime now
+    ) {
+        return waitings.stream()
+                .filter(waiting -> waiting.isOwnedBy(customerName))
+                .filter(waiting -> LocalDateTime.of(
+                        waiting.getReservationDate(),
+                        waiting.getTime().getStartAt()
+                ).isAfter(now))
+                .toList();
+    }
+
+    public void add(final Waiting waiting) {
+        waitings.add(waiting);
+    }
+}

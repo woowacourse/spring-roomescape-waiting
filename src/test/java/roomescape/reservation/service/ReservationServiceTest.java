@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.domain.exception.ReservationAlreadyExistsException;
@@ -17,12 +18,11 @@ import roomescape.reservation.service.dto.response.ReservationResponse;
 import roomescape.reservation.service.support.FakeReservationRepository;
 import roomescape.reservationtime.service.support.FakeReservationTimeRepository;
 import roomescape.theme.service.support.FakeThemeRepository;
+import roomescape.wating.domain.Waiting;
+import roomescape.wating.service.support.FakeWaitingRepository;
 
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.List;
+import java.sql.Date;
+import java.time.*;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -36,10 +36,12 @@ class ReservationServiceTest {
                     .toInstant(),
             ZoneId.of("Asia/Seoul")
     );
+    private static final LocalDateTime NOW = LocalDateTime.now(FIXED_CLOCK);
 
     private FakeReservationRepository reservationRepository;
     private FakeReservationTimeRepository reservationTimeRepository;
     private FakeThemeRepository themeRepository;
+    private FakeWaitingRepository waitingRepository;
     private ReservationService reservationService;
 
     @BeforeEach
@@ -47,10 +49,12 @@ class ReservationServiceTest {
         reservationRepository = new FakeReservationRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
+        waitingRepository = new FakeWaitingRepository();
         reservationService = new ReservationService(
                 reservationRepository,
                 reservationTimeRepository,
                 themeRepository,
+                waitingRepository,
                 FIXED_CLOCK
         );
     }
@@ -73,29 +77,53 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 예약자_이름으로_예약_목록을_조회한다() {
+    void 예약자_이름으로_현재_시간_이후의_예약_및_대기_목록을_조회한다() {
         // given
+        final LocalDateTime oneHourBefore = NOW.minusHours(1);
+        final LocalDateTime oneHourAfter = NOW.plusHours(1);
+
         reservationRepository.add(Reservation.of(
                 1L,
                 "브라운",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(1L, LocalTime.of(10, 0)),
+                oneHourBefore.toLocalDate(),
+                ReservationTime.of(1L, oneHourBefore.toLocalTime()),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
         reservationRepository.add(Reservation.of(
                 2L,
-                "제임스",
-                LocalDate.of(2026, 8, 5),
-                ReservationTime.of(2L, LocalTime.of(11, 0)),
+                "브라운",
+                oneHourAfter.toLocalDate(),
+                ReservationTime.of(2L, oneHourAfter.toLocalTime()),
+                Theme.of(1L, "링", "공포 테마", "http:~")
+        ));
+
+        waitingRepository.add(Waiting.of(
+                1L,
+                "브라운",
+                Date.valueOf(oneHourBefore.toLocalDate()),
+                NOW,
+                ReservationTime.of(1L, oneHourBefore.toLocalTime()),
+                Theme.of(1L, "링", "공포 테마", "http:~")
+        ));
+        waitingRepository.add(Waiting.of(
+                1L,
+                "브라운",
+                Date.valueOf(oneHourAfter.toLocalDate()),
+                NOW,
+                ReservationTime.of(1L, oneHourAfter.toLocalTime()),
                 Theme.of(1L, "링", "공포 테마", "http:~")
         ));
 
         // when
-        List<ReservationResponse> responses = reservationService.getReservationsByCustomerName("브라운");
+        ReservationsAndWaitingsResponse responses = reservationService.getReservationsByCustomerName("브라운");
 
         // then
-        assertThat(responses).hasSize(1);
-        assertThat(responses.getFirst().name()).isEqualTo("브라운");
+        assertThat(responses.reservations()).hasSize(1);
+        assertThat(responses.reservations().getFirst().name()).isEqualTo("브라운");
+
+        assertThat(responses.waitings()).hasSize(1);
+        assertThat(responses.waitings().getFirst().customerName()).isEqualTo("브라운");
+        assertThat(responses.waitings().getFirst().rank()).isEqualTo(1);
     }
 
     @Test

@@ -5,6 +5,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,5 +23,5 @@ public interface ReservationRepository {
 
     List<ReservationTimesWithStatus> findReservationTimeStatusesByDateAndThemeId(LocalDate date, Long themeId);
 
-    List<Reservation> findAllByCustomerName(CustomerName customerName);
+    List<Reservation> findAllByCustomerNameAndReservationDateTimeAfter(CustomerName customerName, LocalDateTime now);
 }

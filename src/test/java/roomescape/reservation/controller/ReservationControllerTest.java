@@ -14,7 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
-import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -132,22 +132,26 @@ class ReservationControllerTest {
 
     @Test
     @Sql("/clear.sql")
-    void 예약자_이름으로_예약_목록을_조회한다() {
+    void 예약자_이름으로_예약_및_대기_목록을_조회한다() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "10:00");
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", "11:00");
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "링", "공포 테마", "http:~");
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "초코칩", "2026-05-13", "1", "1");
         jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)", "재키", "2026-05-13", "2", "1");
+        jdbcTemplate.update("INSERT INTO waiting (customer_name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)", "초코칩", "2026-05-13", "2", "1");
 
-        List<ReservationResponse> responses = RestAssured.given().log().all()
-                .queryParam("customerName", "초코칩")
+        ReservationsAndWaitingsResponse responses = RestAssured.given().log().all()
+                .queryParam("customer-name", "초코칩")
                 .when().get("/reservations")
                 .then().log().all()
                 .statusCode(200).extract()
-                .jsonPath().getList(".", ReservationResponse.class);
+                .jsonPath().getObject(".", ReservationsAndWaitingsResponse.class);
 
-        assertThat(responses).hasSize(1);
-        assertThat(responses.getFirst().name()).isEqualTo("초코칩");
+        assertThat(responses.reservations()).hasSize(1);
+        assertThat(responses.reservations().getFirst().name()).isEqualTo("초코칩");
+        assertThat(responses.waitings()).hasSize(1);
+        assertThat(responses.waitings().getFirst().customerName()).isEqualTo("초코칩");
+        assertThat(responses.waitings().getFirst().rank()).isEqualTo(1);
     }
 
     @Test

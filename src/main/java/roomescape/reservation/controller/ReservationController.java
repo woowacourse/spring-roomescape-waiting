@@ -10,6 +10,7 @@ import roomescape.reservation.service.dto.request.ReservationCreateRequest;
 import roomescape.reservation.service.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.service.dto.response.ReservationOptionResponse;
 import roomescape.reservation.service.dto.response.ReservationResponse;
+import roomescape.reservation.service.dto.response.ReservationsAndWaitingsResponse;
 
 import java.net.URI;
 import java.time.LocalDate;
@@ -22,11 +23,11 @@ public class ReservationController {
 
     private final ReservationService reservationService;
 
-    @GetMapping(params = "customerName")
-    public ResponseEntity<List<ReservationResponse>> getReservationsByCustomerName(
-            @RequestParam("customerName") String customerName
+    @GetMapping(params = "customer-name")
+    public ResponseEntity<ReservationsAndWaitingsResponse> getReservationsByCustomerName(
+            @RequestParam("customer-name") String customerName
     ) {
-        final List<ReservationResponse> results = reservationService.getReservationsByCustomerName(customerName);
+        final ReservationsAndWaitingsResponse results = reservationService.getReservationsByCustomerName(customerName);
         return ResponseEntity.ok(results);
     }
 

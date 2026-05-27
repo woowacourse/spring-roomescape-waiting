@@ -14,9 +14,7 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.reservation.repository.dto.ReservationTimesWithStatus;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
+import java.time.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +24,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 @JdbcTest
 @Sql("/clear.sql")
 class JdbcReservationRepositoryTest {
+
+    private static final LocalDateTime NOW = LocalDateTime.now(Clock.fixed(
+            LocalDate.of(2026, 5, 8)
+                    .atTime(10, 30)
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toInstant(),
+            ZoneId.of("Asia/Seoul")
+    ));
 
     @Autowired
     JdbcTemplate jdbcTemplate;
@@ -164,7 +170,7 @@ class JdbcReservationRepositoryTest {
         insertReservation("초코칩", "2026-08-05", 1L, 1L);
         insertReservation("재키", "2026-08-05", 2L, 1L);
 
-        List<Reservation> reservations = reservationRepository.findAllByCustomerName(new CustomerName("초코칩"));
+        List<Reservation> reservations = reservationRepository.findAllByCustomerNameAndReservationDateTimeAfter(new CustomerName("초코칩"), NOW);
 
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getCustomerName()).isEqualTo("초코칩");
