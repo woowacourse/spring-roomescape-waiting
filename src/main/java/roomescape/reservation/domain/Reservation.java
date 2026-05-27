@@ -94,6 +94,10 @@ public class Reservation {
         return status == Status.CONFIRMED;
     }
 
+    public boolean isCanceled() {
+        return status == Status.CANCELED;
+    }
+
     public Long timeId() {
         return time.getId();
     }

@@ -3,6 +3,7 @@ package roomescape.reservation.service.validator;
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_ALREADY_STARTED_RESERVATION;
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_OTHER_GUEST_RESERVATION;
 import static roomescape.reservation.exception.ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_EXISTS;
 
 import java.time.Clock;
@@ -27,6 +28,7 @@ public class ReservationValidator {
 
     public void validateEdit(Reservation original, Reservation changed, String guestName) {
         validateIsMyReservation(guestName, original);
+        validateNotCanceled(original);
         validateAlreadyStarted(original);
         validateNotPast(changed);
         validateNotDuplicatedExcept(changed);
@@ -34,6 +36,7 @@ public class ReservationValidator {
 
     public void validateDelete(Reservation deleted, String guestName) {
         validateIsMyReservation(guestName, deleted);
+        validateNotCanceled(deleted);
         validateAlreadyStarted(deleted);
     }
 
@@ -57,6 +60,12 @@ public class ReservationValidator {
     private void validateAlreadyStarted(Reservation reservation) {
         if (reservation.isPassed(LocalDateTime.now(clock))) {
             throw new DomainException(CANNOT_EDIT_ALREADY_STARTED_RESERVATION);
+        }
+    }
+
+    private void validateNotCanceled(Reservation reservation) {
+        if (reservation.isCanceled()) {
+            throw new DomainException(RESERVATION_ALREADY_CANCELED);
         }
     }
 

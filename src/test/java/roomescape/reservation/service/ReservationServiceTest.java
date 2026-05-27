@@ -1,11 +1,11 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_ALREADY_STARTED_RESERVATION;
 import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_OTHER_GUEST_RESERVATION;
 import static roomescape.reservation.exception.ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND;
 
@@ -227,6 +227,21 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("이미 취소된 예약은 삭제할 수 없다.")
+    public void cancelMine_fail4() {
+        // given
+        clock.setFixed(LocalDate.of(2023, 7, 6));
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
+        Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme, Status.CANCELED);
+
+        // when, then
+        assertThatThrownBy(() -> reservationService.deleteMine(reservation.getId(), reservation.getGuestName()))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.message());
+    }
+
+    @Test
     @DisplayName("예약의 날짜 및 시간을 수정한다.")
     public void editDateTime_success() {
         // given
@@ -330,7 +345,7 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재는 하는데 그게 본인의 예약이며 취소한 경우 예외가 발생하지 않는다.")
+    @DisplayName("이미 취소된 예약은 수정할 수 없다.")
     public void editDateTime_fail4_2() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
@@ -342,9 +357,10 @@ class ReservationServiceTest {
         Reservation reservation = insertReservation("브라운", date, time, theme, Status.CANCELED);
 
         // when then
-        assertThatCode(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(),
+        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(),
                 reservation.getGuestName()))
-                .doesNotThrowAnyException();
+                .isInstanceOf(DomainException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.message());
     }
 
     @ParameterizedTest
