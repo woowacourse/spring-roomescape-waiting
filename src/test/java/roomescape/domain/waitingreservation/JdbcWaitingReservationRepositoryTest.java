@@ -118,6 +118,15 @@ class JdbcWaitingReservationRepositoryTest {
             .containsExactly(2L, 1L, 3L);
     }
 
+    @Test
+    void 대기_취소를_하면_정상_삭제한다() {
+        WaitingReservation actual = waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
+
+        waitingReservationRepository.deleteById(actual.getId());
+
+        assertThat(waitingReservationRepository.findById(actual.getId())).isEmpty();
+    }
+
     private WaitingReservation waiting(String name, LocalDateTime createdAt) {
         return WaitingReservation.createWithoutId(name, date, time, theme, createdAt);
     }

@@ -13,4 +13,8 @@ public interface WaitingReservationRepository {
     Optional<WaitingReservation> findOldest();
 
     List<WaitingReservationWithRank> findAllByNameWithRank(String name);
+
+    int deleteById(Long id);
+
+    Optional<WaitingReservation> findById(Long id);
 }
