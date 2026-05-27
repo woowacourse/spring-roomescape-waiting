@@ -11,54 +11,56 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
 public record UserReservationsResponse(
-        String username,
-        List<ReservationPayload> reservations
+    String username,
+    List<ReservationPayload> reservations
 ) {
 
     public static UserReservationsResponse of(String username, List<Reservation> reservations) {
         return new UserReservationsResponse(
-                username,
-                reservations.stream()
-                        .map(ReservationPayload::from)
-                        .toList()
+            username,
+            reservations.stream()
+                .map(ReservationPayload::from)
+                .toList()
         );
     }
 
     private record ReservationPayload(
-            ReservationSlotPayload reservationSlot,
-            String status,
-            Long waitingNumber
+        Long id,
+        ReservationSlotPayload reservationSlot,
+        String status,
+        Long waitingNumber
     ) {
 
         private static ReservationPayload from(Reservation reservation) {
             return new ReservationPayload(
-                    ReservationSlotPayload.from(reservation.getReservationSlot()),
-                    reservation.getStatus().toString(),
-                    reservation.getWaitingNumber()
+                reservation.getId(),
+                ReservationSlotPayload.from(reservation.getReservationSlot()),
+                reservation.getStatus().toString(),
+                reservation.getWaitingNumber()
             );
         }
     }
 
     private record ReservationSlotPayload(
-            Long id,
-            ReservationDatePayload date,
-            ReservationTimePayload time,
-            ThemePayload theme
+        Long id,
+        ReservationDatePayload date,
+        ReservationTimePayload time,
+        ThemePayload theme
     ) {
 
         private static ReservationSlotPayload from(ReservationSlot reservationSlot) {
             return new ReservationSlotPayload(
-                    reservationSlot.getId(),
-                    ReservationDatePayload.from(reservationSlot.getDate()),
-                    ReservationTimePayload.from(reservationSlot.getTime()),
-                    ThemePayload.from(reservationSlot.getTheme())
+                reservationSlot.getId(),
+                ReservationDatePayload.from(reservationSlot.getDate()),
+                ReservationTimePayload.from(reservationSlot.getTime()),
+                ThemePayload.from(reservationSlot.getTheme())
             );
         }
     }
 
     private record ReservationDatePayload(
-            Long id,
-            LocalDate startWhen
+        Long id,
+        LocalDate startWhen
     ) {
 
         private static ReservationDatePayload from(ReservationDate date) {
@@ -68,9 +70,9 @@ public record UserReservationsResponse(
 
 
     private record ReservationTimePayload(
-            Long id,
-            @JsonFormat(pattern = "HH:mm")
-            LocalTime startAt
+        Long id,
+        @JsonFormat(pattern = "HH:mm")
+        LocalTime startAt
     ) {
 
         private static ReservationTimePayload from(ReservationTime reservationTime) {
@@ -79,18 +81,18 @@ public record UserReservationsResponse(
     }
 
     private record ThemePayload(
-            Long id,
-            String name,
-            String content,
-            String url
+        Long id,
+        String name,
+        String content,
+        String url
     ) {
 
         private static ThemePayload from(Theme theme) {
             return new ThemePayload(
-                    theme.getId(),
-                    theme.getName(),
-                    theme.getContent(),
-                    theme.getUrl()
+                theme.getId(),
+                theme.getName(),
+                theme.getContent(),
+                theme.getUrl()
             );
         }
     }
