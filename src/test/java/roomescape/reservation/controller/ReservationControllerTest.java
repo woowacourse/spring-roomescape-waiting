@@ -39,8 +39,8 @@ public class ReservationControllerTest {
     void 이름으로_예약과_예약_대기_조회_성공() {
         String name = "초록";
         String date = LocalDate.now().plusDays(1).toString();
-        Long reservationId = createReservation(name, 1L, date, 1L);
-        Long waitingId = createWaiting(name, 2L, date, 2L);
+        Integer reservationId = createReservation(name, 1L, date, 1L);
+        Integer waitingId = createWaiting(name, 2L, date, 2L);
 
         RestAssured.given().log().all()
                 .when().get("/reservations/list?name=" + name)
@@ -143,7 +143,7 @@ public class ReservationControllerTest {
     void 본인_예약_변경_성공() {
         String originDate = LocalDate.now().plusDays(1).toString();
         String changedDate = LocalDate.now().plusDays(2).toString();
-        Long reservationId = createReservation("로치", 1L, originDate, 1L);
+        Integer reservationId = createReservation("로치", 1L, originDate, 1L);
         Map<String, Object> params = Map.of(
                 "name", "로치",
                 "themeId", 1L,
@@ -185,7 +185,7 @@ public class ReservationControllerTest {
     void 이미_예약된_시간으로는_변경할_수_없다() {
         String originDate = LocalDate.now().plusDays(1).toString();
         String duplicatedDate = LocalDate.now().plusDays(2).toString();
-        Long reservationId = createReservation("로치", 1L, originDate, 1L);
+        Integer reservationId = createReservation("로치", 1L, originDate, 1L);
         createReservation("브라운", 1L, duplicatedDate, 3L);
         Map<String, Object> params = Map.of(
                 "name", "로치",
@@ -205,7 +205,7 @@ public class ReservationControllerTest {
 
     @Test
     void 본인_예약_삭제_성공() {
-        Long reservationId = createReservation("로치", 1L, LocalDate.now().plusDays(1).toString(), 1L);
+        Integer reservationId = createReservation("로치", 1L, LocalDate.now().plusDays(1).toString(), 1L);
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/my/" + reservationId + "?name=로치")
@@ -229,7 +229,7 @@ public class ReservationControllerTest {
                 .statusCode(404);
     }
 
-    private Long createReservation(String name, Long themeId, String date, Long timeId) {
+    private Integer createReservation(String name, Long themeId, String date, Long timeId) {
         Map<String, Object> params = Map.of(
                 "name", name,
                 "themeId", themeId,
@@ -247,7 +247,7 @@ public class ReservationControllerTest {
                 .path("id");
     }
 
-    private Long createWaiting(String name, Long themeId, String date, Long timeId) {
+    private Integer createWaiting(String name, Long themeId, String date, Long timeId) {
         Map<String, Object> params = Map.of(
                 "name", name,
                 "themeId", themeId,
