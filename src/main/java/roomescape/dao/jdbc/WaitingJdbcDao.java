@@ -70,6 +70,7 @@ public class WaitingJdbcDao implements WaitingDao {
                         WHERE w2.date = w.date
                         AND w2.time_id = w.time_id
                         AND w2.theme_id = w.theme_id
+                        AND w2.store_id = w.store_id
                         AND w2.id < w.id) AS rank
                 FROM waitings w
                 INNER JOIN members m ON w.member_id = m.id
@@ -150,6 +151,28 @@ public class WaitingJdbcDao implements WaitingDao {
                 SELECT EXISTS(SELECT 1 FROM waitings WHERE id = :id);
                 """;
         SqlParameterSource params = new MapSqlParameterSource("id", id);
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
+    }
+
+    @Override
+    public boolean existsByMemberIdAndDateAndTimeIdAndThemeIdAndStoreId(
+            Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId) {
+        String sql = """
+                SELECT EXISTS(
+                    SELECT 1 FROM waitings
+                    WHERE member_id = :memberId
+                    AND date = :date
+                    AND time_id = :timeId
+                    AND theme_id = :themeId
+                    AND store_id = :storeId
+                );
+                """;
+        SqlParameterSource params = new MapSqlParameterSource()
+                .addValue("memberId", memberId)
+                .addValue("date", date)
+                .addValue("timeId", timeId)
+                .addValue("themeId", themeId)
+                .addValue("storeId", storeId);
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
     }
 

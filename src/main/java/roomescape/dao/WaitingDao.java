@@ -9,6 +9,8 @@ public interface WaitingDao extends CommonDao<Waiting> {
 
     Optional<Waiting> findFirst(LocalDate date, Long timeId, Long themeId, Long storeId);
 
+    boolean existsByMemberIdAndDateAndTimeIdAndThemeIdAndStoreId(Long memberId, LocalDate date, Long timeId, Long themeId, Long storeId);
+
     List<Waiting> findAllByMemberId(Long memberId);
 
     List<Waiting> findAllByStoreId(Long storeId);

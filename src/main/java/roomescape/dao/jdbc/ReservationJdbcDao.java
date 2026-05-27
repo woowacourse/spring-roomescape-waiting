@@ -204,10 +204,11 @@ public class ReservationJdbcDao implements ReservationDao {
     }
 
     @Override
-    public boolean existsByThemeIdAndTimeIdAndDateForUpdate(Long themeId, Long timeId, LocalDate date) {
+    public boolean existsByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId) {
         String sql = """
                 SELECT id FROM reservations
                 WHERE theme_id = :themeId AND time_id = :timeId AND date = :date
+                AND store_id = :storeId
                 AND deleted_at = :sentinel
                 FOR UPDATE
                 """;
@@ -215,14 +216,16 @@ public class ReservationJdbcDao implements ReservationDao {
                 .addValue("themeId", themeId)
                 .addValue("timeId", timeId)
                 .addValue("date", date)
+                .addValue("storeId", storeId)
                 .addValue("sentinel", SENTINEL);
         return !jdbcTemplate.queryForList(sql, params, Long.class).isEmpty();
     }
 
     @Override
-    public Optional<Reservation> findByThemeIdAndTimeIdAndDateForUpdate(Long themeId, Long timeId, LocalDate date) {
+    public Optional<Reservation> findByThemeIdAndTimeIdAndDateAndStoreIdForUpdate(Long themeId, Long timeId, LocalDate date, Long storeId) {
         String sql = BASE_SELECT + """
                 WHERE r.theme_id = :themeId AND r.time_id = :timeId AND r.date = :date
+                AND r.store_id = :storeId
                 AND r.deleted_at = :sentinel
                 FOR UPDATE
                 """;
@@ -231,6 +234,7 @@ public class ReservationJdbcDao implements ReservationDao {
                 .addValue("themeId", themeId)
                 .addValue("timeId", timeId)
                 .addValue("date", date)
+                .addValue("storeId", storeId)
                 .addValue("sentinel", SENTINEL);
         return jdbcTemplate.query(sql, params, ROW_MAPPER).stream().findFirst();
     }
