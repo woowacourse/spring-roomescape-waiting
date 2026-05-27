@@ -1,5 +1,16 @@
 package roomescape.reservation.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_DATE;
+import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_GUEST_NAME;
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_HAS_ID;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.INVALID_RESERVATION_TIME;
+import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -8,16 +19,6 @@ import roomescape.common.exception.DomainException;
 import roomescape.common.exception.ErrorPolicy;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.reservation.exception.ReservationErrorCode.*;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
-import static roomescape.theme.exception.ThemeErrorCode.*;
 
 class ReservationTest {
 
@@ -110,6 +111,7 @@ class ReservationTest {
         // then
         assertThat(result).isEqualTo(expected);
     }
+
     private void assertDomainException(Runnable runnable, ErrorPolicy errorCode) {
         assertThatThrownBy(runnable::run)
                 .isInstanceOfSatisfying(DomainException.class, exception ->

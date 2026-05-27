@@ -1,5 +1,11 @@
 package roomescape.theme.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.theme.exception.ThemeErrorCode.THEME_HAS_RESERVATION;
+import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,21 +14,15 @@ import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
+import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
+import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.test_config.TestClockConfig;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.theme.exception.ThemeErrorCode.*;
 
 @JdbcTest
 @Import({

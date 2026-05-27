@@ -1,5 +1,13 @@
 package roomescape.reservationtime.service;
 
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_ALREADY_EXISTS;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_HAS_RESERVATION;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND;
+import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
+
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,13 +25,6 @@ import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
-import static roomescape.theme.exception.ThemeErrorCode.*;
 
 @JdbcTest
 @Import({
@@ -64,7 +65,7 @@ class ReservationTimeServiceTest {
     @DisplayName("특정 날짜 및 테마의 예약 가능한 시간들을 찾을 때 테마 id가 없으면 예외가 발생한다.")
     public void findAvailableTimes_fail() {
         // when, then
-        assertThatThrownBy(() -> reservationTimeService.findAvailableTimes(LocalDate.of(26,5,6), 37L))
+        assertThatThrownBy(() -> reservationTimeService.findAvailableTimes(LocalDate.of(26, 5, 6), 37L))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(THEME_NOT_FOUND.message());
     }

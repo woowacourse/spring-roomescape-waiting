@@ -1,6 +1,15 @@
 package roomescape.reservationtime.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,16 +24,6 @@ import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.service.ReservationTimeService;
 
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(controllers = AdminReservationTimeController.class)
 class AdminReservationTimeControllerTest {
 
@@ -36,6 +35,14 @@ class AdminReservationTimeControllerTest {
 
     @MockitoBean
     private ReservationTimeService reservationTimeService;
+
+    private static void assertTimeRespose(ReservationTimeResponse reservationTimeResponse,
+                                          ReservationTime reservationTime) {
+        assertThat(reservationTimeResponse).extracting(
+                ReservationTimeResponse::id,
+                ReservationTimeResponse::startAt
+        ).containsExactly(reservationTime.getId(), reservationTime.getStartAt().toString());
+    }
 
     @Test
     @DisplayName("예약 시간을 생성하는 요청을 하면 생성된 예약 시간 정보가 응답으로 반환된다.")
@@ -65,13 +72,6 @@ class AdminReservationTimeControllerTest {
         assertTimeRespose(reservationTimeResponse, reservationTime);
 
         then(reservationTimeService).should().create(request.startAt());
-    }
-
-    private static void assertTimeRespose(ReservationTimeResponse reservationTimeResponse, ReservationTime reservationTime) {
-        assertThat(reservationTimeResponse).extracting(
-                ReservationTimeResponse::id,
-                ReservationTimeResponse::startAt
-        ).containsExactly(reservationTime.getId(), reservationTime.getStartAt().toString());
     }
 
     @Test

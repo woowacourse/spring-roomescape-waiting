@@ -1,15 +1,15 @@
 package roomescape.reservationtime.domain;
 
-import lombok.Getter;
-import roomescape.common.exception.DomainException;
+import static roomescape.common.domain.DomainPreconditions.require;
+import static roomescape.common.domain.DomainPreconditions.requireNonNull;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.INVALID_RESERVATION_TIME;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_ALREADY_HAS_ID;
 
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.Objects;
-
-import static roomescape.common.domain.DomainPreconditions.require;
-import static roomescape.common.domain.DomainPreconditions.requireNonNull;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
+import lombok.Getter;
+import roomescape.common.exception.DomainException;
 
 @Getter
 public class ReservationTime {
@@ -47,8 +47,12 @@ public class ReservationTime {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ReservationTime that)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof ReservationTime that)) {
+            return false;
+        }
         return id != null && Objects.equals(id, that.id);
     }
 

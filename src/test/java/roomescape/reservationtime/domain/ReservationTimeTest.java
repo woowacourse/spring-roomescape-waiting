@@ -1,14 +1,14 @@
 package roomescape.reservationtime.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.INVALID_RESERVATION_TIME;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_ALREADY_HAS_ID;
+
+import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.ErrorPolicy;
-
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 
 class ReservationTimeTest {
 

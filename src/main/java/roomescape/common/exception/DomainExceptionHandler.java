@@ -1,11 +1,11 @@
 package roomescape.common.exception;
 
+import static roomescape.common.exception.GlobalErrorCode.SERVER_ERROR;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-
-import static roomescape.common.exception.GlobalErrorCode.SERVER_ERROR;
 
 @RestControllerAdvice
 public class DomainExceptionHandler {
@@ -23,7 +23,8 @@ public class DomainExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllUncaughtException(Exception exception, HttpServletRequest request) {
-        ErrorResponse errorResponse = ErrorResponse.of(request.getRequestURI(), SERVER_ERROR.code(), SERVER_ERROR.message());
+        ErrorResponse errorResponse = ErrorResponse.of(request.getRequestURI(), SERVER_ERROR.code(),
+                SERVER_ERROR.message());
         return ResponseEntity
                 .internalServerError()
                 .body(errorResponse);

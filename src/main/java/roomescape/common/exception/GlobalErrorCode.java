@@ -1,9 +1,9 @@
 package roomescape.common.exception;
 
-import org.springframework.http.HttpStatus;
-
 import static org.springframework.http.HttpStatus.BAD_REQUEST;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
+
+import org.springframework.http.HttpStatus;
 
 public enum GlobalErrorCode implements ErrorPolicy {
 

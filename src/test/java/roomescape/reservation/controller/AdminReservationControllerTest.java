@@ -1,6 +1,20 @@
 package roomescape.reservation.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.mockito.Mockito.never;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,24 +29,9 @@ import roomescape.reservation.controller.dto.ReservationListResponse;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-import roomescape.reservation.service.ReservationService;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.mockito.Mockito.never;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AdminReservationController.class)
 class AdminReservationControllerTest {
@@ -45,6 +44,20 @@ class AdminReservationControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    private static void assertReservationsResponse(ReservationListResponse response) {
+        assertThat(response.reservations()).hasSize(3)
+                .extracting(
+                        ReservationResponse::id,
+                        ReservationResponse::guestName,
+                        ReservationResponse::date
+                )
+                .containsExactly(
+                        tuple(1L, "브라운", "2023-08-05"),
+                        tuple(2L, "포비", "2023-08-06"),
+                        tuple(3L, "조이", "2023-08-07")
+                );
+    }
 
     @Test
     @DisplayName("예약 목록을 조회한다.")
@@ -134,20 +147,6 @@ class AdminReservationControllerTest {
 
         then(reservationService).should(never())
                 .findAllReservations(anyInt(), anyInt());
-    }
-
-    private static void assertReservationsResponse(ReservationListResponse response) {
-        assertThat(response.reservations()).hasSize(3)
-                .extracting(
-                        ReservationResponse::id,
-                        ReservationResponse::guestName,
-                        ReservationResponse::date
-                )
-                .containsExactly(
-                        tuple(1L, "브라운", "2023-08-05"),
-                        tuple(2L, "포비", "2023-08-06"),
-                        tuple(3L, "조이", "2023-08-07")
-                );
     }
 
     @Test

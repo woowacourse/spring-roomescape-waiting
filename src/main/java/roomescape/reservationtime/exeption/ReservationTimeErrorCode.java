@@ -1,9 +1,11 @@
 package roomescape.reservationtime.exeption;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import org.springframework.http.HttpStatus;
 import roomescape.common.exception.ErrorPolicy;
-
-import static org.springframework.http.HttpStatus.*;
 
 public enum ReservationTimeErrorCode implements ErrorPolicy {
     INVALID_RESERVATION_TIME_ID("예약 시간 id는 비어 있을 수 없습니다.", BAD_REQUEST),

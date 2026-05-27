@@ -1,12 +1,12 @@
 package roomescape.rest_assured_learning_test;
 
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
+
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
 
 @Disabled
 public class RestAssuredTest {
@@ -30,9 +30,9 @@ public class RestAssuredTest {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .queryParam("userId", 1)
-        .when()
+                .when()
                 .get("/posts")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("JSON_PATH", notNullValue());
     }
@@ -43,9 +43,9 @@ public class RestAssuredTest {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .pathParam("id", 1)
-        .when()
+                .when()
                 .get("/posts/{id}")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("id", equalTo(1));
     }
@@ -54,44 +54,44 @@ public class RestAssuredTest {
     @DisplayName("RestAssured Post 요청")
     public void post() {
         String requestBody = """
-        {
-            "title": "hello",
-            "body": "rest assured study",
-            "userId": 1
-        }
-        """;
+                {
+                    "title": "hello",
+                    "body": "rest assured study",
+                    "userId": 1
+                }
+                """;
 
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .header("Content-Type", "application/json")
                 .body(requestBody)
-        .when()
+                .when()
                 .post("/posts")
-        .then()
+                .then()
                 .statusCode(201)
                 .body("title", equalTo("hello"));
 
     }
-    
+
     @Test
     @DisplayName("RestAssured Put 요청")
     public void put() {
         String requestBody = """
-            {
-              "id": 1,
-              "title": "updated title",
-              "body": "updated body",
-              "userId": 1
-            }
-            """;
+                {
+                  "id": 1,
+                  "title": "updated title",
+                  "body": "updated body",
+                  "userId": 1
+                }
+                """;
 
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
                 .header("Content-Type", "application/json")
                 .body(requestBody)
-        .when()
+                .when()
                 .put("/posts/1")
-        .then()
+                .then()
                 .statusCode(200)
                 .body("id", equalTo(1))
                 .body("title", equalTo("updated title"))
@@ -104,9 +104,9 @@ public class RestAssuredTest {
     public void delete() {
         given()
                 .baseUri("https://jsonplaceholder.typicode.com")
-        .when()
+                .when()
                 .delete("/posts/1")
-        .then()
+                .then()
                 .statusCode(200);
     }
 }

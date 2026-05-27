@@ -1,5 +1,12 @@
 package roomescape.reservationtime.repository;
 
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,20 +16,30 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 @RequiredArgsConstructor
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
 
     private final JdbcTemplate jdbcTemplate;
+    private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->
+            ReservationTime.of(
+                    resultSet.getLong("id"),
+                    LocalTime.parse(resultSet.getString("start_at")),
+                    toLocalDateTime(resultSet.getTimestamp("deleted_at"))
+            );
+    private final RowMapper<ReservationTimeAvailability> reservationTimeAvailabilityRowMapper = (resultSet, rowNum) -> {
+        ReservationTime reservationTime = ReservationTime.of(
+                resultSet.getLong("id"),
+                LocalTime.parse(resultSet.getString("start_at")),
+                toLocalDateTime(resultSet.getTimestamp("deleted_at"))
+        );
+
+        if (resultSet.getBoolean("available")) {
+            return ReservationTimeAvailability.available(reservationTime);
+        }
+        return ReservationTimeAvailability.unavailable(reservationTime);
+    };
 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
@@ -107,26 +124,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
             return preparedStatement;
         }, keyHolder);
     }
-
-    private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->
-            ReservationTime.of(
-                    resultSet.getLong("id"),
-                    LocalTime.parse(resultSet.getString("start_at")),
-                    toLocalDateTime(resultSet.getTimestamp("deleted_at"))
-            );
-
-    private final RowMapper<ReservationTimeAvailability> reservationTimeAvailabilityRowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = ReservationTime.of(
-                resultSet.getLong("id"),
-                LocalTime.parse(resultSet.getString("start_at")),
-                toLocalDateTime(resultSet.getTimestamp("deleted_at"))
-        );
-
-        if(resultSet.getBoolean("available")) {
-            return ReservationTimeAvailability.available(reservationTime);
-        }
-        return ReservationTimeAvailability.unavailable(reservationTime);
-    };
 
     private LocalDateTime toLocalDateTime(Timestamp timestamp) {
         if (timestamp == null) {

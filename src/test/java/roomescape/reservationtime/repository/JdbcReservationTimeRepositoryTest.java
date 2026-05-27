@@ -1,5 +1,16 @@
 package roomescape.reservationtime.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.assertj.core.groups.Tuple;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,21 +23,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @Import(JdbcReservationTimeRepository.class)
@@ -37,7 +34,6 @@ class JdbcReservationTimeRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
 
 
     @Test
@@ -164,7 +160,8 @@ class JdbcReservationTimeRepositoryTest {
         insertReservation("브라운", targetDate, time, nonTargetTheme);
 
         // when
-        List<ReservationTimeAvailability> availableTimes = reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(targetDate, targetTheme.getId());
+        List<ReservationTimeAvailability> availableTimes = reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(
+                targetDate, targetTheme.getId());
 
         // then
         assertThat(availableTimes).hasSize(2)

@@ -1,5 +1,17 @@
 package roomescape.theme.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,19 +23,6 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Status;
 import roomescape.theme.domain.Theme;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 @JdbcTest
 @Import(JdbcThemeRepository.class)
@@ -226,7 +225,8 @@ class JdbcThemeRepositoryTest {
             return preparedStatement1;
         }, keyHolder1);
 
-        Theme activeTheme = Theme.of(getGeneratedId(keyHolder1), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme activeTheme = Theme.of(getGeneratedId(keyHolder1), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://example.com/theme.png");
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {
@@ -240,7 +240,8 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme deletedTheme = Theme.of(getGeneratedId(keyHolder), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme deletedTheme = Theme.of(getGeneratedId(keyHolder), "레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.",
+                "https://example.com/theme.png");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
         Long otherTimeId = insertReservationTime(LocalTime.of(12, 0));
         LocalDate targetDate = LocalDate.of(2026, 5, 1);
@@ -279,7 +280,8 @@ class JdbcThemeRepositoryTest {
             return preparedStatement;
         }, keyHolder);
 
-        Theme activeTheme = Theme.of(getGeneratedId(keyHolder), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme activeTheme = Theme.of(getGeneratedId(keyHolder), "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.",
+                "https://example.com/theme.png");
         Theme deletedTheme = insertDeletedTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         Long timeId = insertReservationTime(LocalTime.of(10, 0));
         Long otherTimeId = insertReservationTime(LocalTime.of(12, 0));

@@ -1,5 +1,16 @@
 package roomescape.reservation.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -15,19 +26,6 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
 
 @JdbcTest
 @Import(JdbcReservationRepository.class)
@@ -94,7 +92,8 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findAllByGuestName(reservation.getGuestName());
+        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findAllByGuestName(
+                reservation.getGuestName());
 
         // then
         assertThat(reservationWaitingDtos)
@@ -150,7 +149,8 @@ class JdbcReservationRepositoryTest {
         ReservationTime updatedTime = insertReservationTime(LocalTime.of(12, 0));
 
         // when
-        boolean result = reservationRepository.updateDateAndTime(reservation.getId(), updatedDate, updatedTime.getId(), Status.WAITING);
+        boolean result = reservationRepository.updateDateAndTime(reservation.getId(), updatedDate, updatedTime.getId(),
+                Status.WAITING);
 
         // then
         assertThat(result).isTrue();
@@ -174,8 +174,10 @@ class JdbcReservationRepositoryTest {
         insertReservation("브라운", targetDate, time, theme, Status.WAITING);
 
         // when
-        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate, time.getId(), theme.getId(), "브라운");
-        boolean notExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate, time2.getId(), theme2.getId(), "브라운");
+        boolean exists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate,
+                time.getId(), theme.getId(), "브라운");
+        boolean notExists = reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(targetDate,
+                time2.getId(), theme2.getId(), "브라운");
 
         // then
         assertThat(exists).isTrue();
@@ -363,7 +365,8 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        boolean result = reservationRepository.existsReservationBySlot(reservation.getDate(), time.getId(), theme.getId());
+        boolean result = reservationRepository.existsReservationBySlot(reservation.getDate(), time.getId(),
+                theme.getId());
 
         // then
         assertThat(result).isTrue();
@@ -401,7 +404,8 @@ class JdbcReservationRepositoryTest {
         return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
     }
 
-    private Reservation insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
+    private Reservation insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme,
+                                          Status status) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
 
         jdbcTemplate.update(connection -> {

@@ -13,6 +13,25 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class ApiExceptionLoggingAspect {
 
+    private static void logServerError(ResponseEntity<?> responseEntity, ErrorResponse errorResponse,
+                                       HttpServletRequest request, Throwable exception) {
+        log.error("Exception in API: URI:{}, StatusCode:{}, Error Code:{}, ErrorMessage: {}",
+                request.getMethod() + " " + request.getRequestURI(),
+                responseEntity.getStatusCode(),
+                errorResponse.getCode(),
+                exception.getMessage(),
+                exception);
+    }
+
+    private static void logClientError(ResponseEntity<?> responseEntity, ErrorResponse errorResponse,
+                                       HttpServletRequest request, String errorMessage) {
+        log.info("Exception in API: URI: {}, StatusCode: {}, Error Code: {}, ErrorMessage: {}",
+                request.getMethod() + " " + request.getRequestURI(),
+                responseEntity.getStatusCode(),
+                errorResponse.getCode(),
+                errorMessage);
+    }
+
     @AfterReturning(
             pointcut = "within(roomescape.common.exception.DomainExceptionHandler) || " +
                     "within(roomescape.common.exception.CustomSpringMvcExceptionHandler)",
@@ -34,29 +53,13 @@ public class ApiExceptionLoggingAspect {
         logError(joinPoint, responseEntity, errorResponse, request);
     }
 
-    private void logError(JoinPoint joinPoint, ResponseEntity<?> responseEntity, ErrorResponse errorResponse, HttpServletRequest request) {
+    private void logError(JoinPoint joinPoint, ResponseEntity<?> responseEntity, ErrorResponse errorResponse,
+                          HttpServletRequest request) {
         if (responseEntity.getStatusCode().is5xxServerError()) {
             logServerError(responseEntity, errorResponse, request, findThrowable(joinPoint.getArgs()));
             return;
         }
         logClientError(responseEntity, errorResponse, request, errorResponse.getMessage());
-    }
-
-    private static void logServerError(ResponseEntity<?> responseEntity, ErrorResponse errorResponse, HttpServletRequest request, Throwable exception) {
-        log.error("Exception in API: URI:{}, StatusCode:{}, Error Code:{}, ErrorMessage: {}",
-                request.getMethod() + " " + request.getRequestURI(),
-                responseEntity.getStatusCode(),
-                errorResponse.getCode(),
-                exception.getMessage(),
-                exception);
-    }
-
-    private static void logClientError(ResponseEntity<?> responseEntity, ErrorResponse errorResponse, HttpServletRequest request, String errorMessage) {
-        log.info("Exception in API: URI: {}, StatusCode: {}, Error Code: {}, ErrorMessage: {}",
-                request.getMethod() + " " + request.getRequestURI(),
-                responseEntity.getStatusCode(),
-                errorResponse.getCode(),
-                errorMessage);
     }
 
     private HttpServletRequest findHttpServletRequest(Object[] args) {

@@ -1,5 +1,17 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_ALREADY_STARTED_RESERVATION;
+import static roomescape.reservation.exception.ReservationErrorCode.CANNOT_EDIT_OTHER_GUEST_RESERVATION;
+import static roomescape.reservation.exception.ReservationErrorCode.PAST_RESERVATION_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_NOT_FOUND;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -23,14 +35,6 @@ import roomescape.test_config.TestClockConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.*;
-import static roomescape.reservation.exception.ReservationErrorCode.*;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 
 @JdbcTest
 @Import({
@@ -237,7 +241,8 @@ class ReservationServiceTest {
         clock.setFixed(LocalDate.of(2023, 7, 20));
 
         // when
-        reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName());
+        reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(),
+                reservation.getGuestName());
 
         // then
         ReservationWaitingDto reservationWaitingDto = reservationRepository.findWaitingById(reservation.getId()).get();
@@ -275,7 +280,8 @@ class ReservationServiceTest {
         Long editedTimeId = 999L;
 
         // when then
-        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTimeId, reservation.getGuestName()))
+        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTimeId,
+                reservation.getGuestName()))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(RESERVATION_TIME_NOT_FOUND.message());
     }
@@ -294,7 +300,8 @@ class ReservationServiceTest {
         ReservationTime editedTime = insertReservationTime(LocalTime.of(12, 0));
 
         // when then
-        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(), reservation.getGuestName()))
+        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(),
+                reservation.getGuestName()))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(CANNOT_EDIT_ALREADY_STARTED_RESERVATION.message());
     }
@@ -336,7 +343,8 @@ class ReservationServiceTest {
         Reservation reservation = insertReservation("브라운", date, time, theme, Status.CANCELED);
 
         // when then
-        assertThatCode(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(), reservation.getGuestName()))
+        assertThatCode(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(),
+                reservation.getGuestName()))
                 .doesNotThrowAnyException();
     }
 
@@ -356,7 +364,8 @@ class ReservationServiceTest {
         ReservationTime editedTime = insertReservationTime(et);
 
         // when then
-        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), ed, editedTime.getId(), reservation.getGuestName()))
+        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), ed, editedTime.getId(),
+                reservation.getGuestName()))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(PAST_RESERVATION_NOT_ALLOWED.message());
     }
@@ -380,7 +389,8 @@ class ReservationServiceTest {
                 .hasMessage(CANNOT_EDIT_OTHER_GUEST_RESERVATION.message());
     }
 
-    private Reservation insertConfirmedReservation(LocalDate date, ReservationTime time, Theme theme, String guestName) {
+    private Reservation insertConfirmedReservation(LocalDate date, ReservationTime time, Theme theme,
+                                                   String guestName) {
         return insertReservation(guestName, date, time, theme, Status.CONFIRMED);
     }
 
@@ -397,7 +407,8 @@ class ReservationServiceTest {
         return themeRepository.save(Theme.create(name, description, thumbnail));
     }
 
-    private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme, Status status) {
+    private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme,
+                                          Status status) {
         return reservationRepository.save(Reservation.create(name, date, time, theme, status));
     }
 }

@@ -1,5 +1,13 @@
 package roomescape.theme.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -16,14 +24,6 @@ import roomescape.theme.controller.dto.ThemeCreateRequest;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = AdminThemeController.class)
 class AdminThemeControllerTest {
@@ -99,7 +99,7 @@ class AdminThemeControllerTest {
         // when then
         long id = 1L;
         mockMvc.perform(
-                MockMvcRequestBuilders.delete("/admin/themes/{id}", id))
+                        MockMvcRequestBuilders.delete("/admin/themes/{id}", id))
                 .andDo(print())
                 .andExpect(status().isNoContent());
 

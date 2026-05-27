@@ -1,12 +1,15 @@
 package roomescape.theme.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME_DESCRIPTION;
+import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME_NAME;
+import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME_THUMBNAIL;
+import static roomescape.theme.exception.ThemeErrorCode.THEME_ALREADY_HAS_ID;
+
 import org.junit.jupiter.api.Test;
 import roomescape.common.exception.DomainException;
 import roomescape.common.exception.ErrorPolicy;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static roomescape.theme.exception.ThemeErrorCode.*;
 
 class ThemeTest {
 

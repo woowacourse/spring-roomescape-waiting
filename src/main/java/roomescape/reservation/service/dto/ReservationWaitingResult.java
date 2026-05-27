@@ -1,12 +1,11 @@
 package roomescape.reservation.service.dto;
 
 
+import java.time.LocalDate;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
 
 public record ReservationWaitingResult(
         Long id,

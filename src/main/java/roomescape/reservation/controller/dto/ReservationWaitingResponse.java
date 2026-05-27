@@ -1,11 +1,17 @@
 package roomescape.reservation.controller.dto;
 
-import roomescape.reservation.domain.Status;
 import roomescape.reservation.service.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
 public sealed interface ReservationWaitingResponse permits ConfirmedReservationResponse, WaitingReservationResponse {
+    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
+        if (reservationWaitingResult.status().isConfirmed()) {
+            return ConfirmedReservationResponse.from(reservationWaitingResult);
+        }
+        return WaitingReservationResponse.from(reservationWaitingResult);
+    }
+
     Long id();
 
     String guestName();
@@ -19,11 +25,4 @@ public sealed interface ReservationWaitingResponse permits ConfirmedReservationR
     String status();
 
     boolean isConfirmed();
-
-    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
-        if (reservationWaitingResult.status().isConfirmed()) {
-            return ConfirmedReservationResponse.from(reservationWaitingResult);
-        }
-        return WaitingReservationResponse.from(reservationWaitingResult);
-    }
 }

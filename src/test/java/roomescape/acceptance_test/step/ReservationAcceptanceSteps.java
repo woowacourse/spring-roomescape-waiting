@@ -1,26 +1,25 @@
 package roomescape.acceptance_test.step;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
-import io.restassured.response.ExtractableResponse;
-import io.restassured.response.Response;
-import roomescape.reservation.controller.dto.ReservationCreateRequest;
-import roomescape.reservation.controller.dto.ReservationEditRequest;
-import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
-import roomescape.test_config.MutableClock;
-import roomescape.theme.controller.dto.ThemeCreateRequest;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Map;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance_test.util.RequestUtil.delete;
 import static roomescape.acceptance_test.util.RequestUtil.get;
 import static roomescape.acceptance_test.util.RequestUtil.patch;
 import static roomescape.acceptance_test.util.RequestUtil.post;
 import static roomescape.common.auth.UserArgumentResolver.GUEST_NAME_HEADER;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import io.restassured.response.ExtractableResponse;
+import io.restassured.response.Response;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.Map;
+import roomescape.reservation.controller.dto.ReservationCreateRequest;
+import roomescape.reservation.controller.dto.ReservationEditRequest;
+import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
+import roomescape.test_config.MutableClock;
+import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 public final class ReservationAcceptanceSteps {
 
@@ -162,7 +161,8 @@ public final class ReservationAcceptanceSteps {
     ) {
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.jsonPath().getList("reservations.id", Integer.class)).contains(reservation.id());
-        assertThat(response.jsonPath().getList("reservations.guestName", String.class)).contains(reservation.guestName());
+        assertThat(response.jsonPath().getList("reservations.guestName", String.class)).contains(
+                reservation.guestName());
     }
 
     public static ExtractableResponse<Response> 예약_날짜와_시간_수정을_요청하면(

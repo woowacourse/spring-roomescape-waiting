@@ -1,20 +1,21 @@
 package roomescape.reservation.domain;
 
-import lombok.Getter;
-import roomescape.common.exception.DomainException;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
+import static roomescape.common.domain.DomainPreconditions.require;
+import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
+import static roomescape.common.domain.DomainPreconditions.requireNonNull;
+import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_DATE;
+import static roomescape.reservation.exception.ReservationErrorCode.INVALID_RESERVATION_GUEST_NAME;
+import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_HAS_ID;
+import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.INVALID_RESERVATION_TIME;
+import static roomescape.theme.exception.ThemeErrorCode.INVALID_THEME;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
-
-import static roomescape.common.domain.DomainPreconditions.require;
-import static roomescape.common.domain.DomainPreconditions.requireNonBlank;
-import static roomescape.common.domain.DomainPreconditions.requireNonNull;
-import static roomescape.reservation.exception.ReservationErrorCode.*;
-import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
-import static roomescape.theme.exception.ThemeErrorCode.*;
+import lombok.Getter;
+import roomescape.common.exception.DomainException;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
 
 @Getter
 public class Reservation {
@@ -35,7 +36,8 @@ public class Reservation {
         this.status = status;
     }
 
-    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
+    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme,
+                                     Status status) {
         return new Reservation(null, guestName, date, time, theme, status);
     }
 
@@ -64,8 +66,12 @@ public class Reservation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Reservation that)) return false;
+        if (this == o) {
+            return true;
+        }
+        if (!(o instanceof Reservation that)) {
+            return false;
+        }
         return id != null && Objects.equals(id, that.id);
     }
 
@@ -105,6 +111,7 @@ public class Reservation {
     public boolean hasSameSlotAs(Reservation other) {
         return isSameSlot(other.date, other.timeId(), other.themeId());
     }
+
     public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime, Status status) {
         return of(id, guestName, changedDate, changedTime, theme, status);
     }

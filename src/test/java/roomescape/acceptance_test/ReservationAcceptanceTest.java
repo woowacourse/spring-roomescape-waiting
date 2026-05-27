@@ -1,18 +1,38 @@
 package roomescape.acceptance_test;
 
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.관리자_예약_목록_조회를_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_목록_조회_시_삭제한_예약은_응답받지_않는다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_목록_조회를_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_삭제가_성공한다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.내_예약_삭제를_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.다른_사용자_이름으로_새로운_예약_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.다른_사용자의_이름으로_예약_수정을_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.변경할_예약_시간_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.생성한_예약_삭제가_성공한다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.생성한_예약_삭제를_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.생성한_예약이_포함된_관리자_예약_목록을_응답받는다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_날짜와_시간_수정을_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_수정_실패_응답을_받는다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_수정이_성공한다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.예약_시간_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.지난_날짜와_시간으로_예약_수정을_요청하면;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.테마_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.특정_사용자_이름으로_예약_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.특정_사용자의_예약이_포함된_예약_목록을_응답받는다;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.현재_시간이_변경하려는_예약_날짜와_시간_이후가_되고;
+import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.현재_시간이_예약_시작_이후가_되고;
+
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance_test.step.ReservationAcceptanceSteps.ReservationInfo;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static roomescape.acceptance_test.step.ReservationAcceptanceSteps.*;
 
 public class ReservationAcceptanceTest extends AcceptanceTestSupport {
 

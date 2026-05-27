@@ -1,9 +1,11 @@
 package roomescape.theme.exception;
 
+import static org.springframework.http.HttpStatus.BAD_REQUEST;
+import static org.springframework.http.HttpStatus.CONFLICT;
+import static org.springframework.http.HttpStatus.NOT_FOUND;
+
 import org.springframework.http.HttpStatus;
 import roomescape.common.exception.ErrorPolicy;
-
-import static org.springframework.http.HttpStatus.*;
 
 public enum ThemeErrorCode implements ErrorPolicy {
     INVALID_THEME_ID("테마 id는 비어 있을 수 없습니다.", BAD_REQUEST),

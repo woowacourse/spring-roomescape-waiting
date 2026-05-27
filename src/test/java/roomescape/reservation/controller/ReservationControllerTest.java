@@ -1,31 +1,5 @@
 package roomescape.reservation.controller;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.test.web.servlet.MockMvc;
-import com.fasterxml.jackson.databind.JsonNode;
-import org.springframework.test.web.servlet.MvcResult;
-import roomescape.reservation.controller.dto.*;
-import roomescape.reservation.domain.Status;
-import roomescape.reservation.service.dto.ReservationWaitingResult;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
-import roomescape.reservation.service.ReservationService;
-
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
@@ -43,6 +17,31 @@ import static roomescape.common.auth.UserArgumentResolver.GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.INVALID_GUEST_NAME_HEADER;
 import static roomescape.common.exception.GlobalErrorCode.VALIDATION_ERROR;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
+import roomescape.reservation.controller.dto.ReservationCreateRequest;
+import roomescape.reservation.controller.dto.ReservationEditRequest;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.reservationtime.domain.ReservationTime;
+import roomescape.theme.domain.Theme;
+
 @WebMvcTest(controllers = ReservationController.class)
 class ReservationControllerTest {
 
@@ -54,6 +53,26 @@ class ReservationControllerTest {
 
     @MockitoBean
     private ReservationService reservationService;
+
+    private static void assertReservation(JsonNode response, ReservationWaitingResult reservationWaitingResult) {
+        assertThat(response.get("id").asLong()).isEqualTo(reservationWaitingResult.id());
+        assertThat(response.get("guestName").asText()).isEqualTo(reservationWaitingResult.guestName());
+        assertThat(response.get("date").asText()).isEqualTo(reservationWaitingResult.date().toString());
+        assertThat(response.get("status").asText()).isEqualTo(reservationWaitingResult.status().toString());
+        assertThat(response.get("isConfirmed").asBoolean()).isEqualTo(reservationWaitingResult.status().isConfirmed());
+    }
+
+    private static void assertTime(JsonNode reservationTimeResponse, ReservationTime time) {
+        assertThat(reservationTimeResponse.get("id").asLong()).isEqualTo(time.getId());
+        assertThat(reservationTimeResponse.get("startAt").asText()).isEqualTo(time.getStartAt().toString());
+    }
+
+    private static void assertTheme(JsonNode themeResponse, Theme theme) {
+        assertThat(themeResponse.get("id").asLong()).isEqualTo(theme.getId());
+        assertThat(themeResponse.get("name").asText()).isEqualTo(theme.getName());
+        assertThat(themeResponse.get("description").asText()).isEqualTo(theme.getDescription());
+        assertThat(themeResponse.get("thumbnail").asText()).isEqualTo(theme.getThumbnail());
+    }
 
     @Test
     @DisplayName("예약을 생성하는 요청을 하면 생성된 예약 정보가 응답으로 반환된다.")
@@ -92,26 +111,6 @@ class ReservationControllerTest {
         then(reservationService)
                 .should()
                 .create(request.guestName(), request.date(), request.timeId(), request.themeId());
-    }
-
-    private static void assertReservation(JsonNode response, ReservationWaitingResult reservationWaitingResult) {
-        assertThat(response.get("id").asLong()).isEqualTo(reservationWaitingResult.id());
-        assertThat(response.get("guestName").asText()).isEqualTo(reservationWaitingResult.guestName());
-        assertThat(response.get("date").asText()).isEqualTo(reservationWaitingResult.date().toString());
-        assertThat(response.get("status").asText()).isEqualTo(reservationWaitingResult.status().toString());
-        assertThat(response.get("isConfirmed").asBoolean()).isEqualTo(reservationWaitingResult.status().isConfirmed());
-    }
-
-    private static void assertTime(JsonNode reservationTimeResponse, ReservationTime time) {
-        assertThat(reservationTimeResponse.get("id").asLong()).isEqualTo(time.getId());
-        assertThat(reservationTimeResponse.get("startAt").asText()).isEqualTo(time.getStartAt().toString());
-    }
-
-    private static void assertTheme(JsonNode themeResponse, Theme theme) {
-        assertThat(themeResponse.get("id").asLong()).isEqualTo(theme.getId());
-        assertThat(themeResponse.get("name").asText()).isEqualTo(theme.getName());
-        assertThat(themeResponse.get("description").asText()).isEqualTo(theme.getDescription());
-        assertThat(themeResponse.get("thumbnail").asText()).isEqualTo(theme.getThumbnail());
     }
 
     @ParameterizedTest
@@ -212,7 +211,6 @@ class ReservationControllerTest {
         Long reservationId = 1L;
         ReservationTime time = ReservationTime.of(2L, LocalTime.of(12, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
-
 
         ReservationEditRequest request = new ReservationEditRequest(
                 LocalDate.of(2023, 8, 10),

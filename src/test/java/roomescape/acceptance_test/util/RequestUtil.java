@@ -1,14 +1,13 @@
 package roomescape.acceptance_test.util;
 
+import static io.restassured.RestAssured.given;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.restassured.http.ContentType;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-
 import java.util.Map;
-
-import static io.restassured.RestAssured.given;
 
 public final class RequestUtil {
 

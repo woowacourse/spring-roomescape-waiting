@@ -1,16 +1,27 @@
 package roomescape.acceptance_test;
 
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.기간_내_예약_수가_많은_순서대로_인기_테마_목록을_응답받는다;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.기간_내_테마별_예약_수가_다르게_예약_생성을_요청하고;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.기간_밖_예약_생성을_요청하고;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.기간_밖_예약만_있는_테마는_인기_테마_목록에_포함되지_않는다;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.생성한_테마_삭제를_요청하면;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.생성한_테마가_포함된_테마_목록을_응답받는다;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.여러_테마_생성을_요청하고;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.예약_시간_생성을_요청하고;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.인기_테마_목록_조회를_요청하면;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.테마_목록_조회_시_삭제한_테마는_응답받지_않는다;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.테마_목록_조회를_요청하면;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.테마_삭제가_성공한다;
+import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.테마_생성을_요청하고;
+
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.time.LocalDate;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.acceptance_test.step.ThemeAcceptanceSteps.PopularThemeIds;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static roomescape.acceptance_test.step.ThemeAcceptanceSteps.*;
 
 public class ThemeAcceptanceTest extends AcceptanceTestSupport {
 

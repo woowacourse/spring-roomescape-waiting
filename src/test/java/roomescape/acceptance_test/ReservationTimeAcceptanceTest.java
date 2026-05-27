@@ -1,16 +1,25 @@
 package roomescape.acceptance_test;
 
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.같은_예약_시간_생성을_다시_요청하면;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.새로운_예약_시간_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.생성한_예약_시간이_포함된_예약_시간_목록을_응답받는다;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.예약_시간_목록_조회를_요청하면;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.예약_시간_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.예약되지_않은_시간은_예약_가능으로_응답받는다;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.예약된_시간은_예약_불가로_응답받는다;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.중복_예약_시간_생성은_실패한다;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.테마_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.특정_날짜와_테마에_예약_생성을_요청하고;
+import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.특정_날짜와_테마의_예약_가능_시간_조회를_요청하면;
+
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
+import java.time.LocalDate;
+import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
-
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static roomescape.acceptance_test.step.ReservationTimeAcceptanceSteps.*;
 
 public class ReservationTimeAcceptanceTest extends AcceptanceTestSupport {
 

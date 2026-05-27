@@ -1,6 +1,17 @@
 package roomescape.reservationtime.controller;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.groups.Tuple.tuple;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.then;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,18 +27,6 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 import roomescape.reservationtime.service.ReservationTimeService;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.groups.Tuple.tuple;
-import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.then;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
 @WebMvcTest(controllers = ReservationTimeController.class)
 class ReservationTimeControllerTest {
 
@@ -39,6 +38,19 @@ class ReservationTimeControllerTest {
 
     @MockitoBean
     private ReservationTimeService reservationTimeService;
+
+    private static void assertTimeResponse(ReservationTimeListResponse response) {
+        assertThat(response.times()).hasSize(3)
+                .extracting(
+                        ReservationTimeResponse::id,
+                        ReservationTimeResponse::startAt
+                )
+                .containsExactly(
+                        tuple(1L, "10:00"),
+                        tuple(2L, "12:00"),
+                        tuple(3L, "14:00")
+                );
+    }
 
     @Test
     @DisplayName("예약 시간 목록을 조회한다.")
@@ -67,19 +79,6 @@ class ReservationTimeControllerTest {
         then(reservationTimeService)
                 .should()
                 .findAllReservationTimes();
-    }
-
-    private static void assertTimeResponse(ReservationTimeListResponse response) {
-        assertThat(response.times()).hasSize(3)
-                .extracting(
-                        ReservationTimeResponse::id,
-                        ReservationTimeResponse::startAt
-                )
-                .containsExactly(
-                        tuple(1L, "10:00"),
-                        tuple(2L, "12:00"),
-                        tuple(3L, "14:00")
-                );
     }
 
     @Test
