@@ -15,6 +15,7 @@ public class ReservationTimeDataSource {
 
     public void clearTable() {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY FALSE");
+        jdbcTemplate.execute("TRUNCATE TABLE reservation_entry");
         jdbcTemplate.execute("TRUNCATE TABLE reservation");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time");
         jdbcTemplate.execute("TRUNCATE TABLE theme");
@@ -25,6 +26,7 @@ public class ReservationTimeDataSource {
         jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE reservation_entry ALTER COLUMN id RESTART WITH 1");
     }
 
     public void insertOneTheme() {
@@ -41,8 +43,16 @@ public class ReservationTimeDataSource {
 
     public void insertReservation(long themeId, LocalDate date, long timeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                "이프", date, themeId, timeId
+                "INSERT INTO reservation (date, theme_id, time_id) VALUES (?, ?, ?)",
+                date, themeId, timeId
+        );
+        Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        jdbcTemplate.update(
+                """
+                INSERT INTO reservation_entry (name, reservation_id, status, created_at)
+                VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
+                """,
+                "이프", reservationId
         );
     }
 }

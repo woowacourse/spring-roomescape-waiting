@@ -19,7 +19,6 @@ CREATE TABLE reservation_time (
 
 CREATE TABLE reservation (
     id      BIGINT       NOT NULL AUTO_INCREMENT,
-    name    VARCHAR(20) NOT NULL,
     date    DATE         NOT NULL,
     theme_id BIGINT,
     time_id BIGINT,
@@ -27,4 +26,14 @@ CREATE TABLE reservation (
     FOREIGN KEY (theme_id) REFERENCES theme (id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     CONSTRAINT uk_reservation_date_theme_time UNIQUE (date, theme_id, time_id)
+);
+
+CREATE TABLE reservation_entry (
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    name           VARCHAR(20)  NOT NULL,
+    reservation_id BIGINT       NOT NULL,
+    status         VARCHAR(20)  NOT NULL,
+    created_at     TIMESTAMP    NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (reservation_id) REFERENCES reservation (id)
 );

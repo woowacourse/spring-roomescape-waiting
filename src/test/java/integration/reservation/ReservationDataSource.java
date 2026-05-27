@@ -18,6 +18,7 @@ public class ReservationDataSource {
 
         jdbcTemplate.execute("TRUNCATE TABLE theme");
         jdbcTemplate.execute("TRUNCATE TABLE reservation_time");
+        jdbcTemplate.execute("TRUNCATE TABLE reservation_entry");
         jdbcTemplate.execute("TRUNCATE TABLE reservation");
 
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
@@ -27,6 +28,7 @@ public class ReservationDataSource {
         jdbcTemplate.execute("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.execute("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
+        jdbcTemplate.execute("ALTER TABLE reservation_entry ALTER COLUMN id RESTART WITH 1");
     }
 
     public void insertTheme(String name, String description, String thumbnailImageUrl) {
@@ -35,8 +37,14 @@ public class ReservationDataSource {
     }
 
     public void insertReservation(String name, LocalDate date, Long themeId, Long timeId) {
-        jdbcTemplate.update("INSERT INTO reservation (name, date, theme_id, time_id) VALUES (?, ?, ?, ?)",
-                name, date, themeId, timeId);
+        jdbcTemplate.update("INSERT INTO reservation (date, theme_id, time_id) VALUES (?, ?, ?)",
+                date, themeId, timeId);
+        Long reservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+        jdbcTemplate.update("""
+                        INSERT INTO reservation_entry (name, reservation_id, status, created_at)
+                        VALUES (?, ?, 'RESERVED', CURRENT_TIMESTAMP)
+                        """,
+                name, reservationId);
     }
 
     public void insertReservationTime(LocalTime reservationTime) {

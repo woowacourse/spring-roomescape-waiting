@@ -2,14 +2,15 @@ package roomescape.domain;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.groups.Tuple.tuple;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.NullAndEmptySource;
-import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
 
@@ -21,89 +22,137 @@ class ReservationTest {
     @Test
     void 정상적인_예약_정보를_생성한다() {
         // given
-        String name = "이프";
         LocalDate date = LocalDate.now().plusDays(1);
 
         // when
-        Reservation reservation = Reservation.createNew(name, date, theme, reservationTime);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // then
         assertThat(reservation)
-                .extracting(Reservation::getName, Reservation::getDate, Reservation::getTime)
-                .containsExactly(name,  date, reservationTime);
-    }
-
-    @ParameterizedTest
-    @NullAndEmptySource
-    @ValueSource(strings = {" ", "  "})
-    void 예약자_이름이_비어있을_경우_예외가_발생한다(String invalidName) {
-        // given
-        LocalDate date = LocalDate.now().plusDays(1);
-
-        // when & then
-        assertThatThrownBy(() -> Reservation.createNew(invalidName, date, theme, reservationTime))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("예약자 정보는 비어있을 수 없습니다.");
+                .extracting(Reservation::getDate, Reservation::getTime)
+                .containsExactly(date, reservationTime);
     }
 
     @ParameterizedTest(name = "날짜 {0}, 테마 {1}, 시간 {2} 일 때, {3} 예외가 발생한다")
     @MethodSource("roomescape.domain.fixture.ReservationFixture#invalidReservationConstructor")
     void 예약_일시와_테마_검증_통합_테스트(LocalDate date, Theme theme, ReservationTime reservationTime, String expectedMessage) {
         // when & then
-        assertThatThrownBy(() -> Reservation.createNew("이프", date, theme, reservationTime))
+        assertThatThrownBy(() -> Reservation.createSlot(date, theme, reservationTime))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining(expectedMessage);
     }
 
     @Test
-    void 예약의_날짜와_시간을_정상적으로_변경한다() {
+    void 예약_정보가_있을_때_예약을_할_수_있다() {
         // given
-        Reservation reservation = Reservation.createNew("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-
-        LocalDate newDate = LocalDate.now().plusDays(2);
-        ReservationTime newTime = new ReservationTime(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
-        reservation.update(newDate, newTime);
+        reservation.reserve("이프");
 
         // then
-        assertThat(reservation)
-                .extracting(Reservation::getDate, Reservation::getTime)
-                .containsExactly(newDate, newTime);
+        assertThat(reservation.getEntries())
+                .singleElement()
+                .extracting(ReservationEntry::getName, ReservationEntry::getReservation, ReservationEntry::getStatus)
+                .containsExactly("이프", reservation, ReservationStatus.RESERVED);
     }
 
     @Test
-    void 이미_지나버린_예약을_변경하려고_하면_예외가_발생한다() {
+    void 이미_예약된_예약_정보에_예약을_하면_예외가_발생한다() {
         // given
-        LocalDate pastDate = LocalDate.now().minusDays(1);
-        Reservation pastReservation = new Reservation(1L, "이프", pastDate, theme, reservationTime);
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.reserve("이프");
 
         // when & then
-        assertThatThrownBy(pastReservation::validateNotPast)
+        assertThatThrownBy(() -> reservation.reserve("라텔"))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 된 날짜입니다.");
+    }
+
+    @Test
+    void 이미_지나버린_예약_정보에_예약을_하면_예외가_발생한다() {
+        // given
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        Reservation reservation = new Reservation(1L, pastDate, theme, reservationTime, List.of());
+
+        // when & then
+        assertThatThrownBy(() -> reservation.reserve("이프"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 지난 예약입니다.");
     }
 
     @Test
-    void 이미_지나간_과거_일시로_예약을_변경하려고_하면_예외가_발생한다() {
+    void 예약된_엔트리를_식별자로_조회한다() {
         // given
-        Reservation reservation = Reservation.createNew("이프", LocalDate.now().plusDays(1), theme, reservationTime);
-        LocalDate pastDate = LocalDate.now().minusDays(1);
+        Reservation reservation = createReservationWithEntries(List.of(
+                entry(1L, "이프", ReservationStatus.RESERVED),
+                entry(2L, "라텔", ReservationStatus.WAITING)
+        ));
+
+        // when
+        ReservationEntry result = reservation.findReservedEntry(1L);
+
+        // then
+        assertThat(result.getName()).isEqualTo("이프");
+    }
+
+    @Test
+    void 예약_상태가_아닌_엔트리를_예약된_엔트리로_조회하면_예외가_발생한다() {
+        // given
+        Reservation reservation = createReservationWithEntries(List.of(
+                entry(1L, "이프", ReservationStatus.WAITING)
+        ));
 
         // when & then
-        assertThatThrownBy(() -> reservation.update(pastDate, reservationTime))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("이전 날짜로 예약 할 수 없습니다.");
+        assertThatThrownBy(() -> reservation.findReservedEntry(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("예약 정보를 찾을 수 없습니다.");
+    }
+
+    @Test
+    void 예약된_엔트리를_취소하면_가장_먼저_등록된_대기_엔트리가_예약된다() {
+        // given
+        ReservationEntry reserved = entry(1L, "이프", ReservationStatus.RESERVED, LocalDateTime.now());
+        ReservationEntry firstWaiting = entry(2L, "라텔", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(2));
+        ReservationEntry secondWaiting = entry(3L, "도기", ReservationStatus.WAITING, LocalDateTime.now().minusMinutes(1));
+        Reservation reservation = createReservationWithEntries(List.of(reserved, firstWaiting, secondWaiting));
+
+        // when
+        reservation.cancelEntry(1L);
+
+        // then
+        assertThat(reservation.getEntries())
+                .extracting(ReservationEntry::getId, ReservationEntry::getStatus)
+                .containsExactly(
+                        tuple(1L, ReservationStatus.DELETED),
+                        tuple(2L, ReservationStatus.RESERVED),
+                        tuple(3L, ReservationStatus.WAITING)
+                );
+    }
+
+    @Test
+    void 존재하지_않는_엔트리를_취소하면_예외가_발생한다() {
+        // given
+        Reservation reservation = createReservationWithEntries(List.of(
+                entry(1L, "이프", ReservationStatus.RESERVED)
+        ));
+
+        // when & then
+        assertThatThrownBy(() -> reservation.cancelEntry(999L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("예약 정보를 찾을 수 없습니다.");
     }
 
     @Test
     void 같은_날짜와_시간이면_true를_반환한다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation reservation = Reservation.createNew("이프", date, theme, reservationTime);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         // when
-        boolean result = reservation.isSameTime(date, reservationTime);
+        boolean result = reservation.isSameSlot(date, reservationTime);
 
         // then
         assertThat(result).isTrue();
@@ -113,12 +162,24 @@ class ReservationTest {
     void 날짜나_시간이_다르면_false를_반환한다() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
-        Reservation reservation = Reservation.createNew("이프", date, theme, reservationTime);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
 
         ReservationTime anotherTime = new ReservationTime(2L, LocalTime.of(15, 0), TimeStatus.ACTIVE);
 
         // when & then
-        assertThat(reservation.isSameTime(date.plusDays(1), reservationTime)).isFalse();
-        assertThat(reservation.isSameTime(date, anotherTime)).isFalse();
+        assertThat(reservation.isSameSlot(date.plusDays(1), reservationTime)).isFalse();
+        assertThat(reservation.isSameSlot(date, anotherTime)).isFalse();
+    }
+
+    private Reservation createReservationWithEntries(List<ReservationEntry> entries) {
+        return new Reservation(1L, LocalDate.now().plusDays(1), theme, reservationTime, entries);
+    }
+
+    private ReservationEntry entry(long id, String name, ReservationStatus status) {
+        return entry(id, name, status, LocalDateTime.now());
+    }
+
+    private ReservationEntry entry(long id, String name, ReservationStatus status, LocalDateTime createdAt) {
+        return new ReservationEntry(id, name, null, status, createdAt);
     }
 }

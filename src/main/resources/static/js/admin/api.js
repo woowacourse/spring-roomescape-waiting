@@ -52,7 +52,7 @@ export function createReservation(payload) {
 }
 
 export function deleteReservation(id) {
-  return requestJson(`/api/admin/reservations/${id}`, {
+  return requestJson(`/api/admin/reservations/entries/${id}`, {
     method: "DELETE",
     headers: ADMIN_ONLY_HEADERS
   });

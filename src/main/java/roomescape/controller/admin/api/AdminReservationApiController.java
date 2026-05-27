@@ -34,12 +34,12 @@ public class AdminReservationApiController {
         return ResponseEntity.status(CREATED).body(AdminReservationResponse.from(result));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/entries/{entryId}")
     public ResponseEntity<Void> cancelReservation(
             @PathVariable
-            @Positive(message = "예약 취소 식별자는 양수여야 합니다.") Long id
+            @Positive(message = "예약 엔트리 식별자는 양수여야 합니다.") Long entryId
     ) {
-        reservationService.cancelReservation(id);
+        reservationService.cancelReservation(entryId);
         return ResponseEntity.noContent().build();
     }
 

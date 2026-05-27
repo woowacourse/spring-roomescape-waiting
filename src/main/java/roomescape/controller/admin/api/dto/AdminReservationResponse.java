@@ -3,14 +3,21 @@ package roomescape.controller.admin.api.dto;
 import java.time.LocalDate;
 import roomescape.service.result.ReservationResult;
 
-public record AdminReservationResponse(long id, String name, LocalDate date, AdminReservationTimeResponse time) {
+public record AdminReservationResponse(
+        long reservationId,
+        LocalDate date,
+        AdminThemeResponse theme,
+        AdminReservationTimeResponse time,
+        AdminReservationEntryResponse entry
+) {
 
     public static AdminReservationResponse from(ReservationResult result) {
         return new AdminReservationResponse(
-                result.id(),
-                result.name(),
+                result.reservationId(),
                 result.date(),
-                AdminReservationTimeResponse.from(result.time())
+                AdminThemeResponse.from(result.theme()),
+                AdminReservationTimeResponse.from(result.time()),
+                AdminReservationEntryResponse.from(result.entry())
         );
     }
 }

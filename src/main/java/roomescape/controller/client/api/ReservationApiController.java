@@ -39,30 +39,32 @@ public class ReservationApiController {
     @PostMapping
     public ResponseEntity<ReservationResponse> reserve(@Valid @RequestBody ReservationRequest request) {
         ReservationResult result = reservationService.reserve(request.toCommand());
-        return ResponseEntity.created(URI.create("/api/reservations/" + result.id()))
+        return ResponseEntity.created(URI.create("/api/reservations/entries/" + result.entry().id()))
                 .body(ReservationResponse.from(result));
     }
 
-    @PatchMapping("/{id}")
+    @PatchMapping("/entries/{entryId}")
     public ResponseEntity<ReservationResponse> changeReservation(
-            @PathVariable @Positive(message = "예약 변경 식별자는 양수입니다.") Long id,
+            @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId,
             @Valid @RequestBody ReservationChangeRequest request
     ) {
-        ReservationResult result = reservationService.change(id, request.toCommand());
+        ReservationResult result = reservationService.change(entryId, request.toCommand());
         return ResponseEntity.ok(ReservationResponse.from(result));
     }
 
-    @DeleteMapping("/{id}")
+    @DeleteMapping("/entries/{entryId}")
     public ResponseEntity<Void> cancel(
-            @PathVariable @Positive(message = "예약 취소 식별자는 양수입니다.") Long id
+            @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId
     ) {
-        reservationService.cancelReservation(id);
+        reservationService.cancelReservation(entryId);
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<ReservationDetailResponse> getReservation(@PathVariable Long id) {
-        ReservationResult result = reservationService.getReservation(id);
+    @GetMapping("/entries/{entryId}")
+    public ResponseEntity<ReservationDetailResponse> getReservationEntry(
+            @PathVariable @Positive(message = "예약 엔트리 식별자는 양수입니다.") Long entryId
+    ) {
+        ReservationResult result = reservationService.getReservationEntry(entryId);
         return ResponseEntity.ok(ReservationDetailResponse.from(result));
     }
 

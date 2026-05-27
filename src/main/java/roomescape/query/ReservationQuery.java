@@ -29,12 +29,13 @@ public class ReservationQuery {
         List<Object> params = new ArrayList<>();
 
         if (condition.name() != null && !condition.name().isBlank()) {
-            whereClause.append(" AND r.name = ?");
+            whereClause.append(" AND re.name = ?");
             params.add(condition.name());
         }
 
         String joinClause = """
             FROM reservation r
+            JOIN reservation_entry re ON re.reservation_id = r.id AND re.status = 'RESERVED'
             JOIN theme t ON r.theme_id = t.id
             JOIN reservation_time rt ON r.time_id = rt.id
             """;
@@ -43,8 +44,8 @@ public class ReservationQuery {
         long totalElements = jdbcTemplate.queryForObject(countSql, Long.class, params.toArray());
 
         StringBuilder contentSql = new StringBuilder("""
-                SELECT r.id AS res_id,
-                       r.name AS res_name,
+                SELECT re.id AS res_id,
+                       re.name AS res_name,
                        r.date AS res_date,
                        rt.start_at AS res_start_at,
                        t.name AS theme_name

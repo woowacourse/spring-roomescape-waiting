@@ -1,6 +1,8 @@
 package roomescape.domain;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
@@ -11,22 +13,22 @@ import lombok.ToString;
 public class Reservation {
 
     private final Long id;
-    private final String name;
     private final Theme theme;
     private LocalDate date;
     private ReservationTime time;
+    private ReservationEntries entries;
 
-    public Reservation(Long id, String name, LocalDate date, Theme theme, ReservationTime time) {
-        validateReservation(name, date, theme, time);
+    public Reservation(Long id, LocalDate date, Theme theme, ReservationTime time, List<ReservationEntry> entries) {
+        validateReservation(date, theme, time);
         this.id = id;
-        this.name = name;
         this.date = date;
         this.theme = theme;
         this.time = time;
+        this.entries = new ReservationEntries(entries);
     }
 
-    public static Reservation createNew(String name, LocalDate date, Theme theme, ReservationTime time) {
-        Reservation reservation = new Reservation(null, name, date, theme, time);
+    public static Reservation createSlot(LocalDate date, Theme theme, ReservationTime time) {
+        Reservation reservation = new Reservation(null, date, theme, time, new ArrayList<>());
         validatePastDateTime(date, time);
         return reservation;
     }
@@ -37,16 +39,9 @@ public class Reservation {
         }
     }
 
-    private static void validateReservation(String name, LocalDate date, Theme theme, ReservationTime time) {
-        validateReservationName(name);
+    private static void validateReservation(LocalDate date, Theme theme, ReservationTime time) {
         validateTheme(theme);
         validateReservationDateTime(date, time);
-    }
-
-    private static void validateReservationName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("예약자 정보는 비어있을 수 없습니다.");
-        }
     }
 
     private static void validateTheme(Theme theme) {
@@ -61,20 +56,47 @@ public class Reservation {
         }
     }
 
-    public void update(LocalDate date, ReservationTime time) {
-        validateNotPast();
-        validatePastDateTime(date, time);
-        this.date = date;
-        this.time = time;
+    public boolean isSameSlot(LocalDate date, ReservationTime time) {
+        return this.date.isEqual(date) && this.time.equals(time);
     }
 
-    public void validateNotPast() {
+    public void reserve(String name) {
+        validateNotPast();
+        validateDuplicateReserve();
+        entries.addReserved(name, this);
+    }
+
+    public List<ReservationEntry> getEntries() {
+        return entries.getEntries();
+    }
+
+    private void validateNotPast() {
         if (this.time.isPast(this.date)) {
             throw new IllegalArgumentException("이미 지난 예약입니다.");
         }
     }
 
-    public boolean isSameTime(LocalDate date, ReservationTime time) {
-        return this.date.isEqual(date) && this.time.equals(time);
+    private void validateDuplicateReserve() {
+        if (entries.hasReservedEntry()) {
+            throw new DuplicateEntityException("이미 예약 된 날짜입니다. (%s %s)", date, time.getStartAt());
+        }
+    }
+
+    public ReservationEntry findReservedEntry(long entryId) {
+        return entries.findById(entryId)
+                .filter(ReservationEntry::isReserved)
+                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
+    }
+
+    public void cancelEntry(long entryId) {
+        ReservationEntry entry = entries.findById(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
+
+        boolean wasReserved = entry.isReserved();
+        entry.cancel();
+
+        if (wasReserved) {
+            entries.promoteFirstWaiting();
+        }
     }
 }

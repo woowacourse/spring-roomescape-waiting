@@ -17,11 +17,11 @@ export function createReservation(payload) {
 }
 
 export function fetchReservation(id) {
-  return requestJson(`/api/reservations/${id}`);
+  return requestJson(`/api/reservations/entries/${id}`);
 }
 
 export function changeReservation(id, payload) {
-  return requestJson(`/api/reservations/${id}`, {
+  return requestJson(`/api/reservations/entries/${id}`, {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)

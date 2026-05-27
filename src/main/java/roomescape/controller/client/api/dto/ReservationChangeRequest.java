@@ -4,7 +4,7 @@ import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
-import roomescape.service.command.ReservationCommand;
+import roomescape.service.command.ReservationChangeCommand;
 
 public record ReservationChangeRequest(
         @NotNull(message = "예약 날짜 정보는 필수 값입니다.")
@@ -15,7 +15,7 @@ public record ReservationChangeRequest(
         Long timeId
 ) {
 
-    public ReservationCommand toCommand() {
-        return new ReservationCommand(null, date, null, timeId);
+    public ReservationChangeCommand toCommand() {
+        return new ReservationChangeCommand(date, timeId);
     }
 }

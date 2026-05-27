@@ -34,6 +34,7 @@ import roomescape.query.ReservationQuery;
 import roomescape.query.ReservationSearchCondition;
 import roomescape.query.ReservationSearchResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fixture.ReservationServiceFixture;
 import roomescape.service.result.ReservationResult;
@@ -118,7 +119,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     void 사용자가_예약_취소에_성공하면_삭제_로직_수행_후_204_noContent를_반환한다() {
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
-                .when().delete("/api/reservations/{id}", 1L)
+                .when().delete("/api/reservations/entries/{entryId}", 1L)
                 .then().log().all()
                 .status(HttpStatus.NO_CONTENT);
         verify(reservationService, times(1)).cancelReservation(anyLong());
@@ -129,10 +130,10 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     void 사용자가_예약_취소시_식별자가_양수가_아니라면_400_Bad_Request를_반환한다(int invalidId) {
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
-                .when().delete("/api/reservations/{id}", invalidId)
+                .when().delete("/api/reservations/entries/{entryId}", invalidId)
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body(containsString("예약 취소 식별자는 양수입니다."));
+                .body(containsString("예약 엔트리 식별자는 양수입니다."));
     }
 
     @Test
@@ -140,12 +141,12 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
         // given
         ReservationChangeRequest request = new ReservationChangeRequest(LocalDate.now(), 1L);
         ReservationResult result = ReservationServiceFixture.createReservationResult();
-        when(reservationService.change(anyLong(), any(ReservationCommand.class))).thenReturn(result);
+        when(reservationService.change(anyLong(), any(ReservationChangeCommand.class))).thenReturn(result);
 
         // when
         ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
                 .body(request)
-                .when().patch("/api/reservations/{id}", 1L)
+                .when().patch("/api/reservations/entries/{entryId}", 1L)
                 .then().log().all()
                 .status(HttpStatus.OK)
                 .extract().as(new TypeRef<>() {

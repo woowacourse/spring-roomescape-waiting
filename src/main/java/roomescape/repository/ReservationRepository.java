@@ -1,21 +1,21 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
+import roomescape.repository.dto.ReservationCondition;
 
 public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    void delete(long id);
-
-    boolean existByDateAndThemeIdAndTimeId(LocalDate date, long themeId, long timeId);
-
     List<Reservation> findAll();
 
     Optional<Reservation> findById(long id);
+
+    Optional<Reservation> findByDateAndThemeAndTimeForUpdate(ReservationCondition condition);
+
+    Optional<Reservation> findByEntryIdForUpdate(long entryId);
 
     void update(Reservation reservation);
 }

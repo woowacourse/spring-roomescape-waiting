@@ -7,22 +7,25 @@ import static roomescape.domain.fixture.ReservationFixture.createWithNameAndDate
 
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.DuplicateEntityException;
 import roomescape.domain.EntityNotFoundException;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationEntry;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.service.command.ReservationChangeCommand;
 import roomescape.service.command.ReservationCommand;
 import roomescape.service.fake.FakeReservationRepository;
 import roomescape.service.fake.FakeReservationTimeRepository;
 import roomescape.service.fake.FakeThemeRepository;
+import roomescape.service.fixture.ReservationServiceFixture;
 import roomescape.service.result.ReservationResult;
 import roomescape.service.result.ReservationTimeResult;
 
@@ -56,12 +59,14 @@ class ReservationServiceTest {
         ReservationTimeResult timeResult = ReservationTimeResult.from(time);
         assertThat(result)
                 .extracting(
-                        ReservationResult::id,
-                        ReservationResult::name,
+                        ReservationResult::reservationId,
                         ReservationResult::date,
                         ReservationResult::time
                 )
-                .containsExactly(1L, "이프", reservationDate, timeResult);
+                .containsExactly(1L, reservationDate, timeResult);
+        assertThat(result.entry())
+                .extracting("id", "name", "status")
+                .containsExactly(1L, "이프", "RESERVED");
     }
 
     @Test
@@ -76,10 +81,10 @@ class ReservationServiceTest {
     void 존재하지_않는_시간_정보로_예약_변경_시_예외가_발생한다() {
         // given
         Reservation saved = reservationRepository.save(createDefaultReservationWithName("이프"));
-        ReservationCommand command = new ReservationCommand(null, LocalDate.now(), 1L, 1L);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(LocalDate.now(), 1L);
 
         // when & then
-        assertThatThrownBy(() -> reservationService.change(saved.getId(), command))
+        assertThatThrownBy(() -> reservationService.change(reservedEntryId(saved), command))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessageContaining("존재하지 않는 시간 정보입니다.");
     }
@@ -91,15 +96,16 @@ class ReservationServiceTest {
         reservationTimeRepository.save(reservation.getTime());
         Reservation saved = reservationRepository.save(reservation);
 
-        ReservationCommand command = new ReservationCommand(null, reservation.getDate(), 1L, 1L);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(reservation.getDate(), 1L);
 
         // when
-        ReservationResult result = reservationService.change(saved.getId(), command);
+        ReservationResult result = reservationService.change(reservedEntryId(saved), command);
 
         // then
-        assertThat(result.id()).isEqualTo(saved.getId());
+        assertThat(result.reservationId()).isEqualTo(saved.getId());
         assertThat(result.date()).isEqualTo(saved.getDate());
         assertThat(result.time().id()).isEqualTo(saved.getTime().getId());
+        assertThat(result.entry().id()).isEqualTo(reservedEntryId(saved));
     }
 
     @Test
@@ -111,10 +117,10 @@ class ReservationServiceTest {
         Reservation first = reservationRepository.save(createDefaultReservationWithName("이프"));
         Reservation second = reservationRepository.save(createWithNameAndDate("두둠", first.getDate().plusDays(1)));
 
-        ReservationCommand command = new ReservationCommand(null, second.getDate(), 1L, time.getId());
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(second.getDate(), time.getId());
 
         // when & then
-        assertThatThrownBy(() -> reservationService.change(first.getId(), command))
+        assertThatThrownBy(() -> reservationService.change(reservedEntryId(first), command))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 된 날짜입니다.");
     }
@@ -127,10 +133,10 @@ class ReservationServiceTest {
         Reservation saved = reservationRepository.save(reservation);
 
         LocalDate nextDate = reservation.getDate().plusDays(1);
-        ReservationCommand command = new ReservationCommand(null, nextDate, 1L, 1L);
+        ReservationChangeCommand command = ReservationServiceFixture.createChangeCommand(nextDate, 1L);
 
         // when
-        ReservationResult result = reservationService.change(saved.getId(), command);
+        ReservationResult result = reservationService.change(reservedEntryId(saved), command);
 
         // then
         assertThat(result.date()).isEqualTo(nextDate);
@@ -205,27 +211,26 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 모든_예약_목록을_조회한다() {
-        // given: 2개의 예약이 저장되어 있음
-        reservationRepository.save(createDefaultReservationWithName("이프"));
-        reservationRepository.save(createDefaultReservationWithName("바니"));
-
-        // when: 전체 조회를 요청함
-        List<ReservationResult> results = reservationService.getAllReservations();
-
-        // then: 2개의 결과가 반환됨
-        assertThat(results).hasSize(2);
-    }
-
-    @Test
     void 식별자를_이용해_예약을_취소한다() {
         // given: 취소할 예약이 저장되어 있음
         Reservation saved = reservationRepository.save(createDefaultReservationWithName("웨지"));
 
         // when: 삭제 요청
-        reservationService.cancelReservation(saved.getId());
+        reservationService.cancelReservation(reservedEntryId(saved));
 
-        // then: 조회 시 목록이 비어있음
-        assertThat(reservationService.getAllReservations()).isEmpty();
+        // then: 예약 엔트리가 취소 상태로 변경됨
+        assertThat(reservationRepository.findById(saved.getId()).orElseThrow().getEntries())
+                .singleElement()
+                .extracting(ReservationEntry::getStatus)
+                .isEqualTo(ReservationStatus.DELETED);
+    }
+
+    private long reservedEntryId(Reservation reservation) {
+        return reservation.getEntries()
+                .stream()
+                .filter(ReservationEntry::isReserved)
+                .findFirst()
+                .orElseThrow()
+                .getId();
     }
 }

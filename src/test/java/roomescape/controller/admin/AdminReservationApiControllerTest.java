@@ -76,20 +76,20 @@ class AdminReservationApiControllerTest extends BaseControllerUnitTest {
 
     @ParameterizedTest
     @ValueSource(ints = {0, -1})
-    void 예약_취소를_요청하는_예약_Id가_양수가_아니라면_예외가_발생한다(int reservationId) {
+    void 예약_취소를_요청하는_예약_엔트리_Id가_양수가_아니라면_예외가_발생한다(int reservationEntryId) {
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
-                .when().delete("/api/admin/reservations/" + reservationId)
+                .when().delete("/api/admin/reservations/entries/" + reservationEntryId)
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
-                .body(containsString("예약 취소 식별자는 양수여야 합니다."));
+                .body(containsString("예약 엔트리 식별자는 양수여야 합니다."));
     }
 
     @Test
-    void 정상적인_예약_ID로_예약_취소_요청시_204_응답을_한다() {
+    void 정상적인_예약_엔트리_ID로_예약_취소_요청시_204_응답을_한다() {
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
-                .when().delete("/api/admin/reservations/1")
+                .when().delete("/api/admin/reservations/entries/1")
                 .then().log().all()
                 .status(HttpStatus.NO_CONTENT);
         verify(reservationService, times(1)).cancelReservation(anyLong());

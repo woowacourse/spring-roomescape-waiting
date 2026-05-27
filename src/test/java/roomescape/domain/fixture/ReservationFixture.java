@@ -54,12 +54,22 @@ public class ReservationFixture {
         LocalDate date = LocalDate.now().plusDays(1);
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
-        return Reservation.createNew(name, date, theme, time);
+        Reservation reservation = Reservation.createSlot(date, theme, time);
+        reservation.reserve(name);
+        return reservation;
     }
 
     public static Reservation createWithNameAndDate(String name, LocalDate date) {
         Theme theme = ThemeFixture.createThemeWithId();
         ReservationTime time = ReservationTimeFixture.createDefault();
-        return Reservation.createNew(name, date, theme, time);
+        Reservation reservation = Reservation.createSlot(date, theme, time);
+        reservation.reserve(name);
+        return reservation;
+    }
+
+    public static Reservation createWithAll(String name, LocalDate date, Theme theme, ReservationTime time) {
+        Reservation reservation = Reservation.createSlot(date, theme, time);
+        reservation.reserve(name);
+        return reservation;
     }
 }
