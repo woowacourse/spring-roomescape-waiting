@@ -12,4 +12,6 @@ public interface ReservationWaitingRepository {
     List<ReservationWaitingTurnResponse> findByName(String name);
 
     boolean existsByNameAndReservationId(String name, Long reservationId);
+
+    ReservationWaiting findReservationWaitingById(Long reservationWaitingId);
 }
