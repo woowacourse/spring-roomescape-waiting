@@ -13,6 +13,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
 import roomescape.wating.service.dto.request.WaitingCreateRequest;
@@ -47,10 +48,13 @@ public class WaitingService {
     }
 
     public void deleteByIdAndCustomerName(final long waitingId, final String customerName) {
-        // 아이디로 조회
-        waitingRepository.findById(waitingId);
+        final Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(WaitingNotFoundException::new);
 
-        // 본인의 대기인지 확인
-        // 삭제
+        if (!waiting.isOwnedBy(customerName)) {
+            throw new WaitingNotFoundException();
+        }
+
+        waitingRepository.deleteById(waitingId);
     }
 }

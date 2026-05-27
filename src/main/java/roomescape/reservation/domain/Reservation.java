@@ -37,7 +37,7 @@ public class Reservation {
     ) {
         final Reservation reservation = new Reservation(
                 null,
-                CustomerName.from(name),
+                new CustomerName(name),
                 date,
                 reservationTime,
                 theme
@@ -55,7 +55,7 @@ public class Reservation {
             final Theme theme) {
         return new Reservation(
                 id,
-                CustomerName.from(name),
+                new CustomerName(name),
                 date,
                 time,
                 theme
@@ -80,7 +80,7 @@ public class Reservation {
     }
 
     public String getCustomerName() {
-        return customerName.getName();
+        return customerName.name();
     }
 
     public void validateCancelableByCustomer(final LocalDate today) {

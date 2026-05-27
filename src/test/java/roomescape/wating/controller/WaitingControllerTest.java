@@ -1,20 +1,8 @@
 package roomescape.wating.controller;
 
-import static org.hamcrest.Matchers.is;
-import static org.hamcrest.Matchers.notNullValue;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import io.restassured.response.Response;
-import java.sql.Date;
-import java.sql.PreparedStatement;
-import java.sql.Time;
-import java.time.Clock;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.ZoneId;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,7 +22,17 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.exception.ReservationTimeNotFoundException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
+import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
+
+import java.sql.Date;
+import java.sql.PreparedStatement;
+import java.sql.Time;
+import java.time.*;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.notNullValue;
 
 @Sql("/clear.sql")
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
@@ -55,9 +53,6 @@ class WaitingControllerTest {
 
     @LocalServerPort
     int port;
-
-    @Autowired
-    private ReservationService reservationService;
 
     @BeforeEach
     void setPort() {
@@ -196,6 +191,47 @@ class WaitingControllerTest {
         //then
         response.then().log().all()
                 .statusCode(HttpStatus.NO_CONTENT.value());
+    }
+    
+    @Test
+    void 본인_이름으로_등록되지_않은_대기를_삭제하려_하면_404를_반환한다() {
+        //given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+
+        final String customerName = "코로구";
+        final LocalDate nowDate = NOW.toLocalDate();
+        final long savedWaitingId = insertWaiting(customerName, nowDate, time.getId(), theme.getId());
+
+        //when
+        final String invalidCustomerName = "재키";
+        final Response response = RestAssured.given().log().all()
+                .queryParam("customer-name", invalidCustomerName)
+                .when().delete("/waitings/{id}", savedWaitingId);
+
+        //then
+        final Exception expectedException = new WaitingNotFoundException();
+        response.then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("message", is(expectedException.getMessage()));
+    }
+
+    @Test
+    void 존재하지_않는_대기를_삭제하려_하면_404를_반환한다() {
+        //given
+        final String customerName = "코로구";
+        final long unsavedWaitingId = 999L;
+
+        //when
+        final Response response = RestAssured.given().log().all()
+                .queryParam("customer-name", customerName)
+                .when().delete("/waitings/{id}", unsavedWaitingId);
+
+        //then
+        final Exception expectedException = new WaitingNotFoundException();
+        response.then().log().all()
+                .statusCode(HttpStatus.NOT_FOUND.value())
+                .body("message", is(expectedException.getMessage()));
     }
 
     private ReservationTime insertReservationTime(final String startAt) {

@@ -73,7 +73,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY r.id
                 """;
 
-        return jdbcTemplate.query(sql, this::mapToDomain, customerName.getName())
+        return jdbcTemplate.query(sql, this::mapToDomain, customerName.name())
                 .stream()
                 .toList();
     }

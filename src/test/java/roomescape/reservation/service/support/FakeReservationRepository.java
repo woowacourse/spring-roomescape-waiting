@@ -78,7 +78,7 @@ public class FakeReservationRepository implements ReservationRepository  {
     @Override
     public List<Reservation> findAllByCustomerName(final CustomerName customerName) {
         return reservations.stream()
-                .filter(reservation -> reservation.getCustomerName().equals(customerName.getName()))
+                .filter(reservation -> reservation.getCustomerName().equals(customerName.name()))
                 .toList();
     }
 

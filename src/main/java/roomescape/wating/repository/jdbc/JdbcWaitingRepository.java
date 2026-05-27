@@ -48,7 +48,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
-            ps.setString(1, waiting.getCustomerName().getName());
+            ps.setString(1, waiting.getCustomerName().name());
             ps.setDate(2, Date.valueOf(waiting.getReservationDate()));
             ps.setLong(3, waiting.getTime().getId());
             ps.setLong(4, waiting.getTheme().getId());

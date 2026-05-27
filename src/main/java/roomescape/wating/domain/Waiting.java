@@ -46,7 +46,7 @@ public class Waiting {
     ) {
         final Waiting waiting = new Waiting(
                 null,
-                CustomerName.from(customerName),
+                new CustomerName(customerName),
                 date,
                 null,
                 time,
@@ -66,12 +66,16 @@ public class Waiting {
     ) {
         return new Waiting(
                 id,
-                CustomerName.from(customerName),
+                new CustomerName(customerName),
                 date.toLocalDate(),
                 createdAt,
                 time,
                 theme
         );
+    }
+
+    public boolean isOwnedBy(final String customerName) {
+        return this.customerName.equals(new CustomerName(customerName));
     }
 
     private void validateNotNull(

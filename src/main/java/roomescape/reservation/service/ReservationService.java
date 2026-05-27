@@ -47,7 +47,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getReservationsByCustomerName(final String customerName) {
-        return reservationRepository.findAllByCustomerName(CustomerName.from(customerName))
+        return reservationRepository.findAllByCustomerName(new CustomerName(customerName))
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();

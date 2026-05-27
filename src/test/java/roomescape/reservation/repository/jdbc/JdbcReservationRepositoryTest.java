@@ -164,7 +164,7 @@ class JdbcReservationRepositoryTest {
         insertReservation("초코칩", "2026-08-05", 1L, 1L);
         insertReservation("재키", "2026-08-05", 2L, 1L);
 
-        List<Reservation> reservations = reservationRepository.findAllByCustomerName(CustomerName.from("초코칩"));
+        List<Reservation> reservations = reservationRepository.findAllByCustomerName(new CustomerName("초코칩"));
 
         assertThat(reservations).hasSize(1);
         assertThat(reservations.getFirst().getCustomerName()).isEqualTo("초코칩");
