@@ -44,7 +44,6 @@ class ThemeIntegrationTest {
             "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
             "공포", "무서운 테마", "theme-url"
         );
-
         given().log().all()
             .contentType(ContentType.JSON)
             .when().get("/themes")
@@ -64,6 +63,10 @@ class ThemeIntegrationTest {
             "공포", "무서운 테마", "theme-url"
         );
         jdbcTemplate.update(
+            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
+            "보예", "보예 테마", "boye-url"
+        );
+        jdbcTemplate.update(
             "INSERT INTO reservation_date(date) VALUES (?)",
             reservationDate
         );
@@ -72,6 +75,7 @@ class ThemeIntegrationTest {
             "10:00"
         );
         Long themeId = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, "공포");
+        Long dummyThemeId = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = ?", Long.class, "보예");
         Long dateId = jdbcTemplate.queryForObject(
             "SELECT id FROM reservation_date WHERE date = ?",
             Long.class,
@@ -86,7 +90,7 @@ class ThemeIntegrationTest {
             "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
             dateId,
             timeId,
-            null
+            dummyThemeId
         );
         jdbcTemplate.update(
             "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",

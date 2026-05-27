@@ -31,9 +31,9 @@ CREATE TABLE users
 CREATE TABLE reservation_slot
 (
     id       BIGINT NOT NULL AUTO_INCREMENT,
-    date_id  BIGINT,
-    time_id  BIGINT,
-    theme_id BIGINT,
+    date_id  BIGINT NOT NULL,
+    time_id  BIGINT NOT NULL,
+    theme_id BIGINT NOT NULL,
     PRIMARY KEY (id),
     UNIQUE (date_id, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
