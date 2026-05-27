@@ -59,12 +59,12 @@ public class ReservationService {
         ReservationSlot reservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
         validateUserReservationNotDuplicated(user, reservationSlot);
         Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
-        WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
+        ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
         Reservation reservation = Reservation.createWithoutId(
             reservationSlot,
             user,
             reservationCount,
-            waitingStatus,
+            reservationStatus,
             clock
         );
         Reservation savedReservation = reservationRepository.save(reservation);
@@ -73,7 +73,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> getAllReservations() {
-        return reservationSlotRepository.findAll().stream()
+        return reservationRepository.findAll().stream()
             .map(ReservationResponse::from)
             .toList();
     }
@@ -119,12 +119,12 @@ public class ReservationService {
         validateUserReservationNotDuplicated(user, updatedReservation);
 
         Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
-        WaitingStatus waitingStatus = decideWaitingStatus(reservationCount);
+        ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
 
         Reservation updatedUserReservation = userReservation.update(
             updatedReservation,
             reservationCount,
-            waitingStatus,
+            reservationStatus,
             clock
         );
 
@@ -140,7 +140,7 @@ public class ReservationService {
             return;
         }
         reservationRepository.updateWaitingNumbers(userReservations);
-        reservationRepository.updateStatus(userReservations.getFirst().getId(), WaitingStatus.CONFIRMED);
+        reservationRepository.updateStatus(userReservations.getFirst().getId(), ReservationStatus.CONFIRMED);
         reservationRepository.updateAllStatus(userReservations.subList(1, userReservations.size()));
     }
 
@@ -207,12 +207,12 @@ public class ReservationService {
         }
     }
 
-    private WaitingStatus decideWaitingStatus(Long reservationCount) {
-        WaitingStatus waitingStatus = WaitingStatus.WAITING;
+    private ReservationStatus decideWaitingStatus(Long reservationCount) {
+        ReservationStatus reservationStatus = ReservationStatus.WAITING;
         if (reservationCount == 0) {
-            waitingStatus = WaitingStatus.CONFIRMED;
+            reservationStatus = ReservationStatus.CONFIRMED;
         }
-        return waitingStatus;
+        return reservationStatus;
     }
 
     private User getOrCreateUser(CreateReservationRequest request) {

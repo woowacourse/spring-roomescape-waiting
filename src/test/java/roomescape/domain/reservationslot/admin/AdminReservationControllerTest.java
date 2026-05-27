@@ -23,6 +23,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.reservation.ReservationService;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.admin.AdminReservationController;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.admin.dto.ReservationResponse.ReservationTimePayload;
@@ -51,7 +52,10 @@ class AdminReservationControllerTest {
             1L,
             LocalDate.of(2026, 5, 10),
             ReservationTimePayload.from(ReservationTime.of(2L, LocalTime.of(10, 10))),
-            ThemePayload.from(Theme.of(3L, "공포", "으악 무서워!", "theme-url"))
+            ThemePayload.from(Theme.of(3L, "공포", "으악 무서워!", "theme-url")),
+            "보예",
+            0L,
+            ReservationStatus.CONFIRMED
         );
         when(validator.isUnauthorized(any(HttpServletRequest.class))).thenReturn(false);
         given(reservationService.getAllReservations())
@@ -69,7 +73,11 @@ class AdminReservationControllerTest {
             .andExpect(jsonPath("$[0].theme.id").value(3))
             .andExpect(jsonPath("$[0].theme.name").value("공포"))
             .andExpect(jsonPath("$[0].theme.content").value("으악 무서워!"))
-            .andExpect(jsonPath("$[0].theme.url").value("theme-url"));
+            .andExpect(jsonPath("$[0].theme.url").value("theme-url"))
+            .andExpect(jsonPath("$[0].userName").value("보예"))
+            .andExpect(jsonPath("$[0].waitingNumber").value(0))
+            .andExpect(jsonPath("$[0].reservationStatus").value("CONFIRMED"))
+        ;
 
         verify(reservationService).getAllReservations();
     }

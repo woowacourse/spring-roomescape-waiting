@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationRepository;
-import roomescape.domain.reservation.WaitingStatus;
+import roomescape.domain.reservation.ReservationStatus;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -73,7 +73,7 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Long id, WaitingStatus status) {
+    public void updateStatus(Long id, ReservationStatus status) {
         Reservation userReservation = storage.get(id);
         if (userReservation == null) {
             return;
@@ -95,7 +95,7 @@ public class FakeReservationRepository implements ReservationRepository {
         return storage.values().stream()
             .filter(userReservation -> userId.equals(userReservation.getUser().getId()))
             .filter(userReservation -> reservationId.equals(userReservation.getReservationSlot().getId()))
-            .anyMatch(userReservation -> userReservation.getStatus() != WaitingStatus.CANCELED);
+            .anyMatch(userReservation -> userReservation.getStatus() != ReservationStatus.CANCELED);
     }
 
     @Override
@@ -123,7 +123,7 @@ public class FakeReservationRepository implements ReservationRepository {
                 userReservation.getReservationSlot(),
                 userReservation.getUser(),
                 userReservation.getWaitingNumber(),
-                WaitingStatus.WAITING,
+                ReservationStatus.WAITING,
                 userReservation.getCreatedAt(),
                 userReservation.getUpdatedAt()
             );

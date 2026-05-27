@@ -257,7 +257,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateStatus(Long id, WaitingStatus status) {
+    public void updateStatus(Long id, ReservationStatus status) {
         jdbcTemplate.update(UPDATE_STATUS_SQL, status.name(), id);
     }
 
@@ -293,7 +293,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             userReservations,
             userReservations.size(),
             (ps, userReservation) -> {
-                ps.setString(1, WaitingStatus.WAITING.name());
+                ps.setString(1, ReservationStatus.WAITING.name());
                 ps.setLong(2, userReservation.getId());
             }
         );
@@ -329,7 +329,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 rs.getString(COLUMN_USER_NAME)
             ),
             rs.getObject(COLUMN_WAITING_NUMBER, Long.class),
-            WaitingStatus.valueOf(rs.getString(COLUMN_STATUS)),
+            ReservationStatus.valueOf(rs.getString(COLUMN_STATUS)),
             rs.getTimestamp(COLUMN_CREATED_AT).toLocalDateTime(),
             rs.getTimestamp(COLUMN_UPDATED_AT).toLocalDateTime()
         );

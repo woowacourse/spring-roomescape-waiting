@@ -19,7 +19,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> update(Long id, Reservation userReservation);
 
-    void updateStatus(Long id, WaitingStatus status);
+    void updateStatus(Long id, ReservationStatus status);
 
     boolean existsActiveByUserIdAndReservationId(Long userId, Long reservationId);
 

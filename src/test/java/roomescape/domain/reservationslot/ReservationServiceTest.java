@@ -14,7 +14,9 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationService;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.admin.dto.ReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
@@ -24,16 +26,14 @@ import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.user.User;
-import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.WaitingStatus;
 import roomescape.support.exception.BadRequestException;
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.fake.FakeReservationDateRepository;
+import roomescape.support.fake.FakeReservationRepository;
 import roomescape.support.fake.FakeReservationSlotRepository;
 import roomescape.support.fake.FakeReservationTimeRepository;
 import roomescape.support.fake.FakeThemeRepository;
 import roomescape.support.fake.FakeUserRepository;
-import roomescape.support.fake.FakeReservationRepository;
 
 class ReservationServiceTest {
 
@@ -66,10 +66,10 @@ class ReservationServiceTest {
         ReservationDate savedReservationDate = reservationDateRepository.save(reservationDate);
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -98,10 +98,10 @@ class ReservationServiceTest {
         // given
         Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -124,10 +124,10 @@ class ReservationServiceTest {
         ReservationDate reservationDate = reservationDateRepository.save(
             ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13)));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -157,17 +157,25 @@ class ReservationServiceTest {
             ReservationTime.createWithoutId(LocalTime.of(10, 0))
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운테마", "theme-url"));
-        reservationSlotRepository.save(
-            ReservationSlot.createWithoutId(savedReservationDate,
-                reservationTime,
-                theme
+        ReservationSlot reservationSlot = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(savedReservationDate, reservationTime, theme)
+        );
+        User user = userRepository.save(User.createWithoutId("보예"));
+        reservationRepository.save(
+            Reservation.createWithoutId(
+                reservationSlot,
+                user,
+                null,
+                ReservationStatus.CONFIRMED,
+                now
             )
         );
+
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -220,21 +228,21 @@ class ReservationServiceTest {
             secondReservation,
             user,
             null,
-            WaitingStatus.CONFIRMED,
+            ReservationStatus.CONFIRMED,
             now
         ));
         reservationRepository.save(Reservation.createWithoutId(
             firstReservation,
             user,
             null,
-            WaitingStatus.CONFIRMED,
+            ReservationStatus.CONFIRMED,
             now
         ));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -275,10 +283,10 @@ class ReservationServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -309,10 +317,10 @@ class ReservationServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -343,10 +351,10 @@ class ReservationServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -387,10 +395,10 @@ class ReservationServiceTest {
         );
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -429,10 +437,10 @@ class ReservationServiceTest {
         ReservationDate savedReservationDate = reservationDateRepository.save(reservationDate);
         Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -468,10 +476,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -501,10 +509,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -533,10 +541,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -554,10 +562,10 @@ class ReservationServiceTest {
         // given
         Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -592,10 +600,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -639,10 +647,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -668,10 +676,10 @@ class ReservationServiceTest {
         // given
         Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -701,10 +709,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -734,10 +742,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -770,10 +778,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -806,10 +814,10 @@ class ReservationServiceTest {
         );
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -847,10 +855,10 @@ class ReservationServiceTest {
         Reservation savedUserReservation = saveConfirmedReservation(savedReservation, user, now);
         saveConfirmedReservation(otherReservation, user, now);
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
             now
@@ -873,7 +881,7 @@ class ReservationServiceTest {
             reservationSlot,
             user,
             null,
-            WaitingStatus.CONFIRMED,
+            ReservationStatus.CONFIRMED,
             clock
         ));
     }

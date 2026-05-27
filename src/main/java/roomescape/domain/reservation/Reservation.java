@@ -15,7 +15,7 @@ public class Reservation {
     private final ReservationSlot reservationSlot;
     private final User user;
     private final Long waitingNumber;
-    private final WaitingStatus status;
+    private final ReservationStatus status;
     private final LocalDateTime createdAt;
     private final LocalDateTime updatedAt;
 
@@ -24,7 +24,7 @@ public class Reservation {
         ReservationSlot reservationSlot,
         User user,
         Long waitingNumber,
-        WaitingStatus status,
+        ReservationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
@@ -42,7 +42,7 @@ public class Reservation {
         ReservationSlot reservation,
         User user,
         Long waitingNumber,
-        WaitingStatus status,
+        ReservationStatus status,
         Clock clock
     ) {
         return new Reservation(
@@ -71,7 +71,7 @@ public class Reservation {
     public Reservation update(
         ReservationSlot updatedReservationSlot,
         Long reservationCount,
-        WaitingStatus waitingStatus,
+        ReservationStatus reservationStatus,
         Clock clock
     ) {
         return new Reservation(
@@ -79,7 +79,7 @@ public class Reservation {
             updatedReservationSlot,
             user,
             reservationCount,
-            waitingStatus,
+            reservationStatus,
             createdAt,
             LocalDateTime.now(clock)
         );
@@ -90,7 +90,7 @@ public class Reservation {
         ReservationSlot reservation,
         User user,
         Long waitingNumber,
-        WaitingStatus status,
+        ReservationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
@@ -101,14 +101,14 @@ public class Reservation {
         ReservationSlot reservation,
         User user,
         Long waitingNumber,
-        WaitingStatus status,
+        ReservationStatus status,
         LocalDateTime createdAt,
         LocalDateTime updatedAt
     ) {
         if (reservation == null || user == null || status == null || createdAt == null || updatedAt == null) {
             throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
-        if (status == WaitingStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {
+        if (status == ReservationStatus.WAITING && (waitingNumber == null || waitingNumber < 1)) {
             throw new BadRequestException(ReservationSlotErrors.INVALID_USER_RESERVATION);
         }
     }

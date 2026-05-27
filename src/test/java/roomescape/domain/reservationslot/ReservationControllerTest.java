@@ -25,7 +25,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.ReservationService;
 import roomescape.domain.reservation.ReservationController;
-import roomescape.domain.reservation.WaitingStatus;
+import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
 import roomescape.domain.reservation.dto.CreateReservationResponse.ThemePayload;
@@ -116,7 +116,7 @@ class ReservationControllerTest {
                 ),
                 User.of(1L, "보예"),
                 null,
-                WaitingStatus.CONFIRMED,
+                ReservationStatus.CONFIRMED,
                 LocalDate.of(2026, 5, 16).atStartOfDay(),
                 LocalDate.of(2026, 5, 16).atStartOfDay()
             ))
