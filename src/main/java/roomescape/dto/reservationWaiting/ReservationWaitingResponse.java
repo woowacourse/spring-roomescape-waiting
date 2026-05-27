@@ -16,7 +16,7 @@ public class ReservationWaitingResponse {
     private final Long sequence;
     private final LocalDateTime createdAt;
 
-    private ReservationWaitingResponse(Long id, String name, LocalDate date, ReservationTimeResponse time, ThemeResponse theme,
+    public ReservationWaitingResponse(Long id, String name, LocalDate date, ReservationTimeResponse time, ThemeResponse theme,
                                        Long sequence, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
