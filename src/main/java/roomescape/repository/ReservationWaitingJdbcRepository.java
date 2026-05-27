@@ -1,18 +1,64 @@
 package roomescape.repository;
 
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ReservationWaitingJdbcRepository implements ReservationWaitingRepository {
 
+    private static final String SELECT_BASE = """
+            SELECT rw.id as waiting_id, rw.name as waiting_name, rw.created_at,
+                   r.id as reservation_id, r.name as reservation_name, r.date,
+                   t.id as time_id, t.start_at as time_value,
+                   th.id as theme_id, th.name as theme_name,
+                   th.description as theme_description,
+                   th.thumbnail_image_url as theme_thumbnail
+            FROM reservation_waiting as rw
+            INNER JOIN reservation as r ON rw.reservation_id = r.id
+            INNER JOIN reservation_time as t ON r.time_id = t.id
+            INNER JOIN theme as th ON r.theme_id = th.id
+            """;
+
     private final JdbcTemplate jdbcTemplate;
+
+    private final RowMapper<ReservationWaiting> waitingRowMapper = (rs, rowNum) -> {
+        ReservationTime time = new ReservationTime(
+                rs.getLong("time_id"),
+                rs.getTime("time_value").toLocalTime()
+        );
+        Theme theme = new Theme(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("theme_description"),
+                rs.getString("theme_thumbnail")
+        );
+        Reservation reservation = new Reservation(
+                rs.getLong("reservation_id"),
+                rs.getString("reservation_name"),
+                rs.getDate("date").toLocalDate(),
+                time,
+                theme
+        );
+        return new ReservationWaiting(
+                rs.getLong("waiting_id"),
+                rs.getString("waiting_name"),
+                rs.getTimestamp("created_at").toLocalDateTime(),
+                reservation,
+                0
+        );
+    };
 
     public ReservationWaitingJdbcRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -49,6 +95,18 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
         return count != null && count > 0;
     }
 
+    @Override
+    public Optional<ReservationWaiting> findById(Long id) {
+        String sql = SELECT_BASE + " WHERE rw.id = ?";
+        List<ReservationWaiting> results = jdbcTemplate.query(sql, waitingRowMapper, id);
+        return results.stream().findFirst();
+    }
+
+    @Override
+    public void deleteById(Long id) {
+        jdbcTemplate.update("DELETE FROM reservation_waiting WHERE id = ?", id);
+    }
+
     private int calculateWaitingOrder(ReservationWaiting reservationWaiting) {
         String sql = """
                 SELECT COUNT(*)
@@ -65,5 +123,4 @@ public class ReservationWaitingJdbcRepository implements ReservationWaitingRepos
 
         return waitingCount != null ? waitingCount + 1 : 1;
     }
-
 }

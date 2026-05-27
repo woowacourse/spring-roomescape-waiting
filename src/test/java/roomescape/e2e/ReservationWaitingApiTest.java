@@ -70,6 +70,43 @@ class ReservationWaitingApiTest {
                 .body("type", is(ProblemType.BUSINESS_RULE_VIOLATION.uri().toString()));
     }
 
+    @Test
+    void 본인_대기를_취소하면_204를_반환한다() {
+        Integer timeId = createTime("14:00");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
+        Integer waitingId = createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().delete("/waitings/me/" + waitingId)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void 다른_사람_이름으로_대기를_취소하면_401을_반환한다() {
+        Integer timeId = createTime("15:00");
+        Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
+        Integer waitingId = createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().delete("/waitings/me/" + waitingId)
+                .then().log().all()
+                .statusCode(401);
+    }
+
+    @Test
+    void 존재하지_않는_대기를_취소하면_404를_반환한다() {
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().delete("/waitings/me/999")
+                .then().log().all()
+                .statusCode(404);
+    }
+
     private Integer createWaiting(String name, String date, Integer timeId, Integer themeId) {
         return RestAssured.given()
                 .contentType(ContentType.JSON)

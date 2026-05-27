@@ -3,23 +3,29 @@ package roomescape.api;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.ReservationWaiting;
 import roomescape.dto.ReservationWaitingRequest;
 import roomescape.dto.ReservationWaitingResponse;
 import roomescape.facade.ReservationFacade;
+import roomescape.service.ReservationWaitingService;
 
 @RestController
 @RequestMapping("/waitings")
 public class ReservationWaitingController {
 
     private final ReservationFacade reservationFacade;
+    private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationWaitingController(ReservationFacade reservationFacade) {
+    public ReservationWaitingController(ReservationFacade reservationFacade, ReservationWaitingService reservationWaitingService) {
         this.reservationFacade = reservationFacade;
+        this.reservationWaitingService = reservationWaitingService;
     }
 
     @PostMapping
@@ -28,5 +34,12 @@ public class ReservationWaitingController {
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
+    }
+
+    @DeleteMapping("/me/{id}")
+    public ResponseEntity<ReservationWaitingResponse> cancel(@PathVariable Long id, @RequestParam String name) {
+        reservationWaitingService.cancelMyReservationWaiting(id, name);
+
+        return ResponseEntity.noContent().build();
     }
 }

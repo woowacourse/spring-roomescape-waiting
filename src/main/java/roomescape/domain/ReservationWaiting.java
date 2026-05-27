@@ -32,6 +32,10 @@ public class ReservationWaiting {
         this(null, name, createdAt, reservation, 0);
     }
 
+    public boolean isOwnedBy(String name) {
+        return name.equals(this.name);
+    }
+
     public Long getId() {
         return id;
     }
