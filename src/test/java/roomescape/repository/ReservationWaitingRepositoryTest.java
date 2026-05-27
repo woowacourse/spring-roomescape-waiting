@@ -1,7 +1,8 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.junit.jupiter.api.Assertions.assertAll;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -22,7 +24,7 @@ class ReservationWaitingRepositoryTest {
     private JdbcTemplate jdbcTemplate;
     private ReservationWaitingRepository waitingRepository;
 
-    private LocalDate date = LocalDate.of(2023, 8, 5);
+    private final LocalDate date = LocalDate.of(2023, 8, 5);
 
     @BeforeEach
     void setup() {
@@ -60,7 +62,7 @@ class ReservationWaitingRepositoryTest {
         ReservationWaiting waiting1 = new ReservationWaiting(null, "브라운", date, time1, theme1);
         ReservationWaiting waiting2 = new ReservationWaiting(null, "구구", date, time2, theme2);
         Long id1 = waitingRepository.insert(waiting1);
-        Long id2 = waitingRepository.insert(waiting2);
+        waitingRepository.insert(waiting2);
 
         // when
         waitingRepository.delete(id1);
@@ -93,7 +95,7 @@ class ReservationWaitingRepositoryTest {
     }
 
     @Test
-    void 중복된_예약_대기가_존재하는지_확인한다(){
+    void 중복된_예약_대기가_존재하는지_확인한다() {
         // given
         String name = "브라운";
         ReservationTime time = findTimeByStartAt("15:00");
@@ -105,6 +107,20 @@ class ReservationWaitingRepositoryTest {
 
         // then
         assertThat(result).isTrue();
+    }
+
+    @Test
+    void 같은_사용자는_같은_슬롯에_중복_대기를_등록할_수_없다() {
+        // given
+        String name = "브라운";
+        ReservationTime time = findTimeByStartAt("15:00");
+        Theme theme = new Theme(1L, "테마 이름1", "테마 설명1", "썸네일1");
+        ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
+        waitingRepository.insert(waiting);
+
+        // when & then
+        assertThatThrownBy(() -> waitingRepository.insert(waiting))
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
