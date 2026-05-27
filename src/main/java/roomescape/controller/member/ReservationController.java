@@ -18,7 +18,9 @@ import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.response.ReservationDetailResponses;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
+import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.result.ReservationDetailResults;
+import roomescape.service.dto.result.ReservationResult;
 
 @RestController
 @RequestMapping("/reservations")
@@ -32,7 +34,9 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> read() {
-        List<ReservationResponse> response = reservationService.findAll();
+        List<ReservationResponse> response = reservationService.findAll().stream()
+                .map(ReservationResponse::from)
+                .toList();
 
         return ResponseEntity.ok().body(response);
     }
@@ -49,7 +53,8 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationService.save(request);
+        ReservationResult result = reservationService.save(ReservationCommand.from(request));
+        ReservationResponse response = ReservationResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
@@ -62,7 +67,8 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
                                                       @Valid @RequestBody ReservationRequest request) {
-        ReservationResponse response = reservationService.updateDateTime(id, request);
+        ReservationResult result = reservationService.updateDateTime(id, ReservationCommand.from(request));
+        ReservationResponse response = ReservationResponse.from(result);
 
         return ResponseEntity.ok().body(response);
     }

@@ -28,10 +28,7 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request) {
-        WaitingCommand command = new WaitingCommand(
-                request.name(), request.date(), request.timeId(), request.themeId(), request.createdAt()
-        );
-        WaitingResult result = waitingService.save(command);
+        WaitingResult result = waitingService.save(WaitingCommand.from(request));
         WaitingResponse response = WaitingResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()

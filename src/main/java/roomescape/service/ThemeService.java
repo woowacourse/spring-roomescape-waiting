@@ -8,15 +8,15 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-import roomescape.controller.dto.request.ThemeRequest;
-import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Description;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.theme.ThemeName;
 import roomescape.domain.reservation.theme.ThumbnailUrl;
+import roomescape.service.dto.command.ThemeCommand;
 import roomescape.service.dto.result.ReservationTimeDetailResult;
+import roomescape.service.dto.result.ThemeResult;
 
 @Service
 public class ThemeService {
@@ -30,23 +30,23 @@ public class ThemeService {
         this.clock = clock;
     }
 
-    public List<ThemeResponse> findAllThemes() {
+    public List<ThemeResult> findAllThemes() {
         List<Theme> themes = themeDao.findAllThemes();
         return themes.stream()
-                .map(ThemeResponse::from)
+                .map(ThemeResult::from)
                 .toList();
     }
 
-    public List<ThemeResponse> findTopTheme(Long count) {
+    public List<ThemeResult> findTopTheme(Long count) {
         LocalDate today = LocalDate.now(clock);
         List<Theme> topTheme = themeDao.findTopThemes(count, today);
         return topTheme.stream()
-                .map(ThemeResponse::from)
+                .map(ThemeResult::from)
                 .toList();
     }
 
-    public ThemeResponse create(ThemeRequest request) {
-        MultipartFile file = request.file();
+    public ThemeResult create(ThemeCommand command) {
+        MultipartFile file = command.file();
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         String filePath = uploadDir + fileName;
 
@@ -66,14 +66,14 @@ public class ThemeService {
 
         Theme theme = new Theme(
                 null,
-                ThemeName.parse(request.name()),
-                Description.parse(request.description()),
+                ThemeName.parse(command.name()),
+                Description.parse(command.description()),
                 ThumbnailUrl.parse(imageUrl)
         );
 
         Theme saved = themeDao.save(theme);
 
-        return ThemeResponse.from(saved);
+        return ThemeResult.from(saved);
     }
 
     public void delete(Long id) {

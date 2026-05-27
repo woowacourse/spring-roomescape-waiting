@@ -14,6 +14,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.controller.dto.request.ThemeRequest;
 import roomescape.controller.dto.response.ThemeResponse;
 import roomescape.service.ThemeService;
+import roomescape.service.dto.command.ThemeCommand;
+import roomescape.service.dto.result.ThemeResult;
 
 @RestController
 @RequestMapping("/admin/themes")
@@ -26,7 +28,8 @@ public class AdminThemeController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ThemeResponse> createTheme(@Valid @ModelAttribute ThemeRequest request) {
-        ThemeResponse response = themeService.create(request);
+        ThemeResult result = themeService.create(ThemeCommand.from(request));
+        ThemeResponse response = ThemeResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")

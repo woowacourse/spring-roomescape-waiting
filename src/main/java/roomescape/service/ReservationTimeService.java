@@ -7,8 +7,8 @@ import roomescape.common.exception.NotFoundException;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.reservation.time.ReservationTime;
-import roomescape.controller.dto.request.ReservationTimeRequest;
-import roomescape.controller.dto.response.ReservationTimeResponse;
+import roomescape.service.dto.command.ReservationTimeCommand;
+import roomescape.service.dto.result.ReservationTimeResult;
 
 @Service
 public class ReservationTimeService {
@@ -20,22 +20,22 @@ public class ReservationTimeService {
         this.reservationDao = reservationDao;
     }
 
-    public List<ReservationTimeResponse> findAll() {
+    public List<ReservationTimeResult> findAll() {
         List<ReservationTime> times = reservationTimeDao.findAll();
 
         return times.stream()
-                .map(ReservationTimeResponse::from)
+                .map(ReservationTimeResult::from)
                 .toList();
     }
 
-    public ReservationTimeResponse save(ReservationTimeRequest request) {
+    public ReservationTimeResult save(ReservationTimeCommand command) {
         ReservationTime time = new ReservationTime(
-                request.startAt()
+                command.startAt()
         );
 
         ReservationTime saved = reservationTimeDao.save(time);
 
-        return ReservationTimeResponse.from(saved);
+        return ReservationTimeResult.from(saved);
     }
 
     public void delete(Long id) {

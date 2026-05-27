@@ -9,8 +9,6 @@ import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
-import roomescape.controller.dto.request.ReservationRequest;
-import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
@@ -20,6 +18,7 @@ import roomescape.domain.reservation.Reservation;
 import roomescape.domain.reservation.UserName;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
+import roomescape.service.dto.command.ReservationCommand;
 import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
 import roomescape.service.dto.result.WaitingDetailResult;
@@ -46,11 +45,11 @@ public class ReservationService {
         this.clock = clock;
     }
 
-    public List<ReservationResponse> findAll() {
+    public List<ReservationResult> findAll() {
         List<Reservation> reservations = reservationDao.findAll();
 
         return reservations.stream()
-                .map(ReservationResponse::from)
+                .map(ReservationResult::from)
                 .toList();
     }
 
@@ -68,23 +67,23 @@ public class ReservationService {
         );
     }
 
-    public ReservationResponse save(ReservationRequest request) {
-        Reservation reservation = convertToReservation(null, request);
+    public ReservationResult save(ReservationCommand command) {
+        Reservation reservation = convertToReservation(null, command);
 
         Reservation saved = reservationDao.save(reservation);
 
-        return ReservationResponse.from(saved);
+        return ReservationResult.from(saved);
     }
 
-    public ReservationResponse updateDateTime(Long id, ReservationRequest request) {
+    public ReservationResult updateDateTime(Long id, ReservationCommand command) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("변경하려는 예약이 존재하지 않습니다."));
 
-        if (!request.name().equals(origin.getName().value())) {
+        if (!command.name().equals(origin.getName().value())) {
             throw new ForbiddenException("다른 사람의 예약은 변경할 수 없습니다.");
         }
 
-        Reservation modified = convertToReservation(id, request);
+        Reservation modified = convertToReservation(id, command);
 
         boolean isSuccessful = reservationDao.update(modified);
 
@@ -92,22 +91,22 @@ public class ReservationService {
             throw new ConflictException("다른 사용자가 예약했습니다. 다시 시도해주세요.");
         }
 
-        return ReservationResponse.from(modified);
+        return ReservationResult.from(modified);
     }
 
-    private Reservation convertToReservation(Long id, ReservationRequest request) {
-        ReservationTime time = reservationTimeDao.findTimeById(request.timeId())
+    private Reservation convertToReservation(Long id, ReservationCommand command) {
+        ReservationTime time = reservationTimeDao.findTimeById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
-        Theme theme = themeDao.findThemeById(request.themeId())
+        Theme theme = themeDao.findThemeById(command.themeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
 
-        validateAvailability(request.date(), time, theme);
+        validateAvailability(command.date(), time, theme);
 
         return new Reservation(
                 id,
-                UserName.parse(request.name()),
-                request.date(),
+                UserName.parse(command.name()),
+                command.date(),
                 time,
                 theme
         );

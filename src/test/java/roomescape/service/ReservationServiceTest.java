@@ -15,7 +15,7 @@ import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
-import roomescape.controller.dto.request.ReservationRequest;
+import roomescape.service.dto.command.ReservationCommand;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -31,28 +31,28 @@ public class ReservationServiceTest {
     @Test
     @DisplayName("정상 예약을 생성하면 통과한다.")
     void 정상_예약_생성_테스트() {
-        ReservationRequest request = new ReservationRequest(
+        ReservationCommand command = new ReservationCommand(
                 name,
                 futureDate,
                 timeId,
                 themeId
         );
 
-        assertDoesNotThrow(() -> reservationService.save(request));
+        assertDoesNotThrow(() -> reservationService.save(command));
     }
 
     @Test
     @DisplayName("존재하지 않는 시간 식별자로 예약하면 예외가 발생한다")
     void 없는_시간_식별자_예외_테스트() {
         Long invalidTimeId = 999L;
-        ReservationRequest request = new ReservationRequest(
+        ReservationCommand command = new ReservationCommand(
                 name,
                 futureDate,
                 invalidTimeId,
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(request))
+        assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("존재하지 않는 시간입니다.");
     }
@@ -61,14 +61,14 @@ public class ReservationServiceTest {
     @DisplayName("존재하지 않는 테마 식별자로 예약하면 예외가 발생한다")
     void 없는_테마_식별자_예외_테스트() {
         Long invalidThemeId = 999L;
-        ReservationRequest request = new ReservationRequest(
+        ReservationCommand command = new ReservationCommand(
                 name,
                 futureDate,
                 timeId,
                 invalidThemeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(request))
+        assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("존재하지 않는 테마입니다.");
     }
@@ -78,14 +78,14 @@ public class ReservationServiceTest {
     void 과거_예약_생성_예외_테스트() {
         LocalDate date = LocalDate.parse(TODAY);
         Long timeId = 1L;
-        ReservationRequest request = new ReservationRequest(
+        ReservationCommand command = new ReservationCommand(
                 name,
                 date,
                 timeId,
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(request))
+        assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(UnprocessableEntityException.class)
                 .hasMessageContaining("이미 지난 시간입니다.");
     }
@@ -94,14 +94,14 @@ public class ReservationServiceTest {
     @DisplayName("이미 존재하는 예약 건과 중복으로 예약하면 예외가 발생한다.")
     void 중복_예약_예외_테스트() {
         Long timeId = 5L;
-        ReservationRequest request = new ReservationRequest(
+        ReservationCommand command = new ReservationCommand(
                 name,
                 futureDate,
                 timeId,
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(request))
+        assertThatThrownBy(() -> reservationService.save(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("이미 존재하는 예약 건입니다.");
     }
@@ -111,14 +111,14 @@ public class ReservationServiceTest {
     void 타인_예약_변경_예외_테스트() {
         Long id = 24L;
         String otherName = "브리";
-        ReservationRequest request = new ReservationRequest(
+        ReservationCommand command = new ReservationCommand(
                 otherName,
                 futureDate,
                 timeId,
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(id, request))
+        assertThatThrownBy(() -> reservationService.updateDateTime(id, command))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("다른 사람의 예약은 변경할 수 없습니다.");
     }

@@ -11,7 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
-import roomescape.controller.dto.request.ReservationTimeRequest;
+import roomescape.service.dto.command.ReservationTimeCommand;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -22,11 +22,11 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("정상 시간을 생성하면 통과한다.")
     void 정상_시간_생성_테스트() {
-        ReservationTimeRequest request = new ReservationTimeRequest(
+        ReservationTimeCommand command = new ReservationTimeCommand(
                 LocalTime.parse("19:00")
         );
 
-        assertDoesNotThrow(() -> reservationTimeService.save(request));
+        assertDoesNotThrow(() -> reservationTimeService.save(command));
     }
 
     @Test

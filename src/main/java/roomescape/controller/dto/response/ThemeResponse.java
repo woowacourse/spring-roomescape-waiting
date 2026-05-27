@@ -1,6 +1,5 @@
 package roomescape.controller.dto.response;
 
-import roomescape.domain.reservation.theme.Theme;
 import roomescape.service.dto.result.ThemeResult;
 
 public record ThemeResponse(
@@ -16,15 +15,6 @@ public record ThemeResponse(
                 result.name(),
                 result.description(),
                 result.url()
-        );
-    }
-
-    public static ThemeResponse from(Theme theme) {
-        return new ThemeResponse(
-                theme.getId(),
-                theme.getName().value(),
-                theme.getDescription().value(),
-                theme.getUrl().value()
         );
     }
 }

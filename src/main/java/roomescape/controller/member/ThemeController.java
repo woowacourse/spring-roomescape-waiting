@@ -28,7 +28,8 @@ public class ThemeController {
             @RequestParam LocalDate date
     ) {
         List<ReservationTimeDetailResult> availableTimes = themeService.findThemeSchedule(id, date);
-        List<ReservationTimeDetailResponse> response = availableTimes.stream().map(ReservationTimeDetailResponse::from)
+        List<ReservationTimeDetailResponse> response = availableTimes.stream()
+                .map(ReservationTimeDetailResponse::from)
                 .toList();
 
         return ResponseEntity.ok().body(response);
@@ -36,7 +37,9 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getAllThemes() {
-        List<ThemeResponse> themes = themeService.findAllThemes();
+        List<ThemeResponse> themes = themeService.findAllThemes().stream()
+                .map(ThemeResponse::from)
+                .toList();
         return ResponseEntity.ok().body(themes);
     }
 
@@ -44,7 +47,9 @@ public class ThemeController {
     public ResponseEntity<List<ThemeResponse>> getTopThemes(
             @RequestParam("limit") long limit
     ) {
-        List<ThemeResponse> topTheme = themeService.findTopTheme(limit);
+        List<ThemeResponse> topTheme = themeService.findTopTheme(limit).stream()
+                .map(ThemeResponse::from)
+                .toList();
 
         return ResponseEntity.ok().body(topTheme);
     }

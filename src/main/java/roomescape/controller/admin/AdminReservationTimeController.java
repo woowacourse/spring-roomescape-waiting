@@ -13,6 +13,8 @@ import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.controller.dto.request.ReservationTimeRequest;
 import roomescape.controller.dto.response.ReservationTimeResponse;
 import roomescape.service.ReservationTimeService;
+import roomescape.service.dto.command.ReservationTimeCommand;
+import roomescape.service.dto.result.ReservationTimeResult;
 
 @RestController
 @RequestMapping("/admin/times")
@@ -25,7 +27,8 @@ public class AdminReservationTimeController {
 
     @PostMapping
     public ResponseEntity<ReservationTimeResponse> create(@Valid @RequestBody ReservationTimeRequest request) {
-        ReservationTimeResponse response = reservationTimeService.save(request);
+        ReservationTimeResult result = reservationTimeService.save(ReservationTimeCommand.from(request));
+        ReservationTimeResponse response = ReservationTimeResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
                 .path("/{id}")
