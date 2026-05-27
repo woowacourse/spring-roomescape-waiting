@@ -15,6 +15,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.domain.ReservationTime;
 import roomescape.reservation.dto.request.ReservationTimeCreateRequest;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -62,7 +63,7 @@ class ReservationDAOTest {
             Theme theme = createTheme();
 
             // when
-            Reservation saved = reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId());
+            Reservation saved = reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
             // then
             assertThat(saved.getId()).isNotNull();
@@ -78,7 +79,7 @@ class ReservationDAOTest {
             Theme theme = createTheme();
 
             // when
-            reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId());
+            reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
             // then
             List<ReservationResponse> all = reservationDAO.findAll().stream()
@@ -155,7 +156,7 @@ class ReservationDAOTest {
         // given
         ReservationTimeCreateResponse time = createTime();
         Theme theme = createTheme();
-        Reservation saved = reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId());
+        Reservation saved = reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
         // when
         reservationDAO.delete(saved.getId());
@@ -180,7 +181,7 @@ class ReservationDAOTest {
             // given
             ReservationTimeCreateResponse time = createTime();
             Theme theme = createTheme();
-            reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId());
+            reservationDAO.insert("브라운", LocalDate.of(2023, 8, 5), time.id(), theme.getId(), ReservationStatus.RESERVED);
 
             // when
             boolean exists = reservationDAO.existsByTimeId(time.id());

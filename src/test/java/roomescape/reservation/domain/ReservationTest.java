@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
@@ -19,8 +20,30 @@ class ReservationTest {
     @ValueSource(strings = {"", " ", "\t", "\n"})
     void 이름이_공백이면_예외를_던진다(String blankName) {
         // when // then
-        assertThatThrownBy(() -> Reservation.of(1L, blankName, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME))
+        assertThatThrownBy(() -> Reservation.of(1L, blankName, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED))
                 .isInstanceOf(IllegalArgumentException.class);
 
+    }
+
+    @Test
+    void 상태_전이_테스트_예약에서_취소() {
+        // given
+        Reservation reservation = Reservation.of(1L, "누누", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
+
+        // when
+        reservation.changeStatus(ReservationStatus.CANCELED);
+
+        // then
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.CANCELED);
+    }
+
+    @Test
+    void 상태_전이_불가_테스트_예약에서_대기() {
+        // given
+        Reservation reservation = Reservation.of(1L, "누누", DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED);
+
+        // when // then
+        assertThatThrownBy(() -> reservation.changeStatus(ReservationStatus.WAITING))
+            .isInstanceOf(IllegalStateException.class);
     }
 }

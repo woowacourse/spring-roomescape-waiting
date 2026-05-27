@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import roomescape.reservation.dao.ReservationDAO;
 import roomescape.reservation.dao.ReservationTimeDAO;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.dto.request.ReservationRequest;
 import roomescape.reservation.dto.response.ReservationCreateResponse;
 import roomescape.reservation.dto.response.ReservationResponse;
@@ -25,7 +26,13 @@ public class ReservationService {
 
     public ReservationCreateResponse create(ReservationRequest request) {
         reservationTimeDAO.findById(request.timeId());
-        Reservation reservation = reservationDAO.insert(request.name(), LocalDate.parse(request.date()), request.timeId(), request.themeId());
+        boolean isExist = reservationDAO.findByDateTimeTheme(request.date(), request.timeId(), request.themeId());
+        ReservationStatus status = ReservationStatus.RESERVED;
+        if (isExist) {
+            status = ReservationStatus.WAITING;
+        }
+        Reservation reservation = reservationDAO.insert(request.name(), LocalDate.parse(request.date()), request.timeId(), request.themeId(), status);
+
         return ReservationCreateResponse.from(reservation);
     }
 
