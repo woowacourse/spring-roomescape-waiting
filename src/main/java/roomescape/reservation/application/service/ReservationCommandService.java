@@ -97,14 +97,25 @@ public class ReservationCommandService {
         );
     }
 
-    public void delete(Long id, LocalDateTime now) {
-        Reservation reservation = reservationRepository.findById(id)
+    public void deleteReservation(Long reservationId, LocalDateTime now) {
+        Reservation reservation = reservationRepository.findById(reservationId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약입니다."));
 
         reservation.validateDeletable(now);
 
-        if (reservationRepository.delete(id) == 0) {
+        if (reservationRepository.delete(reservationId) == 0) {
             throw new NotFoundException("존재하지 않는 예약입니다.");
+        }
+    }
+
+    public void deleteWaiting(Long waitingId, LocalDateTime now) {
+        Waiting waiting = waitingRepository.findById(waitingId)
+                .orElseThrow(() -> new NotFoundException("존재하지 않는 대기입니다."));
+
+        waiting.validateDeletable(now);
+
+        if (waitingRepository.delete(waitingId) == 0) {
+            throw new NotFoundException("존재하지 않는 대기입니다.");
         }
     }
 

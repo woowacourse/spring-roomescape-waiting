@@ -1,5 +1,7 @@
 package roomescape.reservation.infra;
 
+import java.time.LocalTime;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
@@ -20,6 +22,31 @@ public class JdbcWaitingRepository implements WaitingRepository {
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("waiting")
                 .usingGeneratedKeyColumns("id");
+    }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        return jdbcTemplate.query("""
+                        SELECT w.id, w.name, w.date, w.theme_id, w.time_id, rt.start_at
+                            FROM waiting w
+                            JOIN reservation_time rt ON w.time_id = rt.id
+                            WHERE w.id = ?
+                        """,
+                (rs, rowNum) -> {
+                    ReservationSlot slot = ReservationSlot.builder()
+                            .date(rs.getDate("date").toLocalDate())
+                            .themeId(rs.getLong("theme_id"))
+                            .timeId(rs.getLong("time_id"))
+                            .startAt(rs.getObject("start_at", LocalTime.class))
+                            .build();
+
+                    return Waiting.builder()
+                            .id(rs.getLong("id"))
+                            .name(rs.getString("name"))
+                            .slot(slot)
+                            .build();
+                }
+                , id).stream().findFirst();
     }
 
     @Override
@@ -51,5 +78,10 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 slot.date(),
                 slot.themeId(),
                 slot.timeId());
+    }
+
+    @Override
+    public Integer delete(Long id) {
+        return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
     }
 }
