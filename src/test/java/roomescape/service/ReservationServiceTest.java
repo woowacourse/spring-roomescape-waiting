@@ -14,6 +14,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.User;
 import roomescape.dto.reservation.ReservationResponses;
+import roomescape.dto.reservation.ReservationWithStatusResponses;
 import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingReservationException;
 import roomescape.exception.PastDateTimeReservationException;
@@ -174,7 +175,7 @@ class ReservationServiceTest {
         reservationRepository.save(buildReservation(other, themeId, timeId, LocalDate.of(2026, 5, 2)));
         reservationRepository.save(buildReservation(brown, themeId, timeId, LocalDate.of(2026, 5, 3)));
 
-        ReservationResponses responses = service.getMyReservations(brown.getId());
+        ReservationWithStatusResponses responses = service.getMyReservations(brown.getId());
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
