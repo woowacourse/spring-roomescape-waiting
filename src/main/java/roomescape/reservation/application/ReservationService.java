@@ -9,12 +9,15 @@ import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
+import roomescape.reservation.application.dto.UserReservationResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.reservationTime.domain.ReservationTimeRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
+import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -23,17 +26,20 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
     private final ReservationValidator reservationValidator;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
+            WaitingRepository waitingRepository,
             ReservationValidator reservationValidator
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
         this.reservationValidator = reservationValidator;
     }
 
@@ -62,8 +68,10 @@ public class ReservationService {
         return reservationRepository.findByDateAndThemeId(date, themeId);
     }
 
-    public List<Reservation> getReservationsByName(String name) {
-        return reservationRepository.findByName(name);
+    public UserReservationResult getReservationsByName(String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        List<Waiting> waitings = waitingRepository.findByName(name);
+        return UserReservationResult.from(reservations, waitings);
     }
 
     @Transactional

@@ -17,20 +17,50 @@ import roomescape.waiting.domain.WaitingRepository;
 public class WaitingJdbcTemplateRepository implements WaitingRepository {
 
     private static final String FIND_BY_ID_QUERY = """
-        SELECT w.id,
-               w.name AS waiting_name,
-               w.date,
-               w.created_at,
-               rt.id AS time_id,
-               rt.start_at,
-               t.id AS theme_id,
-               t.name AS theme_name,
-               t.description AS theme_description,
-               t.thumbnail_url
-        FROM waiting w
-        JOIN reservation_time rt ON w.time_id = rt.id
-        JOIN theme t ON w.theme_id = t.id
-        WHERE w.id = ?
+        SELECT *
+        FROM (
+            SELECT w.id,
+                   w.name AS waiting_name,
+                   w.date,
+                   w.created_at,
+                   rt.id AS time_id,
+                   rt.start_at,
+                   t.id AS theme_id,
+                   t.name AS theme_name,
+                   t.description AS theme_description,
+                   t.thumbnail_url,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY w.date, w.time_id, w.theme_id
+                       ORDER BY w.created_at, w.id
+                   ) AS rank
+            FROM waiting w
+            JOIN reservation_time rt ON w.time_id = rt.id
+            JOIN theme t ON w.theme_id = t.id
+        ) ranked_waiting
+        WHERE id = ?
+        """;
+    private static final String FIND_BY_NAME_QUERY = """
+        SELECT *
+        FROM (
+            SELECT w.id,
+                   w.name AS waiting_name,
+                   w.date,
+                   w.created_at,
+                   rt.id AS time_id,
+                   rt.start_at,
+                   t.id AS theme_id,
+                   t.name AS theme_name,
+                   t.description AS theme_description,
+                   t.thumbnail_url,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY w.date, w.time_id, w.theme_id
+                       ORDER BY w.created_at, w.id
+                   ) AS rank
+            FROM waiting w
+            JOIN reservation_time rt ON w.time_id = rt.id
+            JOIN theme t ON w.theme_id = t.id
+        ) ranked_waiting
+        WHERE waiting_name = ?
         """;
     private static final String DELETE_BY_ID_AND_NAME_QUERY = "DELETE FROM waiting WHERE id = ? AND name = ?";
 
@@ -53,6 +83,7 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
                 rs.getDate("date").toLocalDate(),
                 time,
                 theme,
+                rs.getLong("rank"),
                 rs.getTimestamp("created_at").toLocalDateTime()
         );
     };
@@ -97,6 +128,15 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
         jdbcTemplate.update(
                 DELETE_BY_ID_AND_NAME_QUERY,
                 id,
+                name
+        );
+    }
+
+    @Override
+    public List<Waiting> findByName(String name) {
+        return jdbcTemplate.query(
+                FIND_BY_NAME_QUERY,
+                ROW_MAPPER,
                 name
         );
     }

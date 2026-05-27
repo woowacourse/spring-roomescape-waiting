@@ -15,28 +15,30 @@ public class Waiting {
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final Long rank;
     private final LocalDateTime createdAt;
 
-    private Waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme,
+    private Waiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long rank,
                         LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
+        this.rank = rank;
         this.createdAt = createdAt;
     }
 
     public static Waiting create(String name, LocalDate date, ReservationTime time, Theme theme) {
         validateCreatableDateTime(date, time);
-        return new Waiting(null, name, date, time, theme, LocalDateTime.now());
+        return new Waiting(null, name, date, time, theme, null, LocalDateTime.now());
     }
 
     public Waiting update(String name, LocalDate date, ReservationTime time) {
         validateOwner(name);
         validateModifiable();
         validateModifiableDateTime(date, time);
-        return new Waiting(id, this.name, date, time, theme, this.createdAt);
+        return new Waiting(id, this.name, date, time, theme, this.rank, this.createdAt);
     }
 
     public void cancel(String name) {
@@ -44,12 +46,12 @@ public class Waiting {
         validateModifiable();
     }
 
-    public static Waiting createRow(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
-        return new Waiting(id, name, date, time, theme, createdAt);
+    public static Waiting createRow(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long rank, LocalDateTime createdAt) {
+        return new Waiting(id, name, date, time, theme, rank, createdAt);
     }
 
     public Waiting appendId(Long id) {
-        return new Waiting(id, name, date, time, theme, createdAt);
+        return new Waiting(id, name, date, time, theme, rank, createdAt);
     }
 
     public Long getId() {
@@ -70,6 +72,10 @@ public class Waiting {
 
     public Theme getTheme() {
         return theme;
+    }
+
+    public Long getRank() {
+        return rank;
     }
 
     public LocalDateTime getCreatedAt() {

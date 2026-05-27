@@ -9,7 +9,8 @@ public record WaitingResponse(
         String name,
         String date,
         ReservationTimeResponse time,
-        ThemeResponse theme
+        ThemeResponse theme,
+        Long rank
 ) {
     public static WaitingResponse from(Waiting waiting) {
         return new WaitingResponse(
@@ -17,7 +18,8 @@ public record WaitingResponse(
                 waiting.getName(),
                 waiting.getDate().toString(),
                 ReservationTimeResponse.from(waiting.getTime()),
-                ThemeResponse.from(waiting.getTheme())
+                ThemeResponse.from(waiting.getTheme()),
+                waiting.getRank()
         );
     }
 }

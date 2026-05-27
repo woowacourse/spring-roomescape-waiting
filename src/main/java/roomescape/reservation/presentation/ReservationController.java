@@ -21,6 +21,7 @@ import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.presentation.dto.request.ReservationCreateRequest;
 import roomescape.reservation.presentation.dto.request.ReservationUpdateRequest;
 import roomescape.reservation.presentation.dto.response.ReservationResponse;
+import roomescape.reservation.presentation.dto.response.UserReservationResponse;
 
 @RestController
 @RequestMapping("/reservations")
@@ -58,10 +59,10 @@ public class ReservationController {
     }
 
     @GetMapping("/me")
-    public ResponseEntity<List<ReservationResponse>> getUserReservations(
+    public ResponseEntity<UserReservationResponse> getUserReservations(
             @RequestParam String name
     ) {
-        List<ReservationResponse> response = findUserReservations(name);
+        UserReservationResponse response = UserReservationResponse.toResponse(service.getReservationsByName(name));
         return ResponseEntity.ok(response);
     }
 
@@ -105,12 +106,6 @@ public class ReservationController {
                     .toList();
         }
         return service.getReservations().stream()
-                .map(ReservationResponse::from)
-                .toList();
-    }
-
-    private List<ReservationResponse> findUserReservations(String name) {
-        return service.getReservationsByName(name).stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
