@@ -11,6 +11,7 @@ import java.util.List;
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -44,115 +45,6 @@ class ReservationTimeRepositoryTest {
         jdbcReservationRepository = new JdbcReservationRepository(jdbcTemplate);
     }
 
-    @Test
-    @DisplayName("예약 시간을 추가한다.")
-    void saveTime() {
-        // given
-        List<ReservationTime> emptyTimes = List.of();
-
-        // when
-        jdbcReservationTimeRepository.save(ReservationTimeFixture.time15());
-
-        // then
-        assertThat(jdbcReservationTimeRepository.findAll())
-                .hasSize(emptyTimes.size() + 1);
-    }
-
-    @Test
-    @DisplayName("모든 예약 시간 정보를 조회한다.")
-    void findAll() {
-        // given
-        List<ReservationTime> reservationTimes = List.of(
-                ReservationTimeFixture.time15(),
-                ReservationTimeFixture.time16(),
-                ReservationTimeFixture.time17()
-        );
-        List<ReservationTime> savedTimes = saveAll(reservationTimes);
-
-        // when
-        List<ReservationTime> actual = jdbcReservationTimeRepository.findAll();
-
-        // then
-        assertThat(actual)
-                .hasSize(savedTimes.size());
-    }
-
-    @Test
-    @DisplayName("등록된 예약 시간을 활성화 상태로 변경한다.")
-    void updateStatus_active() {
-        // given
-        ReservationTime saved = saveTime(ReservationTimeFixture.time15());
-        saved.updateStatus(true);
-        updateStatus(saved);
-
-        // when
-        ReservationTime actual = jdbcReservationTimeRepository.findById(saved.getId()).get();
-
-        // then
-        Assertions.assertThat(actual.isActive())
-                .isTrue();
-    }
-
-    @Test
-    @DisplayName("등록된 예약 시간을 비활성화 상태로 변경한다.")
-    void updateStatus_inactive() {
-        // given
-        ReservationTime saved = saveTime(ReservationTimeFixture.activeTime15());
-        saved.updateStatus(false);
-        updateStatus(saved);
-
-        // when
-        ReservationTime actual = jdbcReservationTimeRepository.findById(saved.getId()).get();
-
-        // then
-        Assertions.assertThat(actual.isActive())
-                .isFalse();
-    }
-
-    @Test
-    @DisplayName("예약 시작 시간 값으로 예약 시간이 존재하는지 확인한다.")
-    void existsByStartAt() {
-        // given
-        LocalTime duplicatedTime = LocalTime.of(15, 0);
-        LocalTime nonSavedTime = LocalTime.of(12, 0);
-        saveTime(ReservationTime.create(duplicatedTime));
-
-        // when & then
-        assertThat(jdbcReservationTimeRepository.existsByStartAt(duplicatedTime)).isTrue();
-        assertThat(jdbcReservationTimeRepository.existsByStartAt(nonSavedTime)).isFalse();
-    }
-
-    @Test
-    @DisplayName("예약 가능한 시간을 조회한다.")
-    void findAvailableTimes() {
-        // given
-        ReservationTime reservedTime15 = saveTime(ReservationTimeFixture.activeTime15());
-        ReservationTime reservedTime16 = saveTime(ReservationTimeFixture.activeTime16());
-        ReservationTime nonReservedTime = saveTime(ReservationTimeFixture.activeTime17());
-
-        ReservationDate date = saveDate(ReservationDateFixture.oneWeekLater());
-        Theme theme = saveTheme(ThemeFixture.activeTheme());
-
-        saveReservation(date, reservedTime15, theme);
-        saveReservation(date, reservedTime16, theme);
-
-        // when
-        List<ReservationTime> availableTimes = jdbcReservationTimeRepository.findAvailableByDateIdAndThemeId(
-                date.getId(),
-                theme.getId()
-        );
-
-        // then
-// then
-        assertThat(availableTimes)
-                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
-                .containsExactlyInAnyOrder(
-                        reservedTime15,
-                        reservedTime16,
-                        nonReservedTime
-                );
-    }
-
     private List<ReservationTime> saveAll(List<ReservationTime> reservationTimes) {
         List<ReservationTime> savedTimes = new ArrayList<>();
         for (ReservationTime reservationTime : reservationTimes) {
@@ -173,7 +65,8 @@ class ReservationTimeRepositoryTest {
         return jdbcThemeRepository.save(theme);
     }
 
-    private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime, Theme theme) {
+    private void saveReservation(ReservationDate reservationDate, ReservationTime reservationTime,
+        Theme theme) {
         jdbcReservationRepository.save(reservation("송송", reservationDate, reservationTime, theme));
     }
 
@@ -181,4 +74,144 @@ class ReservationTimeRepositoryTest {
         return jdbcReservationTimeRepository.updateStatus(saved);
     }
 
+
+    @Nested
+    @DisplayName("save 메서드는")
+    class SaveTest {
+
+
+        @Test
+        @DisplayName("시간을 생성한다")
+        void 성공() {
+            // given
+            List<ReservationTime> emptyTimes = List.of();
+
+            // when
+            jdbcReservationTimeRepository.save(ReservationTimeFixture.time15());
+
+            // then
+            assertThat(jdbcReservationTimeRepository.findAll())
+                .hasSize(emptyTimes.size() + 1);
+        }
+    }
+
+    @Nested
+    @DisplayName("findAll 메서드는")
+    class FindAllTest {
+
+
+        @Test
+        @DisplayName("모든 시간을 조회한다")
+        void 성공() {
+            // given
+            List<ReservationTime> reservationTimes = List.of(
+                ReservationTimeFixture.time15(),
+                ReservationTimeFixture.time16(),
+                ReservationTimeFixture.time17()
+            );
+            List<ReservationTime> savedTimes = saveAll(reservationTimes);
+
+            // when
+            List<ReservationTime> actual = jdbcReservationTimeRepository.findAll();
+
+            // then
+            assertThat(actual)
+                .hasSize(savedTimes.size());
+        }
+    }
+
+    @Nested
+    @DisplayName("updateStatus 메서드는")
+    class UpdateStatusTest {
+
+
+        @Test
+        @DisplayName("시간 상태를 활성화로 변경한다")
+        void 성공1() {
+            // given
+            ReservationTime saved = saveTime(ReservationTimeFixture.time15());
+            saved.updateStatus(true);
+            updateStatus(saved);
+
+            // when
+            ReservationTime actual = jdbcReservationTimeRepository.findById(saved.getId()).get();
+
+            // then
+            Assertions.assertThat(actual.isActive())
+                .isTrue();
+        }
+
+
+        @Test
+        @DisplayName("시간 상태를 비활성화로 변경한다")
+        void 성공2() {
+            // given
+            ReservationTime saved = saveTime(ReservationTimeFixture.activeTime15());
+            saved.updateStatus(false);
+            updateStatus(saved);
+
+            // when
+            ReservationTime actual = jdbcReservationTimeRepository.findById(saved.getId()).get();
+
+            // then
+            Assertions.assertThat(actual.isActive())
+                .isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("existsByStartAt 메서드는")
+    class ExistsByStartAtTest {
+
+
+        @Test
+        @DisplayName("시작 시각을 가진 시간이 있는지 확인한다")
+        void 성공() {
+            // given
+            LocalTime duplicatedTime = LocalTime.of(15, 0);
+            LocalTime nonSavedTime = LocalTime.of(12, 0);
+            saveTime(ReservationTime.create(duplicatedTime));
+
+            // when & then
+            assertThat(jdbcReservationTimeRepository.existsByStartAt(duplicatedTime)).isTrue();
+            assertThat(jdbcReservationTimeRepository.existsByStartAt(nonSavedTime)).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("findAvailableTimes 메서드는")
+    class FindAvailableTimesTest {
+
+
+        @Test
+        @DisplayName("예약 가능 시간을 조회한다")
+        void 성공() {
+            // given
+            ReservationTime reservedTime15 = saveTime(ReservationTimeFixture.activeTime15());
+            ReservationTime reservedTime16 = saveTime(ReservationTimeFixture.activeTime16());
+            ReservationTime nonReservedTime = saveTime(ReservationTimeFixture.activeTime17());
+
+            ReservationDate date = saveDate(ReservationDateFixture.oneWeekLater());
+            Theme theme = saveTheme(ThemeFixture.activeTheme());
+
+            saveReservation(date, reservedTime15, theme);
+            saveReservation(date, reservedTime16, theme);
+
+            // when
+            List<ReservationTime> availableTimes = jdbcReservationTimeRepository.findAvailableByDateIdAndThemeId(
+                date.getId(),
+                theme.getId()
+            );
+
+            // then
+            // then
+            assertThat(availableTimes)
+                .usingRecursiveFieldByFieldElementComparatorIgnoringFields("id")
+                .containsExactlyInAnyOrder(
+                    reservedTime15,
+                    reservedTime16,
+                    nonReservedTime
+                );
+        }
+    }
 }

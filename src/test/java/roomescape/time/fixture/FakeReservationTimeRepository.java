@@ -29,7 +29,8 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
         Long id = idGenerator.getAndIncrement();
-        ReservationTime saved = ReservationTime.load(id, reservationTime.getStartAt(), reservationTime.isActive());
+        ReservationTime saved = ReservationTime.load(id, reservationTime.getStartAt(),
+            reservationTime.isActive());
         store.put(id, saved);
         return saved;
     }
@@ -56,7 +57,7 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public boolean existsByStartAt(LocalTime startAt) {
         return store.values().stream()
-                .anyMatch(time -> time.getStartAt().equals(startAt));
+            .anyMatch(time -> time.getStartAt().equals(startAt));
     }
 
     @Override
