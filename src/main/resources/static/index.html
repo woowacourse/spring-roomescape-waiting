@@ -453,6 +453,31 @@
             text-decoration: line-through;
         }
 
+        .time-slot.wait-eligible {
+            background: var(--surface-soft);
+            border: 1px dashed var(--accent);
+            color: var(--accent-strong);
+            position: relative;
+        }
+
+        .time-slot.wait-eligible:hover {
+            background: var(--accent-soft);
+        }
+
+        .time-slot.wait-eligible::after {
+            content: "대기";
+            position: absolute;
+            top: -8px;
+            right: -6px;
+            font-size: 0.65rem;
+            background: var(--accent);
+            color: white;
+            padding: 1px 7px;
+            border-radius: 999px;
+            font-weight: 700;
+            line-height: 1.4;
+        }
+
         /* ─── reservation list ───────────────────── */
 
         .reservation-list {
@@ -470,6 +495,58 @@
             background: white;
             border: 1px solid var(--line);
             border-radius: var(--radius-sm);
+        }
+
+        /* ─── tabs ───────────────────────────────── */
+
+        .tab-bar {
+            display: flex;
+            border-bottom: 1px solid var(--line);
+            margin-bottom: 16px;
+            gap: 4px;
+        }
+
+        .tab-btn {
+            background: transparent;
+            border: none;
+            padding: 10px 16px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 0.95rem;
+            font-weight: 600;
+            border-bottom: 2px solid transparent;
+            margin-bottom: -1px;
+            transition: color 140ms ease, border-color 140ms ease;
+        }
+
+        .tab-btn:hover {
+            color: var(--text);
+        }
+
+        .tab-btn.active {
+            color: var(--accent-strong);
+            border-bottom-color: var(--accent);
+        }
+
+        .tab-count {
+            display: inline-block;
+            background: var(--surface-soft);
+            color: var(--muted);
+            padding: 1px 8px;
+            border-radius: 999px;
+            font-size: 0.7rem;
+            margin-left: 6px;
+            font-weight: 700;
+            vertical-align: middle;
+        }
+
+        .tab-btn.active .tab-count {
+            background: var(--accent-soft);
+            color: var(--accent-strong);
+        }
+
+        .tab-pane.hidden {
+            display: none;
         }
 
         .reservation-row .info {
@@ -763,23 +840,24 @@
             <button id="loadMyReservationsButton" class="btn btn-secondary" type="button">새로 고침</button>
         </div>
 
-        <div class="field" style="margin-bottom: 24px;">
-            <label class="field-label" for="waitReservationIdInput">예약 대기 신청</label>
-            <div class="button-row">
-                <input id="waitReservationIdInput" type="number" min="1" placeholder="대기 신청할 예약 ID"
-                       style="flex: 1; padding: 10px 12px; border-radius: 8px; border: 1px solid #d1d5db;">
-                <button id="submitWaitButton" class="btn btn-primary" type="button">대기 신청</button>
-            </div>
-            <p class="card-subtitle" style="margin-top: 6px;">이미 다른 사용자에 의해 예약된 슬롯의 예약 ID를 입력하세요.</p>
+        <div class="tab-bar" role="tablist">
+            <button id="tabReservations" class="tab-btn active" type="button" role="tab" data-tab="reservations">
+                예약 <span id="reservationsCount" class="tab-count">0</span>
+            </button>
+            <button id="tabWaitings" class="tab-btn" type="button" role="tab" data-tab="waitings">
+                대기 <span id="waitingsCount" class="tab-count">0</span>
+            </button>
         </div>
 
-        <h3 class="card-title" style="font-size: 16px; margin-bottom: 8px;">예약</h3>
-        <div id="myReservationsList" class="reservation-list"></div>
-        <p id="myReservationsEmpty" class="empty">예약 목록을 불러와 주세요.</p>
+        <div id="reservationsPane" class="tab-pane" role="tabpanel">
+            <div id="myReservationsList" class="reservation-list"></div>
+            <p id="myReservationsEmpty" class="empty">예약 목록을 불러와 주세요.</p>
+        </div>
 
-        <h3 class="card-title" style="font-size: 16px; margin: 24px 0 8px;">대기</h3>
-        <div id="myWaitingsList" class="reservation-list"></div>
-        <p id="myWaitingsEmpty" class="empty">대기 목록을 불러와 주세요.</p>
+        <div id="waitingsPane" class="tab-pane hidden" role="tabpanel">
+            <div id="myWaitingsList" class="reservation-list"></div>
+            <p id="myWaitingsEmpty" class="empty">대기 목록을 불러와 주세요.</p>
+        </div>
     </section>
 </main>
 
@@ -895,8 +973,20 @@
     const myReservationsEmpty = document.getElementById("myReservationsEmpty");
     const myWaitingsList = document.getElementById("myWaitingsList");
     const myWaitingsEmpty = document.getElementById("myWaitingsEmpty");
-    const waitReservationIdInput = document.getElementById("waitReservationIdInput");
-    const submitWaitButton = document.getElementById("submitWaitButton");
+    const reservationsCount = document.getElementById("reservationsCount");
+    const waitingsCount = document.getElementById("waitingsCount");
+    const tabReservations = document.getElementById("tabReservations");
+    const tabWaitings = document.getElementById("tabWaitings");
+    const reservationsPane = document.getElementById("reservationsPane");
+    const waitingsPane = document.getElementById("waitingsPane");
+
+    function switchTab(tab) {
+        const isReservations = tab === "reservations";
+        tabReservations.classList.toggle("active", isReservations);
+        tabWaitings.classList.toggle("active", !isReservations);
+        reservationsPane.classList.toggle("hidden", !isReservations);
+        waitingsPane.classList.toggle("hidden", isReservations);
+    }
 
     // Manager view
     const managerName = document.getElementById("managerName");
@@ -1212,12 +1302,19 @@
             }
             userTimeGrid.innerHTML = data.map(item => {
                 const isSelected = state.userSelectedTimeId === item.id;
-                return `<button type="button" class="time-slot ${isSelected ? "selected" : ""}" data-time-id="${item.id}" ${item.available ? "" : "disabled"}>${item.time.slice(0, 5)}</button>`;
+                const reservationIdAttr = item.reservationId != null ? `data-reservation-id="${item.reservationId}"` : "";
+                const slotClass = ["time-slot", isSelected ? "selected" : "", item.available ? "" : "wait-eligible"].filter(Boolean).join(" ");
+                const titleAttr = item.available ? "" : `title="이미 예약된 슬롯 — 대기 신청"`;
+                return `<button type="button" class="${slotClass}" data-time-id="${item.id}" ${reservationIdAttr} ${titleAttr}>${item.time.slice(0, 5)}</button>`;
             }).join("");
 
             userTimeGrid.querySelectorAll("[data-time-id]").forEach(el => {
-                el.addEventListener("click", () => {
-                    if (el.disabled) return;
+                el.addEventListener("click", async () => {
+                    const reservationId = el.dataset.reservationId;
+                    if (reservationId) {
+                        await submitWait(Number(reservationId));
+                        return;
+                    }
                     state.userSelectedTimeId = Number(el.dataset.timeId);
                     userTimeGrid.querySelectorAll(".time-slot").forEach(s => s.classList.remove("selected"));
                     el.classList.add("selected");
@@ -1259,6 +1356,9 @@
             const data = await getJson("/api/v1/reservations");
             const reservations = data.reservations || [];
             const waitings = data.waitings || [];
+
+            reservationsCount.textContent = reservations.length;
+            waitingsCount.textContent = waitings.length;
 
             if (!reservations.length) {
                 myReservationsList.innerHTML = "";
@@ -1334,17 +1434,17 @@
         }
     }
 
-    async function submitWait() {
-        const reservationId = waitReservationIdInput.value;
+    async function submitWait(reservationId) {
         if (!reservationId) {
-            setStatus(userStatus, "error", "대기 신청할 예약 ID를 입력해 주세요.");
+            setStatus(userStatus, "error", "예약 ID를 찾을 수 없습니다.");
             return;
         }
+        if (!confirm("이미 예약된 슬롯입니다. 대기를 신청하시겠습니까?")) return;
         try {
             await postJson(`/api/v1/reservations/${reservationId}/waits`, {});
             setStatus(userStatus, "success", "대기 신청이 완료되었습니다.");
-            waitReservationIdInput.value = "";
             await loadMyReservations();
+            await refreshAvailableTimes();
         } catch (e) {
             setStatus(userStatus, "error", e.message);
         }
@@ -1469,7 +1569,8 @@
     });
     userReserveButton.addEventListener("click", reserve);
     loadMyReservationsButton.addEventListener("click", loadMyReservations);
-    submitWaitButton.addEventListener("click", submitWait);
+    tabReservations.addEventListener("click", () => switchTab("reservations"));
+    tabWaitings.addEventListener("click", () => switchTab("waitings"));
 
     refreshManagerButton.addEventListener("click", loadManagerReservations);
     editModalCancelButton.addEventListener("click", closeEditModal);
