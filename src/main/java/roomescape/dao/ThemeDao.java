@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
 @Repository
@@ -93,23 +92,5 @@ public class ThemeDao {
     @Transactional
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
-    }
-
-    public List<ReservationTime> findAvailableTime(Long id, String date) {
-        return jdbcTemplate.query(
-                """
-                             SELECT t.id AS time_id, t.start_at
-                             FROM reservation_time t
-                             LEFT JOIN reservation r ON t.id = r.time_id
-                                AND r.theme_id = ?
-                                AND r.date = ?
-                             WHERE r.id is NULL
-                        """,
-                (rs, rowNum) -> new ReservationTime(
-                        rs.getLong("time_id"),
-                        rs.getTime("start_at").toLocalTime()
-                ),
-                id, date
-        );
     }
 }

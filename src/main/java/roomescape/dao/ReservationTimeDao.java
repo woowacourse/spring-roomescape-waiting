@@ -8,7 +8,9 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationTimeStatus;
 
 @Repository
 @Transactional(readOnly = true)
@@ -88,6 +90,29 @@ public class ReservationTimeDao {
                         rs.getTime("start_at").toLocalTime()
                 ),
                 timeId
+        );
+    }
+
+    public List<ReservationTimeStatus> findAvailableTime(Long id, String date) {
+        return jdbcTemplate.query(
+                """
+                    SELECT t.id AS time_id, t.start_at,
+                           CASE WHEN r.id IS NULL THEN 'AVAILABLE' ELSE 'CONFIRMED' END AS status
+                    FROM reservation_time t
+                    LEFT JOIN reservation r ON t.id = r.time_id
+                        AND r.theme_id = ?
+                        AND r.date = ?
+                        AND r.status = 'CONFIRMED'
+                    ORDER BY t.start_at
+                    """,
+                (rs, rowNum) -> {
+                    ReservationTime time = new ReservationTime(
+                        rs.getLong("time_id"),
+                        rs.getTime("start_at").toLocalTime());
+
+                    return new ReservationTimeStatus(time, ReservationStatus.valueOf(rs.getString("status")));
+
+                }, id, date
         );
     }
 }
