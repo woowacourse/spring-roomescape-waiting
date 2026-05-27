@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.controller.dto.MyReservationResponse;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.ReservationUpdateRequest;
@@ -40,11 +41,12 @@ public class UserReservationController {
     }
 
     @GetMapping
-    public List<ReservationResponse> listByName(@RequestParam @NotBlank(message = "이름은 비어 있을 수 없습니다.") String name) {
-        return reservationService.findByName(name).stream()
-                .map(ReservationResponse::from)
+    public List<MyReservationResponse> myList(@RequestParam @NotBlank(message = "이름은 비어 있을 수 없습니다.") String name) {
+        return reservationService.findMyReservationsAndWaitings(name).stream()
+                .map(MyReservationResponse::from)
                 .toList();
     }
+
 
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

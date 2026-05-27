@@ -15,4 +15,6 @@ public interface WaitingRepository {
     void deleteById(Long id);
 
     void updateOrderIndex(Long id, int newOrderIndex);
+
+    List<Waiting> findByName(String name);
 }

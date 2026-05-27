@@ -1,6 +1,8 @@
 package roomescape.service;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Reservation;
@@ -13,6 +15,8 @@ import roomescape.exception.server.DataInconsistencyException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitingRepository;
+import roomescape.service.dto.MyReservationResult;
 import roomescape.service.dto.ReservationCreateCommand;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationUpdateCommand;
@@ -24,17 +28,20 @@ public class ReservationService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
     private final ReservationPolicy reservationPolicy;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
-            ReservationPolicy reservationPolicy
+            ReservationPolicy reservationPolicy,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.reservationPolicy = reservationPolicy;
+        this.waitingRepository = waitingRepository;
     }
 
 
@@ -66,10 +73,22 @@ public class ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    public List<ReservationResult> findByName(String name) {
-        return reservationRepository.findByNameOrderByDateAscTimeAsc(name).stream()
-                .map(ReservationResult::from)
-                .toList();
+    public List<MyReservationResult> findMyReservationsAndWaitings(String name) {
+        List<MyReservationResult> results = new ArrayList<>();
+
+        reservationRepository.findByNameOrderByDateAscTimeAsc(name).forEach(r ->
+                results.add(MyReservationResult.ofReservation(
+                        r.getId(), r.getDate(), r.getTime(), r.getTheme())));
+
+        waitingRepository.findByName(name).forEach(w ->
+                results.add(MyReservationResult.ofWaiting(
+                        w.getId(), w.getDate(), w.getTime(), w.getTheme(), w.getOrderIndex())));
+
+        results.sort(Comparator
+                .comparing(MyReservationResult::getDate)
+                .thenComparing(r -> r.getTime().getStartAt()));
+
+        return results;
     }
 
     public void deleteByOwner(Long id, String name) {

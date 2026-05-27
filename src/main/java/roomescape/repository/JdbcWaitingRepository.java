@@ -104,4 +104,20 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public void updateOrderIndex(Long id, int newOrderIndex) {
         jdbcTemplate.update("UPDATE waiting SET wait_order = ? WHERE id = ?", newOrderIndex, id);
     }
+
+    @Override
+    public List<Waiting> findByName(String name) {
+        String sql = """
+                SELECT w.id, w.name, w.date, w.wait_order,
+                       t.id AS time_id, t.start_at,
+                       th.id AS theme_id, th.name AS theme_name, th.description, th.thumbnail_url
+                  FROM waiting w
+                  JOIN reservation_time t ON w.time_id = t.id
+                  JOIN theme th ON w.theme_id = th.id
+                 WHERE w.name = ?
+                 ORDER BY w.date ASC, t.start_at ASC
+                """;
+        return jdbcTemplate.query(sql, rowMapper, name);
+    }
+
 }
