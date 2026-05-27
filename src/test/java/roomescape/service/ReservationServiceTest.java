@@ -27,7 +27,6 @@ class ReservationServiceTest {
     @Autowired
     private ReservationService reservationService;
 
-
     @DisplayName("예약 정상 테스트")
     @Test
     void 예약_정상_테스트() {
@@ -50,7 +49,6 @@ class ReservationServiceTest {
     @Test
     void 지나간_시간_예약_예외_테스트() {
         LocalDateTime mockToday= LocalDateTime.of(LocalDate.now(), LocalTime.of(23, 59, 59));
-
         ReservationRequest request = new ReservationRequest("김철수", mockToday.toLocalDate(), 1L, 1L);
         assertThatThrownBy(() -> reservationService.save(mockToday, request))
                 .isInstanceOf(CustomException.class)
@@ -169,5 +167,4 @@ class ReservationServiceTest {
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_RESERVATION.getMessage());
     }
-
 }

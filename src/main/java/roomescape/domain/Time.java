@@ -6,6 +6,7 @@ import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
 public class Time {
+
     private final Long id;
     private final LocalTime startAt;
 
@@ -17,9 +18,7 @@ public class Time {
 
     private void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
-            throw new CustomException(
-                    ErrorCode.TIME_START_AT_NULL
-            );
+            throw new CustomException(ErrorCode.TIME_START_AT_NULL);
         }
     }
 

@@ -27,6 +27,7 @@ import roomescape.service.ReservationService;
 @RestController
 @Validated
 public class ReservationController {
+
     private final ReservationService reservationService;
 
     public ReservationController(ReservationService reservationService) {
@@ -68,5 +69,4 @@ public class ReservationController {
         LocalDateTime now = LocalDateTime.now();
         reservationService.delete(now, reservationId, name);
     }
-
 }

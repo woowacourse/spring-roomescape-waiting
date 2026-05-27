@@ -21,6 +21,7 @@ import roomescape.service.AdminThemeService;
 @RestController
 @Validated
 public class AdminThemeController {
+
     private final AdminThemeService adminThemeService;
 
     public AdminThemeController(AdminThemeService adminThemeService) {

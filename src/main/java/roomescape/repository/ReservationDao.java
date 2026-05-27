@@ -22,7 +22,7 @@ public class ReservationDao {
     private final RowMapper<Reservation> reservationRowMapper = (rs, rowNum) -> new Reservation(
             rs.getLong("id"),
             rs.getString("name"),
-            rs.getLong("reservation_slot_id"),
+            rs.getLong("schedule_id"),
             Status.valueOf(rs.getString("status")),
             rs.getObject("updated_at", LocalDateTime.class)
     );
@@ -47,10 +47,10 @@ public class ReservationDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Long save(String name, Long reservationSlotId, LocalDateTime now) {
+    public Long save(String name, Long scheduleId, LocalDateTime now) {
         return jdbcInsert.executeAndReturnKey(Map.of(
                 "name", name,
-                "reservation_slot_id", reservationSlotId,
+                "schedule_id", scheduleId,
                 "status", Status.RESERVED.name(),
                 "updated_at", now
         )).longValue();
@@ -58,82 +58,81 @@ public class ReservationDao {
 
     public Reservation findById(long id) {
         String sql = """
-                SELECT  r.id,
-                        r.name AS name,
-                        r.reservation_slot_id AS reservation_slot_id,
-                        r.status AS status,
-                        r.updated_at AS updated_at
+                SELECT r.id,
+                       r.name,
+                       r.schedule_id,
+                       r.status,
+                       r.updated_at
                 FROM reservation AS r
-                where r.id = ?
+                WHERE r.id = ?
                 """;
         return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
     }
 
-    public int findOrderByReservationId(long reservationId, long slotId) {
+    public int findOrderByReservationId(long reservationId, long scheduleId) {
         String sql = """
-            SELECT COUNT(*)
-            FROM reservation r
-            WHERE r.reservation_slot_id = ?
-              AND r.updated_at < (
-                  SELECT updated_at
-                  FROM reservation r2
-                  WHERE r2.id = ?
-              )
-            """;
-
-        return jdbcTemplate.queryForObject(
-                sql,
-                Integer.class,
-                slotId,
-                reservationId
-        );
+                SELECT COUNT(*)
+                FROM reservation r
+                WHERE r.schedule_id = ?
+                  AND r.updated_at < (
+                      SELECT updated_at
+                      FROM reservation r2
+                      WHERE r2.id = ?
+                  )
+                """;
+        return jdbcTemplate.queryForObject(sql, Integer.class, scheduleId, reservationId);
     }
 
     public List<ReservationResponse> findByUserName(String username) {
         String sql = """
                 SELECT rv.id AS reservation_id,
-                       rv.name AS name,
-                       rv.status AS status,
-                       rs.date AS date,
-                       th.name AS theme_name,
-                       th.description AS theme_description,
+                       rv.name,
+                       rv.status,
+                       s.date,
+                       th.name          AS theme_name,
+                       th.description   AS theme_description,
                        th.thumbnail_url AS theme_thumbnail,
-                       t.start_at AS time_value,
+                       t.start_at       AS time_value,
                        (
                            SELECT COUNT(*)
                            FROM reservation rv2
-                           WHERE rv2.reservation_slot_id = rv.reservation_slot_id
+                           WHERE rv2.schedule_id = rv.schedule_id
                              AND rv2.status = 'RESERVED'
                              AND rv2.id < rv.id
                        ) AS waiting_order
-                FROM reservation AS rv
-                INNER JOIN reservation_slot AS rs ON rv.reservation_slot_id = rs.id
-                INNER JOIN reservation_time AS t ON rs.time_id = t.id
-                INNER JOIN theme AS th ON rs.theme_id = th.id
+                FROM reservation       AS rv
+                INNER JOIN schedule         AS s  ON rv.schedule_id = s.id
+                INNER JOIN reservation_time AS t  ON s.time_id      = t.id
+                INNER JOIN theme            AS th ON s.theme_id     = th.id
                 WHERE rv.name = ?
                 """;
         return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
     }
 
-    public boolean existByNameReservationIdStatus(String name, Long reservationSlotId, Status status) {
+    public boolean existByNameScheduleIdStatus(String name, Long scheduleId, Status status) {
         String sql = """
-            SELECT EXISTS (
-                SELECT 1
-                FROM reservation
-                WHERE name = ?
-                  AND reservation_slot_id = ?
-                  AND status = ?
-            )
-            """;
-
-        return jdbcTemplate.queryForObject(sql, Boolean.class, name, reservationSlotId, status.name());
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation
+                    WHERE name        = ?
+                      AND schedule_id = ?
+                      AND status      = ?
+                )
+                """;
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, scheduleId, status.name());
     }
 
-    public void update(Long reservationId, Long reservationSlotId) {
-        jdbcTemplate.update("UPDATE reservation SET reservation_slot_id = ?  WHERE id = ?", reservationSlotId , reservationId);
+    public void update(Long reservationId, Long scheduleId) {
+        jdbcTemplate.update(
+                "UPDATE reservation SET schedule_id = ? WHERE id = ?",
+                scheduleId, reservationId
+        );
     }
 
     public void delete(Long id, Status status) {
-        jdbcTemplate.update("UPDATE reservation SET status = ?  WHERE id = ?", status.name() , id);
+        jdbcTemplate.update(
+                "UPDATE reservation SET status = ? WHERE id = ?",
+                status.name(), id
+        );
     }
 }

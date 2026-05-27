@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+
 import org.junit.jupiter.api.Test;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.Time;
+
+import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
+import roomescape.domain.Time;
 import roomescape.exception.CustomException;
 
 class ReservationTest {
@@ -24,39 +26,21 @@ class ReservationTest {
 
     @Test
     void 예약_생성() {
-        ReservationSlot reservationSlot = new ReservationSlot(1L, LocalDate.of(2023, 8, 5), time, theme);
-        assertThat(reservationSlot.getId()).isEqualTo(1L);
-        assertThat(reservationSlot.getDate()).isEqualTo(LocalDate.of(2023, 8, 5));
-        assertThat(reservationSlot.getTime()).isEqualTo(time);
+        Schedule schedule = new Schedule(1L, LocalDate.of(2023, 8, 5), time, theme);
+        assertThat(schedule.getId()).isEqualTo(1L);
+        assertThat(schedule.getDate()).isEqualTo(LocalDate.of(2023, 8, 5));
+        assertThat(schedule.getTime()).isEqualTo(time);
     }
-
-//    @Test
-//    void 이름이_null이면_예외() {
-//        Time time = new Time(1L, LocalTime.of(15, 40));
-//
-//        assertThatThrownBy(() -> new Reservation(1L, LocalDate.of(2023, 8, 5), time, theme))
-//                .isInstanceOf(CustomException.class);
-//    }
-//
-//    @Test
-//    void 이름이_공백이면_예외() {
-//        Time time = new Time(1L, LocalTime.of(15, 40));
-//
-//        assertThatThrownBy(() -> new Reservation(1L, "   ", LocalDate.of(2023, 8, 5), time, theme))
-//                .isInstanceOf(CustomException.class);
-//    }
 
     @Test
     void 날짜가_null이면_예외() {
-        Time time = new Time(1L, LocalTime.of(15, 40));
-
-        assertThatThrownBy(() -> new ReservationSlot(1L, null, time, theme))
+        assertThatThrownBy(() -> new Schedule(1L, null, time, theme))
                 .isInstanceOf(CustomException.class);
     }
 
     @Test
     void 시간이_null이면_예외() {
-        assertThatThrownBy(() -> new ReservationSlot(1L, LocalDate.of(2023, 8, 5), null, theme))
+        assertThatThrownBy(() -> new Schedule(1L, LocalDate.of(2023, 8, 5), null, theme))
                 .isInstanceOf(CustomException.class);
     }
 }

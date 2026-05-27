@@ -13,6 +13,7 @@ import roomescape.domain.Time;
 
 @Repository
 public class TimeDao {
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
@@ -20,7 +21,6 @@ public class TimeDao {
             rs.getLong("id"),
             rs.getTime("start_at").toLocalTime()
     );
-
 
     public TimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;

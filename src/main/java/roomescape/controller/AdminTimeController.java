@@ -20,10 +20,11 @@ import roomescape.dto.TimeRequest;
 import roomescape.dto.TimeResponse;
 import roomescape.service.AdminTimeService;
 
-@RequestMapping(("/admin/times"))
+@RequestMapping("/admin/times")
 @RestController
 @Validated
 public class AdminTimeController {
+
     private final AdminTimeService adminTimeService;
 
     public AdminTimeController(AdminTimeService adminTimeService) {
@@ -38,8 +39,8 @@ public class AdminTimeController {
 
     @PostMapping
     public ResponseEntity<TimeResponse> createTime(@Valid @RequestBody TimeRequest request) {
-        final TimeResponse response = adminTimeService.save(request);
-        final URI location = URI.create("/times/" + response.id());
+        TimeResponse response = adminTimeService.save(request);
+        URI location = URI.create("/times/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 

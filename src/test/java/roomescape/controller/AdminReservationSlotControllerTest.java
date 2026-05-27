@@ -31,7 +31,5 @@ class AdminReservationSlotControllerTest {
                 .body("find { it.id == 22 }.date", is("2026-06-03"))
                 .body("find { it.id == 22 }.themeName", is("탐정 사무소"))
                 .body("find { it.id == 22 }.time", is("22:00"));
-
     }
-
 }

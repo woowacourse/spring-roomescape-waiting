@@ -9,20 +9,19 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final Long reservationSlotId;
+    private final Long scheduleId;
     private final Status status;
     private final LocalDateTime updateAt;
 
-    public Reservation(Long id, String name, Long reservationSlotId, Status status, LocalDateTime updateAt) {
+    public Reservation(Long id, String name, Long scheduleId, Status status, LocalDateTime updateAt) {
         validateName(name);
 
         this.id = id;
         this.name = name;
-        this.reservationSlotId = reservationSlotId;
+        this.scheduleId = scheduleId;
         this.status = status;
         this.updateAt = updateAt;
     }
-
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
@@ -42,8 +41,8 @@ public class Reservation {
         return name;
     }
 
-    public Long getReservationSlotId() {
-        return reservationSlotId;
+    public Long getScheduleId() {
+        return scheduleId;
     }
 
     public Status getStatus() {

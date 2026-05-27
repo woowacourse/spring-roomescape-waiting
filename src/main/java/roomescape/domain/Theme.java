@@ -1,11 +1,12 @@
 package roomescape.domain;
 
+import java.util.Objects;
+
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
-import java.util.Objects;
-
 public class Theme {
+
     private final Long id;
     private final String name;
     private final String description;
@@ -57,10 +58,17 @@ public class Theme {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Theme theme = (Theme) o;
-        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name) && Objects.equals(description, theme.description) && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
+        return Objects.equals(id, theme.id)
+                && Objects.equals(name, theme.name)
+                && Objects.equals(description, theme.description)
+                && Objects.equals(thumbnailUrl, theme.thumbnailUrl);
     }
 
     @Override

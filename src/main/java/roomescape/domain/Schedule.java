@@ -5,17 +5,17 @@ import java.time.LocalDate;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
-public class ReservationSlot {
+public class Schedule {
+
     private final Long id;
     private final LocalDate date;
     private final Time time;
     private final Theme theme;
 
-    public ReservationSlot(Long id, LocalDate date, Time time, Theme theme) {
+    public Schedule(Long id, LocalDate date, Time time, Theme theme) {
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-
         this.id = id;
         this.date = date;
         this.time = time;
@@ -44,7 +44,6 @@ public class ReservationSlot {
         return id;
     }
 
-
     public LocalDate getDate() {
         return date;
     }
@@ -56,5 +55,4 @@ public class ReservationSlot {
     public Theme getTheme() {
         return theme;
     }
-
 }
