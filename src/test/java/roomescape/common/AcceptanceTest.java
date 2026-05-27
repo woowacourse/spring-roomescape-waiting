@@ -11,7 +11,8 @@ import roomescape.common.auth.jwt.JwtProvider;
 import roomescape.member.domain.Role;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Sql(scripts = {"classpath:truncate.sql", "classpath:test-member.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
+@Sql(scripts = {"classpath:truncate.sql",
+    "classpath:test-member.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 public abstract class AcceptanceTest {
 
     @LocalServerPort
