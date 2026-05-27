@@ -39,4 +39,9 @@ public class JdbcWaitingRepository implements WaitingRepository {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }
     }
+
+    @Override
+    public Integer delete(Long id) {
+        return jdbcTemplate.update("DELETE FROM waiting WHERE id = ?", id);
+    }
 }

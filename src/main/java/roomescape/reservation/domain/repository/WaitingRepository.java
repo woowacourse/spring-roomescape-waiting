@@ -4,4 +4,6 @@ import roomescape.reservation.domain.Waiting;
 
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
+
+    Integer delete(Long id);
 }
