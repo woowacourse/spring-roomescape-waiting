@@ -12,6 +12,7 @@ import roomescape.exception.KeyGenerationException;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
+import java.sql.Timestamp;
 import java.time.LocalDate;
 
 @RequiredArgsConstructor
@@ -41,8 +42,8 @@ public class WaitingListRepository {
 
     private long insertWaitingList(final WaitingList waitingList) {
         final String sql = """
-                INSERT INTO waiting_list (name, date, theme_id, time_id)
-                VALUES (?, ?, ?, ?)
+                INSERT INTO waiting_list (name, date, theme_id, time_id, created_at)
+                VALUES (?, ?, ?, ?, ?)
                 """;
 
         final KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -57,6 +58,7 @@ public class WaitingListRepository {
             preparedStatement.setDate(2, Date.valueOf(waitingList.getReservationDate().getDate()));
             preparedStatement.setLong(3, waitingList.getTheme().getId());
             preparedStatement.setLong(4, waitingList.getReservationTime().getId());
+            preparedStatement.setTimestamp(5, Timestamp.valueOf(waitingList.getCreatedAt()));
 
             return preparedStatement;
         }, keyHolder);
