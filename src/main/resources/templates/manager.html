@@ -38,6 +38,20 @@ nav{
 .btn-logout:hover{border-color:var(--acc);color:var(--acc)}
 .store-name{font-size:.72rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted)}
 
+/* ── TABS ── */
+.tabs{
+  display:flex;background:var(--sur);
+  border-bottom:1px solid var(--border);padding:0 4rem;
+}
+.tab{
+  padding:1.1rem 0;margin-right:3rem;
+  font-size:.82rem;letter-spacing:.22em;text-transform:uppercase;color:var(--muted);
+  background:transparent;border:none;cursor:pointer;font-family:'Inter',sans-serif;
+  border-bottom:2px solid transparent;transition:all .3s;
+}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--white);border-bottom-color:var(--acc)}
+
 /* ── PANEL ── */
 .panel{padding:3rem 4rem;max-width:1280px;margin:0 auto}
 .panel-title{
@@ -144,7 +158,12 @@ select.fi{color:var(--text);background:var(--sur2)}
   </div>
 </nav>
 
-<div class="panel">
+<div class="tabs">
+  <button class="tab active" data-tab="reservations">예약 관리</button>
+  <button class="tab" data-tab="waitings">대기 관리</button>
+</div>
+
+<div class="panel" id="panel-reservations">
   <p class="panel-title">내 매장 예약 관리</p>
   <p class="panel-sub" id="panel-sub">내 매장의 예약만 조회·수정·취소할 수 있습니다</p>
 
@@ -162,6 +181,28 @@ select.fi{color:var(--text);background:var(--sur2)}
         </tr>
       </thead>
       <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="panel" id="panel-waitings" hidden>
+  <p class="panel-title">내 매장 대기 관리</p>
+  <p class="panel-sub">내 매장의 대기 신청만 조회·삭제할 수 있습니다</p>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>대기자</th>
+          <th>날짜</th>
+          <th>테마</th>
+          <th>시간</th>
+          <th>순번</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody id="w-tbody"></tbody>
     </table>
   </div>
 </div>
@@ -344,6 +385,69 @@ function cancelReservation(id) {
     }
   });
 }
+
+/* ── waitings ── */
+async function loadWaitings() {
+  const tbody = document.getElementById('w-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted);font-size:.75rem">불러오는 중...</td></tr>';
+  try {
+    const r = await fetch('/manager/waitings');
+    if (r.status === 401) { location.href = '/login?redirect=/manager'; return; }
+    if (r.status === 403) { location.href = '/'; return; }
+    if (!r.ok) throw new Error(`HTTP ${r.status}`);
+    const data = await r.json();
+    tbody.innerHTML = '';
+    if (!data.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">내 매장 대기가 없습니다</td></tr>';
+      return;
+    }
+    data.forEach(w => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-id">${w.id}</td>
+        <td>${w.name || ''}</td>
+        <td>${w.date || ''}</td>
+        <td>${w.theme?.name || ''}</td>
+        <td>${fmt(w.time?.startAt)}</td>
+        <td>${w.rank != null ? w.rank + '번' : '—'}</td>
+        <td><button class="btn-act cancel" onclick="delWaiting(${w.id},'${(w.name||'').replace(/'/g,"\\'")}')">삭제</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch (e) {
+    tbody.innerHTML = `<tr class="empty-row"><td colspan="7">오류: ${e.message}</td></tr>`;
+  }
+}
+
+function delWaiting(id, name) {
+  confirm('대기 삭제', `"${name}"님의 대기를 삭제하시겠습니까?`, async () => {
+    try {
+      const r = await fetch(`/manager/waitings/${id}`, { method: 'DELETE' });
+      if (!r.ok) {
+        let msg = '삭제에 실패했습니다';
+        try { const e = await r.json(); msg = e.detail || e.message || msg; } catch {}
+        toast('err', msg);
+        return;
+      }
+      toast('ok', '대기가 삭제되었습니다');
+      loadWaitings();
+    } catch {
+      toast('err', '네트워크 오류가 발생했습니다');
+    }
+  });
+}
+
+/* ── tabs ── */
+document.querySelectorAll('.tab').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.hidden = true);
+    btn.classList.add('active');
+    document.getElementById(`panel-${btn.dataset.tab}`).hidden = false;
+    if (btn.dataset.tab === 'reservations') loadReservations();
+    else if (btn.dataset.tab === 'waitings') loadWaitings();
+  });
+});
 
 /* ── init ── */
 (async () => {

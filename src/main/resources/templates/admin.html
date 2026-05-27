@@ -198,6 +198,7 @@ tr:hover td{background:var(--sur2)}
 <!-- Tabs -->
 <div class="tabs">
   <button class="tab active" data-tab="reservations">예약 관리</button>
+  <button class="tab" data-tab="waitings">대기 관리</button>
   <button class="tab" data-tab="themes">테마 관리</button>
   <button class="tab" data-tab="times">시간 관리</button>
 </div>
@@ -250,6 +251,27 @@ tr:hover td{background:var(--sur2)}
     <button id="r-prev" class="btn-add" style="padding:.4rem .9rem;font-size:.75rem" disabled>◀ 이전</button>
     <span id="r-page-info"></span>
     <button id="r-next" class="btn-add" style="padding:.4rem .9rem;font-size:.75rem">다음 ▶</button>
+  </div>
+</div>
+
+<!-- ── 대기 관리 ── -->
+<div class="panel" id="panel-waitings" hidden>
+  <p class="panel-title">대기 관리</p>
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>대기자</th>
+          <th>날짜</th>
+          <th>테마</th>
+          <th>시간</th>
+          <th>순번</th>
+          <th>관리</th>
+        </tr>
+      </thead>
+      <tbody id="w-tbody"></tbody>
+    </table>
   </div>
 </div>
 
@@ -605,6 +627,55 @@ function delTheme(id, name) {
   });
 }
 
+/* ── WAITINGS ── */
+async function loadWaitings() {
+  const tbody = document.getElementById('w-tbody');
+  tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;padding:2rem;color:var(--muted);font-size:.75rem">불러오는 중...</td></tr>';
+  try {
+    const r = await fetch('/admin/waitings');
+    if (!r.ok) throw new Error();
+    const data = await r.json();
+    tbody.innerHTML = '';
+    if (!data.length) {
+      tbody.innerHTML = '<tr class="empty-row"><td colspan="7">대기 내역이 없습니다</td></tr>';
+      return;
+    }
+    data.forEach(w => {
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td class="td-id">${w.id}</td>
+        <td>${w.name}</td>
+        <td>${w.date || ''}</td>
+        <td>${w.theme?.name || ''}</td>
+        <td>${fmt(w.time?.startAt)}</td>
+        <td>${w.rank != null ? w.rank + '번' : '—'}</td>
+        <td><button class="td-del" onclick="delWaiting(${w.id},'${(w.name||'').replace(/'/g,"\\'")}')">×</button></td>
+      `;
+      tbody.appendChild(tr);
+    });
+  } catch {
+    tbody.innerHTML = '<tr class="empty-row"><td colspan="7">데이터를 불러올 수 없습니다</td></tr>';
+  }
+}
+
+function delWaiting(id, name) {
+  confirm('대기 삭제', `"${name}"님의 대기를 삭제하시겠습니까?`, async () => {
+    try {
+      const r = await fetch(`/admin/waitings/${id}`, { method: 'DELETE' });
+      if (!r.ok) {
+        let msg = '삭제에 실패했습니다';
+        try { const e = await r.json(); msg = e.message || msg; } catch {}
+        toast('err', msg);
+        return;
+      }
+      toast('ok', '대기가 삭제되었습니다');
+      loadWaitings();
+    } catch {
+      toast('err', '삭제에 실패했습니다');
+    }
+  });
+}
+
 /* ── TIMES ── */
 async function loadTimes() {
   const tbody = document.getElementById('ti-tbody');
@@ -678,6 +749,7 @@ function delTime(id, label) {
 /* ── TABS ── */
 function loadTab(tab) {
   if (tab === 'reservations') { loadReservations(); loadReservationSelects(); }
+  else if (tab === 'waitings') loadWaitings();
   else if (tab === 'themes') loadThemes();
   else loadTimes();
 }
