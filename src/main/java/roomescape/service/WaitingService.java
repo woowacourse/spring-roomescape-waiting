@@ -45,8 +45,20 @@ public class WaitingService {
                 theme
         );
 
-        if(!exist) {
+        if (!exist) {
             throw new RoomEscapeException(WaitingErrorCode.IMMEDIATE_RESERVATION_AVAILABLE);
         }
+
+        boolean b = waitingRepository.existsByNameAndDateAndTimeAndTheme(
+                request.name(),
+                request.date(),
+                time,
+                theme
+        );
+
+        if (b) {
+            throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
+        }
+
     }
 }

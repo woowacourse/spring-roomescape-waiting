@@ -65,4 +65,32 @@ class JdbcWaitingRepositoryTest {
     void 대기를_대기_id로_삭제한다() {
     }
 
+    @Test
+    void 이름_날짜_시간_테마가_모두_일치하는_대기가_이미_존재하는지_확인한다() {
+        // given
+        String name = "루드비코";
+        LocalDate date = LocalDate.parse("2026-05-06");
+        ReservationTime reservationTime = reservationTimeRepository.save(
+                ReservationTime.create(LocalTime.parse("10:00")));
+        Theme theme = themeRepository.save(Theme.create("귀신찾기", "귀신을 찾는다", "example.com"));
+        Waiting waiting = Waiting.create(
+                name,
+                date,
+                reservationTime,
+                theme,
+                1L
+        );
+        waitingRepository.save(waiting);
+
+        //when
+        boolean exists = waitingRepository.existsByNameAndDateAndTimeAndTheme(
+                name,
+                date,
+                reservationTime,
+                theme
+        );
+
+        assertThat(exists).isTrue();
+    }
+
 }
