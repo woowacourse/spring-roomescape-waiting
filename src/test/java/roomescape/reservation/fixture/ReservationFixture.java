@@ -14,28 +14,30 @@ import roomescape.time.domain.ReservationTime;
 public class ReservationFixture {
 
     public static Reservation reservation(
-            String name,
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme
+        String name,
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme
     ) {
-        return Reservation.create(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return Reservation.create(name, date, time, theme,
+            LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation waitReservation(
-            String name,
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme
+        String name,
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme
     ) {
-        return Reservation.wait(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return Reservation.wait(name, date, time, theme,
+            LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation canceledReservation(
-            String name,
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme
+        String name,
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme
     ) {
         Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
         reservation.updateStatus(ReservationStatus.CANCELED);
@@ -43,33 +45,33 @@ public class ReservationFixture {
     }
 
     public static ReservationSaveCommand toCommand(
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme
     ) {
         return new ReservationSaveCommand(date.getId(), time.getId(), theme.getId());
     }
 
     public static ReservationSaveCommand toCommand(
-            ReservationDate date,
-            Long timeId,
-            Theme theme
+        ReservationDate date,
+        Long timeId,
+        Theme theme
     ) {
         return new ReservationSaveCommand(date.getId(), timeId, theme.getId());
     }
 
     public static ReservationSaveDto toCommand(
-            Long dateId,
-            ReservationTime time,
-            Theme theme
+        Long dateId,
+        ReservationTime time,
+        Theme theme
     ) {
         return new ReservationSaveDto(dateId, time.getId(), theme.getId());
     }
 
     public static ReservationSaveCommand toCommand(
-            ReservationDate date,
-            ReservationTime time,
-            Long themeId
+        ReservationDate date,
+        ReservationTime time,
+        Long themeId
     ) {
         return new ReservationSaveCommand(date.getId(), time.getId(), themeId);
     }

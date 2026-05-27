@@ -21,8 +21,8 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllByNameOrderByDateAndTime(String name) {
         return store.values().stream()
-                .filter(reservation -> reservation.getName().equals(name))
-                .toList();
+            .filter(reservation -> reservation.getName().equals(name))
+            .toList();
     }
 
     @Override
@@ -38,8 +38,9 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         Long id = idGenerator.getAndIncrement();
-        Reservation saved = Reservation.load(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
-                reservation.getTheme(), reservation.getStatus(), reservation.getReservedAt());
+        Reservation saved = Reservation.load(id, reservation.getName(), reservation.getDate(),
+            reservation.getTime(),
+            reservation.getTheme(), reservation.getStatus(), reservation.getReservedAt());
         store.put(id, saved);
         return saved;
     }
@@ -55,35 +56,35 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
         return store.values().stream()
-                .anyMatch(reservation ->
-                        reservation.getDate().getId().equals(dateId) &&
-                                reservation.getTime().getId().equals(timeId) &&
-                                reservation.getTheme().getId().equals(themeId) &&
-                                reservation.getStatus() == ReservationStatus.RESERVED
-                );
+            .anyMatch(reservation ->
+                reservation.getDate().getId().equals(dateId) &&
+                    reservation.getTime().getId().equals(timeId) &&
+                    reservation.getTheme().getId().equals(themeId) &&
+                    reservation.getStatus() == ReservationStatus.RESERVED
+            );
     }
 
     @Override
     public boolean existsByNameAndDateAndTime(String name, Long dateId, Long timeId) {
         return store.values().stream()
-                .anyMatch(reservation ->
-                        reservation.getName().equals(name) &&
-                                reservation.getDate().getId().equals(dateId) &&
-                                reservation.getTime().getId().equals(timeId) &&
-                                reservation.getStatus() == ReservationStatus.RESERVED
-                );
+            .anyMatch(reservation ->
+                reservation.getName().equals(name) &&
+                    reservation.getDate().getId().equals(dateId) &&
+                    reservation.getTime().getId().equals(timeId) &&
+                    reservation.getStatus() == ReservationStatus.RESERVED
+            );
     }
 
     @Override
     public boolean existsByDateId(Long dateId) {
         return store.values().stream()
-                .anyMatch(reservation -> reservation.getDate().getId().equals(dateId));
+            .anyMatch(reservation -> reservation.getDate().getId().equals(dateId));
     }
 
     @Override
     public boolean existsByTimeId(Long timeId) {
         return store.values().stream()
-                .anyMatch(reservation -> reservation.getTime().getId().equals(timeId));
+            .anyMatch(reservation -> reservation.getTime().getId().equals(timeId));
     }
 
     @Override

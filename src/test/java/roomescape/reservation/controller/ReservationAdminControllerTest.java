@@ -17,6 +17,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -29,137 +30,167 @@ class ReservationAdminControllerTest extends AcceptanceTest {
     private final String startAt = "11:00";
     private final String themeName = "테마1";
 
-    @Test
-    @DisplayName("관리자는 전체 예약 목록을 조회한다.")
-    void get_reservations() {
-        RestAssured.given().log().all()
+
+    @Nested
+    @DisplayName("getReservations 메서드는")
+    class GetTest {
+
+
+        @Test
+        @DisplayName("모든 예약을 조회한다")
+        void 성공() {
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(0));
+        }
     }
 
-    @Test
-    @DisplayName("관리자는 예약을 생성한다.")
-    void create_reservation() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer themeId = createTheme(managerToken, themeName);
+    @Nested
+    @DisplayName("create 메서드는")
+    class CreateTest {
 
-        createReservationWithToken(managerToken, dateId, timeId, themeId);
 
-        RestAssured.given().log().all()
+        @Test
+        @DisplayName("예약을 생성한다")
+        void 성공() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            createReservationWithToken(managerToken, dateId, timeId, themeId);
+
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+        }
+
+
+        @Test
+        @DisplayName("요청 본문에 date id가 없으면 400을 반환한다")
+        void 실패1() {
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", null);
+            params.put("timeId", timeId);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("message", is("요청 값 검증에 실패했습니다."));
+        }
+
+
+        @Test
+        @DisplayName("요청 본문에 time id가 없으면 400을 반환한다")
+        void 실패2() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", dateId);
+            params.put("timeId", null);
+            params.put("themeId", themeId);
+
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("message", is("요청 값 검증에 실패했습니다."));
+        }
+
+
+        @Test
+        @DisplayName("요청 본문에 theme id가 없으면 400을 반환한다")
+        void 실패3() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer timeId = createReservationTime(managerToken, startAt);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", dateId);
+            params.put("timeId", timeId);
+            params.put("themeId", null);
+
+            RestAssured.given().log().all()
+                .header(HttpHeaders.AUTHORIZATION, managerToken)
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/reservations")
+                .then().log().all()
+                .statusCode(HttpStatus.BAD_REQUEST.value())
+                .body("message", is("요청 값 검증에 실패했습니다."));
+        }
     }
 
-    @Test
-    @DisplayName("관리자는 예약을 취소할 수 있다.")
-    void cancelByManager_reservation() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer themeId = createTheme(managerToken, themeName);
+    @Nested
+    @DisplayName("cancelReservation 메서드는")
+    class CancelByManagerTest {
 
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
 
-        RestAssured.given().log().all()
+        @Test
+        @DisplayName("예약을 취소한다")
+        void 성공() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer themeId = createTheme(managerToken, themeName);
+
+            Integer reservationId = createReservationWithToken(managerToken, dateId, timeId,
+                themeId);
+
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().patch("/admin/reservations/" + reservationId + "/cancel")
                 .then().log().all()
                 .statusCode(200);
 
-        RestAssured.given().log().all()
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .when().get("/admin/reservations")
                 .then().log().all()
                 .statusCode(200)
                 .body("size()", is(1));
+        }
     }
 
-    @Test
-    @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_date_id() {
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer themeId = createTheme(managerToken, themeName);
+    @Nested
+    @DisplayName("updateSchedule 메서드는")
+    class UpdateScheduleTest {
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", null);
-        params.put("timeId", timeId);
-        params.put("themeId", themeId);
 
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
+        @Test
+        @DisplayName("예약 정보를 변경한다")
+        void 성공() {
+            String futureDate = LocalDate.now().plusDays(1).toString();
+            String futureTime = LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS)
+                .toString();
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer changedDateId = createReservationDate(managerToken, futureDate);
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer changedTimeId = createReservationTime(managerToken, futureTime);
+            Integer themeId = createTheme(managerToken, themeName);
+            Integer reservationId = createReservationWithToken(managerToken, dateId, timeId,
+                themeId);
 
-    @Test
-    @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_time_id() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer themeId = createTheme(managerToken, themeName);
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", changedDateId);
+            params.put("timeId", changedTimeId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", dateId);
-        params.put("timeId", null);
-        params.put("themeId", themeId);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
-    @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_theme_id() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer timeId = createReservationTime(managerToken, startAt);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", dateId);
-        params.put("timeId", timeId);
-        params.put("themeId", null);
-
-        RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/reservations")
-                .then().log().all()
-                .statusCode(HttpStatus.BAD_REQUEST.value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
-    }
-
-    @Test
-    @DisplayName("관리자는 예약자 확인 없이, 예약 날짜/시간을 변경할 수 있다.")
-    void updateSchedule() {
-        String futureDate = LocalDate.now().plusDays(1).toString();
-        String futureTime = LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString();
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer changedDateId = createReservationDate(managerToken, futureDate);
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer changedTimeId = createReservationTime(managerToken, futureTime);
-        Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
-
-        RestAssured.given().log().all()
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
@@ -168,25 +199,35 @@ class ReservationAdminControllerTest extends AcceptanceTest {
                 .statusCode(200)
                 .body("date", is(futureDate))
                 .body("time", is(futureTime));
+        }
     }
 
-    @Test
-    @DisplayName("이미 취소된 예약을 변경하면 예외가 발생한다.")
-    void updateScheduleByManager_already_canceled() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer changedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer changedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+    @Nested
+    @DisplayName("updateScheduleByManager 메서드는")
+    class UpdateScheduleByManagerTest {
 
-        cancelReservationWithToken(this.managerToken, reservationId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", changedDateId);
-        params.put("timeId", changedTimeId);
+        @Test
+        @DisplayName("updateScheduleByManager already canceled")
+        void 실패1() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer changedDateId = createReservationDate(managerToken,
+                LocalDate.now().plusDays(1).toString());
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer changedTimeId = createReservationTime(managerToken,
+                LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+            Integer themeId = createTheme(managerToken, themeName);
+            Integer reservationId = createReservationWithToken(managerToken, dateId, timeId,
+                themeId);
 
-        RestAssured.given().log().all()
+            cancelReservationWithToken(ReservationAdminControllerTest.this.managerToken,
+                reservationId);
+
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", changedDateId);
+            params.put("timeId", changedTimeId);
+
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
@@ -194,51 +235,59 @@ class ReservationAdminControllerTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(RESERVATION_ALREADY_CANCELED.getHttpStatus().value())
                 .body("message", is(RESERVATION_ALREADY_CANCELED.getMessage()));
-    }
+        }
 
-    @Test
-    @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 대기 상태로 들어간다.")
-    void updateScheduleByManager_duplicated() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer alreadyReservedDateId = createReservationDate(managerToken, LocalDate.now().plusDays(1).toString());
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer alreadyReservedTimeId = createReservationTime(managerToken, LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
-        Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
-        createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId, themeId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", alreadyReservedDateId);
-        params.put("timeId", alreadyReservedTimeId);
+        @Test
+        @DisplayName("updateScheduleByManager duplicated")
+        void 실패2() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer alreadyReservedDateId = createReservationDate(managerToken,
+                LocalDate.now().plusDays(1).toString());
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer alreadyReservedTimeId = createReservationTime(managerToken,
+                LocalTime.now().plusHours(1).truncatedTo(ChronoUnit.SECONDS).toString());
+            Integer themeId = createTheme(managerToken, themeName);
+            Integer reservationId = createReservationWithToken(managerToken, dateId, timeId,
+                themeId);
+            createReservationWithToken(managerToken, alreadyReservedDateId, alreadyReservedTimeId,
+                themeId);
 
-        RestAssured.given().log().all()
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", alreadyReservedDateId);
+            params.put("timeId", alreadyReservedTimeId);
+
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
                 .when().patch("/admin/reservations/" + reservationId + "/schedule")
                 .then().log().all()
                 .statusCode(HttpStatus.OK.value());
-    }
+        }
 
-    @Test
-    @DisplayName("관리자가 예약을 과거의 날짜/시간으로 변경하면 예외가 발생한다.")
-    @Sql(
-            scripts = {"classpath:truncate.sql", "classpath:test-member.sql", "classpath:past-reservation-date.sql"},
+
+        @Test
+        @DisplayName("updateScheduleByManager pastDateTime")
+        @Sql(
+            scripts = {"classpath:truncate.sql", "classpath:test-member.sql",
+                "classpath:past-reservation-date.sql"},
             executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-    )
-    void updateScheduleByManager_pastDateTime() {
-        Integer dateId = createReservationDate(managerToken, date);
-        Integer pastSqlDateId = 1;
-        Integer timeId = createReservationTime(managerToken, startAt);
-        Integer pastTimeId = createReservationTime(managerToken, "00:01");
-        Integer themeId = createTheme(managerToken, themeName);
-        Integer reservationId = createReservationWithToken(managerToken, dateId, timeId, themeId);
+        )
+        void 실패3() {
+            Integer dateId = createReservationDate(managerToken, date);
+            Integer pastSqlDateId = 1;
+            Integer timeId = createReservationTime(managerToken, startAt);
+            Integer pastTimeId = createReservationTime(managerToken, "00:01");
+            Integer themeId = createTheme(managerToken, themeName);
+            Integer reservationId = createReservationWithToken(managerToken, dateId, timeId,
+                themeId);
 
-        Map<String, Object> params = new HashMap<>();
-        params.put("dateId", pastSqlDateId);
-        params.put("timeId", pastTimeId);
+            Map<String, Object> params = new HashMap<>();
+            params.put("dateId", pastSqlDateId);
+            params.put("timeId", pastTimeId);
 
-        RestAssured.given().log().all()
+            RestAssured.given().log().all()
                 .header(HttpHeaders.AUTHORIZATION, managerToken)
                 .contentType(ContentType.JSON)
                 .body(params)
@@ -246,6 +295,6 @@ class ReservationAdminControllerTest extends AcceptanceTest {
                 .then().log().all()
                 .statusCode(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getHttpStatus().value())
                 .body("message", is(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage()));
+        }
     }
-
 }
