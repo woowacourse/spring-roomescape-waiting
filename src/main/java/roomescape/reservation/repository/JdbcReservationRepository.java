@@ -56,87 +56,41 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAll() {
-        String sql = """
-                SELECT result.reservation_id,
-                       result.name,
-                       result.date,
-                       result.time_id,
-                       result.start_at,
-                       result.theme_id,
-                       result.theme_name,
-                       result.theme_description,
-                       result.theme_thumbnail,
-                       result.status,
-                       result.waiting_rank
-                FROM (
-                """ + selectActiveReservationsWithStatus("") + """
-                ) result
-                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC
-                """;
+        String sql = selectReservations("", "");
 
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     @Override
     public List<Reservation> findByName(String name) {
-        String sql = """
-                SELECT result.reservation_id,
-                       result.name,
-                       result.date,
-                       result.time_id,
-                       result.start_at,
-                       result.theme_id,
-                       result.theme_name,
-                       result.theme_description,
-                       result.theme_thumbnail,
-                       result.status,
-                       result.waiting_rank
-                FROM (
-                """ + selectActiveReservationsWithStatus("WHERE r.name = ?") + """
-                    UNION ALL
-                    SELECT h.reservation_id,
-                           h.name,
-                           h.date,
-                           h.time_id,
-                           rt.start_at,
-                           h.theme_id,
-                           t.name AS theme_name,
-                           t.description AS theme_description,
-                           t.thumbnail AS theme_thumbnail,
-                           'CANCELED' AS status,
-                           CAST(NULL AS BIGINT) AS waiting_rank,
-                           h.request_order,
-                           1 AS source_order
-                    FROM reservation_history h
-                    JOIN reservation_time rt ON h.time_id = rt.id
-                    JOIN theme t ON h.theme_id = t.id
-                    WHERE h.name = ?
-                ) result
-                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC, result.source_order ASC
+        String historyUnionClause = """
+                UNION ALL
+                SELECT h.reservation_id,
+                       h.name,
+                       h.date,
+                       h.time_id,
+                       rt.start_at,
+                       h.theme_id,
+                       t.name AS theme_name,
+                       t.description AS theme_description,
+                       t.thumbnail AS theme_thumbnail,
+                       'CANCELED' AS status,
+                       CAST(NULL AS BIGINT) AS waiting_rank,
+                       h.request_order,
+                       1 AS source_order
+                FROM reservation_history h
+                JOIN reservation_time rt ON h.time_id = rt.id
+                JOIN theme t ON h.theme_id = t.id
+                WHERE h.name = ?
                 """;
+        String sql = selectReservations("WHERE r.name = ?", historyUnionClause);
 
         return jdbcTemplate.query(sql, reservationRowMapper, name, name);
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
-        String sql = """
-                SELECT result.reservation_id,
-                       result.name,
-                       result.date,
-                       result.time_id,
-                       result.start_at,
-                       result.theme_id,
-                       result.theme_name,
-                       result.theme_description,
-                       result.theme_thumbnail,
-                       result.status,
-                       result.waiting_rank
-                FROM (
-                """ + selectActiveReservationsWithStatus("WHERE r.id = ?") + """
-                ) result
-                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC
-                """;
+        String sql = selectReservations("WHERE r.id = ?", "");
 
         return jdbcTemplate.query(sql, reservationRowMapper, id)
                 .stream()
@@ -145,7 +99,13 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findByDateAndThemeId(LocalDate date, Long themeId) {
-        String sql = """
+        String sql = selectReservations("WHERE r.date = ? AND r.theme_id = ?", "");
+
+        return jdbcTemplate.query(sql, reservationRowMapper, date, themeId);
+    }
+
+    private String selectReservations(String whereClause, String additionalRowsClause) {
+        return """
                 SELECT result.reservation_id,
                        result.name,
                        result.date,
@@ -158,16 +118,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                        result.status,
                        result.waiting_rank
                 FROM (
-                """ + selectActiveReservationsWithStatus("WHERE r.date = ? AND r.theme_id = ?") + """
-                ) result
-                ORDER BY result.date ASC, result.start_at ASC, result.request_order ASC
-                """;
-
-        return jdbcTemplate.query(sql, reservationRowMapper, date, themeId);
-    }
-
-    private String selectActiveReservationsWithStatus(String whereClause) {
-        return """
                     SELECT ranked.reservation_id,
                            ranked.name,
                            ranked.date,
@@ -206,9 +156,15 @@ public class JdbcReservationRepository implements ReservationRepository {
                         FROM reservation r
                         JOIN reservation_time rt ON r.time_id = rt.id
                         JOIN theme t ON r.theme_id = t.id
-                """ + whereClause + """
+                        %s
                     ) ranked
-                """;
+                    %s
+                ) result
+                ORDER BY result.date ASC,
+                         result.start_at ASC,
+                         result.request_order ASC,
+                         result.source_order ASC
+                """.formatted(whereClause, additionalRowsClause);
     }
 
     @Override
