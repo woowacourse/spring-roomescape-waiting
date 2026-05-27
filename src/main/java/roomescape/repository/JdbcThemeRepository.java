@@ -108,7 +108,7 @@ public class JdbcThemeRepository implements ThemeRepository {
     }
 
     @Override
-    public boolean existById(Long id) {
+    public boolean existsById(Long id) {
         String sql = "SELECT EXISTS ("
                 + "SELECT 1 FROM `theme` WHERE `id` = (?) "
                 + ") AS exist";

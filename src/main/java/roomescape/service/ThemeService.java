@@ -56,7 +56,7 @@ public class ThemeService {
     }
 
     public void validateExistTheme(Long themeId) {
-        if (!themeRepository.existById(themeId)) {
+        if (!themeRepository.existsById(themeId)) {
             throw new CustomInvalidRequestException(ErrorCode.NOT_FOUND_THEME);
         }
     }

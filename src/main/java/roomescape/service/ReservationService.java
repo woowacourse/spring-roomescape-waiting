@@ -62,13 +62,13 @@ public class ReservationService {
     }
 
     public void validateReferencedTheme(Long themeId) {
-        if (reservationRepository.existByThemeId(themeId)) {
+        if (reservationRepository.existsByThemeId(themeId)) {
             throw new CustomInvalidRequestException(ErrorCode.REFERENCED_THEME);
         }
     }
 
     public void validateReferencedTime(Long id) {
-        if (reservationRepository.existByTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id)) {
             throw new CustomInvalidRequestException(ErrorCode.REFERENCED_TIME);
         }
     }

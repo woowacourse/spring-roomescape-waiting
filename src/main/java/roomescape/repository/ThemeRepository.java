@@ -17,5 +17,5 @@ public interface ThemeRepository {
 
     void delete(Long id);
 
-    boolean existById(Long id);
+    boolean existsById(Long id);
 }

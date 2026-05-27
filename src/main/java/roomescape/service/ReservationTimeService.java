@@ -42,7 +42,7 @@ public class ReservationTimeService {
     }
 
     private void validateDuplicatedReservationTime(LocalTime startAt) {
-        if (reservationTimeRepository.existByStartAt(startAt)) {
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
             throw new CustomInvalidRequestException(ErrorCode.DUPLICATED_RESERVATION_TIME);
         }
     }
