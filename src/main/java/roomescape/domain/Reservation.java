@@ -1,5 +1,7 @@
 package roomescape.domain;
 
+import java.time.LocalDateTime;
+
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 
@@ -7,15 +9,18 @@ public class Reservation {
 
     private final Long id;
     private final String name;
-    private final Long reservationId;
+    private final Long reservationSlotId;
+    private final LocalDateTime updateAt;
 
-    public Reservation(Long id, String name, Long reservationId) {
+    public Reservation(Long id, String name, Long reservationSlotId, LocalDateTime updateAt) {
         validateName(name);
-        
+
         this.id = id;
         this.name = name;
-        this.reservationId = reservationId;
+        this.reservationSlotId = reservationSlotId;
+        this.updateAt = updateAt;
     }
+
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
@@ -35,7 +40,7 @@ public class Reservation {
         return name;
     }
 
-    public Long getReservationId() {
-        return reservationId;
+    public Long getReservationSlotId() {
+        return reservationSlotId;
     }
 }

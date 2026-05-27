@@ -34,11 +34,12 @@ CREATE TABLE IF NOT EXISTS reservation
 (
     id              BIGINT       NOT NULL AUTO_INCREMENT,
     name            VARCHAR(255) NOT NULL,
-    reservation_id  BIGINT       NOT NULL,
+    reservation_slot_id  BIGINT       NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'RESERVED',
+    updated_at DATETIME NOT NULL,
     PRIMARY KEY (id),
 
-    CONSTRAINT unique_waiting
-    UNIQUE(name, reservation_id),
+    CONSTRAINT check_reservation_status CHECK (status IN ('RESERVED','CANCELED')),
 
-    FOREIGN KEY (reservation_id) REFERENCES reservation_slot (id)
-    );
+    FOREIGN KEY (reservation_slot_id) REFERENCES reservation_slot (id)
+);

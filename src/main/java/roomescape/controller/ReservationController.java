@@ -20,23 +20,17 @@ import org.springframework.web.bind.annotation.RestController;
 
 import jakarta.validation.Valid;
 import roomescape.dto.ReservationRequest;
-import roomescape.dto.ReservationUpdateRequest;
-import roomescape.dto.WaitingRequest;
 import roomescape.dto.ReservationResponse;
-import roomescape.dto.WaitingResponse;
 import roomescape.service.ReservationService;
-import roomescape.service.WaitingService;
 
 @RequestMapping("/reservations")
 @RestController
 @Validated
 public class ReservationController {
     private final ReservationService reservationService;
-    private final WaitingService waitingService;
 
-    public ReservationController(ReservationService reservationService, WaitingService waitingService) {
+    public ReservationController(ReservationService reservationService) {
         this.reservationService = reservationService;
-        this.waitingService = waitingService;
     }
 
     @PostMapping
@@ -49,22 +43,12 @@ public class ReservationController {
                 .body(response);
     }
 
-//    @PostMapping("/waitings")
-//    public ResponseEntity<WaitingResponse> createReservation(@Valid @RequestBody WaitingRequest request) {
-//        LocalDateTime now = LocalDateTime.now();
-//        WaitingResponse response = waitingService.save(now, request);
-//        URI location = URI.create("/waiting/" + response.id());
-//        return ResponseEntity
-//                .created(location)
-//                .body(response);
+//    @GetMapping("/{id}")
+//    public ReservationResponse getReservation(
+//            @PathVariable long id
+//    ) {
+//        return waitingService.findById(id);
 //    }
-
-    @GetMapping("/{id}")
-    public ReservationResponse getReservation(
-            @PathVariable long id
-    ) {
-        return waitingService.findById(id);
-    }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
@@ -72,29 +56,21 @@ public class ReservationController {
         return reservationService.findAllByName(username);
     }
 
-
-
-    @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/{id}")
-    public void deleteReservation(@PathVariable Long id) {
-        LocalDateTime now = LocalDateTime.now();
-        reservationService.delete(now, id);
-    }
-
     @ResponseStatus(HttpStatus.OK)
-    @PatchMapping("/waitings/{waitingId}")
+    @PatchMapping("/{reservationId}")
     public void updateReservation(
-            @PathVariable long waitingId,
-            @Valid @RequestBody ReservationUpdateRequest request
+            @PathVariable long reservationId,
+            @Valid @RequestBody ReservationRequest request
     ) {
         LocalDateTime now = LocalDateTime.now();
-        reservationService.update(waitingId, now, request);
+        reservationService.update(reservationId, now, request);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    @DeleteMapping("/waitings/{id}")
-    public void deleteWaiting(@PathVariable Long id) {
+    @DeleteMapping("/{reservationId}")
+    public void deleteReservation(@PathVariable Long reservationId) {
         LocalDateTime now = LocalDateTime.now();
-        waitingService.delete(now, id);
+        reservationService.delete(now, reservationId);
     }
+
 }
