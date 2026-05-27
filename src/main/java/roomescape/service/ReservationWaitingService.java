@@ -58,7 +58,7 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting = reservationWaitingReq.to(reservationTimeById, themeById);
         Long id = reservationWaitingUpdatingDao.create(reservationWaiting);
 
-        return ReservationWaitingResponse.from(reservationWaiting.withReservationWaitingId(id));
+        return ReservationWaitingResponse.from(reservationWaitingQueryingDao.findReservationWaitingById(id).get());
     }
 
     public void delete(Long id) {
