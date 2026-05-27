@@ -14,7 +14,6 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
@@ -213,14 +212,6 @@ public class JdbcReservationRepository implements ReservationRepository {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE' AND is_deleted = 0)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId, "themeId", themeId, "date", date),
-                        Boolean.class));
-    }
-
-    @Override
-    public boolean existsByIdAndUsernameAndActiveOrPending(final Long reservationId, final String username) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id=:reservationId AND name=:username AND (status='ACTIVE' OR status='PENDING') AND is_deleted = 0)";
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Map.of("reservationId", reservationId, "username", username),
                         Boolean.class));
     }
 

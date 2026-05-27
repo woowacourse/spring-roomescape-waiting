@@ -80,11 +80,8 @@ public class ReservationService {
     }
 
     public void cancelReservation(final Long id, final String username) {
-        if (!reservationRepository.existsByIdAndUsernameAndActiveOrPending(id, username)) {
-            throw new ReservationNotFoundException("해당 예약을 찾을 수 없거나 취소할 권한이 없습니다.");
-        }
         Reservation reservation = reservationRepository.getById(id);
-        Reservation canceledReservation = reservation.cancel();
+        Reservation canceledReservation = reservation.cancel(username, clock);
         reservationRepository.cancel(canceledReservation);
         if (reservation.getStatus().equals(Status.ACTIVE)) {
             Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
@@ -113,8 +110,7 @@ public class ReservationService {
         Reservation reservation = reservationRepository.getById(id);
         ReservationTime time = timeRepository.getById(command.timeId());
         Theme theme = themeRepository.getById(command.themeId());
-        if (!reservationRepository.existsActiveReservationByThemeAndTime(time.getId(), theme.getId(),
-                command.date())) {
+        if (!reservationRepository.existsActiveReservationByThemeAndTime(time.getId(), theme.getId(), command.date())) {
             throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
         }
         checkDuplicatePendingReservation(command.date(), command.username(), time, theme);

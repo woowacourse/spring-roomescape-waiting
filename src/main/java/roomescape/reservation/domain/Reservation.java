@@ -43,7 +43,7 @@ public class Reservation {
 
     private void checkChangeable(final String username, final Clock clock) {
         if (!this.name.equals(username)) {
-            throw new UnauthorizedReservationChangeException("예약 변경 권한이 없습니다.");
+            throw new UnauthorizedReservationChangeException("예약 변경, 삭제 권한이 없습니다.");
         }
         if (status == Status.CANCELED) {
             throw new IllegalStateReservationException("이미 취소된 예약은 변경할 수 없습니다.");
@@ -83,7 +83,8 @@ public class Reservation {
                 .build();
     }
 
-    public Reservation cancel() {
+    public Reservation cancel(String username, Clock clock) {
+        checkChangeable(username, clock);
         return Reservation.builder()
                 .id(id)
                 .name(name)
