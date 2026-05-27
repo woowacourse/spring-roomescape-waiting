@@ -2,13 +2,10 @@ package roomescape.domain.theme;
 
 public class Theme {
 
-    private Long id;
-    private String name;
-    private String description;
-    private String url;
-
-    public Theme() {
-    }
+    private final Long id;
+    private final String name;
+    private final String description;
+    private final String url;
 
     public Theme(Long id, String name, String description, String url) {
         this.id = id;

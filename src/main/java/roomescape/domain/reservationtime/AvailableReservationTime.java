@@ -4,9 +4,9 @@ import java.time.LocalTime;
 
 public class AvailableReservationTime {
 
-    private Long id;
-    private LocalTime startAt;
-    private boolean isAvailable;
+    private final Long id;
+    private final LocalTime startAt;
+    private final boolean isAvailable;
 
     public AvailableReservationTime(Long id, LocalTime startAt, boolean isAvailable) {
         this.id = id;

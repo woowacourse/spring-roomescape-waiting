@@ -8,12 +8,12 @@ import roomescape.domain.theme.Theme;
 public class ReservationWaiting {
 
     private Long id;
-    private String name;
-    private LocalDate date;
-    private ReservationTime time;
-    private Theme theme;
+    private final String name;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final Theme theme;
     private Long sequence;
-    private LocalDateTime createdAt;
+    private final LocalDateTime createdAt;
 
     public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
         this.name = name;
