@@ -3,7 +3,6 @@ package roomescape.waiting.dao;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -15,15 +14,15 @@ import roomescape.waiting.ReservationWaiting;
 @Repository
 public class ReservationWaitingDao {
     private static final RowMapper<ReservationWaiting> rowMapper = (rs, rowNum) ->
-        new ReservationWaiting(
-                rs.getLong("id"),
-                rs.getString("name"),
-                rs.getLong("theme_id"),
-                rs.getDate("date").toLocalDate(),
-                new ReservationTime(rs.getLong("time_id"),
-                        rs.getTime("start_at").toLocalTime()),
-                rs.getLong("waiting_number")
-        );
+            new ReservationWaiting(
+                    rs.getLong("reservation_waiting_id"),
+                    rs.getString("name"),
+                    rs.getLong("theme_id"),
+                    rs.getDate("date").toLocalDate(),
+                    new ReservationTime(rs.getLong("time_id"),
+                            rs.getTime("start_at").toLocalTime()),
+                    rs.getLong("waiting_number")
+            );
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
@@ -37,7 +36,11 @@ public class ReservationWaitingDao {
 
     public Optional<ReservationWaiting> selectById(Long id) {
         String sql = """
-                select * from reservation_waiting where id = ?;
+                select w.id as reservation_waiting_id, w.name, w.theme_id, w.date, t.id as time_id, t.start_at as start_at, w.waiting_number
+                from reservation_waiting w
+                join reservation_time t
+                on w.time_id = t.id
+                where w.id = ?
                 """;
 
         List<ReservationWaiting> results = jdbcTemplate.query(sql, rowMapper, id);
@@ -65,7 +68,8 @@ public class ReservationWaitingDao {
                 .addValue("waiting_number", reservationsWaiting.getWaitingNumber());
 
         Long id = (long) simpleJdbcInsert.executeAndReturnKey(parameters);
-        return new ReservationWaiting(id, reservationsWaiting.getName(), reservationsWaiting.getThemeId(), reservationsWaiting.getDate(),
+        return new ReservationWaiting(id, reservationsWaiting.getName(), reservationsWaiting.getThemeId(),
+                reservationsWaiting.getDate(),
                 reservationsWaiting.getReservationTime(), reservationsWaiting.getWaitingNumber());
     }
 

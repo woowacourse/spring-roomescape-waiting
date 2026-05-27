@@ -25,7 +25,7 @@ public class ReservationWaitingController {
     @GetMapping("/reservations/{id}")
     public ResponseEntity<ReservationWaitingResponse> readById(@PathVariable Long id) {
         ReservationWaiting reservationWaiting = reservationWaitingService.findById(id);
-        return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservation));
+        return ResponseEntity.ok().body(ReservationWaitingResponse.from(reservationWaiting));
     }
 
     @PostMapping

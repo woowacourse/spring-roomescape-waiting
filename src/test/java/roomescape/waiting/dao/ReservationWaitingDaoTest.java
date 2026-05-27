@@ -38,7 +38,7 @@ class ReservationWaitingDaoTest {
         Long themeId = 1L;
         LocalDate date = LocalDate.now();
         Long timeId = 1L;
-        ReservationTime reservationTime = new ReservationTime(LocalTime.now().plusHours(1));
+        ReservationTime reservationTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
         Long waitingNumber = 1L;
 
         ReservationWaiting reservationWaiting = new ReservationWaiting(name, themeId, date, reservationTime, waitingNumber);
@@ -54,7 +54,7 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                new ReservationTime(LocalTime.now().plusHours(1)),
+                new ReservationTime(1L, LocalTime.now().plusHours(1)),
                 2L
         );
 
@@ -74,7 +74,7 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                new ReservationTime(LocalTime.now().plusHours(1)),
+                new ReservationTime(1L, LocalTime.now().plusHours(1)),
                 2L
         );
 
@@ -107,7 +107,7 @@ class ReservationWaitingDaoTest {
                 "티버",
                 1L,
                 LocalDate.now(),
-                new ReservationTime(LocalTime.now().plusHours(1)),
+                new ReservationTime(1L, LocalTime.now().plusHours(1)),
                 1L
         );
         reservationWaitingDao.insert(reservationWaiting);

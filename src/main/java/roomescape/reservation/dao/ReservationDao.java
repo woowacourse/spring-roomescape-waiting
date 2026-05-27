@@ -116,10 +116,10 @@ public class ReservationDao {
     }
 
     public Optional<Reservation> updateDateTimeById(Long id, LocalDate date, Long timeId) {
-       String sql = "update reservation set date = ?, time_id = ? where id = ?";
-       jdbcTemplate.update(sql, date, timeId, id);
+        String sql = "update reservation set date = ?, time_id = ? where id = ?";
+        jdbcTemplate.update(sql, date, timeId, id);
 
-       return selectById(id);
+        return selectById(id);
     }
 
     public boolean existsByThemeIdAndAfterDate(Long themeId, LocalDate now) {
