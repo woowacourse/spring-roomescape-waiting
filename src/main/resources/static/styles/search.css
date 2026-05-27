@@ -95,6 +95,32 @@ label {
     color: #191f28;
 }
 
+.res-title-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.res-status {
+    display: inline-flex;
+    align-items: center;
+    height: 22px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.res-status.reserved {
+    background: #edf6ff;
+    color: #1c64f2;
+}
+
+.res-status.waiting {
+    background: #fff7e6;
+    color: #ad6800;
+}
+
 .res-details {
     margin-top: 4px;
     font-size: 12px;

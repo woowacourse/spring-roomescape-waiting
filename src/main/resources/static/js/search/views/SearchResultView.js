@@ -41,6 +41,7 @@ export default class SearchResultView extends View {
 
         page.content.forEach((reservation) => {
             const item = createElement("div", "reservation-item");
+            const isWaiting = reservation.status === "WAITING";
             const expired = this.isPastReservation(
                 reservation.date,
                 reservation.startAt
@@ -50,7 +51,12 @@ export default class SearchResultView extends View {
 
             item.innerHTML = `
                 <div>
-                    <div class="res-theme">${reservation.theme}</div>
+                    <div class="res-title-row">
+                        <div class="res-theme">${reservation.theme}</div>
+                        <span class="res-status ${isWaiting ? "waiting" : "reserved"}">
+                            ${isWaiting ? `대기 ${reservation.waitingRank}번` : "예약"}
+                        </span>
+                    </div>
 
                     <div class="res-details">
                         ${reservation.date}
@@ -64,7 +70,7 @@ export default class SearchResultView extends View {
                 <div class="res-actions">
                     <button
                         class="btn-change"
-                        ${expired ? "disabled" : ""}
+                        ${expired || isWaiting ? "disabled" : ""}
                     >
                         변경
                     </button>

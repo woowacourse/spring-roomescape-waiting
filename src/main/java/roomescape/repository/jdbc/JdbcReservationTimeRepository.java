@@ -78,12 +78,16 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                         SELECT
                             rt.id AS time_id,
                             rt.start_at AS time_start_at,
-                            (CASE WHEN r.id IS NULL THEN true ELSE false END) AS is_reservable
+                            NOT EXISTS (
+                                SELECT 1
+                                FROM reservation r
+                                JOIN reservation_entry re ON re.reservation_id = r.id
+                                WHERE r.time_id = rt.id
+                                  AND r.theme_id = ?
+                                  AND r.date = ?
+                                  AND re.status = 'RESERVED'
+                            ) AS is_reservable
                         FROM reservation_time rt
-                        LEFT JOIN reservation r
-                                ON rt.id = r.time_id
-                                AND r.theme_id = ?
-                                AND r.date = ?
                         WHERE rt.status = ?
                         ORDER BY rt.start_at ASC;
                 """;

@@ -83,7 +83,7 @@ public class ThemeService {
         LocalDateTime startAt = LocalDateTime.of(date, projection.startAt());
 
         if (now.isAfter(startAt)) {
-            return ThemeTimesResult.from(projection.disabled());
+            return ThemeTimesResult.unavailable(projection);
         }
         return ThemeTimesResult.from(projection);
     }
