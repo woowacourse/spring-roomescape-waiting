@@ -72,6 +72,67 @@ class ReservationTest {
     }
 
     @Test
+    void 동일_이름으로_예약을_중복_요청하면_예외가_발생한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.reserve("이프");
+
+        // when & then
+        assertThatThrownBy(() -> reservation.reserve("이프"))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
+    }
+
+    @Test
+    void 대기_신청_시_예약이_있으면_대기로_등록된다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.reserve("이프");
+
+        // when
+        reservation.joinWaitingList("라텔");
+
+        // then
+        assertThat(reservation.getEntries())
+                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .containsExactlyInAnyOrder(
+                        tuple("이프", ReservationStatus.RESERVED),
+                        tuple("라텔", ReservationStatus.WAITING)
+                );
+    }
+
+    @Test
+    void 대기_신청_시_예약이_없으면_예약으로_승격된다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+
+        // when
+        reservation.joinWaitingList("라텔");
+
+        // then
+        assertThat(reservation.getEntries())
+                .singleElement()
+                .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
+                .containsExactly("라텔", ReservationStatus.RESERVED);
+    }
+
+    @Test
+    void 대기_신청_시_동일_이름이_이미_존재하면_예외가_발생한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Reservation reservation = Reservation.createSlot(date, theme, reservationTime);
+        reservation.reserve("이프");
+
+        // when & then
+        assertThatThrownBy(() -> reservation.joinWaitingList("이프"))
+                .isInstanceOf(DuplicateEntityException.class)
+                .hasMessageContaining("이미 예약 또는 대기가 존재합니다.");
+    }
+
+    @Test
     void 이미_지나버린_예약_정보에_예약을_하면_예외가_발생한다() {
         // given
         LocalDate pastDate = LocalDate.now().minusDays(1);

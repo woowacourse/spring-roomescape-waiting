@@ -18,6 +18,13 @@ public class ReservationServiceFixture {
         return new ReservationResult(1L, LocalDate.now(), themeResult, timeResult, entryResult);
     }
 
+    public static ReservationResult createWaitingResult() {
+        ReservationTimeResult timeResult = new ReservationTimeResult(1L, LocalTime.now(), "ACTIVE");
+        ThemeResult themeResult = new ThemeResult(1L, "테마", "테마설명", "테마 이미지", true);
+        ReservationEntryResult entryResult = new ReservationEntryResult(2L, "라텔", "WAITING", LocalDateTime.now());
+        return new ReservationResult(1L, LocalDate.now(), themeResult, timeResult, entryResult);
+    }
+
     public static ReservationChangeCommand createChangeCommand(LocalDate date, long timeId) {
         return new ReservationChangeCommand(date, timeId);
     }

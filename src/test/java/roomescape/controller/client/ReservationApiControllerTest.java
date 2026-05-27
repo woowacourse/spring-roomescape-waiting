@@ -88,7 +88,7 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
     void 사용자_이름으로_예약_정보를_조회할_수_있다() {
         // given
         ReservationSearchResponse searchResponse =
-                new ReservationSearchResponse(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명");
+                new ReservationSearchResponse(1L, "이름", LocalDate.now(), LocalTime.now(), "테마명", "RESERVED", null);
         Page<ReservationSearchResponse> result = Page.of(10, 10, List.of(searchResponse));
         when(reservationQuery.search(any(ReservationSearchCondition.class), any(Pageable.class))).thenReturn(result);
 
@@ -134,6 +134,25 @@ class ReservationApiControllerTest extends BaseControllerUnitTest {
                 .then().log().all()
                 .status(HttpStatus.BAD_REQUEST)
                 .body(containsString("예약 엔트리 식별자는 양수입니다."));
+    }
+
+    @Test
+    void 대기_신청_요청에_성공하면_201_Created_상태와_WAITING_응답이_반환된다() {
+        // given
+        ReservationRequest body = ReservationApiRequestFixture.reserveSuccessRequestFixture();
+        ReservationResult result = ReservationServiceFixture.createWaitingResult();
+        when(reservationService.addWaiting(any(ReservationCommand.class))).thenReturn(result);
+
+        // when & then
+        ReservationResponse response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
+                .body(body)
+                .when().post("/api/reservations/waiting")
+                .then().log().all()
+                .status(HttpStatus.CREATED)
+                .extract().as(new TypeRef<>() {
+                });
+
+        assertThat(response).isEqualTo(ReservationResponse.from(result));
     }
 
     @Test

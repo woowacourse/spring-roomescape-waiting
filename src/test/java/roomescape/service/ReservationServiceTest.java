@@ -192,8 +192,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 같은_날짜와_같은_시간에_특정_테마로_예약을_시도하면_중복_예외가_발생한다() {
-        // given: 1번 이미 10시 예약이 하나 존재함
+    void 같은_날짜와_같은_시간에_예약을_시도하면_중복_예외가_발생한다() {
+        // given: 이미 10시 예약이 존재함
         themeRepository.save(ThemeFixture.createDefaultTheme());
         reservationTimeRepository.save(ReservationTimeFixture.createDefault());
 
@@ -201,13 +201,49 @@ class ReservationServiceTest {
         reservationRepository.save(existingReservation);
 
         LocalDate date = existingReservation.getDate();
-
         ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
 
-        // when & then: DuplicateEntityException 발생 확인
+        // when & then
         assertThatThrownBy(() -> reservationService.reserve(command))
                 .isInstanceOf(DuplicateEntityException.class)
                 .hasMessageContaining("이미 예약 된 날짜입니다.");
+    }
+
+    @Test
+    void 대기_신청_시_같은_슬롯에_다른_이름으로_신청하면_대기로_등록된다() {
+        // given
+        themeRepository.save(ThemeFixture.createDefaultTheme());
+        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+
+        Reservation existingReservation = createDefaultReservationWithName("기존 예약자");
+        reservationRepository.save(existingReservation);
+
+        LocalDate date = existingReservation.getDate();
+        ReservationCommand command = new ReservationCommand("새예약자", date, 1L, 1L);
+
+        // when
+        ReservationResult result = reservationService.addWaiting(command);
+
+        // then
+        assertThat(result.entry().name()).isEqualTo("새예약자");
+        assertThat(result.entry().status()).isEqualTo("WAITING");
+    }
+
+    @Test
+    void 대기_신청_시_슬롯이_비어있으면_예약으로_승격된다() {
+        // given
+        themeRepository.save(ThemeFixture.createDefaultTheme());
+        reservationTimeRepository.save(ReservationTimeFixture.createDefault());
+
+        LocalDate date = LocalDate.now().plusDays(1);
+        ReservationCommand command = new ReservationCommand("이프", date, 1L, 1L);
+
+        // when
+        ReservationResult result = reservationService.addWaiting(command);
+
+        // then: 슬롯이 비어있으므로 RESERVED로 승격
+        assertThat(result.entry().name()).isEqualTo("이프");
+        assertThat(result.entry().status()).isEqualTo("RESERVED");
     }
 
     @Test
