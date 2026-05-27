@@ -47,10 +47,6 @@ public class WaitingCommandService {
         }
     }
 
-    private boolean isPast(LocalDate date, ReservationTime time) {
-        return date.atTime(time.startAt()).isBefore(LocalDateTime.now(clock));
-    }
-
     public Waiting create(String name, LocalDate date, long timeId, long themeId) {
         ReservationTime time = findTimeReference(timeId);
         findThemeReference(themeId);
@@ -59,11 +55,9 @@ public class WaitingCommandService {
             throw new ResourceNotFoundException("해당 날짜와 시간에 예약이 존재하지 않습니다.");
         }
 
-        if (isPast(date, time)) {
-            throw new PastReservationException("지나간 시간에는 예약 대기를 생성할 수 없습니다.");
-        }
+        time.validateNotPast(date, LocalDateTime.now(clock));
 
-        if (name.equals(reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).get().username())){
+        if (reservationDao.findByDateAndTimeIdAndThemeId(date, timeId, themeId).get().isOwnedBy(name)) {
             throw new DuplicateException("내가 예약한 시간에 예약대기를 생성할 수 없습니다.");
         }
 
@@ -78,13 +72,8 @@ public class WaitingCommandService {
     public void cancel(long waitingId, String name) {
         Waiting waiting = findWaitingReference(waitingId);
 
-        if (isPast(waiting.reservationDate(), waiting.reservationTime())) {
-            throw new PastReservationException("이미 시작된 게임의 예약대기는 취소할 수 없습니다.");
-        }
-
-        if (!name.equals(waiting.name())) {
-            throw new ForbiddenException("타인의 예약대기는 취소할 수 없습니다.");
-        }
+        waiting.validateCancelable(LocalDateTime.now(clock));
+        waiting.validateOwnedBy(name);
 
         waitingDao.delete(waitingId);
     }
