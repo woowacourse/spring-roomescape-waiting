@@ -303,6 +303,46 @@
   color: #fff !important;
 }
 
+/* ─── 대기 신청 버튼 ─── */
+.time-btn--waiting {
+  border-color: #d1d5db;
+  color: var(--text-muted);
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 10px;
+}
+
+.time-btn--waiting:hover:not(:disabled) {
+  border-color: #f59e0b;
+  color: #b45309;
+  background: #fffbeb;
+}
+
+.time-btn--waiting.active {
+  background: #f59e0b;
+  border-color: #f59e0b;
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.35);
+}
+
+.time-badge {
+  font-size: 0.68rem;
+  font-weight: 700;
+  background: #fef3c7;
+  color: #b45309;
+  border-radius: 4px;
+  padding: 1px 6px;
+  letter-spacing: 0.02em;
+}
+
+.time-btn--waiting.active .time-badge {
+  background: rgba(255,255,255,0.25);
+  color: #fff;
+}
+
 /* ─── 반응형 ─── */
 @media (max-width: 720px) {
   .reservation-cards {

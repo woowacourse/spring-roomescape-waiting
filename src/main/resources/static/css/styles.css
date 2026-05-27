@@ -546,6 +546,27 @@ table.table td .form-control { height: 36px; padding: 6px 10px; }
   gap: 18px;
 }
 
+/* ─── 상태 뱃지 ─── */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 3px 10px;
+  border-radius: 100px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.status-badge--reserved {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.status-badge--waiting {
+  background: #fef3c7;
+  color: #b45309;
+}
+
 /* ─── Toast notification ─── */
 .toast-container {
   position: fixed;

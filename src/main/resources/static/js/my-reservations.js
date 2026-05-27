@@ -25,48 +25,73 @@ document.addEventListener('DOMContentLoaded', () => {
 
 function search() {
   const name = document.getElementById('search-name').value.trim();
-  if (!name) {
-    showToast('이름을 입력해주세요.');
-    return;
-  }
-  fetch(`/reservations?name=${encodeURIComponent(name)}`)
-    .then(res => res.json())
-    .then(renderReservations)
-    .catch(() => showToast('예약 조회에 실패했습니다.'));
+  if (!name) { showToast('이름을 입력해주세요.'); return; }
+
+  Promise.all([
+    fetch(`/reservations?name=${encodeURIComponent(name)}`).then(r => r.json()),
+    fetch(`/waitings?name=${encodeURIComponent(name)}`).then(r => r.json())
+  ])
+    .then(([reservations, waitings]) => renderAll(reservations, waitings))
+    .catch(() => showToast('조회에 실패했습니다.'));
 }
 
-function renderReservations(data) {
+function renderAll(reservations, waitings) {
   const tbody = document.getElementById('reservation-tbody');
   const empty = document.getElementById('reservation-empty');
   tbody.innerHTML = '';
 
-  if (!data || data.length === 0) {
+  const rows = [
+    ...reservations.map(r => ({type: 'reservation', data: r})),
+    ...waitings.map(w => ({type: 'waiting', data: w}))
+  ];
+
+  rows.sort((a, b) => {
+    const dateA = a.type === 'reservation' ? a.data.date : a.data.date;
+    const dateB = b.type === 'reservation' ? b.data.date : b.data.date;
+    return dateA < dateB ? -1 : dateA > dateB ? 1 : 0;
+  });
+
+  if (rows.length === 0) {
     empty.classList.remove('d-none');
     return;
   }
   empty.classList.add('d-none');
 
-  data.forEach(r => {
+  rows.forEach(({type, data}) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `
-      <td>${r.date}</td>
-      <td>${r.themeName}</td>
-      <td>${formatTime(r.time.startAt)}</td>
-      <td style="text-align:right;">
-        <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
-          onclick="openEditModal(${r.id}, '${r.date}', ${r.themeId})">변경</button>
-        <button class="btn btn-danger"
-          onclick="cancelReservation(${r.id}, this)">취소</button>
-      </td>
-    `;
+    if (type === 'reservation') {
+      tr.innerHTML = `
+        <td>${data.date}</td>
+        <td>${data.themeName}</td>
+        <td>${formatTime(data.time.startAt)}</td>
+        <td><span class="status-badge status-badge--reserved">예약</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-secondary" style="font-size:0.82rem;padding:6px 12px;margin-right:4px;"
+            onclick="openEditModal(${data.id}, '${data.date}', ${data.themeId})">변경</button>
+          <button class="btn btn-danger"
+            onclick="cancelReservation(${data.id}, this)">취소</button>
+        </td>
+      `;
+    } else {
+      tr.innerHTML = `
+        <td>${data.date}</td>
+        <td>${data.themeName}</td>
+        <td>${formatTime(data.startAt)}</td>
+        <td><span class="status-badge status-badge--waiting">대기 ${data.turn}순번</span></td>
+        <td style="text-align:right;">
+          <button class="btn btn-danger"
+            onclick="cancelWaiting(${data.id}, this)">취소</button>
+        </td>
+      `;
+    }
     tbody.appendChild(tr);
   });
 }
 
 function formatTime(value) {
   if (!value) return '';
-  const [h, m] = value.split(':');
-  return `${h}:${m}`;
+  const parts = String(value).split(':');
+  return `${parts[0]}:${parts[1]}`;
 }
 
 function cancelReservation(id, btn) {
@@ -76,6 +101,20 @@ function cancelReservation(id, btn) {
       if (res.status === 204) {
         btn.closest('tr').remove();
         showToast('예약이 취소되었습니다.', 'success');
+        return;
+      }
+      return res.json().then(b => { throw new Error(b.message || '취소에 실패했습니다.'); });
+    })
+    .catch(err => showToast(err.message));
+}
+
+function cancelWaiting(id, btn) {
+  if (!confirm('대기를 취소하시겠습니까?')) return;
+  fetch(`/waitings/${id}`, {method: 'DELETE'})
+    .then(res => {
+      if (res.status === 204) {
+        btn.closest('tr').remove();
+        showToast('대기가 취소되었습니다.', 'success');
         return;
       }
       return res.json().then(b => { throw new Error(b.message || '취소에 실패했습니다.'); });
@@ -116,18 +155,13 @@ function loadAvailableTimes(date, themeId) {
         select.appendChild(opt);
       });
     })
-    .catch(() => {
-      select.innerHTML = '<option value="">시간 조회에 실패했습니다.</option>';
-    });
+    .catch(() => { select.innerHTML = '<option value="">시간 조회에 실패했습니다.</option>'; });
 }
 
 function submitEdit() {
   const date = datePicker.input.value;
   const timeId = document.getElementById('edit-time').value;
-  if (!date || !timeId) {
-    showToast('날짜와 시간을 선택해주세요.');
-    return;
-  }
+  if (!date || !timeId) { showToast('날짜와 시간을 선택해주세요.'); return; }
   fetch(`/reservations/${editingId}`, {
     method: 'PATCH',
     headers: {'Content-Type': 'application/json'},

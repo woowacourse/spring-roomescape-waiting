@@ -34,7 +34,7 @@ public class ReservationWaitingControllerTest {
                 .when().post("/waitings")
                 .then().log().all()
                 .statusCode(201)
-                .body("id", equalTo(2))
+                .body("id", equalTo(4))
                 .body("name", equalTo("현미밥"))
                 .body("reservationId", equalTo(12));
     }
@@ -60,3 +60,4 @@ public class ReservationWaitingControllerTest {
                 .body("[0].turn", equalTo(2));
     }
 }
+

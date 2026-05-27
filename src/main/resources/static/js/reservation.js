@@ -7,6 +7,8 @@ const state = {
   themeName: null,
   timeId: null,
   timeText: null,
+  mode: null, // 'reserve' | 'waiting'
+  reservationId: null,
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -99,39 +101,51 @@ function refreshTimes() {
     return;
   }
 
-  fetch(`/times/available?date=${state.date}&themeId=${state.themeId}`)
-    .then(res => res.json())
-    .then(times => renderTimes(times))
-    .catch(err => {
-      console.error('시간 조회 실패:', err);
+  Promise.all([
+    fetch('/times').then(r => r.json()),
+    fetch(`/times/available?date=${state.date}&themeId=${state.themeId}`).then(r => r.json())
+  ])
+    .then(([allTimes, availableTimes]) => renderTimes(allTimes, availableTimes))
+    .catch(() => {
       hint.classList.remove('d-none');
       hint.textContent = '시간을 불러오지 못했습니다.';
     });
 }
 
-function renderTimes(times) {
+function renderTimes(allTimes, availableTimes) {
   const list = document.getElementById('time-list');
   const hint = document.getElementById('time-hint');
   list.innerHTML = '';
 
-  if (!times || times.length === 0) {
+  if (!allTimes || allTimes.length === 0) {
     list.classList.add('d-none');
     hint.classList.remove('d-none');
-    hint.textContent = '예약 가능한 시간이 없습니다.';
+    hint.textContent = '등록된 시간이 없습니다.';
     return;
   }
 
   hint.classList.add('d-none');
   list.classList.remove('d-none');
 
-  times.forEach(time => {
+  const availableIds = new Set(availableTimes.map(t => t.id));
+
+  allTimes.forEach(time => {
+    const isAvailable = availableIds.has(time.id);
     const btn = document.createElement('button');
     btn.type = 'button';
-    btn.className = 'time-btn';
     btn.dataset.timeId = time.id;
     btn.dataset.timeText = time.startAt;
-    btn.textContent = formatTime(time.startAt);
-    btn.addEventListener('click', () => selectTime(btn));
+
+    if (isAvailable) {
+      btn.className = 'time-btn';
+      btn.textContent = formatTime(time.startAt);
+      btn.addEventListener('click', () => selectTime(btn, 'reserve'));
+    } else {
+      btn.className = 'time-btn time-btn--waiting';
+      btn.innerHTML = `${formatTime(time.startAt)}<span class="time-badge">대기</span>`;
+      btn.addEventListener('click', () => selectTime(btn, 'waiting'));
+    }
+
     list.appendChild(btn);
   });
 }
@@ -142,18 +156,28 @@ function formatTime(value) {
   return `${h}:${m}`;
 }
 
-function selectTime(btn) {
+function selectTime(btn, mode) {
   document.querySelectorAll('#time-list .time-btn').forEach(el => el.classList.remove('active'));
   btn.classList.add('active');
   state.timeId = parseInt(btn.dataset.timeId);
   state.timeText = btn.dataset.timeText;
-  showBookingBar();
+  state.mode = mode;
+  state.reservationId = null;
+  showBookingBar(mode);
 }
 
-function showBookingBar() {
+function showBookingBar(mode) {
   const bar = document.getElementById('booking-bar');
+  const confirmBtn = document.getElementById('confirm-booking');
   document.getElementById('booking-summary-text').textContent =
     `${state.date} · ${state.themeName} · ${formatTime(state.timeText)}`;
+  if (mode === 'waiting') {
+    confirmBtn.textContent = '대기 신청';
+    confirmBtn.className = 'btn btn-secondary';
+  } else {
+    confirmBtn.innerHTML = '<i class="fas fa-check"></i> 예약 확정';
+    confirmBtn.className = 'btn btn-primary';
+  }
   bar.classList.remove('d-none');
   document.getElementById('booking-name').focus();
 }
@@ -164,29 +188,31 @@ function clearBookingBar() {
   document.getElementById('booking-name').value = '';
   state.timeId = null;
   state.timeText = null;
+  state.mode = null;
+  state.reservationId = null;
   document.querySelectorAll('#time-list .time-btn').forEach(el => el.classList.remove('active'));
 }
 
 function confirmBooking() {
   const name = document.getElementById('booking-name').value.trim();
-  if (!name) {
-    showToast('예약자 이름을 입력해주세요.');
-    return;
-  }
+  if (!name) { showToast('예약자 이름을 입력해주세요.'); return; }
   if (!state.date || !state.themeId || !state.timeId) {
     showToast('날짜·테마·시간을 모두 선택해주세요.');
     return;
   }
 
+  if (state.mode === 'waiting') {
+    submitWaiting(name);
+  } else {
+    submitReservation(name);
+  }
+}
+
+function submitReservation(name) {
   fetch(RESERVATION_API, {
     method: 'POST',
     headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify({
-      name,
-      date: state.date,
-      timeId: state.timeId,
-      themeId: state.themeId
-    })
+    body: JSON.stringify({ name, date: state.date, timeId: state.timeId, themeId: state.themeId })
   })
     .then(res => {
       if (res.status === 201) return res.json();
@@ -194,6 +220,32 @@ function confirmBooking() {
     })
     .then(() => {
       showToast('예약이 완료되었습니다.', 'success');
+      clearBookingBar();
+      refreshTimes();
+    })
+    .catch(err => showToast(err.message));
+}
+
+function submitWaiting(name) {
+  fetch(`/reservations/id?date=${state.date}&themeId=${state.themeId}&timeId=${state.timeId}`)
+    .then(res => {
+      if (!res.ok) return res.json().then(b => { throw new Error(b.message || '예약 정보를 찾을 수 없습니다.'); });
+      return res.json();
+    })
+    .then(data => {
+      return fetch('/waitings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ name, reservationId: data.id })
+      });
+    })
+    .then(res => {
+      if (res.status === 201) return res.json();
+      return res.json().then(b => { throw new Error(b.message || '대기 신청에 실패했습니다.'); });
+    })
+    .then(() => {
+      showToast('대기 신청이 완료되었습니다.', 'success');
+      clearBookingBar();
       refreshTimes();
     })
     .catch(err => showToast(err.message));

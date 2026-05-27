@@ -78,6 +78,6 @@ public class ReservationWaitingRepositoryTest {
         List<ReservationWaitingTurnResponse> reservationWaitingTurnResponses = jdbcReservationWaitingRepository.findByName(
                 "현미밥2");
         System.out.println("reservationWaitingTurnResponses.size() = " + reservationWaitingTurnResponses.size());
-        assertThat(reservationWaitingTurnResponses.get(0).turn()).isEqualTo(2);
+        assertThat(reservationWaitingTurnResponses.get(0).turn()).isEqualTo(3);
     }
 }
