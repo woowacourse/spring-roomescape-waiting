@@ -140,4 +140,11 @@ public class ReservationDAO {
 
     return count != null && count > 0;
   }
+
+  public boolean findByNameAndDateAndTimeAndTheme(String name, String date, Long timeId, Long themeId) {
+    String sql = "select count(*) from reservation where name = ? and date = ? and time_id = ? and themeId = ?";
+    Integer count = jdbcTemplate.queryForObject(sql, Integer.class, name, date, timeId, themeId);
+
+    return count != null && count > 0;
+  }
 }

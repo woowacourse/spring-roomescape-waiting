@@ -1,6 +1,7 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -43,21 +44,23 @@ class ReservationServiceTest {
 
   @Nested
   class 예약하기 {
+
+    public static final String NAME = "누누";
+    public static final String DATE = "9999-01-01";
+    public static final long TIME_ID = 1L;
+    public static final Long THEME_ID = 1L;
+
     @Test
     void 예약_생성_성공() {
       // given
-      String name = "누누";
-      String date = "9999-01-01";
-      Long timeId = 1L;
-      Long themeId = 1L;
-      ReservationRequest request = new ReservationRequest(name, date, timeId, themeId);
+      ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
       when(reservationTimeDAO.findById(any())).thenReturn(null);
-      when(reservationDAO.findByDateTimeTheme(date, timeId, themeId)).thenReturn(false);
-      when(reservationDAO.insert(name, LocalDate.parse(date), timeId, themeId, ReservationStatus.RESERVED))
+      when(reservationDAO.findByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(false);
+      when(reservationDAO.insert(NAME, LocalDate.parse(DATE), TIME_ID, THEME_ID, ReservationStatus.RESERVED))
           .thenReturn(
-              Reservation.of(1L, name, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED));
+              Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.RESERVED));
 
       // when
       ReservationCreateResponse response = reservationService.create(request);
@@ -69,23 +72,33 @@ class ReservationServiceTest {
     @Test
     void 예약_대기_성공() {
       // given
-      String name = "누누";
-      String date = "9999-01-01";
-      Long timeId = 1L;
-      Long themeId = 1L;
-      ReservationRequest request = new ReservationRequest(name, date, timeId, themeId);
+      ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
 
       // stubbing
       when(reservationTimeDAO.findById(any())).thenReturn(null);
-      when(reservationDAO.findByDateTimeTheme(date, timeId, themeId)).thenReturn(true);
-      when(reservationDAO.insert(name, LocalDate.parse(date), timeId, themeId, ReservationStatus.WAITING))
-          .thenReturn(Reservation.of(1L, name, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING));
+      when(reservationDAO.findByDateTimeTheme(DATE, TIME_ID, THEME_ID)).thenReturn(true);
+      when(reservationDAO.insert(NAME, LocalDate.parse(DATE), TIME_ID, THEME_ID, ReservationStatus.WAITING))
+          .thenReturn(Reservation.of(1L, NAME, DEFAULT_DATE, DEFAULT_TIME, DEFAULT_THEME, ReservationStatus.WAITING));
 
       // when
       ReservationCreateResponse response = reservationService.create(request);
 
       // then
       assertThat(response.status()).isEqualTo(ReservationStatus.WAITING);
+    }
+
+    @Test
+    void 중복_예약_시도_예외() {
+      // given
+      ReservationRequest request = new ReservationRequest(NAME, DATE, TIME_ID, THEME_ID);
+
+      // stubbing
+      when(reservationTimeDAO.findById(any())).thenReturn(null);
+      when(reservationDAO.findByNameAndDateAndTimeAndTheme(NAME, DATE, TIME_ID, THEME_ID)).thenReturn(true);
+
+      // when // then
+      assertThatThrownBy(() -> reservationService.create(request))
+          .isInstanceOf(IllegalStateException.class);
     }
   }
 }
