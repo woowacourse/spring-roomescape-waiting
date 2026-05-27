@@ -23,6 +23,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.controller.dto.ReservationRequest;
 import roomescape.controller.dto.ReservationUpdateRequest;
 import roomescape.service.UserReservationService;
+import roomescape.service.exception.PastReservationException;
 import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationTimeResult;
 import roomescape.service.dto.ThemeResult;
@@ -71,22 +72,36 @@ class UserReservationControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isBadRequest());
     }
+@Test
+@DisplayName("PATCH /user/reservations/{id} - 유효한 요청이면 예약을 변경한다")
+void update() throws Exception {
+    given(userReservationService.update(any())).willReturn(sampleResult());
+    ReservationUpdateRequest request = new ReservationUpdateRequest("브라운", LocalDate.of(2099, 12, 31), 1L);
 
-    @Test
-    @DisplayName("PATCH /user/reservations/{id} - 유효한 요청이면 예약을 변경한다")
-    void update() throws Exception {
-        given(userReservationService.update(any())).willReturn(sampleResult());
-        ReservationUpdateRequest request = new ReservationUpdateRequest("브라운", LocalDate.of(2099, 12, 31), 1L);
+    mockMvc.perform(patch("/user/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.name").value("브라운"))
+            .andExpect(jsonPath("$.waitingOrder").value(0));
+}
 
-        mockMvc.perform(patch("/user/reservations/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.name").value("브라운"));
-    }
+@Test
+@DisplayName("PATCH /user/reservations/{id} - 이미 지난 예약을 변경하려고 하면 400을 반환한다")
+void update_past_reservation() throws Exception {
+    given(userReservationService.update(any()))
+            .willThrow(new PastReservationException("이미 지난 예약은 변경할 수 없습니다"));
 
-    @Test
-    @DisplayName("DELETE /user/reservations/{id} - 예약을 취소하면 204를 반환한다")
+    ReservationUpdateRequest request = new ReservationUpdateRequest("브라운", LocalDate.of(2099, 12, 31), 1L);
+
+    mockMvc.perform(patch("/user/reservations/1")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(objectMapper.writeValueAsString(request)))
+            .andExpect(status().isBadRequest());
+}
+
+@Test
+@DisplayName("DELETE /user/reservations/{id} - 예약을 취소하면 204를 반환한다")
     void cancel() throws Exception {
         mockMvc.perform(delete("/user/reservations/1").param("name", "브라운"))
                 .andExpect(status().isNoContent());

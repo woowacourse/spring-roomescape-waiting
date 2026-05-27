@@ -69,6 +69,11 @@ public class UserReservationService {
     public ReservationResult update(ReservationUpdateCommand command) {
         Reservation reservation = findReservation(command.id());
         validateOwner(reservation, command.name());
+        validateNotPast(
+                reservation.getDate(),
+                reservation.getTime().getStartAt(),
+                "이미 지난 예약은 변경할 수 없습니다"
+        );
 
         ReservationTime newTime = reservationTimeRepository.findById(command.timeId())
                 .orElseThrow(() -> {
