@@ -95,12 +95,14 @@ public class Reservation {
 
     public void cancel() {
         reservationStatus.cancel(this);
-
-
     }
 
     public void complete() {
         reservationStatus.complete(this);
+    }
+
+    public boolean isPendingStatus() {
+        return reservationStatus == PendingStatus.getInstance();
     }
 
     @Override

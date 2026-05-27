@@ -29,8 +29,8 @@ public class ReservationController {
     }
 
     @GetMapping(params = "name")
-    public ResponseEntity<List<ReservationResponse>> getMyReservations(@NotBlank @RequestParam String name) {
-        return ResponseEntity.ok(convertToReservationResponse(reservationService.findReservationBy(name)));
+    public ResponseEntity<MyReservationResponse> getMyReservations(@NotBlank @RequestParam String name) {
+        return ResponseEntity.ok(reservationService.findReservationBy(name));
     }
 
     @PostMapping

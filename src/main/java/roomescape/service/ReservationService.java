@@ -5,11 +5,12 @@ import java.util.ArrayList;
 import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.controller.dto.MyReservationResponse;
+import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
-import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -69,8 +70,27 @@ public class ReservationService {
         return getReservationOrElseThrow(reservationId);
     }
 
-    public List<Reservation> findReservationBy(String name) {
-        return reservationRepository.findByName(name);
+    public MyReservationResponse findReservationBy(String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        List<ReservationResponse> myNotPendingReservation = reservations.stream()
+                .filter(reservation -> !reservation.isPendingStatus())
+                .map(ReservationResponse::from)
+                .toList();
+
+        List<WaitingReservationResponse> waitingReservationResponses = new ArrayList<>();
+        // 예약이 PENDING이라면 themeSlot으로 repository에서 List<reservation>를 조회해서 대기 순번을 추출한다.
+        for (Reservation reservation : reservations) {
+            if (reservation.isPendingStatus()) {
+                List<WaitingReservationResponse> pendingReservations = findWaitingReservationWithOrder(reservation.getThemeSlot().getId());
+                WaitingReservationResponse waitingReservationResponse = pendingReservations.stream()
+                        .filter(each -> each.name().equals(reservation.getName()))
+                        .findFirst()
+                        .orElseThrow(() -> new IllegalArgumentException("존재하지 않습니다."));
+
+                waitingReservationResponses.add(waitingReservationResponse);
+            }
+        }
+        return new MyReservationResponse(myNotPendingReservation, waitingReservationResponses);
     }
 
     @Transactional
@@ -124,9 +144,9 @@ public class ReservationService {
         return updateReservation;
     }
 
-    public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long id) {
+    public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long themeSlotId) {
         List<WaitingReservationResponse> list = new ArrayList<>();
-        List<Reservation> reservations = reservationRepository.findByThemeSlotAndPending(id);
+        List<Reservation> reservations = reservationRepository.findByThemeSlotAndPending(themeSlotId);
         for (int i = 1; i <= reservations.size(); i++) {
             WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i - 1));
             list.add(response);
@@ -169,6 +189,4 @@ public class ReservationService {
             throw new CustomException(RESERVATION_ALREADY_EXIST_BY_USER_AND_SLOT);
         }
     }
-
-
 }
