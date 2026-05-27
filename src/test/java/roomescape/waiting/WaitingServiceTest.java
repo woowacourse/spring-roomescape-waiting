@@ -55,6 +55,10 @@ class WaitingServiceTest {
                 .thenReturn(false);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(false);
+        when(reservationRepository.existsByScheduleId(scheduleId))
+                .thenReturn(false);
+        when(waitingRepository.existsByScheduleId(scheduleId))
+                .thenReturn(true);
         when(waitingRepository.save(any(Waiting.class)))
                 .thenReturn(savedWaiting);
         when(waitingRepository.countByScheduleIdAndIdLessThanEqual(scheduleId, savedWaiting.getId()))
@@ -97,6 +101,29 @@ class WaitingServiceTest {
                 .thenReturn(scheduleId);
         when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
                 .thenReturn(true);
+
+        assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
+                .isInstanceOf(EscapeRoomException.class);
+
+        verify(waitingRepository, never()).save(any(Waiting.class));
+    }
+
+    @Test
+    @DisplayName("해당 스케줄에 예약/대기가 모두 없으면 대기를 신청할 수 없다.")
+    void save_테스트_4() {
+        WaitingRequest request = new WaitingRequest(LocalDate.of(2026, 5, 5), 4L, 4L);
+        long scheduleId = 4L;
+
+        when(scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId()))
+                .thenReturn(scheduleId);
+        when(reservationRepository.existsByMemberIdAndScheduleId(MEMBER_ID, scheduleId))
+                .thenReturn(false);
+        when(waitingRepository.existsByScheduleIdAndMemberId(MEMBER_ID, scheduleId))
+                .thenReturn(false);
+        when(reservationRepository.existsByScheduleId(scheduleId))
+                .thenReturn(false);
+        when(waitingRepository.existsByScheduleId(scheduleId))
+                .thenReturn(false);
 
         assertThatThrownBy(() -> waitingService.save(request, MEMBER_ID))
                 .isInstanceOf(EscapeRoomException.class);

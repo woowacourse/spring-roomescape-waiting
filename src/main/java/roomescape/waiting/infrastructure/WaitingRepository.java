@@ -13,6 +13,8 @@ public interface WaitingRepository {
 
     boolean existsByScheduleIdAndMemberId(long memberId, long scheduleId);
 
+    boolean existsByScheduleId(long scheduleId);
+
     long countByScheduleIdAndIdLessThanEqual(long scheduleId, long waitingId);
 
     List<WaitingDetailProjection> findAllWaitingDetailsByMemberId(long memberId);

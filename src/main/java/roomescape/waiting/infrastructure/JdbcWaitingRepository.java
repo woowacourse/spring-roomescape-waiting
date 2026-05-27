@@ -88,6 +88,18 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
+    public boolean existsByScheduleId(long scheduleId) {
+        String sql = """
+                SELECT EXISTS (SELECT 1 FROM waiting WHERE schedule_id = :scheduleId)
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource()
+                .addValue("scheduleId", scheduleId);
+
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, params, Boolean.class));
+    }
+
+    @Override
     public long countByScheduleIdAndIdLessThanEqual(long scheduleId, long waitingId) {
         String sql = """
                 SELECT COUNT(*) FROM waiting
