@@ -37,9 +37,11 @@ import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.ReservationService;
+import roomescape.reservation.application.dto.UserReservationResult;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+import roomescape.waiting.domain.Waiting;
 
 @WebMvcTest(ReservationController.class)
 @Import({AdminInterceptor.class, ReservationControllerTest.TestWebConfig.class})
@@ -70,6 +72,13 @@ class ReservationControllerTest {
         ReservationTime time = ReservationTime.createRow(timeId, LocalTime.parse(startAt));
         Theme theme = Theme.createRow(themeId, themeName, "설명", "https://thumbnail.com");
         return Reservation.createRow(id, name, date, time, theme, LocalDateTime.now());
+    }
+
+    private Waiting sampleWaiting(Long id, String name, LocalDate date, Long timeId, String startAt,
+                                  Long themeId, String themeName, Long rank) {
+        ReservationTime time = ReservationTime.createRow(timeId, LocalTime.parse(startAt));
+        Theme theme = Theme.createRow(themeId, themeName, "설명", "https://thumbnail.com");
+        return Waiting.createRow(id, name, date, time, theme, rank, LocalDateTime.now());
     }
 
     @Test
@@ -246,17 +255,34 @@ class ReservationControllerTest {
                 1L,
                 "테마A"
         );
-        given(reservationService.getReservationsByName("브라운")).willReturn(List.of(reservation));
+        Waiting waiting = sampleWaiting(
+                2L,
+                "브라운",
+                LocalDate.of(2026, 5, 6),
+                2L,
+                "11:00",
+                2L,
+                "테마B",
+                2L
+        );
+        given(reservationService.getReservationsByName("브라운"))
+                .willReturn(UserReservationResult.from(List.of(reservation), List.of(waiting)));
 
         // when & then
         mockMvc.perform(get("/reservations/me")
                         .param("name", "브라운"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(1))
-                .andExpect(jsonPath("$[0].id").value(1))
-                .andExpect(jsonPath("$[0].name").value("브라운"))
-                .andExpect(jsonPath("$[0].time.startAt").value("10:00"))
-                .andExpect(jsonPath("$[0].theme.name").value("테마A"));
+                .andExpect(jsonPath("$.reservations.length()").value(1))
+                .andExpect(jsonPath("$.reservations[0].id").value(1))
+                .andExpect(jsonPath("$.reservations[0].name").value("브라운"))
+                .andExpect(jsonPath("$.reservations[0].time.startAt").value("10:00"))
+                .andExpect(jsonPath("$.reservations[0].theme.name").value("테마A"))
+                .andExpect(jsonPath("$.waitings.length()").value(1))
+                .andExpect(jsonPath("$.waitings[0].id").value(2))
+                .andExpect(jsonPath("$.waitings[0].name").value("브라운"))
+                .andExpect(jsonPath("$.waitings[0].time.startAt").value("11:00"))
+                .andExpect(jsonPath("$.waitings[0].theme.name").value("테마B"))
+                .andExpect(jsonPath("$.waitings[0].rank").value(2));
 
         then(reservationService).should().getReservationsByName("브라운");
     }
