@@ -22,6 +22,7 @@ class ReservationTimeRepositoryTest {
 
     @BeforeEach
     void setup() {
+        jdbcTemplate.update("DELETE FROM reservation_waiting;");
         jdbcTemplate.update("DELETE FROM reservation;");
         jdbcTemplate.update("DELETE FROM reservation_time;");
         this.dao = new ReservationTimeRepository(jdbcTemplate);

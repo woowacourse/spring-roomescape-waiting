@@ -24,6 +24,7 @@ class ThemeRepositoryTest {
     @BeforeEach
     void setup() {
         this.themeRepository = new ThemeRepository(jdbcTemplate);
+        jdbcTemplate.update("DELETE FROM reservation_waiting;");
         jdbcTemplate.update("DELETE FROM reservation;");
         jdbcTemplate.update("DELETE FROM theme");
     }

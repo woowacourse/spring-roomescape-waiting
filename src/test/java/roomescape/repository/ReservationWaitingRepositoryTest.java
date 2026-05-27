@@ -30,7 +30,9 @@ class ReservationWaitingRepositoryTest {
     @BeforeEach
     void setup() {
         this.waitingRepository = new ReservationWaitingRepository(jdbcTemplate);
+        jdbcTemplate.update("DELETE FROM reservation_waiting;");
         jdbcTemplate.update("DELETE FROM reservation;");
+        jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1;");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1;");
     }
 
