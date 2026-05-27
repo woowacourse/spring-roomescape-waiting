@@ -2,6 +2,7 @@ package roomescape.service;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.BusinessRuleViolationException;
 import roomescape.common.exception.EntityNotFoundException;
 import roomescape.dao.MemberDao;
@@ -17,6 +18,7 @@ import roomescape.domain.Waiting;
 import roomescape.dto.request.WaitingRequestDto;
 
 @Service
+@Transactional
 public class WaitingService {
     private final WaitingDao waitingDao;
     private final MemberDao memberDao;
@@ -34,7 +36,7 @@ public class WaitingService {
     }
 
     public Waiting create(WaitingRequestDto waitingRequestDto, Member member) {
-        Reservation reservation = reservationDao.findByThemeIdAndTimeIdAndDate(waitingRequestDto.themeId(),
+        Reservation reservation = reservationDao.findByThemeIdAndTimeIdAndDateForUpdate(waitingRequestDto.themeId(),
                         waitingRequestDto.timeId(), waitingRequestDto.date())
                 .orElseThrow(() -> new EntityNotFoundException("예약이 존재하지 않아 대기가 불가능합니다."));
 
@@ -51,14 +53,17 @@ public class WaitingService {
         }
     }
 
+    @Transactional(readOnly = true)
     public List<Waiting> findAll() {
         return waitingDao.findAll();
     }
 
+    @Transactional(readOnly = true)
     public List<Waiting> findAllByMemberId(Long memberId) {
         return waitingDao.findAllByMemberId(memberId);
     }
 
+    @Transactional(readOnly = true)
     public List<Waiting> findAllByStoreId(Long storeId) {
         return waitingDao.findAllByStoreId(storeId);
     }
