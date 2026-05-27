@@ -36,7 +36,7 @@ public class ReservationValidator {
     }
 
     private void validateNotDuplicated(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+        if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
@@ -47,7 +47,7 @@ public class ReservationValidator {
     }
 
     private void validateNotDuplicatedExcept(Reservation reservation) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
+        if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),

@@ -55,6 +55,17 @@ public class Reservation {
         return new Reservation(id, guestName, date, time, theme, status, changedAt);
     }
 
+    public static Reservation clone(Reservation reservation) {
+        return new Reservation(
+                reservation.id,
+                reservation.guestName,
+                reservation.date,
+                reservation.time,
+                reservation.theme,
+                reservation.status,
+                reservation.lastModifiedAt);
+    }
+
     public Reservation withId(long id) {
         require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
         return of(id, guestName, date, time, theme, status, lastModifiedAt);
@@ -66,6 +77,14 @@ public class Reservation {
         requireNonNull(time, new DomainException(INVALID_RESERVATION_TIME));
         requireNonNull(theme, new DomainException(INVALID_THEME));
         requireNonNull(changedAt, new DomainException(INVALID_LAST_MODIFIED_AT));
+    }
+
+    public Long getThemeId() {
+        return theme.getId();
+    }
+
+    public Long getTimeId() {
+        return time.getId();
     }
 
     @Override
@@ -89,7 +108,15 @@ public class Reservation {
         return Objects.equals(this.guestName, guestName);
     }
 
-    public Reservation changeDateAndTimeAndStatus(LocalDate changedDate, ReservationTime changedTime, Status status) {
-        return of(id, guestName, changedDate, changedTime, theme, status, lastModifiedAt);
+    public Reservation changeDateTimeAndStatus(LocalDate changedDate, ReservationTime changedTime, Status status) {
+        return new Reservation(id, guestName, changedDate, changedTime, theme, status, lastModifiedAt);
+    }
+
+    public Reservation changeStatus(Status status) {
+        return new Reservation(id, guestName, date, time, theme, status, lastModifiedAt);
+    }
+
+    public boolean isConfirmed() {
+        return Status.CONFIRMED.equals(status);
     }
 }

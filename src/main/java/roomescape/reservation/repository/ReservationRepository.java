@@ -18,15 +18,19 @@ public interface ReservationRepository {
 
     List<ReservationWaitingDto> findWaitingAllByGuestName(String guestName);
 
+    Optional<Reservation> findBySlotAndStatusWaitingAndWaitingNumberIsOne(LocalDate date, Long timeId, Long themeId);
+
     Reservation save(Reservation reservation);
 
-    boolean updateDateAndTime(Long id, LocalDate date, Long timeId, Status status);
+    boolean updateDateAndTimeAndStatus(Long id, LocalDate date, Long timeId, Status status);
+
+    boolean updateStatus(Long id, Status status);
 
     boolean cancelById(Long id);
 
-    boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(LocalDate date, Long timeId, Long themeId, String guestName);
+    boolean existsBySlotAndGuestNameExceptCanceled(LocalDate date, Long timeId, Long themeId, String guestName);
 
-    boolean existsReservationBySlot(LocalDate date, Long timeId, Long themeId);
+    boolean existsBySlot(LocalDate date, Long timeId, Long themeId);
 
     boolean existByTimeId(Long timeId);
 

@@ -18,7 +18,9 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 
+import static roomescape.reservation.domain.Status.CONFIRMED;
 import static roomescape.reservation.exception.ReservationErrorCode.*;
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.*;
 import static roomescape.theme.exception.ThemeErrorCode.*;
@@ -62,16 +64,32 @@ public class ReservationService {
     }
 
     @Transactional
-    public void editDateTime(Long reservationId, LocalDate date, Long timeId, String guestName) {
+    public void editDateTime(Long reservationId, LocalDate changedDate, Long timeId, String requestGuestName) {
         Reservation reservation = getReservation(reservationId);
         ReservationTime changedTime = getReservationTime(timeId);
 
-        Status status = determineState(date, timeId, reservation.getTheme().getId());
-        Reservation changedReservation = reservation.changeDateAndTimeAndStatus(date, changedTime, status);
+        Reservation beforeReservation = Reservation.clone(reservation);
+        Status afterStatus = determineState(changedDate, timeId, reservation.getTheme().getId());
+        Reservation changedReservation = reservation.changeDateTimeAndStatus(changedDate, changedTime, afterStatus);
 
-        reservationValidator.validateEdit(reservation, changedReservation, guestName);
+        reservationValidator.validateEdit(reservation, changedReservation, requestGuestName);
 
-        updateReservation(changedReservation);
+        updateDateAndTimeAndStatus(changedReservation);
+        updateTopWaitingConfirmed(beforeReservation);
+    }
+
+    private void updateTopWaitingConfirmed(Reservation beforeReservation) {
+        if(beforeReservation.isConfirmed()) {
+            Optional<Reservation> topWaiting = reservationRepository.findBySlotAndStatusWaitingAndWaitingNumberIsOne(
+                    beforeReservation.getDate(),
+                    beforeReservation.getTimeId(),
+                    beforeReservation.getThemeId());
+
+            if(topWaiting.isPresent()) {
+                Reservation top = topWaiting.get();
+                updateStatus(top.changeStatus(CONFIRMED));
+            }
+        }
     }
 
     @Transactional
@@ -107,8 +125,8 @@ public class ReservationService {
                 .orElseThrow(() -> new DomainException(RESERVATION_TIME_NOT_FOUND));
     }
 
-    private void updateReservation(Reservation reservation) {
-        if (!reservationRepository.updateDateAndTime(
+    private void updateDateAndTimeAndStatus(Reservation reservation) {
+        if (!reservationRepository.updateDateAndTimeAndStatus(
                 reservation.getId(),
                 reservation.getDate(),
                 reservation.getTime().getId(),
@@ -118,9 +136,15 @@ public class ReservationService {
         }
     }
 
+    private void updateStatus(Reservation reservation) {
+        if (!reservationRepository.updateStatus(reservation.getId(), reservation.getStatus())) {
+            throw new DomainException(RESERVATION_NOT_FOUND);
+        }
+    }
+
     private Status determineState(LocalDate date, Long timeId, Long themeId){
-        if (!reservationRepository.existsReservationBySlot(date, timeId, themeId)){
-            return Status.CONFIRMED;
+        if (!reservationRepository.existsBySlot(date, timeId, themeId)){
+            return CONFIRMED;
         }
         return Status.WAITING;
     }
