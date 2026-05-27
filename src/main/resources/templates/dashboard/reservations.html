@@ -29,26 +29,25 @@
 <div class="page">
     <section class="nav">
         <h1>예약 관리</h1>
-        <div class="links"><a href="/dashboard">홈</a><a href="/dashboard/availability">예약 가능 시간 조회</a></div>
+        <div class="links"><a href="/page/dashboard">홈</a><a href="/page/dashboard/availability">예약 가능 시간 조회</a></div>
     </section>
     <div th:if="${successMessage}" class="flash success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="flash error" th:text="${errorMessage}"></div>
     <section class="grid">
         <article class="card">
             <h2>예약 생성</h2>
-            <form method="post" th:action="@{/dashboard/reservations}">
+            <form method="post" th:action="@{/page/dashboard/reservations}">
                 <label>예약자 이름<input type="text" name="name" required></label>
-                <label>예약 날짜<input type="date" name="date" required></label>
                 <label>테마
                     <select name="themeId" required>
                         <option value="">테마 선택</option>
                         <option th:each="theme : ${themes}" th:value="${theme.id()}" th:text="|${theme.name()} (#${theme.id()})|"></option>
                     </select>
                 </label>
-                <label>시작 시간
-                    <select name="time" required>
+                <label>시간
+                    <select name="timeId" required>
                         <option value="">시간 선택</option>
-                        <option th:each="time : ${times}" th:value="${time.startAt()}" th:text="|${time.startAt()} ~ ${time.endAt()}|"></option>
+                        <option th:each="time : ${times}" th:value="${time.id()}" th:text="|${time.startAt()} ~ ${time.endAt()}|"></option>
                     </select>
                 </label>
                 <button type="submit">예약 생성</button>
@@ -64,7 +63,7 @@
                             <strong th:text="${reservation.name()}"></strong>
                             <p th:text="|${reservation.time().startAt()} ~ ${reservation.time().endAt()} · ${reservation.theme().name()}|"></p>
                         </div>
-                        <form class="inline-form" method="post" th:action="@{|/dashboard/reservations/${reservation.id()}/cancel|}">
+                        <form class="inline-form" method="post" th:action="@{|/page/dashboard/reservations/${reservation.id()}/cancel|}">
                             <button type="submit" class="danger">취소</button>
                         </form>
                     </div>

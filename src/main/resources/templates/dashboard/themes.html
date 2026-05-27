@@ -27,13 +27,13 @@
 </head>
 <body>
 <div class="page">
-    <section class="nav"><h1>테마 관리</h1><div class="links"><a href="/dashboard">홈</a></div></section>
+    <section class="nav"><h1>테마 관리</h1><div class="links"><a href="/page/dashboard">홈</a></div></section>
     <div th:if="${successMessage}" class="flash success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="flash error" th:text="${errorMessage}"></div>
     <section class="grid">
         <article class="card">
             <h2>테마 추가</h2>
-            <form method="post" th:action="@{/dashboard/themes}">
+            <form method="post" th:action="@{/page/dashboard/themes}">
                 <label>이름<input type="text" name="name" required></label>
                 <label>설명<textarea name="description" required></textarea></label>
                 <label>이미지 URL<input type="url" name="imageUrl" required></label>
@@ -49,7 +49,7 @@
                 <li th:each="theme : ${themes}">
                     <div class="head">
                         <div><strong th:text="${theme.name()}"></strong><p th:text="${theme.description()}"></p><p th:text="|이미지 URL: ${theme.imageUrl()}|"></p></div>
-                        <form class="inline-form" method="post" th:action="@{|/dashboard/themes/${theme.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
+                        <form class="inline-form" method="post" th:action="@{|/page/dashboard/themes/${theme.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
                     </div>
                 </li>
             </ul>

@@ -12,6 +12,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
@@ -20,7 +21,9 @@ import roomescape.holiday.exception.HolidayNotFoundException;
 import roomescape.holiday.service.HolidayService;
 import roomescape.holiday.service.dto.HolidaySaveServiceDto;
 import roomescape.reservation.controller.dto.ReservationResponseDto;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
 import roomescape.reservation.exception.DuplicateReservationException;
+import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
@@ -35,6 +38,7 @@ import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.TimeService;
 
 @Controller
+@RequestMapping("/page")
 public class RoomescapePageController {
 
     private static final Logger log = LoggerFactory.getLogger(RoomescapePageController.class);
@@ -56,7 +60,7 @@ public class RoomescapePageController {
         this.holidayService = holidayService;
     }
 
-    @GetMapping({"/", "/dashboard"})
+    @GetMapping("/dashboard")
     public String dashboard() {
         return "dashboard/index";
     }
@@ -115,7 +119,54 @@ public class RoomescapePageController {
                  IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "예약 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
         }
-        return "redirect:/dashboard/reservations";
+        return "redirect:/page/dashboard/reservations";
+    }
+
+    @GetMapping("/reservations")
+    public String userReservationsPage(@RequestParam(required = false) String name, Model model) {
+        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponseDto::from).toList());
+        model.addAttribute("times", timeService.findAll().stream().map(TimeResponseDto::from).toList());
+        if (name != null && !name.isBlank()) {
+            model.addAttribute("reservations", reservationService.getAllByName(name));
+            model.addAttribute("name", name);
+        }
+        return "reservations";
+    }
+
+    @PostMapping("/reservations")
+    public String createUserReservation(
+            @RequestParam String name,
+            @RequestParam Long themeId,
+            @RequestParam Long timeId,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            reservationService.create(new ReservationSaveServiceDto(name, themeId, timeId));
+            addSuccessMessage(redirectAttributes, "예약을 생성했습니다.");
+        } catch (PastReservationException | DuplicateReservationException |
+                 IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
+            addExpectedErrorMessage(redirectAttributes, "예약 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
+        }
+        return "redirect:/page/reservations?name=" + name;
+    }
+
+    @PostMapping("/reservations/{id}/cancel")
+    public String cancelUserReservation(
+            @PathVariable Long id,
+            @RequestParam String name,
+            RedirectAttributes redirectAttributes
+    ) {
+        try {
+            reservationService.cancelForUser(id, name);
+            addSuccessMessage(redirectAttributes, "예약을 취소했습니다.");
+        } catch (ReservationNotFoundException e) {
+            addExpectedErrorMessage(redirectAttributes, "취소할 예약을 찾지 못했습니다.", e);
+        } catch (PastReservationException e) {
+            addExpectedErrorMessage(redirectAttributes, "이미 지난 예약은 취소할 수 없습니다.", e);
+        } catch (ForbiddenRequestException e) {
+            addExpectedErrorMessage(redirectAttributes, "본인의 예약만 취소할 수 있습니다.", e);
+        }
+        return "redirect:/page/reservations?name=" + name;
     }
 
     @PostMapping("/dashboard/reservations/{id}/cancel")
@@ -126,7 +177,7 @@ public class RoomescapePageController {
         } catch (ReservationNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "취소할 예약을 찾지 못했습니다.", e);
         }
-        return "redirect:/dashboard/reservations";
+        return "redirect:/page/dashboard/reservations";
     }
 
     @PostMapping("/dashboard/themes")
@@ -142,7 +193,7 @@ public class RoomescapePageController {
         } catch (IllegalArgumentException e) {
             addExpectedErrorMessage(redirectAttributes, "테마 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
         }
-        return "redirect:/dashboard/themes";
+        return "redirect:/page/dashboard/themes";
     }
 
     @PostMapping("/dashboard/themes/{id}/delete")
@@ -153,7 +204,7 @@ public class RoomescapePageController {
         } catch (ThemeNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "삭제할 테마를 찾지 못했습니다.", e);
         }
-        return "redirect:/dashboard/themes";
+        return "redirect:/page/dashboard/themes";
     }
 
     @PostMapping("/dashboard/times")
@@ -168,7 +219,7 @@ public class RoomescapePageController {
         } catch (IllegalArgumentException e) {
             addExpectedErrorMessage(redirectAttributes, "시간 슬롯 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
         }
-        return "redirect:/dashboard/times";
+        return "redirect:/page/dashboard/times";
     }
 
     @PostMapping("/dashboard/times/{id}/delete")
@@ -181,7 +232,7 @@ public class RoomescapePageController {
         } catch (TimeNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "삭제할 시간 슬롯을 찾지 못했습니다.", e);
         }
-        return "redirect:/dashboard/times";
+        return "redirect:/page/dashboard/times";
     }
 
     @PostMapping("/dashboard/holidays")
@@ -195,7 +246,7 @@ public class RoomescapePageController {
         } catch (IllegalArgumentException e) {
             addExpectedErrorMessage(redirectAttributes, "휴일 추가에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
         }
-        return "redirect:/dashboard/holidays";
+        return "redirect:/page/dashboard/holidays";
     }
 
     @PostMapping("/dashboard/holidays/{id}/delete")
@@ -206,7 +257,7 @@ public class RoomescapePageController {
         } catch (HolidayNotFoundException e) {
             addExpectedErrorMessage(redirectAttributes, "삭제할 휴일을 찾지 못했습니다.", e);
         }
-        return "redirect:/dashboard/holidays";
+        return "redirect:/page/dashboard/holidays";
     }
 
     private List<TimeResponseDto> availableTimes(Long availableThemeId, LocalDate availableDate, Model model) {

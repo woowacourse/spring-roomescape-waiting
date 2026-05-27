@@ -138,16 +138,16 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public Optional<Long> findEarliestWaiting(Long timeId, Long themeId) {
-        Long waitingId = jdbcTemplate.queryForObject(
+        return jdbcTemplate.query(
                 "SELECT id FROM reservation "
                         + "WHERE time_id = ? "
                         + "AND theme_id = ? "
                         + "AND status = 'WAITING' "
                         + "ORDER BY created_at ASC "
                         + "LIMIT 1",
-                Long.class,
-                timeId, themeId);
-        return Optional.ofNullable(waitingId);
+                (rs, rowNum) -> rs.getLong("id"),
+                timeId, themeId
+        ).stream().findFirst();
     }
 
     @Override

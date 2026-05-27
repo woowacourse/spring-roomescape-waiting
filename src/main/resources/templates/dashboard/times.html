@@ -25,14 +25,14 @@
 </head>
 <body>
 <div class="page">
-    <section class="nav"><h1>시간 관리</h1><div class="links"><a href="/dashboard">홈</a></div></section>
+    <section class="nav"><h1>시간 관리</h1><div class="links"><a href="/page/dashboard">홈</a></div></section>
     <div th:if="${successMessage}" class="flash success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="flash error" th:text="${errorMessage}"></div>
     <article class="card">
         <h2>시간 추가</h2>
-        <form method="post" th:action="@{/dashboard/times}">
-            <label>시작 시간<input type="time" name="startAt" required></label>
-            <label>종료 시간<input type="time" name="endAt" required></label>
+        <form method="post" th:action="@{/page/dashboard/times}">
+            <label>시작 시간<input type="datetime-local" name="startAt" required></label>
+            <label>종료 시간<input type="datetime-local" name="endAt" required></label>
             <button type="submit">시간 추가</button>
         </form>
     </article>
@@ -42,7 +42,7 @@
             <li th:each="time : ${times}">
                 <div class="head">
                     <div><strong th:text="|#${time.id()}|"></strong><p th:text="|${time.startAt()} ~ ${time.endAt()}|"></p></div>
-                    <form class="inline-form" method="post" th:action="@{|/dashboard/times/${time.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
+                    <form class="inline-form" method="post" th:action="@{|/page/dashboard/times/${time.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
                 </div>
             </li>
         </ul>

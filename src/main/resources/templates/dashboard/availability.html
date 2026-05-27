@@ -23,10 +23,10 @@
 <div class="page">
     <section class="nav">
         <h1>예약 가능 시간 조회</h1>
-        <div class="links"><a href="/dashboard">홈</a><a href="/dashboard/reservations">예약 관리</a></div>
+        <div class="links"><a href="/page/dashboard">홈</a><a href="/page/dashboard/reservations">예약 관리</a></div>
     </section>
     <article class="card">
-        <form method="get" th:action="@{/dashboard/availability}">
+        <form method="get" th:action="@{/page/dashboard/availability}">
             <label>테마
                 <select name="availableThemeId" required>
                     <option value="">테마 선택</option>

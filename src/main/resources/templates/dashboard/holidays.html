@@ -25,12 +25,12 @@
 </head>
 <body>
 <div class="page">
-    <section class="nav"><h1>휴일 관리</h1><div class="links"><a href="/dashboard">홈</a></div></section>
+    <section class="nav"><h1>휴일 관리</h1><div class="links"><a href="/page/dashboard">홈</a></div></section>
     <div th:if="${successMessage}" class="flash success" th:text="${successMessage}"></div>
     <div th:if="${errorMessage}" class="flash error" th:text="${errorMessage}"></div>
     <article class="card">
         <h2>휴일 추가</h2>
-        <form method="post" th:action="@{/dashboard/holidays}">
+        <form method="post" th:action="@{/page/dashboard/holidays}">
             <label>휴일 날짜<input type="date" name="date" required></label>
             <button type="submit">휴일 추가</button>
         </form>
@@ -41,7 +41,7 @@
             <li th:each="holiday : ${holidays}">
                 <div class="head">
                     <div><strong th:text="|#${holiday.id()}|"></strong><p th:text="${holiday.date()}"></p></div>
-                    <form class="inline-form" method="post" th:action="@{|/dashboard/holidays/${holiday.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
+                    <form class="inline-form" method="post" th:action="@{|/page/dashboard/holidays/${holiday.id()}/delete|}"><button type="submit" class="danger">삭제</button></form>
                 </div>
             </li>
         </ul>
