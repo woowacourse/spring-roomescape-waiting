@@ -4,14 +4,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
-import org.springframework.expression.spel.ast.Literal;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ThemeResponse;
 
 @Service
@@ -70,13 +67,5 @@ public class ThemeService {
 
     public void delete(Long id) {
         themeDao.delete(id);
-    }
-
-    public List<ReservationTimeResponse> findAvailableTime(Long id, String date) {
-        List<ReservationTime> availableTimes = themeDao.findAvailableTime(id, date);
-
-        return availableTimes.stream()
-                .map(ReservationTimeResponse::from)
-                .toList();
     }
 }
