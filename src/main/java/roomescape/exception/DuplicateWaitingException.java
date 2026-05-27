@@ -1,10 +1,12 @@
 package roomescape.exception;
 
-import roomescape.service.dto.WaitingCommand;
+import roomescape.domain.Waiting;
 
 public class DuplicateWaitingException extends RoomescapeException {
 
-    public DuplicateWaitingException(WaitingCommand waiting) {
-        super("DUPLICATE_WAITING", "이미 등록된 예약 대기입니다. (" + waiting.toString() + ")");
+    public DuplicateWaitingException(Waiting waiting) {
+        super("DUPLICATE_WAITING",
+                String.format("해당 날짜(%s)의 시간(%d)과 테마(%d)는 이미 예약되어 있습니다.", waiting.getDate(), waiting.getTimeSlotId(),
+                        waiting.getThemeId()));
     }
 }

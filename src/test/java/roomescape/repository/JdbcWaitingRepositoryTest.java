@@ -13,7 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
-import roomescape.service.dto.WaitingCommand;
+import roomescape.domain.Waiting;
 
 @JdbcTest
 @Sql(scripts = "/test-setup.sql", executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
@@ -42,14 +42,14 @@ class JdbcWaitingRepositoryTest {
     @Test
     @DisplayName("예약 대기를 저장한다.")
     void save() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
     }
 
     @Test
     @DisplayName("저장된 예약 대기 존재를 확인하면, 참을 반환한다.")
     void existsWaiting() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
         assertThat(jdbcWaitingRepository.isExists(waiting)).isEqualTo(true);
     }
@@ -57,14 +57,14 @@ class JdbcWaitingRepositoryTest {
     @Test
     @DisplayName("저장되지 않은 예약 대기 존재를 확인하면, 거짓을 반환한다.")
     void notExistsWaiting() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         assertThat(jdbcWaitingRepository.isExists(waiting)).isEqualTo(false);
     }
 
     @Test
     @DisplayName("예약 대기를 삭제한다.")
     void delete() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
         jdbcWaitingRepository.delete(waiting);
     }
@@ -72,8 +72,8 @@ class JdbcWaitingRepositoryTest {
     @Test
     @DisplayName("예약 대기 순번을 계산한다.")
     void calculateWaitingNumber() {
-        WaitingCommand waiting1 = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
-        WaitingCommand waiting2 = new WaitingCommand("워니", LocalDate.now(), 1L, 1L);
+        Waiting waiting1 = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
+        Waiting waiting2 = new Waiting(null, "워니", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting1);
         jdbcWaitingRepository.save(waiting2);
 

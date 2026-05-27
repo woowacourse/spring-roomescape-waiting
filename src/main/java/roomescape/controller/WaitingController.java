@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.WaitingRequest;
+import roomescape.domain.Waiting;
 import roomescape.service.WaitingService;
-import roomescape.service.dto.WaitingCommand;
 
 @RestController
 @RequestMapping("/waitings")
@@ -30,13 +30,15 @@ public class WaitingController {
                                                  @RequestParam @NotNull LocalDate date,
                                                  @RequestParam @NotNull Long timeId,
                                                  @RequestParam @NotNull Long themeId) {
-
-        return ResponseEntity.ok(waitingService.waitingNumber(new WaitingCommand(name, date, timeId, themeId)));
+        Waiting waiting = Waiting.transientOf(name, date, timeId, themeId);
+        return ResponseEntity.ok(waitingService.waitingNumber(waiting));
     }
 
     @PostMapping
     public ResponseEntity<Void> apply(@RequestBody WaitingRequest waitingRequest) {
-        waitingService.saveWaiting(waitingRequest.toCommand());
+        Waiting waiting = Waiting.transientOf(waitingRequest.name(), waitingRequest.date(), waitingRequest.timeId(),
+                waitingRequest.themeId());
+        waitingService.saveWaiting(waiting);
         return ResponseEntity.ok().build();
     }
 
@@ -45,8 +47,8 @@ public class WaitingController {
                                        @RequestParam @NotNull LocalDate date,
                                        @RequestParam @NotNull Long timeId,
                                        @RequestParam @NotNull Long themeId) {
-
-        waitingService.removeWaiting(new WaitingCommand(name, date, timeId, themeId));
+        Waiting waiting = Waiting.transientOf(name, date, timeId, themeId);
+        waitingService.removeWaiting(waiting);
         return ResponseEntity.noContent().build();
     }
 
@@ -54,6 +56,6 @@ public class WaitingController {
     ResponseEntity<Integer> allWaiting(@RequestParam @NotNull LocalDate date,
                                        @RequestParam @NotNull Long timeId,
                                        @RequestParam @NotNull Long themeId) {
-        return ResponseEntity.ok(waitingService.allWaiting(WaitingCommand.withoutName(date, timeId, themeId)));
+        return ResponseEntity.ok(waitingService.allWaitingOf(date, timeId, themeId));
     }
 }

@@ -7,29 +7,29 @@ public class Waiting {
     private final Long id;
     private String name;
     private LocalDate date;
-    private TimeSlot timeSlot;
-    private Theme theme;
+    private Long timeSlotId;
+    private Long themeId;
     private Integer waitingNumber;
 
-    public Waiting(Long id, String name, LocalDate date, TimeSlot timeSlot, Theme theme, Integer waitingNumber) {
-        validateFields(name, date, timeSlot, theme);
+    public Waiting(Long id, String name, LocalDate date, Long timeSlotId, Long themeId, Integer waitingNumber) {
+        validateFields(name, date, timeSlotId, themeId);
         this.id = id;
         this.name = name;
         this.date = date;
-        this.timeSlot = timeSlot;
-        this.theme = theme;
+        this.timeSlotId = timeSlotId;
+        this.themeId = themeId;
         this.waitingNumber = waitingNumber;
     }
 
-    public static Waiting transientOf(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
-        return new Waiting(null, name, date, timeSlot, theme, null);
+    public static Waiting transientOf(String name, LocalDate date, Long timeSlotId, Long themeId) {
+        return new Waiting(null, name, date, timeSlotId, themeId, null);
     }
 
-    private void validateFields(String name, LocalDate date, TimeSlot timeSlot, Theme theme) {
+    private void validateFields(String name, LocalDate date, Long timeSlotId, Long themeId) {
         validateName(name);
         validateDate(date);
-        validateTimeSlot(timeSlot);
-        validateTheme(theme);
+        validateTimeSlot(timeSlotId);
+        validateTheme(themeId);
     }
 
     private void validateName(String name) {
@@ -44,14 +44,14 @@ public class Waiting {
         }
     }
 
-    private void validateTimeSlot(TimeSlot timeSlot) {
-        if (timeSlot == null) {
+    private void validateTimeSlot(Long timeSlotId) {
+        if (timeSlotId == null) {
             throw new IllegalArgumentException("존재하지 않는 예약 시간대입니다.");
         }
     }
 
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
+    private void validateTheme(Long themeId) {
+        if (themeId == null) {
             throw new IllegalArgumentException("존재하지 않는 테마입니다.");
         }
     }
@@ -68,12 +68,12 @@ public class Waiting {
         return date;
     }
 
-    public TimeSlot getTimeSlot() {
-        return timeSlot;
+    public Long getTimeSlotId() {
+        return timeSlotId;
     }
 
-    public Theme getTheme() {
-        return theme;
+    public Long getThemeId() {
+        return themeId;
     }
 
     public Integer getWaitingNumber() {

@@ -11,10 +11,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.domain.Waiting;
 import roomescape.exception.DuplicateWaitingException;
 import roomescape.exception.WaitingNotFoundException;
 import roomescape.repository.WaitingRepository;
-import roomescape.service.dto.WaitingCommand;
 
 @ExtendWith(MockitoExtension.class)
 class WaitingServiceTest {
@@ -32,7 +32,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하는 예약 대기를 삭제한다.")
     void deleteWaiting() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         given(waitingRepository.calculateWaitingNumber(waiting)).willReturn(1);
 
         assertThatCode(() -> waitingService.removeWaiting(waiting)).doesNotThrowAnyException();
@@ -41,7 +41,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하지 않는 예약 대기를 삭제하면, 예외가 발생한다.")
     void deleteNotExistsWaiting() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         given(waitingRepository.calculateWaitingNumber(waiting)).willReturn(0);
 
         assertThatThrownBy(() -> waitingService.removeWaiting(waiting)).isInstanceOf(WaitingNotFoundException.class);
@@ -50,7 +50,7 @@ class WaitingServiceTest {
     @Test
     @DisplayName("존재하는 예약 대기를 중복해서 저장하면, 예외가 발생한다.")
     void saveDuplicateWaiting() {
-        WaitingCommand waiting = new WaitingCommand("브라운", LocalDate.now(), 1L, 1L);
+        Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         waitingService.saveWaiting(waiting);
         given(waitingRepository.isExists(waiting)).willReturn(true);
 

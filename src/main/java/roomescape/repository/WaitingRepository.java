@@ -1,16 +1,20 @@
 package roomescape.repository;
 
-import roomescape.service.dto.WaitingCommand;
+import java.time.LocalDate;
+import java.util.List;
+import roomescape.domain.Waiting;
 
 public interface WaitingRepository {
 
-    int calculateWaitingNumber(WaitingCommand waiting);
+    int calculateWaitingNumber(Waiting waiting);
 
-    void save(WaitingCommand waiting);
+    void save(Waiting waiting);
 
-    void delete(WaitingCommand waiting);
+    void delete(Waiting waiting);
 
-    boolean isExists(WaitingCommand waiting);
+    boolean isExists(Waiting waiting);
 
-    int countAllBy(WaitingCommand waitingCommand);
+    int countAllBy(LocalDate date, Long timeSlotId, Long themeId);
+
+    List<Waiting> findByName(String name);
 }

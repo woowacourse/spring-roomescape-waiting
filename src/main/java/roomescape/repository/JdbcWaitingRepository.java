@@ -1,10 +1,12 @@
 package roomescape.repository;
 
+import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.service.dto.WaitingCommand;
+import roomescape.domain.Waiting;
 
 @Repository
 public class JdbcWaitingRepository implements WaitingRepository {
@@ -16,7 +18,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int calculateWaitingNumber(WaitingCommand waiting) {
+    public int calculateWaitingNumber(Waiting waiting) {
         String sql = """
                 SELECT COUNT(*)
                 FROM waiting w
@@ -33,19 +35,20 @@ public class JdbcWaitingRepository implements WaitingRepository {
                   )
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Integer.class, waiting.date(), waiting.timeId(), waiting.themeId(),
-                waiting.name(), waiting.date(), waiting.timeId(), waiting.themeId());
+        return jdbcTemplate.queryForObject(sql, Integer.class,
+                waiting.getDate(), waiting.getTimeSlotId(), waiting.getThemeId(),
+                waiting.getName(), waiting.getDate(), waiting.getTimeSlotId(), waiting.getThemeId());
     }
 
     @Override
-    public void save(WaitingCommand waiting) {
+    public void save(Waiting waiting) {
         SimpleJdbcInsert insert = createInsert();
         Map<String, Object> params = createParams(waiting);
         insert.execute(params);
     }
 
     @Override
-    public void delete(WaitingCommand waiting) {
+    public void delete(Waiting waiting) {
         String sql = """
                 DELETE FROM waiting 
                 WHERE name = ? 
@@ -54,11 +57,11 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 AND theme_id = ?
                 """;
 
-        jdbcTemplate.update(sql, waiting.name(), waiting.date(), waiting.timeId(), waiting.themeId());
+        jdbcTemplate.update(sql, waiting.getName(), waiting.getDate(), waiting.getTimeSlotId(), waiting.getThemeId());
     }
 
     @Override
-    public boolean isExists(WaitingCommand waiting) {
+    public boolean isExists(Waiting waiting) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -70,12 +73,13 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 )
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Boolean.class, waiting.name(), waiting.date(), waiting.timeId(),
-                waiting.themeId());
+        return jdbcTemplate.queryForObject(sql, Boolean.class, waiting.getName(), waiting.getDate(),
+                waiting.getTimeSlotId(),
+                waiting.getThemeId());
     }
 
     @Override
-    public int countAllBy(WaitingCommand waiting) {
+    public int countAllBy(LocalDate date, Long timeSlotId, Long themeId) {
         String sql = """
                 SELECT COUNT(*)
                 FROM waiting
@@ -84,7 +88,18 @@ public class JdbcWaitingRepository implements WaitingRepository {
                   AND theme_id = ?
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Integer.class, waiting.date(), waiting.timeId(), waiting.themeId());
+        return jdbcTemplate.queryForObject(sql, Integer.class, date, timeSlotId, themeId);
+    }
+
+    @Override
+    public List<Waiting> findByName(String name) {
+        String sql = """
+                SELECT *
+                FROM waiting
+                WHERE name = ?
+                """;
+
+        return jdbcTemplate.queryForList(sql, Waiting.class, name);
     }
 
     private SimpleJdbcInsert createInsert() {
@@ -93,12 +108,12 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 .usingColumns("name", "date", "time_id", "theme_id");
     }
 
-    private Map<String, Object> createParams(WaitingCommand waiting) {
+    private Map<String, Object> createParams(Waiting waiting) {
         return Map.of(
-                "name", waiting.name(),
-                "date", waiting.date(),
-                "time_id", waiting.timeId(),
-                "theme_id", waiting.themeId()
+                "name", waiting.getName(),
+                "date", waiting.getDate(),
+                "time_id", waiting.getTimeSlotId(),
+                "theme_id", waiting.getThemeId()
         );
     }
 }
