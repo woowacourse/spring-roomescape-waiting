@@ -162,4 +162,24 @@ class ReservationServiceTest {
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
         assertThat(confirmReservation.getThemeSlot().isReserved()).isFalse();
     }
+
+    @Test
+    @DisplayName("이미 CANCELLED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
+    void returnInvalidCancelledCommandWhenCancelCancelledReservation(){
+        Reservation cancelledReservation = reservationService.saveReservation("김대기", savedThemeSlot.getId());
+        reservationService.cancelReservation(cancelledReservation.getId());
+        assertThatThrownBy(() -> {
+            reservationService.cancelReservation(cancelledReservation.getId());
+        }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
+    }
+
+    @Test
+    @DisplayName("이미 COMPLETED된 예약을 취소 요청 하는 경우, INVALID_CANCELLED_COMMAND 예외를 반환한다.")
+    void returnInvalidCancelledCommandWhenCancelCompletedReservation(){
+        Reservation completedReservation = reservationService.saveReservation("김대기", savedThemeSlot.getId());
+        reservationService.completeReservation(completedReservation.getId());
+        assertThatThrownBy(() -> {
+            reservationService.cancelReservation(completedReservation.getId());
+        }).isInstanceOf(CustomException.class).hasMessage("취소할 수 없는 예약입니다.");
+    }
 }
