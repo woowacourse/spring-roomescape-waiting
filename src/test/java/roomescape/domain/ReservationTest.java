@@ -1,0 +1,171 @@
+package roomescape.domain;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import roomescape.common.exception.BusinessRuleViolationException;
+import roomescape.domain.vo.Name;
+
+class ReservationTest {
+
+    private Member member;
+    private Theme theme;
+
+    @BeforeEach
+    void setUp() {
+        member = new Member(1L, "유저", "user@test.com", "password", MemberRole.USER);
+        theme = new Theme(1L, new Name("테마"), "http://thumbnail", "설명");
+    }
+
+    @Nested
+    class CreateByUser {
+
+        @Test
+        @DisplayName("미래 시간으로 생성하면 성공한다")
+        void createsWithFutureTime() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            LocalDate futureDate = LocalDate.now().plusDays(1);
+            LocalDateTime now = LocalDateTime.now();
+
+            Reservation reservation = Reservation.createByUser(member, futureDate, time, theme, null, now);
+
+            assertThat(reservation.isActive()).isTrue();
+        }
+
+        @Test
+        @DisplayName("과거 시간으로 생성하면 예외를 던진다")
+        void throwsWhenCreatingWithPastTime() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            LocalDateTime now = LocalDateTime.now();
+
+            assertThatThrownBy(() -> Reservation.createByUser(member, pastDate, time, theme, null, now))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+    }
+
+    @Nested
+    class CancelByUser {
+
+        @Test
+        @DisplayName("미래 예약을 취소하면 상태가 CANCELED가 된다")
+        void cancelsFutureReservation() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+
+            reservation.cancelByUser(LocalDateTime.now());
+
+            assertThat(reservation.isActive()).isFalse();
+        }
+
+        @Test
+        @DisplayName("과거 예약을 취소하면 예외를 던진다")
+        void throwsWhenCancelingPastReservation() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().minusDays(1), time, theme);
+
+            assertThatThrownBy(() -> reservation.cancelByUser(LocalDateTime.now()))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+    }
+
+    @Nested
+    class CancelByAdmin {
+
+        @Test
+        @DisplayName("과거 예약도 어드민은 취소할 수 있다")
+        void adminCanCancelPastReservation() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().minusDays(1), time, theme);
+
+            reservation.cancelByAdmin(LocalDateTime.now());
+
+            assertThat(reservation.isActive()).isFalse();
+        }
+    }
+
+    @Nested
+    class IsActive {
+
+        @Test
+        @DisplayName("BOOKED 상태이면 true를 반환한다")
+        void returnsTrueWhenBooked() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+
+            assertThat(reservation.isActive()).isTrue();
+        }
+
+        @Test
+        @DisplayName("CANCELED 상태이면 false를 반환한다")
+        void returnsFalseWhenCanceled() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(
+                    1L, member, LocalDate.now().plusDays(1), time, theme,
+                    ReservationStatus.CANCELED, LocalDateTime.now(), 0L, null);
+
+            assertThat(reservation.isActive()).isFalse();
+        }
+    }
+
+    @Nested
+    class IsSameMember {
+
+        @Test
+        @DisplayName("같은 멤버면 true를 반환한다")
+        void returnsTrueForSameMember() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+
+            assertThat(reservation.isSameMember(member)).isTrue();
+        }
+
+        @Test
+        @DisplayName("다른 멤버면 false를 반환한다")
+        void returnsFalseForDifferentMember() {
+            Time time = new Time(1L, LocalTime.of(10, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), time, theme);
+            Member other = new Member(2L, "다른유저", "other@test.com", "password", MemberRole.USER);
+
+            assertThat(reservation.isSameMember(other)).isFalse();
+        }
+    }
+
+    @Nested
+    class Update {
+
+        @Test
+        @DisplayName("미래 날짜와 시간으로 수정하면 성공한다")
+        void updatesWithFutureDateTime() {
+            Time futureTime = new Time(1L, LocalTime.of(13, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), futureTime, theme);
+
+            LocalDate newDate = LocalDate.now().plusDays(3);
+            Time newTime = new Time(2L, LocalTime.of(14, 0));
+            reservation.update(newDate, newTime);
+
+            assertThat(reservation.getDate()).isEqualTo(newDate);
+            assertThat(reservation.getTime()).isEqualTo(newTime);
+        }
+
+        @Test
+        @DisplayName("과거 날짜로 수정하면 예외를 던진다")
+        void throwsWhenUpdatingWithPastDateTime() {
+            Time futureTime = new Time(1L, LocalTime.of(13, 0));
+            Reservation reservation = Reservation.reconstruct(1L, member, LocalDate.now().plusDays(1), futureTime, theme);
+
+            LocalDate pastDate = LocalDate.now().minusDays(1);
+            Time pastTime = new Time(2L, LocalTime.of(14, 0));
+
+            assertThatThrownBy(() -> reservation.update(pastDate, pastTime))
+                    .isInstanceOf(BusinessRuleViolationException.class);
+        }
+    }
+}
