@@ -15,11 +15,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
+import roomescape.domain.Waiting;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.ReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationCommandService;
 import roomescape.service.ReservationQueryService;
+import roomescape.service.WaitingQueryService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -28,6 +30,7 @@ public class ReservationController {
 
     private final ReservationCommandService reservationCommandService;
     private final ReservationQueryService reservationQueryService;
+    private final WaitingQueryService waitingQueryService;
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getMyReservations(@RequestParam String name) {
@@ -35,6 +38,14 @@ public class ReservationController {
                 .stream()
                 .map(ReservationResponse::from)
                 .toList();
+
+        List<ReservationResponse> waitingResponses = waitingQueryService.getByName(name)
+                .stream()
+                .map(ReservationResponse::from)
+                .toList();
+
+        responses.addAll(waitingResponses);
+
         return ResponseEntity.ok(responses);
     }
 

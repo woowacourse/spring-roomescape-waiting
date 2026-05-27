@@ -11,6 +11,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
+import roomescape.domain.WaitingWithRank;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.time.LocalDateTime;
@@ -43,6 +44,29 @@ public class WaitingDao {
                 reservationTime,
                 theme,
                 rs.getObject("created_at", LocalDateTime.class)
+        );
+    };
+
+    private final RowMapper<WaitingWithRank> withRankRowMapper = (rs, rowNum) -> {
+        Theme theme = Theme.create(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("thumbnail_url"),
+                rs.getString("theme_description")
+        );
+
+        ReservationTime reservationTime = ReservationTime.create(
+                rs.getLong("time_id"),
+                rs.getObject("time_value", LocalTime.class)
+        );
+
+        return new WaitingWithRank(
+                rs.getLong("waiting_id"),
+                rs.getString("name"),
+                rs.getObject("date", LocalDate.class),
+                reservationTime,
+                theme,
+                rs.getInt("waiting_rank")
         );
     };
 
@@ -125,5 +149,18 @@ public class WaitingDao {
                 ORDER BY created_at;
                 """;
         return jdbcTemplate.query(sql, rowMapper, date, timeId, themeId);
+    }
+
+    public List<WaitingWithRank> findAllByName(String name) {
+        String sql = """
+                SELECT id, name, date, time_id, theme_id, created_at, waiting_rank
+                FROM (
+                    SELECT *,
+                           RANK() OVER (PARTITION BY date, time_id, theme_id ORDER BY created_at ASC) as waiting_rank
+                    FROM waiting
+                ) as ranked_waiting
+                WHERE name = ?; 
+                """;
+        return jdbcTemplate.query(sql, withRankRowMapper, name);
     }
 }

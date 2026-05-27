@@ -52,4 +52,6 @@ public class WaitingController {
         return ResponseEntity.noContent().build();
     }
 
+
+
 }
