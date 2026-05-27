@@ -1,9 +1,6 @@
 package roomescape.integration;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import roomescape.global.exception.DuplicateException;
-import roomescape.global.exception.NotFoundException;
-
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -21,23 +18,17 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
+import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.integration.support.DatabaseHelper;
 import roomescape.integration.support.SpringWebTest;
-
-
-import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
-
-
-import roomescape.reservationWaiting.service.ReservationWaitingService;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
-
-
+import roomescape.reservationWaiting.service.ReservationWaitingService;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
-
-
 import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 

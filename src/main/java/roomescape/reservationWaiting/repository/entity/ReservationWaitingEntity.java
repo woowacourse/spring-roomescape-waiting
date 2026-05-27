@@ -1,6 +1,7 @@
 package roomescape.reservationWaiting.repository.entity;
 
 import java.time.LocalDate;
+import java.util.Objects;
 import roomescape.theme.repository.entity.ThemeEntity;
 import roomescape.time.repository.entity.ReservationTimeEntity;
 
@@ -12,7 +13,8 @@ public class ReservationWaitingEntity {
     private final ReservationTimeEntity time;
     private final ThemeEntity theme;
 
-    public ReservationWaitingEntity(Long id, String name, LocalDate date, ReservationTimeEntity time, ThemeEntity theme) {
+    public ReservationWaitingEntity(Long id, String name, LocalDate date, ReservationTimeEntity time,
+                                    ThemeEntity theme) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -38,5 +40,19 @@ public class ReservationWaitingEntity {
 
     public ThemeEntity getTheme() {
         return theme;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
+        ReservationWaitingEntity that = (ReservationWaitingEntity) o;
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

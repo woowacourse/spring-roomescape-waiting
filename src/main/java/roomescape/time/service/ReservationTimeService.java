@@ -57,6 +57,11 @@ public class ReservationTimeService {
         return reservationTimeRepository.findAll();
     }
 
+    public ReservationTime getReservationTime(Long id) {
+        return reservationTimeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
+    }
+
     public AvailableTimesResult findAvailableTimes(Long themeId, LocalDate date) {
         if (LocalDate.now(clock).isAfter(date)) {
             throw new InvalidRequestValueException(ReservationErrorCode.INVALID_DATE.getMessage());

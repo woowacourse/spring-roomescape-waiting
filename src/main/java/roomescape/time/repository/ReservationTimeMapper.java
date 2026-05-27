@@ -5,9 +5,6 @@ import roomescape.time.repository.entity.ReservationTimeEntity;
 
 public class ReservationTimeMapper {
 
-    private ReservationTimeMapper() {
-    }
-
     public static ReservationTime toDomain(ReservationTimeEntity entity) {
         return new ReservationTime(
                 entity.getId(),

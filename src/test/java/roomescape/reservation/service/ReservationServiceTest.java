@@ -23,8 +23,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
 import roomescape.reservation.domain.Reservation;
-
-
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
@@ -32,32 +30,28 @@ import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
-import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeRepository;
+import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeRepository;
+import roomescape.time.service.ReservationTimeService;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
+
+    @InjectMocks
+    ReservationService reservationService;
 
     @Mock
     ReservationRepository reservationRepository;
 
     @Mock
-    ReservationTimeRepository reservationTimeRepository;
-
-    @Mock
-    ReservationWaitingRepository reservationWaitingRepository;
-
-    @Mock
-    ThemeRepository themeRepository;
-
-    @Mock
     Clock clock;
 
-    @InjectMocks
-    ReservationService reservationService;
+    @Mock
+    ReservationTimeService reservationTimeService;
+
+    @Mock
+    ThemeService themeService;
 
     @DisplayName("인기 테마 조회 시 period=7이면 오늘 제외 직전 7일 범위로 조회한다.")
     @Test
@@ -116,20 +110,17 @@ class ReservationServiceTest {
         );
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
-        when(reservationTimeRepository.findById(any()))
-                .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(10, 0))));
-
-        when(themeRepository.findById(any()))
-                .thenReturn(Optional.of(new Theme(1L, "이름", "설명", "thumbnailUrl")));
-
         when(reservationRepository.save(any()))
                 .thenThrow(new DataIntegrityViolationException("duplicate"));
 
         //when & then
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
+        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
+
         assertThatThrownBy(() -> reservationService.save(
                 new ReservationCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
-                )
+                ), time, theme
         )).isInstanceOf(DuplicateException.class)
                 .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
@@ -153,9 +144,6 @@ class ReservationServiceTest {
         );
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
-        when(reservationTimeRepository.findById(any()))
-                .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(10, 0))));
-
         when(reservationRepository.findById(1L))
                 .thenReturn(Optional.of(
                         new Reservation(
@@ -172,10 +160,11 @@ class ReservationServiceTest {
         ).thenReturn(true);
 
         //when & then
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         assertThatThrownBy(() -> reservationService.update(
                 new ReservationUpdateCommand(
                         LocalDate.of(2026, 5, 15), 1L
-                ), 1L
+                ), 1L, time
         )).isInstanceOf(DuplicateException.class)
                 .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
@@ -184,29 +173,28 @@ class ReservationServiceTest {
     @Test
     void findReservationsByNameTest() {
         //given
-        when(reservationRepository.findAllByName("브라운"))
-                .thenReturn(List.of(new Reservation(
-                        1L,
-                        "브라운",
-                        LocalDate.of(2026, 5, 15),
-                        new ReservationTime(1L, LocalTime.of(10, 0)),
-                        new Theme(1L, "이름", "설명", "thumbnailUrl")
-                        ))
-                );
-
-        when(reservationWaitingRepository.findAllByName("브라운"))
-                .thenReturn(List.of(new ReservationWaiting(
+        // Mock native query result combining reserved and waiting entries
+        when(reservationRepository.findAllByNameWithStatus("브라운"))
+                .thenReturn(List.of(
+                        new ReservationWithStatusResult(
                                 1L,
                                 "브라운",
                                 LocalDate.of(2026, 5, 15),
+                                new ReservationTime(1L, LocalTime.of(10, 0)),
+                                new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                                "reserved",
+                                0L
+                        ),
+                        new ReservationWithStatusResult(
+                                2L,
+                                "브라운",
+                                LocalDate.of(2026, 5, 16),
                                 new ReservationTime(2L, LocalTime.of(11, 0)),
-                                new Theme(1L, "이름", "설명", "thumbnailUrl")
-                        ))
-                );
-
-        when(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                any(), any(), any(), any()
-        )).thenReturn(0L);
+                                new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                                "waiting",
+                                2L
+                        )
+                ));
 
         //when
         List<ReservationWithStatusResult> result = reservationService.findAllByName("브라운");
@@ -224,13 +212,13 @@ class ReservationServiceTest {
                         "reserved",
                         0L
                 ), new ReservationWithStatusResult(
-                        1L,
+                        2L,
                         "브라운",
-                        LocalDate.of(2026, 5, 15),
+                        LocalDate.of(2026, 5, 16),
                         new ReservationTime(2L, LocalTime.of(11, 0)),
                         new Theme(1L, "이름", "설명", "thumbnailUrl"),
                         "waiting",
-                        1L
+                        2L
                 )
         );
     }

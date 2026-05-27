@@ -5,9 +5,6 @@ import roomescape.theme.repository.entity.ThemeEntity;
 
 public class ThemeMapper {
 
-    private ThemeMapper() {
-    }
-
     public static Theme toDomain(ThemeEntity entity) {
         return new Theme(
                 entity.getId(),

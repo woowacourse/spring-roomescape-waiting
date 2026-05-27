@@ -1,14 +1,16 @@
 package roomescape.reservationWaiting.controller.dto;
 
-import roomescape.global.exception.InvalidRequestFormatException;
-
 import java.time.LocalDate;
+import roomescape.global.exception.InvalidRequestFormatException;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.global.exception.BadRequestException;
-
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 
-public record ReservationWaitingRequest(String name, LocalDate date, Long timeId, Long themeId) {
+public record ReservationWaitingRequest(
+        String name,
+        LocalDate date,
+        Long timeId,
+        Long themeId
+) {
 
     public ReservationWaitingRequest {
         if (name == null || name.isBlank() ||

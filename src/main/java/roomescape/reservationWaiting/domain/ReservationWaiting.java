@@ -1,19 +1,15 @@
 package roomescape.reservationWaiting.domain;
 
-import roomescape.global.exception.InvalidRequestValueException;
-
 import java.time.Clock;
-import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.time.exception.TimeErrorCode;
-import roomescape.global.exception.BadRequestException;
-import roomescape.global.exception.ForbiddenException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Objects;
-
-
+import roomescape.global.exception.ForbiddenException;
+import roomescape.global.exception.InvalidRequestValueException;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+import roomescape.time.exception.TimeErrorCode;
 
 
 public class ReservationWaiting {
@@ -32,18 +28,8 @@ public class ReservationWaiting {
         this.theme = theme;
     }
 
-    public static ReservationWaiting of (String name, LocalDate date, ReservationTime time, Theme theme) {
+    public static ReservationWaiting of(String name, LocalDate date, ReservationTime time, Theme theme) {
         return new ReservationWaiting(null, name, date, time, theme);
-    }
-
-    public ReservationWaiting updateId(Long id) {
-        return new ReservationWaiting(
-                id,
-                this.name,
-                this.date,
-                this.time,
-                this.theme
-        );
     }
 
     public void validateExpiry(Clock clock) {

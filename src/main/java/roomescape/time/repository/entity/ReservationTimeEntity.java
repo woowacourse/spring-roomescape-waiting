@@ -1,6 +1,7 @@
 package roomescape.time.repository.entity;
 
 import java.time.LocalTime;
+import java.util.Objects;
 
 public class ReservationTimeEntity {
 
@@ -18,5 +19,18 @@ public class ReservationTimeEntity {
 
     public LocalTime getStartAt() {
         return startAt;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ReservationTimeEntity that)) {
+            return false;
+        }
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
     }
 }

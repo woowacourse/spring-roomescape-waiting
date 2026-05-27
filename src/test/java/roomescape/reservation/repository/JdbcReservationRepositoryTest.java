@@ -22,6 +22,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.domain.Reservation;
 
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
+import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -276,6 +277,55 @@ class JdbcReservationRepositoryTest {
         assertThat(reservations).containsExactly(saved1, saved2);
     }
 
+    @Test
+    @DisplayName("이름에 해당하는 예약과 대기를 상태·순번과 함께 조회한다.")
+    void findAllByNameWithStatus_reservedAndWaiting() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        saveWaiting("코니", LocalDate.of(2024, 5, 1), time, theme);   // 1번째 대기
+        saveWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme); // 2번째 대기 ← 브라운
+
+        // when
+        List<ReservationWithStatusResult> result =
+                reservationRepository.findAllByNameWithStatus("브라운");
+
+        // then
+        assertThat(result).hasSize(2);
+
+        ReservationWithStatusResult reserved = result.stream()
+                .filter(r -> r.status().equals("reserved"))
+                .findFirst().orElseThrow();
+        ReservationWithStatusResult waiting = result.stream()
+                .filter(r -> r.status().equals("waiting"))
+                .findFirst().orElseThrow();
+
+        assertThat(reserved.waitingOrder()).isEqualTo(0L);
+        assertThat(waiting.waitingOrder()).isEqualTo(2L); // 코니(1)보다 늦게 등록했으므로 2번째
+    }
+
+    @Test
+    @DisplayName("대기가 1번째인 경우 waitingOrder는 1이다.")
+    void findAllByNameWithStatus_firstWaiting() {
+        // given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        saveWaiting("코니", LocalDate.of(2024, 5, 1), time, theme); // 1번째 대기
+
+        // when
+        List<ReservationWithStatusResult> result =
+                reservationRepository.findAllByNameWithStatus("코니");
+
+        // then
+        assertThat(result).hasSize(1);
+        assertThat(result.get(0).status()).isEqualTo("waiting");
+        assertThat(result.get(0).waitingOrder()).isEqualTo(1L);
+    }
+
 
     @Test
     @DisplayName("from과 to 사이 일정의 예약들에 대해, 상위 limit 개의 테마들을 조회한다.")
@@ -395,5 +445,15 @@ class JdbcReservationRepositoryTest {
 
         //then
         assertThat(result).isPresent();
+    }
+
+    private void saveWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name,
+                java.sql.Date.valueOf(date),
+                time.getId(),
+                theme.getId()
+        );
     }
 }

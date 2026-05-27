@@ -47,6 +47,11 @@ public class ThemeService {
         return themeRepository.findAll();
     }
 
+    public Theme getTheme(Long id) {
+        return themeRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
+    }
+
     @Transactional
     public void deleteById(Long id) {
         if (themeRepository.findById(id).isEmpty()) {
