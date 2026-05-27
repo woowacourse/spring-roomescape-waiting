@@ -40,9 +40,6 @@ class ReservationTest {
 
         Reservation pendingReservation = reservation.pending(
                 reservation.getName(),
-                reservation.getDate(),
-                reservation.getTime(),
-                theme,
                 clock
         );
         Assertions.assertThat(pendingReservation.getStatus()).isEqualTo(Status.PENDING);
