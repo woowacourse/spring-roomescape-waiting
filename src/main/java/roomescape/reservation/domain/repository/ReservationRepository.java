@@ -12,7 +12,7 @@ public interface ReservationRepository {
 
     Integer delete(Long id);
 
-    Boolean existsDuplicate(Reservation reservation);
+    Boolean existsBySlot(Reservation reservation);
 
     Boolean existsDuplicateExcluding(Reservation reservation);
 

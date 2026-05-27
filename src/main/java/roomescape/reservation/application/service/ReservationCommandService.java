@@ -41,10 +41,8 @@ public class ReservationCommandService {
         Reservation reservation = request.toEntity(theme.getId(), time.getId(), time.getStartAt());
         reservation.validateReservable(request.now());
 
-        // 예약이 존재하는지 확인하는 메서드
-        // 현재는 예약이 있으면 예외
-        // TODO: 그런데 이제는 예약이 있으면 예외가 아니라 Waiting을 만들고 Reservation은 만들면 안됨
-        if (reservationRepository.existsDuplicate(reservation)) {
+        // TODO : 42번째 줄에서 validateReservable()을 했는데 밑에서 또 하는게 옳은지.
+        if (reservationRepository.existsBySlot(reservation)) {
             Waiting waiting = request.toWaiting(theme.getId(), time.getId(), time.getStartAt());
             // 위에서 예약에 대해서 이전 시간 예약인지 검증했지만, 대기도 명시적으로 일단 검증 추가
             waiting.validateReservable(request.now());
@@ -58,14 +56,10 @@ public class ReservationCommandService {
             );
         }
 
-        // 특정 슬롯에 예약이 없는 상황에서 동시에 예약 생성 요청이 들어옴
         Reservation savedReservation;
         try {
             savedReservation = reservationRepository.save(reservation);
         } catch (DataIntegrityViolationException e) {
-            // TODO: 여기서 예외 발생이 아닌, Waiting으로 저장하는 로직 필요
-            // 그후 ConcurrencyTest에서 Waiting으로 저장된 것을 테스트해야함.
-            // 현재는 기존 예외 발생 로직을 테스트
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 
@@ -127,7 +121,7 @@ public class ReservationCommandService {
         // 예약이 존재하는지 확인하는 메서드
         // 현재는 예약이 있으면 예외
         // TODO: 그런데 이제는 예약이 있으면 예외가 아니라 Waiting을 만들고 Reservation은 만들면 안됨
-        if (reservationRepository.existsDuplicate(reservation)) {
+        if (reservationRepository.existsBySlot(reservation)) {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
     }
