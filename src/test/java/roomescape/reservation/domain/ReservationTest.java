@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -80,5 +81,62 @@ class ReservationTest {
         );
 
         assertThat(reservation).isEqualTo(updatedReservation);
+    }
+
+    @DisplayName("예약 날짜와 시간을 변경하면 ID와 이름은 유지하고 슬롯만 변경되는 것을 테스트합니다.")
+    @Test
+    void update_date_and_time() {
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 6))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .name("스타크")
+                .slot(slot)
+                .build();
+
+        Reservation updatedReservation = reservation.updateDateAndTime(
+                LocalDate.of(2026, 5, 7),
+                2L,
+                LocalTime.of(10, 0),
+                LocalDateTime.of(2026, 5, 5, 10, 0)
+        );
+
+        SoftAssertions.assertSoftly(softly -> {
+            softly.assertThat(updatedReservation.getId()).isEqualTo(1L);
+            softly.assertThat(updatedReservation.getName()).isEqualTo("스타크");
+            softly.assertThat(updatedReservation.getSlot().date()).isEqualTo(LocalDate.of(2026, 5, 7));
+            softly.assertThat(updatedReservation.getSlot().themeId()).isEqualTo(1L);
+            softly.assertThat(updatedReservation.getSlot().timeId()).isEqualTo(2L);
+            softly.assertThat(updatedReservation.getSlot().startAt()).isEqualTo(LocalTime.of(10, 0));
+        });
+    }
+
+    @DisplayName("예약 날짜와 시간을 현재 시간보다 이전으로 변경 시 예외를 테스트합니다.")
+    @Test
+    void update_date_and_time_past_exception() {
+        ReservationSlot slot = ReservationSlot.builder()
+                .date(LocalDate.of(2026, 5, 6))
+                .themeId(1L)
+                .timeId(1L)
+                .startAt(LocalTime.of(9, 0))
+                .build();
+        Reservation reservation = Reservation.builder()
+                .id(1L)
+                .name("스타크")
+                .slot(slot)
+                .build();
+
+        assertThatThrownBy(() -> reservation.updateDateAndTime(
+                LocalDate.of(2026, 5, 7),
+                2L,
+                LocalTime.of(10, 0),
+                LocalDateTime.of(2026, 5, 7, 11, 0)
+        ))
+                .isInstanceOf(RoomEscapeException.class)
+                .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
     }
 }
