@@ -9,7 +9,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.atomic.AtomicInteger;
 import org.assertj.core.api.SoftAssertions;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +31,6 @@ public class ReservationConcurrencyTest {
     @Autowired
     private TestDataHelper testHelper;
 
-    @Disabled
     @DisplayName("동시에 예약 생성 시 하나는 성공하고 나머지는 예외 발생을 테스트합니다.")
     @Test
     void save_concurrent_duplicate_exception() throws InterruptedException {
