@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -10,6 +11,7 @@ import org.springframework.stereotype.Repository;
 
 import roomescape.domain.Reservation;
 import roomescape.domain.Status;
+import roomescape.dto.ReservationResponse;
 
 @Repository
 public class ReservationDao {
@@ -24,6 +26,19 @@ public class ReservationDao {
             Status.valueOf(rs.getString("status")),
             rs.getObject("updated_at", LocalDateTime.class)
     );
+
+    private final RowMapper<ReservationResponse> reservationResponseRowMapper = (rs, rowNum) ->
+            new ReservationResponse(
+                    rs.getLong("reservation_id"),
+                    rs.getString("name"),
+                    rs.getString("status"),
+                    rs.getDate("date").toLocalDate(),
+                    rs.getString("theme_name"),
+                    rs.getString("theme_description"),
+                    rs.getString("theme_thumbnail"),
+                    rs.getTime("time_value").toLocalTime(),
+                    rs.getInt("waiting_order")
+            );
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -87,6 +102,32 @@ public class ReservationDao {
                 slotId,
                 reservationId
         );
+    }
+
+    public List<ReservationResponse> findByUserName(String username) {
+        String sql = """
+                SELECT rv.id AS reservation_id,
+                       rv.name AS name,
+                       rv.status AS status,
+                       rs.date AS date,
+                       th.name AS theme_name,
+                       th.description AS theme_description,
+                       th.thumbnail_url AS theme_thumbnail,
+                       t.start_at AS time_value,
+                       (
+                           SELECT COUNT(*)
+                           FROM reservation rv2
+                           WHERE rv2.reservation_slot_id = rv.reservation_slot_id
+                             AND rv2.status = 'RESERVED'
+                             AND rv2.id < rv.id
+                       ) AS waiting_order
+                FROM reservation AS rv
+                INNER JOIN reservation_slot AS rs ON rv.reservation_slot_id = rs.id
+                INNER JOIN reservation_time AS t ON rs.time_id = t.id
+                INNER JOIN theme AS th ON rs.theme_id = th.id
+                WHERE rv.name = ?
+                """;
+        return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
     }
 
     public boolean existsByReservation(Long reservationId) {

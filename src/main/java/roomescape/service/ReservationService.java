@@ -14,7 +14,6 @@ import roomescape.domain.Status;
 import roomescape.domain.Theme;
 import roomescape.domain.Time;
 import roomescape.dto.ReservationResponse;
-import roomescape.dto.WaitingResponse;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationSlotDao;
@@ -82,7 +81,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponse> findAllByName(String username) {
-        return reservationSlotDao.findByUserName(username);
+        return reservationDao.findByUserName(username);
     }
 
     private void validateDateAndTimeNotPast(LocalDateTime now, LocalDateTime reservationTime) {

@@ -27,19 +27,6 @@ public class ReservationSlotDao {
             new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
     );
 
-    private final RowMapper<ReservationResponse> reservationResponseRowMapper = (rs, rowNum) ->
-            new ReservationResponse(
-                    rs.getLong("reservation_id"),
-                    rs.getString("name"),
-                    rs.getString("status"),
-                    rs.getDate("date").toLocalDate(),
-                    rs.getString("theme_name"),
-                    rs.getString("theme_description"),
-                    rs.getString("theme_thumbnail"),
-                    rs.getTime("time_value").toLocalTime(),
-                    rs.getInt("waiting_order")
-            );
-
     public ReservationSlotDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -111,57 +98,32 @@ public class ReservationSlotDao {
         return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
-    public List<ReservationResponse> findByUserName(String username) {
-        String sql = """
-                SELECT rv.id AS reservation_id,
-                       rv.name AS name,
-                       rv.status AS status,
-                       rs.date AS date,
-                       th.name AS theme_name,
-                       th.description AS theme_description,
-                       th.thumbnail_url AS theme_thumbnail,
-                       t.start_at AS time_value,
-                       (
-                           SELECT COUNT(*)
-                           FROM reservation rv2
-                           WHERE rv2.reservation_slot_id = rv.reservation_slot_id
-                             AND rv2.status = 'RESERVED'
-                             AND rv2.id < rv.id
-                       ) AS waiting_order
-                FROM reservation AS rv
-                INNER JOIN reservation_slot AS rs ON rv.reservation_slot_id = rs.id
-                INNER JOIN reservation_time AS t ON rs.time_id = t.id
-                INNER JOIN theme AS th ON rs.theme_id = th.id
-                WHERE rv.name = ?
-                """;
-        return jdbcTemplate.query(sql, reservationResponseRowMapper, username);
-    }
 
-    public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
-        jdbcTemplate.update("UPDATE reservationSlot SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
-    }
+//    public void updateDateAndTimeById(long id, LocalDate date, long timeId) {
+//        jdbcTemplate.update("UPDATE reservationSlot SET date = ?, time_id = ? WHERE id = ?", date, timeId, id);
+//    }
+//
+//    public Optional<ReservationSlot> findByDateAndTimeId(LocalDate date, Long timeId) {
+//        String sql = """
+//                SELECT r.id AS reservation_id,
+//                       r.date AS date,
+//                       rt.id AS time_id,
+//                       rt.start_at AS start_at,
+//                       t.id AS theme_id,
+//                       t.name AS theme_name,
+//                       t.description AS description,
+//                       t.thumbnail_url AS thumbnail_url
+//                FROM reservation_slot r
+//                JOIN reservation_time rt ON r.time_id = rt.id
+//                JOIN theme t ON r.theme_id = t.id
+//                WHERE r.date = ? AND r.time_id = ?
+//                """;
+//        return jdbcTemplate.query(sql, reservationRowMapper, date, timeId)
+//                .stream()
+//                .findFirst();
+//    }
 
-    public Optional<ReservationSlot> findByDateAndTimeId(LocalDate date, Long timeId) {
-        String sql = """
-                SELECT r.id AS reservation_id,
-                       r.date AS date,
-                       rt.id AS time_id,
-                       rt.start_at AS start_at,
-                       t.id AS theme_id,
-                       t.name AS theme_name,
-                       t.description AS description,
-                       t.thumbnail_url AS thumbnail_url
-                FROM reservation_slot r
-                JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id
-                WHERE r.date = ? AND r.time_id = ?
-                """;
-        return jdbcTemplate.query(sql, reservationRowMapper, date, timeId)
-                .stream()
-                .findFirst();
-    }
-
-    public void delete(Long id) {
-        jdbcTemplate.update("DELETE FROM reservationSlot WHERE id = ?", id);
-    }
+//    public void delete(Long id) {
+//        jdbcTemplate.update("DELETE FROM reservationSlot WHERE id = ?", id);
+//    }
 }

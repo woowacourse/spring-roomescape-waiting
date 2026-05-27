@@ -43,13 +43,6 @@ public class ReservationController {
                 .body(response);
     }
 
-//    @GetMapping("/{id}")
-//    public ReservationResponse getReservation(
-//            @PathVariable long id
-//    ) {
-//        return waitingService.findById(id);
-//    }
-
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<ReservationResponse> getReservations(@RequestParam String username) {
