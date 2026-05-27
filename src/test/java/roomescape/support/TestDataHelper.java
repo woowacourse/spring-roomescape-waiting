@@ -61,4 +61,16 @@ public class TestDataHelper {
         )).longValue();
     }
 
+    public Long insertWaiting(String name, LocalDate date, Long themeId, Long timeId) {
+        SimpleJdbcInsert waitingInsert = new SimpleJdbcInsert(jdbcTemplate)
+                .withTableName("waiting")
+                .usingGeneratedKeyColumns("id");
+        return waitingInsert.executeAndReturnKey(Map.of(
+                "name", name,
+                "date", date,
+                "theme_id", themeId,
+                "time_id", timeId
+        )).longValue();
+    }
+
 }

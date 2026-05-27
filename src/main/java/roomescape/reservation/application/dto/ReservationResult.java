@@ -12,7 +12,8 @@ public record ReservationResult(
         LocalDate date,
         ThemeResult theme,
         ReservationTimeResult time,
-        Status status
+        Status status,
+        Long rank
 ) {
 
     public static ReservationResult confirmed(Reservation reservation, ThemeResult themeResult,
@@ -23,19 +24,22 @@ public record ReservationResult(
                 reservation.getDate(),
                 themeResult,
                 timeResult,
-                Status.CONFIRM
+                Status.CONFIRM,
+                null
         );
     }
 
     public static ReservationResult waiting(Waiting waiting, ThemeResult themeResult,
-                                            ReservationTimeResult timeResult) {
+                                            ReservationTimeResult timeResult,
+                                            Long rank) {
         return new ReservationResult(
                 waiting.getId(),
                 waiting.getName(),
                 waiting.getDate(),
                 themeResult,
                 timeResult,
-                Status.WAITING
+                Status.WAITING,
+                rank
         );
     }
 
@@ -54,7 +58,8 @@ public record ReservationResult(
                         reservationDetail.timeId(),
                         reservationDetail.startAt()
                 ),
-                Status.WAITING // TODO: 이건 나중에 조회한게 예약인지, 대기인지 구분하는 로직이 추가 필요 반드시 수정 ✅
+                Status.WAITING, // TODO: 이건 나중에 조회한게 예약인지, 대기인지 구분하는 로직이 추가 필요 반드시 수정 ✅
+                null // TODO: 이건 나중에 조회한게 예약인지, 대기인지 구분하는 로직이 추가 후 수정 ✅
         );
     }
 

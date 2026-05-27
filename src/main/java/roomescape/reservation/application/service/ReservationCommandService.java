@@ -49,18 +49,23 @@ public class ReservationCommandService {
             // 위에서 예약에 대해서 이전 시간 예약인지 검증했지만, 대기도 명시적으로 일단 검증 추가
             waiting.validateReservable(request.now());
             Waiting savedWaiting = waitingRepository.save(waiting);
-
+            Long rank = waitingRepository.getRank(savedWaiting);
             return ReservationResult.waiting(
                     savedWaiting,
                     ThemeResult.from(theme),
-                    ReservationTimeResult.from(time)
+                    ReservationTimeResult.from(time),
+                    rank
             );
         }
 
+        // 특정 슬롯에 예약이 없는 상황에서 동시에 예약 생성 요청이 들어옴
         Reservation savedReservation;
         try {
             savedReservation = reservationRepository.save(reservation);
         } catch (DataIntegrityViolationException e) {
+            // TODO: 여기서 예외 발생이 아닌, Waiting으로 저장하는 로직 필요
+            // 그후 ConcurrencyTest에서 Waiting으로 저장된 것을 테스트해야함.
+            // 현재는 기존 예외 발생 로직을 테스트
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 

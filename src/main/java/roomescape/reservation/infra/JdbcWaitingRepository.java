@@ -32,4 +32,21 @@ public class JdbcWaitingRepository implements WaitingRepository {
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return waiting.withId(id);
     }
+
+    @Override
+    public Long getRank(Waiting waiting) {
+        return jdbcTemplate.queryForObject("""
+                            SELECT COUNT(*)
+                            FROM waiting
+                            WHERE id <= ?
+                              AND date = ? 
+                              AND theme_id = ?
+                              AND time_id = ?
+                        """,
+                Long.class,
+                waiting.getId(),
+                waiting.getDate(),
+                waiting.getThemeId(),
+                waiting.getTimeId());
+    }
 }

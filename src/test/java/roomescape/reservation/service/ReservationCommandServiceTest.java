@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatNoException;
 
@@ -221,10 +222,9 @@ class ReservationCommandServiceTest {
                 .hasMessage("현재 시간보다 이전 시간으로 예약을 할 수 없습니다.");
     }
 
-    // 예약이 이미 존재할 경우 예외 발생이 아닌 대기로 생성되는지 확인.
-    @DisplayName("중복된 날짜와 테마와 시간의 예약 생성 예외를 테스트합니다.")
+    @DisplayName("이미 확정된 예약이 존재할 경우, 예약이 대기로 생성되는 것을 테스트합니다.")
     @Test
-    void save_duplicated_reservation_exception() {
+    void save_waiting_if_reservation_exists() {
         Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
         Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
         testHelper.insertReservation("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
@@ -240,5 +240,20 @@ class ReservationCommandServiceTest {
             softly.assertThat(savedWaiting.time()).isEqualTo(new ReservationTimeResult(timeId, LocalTime.of(10, 0)));
             softly.assertThat(savedWaiting.status()).isEqualTo(Status.WAITING);
         });
+    }
+
+    @DisplayName("예약 대기의 순번을 테스트합니다.")
+    @Test
+    void check_waiting_rank() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(10, 0));
+        testHelper.insertReservation("네오", ReservationFixture.futureReservationDate(), themeId, timeId);
+        testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+        testHelper.insertWaiting("피노", ReservationFixture.futureReservationDate(), themeId, timeId);
+
+        ReservationCreateCommand request = ReservationFixture.futureKayaCreateCommand(themeId, timeId, NOW);
+        ReservationResult savedWaiting = reservationCommandService.save(request);
+
+        assertThat(savedWaiting.rank()).isEqualTo(3L);
     }
 }
