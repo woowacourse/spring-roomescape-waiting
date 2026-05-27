@@ -27,5 +27,5 @@ public interface ReservationRepository {
 
     Optional<Long> findEarliestWaiting(Long timeId, Long themeId);
 
-    boolean updateStatus(Long waitingId);
+    boolean promoteToReserved(Long waitingId);
 }

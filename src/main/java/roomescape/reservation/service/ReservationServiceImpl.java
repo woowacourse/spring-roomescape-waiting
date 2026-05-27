@@ -112,7 +112,7 @@ public class ReservationServiceImpl implements ReservationService {
         if (reservation.isReserved()) {
             reservationRepository.findEarliestWaiting(reservation.getTime().getId(), reservation.getTheme().getId())
                     .ifPresent(waitingId -> {
-                        if (!reservationRepository.updateStatus(waitingId)) {
+                        if (!reservationRepository.promoteToReserved(waitingId)) {
                             throw new ReservationNotFoundException(id);
                         }});
         }

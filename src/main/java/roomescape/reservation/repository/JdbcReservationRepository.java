@@ -139,7 +139,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 "SELECT id FROM reservation "
                         + "WHERE time_id = ? "
                         + "AND theme_id = ? "
-                        + "AND status = WAITING "
+                        + "AND status = 'WAITING' "
                         + "ORDER BY created_at ASC "
                         + "LIMIT 1",
                 Long.class,
@@ -148,9 +148,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateStatus(Long waitingId) {
+    public boolean promoteToReserved(Long waitingId) {
         int affected = jdbcTemplate.update(
-                "UPDATE reservation SET status = RESERVED where id = ?",
+                "UPDATE reservation SET status = 'RESERVED' where id = ?",
                 waitingId);
         return affected > 0;
     }
