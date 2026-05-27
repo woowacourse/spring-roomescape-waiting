@@ -14,6 +14,16 @@ import org.springframework.stereotype.Repository;
 public class JdbcWaitingReservationRepository implements WaitingReservationRepository {
 
     private static final String INSERT_SQL = "insert into waiting_reservation(name, date_id, time_id, theme_id, created_at) values (?, ?, ?, ?, ?)";
+
+    private static final String EXIST_BY_NAME_DATE_TIME_THEME_SQL =
+        """
+            select exists(
+            select 1
+            from waiting_reservation
+            where name = ? and date_id = ? and time_id = ? and theme_id = ?
+            );
+            """;
+
     private final JdbcTemplate jdbcTemplate;
 
     @Override
@@ -37,6 +47,11 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
                 waitingReservation.getTheme(),
                 waitingReservation.getCreatedAt()
         );
+    }
+
+    @Override
+    public boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, long dateId, long timeId, long themeId) {
+        return jdbcTemplate.queryForObject(EXIST_BY_NAME_DATE_TIME_THEME_SQL, Boolean.class, name, dateId, timeId, themeId);
     }
 
     private long extractId(KeyHolder keyHolder) {

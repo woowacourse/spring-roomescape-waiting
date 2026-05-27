@@ -40,6 +40,7 @@ public class WaitingReservationService {
     }
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
+        validateDuplicationOfWaitingReservation(request);
         ReservationDate date = reservationDateService.findById(request.dateId());
         ReservationTime time = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
@@ -48,6 +49,12 @@ public class WaitingReservationService {
         WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now(clock));
         WaitingReservation savedWaitingReservation = waitingReservationRepository.save(waitingReservation);
         return WaitingReservationCreationResponse.from(savedWaitingReservation);
+    }
+
+    private void validateDuplicationOfWaitingReservation(WaitingReservationCreationRequest request) {
+        if (waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId(request.name(), request.dateId(), request.timeId(), request.themeId())) {
+            throw new RoomescapeException(WaitingReservationErrorCode.DUPLICATE_WAITING_RESERVATION);
+        }
     }
 
     private void validateSlotIsReserved(WaitingReservationCreationRequest request) {

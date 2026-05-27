@@ -1,6 +1,7 @@
 package roomescape.domain.waitingreservation;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
@@ -24,6 +25,7 @@ import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeService;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRequest;
 import roomescape.domain.waitingreservation.dto.WaitingReservationCreationResponse;
+import roomescape.support.exception.RoomescapeException;
 
 class WaitingReservationServiceTest {
 
@@ -71,9 +73,6 @@ class WaitingReservationServiceTest {
             LocalDateTime.of(2026, 5, 5, 14, 0)
         );
 
-        when(reservationDateService.findById(1L)).thenReturn(date);
-        when(reservationTimeService.findById(2L)).thenReturn(time);
-        when(themeService.findById(3L)).thenReturn(theme);
         when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(true);
         when(waitingReservationRepository.save(any(WaitingReservation.class))).thenReturn(savedWaiting);
 
@@ -84,5 +83,27 @@ class WaitingReservationServiceTest {
         assertThat(response.createdAt()).isEqualTo(LocalDateTime.of(2026, 5, 5, 14, 0));
 
         verify(waitingReservationRepository, times(1)).save(any(WaitingReservation.class));
+    }
+
+    @Test
+    void 비어있는_슬롯에_대기를_신청하면_예외가_발생한다() {
+        WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
+
+        when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(false);
+
+        assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessageContaining("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
+    }
+
+    @Test
+    void 같은_사용자가_같은_슬롯에_중복_대기할_수_없다() {
+        WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
+
+        when(waitingReservationRepository.existsByNameAndDateIdAndTimeIdAndThemeId("고래", 1L, 2L, 3L)).thenReturn(true);
+
+        assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessageContaining("중복으로 대기 신청을 할 수 없습니다.");
     }
 }
