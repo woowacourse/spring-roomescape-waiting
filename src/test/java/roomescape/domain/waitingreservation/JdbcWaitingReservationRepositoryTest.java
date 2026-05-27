@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 
 @JdbcTest
 @Sql("/truncate.sql")
@@ -83,8 +85,67 @@ class JdbcWaitingReservationRepositoryTest {
         assertThat(waitingReservationRepository.findOldest()).isEmpty();
     }
 
+    @Test
+    void 사용자_이름으로_예약_대기_목록을_조회하면_각_슬롯의_순번을_반환한다() {
+        waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
+        waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 8, 10, 0)));
+
+        Slot secondSlot = insertSlot(
+            102L, LocalDate.of(2026, 5, 11),
+            202L, LocalTime.of(11, 0),
+            302L, "스릴러"
+        );
+        waitingReservationRepository.save(waiting("이산", secondSlot, LocalDateTime.of(2026, 5, 7, 11, 0)));
+        waitingReservationRepository.save(waiting("브리", secondSlot, LocalDateTime.of(2026, 5, 8, 11, 0)));
+
+        Slot thirdSlot = insertSlot(
+            103L, LocalDate.of(2026, 5, 12),
+            203L, LocalTime.of(13, 0),
+            303L, "미스터리"
+        );
+        waitingReservationRepository.save(waiting("나무", thirdSlot, LocalDateTime.of(2026, 5, 7, 12, 0)));
+        waitingReservationRepository.save(waiting("고래", thirdSlot, LocalDateTime.of(2026, 5, 8, 12, 0)));
+        waitingReservationRepository.save(waiting("이산", thirdSlot, LocalDateTime.of(2026, 5, 9, 12, 0)));
+
+        List<WaitingReservationWithRank> waitings = waitingReservationRepository.findAllByNameWithRank("이산");
+
+        assertThat(waitings).hasSize(3);
+        assertThat(waitings).extracting(result -> result.waitingReservation().getName())
+            .containsOnly("이산");
+        assertThat(waitings).extracting(result -> result.waitingReservation().getDate().getId())
+            .containsExactly(DATE_ID, 102L, 103L);
+        assertThat(waitings).extracting(WaitingReservationWithRank::rank)
+            .containsExactly(2L, 1L, 3L);
+    }
+
     private WaitingReservation waiting(String name, LocalDateTime createdAt) {
         return WaitingReservation.createWithoutId(name, date, time, theme, createdAt);
+    }
+
+    private WaitingReservation waiting(String name, Slot slot, LocalDateTime createdAt) {
+        return WaitingReservation.createWithoutId(name, slot.date(), slot.time(), slot.theme(), createdAt);
+    }
+
+    private Slot insertSlot(long dateId, LocalDate playDay, long timeId, LocalTime startAt, long themeId,
+        String themeName) {
+        jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", dateId, playDay.toString());
+        jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", timeId, startAt.toString());
+        jdbcTemplate.update(
+            "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
+            themeId, themeName, "테마 내용", "/themes/" + themeId
+        );
+        return new Slot(
+            ReservationDate.of(dateId, playDay),
+            ReservationTime.of(timeId, startAt),
+            Theme.of(themeId, themeName, "테마 내용", "/themes/" + themeId)
+        );
+    }
+
+    private record Slot(
+        ReservationDate date,
+        ReservationTime time,
+        Theme theme
+    ) {
     }
 
 }

@@ -5,6 +5,7 @@ import java.sql.Statement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.domain.waitingreservation.dto.WaitingReservationWithRank;
 
 @Repository
 @RequiredArgsConstructor
@@ -43,6 +45,27 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
             join theme th on wr.theme_id = th.id
             order by wr.created_at asc, wr.id asc
             limit 1
+            """;
+
+    private static final String FIND_ALL_BY_NAME_WITH_RANK_SQL =
+        """
+            select ranked.id, ranked.name, ranked.created_at, ranked.waiting_rank,
+                   rd.id as date_id, rd.play_day,
+                   rt.id as time_id, rt.start_at,
+                   th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+            from (
+                select wr.id, wr.name, wr.date_id, wr.time_id, wr.theme_id, wr.created_at,
+                       row_number() over (
+                           partition by wr.date_id, wr.time_id, wr.theme_id
+                           order by wr.created_at asc, wr.id asc
+                       ) as waiting_rank
+                from waiting_reservation wr
+            ) ranked
+            join reservation_date rd on ranked.date_id = rd.id
+            join reservation_time rt on ranked.time_id = rt.id
+            join theme th on ranked.theme_id = th.id
+            where ranked.name = ?
+            order by rd.play_day asc, rt.start_at asc, ranked.id asc
             """;
 
     private final JdbcTemplate jdbcTemplate;
@@ -80,6 +103,18 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
         return jdbcTemplate.query(FIND_OLDEST_SQL, waitingReservationRowMapper())
             .stream()
             .findFirst();
+    }
+
+    @Override
+    public List<WaitingReservationWithRank> findAllByNameWithRank(String name) {
+        return jdbcTemplate.query(FIND_ALL_BY_NAME_WITH_RANK_SQL, waitingReservationWithRankRowMapper(), name);
+    }
+
+    private RowMapper<WaitingReservationWithRank> waitingReservationWithRankRowMapper() {
+        return (rs, rowNum) -> new WaitingReservationWithRank(
+            waitingReservationRowMapper().mapRow(rs, rowNum),
+            rs.getLong("waiting_rank")
+        );
     }
 
     private RowMapper<WaitingReservation> waitingReservationRowMapper() {
