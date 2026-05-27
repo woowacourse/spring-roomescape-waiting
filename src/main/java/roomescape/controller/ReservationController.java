@@ -11,6 +11,7 @@ import roomescape.service.ReservationService;
 
 import java.net.URI;
 import java.util.List;
+import roomescape.service.dto.ReservationAndWaiting;
 
 @Validated
 @RestController
@@ -35,8 +36,9 @@ public class ReservationController {
     }
 
     @GetMapping(params = {"userName"})
-    public ResponseEntity<List<ReservationResponse>> getReservationByName(@RequestParam String userName) {
-        return ResponseEntity.ok(convertToReservationResponse(reservationService.findReservationByName(userName)));
+    public ResponseEntity<List<ReservationAndWaitingResponse>> getReservationByName(@RequestParam String userName) {
+        return ResponseEntity.ok(
+                convertToReservationAndWaitingResponse(reservationService.findReservationByName(userName)));
     }
 
     @PostMapping
@@ -106,6 +108,25 @@ public class ReservationController {
                 reservation.getDate(),
                 TimeResponse.from(reservation.getTimeSlot()),
                 ThemeResponse.from(reservation.getTheme())
+        );
+    }
+
+    private List<ReservationAndWaitingResponse> convertToReservationAndWaitingResponse(
+            List<ReservationAndWaiting> reservationAndWaitings) {
+
+        return reservationAndWaitings.stream()
+                .map(this::toResponse)
+                .toList();
+    }
+
+    private ReservationAndWaitingResponse toResponse(ReservationAndWaiting reservationAndWaiting) {
+        return new ReservationAndWaitingResponse(
+                reservationAndWaiting.name(),
+                reservationAndWaiting.date(),
+                TimeResponse.from(reservationAndWaiting.timeSlot()),
+                ThemeResponse.from(reservationAndWaiting.theme()),
+                reservationAndWaiting.isReserved(),
+                reservationAndWaiting.waitingNumber()
         );
     }
 }

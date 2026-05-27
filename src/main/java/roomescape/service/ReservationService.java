@@ -1,10 +1,12 @@
 package roomescape.service;
 
+import java.util.ArrayList;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeSlot;
+import roomescape.domain.Waiting;
 import roomescape.exception.*;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
@@ -14,6 +16,8 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
+import roomescape.repository.WaitingRepository;
+import roomescape.service.dto.ReservationAndWaiting;
 
 @Service
 @Transactional(readOnly = true)
@@ -22,15 +26,18 @@ public class ReservationService {
     private final ReservationRepository reservationRepository;
     private final TimeSlotRepository timeSlotRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingRepository waitingRepository;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             TimeSlotRepository timeSlotRepository,
-            ThemeRepository themeRepository
+            ThemeRepository themeRepository,
+            WaitingRepository waitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.timeSlotRepository = timeSlotRepository;
         this.themeRepository = themeRepository;
+        this.waitingRepository = waitingRepository;
     }
 
     public List<Reservation> allReservations() {
@@ -42,8 +49,27 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationNotFoundException(id));
     }
 
-    public List<Reservation> findReservationByName(String name) {
-        return reservationRepository.findByName(name);
+    public List<ReservationAndWaiting> findReservationByName(String name) {
+        List<Reservation> reservations = reservationRepository.findByName(name);
+        List<Waiting> waitings = waitingRepository.findByName(name);
+
+        List<ReservationAndWaiting> reservationAndWaitings = new ArrayList<>();
+
+        for (Reservation reservation : reservations) {
+            reservationAndWaitings.add(ReservationAndWaiting.fromReservation(reservation));
+        }
+
+        for (Waiting waiting : waitings) {
+            TimeSlot timeSlot = timeSlotRepository.findById(waiting.getTimeSlotId())
+                    .orElseThrow(() -> new TimeSlotNotFoundException(waiting.getTimeSlotId()));
+
+            Theme theme = themeRepository.findById(waiting.getThemeId())
+                    .orElseThrow(() -> new ThemeNotFoundException(waiting.getThemeId()));
+
+            reservationAndWaitings.add(ReservationAndWaiting.fromWaiting(waiting, timeSlot, theme));
+        }
+
+        return reservationAndWaitings;
     }
 
     @Transactional

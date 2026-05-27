@@ -1,11 +1,16 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.domain.Reservation;
+import roomescape.domain.Theme;
+import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 
 @Repository
@@ -94,12 +99,23 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public List<Waiting> findByName(String name) {
         String sql = """
-                SELECT *
-                FROM waiting
-                WHERE name = ?
-                """;
+            SELECT *
+            FROM (
+                SELECT w.id,
+                       w.name,
+                       w.date,
+                       w.time_id,
+                       w.theme_id,
+                       ROW_NUMBER() OVER (
+                           PARTITION BY w.date, w.time_id, w.theme_id
+                           ORDER BY w.created_at ASC, w.id ASC
+                       ) AS waiting_number
+                FROM waiting w
+            ) ranked
+            WHERE ranked.name = ?
+            """;
 
-        return jdbcTemplate.queryForList(sql, Waiting.class, name);
+        return jdbcTemplate.query(sql, rowMapper(), name);
     }
 
     private SimpleJdbcInsert createInsert() {
@@ -114,6 +130,17 @@ public class JdbcWaitingRepository implements WaitingRepository {
                 "date", waiting.getDate(),
                 "time_id", waiting.getTimeSlotId(),
                 "theme_id", waiting.getThemeId()
+        );
+    }
+
+    private RowMapper<Waiting> rowMapper() {
+        return (rs, rowNum) -> new Waiting(
+                rs.getLong("id"),
+                rs.getString("name"),
+                rs.getObject("date", LocalDate.class),
+                rs.getLong("time_id"),
+                rs.getLong("theme_id"),
+                rs.getInt("waiting_number")
         );
     }
 }
