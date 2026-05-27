@@ -13,8 +13,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 
-import static org.hamcrest.Matchers.endsWith;
-import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -268,6 +267,56 @@ public class MissionStepTest {
                 .statusCode(400)
                 .body("code", is("INVALID_INPUT"))
                 .body("detail", is("예약 가능한 시간에는 대기를 신청할 수 없습니다."));
+    }
+
+    @Test
+    void 내_예약_목록에서_예약과_대기를_상태로_구분해서_함께_조회한다() {
+        Map<String, String> myReservationParams = new HashMap<>();
+        myReservationParams.put("name", "브라운");
+        myReservationParams.put("date", LocalDate.now().plusDays(1).toString());
+        myReservationParams.put("timeId", "1");
+        myReservationParams.put("themeId", "1");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(myReservationParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, String> reservedSlotParams = new HashMap<>(myReservationParams);
+        reservedSlotParams.put("name", "구구");
+        reservedSlotParams.put("timeId", "2");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservedSlotParams)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, String> waitingParams = new HashMap<>(reservedSlotParams);
+        waitingParams.put("name", "브라운");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(waitingParams)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/reservation-statuses")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[0].name", is("브라운"))
+                .body("[0].status", is("RESERVED"))
+                .body("[0].turn", nullValue())
+                .body("[1].name", is("브라운"))
+                .body("[1].status", is("WAITING"))
+                .body("[1].turn", is(1));
     }
 
     @Test
