@@ -66,7 +66,7 @@ public class ThemeRepository {
                 LEFT JOIN reservation AS r
                     ON r.theme_id = t.id
                     AND r.date >= ?
-                    AND r.date < ?
+                    AND r.date <= ?
                 GROUP BY t.id, t.name, t.description, t.thumbnail
                 ORDER BY reservation_count DESC, t.id ASC
                 LIMIT ?;
