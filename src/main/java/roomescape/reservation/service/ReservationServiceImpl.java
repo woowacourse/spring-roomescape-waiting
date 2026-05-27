@@ -1,7 +1,5 @@
 package roomescape.reservation.service;
 
-import java.time.LocalDateTime;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.service.HolidayService;
@@ -17,6 +15,9 @@ import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.TimeService;
+
+import java.time.LocalDateTime;
+import java.util.List;
 
 @Service
 public class ReservationServiceImpl implements ReservationService {
@@ -102,11 +103,6 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<Reservation> getByName(String name) {
-        return reservationRepository.findByName(name);
-    }
-
-    @Override
     public List<ReservationWithWaitingOrderResponseDto> getAllByName(String name) {
         return reservationRepository.findAllByName(name).stream()
                 .map(ReservationWithWaitingOrderResponseDto::from)
@@ -118,7 +114,7 @@ public class ReservationServiceImpl implements ReservationService {
     public void cancelForUser(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
-        reservation.isOwnedBy(name);
+        reservation.validateOwnedBy(name);
         reservation.getTime().validateNotPastForCancel();
 
         if (reservation.isReserved()) {

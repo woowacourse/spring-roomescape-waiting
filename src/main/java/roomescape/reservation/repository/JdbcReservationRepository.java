@@ -1,25 +1,24 @@
 package roomescape.reservation.repository;
 
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.RowMapper;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
+import org.springframework.stereotype.Repository;
+import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Status;
+import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
+import roomescape.theme.controller.dto.ThemeResponseDto;
+import roomescape.theme.domain.Theme;
+import roomescape.time.domain.ReservationTime;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
-import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
-import org.springframework.stereotype.Repository;
-
-import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.Status;
-import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
-import roomescape.theme.controller.dto.ThemeResponseDto;
-import roomescape.time.domain.ReservationTime;
-import roomescape.theme.domain.Theme;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -63,15 +62,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 id
         );
         return results.stream().findFirst();
-    }
-
-    @Override
-    public List<Reservation> findByName(String name) {
-        return jdbcTemplate.query(
-                BASE_SELECT + "WHERE r.name = ?",
-                new ReservationRowMapper(),
-                name
-        );
     }
 
     @Override

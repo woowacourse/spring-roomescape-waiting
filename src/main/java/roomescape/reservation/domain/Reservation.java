@@ -1,9 +1,10 @@
 package roomescape.reservation.domain;
 
-import java.time.LocalDateTime;
 import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
+
+import java.time.LocalDateTime;
 
 public class Reservation {
     private final Long id;
@@ -31,16 +32,8 @@ public class Reservation {
         return new Reservation(id, this.name, this.time, this.theme, this.status, this.createdAt);
     }
 
-    public Reservation withTheme(Theme theme) {
-        return new Reservation(this.id, this.name, this.time, theme, this.status, this.createdAt);
-    }
-
     public Reservation withTime(ReservationTime time) {
         return new Reservation(this.id, this.name, time, this.theme, this.status, this.createdAt);
-    }
-
-    public Reservation withStatus(Status status) {
-        return new Reservation(this.id, this.name, this.time, this.theme, status, this.createdAt);
     }
 
     public Long getId() {
@@ -71,7 +64,7 @@ public class Reservation {
         return this.status.equals(Status.RESERVED);
     }
 
-    public void isOwnedBy(String name) {
+    public void validateOwnedBy(String name) {
         if (!this.name.equals(name)) {
             throw new ForbiddenRequestException();
         }

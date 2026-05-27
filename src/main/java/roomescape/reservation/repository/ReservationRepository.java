@@ -1,19 +1,18 @@
 package roomescape.reservation.repository;
 
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
+import roomescape.time.domain.ReservationTime;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
-import roomescape.time.domain.ReservationTime;
 
 public interface ReservationRepository {
     List<Reservation> findAll();
 
     Optional<Reservation> findById(Long id);
-
-    List<Reservation> findByName(String name);
 
     Reservation save(Reservation reservation);
 
