@@ -159,8 +159,24 @@ class ReservationServiceTest {
 
         @Test
         @DisplayName("해당 타임 슬롯에 예약이 없다면 얘약을 허용한다")
-        void a() {
+        void 해당_타임_슬롯에_예약이_없다면_예약을_허용한다() {
 
+            given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+            given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
+            given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
+                    1L))
+                    .willReturn(false);
+            given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
+                    1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L));
+
+            assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
+
+            verify(reservationTimeRepository, times(1)).findById(1L);
+            verify(themeRepository, times(1)).findById(1L);
+            verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId("모아",
+                    VALID_COMMAND_MOA.date(), 1L,
+                    1L);
+            verify(reservationRepository, times(1)).save(any(Reservation.class));
         }
 
         @Nested
