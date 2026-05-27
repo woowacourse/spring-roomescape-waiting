@@ -157,7 +157,7 @@ class WaitingRepositoryTest {
         void 이름에_해당하는_대기와_대기_순번을_반환한다() {
             waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
             waitingRepository.save(Waiting.of("유저2", LocalDate.of(2099, 12, 31), time, theme));
-            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+            waitingRepository.save(Waiting.of("유저1", LocalDate.of(2099, 12, 30), time, theme));
 
             List<MyWaitingResult> result = waitingRepository.findByName("유저1");
 
@@ -168,7 +168,7 @@ class WaitingRepositoryTest {
                     () -> assertThat(result).extracting(MyWaitingResult::themeName)
                             .containsExactly("테마1", "테마1"),
                     () -> assertThat(result).extracting(MyWaitingResult::waitingNumber)
-                            .containsExactly(1, 3)
+                            .containsExactly(1, 1)
             );
         }
 

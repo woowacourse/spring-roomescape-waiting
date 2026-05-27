@@ -213,11 +213,9 @@ class ReservationRepositoryTest {
 
         @Test
         void 기간_내_예약이_많은_테마_id부터_최대_10개를_반환한다() {
-            for (int i = 0; i < 3; i++) {
-                reservationRepository.save(
-                        Reservation.of("유저" + i, LocalDate.of(2099, 12, 31), time, theme)
-                );
-            }
+            reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+            reservationRepository.save(Reservation.of("유저2", LocalDate.of(2099, 12, 30), time, theme));
+            reservationRepository.save(Reservation.of("유저3", LocalDate.of(2099, 12, 30), anotherTime, theme));
             reservationRepository.save(Reservation.of("다른유저", LocalDate.of(2099, 12, 31), time, anotherTheme));
             reservationRepository.save(Reservation.of("기간밖유저", LocalDate.of(2099, 12, 29), time, anotherTheme));
 

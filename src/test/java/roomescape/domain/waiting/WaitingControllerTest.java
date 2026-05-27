@@ -37,6 +37,7 @@ class WaitingControllerTest {
     void 예약_대기_정상_생성_확인_테스트() {
         Long themeId = insertTheme("테마1");
         Long timeId = insertTime("10:00", "11:00");
+        insertReservation("예약자", "2099-12-31", timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("name", "유저1");
@@ -236,6 +237,57 @@ class WaitingControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("waitings", is(empty()));
+    }
+
+    @Test
+    void createWaiting_예약이_없는_슬롯인경우_에러_반환_테스트() {
+        Long themeId = insertTheme("테마1");
+        Long timeId = insertTime("10:00", "11:00");
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "유저1");
+        params.put("date", "2099-12-31");
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(422)
+                .body("message", is("해당 예약은 점유되어있지 않습니다."));
+    }
+
+    @Test
+    void createWaiting_이미_예약한_사람인경우_에러_반환_테스트() {
+        Long themeId = insertTheme("테마1");
+        Long timeId = insertTime("10:00", "11:00");
+        insertReservation("예약자", "2099-12-31", timeId, themeId);
+
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "예약자");
+        params.put("date", "2099-12-31");
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations/waiting")
+                .then().log().all()
+                .statusCode(422)
+                .body("message", is("예약이 이미 등록되어있습니다."));
+    }
+
+    private Long insertReservation(String name, String date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, date, timeId, themeId
+        );
+        return jdbcTemplate.queryForObject(
+                "SELECT MAX(id) FROM reservation", Long.class
+        );
     }
 
 }
