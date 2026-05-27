@@ -89,7 +89,8 @@ public class WaitingRepository {
                 ) ranked
                 JOIN reservation_time t ON ranked.time_id = t.id
                 JOIN theme th ON ranked.theme_id = th.id
-                WHERE ranked.name = ?;
+                WHERE ranked.name = ?
+                ORDER BY ranked.date DESC, ranked.waiting_id
                 """;
         return jdbcTemplate.query(query, rowMapper, name);
     }

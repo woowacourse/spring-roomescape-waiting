@@ -2,6 +2,8 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.dto.MyReservationsResponse;
@@ -49,8 +51,13 @@ public class ReservationService {
                 time,
                 theme
         );
-        Reservation saved = reservationRepository.save(reservation);
-        return ReservationResponse.from(saved);
+
+        try {
+            Reservation saved = reservationRepository.save(reservation);
+            return ReservationResponse.from(saved);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+        }
     }
 
     @Transactional(readOnly = true)
@@ -86,7 +93,11 @@ public class ReservationService {
 
         reservation.validateOwner(fixRequest.name());
 
-        reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
+        try {
+            reservationRepository.updateDateAndTime(id, fixRequest.date(), fixRequest.timeId());
+        } catch (DuplicateKeyException exception) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+        }
     }
 
     private void validateReservationId(Long id) {

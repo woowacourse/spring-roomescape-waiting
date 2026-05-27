@@ -2,6 +2,7 @@ package roomescape.domain.waiting;
 
 import java.time.LocalDate;
 import java.util.List;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.ReservationRepository;
@@ -54,9 +55,12 @@ public class WaitingService {
                 theme
         );
 
-        Waiting saved = waitingRepository.save(waiting);
-
-        return WaitingResponse.of(saved);
+        try {
+            Waiting saved = waitingRepository.save(waiting);
+            return WaitingResponse.of(saved);
+        } catch (DuplicateKeyException exception) {
+            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION_NAME);
+        }
     }
 
     @Transactional
@@ -91,7 +95,7 @@ public class WaitingService {
                 waitingRequest.themeId());
 
         if (!isExistReservation) {
-            throw new RoomescapeException(ErrorCode.DUPLICATE_RESERVATION);
+            throw new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND);
         }
 
         String reservationName = reservationRepository.findNameByDateAndTimeIdAndThemeId(waitingRequest.date(),
