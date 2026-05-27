@@ -1,5 +1,6 @@
 package roomescape.reservation.infra;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.dao.DuplicateKeyException;
@@ -49,6 +50,36 @@ public class JdbcWaitingRepository implements WaitingRepository {
                                 rs.getLong("time_id"),
                                 rs.getTime("start_at").toLocalTime()),
                 id
+        ).stream().findFirst();
+    }
+
+    @Override
+    public Optional<Waiting> findOldestByDateAndThemeIdAndTimeId(
+            LocalDate date,
+            Long themeId,
+            Long timeId
+    ) {
+        return jdbcTemplate.query(
+                """
+                        SELECT *
+                        FROM waiting
+                        WHERE date = ?
+                          AND theme_id = ?
+                          AND time_id = ?
+                        ORDER BY id ASC
+                        LIMIT 1
+                        """,
+                (rs, rowNum) ->
+                        Waiting.of(
+                                rs.getLong("id"),
+                                rs.getString("name"),
+                                rs.getDate("date").toLocalDate(),
+                                rs.getLong("theme_id"),
+                                rs.getLong("time_id")
+                        ),
+                date,
+                themeId,
+                timeId
         ).stream().findFirst();
     }
 
