@@ -20,27 +20,31 @@ public class ReservationWaitingController {
 
     private final ReservationWaitingService reservationWaitingService;
 
-    public ReservationWaitingController(ReservationWaitingService reservationWaitingService) {
+    public ReservationWaitingController(final ReservationWaitingService reservationWaitingService) {
         this.reservationWaitingService = reservationWaitingService;
     }
 
     @PostMapping
-    public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(@Valid @RequestBody ReservationWaitingCreateRequest reservationWaitingRequest) {
-
+    public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
+            @Valid @RequestBody final ReservationWaitingCreateRequest reservationWaitingRequest
+    ) {
         ReservationWaitingResponse reservationWaiting = ReservationWaitingResponse.from(
                 reservationWaitingService.save(
-                reservationWaitingRequest.name(),
-                reservationWaitingRequest.date(),
-                reservationWaitingRequest.themeId(),
-                reservationWaitingRequest.timeId()
-        ));
+                        reservationWaitingRequest.name(),
+                        reservationWaitingRequest.date(),
+                        reservationWaitingRequest.themeId(),
+                        reservationWaitingRequest.timeId()
+                ));
 
         return ResponseEntity.created(URI.create("/waitings/" + reservationWaiting.id()))
                 .body(reservationWaiting);
     }
 
     @DeleteMapping("/{waiting_id}")
-    public ResponseEntity<Void> deleteReservationWaiting(@PathVariable("waiting_id") Long waitingId, @RequestParam String name) {
-
+    public ResponseEntity<Void> deleteReservationWaiting(
+            @PathVariable("waiting_id") final Long waitingId,
+            @RequestParam final String name
+    ) {
+        return ResponseEntity.noContent().build();
     }
 }

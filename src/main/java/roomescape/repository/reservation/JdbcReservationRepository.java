@@ -266,6 +266,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                               WHERE date = ? AND theme_id = ? AND time_id = ?
                           """;
 
-        return jdbcTemplate.queryForObject(sql, Long.class, date, themeId, timeId);
+        return jdbcTemplate.queryForObject(sql, Long.class, Date.valueOf(date), themeId, timeId);
     }
 }

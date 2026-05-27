@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.reservationwaiting.ReservationWaiting;
 
 @Repository
-public class JdbcReservationWaitingRepository implements ReservationWaitingRepository{
+public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
     private final JdbcTemplate jdbcTemplate;
 
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
@@ -24,8 +24,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(sql, new String[]{"id"});
-            preparedStatement.setLong(1, reservationWaiting.getId());
-            preparedStatement.setString(2, String.valueOf(reservationWaiting.getName()));
+            preparedStatement.setLong(1, reservationWaiting.getReservation().getId());
+            preparedStatement.setString(2, reservationWaiting.getName());
             preparedStatement.setTime(3, Time.valueOf(reservationWaiting.getRequestAt()));
             return preparedStatement;
         }, keyHolder);

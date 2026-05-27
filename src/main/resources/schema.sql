@@ -31,11 +31,11 @@ CREATE TABLE reservation
 
 CREATE TABLE reservation_waiting
 (
-    id       BIGINT       NOT NULL AUTO_INCREMENT,
-    reservation_id BIGINT NOT NULL,
-    name     VARCHAR(255) NOT NULL,
-    request_at TIME NOT NULL
+    id             BIGINT       NOT NULL AUTO_INCREMENT,
+    reservation_id BIGINT       NOT NULL,
+    name           VARCHAR(255) NOT NULL,
+    requested_at   TIME         NOT NULL,
     PRIMARY KEY (id),
     FOREIGN KEY (reservation_id) REFERENCES reservation (id),
-    UNIQUE (name, request_at)
-)
+    UNIQUE (reservation_id, name)
+);
