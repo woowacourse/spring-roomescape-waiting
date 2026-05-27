@@ -4,11 +4,13 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.ConflictException;
 import roomescape.global.exception.InvalidRequestException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -45,6 +47,9 @@ class ReservationServiceTest {
     @Autowired
     private ThemeRepository themeRepository;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
     @Test
     @DisplayName("예약을 생성한다.")
     public void create_success() {
@@ -57,10 +62,12 @@ class ReservationServiceTest {
 
         // then
         assertThat(reservationService.findAll()).containsExactly(reservation);
+        assertThat(reservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(reservation.getWaitingRank()).isZero();
     }
 
     @Test
-    @DisplayName("이미 예약된 날짜, 시간, 테마로 예약하면 예외가 발생한다.")
+    @DisplayName("같은 사용자가 같은 날짜, 시간, 테마로 예약하면 예외가 발생한다.")
     public void create_fail_whenDuplicatedReservation() {
         // given
         ReservationTime time = saveReservationTime(10);
@@ -71,6 +78,25 @@ class ReservationServiceTest {
         // when, then
         assertThatThrownBy(() -> createReservation(NAME, FUTURE_DATE, time, theme))
                 .isInstanceOf(ConflictException.class);
+    }
+
+    @Test
+    @DisplayName("다른 사용자가 이미 예약한 슬롯에는 대기로 예약한다.")
+    public void create_success_whenSameSlotReservedByOtherUser() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+
+        Reservation reservedReservation = createReservation(NAME, FUTURE_DATE, time, theme);
+
+        // when
+        Reservation waitingReservation = createReservation(OTHER_NAME, FUTURE_DATE, time, theme);
+
+        // then
+        assertThat(reservedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(reservedReservation.getWaitingRank()).isZero();
+        assertThat(waitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(waitingReservation.getWaitingRank()).isEqualTo(1L);
     }
 
     @Test
@@ -120,6 +146,28 @@ class ReservationServiceTest {
 
         // then
         assertThat(reservationService.findAll()).isEmpty();
+        assertThat(countHistoryByReservationId(reservation.getId())).isZero();
+    }
+
+    @Test
+    @DisplayName("관리자가 예약 확정자를 삭제하면 다음 대기가 예약 확정이 되고 취소 이력은 남지 않는다.")
+    public void delete_success_promotesWaitingReservationWithoutHistory() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+
+        Reservation reservedReservation = createReservation(NAME, FUTURE_DATE, time, theme);
+        Reservation waitingReservation = createReservation(OTHER_NAME, FUTURE_DATE, time, theme);
+
+        // when
+        reservationService.delete(reservedReservation.getId());
+
+        // then
+        Reservation promotedReservation = reservationService.findByName(OTHER_NAME).get(0);
+        assertThat(promotedReservation.getId()).isEqualTo(waitingReservation.getId());
+        assertThat(promotedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(promotedReservation.getWaitingRank()).isZero();
+        assertThat(countHistoryByReservationId(reservedReservation.getId())).isZero();
     }
 
     @Test
@@ -133,6 +181,27 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("예약 확정자가 취소하면 다음 대기가 예약 확정이 된다.")
+    public void cancel_success_promotesWaitingReservation() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        Theme theme = saveTheme();
+
+        Reservation reservedReservation = createReservation(NAME, FUTURE_DATE, time, theme);
+        Reservation waitingReservation = createReservation(OTHER_NAME, FUTURE_DATE, time, theme);
+
+        // when
+        reservationService.cancel(reservedReservation.getId(), NAME);
+
+        // then
+        Reservation promotedReservation = reservationService.findByName(OTHER_NAME).get(0);
+        assertThat(promotedReservation.getId()).isEqualTo(waitingReservation.getId());
+        assertThat(promotedReservation.getStatus()).isEqualTo(ReservationStatus.RESERVED);
+        assertThat(promotedReservation.getWaitingRank()).isZero();
+        assertThat(countHistoryByReservationId(reservedReservation.getId())).isEqualTo(1);
+    }
+
+    @Test
     @DisplayName("사용자가 본인의 예약을 취소한다.")
     public void cancel_success() {
         // given
@@ -143,6 +212,7 @@ class ReservationServiceTest {
 
         // then
         assertThat(reservationService.findAll()).isEmpty();
+        assertThat(countHistoryByReservationId(reservation.getId())).isEqualTo(1);
     }
 
     @Test
@@ -202,8 +272,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("이미 예약된 날짜, 시간, 테마로 예약을 변경하면 예외가 발생한다.")
-    public void updateDateTime_fail_whenDuplicatedReservation() {
+    @DisplayName("다른 사용자가 예약한 슬롯으로 변경하면 대기로 예약된다.")
+    public void updateDateTime_success_whenTargetSlotReservedByOtherUser() {
         // given
         ReservationTime time = saveReservationTime(10);
         ReservationTime occupiedTime = saveReservationTime(11);
@@ -211,6 +281,32 @@ class ReservationServiceTest {
 
         Reservation reservation = createReservation(NAME, FUTURE_DATE, time, theme);
         createReservation(OTHER_NAME, NEXT_FUTURE_DATE, occupiedTime, theme);
+
+        // when
+        Reservation updatedReservation = reservationService.updateDateTime(
+                reservation.getId(),
+                NAME,
+                NEXT_FUTURE_DATE,
+                occupiedTime.getId()
+        );
+
+        // then
+        assertThat(updatedReservation.getId()).isNotEqualTo(reservation.getId());
+        assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+        assertThat(updatedReservation.getWaitingRank()).isEqualTo(1L);
+        assertThat(countHistoryByReservationId(reservation.getId())).isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("같은 사용자가 이미 신청한 날짜, 시간, 테마로 예약을 변경하면 예외가 발생한다.")
+    public void updateDateTime_fail_whenDuplicatedReservation() {
+        // given
+        ReservationTime time = saveReservationTime(10);
+        ReservationTime occupiedTime = saveReservationTime(11);
+        Theme theme = saveTheme();
+
+        Reservation reservation = createReservation(NAME, FUTURE_DATE, time, theme);
+        createReservation(NAME, NEXT_FUTURE_DATE, occupiedTime, theme);
 
         // when, then
         assertThatThrownBy(() -> reservationService.updateDateTime(
@@ -220,24 +316,6 @@ class ReservationServiceTest {
                 occupiedTime.getId()
         ))
                 .isInstanceOf(ConflictException.class);
-    }
-
-    @Test
-    @DisplayName("현재 예약과 같은 날짜와 시간으로 변경하면 예외가 발생한다.")
-    public void updateDateTime_fail_whenSameSchedule() {
-        // given
-        ReservationTime time = saveReservationTime(10);
-        Theme theme = saveTheme();
-        Reservation reservation = createReservation(NAME, FUTURE_DATE, time, theme);
-
-        // when, then
-        assertThatThrownBy(() -> reservationService.updateDateTime(
-                reservation.getId(),
-                NAME,
-                FUTURE_DATE,
-                time.getId()
-        ))
-                .isInstanceOf(InvalidRequestException.class);
     }
 
     @Test
@@ -253,23 +331,6 @@ class ReservationServiceTest {
                 NAME,
                 PAST_DATE,
                 pastTime.getId()
-        ))
-                .isInstanceOf(InvalidRequestException.class);
-    }
-
-    @Test
-    @DisplayName("이미 지난 예약을 변경하면 예외가 발생한다.")
-    public void updateDateTime_fail_whenPastReservation() {
-        // given
-        Reservation reservation = savePastReservation();
-        ReservationTime newTime = saveReservationTime(11);
-
-        // when, then
-        assertThatThrownBy(() -> reservationService.updateDateTime(
-                reservation.getId(),
-                NAME,
-                FUTURE_DATE,
-                newTime.getId()
         ))
                 .isInstanceOf(InvalidRequestException.class);
     }
@@ -296,5 +357,13 @@ class ReservationServiceTest {
                 "우테코 레벨2를 탈출하는 내용입니다.",
                 "https://example.com/theme.png"
         ));
+    }
+
+    private Integer countHistoryByReservationId(Long reservationId) {
+        return jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation_history WHERE reservation_id = ?",
+                Integer.class,
+                reservationId
+        );
     }
 }

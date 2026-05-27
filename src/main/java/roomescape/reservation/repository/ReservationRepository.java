@@ -17,15 +17,15 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    Optional<Reservation> update(Reservation reservation);
+    Reservation update(Reservation reservation);
 
     boolean existsByTimeId(Long timeId);
 
     boolean existsByThemeId(Long themeId);
 
-    boolean existsConflict(LocalDate date, Long timeId, Long themeId);
+    boolean existsConflict(String name, LocalDate date, Long timeId, Long themeId);
 
-    boolean existsConflictExcluding(LocalDate date, Long timeId, Long themeId, Long id);
+    boolean existsConflictExcluding(String name, LocalDate date, Long timeId, Long themeId, Long id);
 
     void deleteById(Long id);
 }

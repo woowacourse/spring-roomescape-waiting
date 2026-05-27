@@ -181,6 +181,71 @@ public class MissionStepTest {
     }
 
     @Test
+    @DisplayName("이미 예약된 슬롯에 다른 사용자가 예약하면 대기로 생성되고 내 예약 조회에 대기 순번이 포함된다.")
+    void createWaitingReservationAndFindMyReservations() {
+        Map<String, String> time = new HashMap<>();
+        time.put("startAt", "22:30");
+
+        Map<String, String> theme = new HashMap<>();
+        theme.put("name", "대기 신청 테스트");
+        theme.put("description", "대기 신청 테스트용 테마");
+        theme.put("thumbnail", "https://example.com/waiting-theme.png");
+
+        String date = LocalDate.now().plusDays(1).toString();
+
+        int timeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(time)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        int themeId = RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(theme)
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
+
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", date);
+        reservation.put("timeId", timeId);
+        reservation.put("themeId", themeId);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", is("RESERVED"))
+                .body("waitingRank", is(0));
+
+        reservation.put("name", "레아");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .body("status", is("WAITING"))
+                .body("waitingRank", is(1));
+
+        RestAssured.given().log().all()
+                .when().get("/reservations?name=레아")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations[0].status", is("WAITING"))
+                .body("reservations[0].waitingRank", is(1));
+    }
+
+    @Test
     @DisplayName("컨트롤러는 JdbcTemplate을 직접 의존하지 않는다.")
     void controllerDoesNotDependOnJdbcTemplate() {
         boolean isJdbcTemplateInjected = false;

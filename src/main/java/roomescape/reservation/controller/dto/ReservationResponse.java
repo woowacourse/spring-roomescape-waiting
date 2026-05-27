@@ -5,7 +5,9 @@ import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 
 public record ReservationResponse(
-        Long id,
+        long id,
+        String status,
+        Long waitingRank,
         String name,
         String date,
         ReservationTimeResponse time,
@@ -15,6 +17,8 @@ public record ReservationResponse(
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
+                reservation.getStatus().name(),
+                reservation.getWaitingRank(),
                 reservation.getName(),
                 reservation.getDate().toString(),
                 ReservationTimeResponse.from(reservation.getTime()),

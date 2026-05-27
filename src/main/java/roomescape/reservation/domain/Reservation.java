@@ -12,6 +12,8 @@ import java.util.Objects;
 @Getter
 public class Reservation {
     private final Long id;
+    private final ReservationStatus status;
+    private final Long waitingRank;
     private final String name;
     private final LocalDate date;
     private final ReservationTime time;
@@ -22,74 +24,38 @@ public class Reservation {
                                      ReservationTime time,
                                      Theme theme,
                                      LocalDateTime now) {
-        Reservation reservation = new Reservation(name, date, time, theme);
-        if (reservation.isPast(now)) {
-            throw new InvalidRequestException("현재 시각 이후의 날짜와 시간을 선택해주세요.");
-        }
-
-        return reservation;
+        validate(now, name, date, time, theme);
+        return new Reservation(null, null, null, name, date, time, theme);
     }
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, name, date, time, theme);
-    }
-
-    public Reservation changeDateTime(LocalDate newDate, ReservationTime newTime, LocalDateTime now) {
-        if (isPast(now)) {
-            throw new InvalidRequestException("이미 지난 예약은 변경할 수 없습니다.");
-        }
-
-        if (Objects.equals(this.date, newDate)
-                && Objects.equals(this.time.getStartAt(), newTime.getStartAt())) {
-            throw new InvalidRequestException("변경할 날짜와 시간을 현재 예약과 다르게 선택해주세요.");
-        }
-
-        Reservation changedReservation = new Reservation(id, name, newDate, newTime, theme);
-        if (changedReservation.isPast(now)) {
-            throw new InvalidRequestException("현재 시각 이후의 날짜와 시간을 선택해주세요.");
-        }
-
-        return changedReservation;
+        this(null, null, null, name, date, time, theme);
     }
 
     public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
-        this.id = id;
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
+        this(id, null, null, name, date, time, theme);
     }
 
-    private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(
+            Long id,
+            ReservationStatus status,
+            Long waitingRank,
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme) {
         validateName(name);
         validateDate(date);
         validateTime(time);
         validateTheme(theme);
-    }
 
-    private void validateName(String name) {
-        if (name == null || name.isBlank()) {
-            throw new InvalidRequestException("예약자 이름은 비어 있을 수 없습니다.");
-        }
-    }
-
-    private void validateDate(LocalDate date) {
-        if (date == null) {
-            throw new InvalidRequestException("예약 날짜는 비어 있을 수 없습니다.");
-        }
-    }
-
-    private void validateTime(ReservationTime time) {
-        if (time == null) {
-            throw new InvalidRequestException("예약 시간은 비어 있을 수 없습니다.");
-        }
-    }
-
-    private void validateTheme(Theme theme) {
-        if (theme == null) {
-            throw new InvalidRequestException("테마 정보는 비어 있을 수 없습니다.");
-        }
+        this.id = id;
+        this.status = status;
+        this.waitingRank = waitingRank;
+        this.name = name;
+        this.date = date;
+        this.time = time;
+        this.theme = theme;
     }
 
     public Reservation withId(Long id) {
@@ -99,7 +65,54 @@ public class Reservation {
             throw new InvalidRequestException("이미 식별자가 존재하는 예약입니다.");
         }
 
-        return new Reservation(id, name, date, time, theme);
+        return new Reservation(id, status, waitingRank, name, date, time, theme);
+    }
+
+    public Reservation cancel() {
+        return new Reservation(id, ReservationStatus.CANCELED, null, name, date, time, theme);
+    }
+
+    private static void validate(
+            LocalDateTime now,
+            String name,
+            LocalDate date,
+            ReservationTime time,
+            Theme theme) {
+        validateName(name);
+        validateDate(date);
+        validateTime(time);
+        validateTheme(theme);
+        validatePastDateTime(now, date, time);
+    }
+
+    private static void validateName(String name) {
+        if (name == null || name.isBlank()) {
+            throw new InvalidRequestException("예약자 이름은 비어 있을 수 없습니다.");
+        }
+    }
+
+    private static void validateDate(LocalDate date) {
+        if (date == null) {
+            throw new InvalidRequestException("예약 날짜는 비어 있을 수 없습니다.");
+        }
+    }
+
+    private static void validateTime(ReservationTime time) {
+        if (time == null) {
+            throw new InvalidRequestException("예약 시간은 비어 있을 수 없습니다.");
+        }
+    }
+
+    private static void validateTheme(Theme theme) {
+        if (theme == null) {
+            throw new InvalidRequestException("테마 정보는 비어 있을 수 없습니다.");
+        }
+    }
+
+    private static void validatePastDateTime(LocalDateTime now, LocalDate date, ReservationTime time) {
+        if (isReservationDateTimeBefore(now, date, time)) {
+            throw new InvalidRequestException("현재 시각 이후의 날짜와 시간을 선택해주세요.");
+        }
     }
 
     private void validateId(Long id) {
@@ -109,11 +122,19 @@ public class Reservation {
     }
 
     public boolean isPast(LocalDateTime now) {
+        return isReservationDateTimeBefore(now, this.date, this.time);
+    }
+
+    private static boolean isReservationDateTimeBefore(LocalDateTime now, LocalDate date, ReservationTime time) {
         return LocalDateTime.of(date, time.getStartAt()).isBefore(now);
     }
 
     public boolean isReservedBy(String name) {
         return Objects.equals(this.name, name);
+    }
+
+    public boolean isCanceled() {
+        return this.status == ReservationStatus.CANCELED;
     }
 
     @Override

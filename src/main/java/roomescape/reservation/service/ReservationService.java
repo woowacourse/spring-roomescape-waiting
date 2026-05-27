@@ -42,11 +42,12 @@ public class ReservationService {
         Theme theme = findTheme(themeId);
 
         if (reservationRepository.existsConflict(
+                name,
                 date,
                 time.getId(),
                 theme.getId()
         )) {
-            throw new ConflictException("선택한 날짜와 시간에는 이미 해당 테마의 예약이 있습니다. 다른 시간을 선택해주세요.");
+            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }
 
         Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
@@ -59,25 +60,35 @@ public class ReservationService {
         LocalDateTime now = LocalDateTime.now();
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("변경할 예약이 존재하지 않습니다. 예약 목록을 확인해주세요."));
+
         if (!reservation.isReservedBy(name)) {
             throw new NotFoundException("해당 이름으로 예약을 찾을 수 없습니다. 예약 정보를 확인해주세요.");
         }
+        if (reservation.isCanceled()) {
+            throw new InvalidRequestException("이미 취소된 예약은 다시 취소할 수 없습니다.");
+        }
 
         ReservationTime time = findTime(timeId);
-
         if (reservationRepository.existsConflictExcluding(
+                name,
                 date,
                 time.getId(),
                 reservation.getTheme().getId(),
                 reservation.getId()
         )) {
-            throw new ConflictException("선택한 날짜와 시간에는 이미 해당 테마의 예약이 있습니다. 다른 시간을 선택해주세요.");
+            throw new ConflictException("이미 같은 날짜, 시간, 테마에 예약 또는 대기가 있습니다.");
         }
 
-        Reservation changedReservation = reservation.changeDateTime(date, time, now);
+        Reservation newReservation = Reservation.create(
+                reservation.getName(),
+                date,
+                time,
+                reservation.getTheme(),
+                now);
 
-        return reservationRepository.update(changedReservation)
-                .orElseThrow(() -> new NotFoundException("변경할 예약이 존재하지 않습니다. 예약 목록을 확인해주세요."));
+        reservationRepository.update(reservation.cancel());
+
+        return reservationRepository.save(newReservation);
     }
 
     @Transactional(readOnly = true)
@@ -99,12 +110,14 @@ public class ReservationService {
         if (reservation.isPast(LocalDateTime.now())) {
             throw new InvalidRequestException("이미 지난 예약은 취소할 수 없습니다.");
         }
-        reservationRepository.deleteById(reservation.getId());
+
+        reservationRepository.update(reservation.cancel());
     }
 
     @Transactional
     public void delete(Long id) {
-        reservationRepository.deleteById(id);
+        reservationRepository.findById(id)
+                .ifPresent(reservation -> reservationRepository.deleteById(id));
     }
 
     private ReservationTime findTime(Long timeId) {
