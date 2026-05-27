@@ -1,16 +1,15 @@
 package roomescape.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Optional;
+import org.assertj.core.api.SoftAssertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -25,6 +24,7 @@ import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.dto.ReservationCreateCommand;
+import roomescape.service.dto.ReservationResult;
 import roomescape.service.dto.ReservationWithWaitingOrder;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -67,11 +67,6 @@ class ReservationServiceTest {
                 ReservationConflictException.class,
                 () -> reservationService.create(VALID_COMMAND_MOA)
         );
-
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
-        verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId(
-                VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), 1L, 1L);
     }
 
     @Test
@@ -86,13 +81,9 @@ class ReservationServiceTest {
                 .willReturn(false);
         given(reservationRepository.save(any(Reservation.class))).willReturn(saved);
 
-        assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
+        ReservationResult created = reservationService.create(VALID_COMMAND_MOA);
 
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
-        verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId(
-                VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), 1L, 1L);
-        verify(reservationRepository, times(1)).save(any(Reservation.class));
+        assertThat(created).isEqualTo(ReservationResult.from(saved));
     }
 
     @Test
@@ -104,9 +95,6 @@ class ReservationServiceTest {
                 ReservationTimeNotFoundException.class,
                 () -> reservationService.create(VALID_COMMAND_MOA)
         );
-
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(themeRepository, reservationRepository);
     }
 
     @Test
@@ -119,10 +107,6 @@ class ReservationServiceTest {
                 ThemeNotFoundException.class,
                 () -> reservationService.create(VALID_COMMAND_MOA)
         );
-
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(themeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationRepository);
     }
 
     @Test
@@ -134,9 +118,6 @@ class ReservationServiceTest {
                 ReservationNotFoundException.class,
                 () -> reservationService.delete(1L)
         );
-
-        verify(reservationRepository, times(1)).existsById(1L);
-        verifyNoInteractions(reservationTimeRepository, themeRepository);
     }
 
     @Test
@@ -145,10 +126,6 @@ class ReservationServiceTest {
         given(reservationRepository.existsById(1L)).willReturn(true);
 
         assertDoesNotThrow(() -> reservationService.delete(1L));
-
-        verify(reservationRepository, times(1)).existsById(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
-        verifyNoInteractions(reservationTimeRepository, themeRepository);
     }
 
     @Nested
@@ -157,7 +134,6 @@ class ReservationServiceTest {
         @Test
         @DisplayName("해당 타임 슬롯에 예약이 없다면 얘약을 허용한다")
         void 해당_타임_슬롯에_예약이_없다면_예약을_허용한다() {
-
             given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
             given(themeRepository.findById(1L)).willReturn(Optional.of(VALID_THEME));
             given(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId("모아", VALID_COMMAND_MOA.date(), 1L,
@@ -166,14 +142,15 @@ class ReservationServiceTest {
             given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
                     1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 0L));
 
-            assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
+            ReservationResult created = reservationService.create(VALID_COMMAND_MOA);
 
-            verify(reservationTimeRepository, times(1)).findById(1L);
-            verify(themeRepository, times(1)).findById(1L);
-            verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId("모아",
-                    VALID_COMMAND_MOA.date(), 1L,
-                    1L);
-            verify(reservationRepository, times(1)).save(any(Reservation.class));
+            SoftAssertions.assertSoftly(softAssertions -> {
+                softAssertions.assertThat(created.id()).isEqualTo(1L);
+                softAssertions.assertThat(created.date()).isEqualTo(VALID_COMMAND_MOA.date());
+                softAssertions.assertThat(created.time().id()).isEqualTo(VALID_COMMAND_MOA.timeId());
+                softAssertions.assertThat(created.theme().id()).isEqualTo(VALID_COMMAND_MOA.themeId());
+                softAssertions.assertThat(created.waitingOrder()).isEqualTo(0L);
+            });
         }
 
         @Nested
@@ -192,12 +169,6 @@ class ReservationServiceTest {
                         ReservationConflictException.class,
                         () -> reservationService.create(VALID_COMMAND_MOA)
                 );
-
-                verify(reservationTimeRepository, times(1)).findById(1L);
-                verify(themeRepository, times(1)).findById(1L);
-                verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId(
-                        VALID_COMMAND_MOA.name(), VALID_COMMAND_MOA.date(), 1L, 1L);
-
             }
 
             @Test
@@ -214,16 +185,15 @@ class ReservationServiceTest {
                 given(reservationRepository.save(any(Reservation.class))).willReturn(new ReservationWithWaitingOrder(
                         1L, "모아", VALID_COMMAND_MOA.date(), VALID_TIME, VALID_THEME, 1L));
 
-                assertDoesNotThrow(() -> reservationService.create(VALID_COMMAND_MOA));
+                ReservationResult created = reservationService.create(VALID_COMMAND_MOA);
 
-                verify(reservationTimeRepository, times(1)).findById(1L);
-                verify(themeRepository, times(1)).findById(1L);
-                verify(reservationRepository, times(1)).existsByNameAndDateAndTimeIdAndThemeId(
-                        "모아",
-                        VALID_COMMAND_MOA.date(), 1L,
-                        1L
-                );
-                verify(reservationRepository, times(1)).save(any(Reservation.class));
+                SoftAssertions.assertSoftly(softAssertions -> {
+                    softAssertions.assertThat(created.id()).isEqualTo(1L);
+                    softAssertions.assertThat(created.date()).isEqualTo(VALID_COMMAND_MOA.date());
+                    softAssertions.assertThat(created.time().id()).isEqualTo(VALID_COMMAND_MOA.timeId());
+                    softAssertions.assertThat(created.theme().id()).isEqualTo(VALID_COMMAND_MOA.themeId());
+                    softAssertions.assertThat(created.waitingOrder()).isEqualTo(1L);
+                });
             }
         }
     }

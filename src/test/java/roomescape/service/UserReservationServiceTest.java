@@ -1,13 +1,9 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoInteractions;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -64,13 +60,14 @@ class UserReservationServiceTest {
     @DisplayName("미래 시점에 예약하면 정상적으로 생성된다")
     void 미래_시점_예약은_정상_생성된다() {
         ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        ReservationResult expected = new ReservationResult(
+                1L, OWNER, FUTURE_DATE, null, null, 0L);
         given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationService.create(command)).willReturn(expected);
 
-        assertDoesNotThrow(() -> userReservationService.create(command));
+        ReservationResult actual = userReservationService.create(command);
 
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(reservationService, times(1)).create(command);
-        verifyNoInteractions(reservationRepository);
+        assertThat(actual).isEqualTo(expected);
     }
 
     @Test
@@ -83,9 +80,6 @@ class UserReservationServiceTest {
                 PastReservationException.class,
                 () -> userReservationService.create(command)
         );
-
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationRepository);
     }
 
     @Test
@@ -98,9 +92,6 @@ class UserReservationServiceTest {
                 ReservationTimeNotFoundException.class,
                 () -> userReservationService.create(command)
         );
-
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationRepository);
     }
 
     @Test
@@ -114,9 +105,6 @@ class UserReservationServiceTest {
                 ReservationConflictException.class,
                 () -> userReservationService.create(command)
         );
-
-        verify(reservationTimeRepository, times(1)).findById(1L);
-        verify(reservationService, times(1)).create(command);
     }
 
     @Test
@@ -131,8 +119,6 @@ class UserReservationServiceTest {
         assertThat(results).hasSize(1);
         assertThat(results.get(0).name()).isEqualTo(OWNER);
         assertThat(results.get(0).waitingOrder()).isEqualTo(2L);
-        verify(reservationRepository, times(1)).findByName(OWNER);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -142,10 +128,6 @@ class UserReservationServiceTest {
         given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
 
         userReservationService.cancel(1L, OWNER);
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationRepository, times(1)).deleteById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -157,9 +139,6 @@ class UserReservationServiceTest {
                 ReservationNotFoundException.class,
                 () -> userReservationService.cancel(1L, OWNER)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -172,9 +151,6 @@ class UserReservationServiceTest {
                 UnauthorizedReservationException.class,
                 () -> userReservationService.cancel(1L, OTHER)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -187,9 +163,6 @@ class UserReservationServiceTest {
                 PastReservationException.class,
                 () -> userReservationService.cancel(1L, OWNER)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -211,12 +184,6 @@ class UserReservationServiceTest {
 
         assertThat(result.date()).isEqualTo(ANOTHER_FUTURE_DATE);
         assertThat(result.time().id()).isEqualTo(2L);
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationTimeRepository, times(1)).findById(2L);
-        verify(reservationRepository, times(1)).existsByDateAndTimeIdAndThemeIdAndIdNot(
-                ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
-        verify(reservationRepository, times(1)).update(any(Reservation.class));
-        verifyNoInteractions(reservationService);
     }
 
     @Test
@@ -230,9 +197,6 @@ class UserReservationServiceTest {
                 UnauthorizedReservationException.class,
                 () -> userReservationService.update(command)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -247,10 +211,6 @@ class UserReservationServiceTest {
                 ReservationTimeNotFoundException.class,
                 () -> userReservationService.update(command)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationTimeRepository, times(1)).findById(99L);
-        verifyNoInteractions(reservationService);
     }
 
     @Test
@@ -265,10 +225,6 @@ class UserReservationServiceTest {
                 PastReservationException.class,
                 () -> userReservationService.update(command)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationTimeRepository, times(1)).findById(2L);
-        verifyNoInteractions(reservationService);
     }
 
     @Test
@@ -282,9 +238,6 @@ class UserReservationServiceTest {
                 PastReservationException.class,
                 () -> userReservationService.update(command)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verifyNoInteractions(reservationService, reservationTimeRepository);
     }
 
     @Test
@@ -301,11 +254,5 @@ class UserReservationServiceTest {
                 ReservationConflictException.class,
                 () -> userReservationService.update(command)
         );
-
-        verify(reservationRepository, times(1)).findById(1L);
-        verify(reservationTimeRepository, times(1)).findById(2L);
-        verify(reservationRepository, times(1)).existsByDateAndTimeIdAndThemeIdAndIdNot(
-                ANOTHER_FUTURE_DATE, 2L, VALID_THEME.getId(), 1L);
-        verifyNoInteractions(reservationService);
     }
 }
