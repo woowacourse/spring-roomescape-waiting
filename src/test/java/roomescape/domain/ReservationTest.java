@@ -22,13 +22,12 @@ class ReservationTest {
         LocalDate pastDate = now.toLocalDate().minusDays(1);
         ReservationTime reservationTime = new ReservationTime(1L, LocalTime.of(11, 0));
         Theme theme = new Theme(1L, "테마", "설명설명설명설명설명설명", "https://sdfsd.com");
+        Slot slot = new Slot(pastDate, reservationTime, theme);
 
         // when & then
         assertThatThrownBy(() -> Reservation.createFutureReservation(
                 "예약자",
-                pastDate,
-                reservationTime,
-                theme,
+                slot,
                 now
         ))
                 .isInstanceOf(ReservationException.class)
@@ -42,13 +41,12 @@ class ReservationTest {
         LocalDate today = now.toLocalDate();
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명설명설명설명설명설명", "https://sdfsd.com");
+        Slot slot = new Slot(today, pastTime, theme);
 
         // when & then
         assertThatThrownBy(() -> Reservation.createFutureReservation(
                 "예약자",
-                today,
-                pastTime,
-                theme,
+                slot,
                 now
         ))
                 .isInstanceOf(ReservationException.class)
@@ -65,10 +63,12 @@ class ReservationTest {
         // given
         Reservation reservation = new Reservation(
                 1L,
-                "브라운",
-                LocalDate.of(2026, 5, 10),
-                new ReservationTime(1L, LocalTime.of(15, 0)),
-                new Theme(1L, "공포의 저택", "무서운 방탈출", "https://image.com")
+                new Slot(
+                        LocalDate.of(2026, 5, 10),
+                        new ReservationTime(1L, LocalTime.of(15, 0)),
+                        new Theme(1L, "공포의 저택", "무서운 방탈출", "https://image.com")
+                ),
+                "브라운"
         );
 
         LocalDateTime now = LocalDateTime.parse(nowText);

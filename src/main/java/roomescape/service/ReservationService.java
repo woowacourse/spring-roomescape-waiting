@@ -46,20 +46,17 @@ public class ReservationService {
         Theme theme = getTheme(request.themeId());
         LocalDateTime currentDateTime = LocalDateTime.now(clock);
 
-        Reservation reservation = request.toReservation(reservationTime, theme, currentDateTime);
+        Slot slot = createSlot(request.date(),reservationTime,theme);
+        Reservation reservation = request.toReservation(slot, currentDateTime);
         validateUniqueReservation(theme.getId(), reservation.getDate(), reservationTime.getId());
 
         Reservation savedReservation = reservationDao.save(reservation);
-        createSlot(request);
-
         return ReservationResponse.from(savedReservation);
     }
 
-    private void createSlot(ReservationRequest request) {
-        Optional<Slot> dateAndTimeAndTheme = slotDao.findByDateAndTimeAndTheme(request.date(), request.timeId(), request.themeId());
-        if (dateAndTimeAndTheme.isEmpty()) {
-            slotDao.save(new Slot(request.date(), request.timeId(), request.themeId()));
-        }
+    private Slot createSlot(LocalDate date, ReservationTime reservationTime, Theme theme) {
+        Optional<Slot> dateAndTimeAndTheme = slotDao.findByDateAndTimeAndTheme(date, reservationTime.getId(), theme.getId());
+        return dateAndTimeAndTheme.orElseGet(() -> slotDao.save(new Slot(date,reservationTime,theme)));
     }
 
     private void validateUniqueReservation(long themeId, LocalDate date, long timeId) {
@@ -102,9 +99,8 @@ public class ReservationService {
         validateNotPastDateTime(request.date(), reservationTime, LocalDateTime.now(clock));
         validateUniqueReservationForUpdate(reservationId, theme, request.date(), reservationTime);
 
-        Reservation updatedReservation = new Reservation(
-                reservationId, request.name(),
-                request.date(), reservationTime, theme);
+        Slot slot = createSlot(request.date(), reservationTime, theme);
+        Reservation updatedReservation = new Reservation(reservationId, slot, request.name());
         reservationDao.update(updatedReservation);
         return ReservationResponse.from(updatedReservation);
     }

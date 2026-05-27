@@ -14,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ThemeRequest;
 import roomescape.dto.response.ThemeResponse;
@@ -36,6 +38,9 @@ class ThemeServiceTest extends ServiceTest {
 
     @Autowired
     private ThemeDao themeDao;
+
+    @Autowired
+    private SlotDao slotDao;
 
     @Autowired
     private Clock clock;
@@ -201,13 +206,7 @@ class ThemeServiceTest extends ServiceTest {
         Theme theme = saveTheme("테마1");
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
 
-        Reservation reservation = new Reservation(
-                "예약1",
-                LocalDate.of(2026, 5, 8),
-                reservationTime,
-                theme
-        );
-        reservationDao.save(reservation);
+        saveReservation("예약1", LocalDate.of(2026, 5, 8), reservationTime, theme);
 
         // when & then
         assertThatThrownBy(() -> themeService.delete(theme.getId()))
@@ -235,11 +234,10 @@ class ThemeServiceTest extends ServiceTest {
             ReservationTime reservationTime,
             Theme theme
     ) {
+        Slot savedSlot = slotDao.save(new Slot(date, reservationTime, theme));
         Reservation reservation = new Reservation(
-                name,
-                date,
-                reservationTime,
-                theme
+                savedSlot,
+                name
         );
         return reservationDao.save(reservation);
     }

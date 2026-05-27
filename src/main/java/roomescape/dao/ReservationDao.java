@@ -12,6 +12,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @Repository
@@ -30,12 +31,17 @@ public class ReservationDao {
                 resultSet.getString("thumbnail")
         );
 
-        return new Reservation(
-                resultSet.getLong("id"),
-                resultSet.getString("reservation_name"),
+        Slot slot = new Slot(
+                resultSet.getLong("slot_id"),
                 resultSet.getDate("date").toLocalDate(),
                 reservationTime,
                 theme
+        );
+
+        return new Reservation(
+                resultSet.getLong("id"),
+                slot,
+                resultSet.getString("reservation_name")
         );
     };
 
@@ -52,9 +58,7 @@ public class ReservationDao {
     public Reservation save(Reservation reservation) {
         Map<String, Object> parameters = new HashMap<>();
         parameters.put("name", reservation.getName());
-        parameters.put("date", reservation.getDate());
-        parameters.put("time_id", reservation.getTime().getId());
-        parameters.put("theme_id", reservation.getTheme().getId());
+        parameters.put("slot_id", reservation.getSlot().getId());
 
         Number generatedId = jdbcInsert.executeAndReturnKey(parameters);
 
@@ -65,7 +69,8 @@ public class ReservationDao {
         String sql = """
                 SELECT r.id, 
                        r.name as reservation_name, 
-                       r.date,
+                       s.id as slot_id,
+                       s.date,
                        rt.id as time_id,
                        rt.start_at,
                        t.id as theme_id,
@@ -73,10 +78,12 @@ public class ReservationDao {
                        t.description,
                        t.thumbnail
                 FROM reservation AS r
+                INNER JOIN slot AS s
+                ON r.slot_id = s.id
                 INNER JOIN reservation_time AS rt 
-                ON r.time_id = rt.id
+                ON s.time_id = rt.id
                 INNER JOIN theme AS t 
-                ON r.theme_id = t.id
+                ON s.theme_id = t.id
                 """;
         return jdbcTemplate.query(sql, ROW_MAPPER);
     }
@@ -85,7 +92,8 @@ public class ReservationDao {
         String sql = """
                 SELECT r.id, 
                        r.name as reservation_name, 
-                       r.date,
+                       s.id as slot_id,
+                       s.date,
                        rt.id as time_id,
                        rt.start_at,
                        t.id as theme_id,
@@ -93,12 +101,14 @@ public class ReservationDao {
                        t.description,
                        t.thumbnail
                 FROM reservation AS r
+                INNER JOIN slot AS s
+                ON r.slot_id = s.id
                 INNER JOIN reservation_time AS rt 
-                ON r.time_id = rt.id
+                ON s.time_id = rt.id
                 INNER JOIN theme AS t 
-                ON r.theme_id = t.id
+                ON s.theme_id = t.id
                 WHERE r.name = ?
-                ORDER BY r.date DESC, rt.start_at DESC
+                ORDER BY s.date DESC, rt.start_at DESC
                 ;
                 """;
         return jdbcTemplate.query(sql, ROW_MAPPER, name);
@@ -108,7 +118,8 @@ public class ReservationDao {
         String sql = """
                 SELECT r.id, 
                        r.name as reservation_name, 
-                       r.date,
+                       s.id as slot_id,
+                       s.date,
                        rt.id as time_id,
                        rt.start_at,
                        t.id as theme_id,
@@ -116,10 +127,12 @@ public class ReservationDao {
                        t.description,
                        t.thumbnail
                 FROM reservation AS r
+                INNER JOIN slot AS s
+                ON r.slot_id = s.id
                 INNER JOIN reservation_time AS rt 
-                    ON r.time_id = rt.id
+                    ON s.time_id = rt.id
                 INNER JOIN theme AS t 
-                    ON r.theme_id = t.id
+                    ON s.theme_id = t.id
                 WHERE r.id = ?
                 """;
 
@@ -134,8 +147,9 @@ public class ReservationDao {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
-                    FROM reservation
-                    WHERE time_id = ?
+                    FROM reservation AS r
+                    INNER JOIN slot AS s ON r.slot_id = s.id
+                    WHERE s.time_id = ?
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, reservationTimeId));
@@ -145,8 +159,9 @@ public class ReservationDao {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
-                    FROM reservation
-                    WHERE theme_id = ?
+                    FROM reservation AS r
+                    INNER JOIN slot AS s ON r.slot_id = s.id
+                    WHERE s.theme_id = ?
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, themeId));
@@ -156,10 +171,11 @@ public class ReservationDao {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
-                    FROM reservation
-                    WHERE theme_id = ?
-                        AND date = ? 
-                        AND time_id = ?
+                    FROM reservation AS r
+                    INNER JOIN slot AS s ON r.slot_id = s.id
+                    WHERE s.theme_id = ?
+                        AND s.date = ? 
+                        AND s.time_id = ?
                 )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, themeId, date, reservationTimeId));
@@ -170,27 +186,38 @@ public class ReservationDao {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
-                    FROM reservation
-                    WHERE theme_id = ?
-                      AND date = ?
-                      AND time_id = ?
-                      AND id != ?
+                    FROM reservation AS r
+                    INNER JOIN slot AS s ON r.slot_id = s.id
+                    WHERE s.theme_id = ?
+                      AND s.date = ?
+                      AND s.time_id = ?
+                      AND r.id != ?
                 )
                 """;
         return jdbcTemplate.queryForObject(sql, Boolean.class, themeId, date, reservationTimeId, reservationId);
+    }
+
+    public boolean existsBySlotIdAndName(long slotId, String name) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation r
+                    INNER JOIN slot s ON r.slot_id=s.id
+                    WHERE s.id=?
+                        AND r.name = ?
+                )
+                """;
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, boolean.class, slotId, name));
     }
 
     public void update(Reservation reservation) {
         String sql = """
                 UPDATE reservation
                 SET name = ?,
-                    date = ?,
-                    time_id = ?,
-                    theme_id = ?
+                    slot_id = ?
                 WHERE id = ?
                 """;
-        jdbcTemplate.update(sql, reservation.getName(), reservation.getDate(),
-                reservation.getTime().getId(), reservation.getTheme().getId(), reservation.getId());
+        jdbcTemplate.update(sql, reservation.getName(), reservation.getSlot().getId(), reservation.getId());
     }
 
     public int delete(long reservationId) {

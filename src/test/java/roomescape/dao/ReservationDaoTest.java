@@ -13,10 +13,11 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class})
+@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, SlotDao.class})
 class ReservationDaoTest {
 
     @Autowired
@@ -25,6 +26,8 @@ class ReservationDaoTest {
     private ReservationTimeDao timeDao;
     @Autowired
     private ThemeDao themeDao;
+    @Autowired
+    private SlotDao slotDao;
 
     @Test
     void 예약을_생성한다() {
@@ -33,7 +36,8 @@ class ReservationDaoTest {
         Theme savedTheme = saveTheme("방탈출1", "로지와 러키의 방탈출", "https:fsof/ommff");
 
         LocalDate date = LocalDate.of(2026, 5, 5);
-        Reservation reservation = new Reservation("브라운", date, savedReservationTime, savedTheme);
+        Slot savedSlot = slotDao.save(new Slot(date, savedReservationTime, savedTheme));
+        Reservation reservation = new Reservation(savedSlot, "브라운");
 
         // when
         Reservation savedReservation = reservationDao.save(reservation);
@@ -234,12 +238,11 @@ class ReservationDaoTest {
                 originalTheme
         );
 
+        Slot changedSlot = slotDao.save(new Slot(LocalDate.of(2026, 5, 10), changedTime, changedTheme));
         Reservation changedReservation = new Reservation(
                 savedReservation.getId(),
-                "브라운",
-                LocalDate.of(2026, 5, 10),
-                changedTime,
-                changedTheme
+                changedSlot,
+                "브라운"
         );
 
         // when
@@ -301,7 +304,8 @@ class ReservationDaoTest {
     }
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        Reservation reservation = new Reservation(name, date, time, theme);
+        Slot savedSlot = slotDao.save(new Slot(date, time, theme));
+        Reservation reservation = new Reservation(savedSlot, name);
         return reservationDao.save(reservation);
     }
 }

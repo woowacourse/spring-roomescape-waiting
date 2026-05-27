@@ -11,44 +11,39 @@ public class Reservation {
     private static final int RESERVATION_CHANGE_DEADLINE_PASSED = 1;
 
     private Long id;
-    private final String name;
-    private final LocalDate date;
-    private final ReservationTime time;
-    private final Theme theme;
+    private Slot slot;
+    private String name;
 
-    public static Reservation createFutureReservation(String name, LocalDate date,
-                                                      ReservationTime time, Theme theme, LocalDateTime now) {
-        validateNotPastDateTime(date, time, now);
-        return new Reservation(null, name, date, time, theme);
+    public static Reservation createFutureReservation(String name, Slot slot, LocalDateTime now) {
+        validateNotPastDateTime(slot, now);
+        return new Reservation(null, slot, name);
     }
 
-    private static void validateNotPastDateTime(LocalDate date, ReservationTime time, LocalDateTime now) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(date, time.getStartAt());
+    private static void validateNotPastDateTime(Slot slot, LocalDateTime now) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(slot.getDate(), slot.getTime().getStartAt());
         if (reservationDateTime.isBefore(now)) {
             throw new ReservationException(ReservationErrorCode.PAST_DATE_NOT_ALLOWED);
         }
     }
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this(null, name, date, time, theme);
+    public Reservation(Slot slot, String name) {
+        this(null, slot, name);
     }
 
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme) {
+    public Reservation(Long id, Slot slot, String name) {
         this.id = id;
+        this.slot = slot;
         this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
     }
 
     public Reservation createWithId(long id) {
-        return new Reservation(id, this.name, this.date, this.time, this.theme);
+        return new Reservation(id, this.slot, this.name);
     }
 
     public boolean isNotModifiableAt(LocalDateTime now) {
         LocalDateTime reservationDateTime = LocalDateTime.of(
-                date,
-                time.getStartAt()
+                slot.getDate(),
+                slot.getTime().getStartAt()
         );
         LocalDateTime cancelDeadline = reservationDateTime.minusDays(RESERVATION_CHANGE_DEADLINE_PASSED);
         return now.isAfter(cancelDeadline);
@@ -62,20 +57,27 @@ public class Reservation {
         return name;
     }
 
+    public Slot getSlot() {
+        return slot;
+    }
+
     public LocalDate getDate() {
-        return date;
+        return slot.getDate();
     }
 
     public ReservationTime getTime() {
-        return time;
+        return slot.getTime();
     }
 
     public Theme getTheme() {
-        return theme;
+        return slot.getTheme();
     }
 
     @Override
     public boolean equals(Object object) {
+        if (this == object) {
+            return true;
+        }
         if (object == null || getClass() != object.getClass()) {
             return false;
         }
@@ -84,9 +86,7 @@ public class Reservation {
         if (id != null && reservation.id != null) {
             return Objects.equals(id, reservation.id);
         }
-        return Objects.equals(name, reservation.name)
-                && Objects.equals(date, reservation.date) && Objects.equals(time, reservation.time)
-                && Objects.equals(theme, reservation.theme);
+        return Objects.equals(name, reservation.name) && Objects.equals(slot, reservation.slot);
     }
 
     @Override
@@ -94,6 +94,6 @@ public class Reservation {
         if (id != null) {
             return Objects.hash(id);
         }
-        return Objects.hash(name, date, time, theme);
+        return Objects.hash(name, slot);
     }
 }

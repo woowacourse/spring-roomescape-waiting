@@ -14,14 +14,31 @@ CREATE TABLE theme
     PRIMARY KEY (id)
 );
 
+CREATE TABLE slot
+(
+    id       BIGINT NOT NULL AUTO_INCREMENT,
+    `date`   DATE   NOT NULL,
+    time_id  BIGINT NOT NULL,
+    theme_id BIGINT NOT NULL,
+    PRIMARY KEY (id),
+    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
+    FOREIGN KEY (theme_id) REFERENCES theme (id)
+);
+
+CREATE TABLE waiting
+(
+    id         BIGINT      NOT NULL AUTO_INCREMENT,
+    created_at TIMESTAMP   NOT NULL,
+    slot_id    BIGINT,
+    name       VARCHAR(10) NOT NULL,
+    FOREIGN KEY (slot_id) REFERENCES slot (id)
+);
+
 CREATE TABLE reservation
 (
     id       BIGINT      NOT NULL AUTO_INCREMENT,
     name     VARCHAR(10) NOT NULL,
-    `date`   DATE        NOT NULL,
-    time_id  BIGINT,
-    theme_id BIGINT,
+    slot_id  BIGINT,
     PRIMARY KEY (id),
-    FOREIGN KEY (time_id) REFERENCES reservation_time (id),
-    FOREIGN KEY (theme_id) REFERENCES theme (id)
+    FOREIGN KEY (slot_id) REFERENCES slot (id)
 );

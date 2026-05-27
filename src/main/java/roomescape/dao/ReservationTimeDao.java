@@ -81,10 +81,12 @@ public class ReservationTimeDao {
                            ELSE true
                        END AS reserved
                 FROM reservation_time AS rt
+                LEFT JOIN slot AS s
+                    ON s.time_id = rt.id
+                   AND s.theme_id = ?
+                   AND s.date = ?
                 LEFT JOIN reservation AS r
-                    ON r.time_id = rt.id
-                   AND r.theme_id = ?
-                   AND r.date = ?
+                    ON r.slot_id = s.id
                 ORDER BY rt.start_at
                 """;
         return jdbcTemplate.query(sql, TIME_AVAILABILITY_ROW_MAPPER, themeId, date);

@@ -15,10 +15,11 @@ import org.springframework.context.annotation.Import;
 import roomescape.dao.dto.ReservationTimeAvailability;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 
 @JdbcTest
-@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class})
+@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class, SlotDao.class})
 class ReservationTimeDaoTest {
 
     @Autowired
@@ -27,6 +28,8 @@ class ReservationTimeDaoTest {
     private ReservationDao reservationDao;
     @Autowired
     private ThemeDao themeDao;
+    @Autowired
+    private SlotDao slotDao;
 
     @Test
     void 예약_시간을_생성한다() {
@@ -146,7 +149,8 @@ class ReservationTimeDaoTest {
     }
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        Reservation reservation = new Reservation(name, date, time, theme);
+        Slot savedSlot = slotDao.save(new Slot(date, time, theme));
+        Reservation reservation = new Reservation(savedSlot, name);
         return reservationDao.save(reservation);
     }
 }

@@ -79,9 +79,11 @@ public class ThemeDao {
                        t.description,
                        t.thumbnail
                 FROM reservation AS r
+                INNER JOIN slot AS s
+                ON r.slot_id = s.id
                 INNER JOIN theme AS t 
-                ON r.theme_id = t.id
-                WHERE r.date BETWEEN ? AND ?
+                ON s.theme_id = t.id
+                WHERE s.date BETWEEN ? AND ?
                 GROUP BY t.id, t.name, t.description, t.thumbnail
                 ORDER BY COUNT(r.id) DESC
                 LIMIT 10

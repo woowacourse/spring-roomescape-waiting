@@ -14,9 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.SlotDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.AvailableReservationTimeResponse;
@@ -41,6 +43,9 @@ class ReservationTimeServiceTest extends ServiceTest {
 
     @Autowired
     private ThemeDao themeDao;
+
+    @Autowired
+    private SlotDao slotDao;
 
     @Autowired
     private Clock clock;
@@ -80,11 +85,10 @@ class ReservationTimeServiceTest extends ServiceTest {
         ReservationTime reservedTime = saveReservationTime(LocalTime.of(10, 0));
         ReservationTime notReservedTime = saveReservationTime(LocalTime.of(11, 0));
 
+        Slot savedSlot = slotDao.save(new Slot(date, reservedTime, theme));
         Reservation reservation = new Reservation(
-                "예약1",
-                date,
-                reservedTime,
-                theme
+                savedSlot,
+                "예약1"
         );
         reservationDao.save(reservation);
 
@@ -158,11 +162,12 @@ class ReservationTimeServiceTest extends ServiceTest {
     void 예약시간_삭제시_관련_예약이_존재하면_예외를_반환한다() {
         // given
         ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        LocalDate date = LocalDate.of(2026, 5, 8);
+        Theme theme = saveTheme("테마1");
+        Slot savedSlot = slotDao.save(new Slot(date, reservationTime, theme));
         Reservation reservation = new Reservation(
-                "예약1",
-                LocalDate.of(2026, 5, 8),
-                reservationTime,
-                saveTheme("테마1")
+                savedSlot,
+                "예약1"
         );
         reservationDao.save(reservation);
 

@@ -10,9 +10,12 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
+import java.sql.PreparedStatement;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import roomescape.AcceptanceTest;
 
 class ThemeControllerTest extends AcceptanceTest {
@@ -221,11 +224,18 @@ class ThemeControllerTest extends AcceptanceTest {
     }
 
     private void saveReservationFixture(String name, LocalDate date, long timeId, long themeId) {
-        String sql = """
-                INSERT INTO reservation (name, date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
-                """;
+        String slotSql = "INSERT INTO slot (date, time_id, theme_id) VALUES (?, ?, ?)";
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+        jdbcTemplate.update(connection -> {
+            PreparedStatement ps = connection.prepareStatement(slotSql, new String[]{"id"});
+            ps.setObject(1, date);
+            ps.setLong(2, timeId);
+            ps.setLong(3, themeId);
+            return ps;
+        }, keyHolder);
 
-        jdbcTemplate.update(sql, name, date, timeId, themeId);
+        long slotId = keyHolder.getKey().longValue();
+        String reservationSql = "INSERT INTO reservation (name, slot_id) VALUES (?, ?)";
+        jdbcTemplate.update(reservationSql, name, slotId);
     }
 }
