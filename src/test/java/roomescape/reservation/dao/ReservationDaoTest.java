@@ -35,7 +35,7 @@ public class ReservationDaoTest {
 
     @Test
     void 예약_생성_성공() {
-        Reservation reservation = new Reservation("초록", 1L, LocalDate.parse("2026-05-05"),
+        Reservation reservation = new Reservation("초록", 1L, LocalDate.now().plusDays(1),
                 new ReservationTime(6L, LocalTime.parse("15:00")));
         Reservation expected = reservationDao.insert(reservation);
 
@@ -58,7 +58,11 @@ public class ReservationDaoTest {
     @Test
     void 예약_시간_조회_성공() {
         Long themeId = 2L;
-        LocalDate date = LocalDate.parse("2026-05-05");
+        LocalDate date = LocalDate.now().plusDays(1);
+        reservationDao.insert(new Reservation("초록", themeId, date, new ReservationTime(1L, LocalTime.parse("10:00"))));
+        reservationDao.insert(new Reservation("브라운", themeId, date, new ReservationTime(2L, LocalTime.parse("11:00"))));
+        reservationDao.insert(new Reservation("로치", themeId, date, new ReservationTime(3L, LocalTime.parse("12:00"))));
+
         List<Long> times = reservationDao.selectTimeIdByThemeIdAndDate(themeId, date);
 
         assertThat(times.size()).isEqualTo(3);
@@ -74,7 +78,7 @@ public class ReservationDaoTest {
     @Test
     void 예약의_날짜와_시간_수정_성공() {
         Long reservationId = 1L;
-        LocalDate changedDate = LocalDate.of(2026, 5, 20);
+        LocalDate changedDate = LocalDate.now().plusDays(1);
         Long changedTimeId = 2L;
 
         reservationDao.updateDateTimeById(reservationId, changedDate, changedTimeId);

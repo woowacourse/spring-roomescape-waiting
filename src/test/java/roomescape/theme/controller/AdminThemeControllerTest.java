@@ -4,6 +4,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -40,6 +41,19 @@ public class AdminThemeControllerTest {
 
     @Test
     void 예약이_존재하는_테마_삭제_실패() {
+        Map<String, Object> reservation = Map.of(
+                "name", "로치",
+                "themeId", 1L,
+                "date", LocalDate.now().plusDays(1).toString(),
+                "timeId", 1L
+        );
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/1")
                 .then().log().all()

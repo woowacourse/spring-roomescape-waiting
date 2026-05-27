@@ -5,6 +5,7 @@ import static org.hamcrest.Matchers.is;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
@@ -38,7 +39,7 @@ public class ReservationControllerTest {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "초록");
         params.put("themeId", 2L);
-        params.put("date", "2027-05-12");
+        params.put("date", LocalDate.now().plusDays(1).toString());
         params.put("timeId", 7L);
 
         RestAssured.given().log().all()
@@ -53,7 +54,7 @@ public class ReservationControllerTest {
     void 시간없음예약_추가_실패() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "초록");
-        params.put("date", "2026-05-05");
+        params.put("date", LocalDate.now().plusDays(1).toString());
         params.put("timeId", 15L);
         params.put("themeId", 2L);
 
@@ -80,7 +81,7 @@ public class ReservationControllerTest {
         Map<String, Object> params = new HashMap<>();
         params.put("name", " ");
         params.put("themeId", 2L);
-        params.put("date", "2027-05-12");
+        params.put("date", LocalDate.now().plusDays(1).toString());
         params.put("timeId", 7L);
 
         RestAssured.given().log().all()
@@ -113,22 +114,25 @@ public class ReservationControllerTest {
 
     @Test
     void 본인_예약_변경_성공() {
+        String originDate = LocalDate.now().plusDays(1).toString();
+        String changedDate = LocalDate.now().plusDays(2).toString();
+        Integer reservationId = createReservation("로치", 1L, originDate, 1L);
         Map<String, Object> params = Map.of(
                 "name", "로치",
                 "themeId", 1L,
-                "date", "2026-05-20",
+                "date", changedDate,
                 "timeId", 2L
         );
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservations/1")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(200)
-                .body("id", is(1))
+                .body("id", is(reservationId))
                 .body("name", is("로치"))
-                .body("date", is("2026-05-20"))
+                .body("date", is(changedDate))
                 .body("time.id", is(2));
     }
 
@@ -137,7 +141,7 @@ public class ReservationControllerTest {
         Map<String, Object> params = Map.of(
                 "name", "브라운",
                 "themeId", 1L,
-                "date", "2026-05-20",
+                "date", LocalDate.now().plusDays(1).toString(),
                 "timeId", 2L
         );
 
@@ -152,17 +156,21 @@ public class ReservationControllerTest {
 
     @Test
     void 이미_예약된_시간으로는_변경할_수_없다() {
+        String originDate = LocalDate.now().plusDays(1).toString();
+        String duplicatedDate = LocalDate.now().plusDays(2).toString();
+        Integer reservationId = createReservation("로치", 1L, originDate, 1L);
+        createReservation("브라운", 1L, duplicatedDate, 3L);
         Map<String, Object> params = Map.of(
                 "name", "로치",
                 "themeId", 1L,
-                "date", "2026-05-20",
+                "date", duplicatedDate,
                 "timeId", 3L
         );
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(params)
-                .when().patch("/reservations/1")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
                 .statusCode(409)
                 .body("code", is("RESERVATION_ALREADY_EXISTS"));
@@ -170,8 +178,10 @@ public class ReservationControllerTest {
 
     @Test
     void 본인_예약_삭제_성공() {
+        Integer reservationId = createReservation("로치", 1L, LocalDate.now().plusDays(1).toString(), 1L);
+
         RestAssured.given().log().all()
-                .when().delete("/reservations/my/1?name=로치")
+                .when().delete("/reservations/my/" + reservationId + "?name=로치")
                 .then().log().all()
                 .statusCode(204);
     }
@@ -190,5 +200,23 @@ public class ReservationControllerTest {
                 .when().delete("/reservations/my/17?name=로치")
                 .then().log().all()
                 .statusCode(404);
+    }
+
+    private Integer createReservation(String name, Long themeId, String date, Long timeId) {
+        Map<String, Object> params = Map.of(
+                "name", name,
+                "themeId", themeId,
+                "date", date,
+                "timeId", timeId
+        );
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract()
+                .path("id");
     }
 }

@@ -101,7 +101,7 @@ public class ReservationServiceTest {
         ReservationTime mockTime = new ReservationTime(17L, LocalTime.now().minusMinutes(10));
         when(timeDao.selectById(anyLong())).thenReturn(Optional.of(mockTime));
 
-        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.of(2026, 5, 10), 1L))
+        assertThatThrownBy(() -> reservationService.add("브라운", 1L, LocalDate.now().minusDays(1), 1L))
                 .isInstanceOf(RoomescapeException.class)
                 .hasMessage(ErrorCode.PAST_RESERVATION.getMessage());
 
@@ -175,14 +175,14 @@ public class ReservationServiceTest {
                 reservationId,
                 "로치",
                 1L,
-                LocalDate.of(2026, 5, 23),
+                LocalDate.now().plusDays(1),
                 new ReservationTime(3L, LocalTime.of(12, 0))
         );
 
         ReservationChangeRequest request = new ReservationChangeRequest(
                 "브라운",
                 1L,
-                LocalDate.of(2026, 5, 20),
+                LocalDate.now().plusDays(2),
                 2L
         );
 
@@ -206,7 +206,7 @@ public class ReservationServiceTest {
         ReservationChangeRequest request = new ReservationChangeRequest(
                 "로치",
                 1L,
-                LocalDate.of(2026, 5, 20),
+                LocalDate.now().plusDays(1),
                 2L
         );
 
@@ -249,14 +249,14 @@ public class ReservationServiceTest {
                 reservationId,
                 "로치",
                 1L,
-                LocalDate.of(2026, 5, 23),
+                LocalDate.now().plusDays(1),
                 new ReservationTime(3L, LocalTime.of(12, 0))
         );
 
         ReservationChangeRequest request = new ReservationChangeRequest(
                 "브라운",
                 1L,
-                LocalDate.of(2026, 5, 20),
+                LocalDate.now().plusDays(2),
                 2L
         );
 
@@ -275,7 +275,7 @@ public class ReservationServiceTest {
         ReservationChangeRequest request = new ReservationChangeRequest(
                 "로치",
                 1L,
-                LocalDate.of(2026, 5, 20),
+                LocalDate.now().plusDays(1),
                 2L
         );
 
@@ -291,14 +291,14 @@ public class ReservationServiceTest {
         ReservationChangeRequest request = new ReservationChangeRequest(
                 "로치",
                 1L,
-                LocalDate.of(2026, 5, 5),
+                LocalDate.now().minusDays(1),
                 2L
         );
         Reservation reservation = new Reservation(
                 pastReserved,
                 "로치",
                 1L,
-                LocalDate.of(2026, 5, 5),
+                LocalDate.now().minusDays(1),
                 new ReservationTime(2L, LocalTime.of(11, 0))
         );
         given(reservationDao.selectById(pastReserved)).willReturn(Optional.of(reservation));
