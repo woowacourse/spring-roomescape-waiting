@@ -341,6 +341,78 @@
     }
   });
 
+  const lookupForm = document.getElementById("lookup-form");
+  const lookupNameInput = document.getElementById("lookup-name-input");
+  const lookupMessage = document.getElementById("lookup-message");
+  const lookupReservations = document.getElementById("lookup-reservations");
+  const lookupWaitings = document.getElementById("lookup-waitings");
+
+  function formatTime(startAt) {
+    if (!startAt) return "";
+    const parts = String(startAt).split(":");
+    return `${parts[0]}:${parts[1] || "00"}`;
+  }
+
+  function renderReservationItems(items) {
+    lookupReservations.innerHTML = "";
+    if (!items.length) {
+      const empty = document.createElement("li");
+      empty.className = "lookup-list__empty";
+      empty.textContent = "예약 내역이 없습니다.";
+      lookupReservations.appendChild(empty);
+      return;
+    }
+    items.forEach((r) => {
+      const li = document.createElement("li");
+      li.className = "lookup-list__item";
+      li.textContent = `${r.themeResponse.name} · ${r.date} · ${formatTime(r.timeResponse.startAt)}`;
+      lookupReservations.appendChild(li);
+    });
+  }
+
+  function renderWaitingItems(items) {
+    lookupWaitings.innerHTML = "";
+    if (!items.length) {
+      const empty = document.createElement("li");
+      empty.className = "lookup-list__empty";
+      empty.textContent = "예약 대기 내역이 없습니다.";
+      lookupWaitings.appendChild(empty);
+      return;
+    }
+    items.forEach((w) => {
+      const li = document.createElement("li");
+      li.className = "lookup-list__item";
+      const info = document.createElement("span");
+      info.className = "lookup-list__info";
+      info.textContent = `${w.themeResponse.name} · ${w.date} · ${formatTime(w.timeResponse.startAt)}`;
+      const rank = document.createElement("span");
+      rank.className = "lookup-list__rank";
+      rank.textContent = `대기 ${w.sequence}번`;
+      li.append(info, rank);
+      lookupWaitings.appendChild(li);
+    });
+  }
+
+  lookupForm.addEventListener("submit", async (ev) => {
+    ev.preventDefault();
+    lookupMessage.textContent = "";
+    lookupMessage.className = "message";
+    const userName = lookupNameInput.value.trim();
+    if (!userName) return;
+    try {
+      const data = await fetchJson(
+          `/reservations?userName=${encodeURIComponent(userName)}`
+      );
+      renderReservationItems(data.reservationResponses || []);
+      renderWaitingItems(data.waitingDetailResponses || []);
+    } catch (e) {
+      lookupReservations.innerHTML = "";
+      lookupWaitings.innerHTML = "";
+      lookupMessage.textContent = "조회에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+      lookupMessage.classList.add("message--err");
+    }
+  });
+
   loadPopular();
   loadThemesForBooking();
 })();
