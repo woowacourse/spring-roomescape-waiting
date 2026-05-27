@@ -79,6 +79,26 @@ class ReservationTimeIntegrationTest {
             firstTimeId,
             themeId
         );
+        Long reservationSlotId = jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation_slot WHERE date_id = ? AND time_id = ? AND theme_id = ?",
+            Long.class,
+            dateId,
+            firstTimeId,
+            themeId
+        );
+        jdbcTemplate.update("INSERT INTO users(name) VALUES (?)", "보예");
+        Long userId = jdbcTemplate.queryForObject(
+            "SELECT id FROM users WHERE name = ?",
+            Long.class,
+            "보예"
+        );
+        jdbcTemplate.update(
+            "INSERT INTO reservation(user_id, reservation_slot_id, waiting_number, status) VALUES (?, ?, ?, ?)",
+            userId,
+            reservationSlotId,
+            null,
+            "CONFIRMED"
+        );
 
         given().log().all()
             .contentType(ContentType.JSON)
@@ -93,6 +113,55 @@ class ReservationTimeIntegrationTest {
             .body("[1].timeId", is(secondTimeId.intValue()))
             .body("[1].startAt", is("11:00"))
             .body("[1].available", is(true));
+    }
+
+    @Test
+    @DisplayName("예약 슬롯만 있고 실제 예약이 없으면 예약 가능 시간으로 조회된다.")
+    void getReservationTimeAvailabilityWhenReservationSlotHasNoActiveReservation() {
+        jdbcTemplate.update(
+            "INSERT INTO theme(name, content, url) VALUES (?, ?, ?)",
+            "공포", "무서운 테마", "theme-url"
+        );
+        jdbcTemplate.update(
+            "INSERT INTO reservation_date(date) VALUES (?)",
+            "2026-06-01"
+        );
+        jdbcTemplate.update(
+            "INSERT INTO reservation_time(start_at) VALUES (?)",
+            "10:00"
+        );
+        Long themeId = jdbcTemplate.queryForObject(
+            "SELECT id FROM theme WHERE name = ?",
+            Long.class,
+            "공포"
+        );
+        Long dateId = jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation_date WHERE date = ?",
+            Long.class,
+            "2026-06-01"
+        );
+        Long timeId = jdbcTemplate.queryForObject(
+            "SELECT id FROM reservation_time WHERE start_at = ?",
+            Long.class,
+            "10:00:00"
+        );
+        jdbcTemplate.update(
+            "INSERT INTO reservation_slot(date_id, time_id, theme_id) VALUES (?, ?, ?)",
+            dateId,
+            timeId,
+            themeId
+        );
+
+        given().log().all()
+            .contentType(ContentType.JSON)
+            .param("themeId", themeId)
+            .param("dateId", dateId)
+            .when().get("/reservation-times/availability")
+            .then().log().all()
+            .statusCode(200)
+            .body("[0].timeId", is(timeId.intValue()))
+            .body("[0].startAt", is("10:00"))
+            .body("[0].available", is(true));
     }
 
     @Test

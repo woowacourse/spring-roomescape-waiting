@@ -628,6 +628,98 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("같은 날짜와 시간으로 예약을 수정하면 기존 상태와 대기 순번을 유지한다.")
+    void updateReservationToSameSchedule() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationTime reservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
+        ReservationSlot savedReservation = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
+        );
+        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
+        ReservationService reservationService = new ReservationService(
+                reservationSlotRepository,
+            reservationTimeRepository,
+            reservationDateRepository,
+                reservationRepository,
+            themeRepository,
+            userRepository,
+            now
+        );
+        UpdateReservationRequest request = new UpdateReservationRequest(
+            reservationDate.getDate(),
+            reservationTime.getStartAt()
+        );
+
+        // when
+        reservationService.updateReservation(savedUserReservation.getId(), request);
+
+        // then
+        Reservation updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+            .orElseThrow();
+        assertSoftly(softly -> {
+            assertThat(updatedReservation.getReservationSlot().getId()).isEqualTo(savedReservation.getId());
+            assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+            assertThat(updatedReservation.getWaitingNumber()).isNull();
+        });
+    }
+
+    @Test
+    @DisplayName("예약을 다른 슬롯으로 수정하면 이동할 슬롯의 예약 수로 대기 순번을 정한다.")
+    void updateReservationWaitingNumberByUpdatedReservationSlot() {
+        // given
+        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        ReservationTime beforeReservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(10, 0))
+        );
+        ReservationTime afterReservationTime = reservationTimeRepository.save(
+            ReservationTime.createWithoutId(LocalTime.of(15, 0))
+        );
+        ReservationDate reservationDate = reservationDateRepository.save(
+            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
+        );
+        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
+        ReservationSlot beforeReservation = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, beforeReservationTime, theme)
+        );
+        ReservationSlot afterReservation = reservationSlotRepository.save(
+            ReservationSlot.createWithoutId(reservationDate, afterReservationTime, theme)
+        );
+        User user = userRepository.save(User.createWithoutId("보예"));
+        User otherUser = userRepository.save(User.createWithoutId("이산"));
+        Reservation savedUserReservation = saveConfirmedReservation(beforeReservation, user, now);
+        saveConfirmedReservation(afterReservation, otherUser, now);
+        ReservationService reservationService = new ReservationService(
+                reservationSlotRepository,
+            reservationTimeRepository,
+            reservationDateRepository,
+                reservationRepository,
+            themeRepository,
+            userRepository,
+            now
+        );
+        UpdateReservationRequest request = new UpdateReservationRequest(null, afterReservationTime.getStartAt());
+
+        // when
+        reservationService.updateReservation(savedUserReservation.getId(), request);
+
+        // then
+        Reservation updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+            .orElseThrow();
+        assertSoftly(softly -> {
+            assertThat(updatedReservation.getReservationSlot().getId()).isEqualTo(afterReservation.getId());
+            assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(updatedReservation.getWaitingNumber()).isEqualTo(1L);
+        });
+    }
+
+    @Test
     @DisplayName("예약 시간만 수정한다.")
     void updateReservationTimeOnly() {
         // given

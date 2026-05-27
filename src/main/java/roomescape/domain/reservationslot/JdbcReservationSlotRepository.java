@@ -35,15 +35,15 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String INSERT_SQL = "insert into reservation_slot(date_id, time_id, theme_id) values (?, ?, ?)";
     private static final String FIND_ALL_SQL =
         """
-            select r.id,
+            select rs.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation_slot r
-            join reservation_date rd on r.date_id = rd.id
-            join reservation_time rt on r.time_id = rt.id
-            join theme th on r.theme_id = th.id
-            order by r.id
+            from reservation_slot rs
+            join reservation_date rd on rs.date_id = rd.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            order by rs.id
             """;
     private static final String COUNT_BY_TIME_ID_SQL =
         """
@@ -60,9 +60,11 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
     private static final String DELETE_BY_ID_SQL = "delete from reservation_slot where id = ?";
     private static final String FIND_BY_THEME_AND_DATE_SQL =
         """
-            select time_id
-            from reservation_slot
-            where theme_id = ? and date_id = ?
+            select distinct rs.time_id
+            from reservation_slot rs
+            join reservation r on r.reservation_slot_id = rs.id
+            where rs.theme_id = ? and rs.date_id = ?
+              and r.status <> 'CANCELED'
             """;
 
     private static final String FIND_POPULAR_THEME_SQL =
@@ -73,7 +75,7 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
                 th.content,
                 th.url
             from reservation r
-            join reservation_slot rs on r.reservation_slot_id = r.id
+            join reservation_slot rs on r.reservation_slot_id = rs.id
             join reservation_date rd on rs.date_id = rd.id
             join theme th on rs.theme_id = th.id
             where rd.date between ? and ?
@@ -98,27 +100,27 @@ public class JdbcReservationSlotRepository implements ReservationSlotRepository 
             """;
     private static final String FIND_BY_SCHEDULE_SQL =
         """
-            select r.id,
+            select rs.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation_slot r
-            join reservation_date rd on r.date_id = rd.id
-            join reservation_time rt on r.time_id = rt.id
-            join theme th on r.theme_id = th.id
-            where r.time_id = ? and r.date_id = ? and r.theme_id = ?
+            from reservation_slot rs
+            join reservation_date rd on rs.date_id = rd.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.time_id = ? and rs.date_id = ? and rs.theme_id = ?
             """;
     private static final String FIND_BY_ID_SQL =
         """
-            select r.id,
+            select rs.id,
                    rd.id as date_id, rd.date,
                    rt.id as time_id, rt.start_at,
                    th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
-            from reservation_slot r
-            join reservation_date rd on r.date_id = rd.id
-            join reservation_time rt on r.time_id = rt.id
-            join theme th on r.theme_id = th.id
-            where r.id = ?
+            from reservation_slot rs
+            join reservation_date rd on rs.date_id = rd.id
+            join reservation_time rt on rs.time_id = rt.id
+            join theme th on rs.theme_id = th.id
+            where rs.id = ?
             """;
     private static final String UPDATE_SQL =
         """

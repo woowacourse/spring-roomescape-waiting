@@ -102,10 +102,10 @@ public class ReservationService {
 
     @Transactional
     public void updateReservation(Long id, UpdateReservationRequest request) {
-        Reservation userReservation = reservationRepository.findById(id)
+        Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
 
-        ReservationSlot reservationSlot = userReservation.getReservationSlot();
+        ReservationSlot reservationSlot = reservation.getReservationSlot();
 
         ReservationTime reservationTime = reservationSlot.getTime();
         ReservationDate reservationDate = reservationSlot.getDate();
@@ -113,35 +113,35 @@ public class ReservationService {
         reservationDate = getReservationDate(request, reservationDate);
         validateReservationScheduleToCreate(reservationDate, reservationTime);
         Theme theme = reservationSlot.getTheme();
-        User user = userReservation.getUser();
+        User user = reservation.getUser();
 
-        ReservationSlot updatedReservation = getOrCreateReservation(reservationDate, reservationTime, theme);
-        validateUserReservationNotDuplicated(user, updatedReservation);
+        ReservationSlot updatedReservationSlot = getOrCreateReservation(reservationDate, reservationTime, theme);
+        validateUserReservationNotDuplicated(user, updatedReservationSlot);
 
         Long reservationCount = reservationRepository.countByReservationId(reservationSlot.getId());
         ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
 
-        Reservation updatedUserReservation = userReservation.update(
-            updatedReservation,
+        Reservation updatedReservation = reservation.update(
+            updatedReservationSlot,
             reservationCount,
             reservationStatus,
             clock
         );
 
-        reservationRepository.update(userReservation.getId(), updatedUserReservation)
+        reservationRepository.update(reservation.getId(), updatedReservation)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
 
         reorderWaitingNumbers(reservationSlot);
     }
 
     private void reorderWaitingNumbers(ReservationSlot reservationSlot) {
-        List<Reservation> userReservations = reservationRepository.findAllByReservationIdOrder(reservationSlot.getId());
-        if (userReservations.isEmpty()) {
+        List<Reservation> reservations = reservationRepository.findAllByReservationIdOrder(reservationSlot.getId());
+        if (reservations.isEmpty()) {
             return;
         }
-        reservationRepository.updateWaitingNumbers(userReservations);
-        reservationRepository.updateStatus(userReservations.getFirst().getId(), ReservationStatus.CONFIRMED);
-        reservationRepository.updateAllStatus(userReservations.subList(1, userReservations.size()));
+        reservationRepository.updateWaitingNumbers(reservations);
+        reservationRepository.updateStatus(reservations.getFirst().getId(), ReservationStatus.CONFIRMED);
+        reservationRepository.updateAllStatus(reservations.subList(1, reservations.size()));
     }
 
     private void validateReservationScheduleToCreate(
