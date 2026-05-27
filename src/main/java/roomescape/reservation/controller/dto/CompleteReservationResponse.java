@@ -1,6 +1,6 @@
 package roomescape.reservation.controller.dto;
 
-import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.theme.controller.dto.ThemeResponse;
 

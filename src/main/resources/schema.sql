@@ -26,6 +26,7 @@ CREATE TABLE reservation
     time_id         BIGINT       NOT NULL,
     theme_id        BIGINT       NOT NULL,
     status          VARCHAR(50)  NOT NULL,
+    created_at      TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
     confirmed_token TINYINT,
 
     PRIMARY KEY (id),

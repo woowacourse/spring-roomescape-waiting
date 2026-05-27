@@ -6,7 +6,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-public record ReservationWaitingDto(
+public record ReservationWaitingResult(
         Long id,
         String guestName,
         LocalDate date,
@@ -15,8 +15,8 @@ public record ReservationWaitingDto(
         Status status,
         long waitNumber
 ) {
-    public static ReservationWaitingDto from(Reservation reservation, long waitNumber) {
-        return new ReservationWaitingDto(
+    public static ReservationWaitingResult from(Reservation reservation, long waitNumber) {
+        return new ReservationWaitingResult(
                 reservation.getId(),
                 reservation.getGuestName(),
                 reservation.getDate(),

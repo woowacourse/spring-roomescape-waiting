@@ -13,7 +13,7 @@ import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -43,8 +43,8 @@ public class ReservationService {
 
         Reservation saved = reservationRepository.save(reservation);
 
-        return ReservationWaitingResult.from(reservationRepository.findWaitingById(saved.getId())
-                .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND)));
+        return reservationRepository.findWaitingById(saved.getId())
+                .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
     }
 
     public List<Reservation> findAllReservations(int page, int size) {
@@ -52,15 +52,11 @@ public class ReservationService {
     }
 
     public List<ReservationWaitingResult> findByGuestName(String guestName) {
-        return reservationRepository.findAllByGuestName(guestName).stream()
-                .map(ReservationWaitingResult::from)
-                .toList();
+        return reservationRepository.findAllByGuestName(guestName);
     }
 
     public List<ReservationWaitingResult> findByGuestNameExceptCanceled(String guestName) {
-        return reservationRepository.findAllByGuestNameExceptCanceled(guestName).stream()
-                .map(ReservationWaitingResult::from)
-                .toList();
+        return reservationRepository.findAllByGuestNameExceptCanceled(guestName);
     }
 
     @Transactional
@@ -76,10 +72,8 @@ public class ReservationService {
         updateReservation(changedReservation);
         promoteWaitingIfNeeded(reservation, changedReservation);
 
-        return ReservationWaitingResult.from(
-                reservationRepository.findWaitingById(reservationId)
-                        .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND))
-        );
+        return reservationRepository.findWaitingById(reservationId)
+                .orElseThrow(() -> new DomainException(RESERVATION_NOT_FOUND));
     }
 
     @Transactional
@@ -146,7 +140,13 @@ public class ReservationService {
 
     private void promoteFirstWaiting(LocalDate date, Long timeId, Long themeId) {
         reservationRepository.findFirstWaitingIdBySlot(date, timeId, themeId)
-                .ifPresent(waitingId -> reservationRepository.updateStatus(waitingId, Status.CONFIRMED));
+                .ifPresent(waitingId -> updateState(waitingId, Status.CONFIRMED));
+    }
+
+    private void updateState(Long waitingId, Status status) {
+        if (!reservationRepository.updateStatus(waitingId, status)) {
+            throw new DomainException(RESERVATION_NOT_FOUND);
+        }
     }
 
     private Status determineState(LocalDate date, Long timeId, Long themeId) {

@@ -19,7 +19,7 @@ import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationWaitingListResponse;
 import roomescape.reservation.controller.dto.ReservationWaitingResponse;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 
 @RestController
 @RequestMapping("/reservations")

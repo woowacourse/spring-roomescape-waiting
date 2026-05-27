@@ -23,7 +23,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.repository.dto.ReservationWaitingDto;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -92,17 +92,17 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findAllByGuestName(
+        List<ReservationWaitingResult> reservationWaitingResults = reservationRepository.findAllByGuestName(
                 reservation.getGuestName());
 
         // then
-        assertThat(reservationWaitingDtos)
+        assertThat(reservationWaitingResults)
                 .extracting(
-                        ReservationWaitingDto::id,
-                        ReservationWaitingDto::guestName,
-                        ReservationWaitingDto::date,
-                        ReservationWaitingDto::time,
-                        ReservationWaitingDto::theme
+                        ReservationWaitingResult::id,
+                        ReservationWaitingResult::guestName,
+                        ReservationWaitingResult::date,
+                        ReservationWaitingResult::time,
+                        ReservationWaitingResult::theme
                 ).containsExactly(
                         tuple(
                                 reservation.getId(),
@@ -348,10 +348,10 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        ReservationWaitingDto reservationWaitingDto = reservationRepository.findWaitingById(reservation.getId()).get();
+        ReservationWaitingResult reservationWaitingResult = reservationRepository.findWaitingById(reservation.getId()).get();
 
         // then
-        assertThat(reservationWaitingDto.waitNumber()).isEqualTo(2);
+        assertThat(reservationWaitingResult.waitNumber()).isEqualTo(2);
     }
 
     @Test

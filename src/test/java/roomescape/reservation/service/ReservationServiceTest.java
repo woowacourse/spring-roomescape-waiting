@@ -24,8 +24,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.repository.dto.ReservationWaitingDto;
-import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
@@ -245,10 +244,10 @@ class ReservationServiceTest {
                 reservation.getGuestName());
 
         // then
-        ReservationWaitingDto reservationWaitingDto = reservationRepository.findWaitingById(reservation.getId()).get();
+        ReservationWaitingResult reservationWaitingResult = reservationRepository.findWaitingById(reservation.getId()).get();
 
-        assertThat(reservationWaitingDto)
-                .extracting(ReservationWaitingDto::date, r -> r.time().getId())
+        assertThat(reservationWaitingResult)
+                .extracting(ReservationWaitingResult::date, r -> r.time().getId())
                 .containsExactly(editedDate, editedTime.getId());
     }
 

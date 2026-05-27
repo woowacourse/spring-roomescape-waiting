@@ -15,7 +15,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
-import roomescape.reservation.repository.dto.ReservationWaitingDto;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -48,7 +48,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 Status.from(resultSet.getString("status"))
         );
     };
-    private final RowMapper<ReservationWaitingDto> reservationWaitingDtoRowMapper = (resultSet, rowNum) -> {
+    private final RowMapper<ReservationWaitingResult> reservationWaitingDtoRowMapper = (resultSet, rowNum) -> {
         ReservationTime reservationTime = ReservationTime.of(
                 resultSet.getLong("time_id"),
                 resultSet.getTime("start_at").toLocalTime(),
@@ -63,7 +63,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 toLocalDateTime(resultSet.getTimestamp("theme_deleted_at"))
         );
 
-        return ReservationWaitingDto.from(Reservation.of(
+        return ReservationWaitingResult.from(Reservation.of(
                         resultSet.getLong("reservation_id"),
                         resultSet.getString("guest_name"),
                         resultSet.getDate("date").toLocalDate(),
@@ -103,7 +103,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<ReservationWaitingDto> findWaitingById(Long id) {
+    public Optional<ReservationWaitingResult> findWaitingById(Long id) {
         return jdbcTemplate.query("""
                         SELECT *
                         FROM (
@@ -125,7 +125,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         
                                 ROW_NUMBER() OVER (
                                     PARTITION BY r.date, t.id, th.id, r.status
-                                    ORDER BY r.id
+                                    ORDER BY r.created_at, r.id
                                 ) AS wait_number
                         
                             FROM reservation r
@@ -168,7 +168,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationWaitingDto> findAllByGuestName(String guestName) {
+    public List<ReservationWaitingResult> findAllByGuestName(String guestName) {
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
@@ -187,7 +187,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.deleted_at AS theme_deleted_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
-                        ORDER BY r.id
+                        ORDER BY r.created_at, r.id
                     ) AS wait_number
                 FROM reservation r
                 INNER JOIN reservation_time t
@@ -199,7 +199,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationWaitingDto> findAllByGuestNameExceptCanceled(String guestName) {
+    public List<ReservationWaitingResult> findAllByGuestNameExceptCanceled(String guestName) {
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
@@ -218,7 +218,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     th.deleted_at AS theme_deleted_at,
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
-                        ORDER BY r.id
+                        ORDER BY r.created_at, r.id
                     ) AS wait_number
                 FROM reservation r
                 INNER JOIN reservation_time t

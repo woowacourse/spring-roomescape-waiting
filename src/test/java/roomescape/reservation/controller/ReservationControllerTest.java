@@ -38,7 +38,7 @@ import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.ReservationWaitingResult;
+import roomescape.reservation.repository.dto.ReservationWaitingResult;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
