@@ -2,10 +2,12 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import roomescape.TestClockConfig;
 import roomescape.domain.Reservation;
@@ -179,6 +181,38 @@ class ReservationServiceTest {
 
         assertThat(responses.reservations()).hasSize(2);
         assertThat(responses.reservations()).extracting("name").containsOnly("브라운");
+    }
+
+    @Disabled("TODO: 예약 대기 순번 조회 구현 후 작성")
+    @Test
+    void getMyReservations_예약_대기는_대기_순번을_포함해_반환한다() {
+        User brown = buildUser("브라운");
+        User charles = buildUser("샤를");
+        User aron = buildUser("아론");
+
+        Long themeBId = themeRepository.save(new Theme(null, "공포B", "무서움", "u"));
+        Long timeId = reservationTimeRepository.save(new ReservationTime(null, LocalTime.of(10, 0)));
+
+        reservationRepository.save(buildReservation(charles, themeBId, timeId, LocalDate.of(2026, 5, 2)));
+        reservationRepository.save(buildWaitingReservation(aron, themeBId, timeId, LocalDate.of(2026, 5, 2)));
+        reservationRepository.save(buildWaitingReservation(brown, themeBId, timeId, LocalDate.of(2026, 5, 2))); //브라운 B 대기 2번
+
+        ReservationWithStatusResponses results = service.getMyReservations(brown.getId());
+
+        assertThat(results.waitingReservations()).hasSize(1);
+        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().name()).isEqualTo("브라운");
+        assertThat(results).extracting(responses -> responses.waitingReservations().getFirst().waitingOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void getMyReservations_예약과_대기가_없으면_빈_목록을_반환한다() {
+        User brown = buildUser("브라운");
+
+        ReservationWithStatusResponses responses = service.getMyReservations(brown.getId());
+
+        assertThat(responses.reservations()).isEmpty();
+        assertThat(responses.waitingReservations()).isEmpty();
+        assertThat(responses.hasNext()).isFalse();
     }
 
     @Test

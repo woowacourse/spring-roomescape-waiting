@@ -51,6 +51,119 @@ class ReservationAcceptanceTest {
     }
 
     @Test
+    void GET_reservations_mine_예약_확정과_예약_대기를_상태별로_함께_조회한다() {
+        Scenario.ExistingReservation reserved = Scenario.reservation(jdbcTemplate)
+                .date("9999-12-31").theme("공포A").time("10:00").store("강남점")
+                .member("브라운").save();
+        Scenario.ExistingReservation existing = Scenario.reservation(jdbcTemplate)
+                .date("9999-12-31").theme("공포B").time("11:00").store("강남점")
+                .member("샤를").save();
+        Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(existing.themeId()).onTime(existing.timeId()).onStore(existing.storeId())
+                .member("아론").save();
+        Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(existing.themeId()).onTime(existing.timeId()).onStore(existing.storeId())
+                .member("브라운").save();
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, reserved.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", equalTo("브라운"))
+                .body("reservations[0].themeName", equalTo("공포A"))
+                .body("waitingReservations.size()", is(1))
+                .body("waitingReservations[0].name", equalTo("브라운"))
+                .body("waitingReservations[0].themeName", equalTo("공포B"))
+                .body("waitingReservations[0].waitingOrder", equalTo(2))
+                .body("hasNext", equalTo(false));
+    }
+    
+    @Test
+    void GET_reservations_mine_앞_대기자가_취소되면_재조회시_대기_순번이_줄어든다() {
+        // 주인공 - 브라운
+        Scenario.ExistingReservation existing = Scenario.reservation(jdbcTemplate).date("9999-12-31").theme("공포")
+                .time("10:00").store("강남점").member("샤를").save();
+        Long themeId = existing.themeId();
+        Long timeId = existing.timeId();
+        Long storeId = existing.storeId();
+
+        Scenario.ExistingReservation waitingReservation1 = Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(themeId).onTime(timeId).onStore(storeId)
+                .member("아론").save();
+        Scenario.ExistingReservation waitingReservation2 = Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(themeId).onTime(timeId).onStore(storeId)
+                .member("재키").save();
+        Scenario.ExistingReservation mine = Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(themeId).onTime(timeId).onStore(storeId)
+                .member("브라운").save();
+
+        //1차 조회 - 대기 3번
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, mine.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservations[0].waitingOrder", equalTo(3));
+
+        //재키 삭제
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, waitingReservation2.bearer())
+                .when().delete("/reservations/" + waitingReservation2.reservationId())
+                .then().log().all()
+                .statusCode(200);
+
+        //재조회 - 대기 2번
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, mine.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservations[0].waitingOrder", equalTo(2));
+    }
+
+    @Test
+    void GET_reservations_mine_다른_슬롯의_대기자는_내_대기_순번에_영향을_주지_않는다() {
+        Scenario.ExistingReservation targetSlot = Scenario.reservation(jdbcTemplate)
+                .date("9999-12-31").theme("공포").time("10:00").store("강남점")
+                .member("샤를").save();
+        Scenario.ExistingReservation otherSlot = Scenario.reservation(jdbcTemplate)
+                .date("9999-12-31").theme("공포").time("11:00").store("강남점")
+                .member("재키").save();
+
+        Scenario.ExistingReservation otherSlotWaiting = Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(otherSlot.themeId()).onTime(otherSlot.timeId())
+                .onStore(otherSlot.storeId())
+                .member("아론").save();
+        Scenario.ExistingReservation targetSlotFirstWaiting = Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(targetSlot.themeId()).onTime(targetSlot.timeId())
+                .onStore(targetSlot.storeId())
+                .member("재키").save();
+        Scenario.ExistingReservation mine = Scenario.waitingReservation(jdbcTemplate)
+                .date("9999-12-31").onTheme(targetSlot.themeId()).onTime(targetSlot.timeId())
+                .onStore(targetSlot.storeId())
+                .member("브라운").save();
+
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
+                otherSlotWaiting.reservationId());
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 10:00:00",
+                targetSlotFirstWaiting.reservationId());
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 11:00:00",
+                mine.reservationId());
+
+        RestAssured.given().log().all()
+                .header(AUTHORIZATION, mine.bearer())
+                .when().get("/reservations/mine")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitingReservations.size()", is(1))
+                .body("waitingReservations[0].name", equalTo("브라운"))
+                .body("waitingReservations[0].time", equalTo("10:00:00"))
+                .body("waitingReservations[0].waitingOrder", equalTo(2));
+    }
+
+    @Test
     void GET_reservations_mine_토큰이_없으면_401과_메시지를_반환한다() {
         RestAssured.given().log().all()
                 .when().get("/reservations/mine")

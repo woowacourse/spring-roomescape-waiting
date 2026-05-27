@@ -1,11 +1,13 @@
 package roomescape.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -95,6 +97,89 @@ class ReservationJdbcRepositoryTest {
         List<Reservation> result = repository.findAllByStoreIds(List.of(storeA), 10, 0);
 
         assertThat(result).extracting(r -> r.getUser().getName()).containsExactly("A");
+    }
+
+    @Test
+    void findAllByUserId_예약_확정과_예약_대기를_상태와_예약일시_생성순으로_정렬해_조회한다() {
+        Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운"); //주인공
+        Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
+        Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
+        Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
+        Long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
+        Long time = DbFixtures.insertTime(jdbcTemplate, "10:00");
+
+        long reservedBrownId = DbFixtures.insertReservation(jdbcTemplate, brown, themeA, "2026-06-01", time,
+                ReservationStatus.RESERVED.name());
+        DbFixtures.insertReservation(jdbcTemplate, charles, themeB, "2026-06-01", time, ReservationStatus.RESERVED.name());
+        DbFixtures.insertReservation(jdbcTemplate, aron, themeB, "2026-06-01", time, ReservationStatus.WAITING.name());
+        long waitingBrownId = DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-01", time,
+                ReservationStatus.WAITING.name());
+
+        List<Reservation> results = repository.findAllByUserId(brown);
+
+        assertThat(results).hasSize(2);
+        assertThat(results).extracting(reservation -> reservation.getUser().getName())
+                .containsOnly("브라운");
+        assertThat(results).extracting(Reservation::getId)
+                .containsExactly(reservedBrownId, waitingBrownId);
+        assertThat(results).extracting(
+                        Reservation::getStatus,
+                        Reservation::getDate,
+                        reservation -> reservation.getTime().getStartAt(),
+                        reservation -> reservation.getTheme().getName()
+                )
+                .containsExactly(
+                        tuple(ReservationStatus.RESERVED, LocalDate.of(2026, 6, 1), LocalTime.of(10, 0), "A"),
+                        tuple(ReservationStatus.WAITING, LocalDate.of(2026, 6, 1), LocalTime.of(10, 0), "B")
+                );
+    }
+
+    @Test
+    void findWaitingReservationsWithOrderByUserId_두_개의_슬롯에_건_대기는_슬롯별로_순번을_독립_계산한다() {
+        Long brown = DbFixtures.insertMember(jdbcTemplate, "브라운");
+        Long charles = DbFixtures.insertMember(jdbcTemplate, "샤를");
+        Long aron = DbFixtures.insertMember(jdbcTemplate, "아론");
+        Long themeA = DbFixtures.insertTheme(jdbcTemplate, "A");
+        Long themeB = DbFixtures.insertTheme(jdbcTemplate, "B");
+        Long time = DbFixtures.insertTime(jdbcTemplate, "10:00");
+
+        long slotAFirstWaitingId = DbFixtures.insertReservation(jdbcTemplate, aron, themeA, "2026-06-01", time,
+                ReservationStatus.WAITING.name());
+        long slotABrownWaitingId = DbFixtures.insertReservation(jdbcTemplate, brown, themeA, "2026-06-01", time,
+                ReservationStatus.WAITING.name());
+        long slotBFirstWaitingId = DbFixtures.insertReservation(jdbcTemplate, charles, themeB, "2026-06-02", time,
+                ReservationStatus.WAITING.name());
+        long slotBSecondWaitingId = DbFixtures.insertReservation(jdbcTemplate, aron, themeB, "2026-06-02", time,
+                ReservationStatus.WAITING.name());
+        long slotBBrownWaitingId = DbFixtures.insertReservation(jdbcTemplate, brown, themeB, "2026-06-02", time,
+                ReservationStatus.WAITING.name());
+
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
+                slotAFirstWaitingId);
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 10:00:00",
+                slotABrownWaitingId);
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 09:00:00",
+                slotBFirstWaitingId);
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 10:00:00",
+                slotBSecondWaitingId);
+        jdbcTemplate.update("update reservation set created_at = ? where id = ?", "2026-05-01 11:00:00",
+                slotBBrownWaitingId);
+
+        Map<Reservation, Integer> results = repository.findWaitingReservationsWithOrderByUserId(brown);
+
+        assertThat(results).hasSize(2);
+        assertThat(results.keySet()).extracting(Reservation::getId)
+                .containsExactly(slotABrownWaitingId, slotBBrownWaitingId);
+        assertThat(results.values()).containsExactly(2, 3);
+        assertThat(results.keySet()).extracting(
+                        Reservation::getStatus,
+                        Reservation::getDate,
+                        reservation -> reservation.getTheme().getName()
+                )
+                .containsExactly(
+                        tuple(ReservationStatus.WAITING, LocalDate.of(2026, 6, 1), "A"),
+                        tuple(ReservationStatus.WAITING, LocalDate.of(2026, 6, 2), "B")
+                );
     }
 
     @Test
