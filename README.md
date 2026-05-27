@@ -168,7 +168,7 @@
 - [x] **이전 미션의 내 예약 목록 조회를 확장한다.**
   - 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다.
   - 대기에는 본인의 대기 순번도 함께 보여준다.
-- [ ] **api에 맞추어 프론트 페이지를 수정한다.**
+- [x] **api에 맞추어 프론트 페이지를 수정한다.**
 
 ### 에러 응답 형식
 
@@ -225,6 +225,14 @@
 | **예약 조회**           | `GET /reservations?username={name}` | —                                      | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time}]` |
 | **예약 추가**           | `POST /reservations`                | `{name, date, timeId, themeId}`        | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}`   |
 | **예약 삭제**           | `DELETE /reservations/{id}`         | —                                      | `204`                                                                    |
+
+### 예약 대기 API 명세
+
+| 기능 | 메서드 / URL | 요청 본문 / 쿼리 파라미터 | 응답 |
+|------|------------|----------------------|------|
+| **예약 대기 신청** | `POST /reservations/waiting` | `{name, date, timeId, themeId}` | `201 {id, date, themeName, themeDescription, themeThumbnailUrl, time}` |
+| **예약 대기 취소** | `DELETE /reservations/waiting/{id}` | - | `204` |
+| **내 예약 대기 조회** | `GET /reservations/waiting?username={name}` | - | `200 [{id, date, themeName, themeDescription, themeThumbnailUrl, time, waitingNumber}]` |
 
 ---
 
