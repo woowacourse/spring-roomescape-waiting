@@ -1,5 +1,12 @@
 package roomescape.integration;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +19,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationWaitingJdbcRepository;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
 @Import(ReservationWaitingJdbcRepository.class)
@@ -105,6 +105,18 @@ class ReservationWaitingJdbcRepositoryTest {
     @Test
     void findById는_존재하지_않으면_빈_Optional을_반환한다() {
         assertThat(repository.findById(999L)).isEmpty();
+    }
+
+    @Test
+    void findByName은_같은_예약의_대기_순번을_계산해_반환한다() {
+        LocalDateTime waitingTime = LocalDateTime.of(2026, 8, 1, 10, 0, 0);
+        repository.save(new ReservationWaiting("브라운", waitingTime, reservation));
+        repository.save(new ReservationWaiting("민욱", waitingTime.plusMinutes(1), reservation));
+
+        List<ReservationWaiting> found = repository.findByName("민욱");
+
+        assertThat(found).hasSize(1);
+        assertThat(found.get(0).getOrder()).isEqualTo(2);
     }
 
     @Test

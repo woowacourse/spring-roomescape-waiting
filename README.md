@@ -51,9 +51,9 @@
 
 ## 2단계 - 내 예약 목록 조회 (상태 구분)
 
-- [ ] 이전 미션의 내 예약 목록 조회를 확장한다.
-- [ ] 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다.
-- [ ] 대기에는 본인의 대기 순번도 함께 보여준다.
+- [x] 이전 미션의 내 예약 목록 조회를 확장한다.
+    - [x] 사용자의 예약과 대기가 상태로 구분되어 함께 표시된다.
+    - [x] 대기에는 본인의 대기 순번도 함께 보여준다.
 
 ## API 명세
 
@@ -75,15 +75,16 @@
 
 ### 사용자 API
 
-| 메서드    | 경로                      | 요청                                | 성공 응답                                        |
-|--------|-------------------------|-----------------------------------|----------------------------------------------|
-| GET    | `/times/availability`   | `?date=YYYY-MM-DD&themeId={id}`   | 200 `{ times: [{ id, startAt, reserved }] }` |
-| POST   | `/reservations`         | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme }`        |
-| GET    | `/reservations/me`      | `?name={이름}`                      | 200 `{ reservations: [...] }`                |
-| PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`        |
-| DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                          |
-| POST   | `/waitings`             | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme, order }` |
-| DELETE | `/waitings/me/{id}`     | `{ name }`                        | 204                                          |
+| 메서드    | 경로                      | 요청                                | 성공 응답                                                      |
+|--------|-------------------------|-----------------------------------|------------------------------------------------------------|
+| GET    | `/times/availability`   | `?date=YYYY-MM-DD&themeId={id}`   | 200 `{ times: [{ id, startAt, reserved }] }`               |
+| POST   | `/reservations`         | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme }`                      |
+| GET    | `/reservations/me`      | `?name={이름}`                      | 200 `{ reservations: [...] }`                              |
+| PUT    | `/reservations/me/{id}` | `?name={이름}` + `{ date, timeId }` | 200 `{ id, name, date, time, theme }`                      |
+| DELETE | `/reservations/me/{id}` | `?name={이름}`                      | 204                                                        |
+| POST   | `/waitings`             | `{ name, date, timeId, themeId }` | 201 `{ id, name, date, time, theme, order }`               |
+| GET    | `/waitings/me`          | `?name={이름}`                      | 200 `{ waitings: [ id, name, order, date, time, theme ] }` |
+| DELETE | `/waitings/me/{id}`     | `{ name }`                        | 204                                                        |
 
 ## 에러 응답
 

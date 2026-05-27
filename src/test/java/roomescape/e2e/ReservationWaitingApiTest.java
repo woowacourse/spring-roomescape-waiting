@@ -57,6 +57,30 @@ class ReservationWaitingApiTest {
     }
 
     @Test
+    void 내_대기_목록_조회시_대기_순번을_함께_반환한다() {
+        Integer timeId = createTime("12:30");
+        Integer themeId = createTheme("추리", "단서를 찾아라", "https://example.com/mystery.jpg");
+        createReservation("티뉴", "2026-08-05", timeId, themeId);
+
+        createWaiting("브라운", "2026-08-05", timeId, themeId);
+        Integer waitingId = createWaiting("민욱", "2026-08-05", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "민욱")
+                .when().get("/waitings/me")
+                .then().log().all()
+                .statusCode(200)
+                .body("waitings.size()", is(1))
+                .body("waitings[0].id", is(waitingId))
+                .body("waitings[0].name", is("민욱"))
+                .body("waitings[0].date", is("2026-08-05"))
+                .body("waitings[0].time.id", is(timeId))
+                .body("waitings[0].time.startAt", is("12:30"))
+                .body("waitings[0].theme.id", is(themeId))
+                .body("waitings[0].order", is(2));
+    }
+
+    @Test
     void 예약되지_않은_슬롯에는_대기를_신청할_수_없다() {
         Integer timeId = createTime("13:00");
         Integer themeId = createTheme("SF", "우주에서 탈출", "https://example.com/sf.jpg");
