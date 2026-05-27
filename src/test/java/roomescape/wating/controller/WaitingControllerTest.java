@@ -74,6 +74,7 @@ class WaitingControllerTest {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
+        insertReservation("브라운", LocalDate.of(2026, 5, 26), time.getId(), theme.getId());
         Map<String, String> body = Map.of(
                 "name", "재키",
                 "date", "2026-05-26",
@@ -151,6 +152,7 @@ class WaitingControllerTest {
 
         final String customerName = "재키";
         final LocalDate nowDate = NOW.toLocalDate();
+        insertReservation("브라운", nowDate, time.getId(), theme.getId());
         insertWaiting(customerName, nowDate, time.getId(), theme.getId());
 
         Map<String, String> body = Map.of(
@@ -273,6 +275,21 @@ class WaitingControllerTest {
         );
 
         return Theme.of(1L, name, description, thumbnailUrl);
+    }
+
+    private void insertReservation(
+            final String name,
+            final LocalDate date,
+            final long timeId,
+            final long themeId
+    ) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name,
+                Date.valueOf(date),
+                timeId,
+                themeId
+        );
     }
 
     private long insertWaiting(

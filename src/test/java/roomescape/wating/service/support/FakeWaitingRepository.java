@@ -1,6 +1,8 @@
 package roomescape.wating.service.support;
 
 import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.NoReservationForWaitingException;
+import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
 import roomescape.wating.repository.WaitingRepository;
 
 import java.sql.Date;
@@ -13,9 +15,13 @@ public class FakeWaitingRepository implements WaitingRepository {
 
     private final List<Waiting> waitings = new ArrayList<>();
     private Waiting savedWaiting;
+    private RuntimeException saveException;
 
     @Override
     public Long save(final Waiting waiting) {
+        if (saveException != null) {
+            throw saveException;
+        }
         savedWaiting = waiting;
         final Waiting savedWaitingWithId = Waiting.of(
                 1L,
@@ -57,5 +63,13 @@ public class FakeWaitingRepository implements WaitingRepository {
 
     public void add(final Waiting waiting) {
         waitings.add(waiting);
+    }
+
+    public void failToSaveByDuplicatedWaiting() {
+        saveException = new WaitingSlotDuplicateException();
+    }
+
+    public void failToSaveByNoReservation() {
+        saveException = new NoReservationForWaitingException();
     }
 }

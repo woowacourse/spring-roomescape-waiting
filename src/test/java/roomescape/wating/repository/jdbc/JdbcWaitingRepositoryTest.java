@@ -1,6 +1,7 @@
 package roomescape.wating.repository.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -24,6 +25,7 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.NoReservationForWaitingException;
 
 @JdbcTest
 @Sql("/clear.sql")
@@ -48,7 +50,29 @@ class JdbcWaitingRepositoryTest {
     }
 
     @Test
-    void 날짜와_시간과_테마와_이름으로_대기를_등록할_수_있다() {
+    void 예약이_있는_슬롯에_대기를_등록할_수_있다() {
+        //given
+        ReservationTime time = insertReservationTime("11:00:00");
+        Theme theme = insertTheme("링", "공포 테마", "http:~");
+        final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
+        insertReservation("브라운", tomorrow, time.getId(), theme.getId());
+        Waiting waiting = Waiting.create(
+                "코로구",
+                tomorrow,
+                time,
+                theme,
+                NOW
+        );
+
+        //when
+        final Long savedWaitingId = jdbcWaitingRepository.save(waiting);
+
+        //then
+        assertThat(savedWaitingId).isNotNull();
+    }
+
+    @Test
+    void 예약이_없는_슬롯에_대기를_등록하면_예외가_발생한다() {
         //given
         ReservationTime time = insertReservationTime("11:00:00");
         Theme theme = insertTheme("링", "공포 테마", "http:~");
@@ -60,11 +84,9 @@ class JdbcWaitingRepositoryTest {
                 NOW
         );
 
-        //when
-        final Long savedWaitingId = jdbcWaitingRepository.save(waiting);
-
-        //then
-        assertThat(savedWaitingId).isNotNull();
+        //when & then
+        assertThatThrownBy(() -> jdbcWaitingRepository.save(waiting))
+                .isInstanceOf(NoReservationForWaitingException.class);
     }
 
     @Test
@@ -149,6 +171,21 @@ class JdbcWaitingRepositoryTest {
         );
 
         return Theme.of(1L, name, description, thumbnailUrl);
+    }
+
+    private void insertReservation(
+            final String name,
+            final LocalDate date,
+            final long timeId,
+            final long themeId
+    ) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation(name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name,
+                Date.valueOf(date),
+                timeId,
+                themeId
+        );
     }
 
     private long insertWaiting(

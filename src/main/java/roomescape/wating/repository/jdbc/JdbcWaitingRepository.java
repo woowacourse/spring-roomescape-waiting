@@ -15,6 +15,7 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.repository.WaitingRepository;
 
 @Repository
@@ -45,18 +46,27 @@ public class JdbcWaitingRepository implements WaitingRepository {
     public Long save(final Waiting waiting) {
         final String sql = """
                 INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
-                VALUES (?, ?, ?, ?)
+                SELECT ?, ?, ?, ?
+                FROM reservation
+                WHERE date = ? AND time_id = ? AND theme_id = ?
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        jdbcTemplate.update(con -> {
+        int updateCount = jdbcTemplate.update(con -> {
             PreparedStatement ps = con.prepareStatement(sql, new String[]{"id"});
             ps.setString(1, waiting.getCustomerName().name());
             ps.setDate(2, Date.valueOf(waiting.getReservationDate()));
             ps.setLong(3, waiting.getTime().getId());
             ps.setLong(4, waiting.getTheme().getId());
+            ps.setDate(5, Date.valueOf(waiting.getReservationDate()));
+            ps.setLong(6, waiting.getTime().getId());
+            ps.setLong(7, waiting.getTheme().getId());
             return ps;
         }, keyHolder);
+
+        if (updateCount == 0) {
+            throw new NoReservationForWaitingException();
+        }
 
         Number key = keyHolder.getKey();
         if (key == null) {
