@@ -104,14 +104,23 @@ public class WaitingDao {
 
     public List<WaitingQueryResult> findAllByUserName(String userName) {
         String sql = """
-                SELECT w.id, w.name, w.date, w.created_at,
-                       ROW_NUMBER() OVER(ORDER BY w.created_at ASC) AS sequence,
-                       rt.id AS time_id, rt.start_at,
-                       t.id AS theme_id, t.name AS theme_name, t.description, t.url
-                FROM waiting w
-                INNER JOIN reservation_time rt ON w.time_id = rt.id
-                INNER JOIN theme t ON w.theme_id = t.id
-                WHERE w.name = ?
+                SELECT id, name, date, created_at,
+                       time_id, start_at,
+                       theme_id, theme_name, description, url,
+                       sequence
+                FROM (
+                    SELECT w.id, w.name, w.date, w.created_at,
+                           rt.id AS time_id, rt.start_at,
+                           t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY w.date, w.time_id, w.theme_id
+                               ORDER BY w.created_at ASC
+                           ) AS sequence
+                    FROM waiting w
+                    INNER JOIN reservation_time rt ON w.time_id = rt.id
+                    INNER JOIN theme t ON w.theme_id = t.id
+                ) ranked
+                WHERE name = ?
                 """;
 
         return jdbcTemplate.query(
