@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Waiting;
-import roomescape.reservation.domain.repository.WaitingDetail;
 import roomescape.reservation.domain.repository.WaitingRepository;
 
 @Repository
@@ -26,7 +25,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public WaitingDetail save(Waiting waiting) {
+    public Waiting save(Waiting waiting) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", waiting.getName())
                 .addValue("date", waiting.getDate())
@@ -35,9 +34,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
         try {
             Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-            Waiting saved = waiting.withId(id);
-
-            return new WaitingDetail(saved.getId(), saved.getName(), saved.getDate(), saved.getThemeId(), saved.getTimeId(), null);
+            return waiting.withId(id);
         } catch (DuplicateKeyException e) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE_RESERVATION);
         }

@@ -12,8 +12,8 @@ import org.springframework.stereotype.Repository;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.repository.ReservationDetail;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.dto.ReservationDetail;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {

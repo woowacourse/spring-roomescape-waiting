@@ -3,7 +3,8 @@ package roomescape.reservation.application.dto;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import java.time.LocalDate;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.repository.ReservationDetail;
+import roomescape.reservation.domain.Waiting;
+import roomescape.reservation.domain.repository.dto.ReservationDetail;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
 import roomescape.theme.application.dto.ThemeQueryResult;
 
@@ -16,6 +17,17 @@ public record ReservationQueryResult(Long id, String name, @JsonFormat(pattern =
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),
+                themeQueryResult,
+                timeQueryResult
+        );
+    }
+
+    public static ReservationQueryResult from(Waiting waiting, ThemeQueryResult themeQueryResult,
+                                              ReservationTimeQueryResult timeQueryResult) {
+        return new ReservationQueryResult(
+                waiting.getId(),
+                waiting.getName(),
+                waiting.getDate(),
                 themeQueryResult,
                 timeQueryResult
         );
