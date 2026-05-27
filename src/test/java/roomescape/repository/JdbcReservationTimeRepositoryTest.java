@@ -83,7 +83,7 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약된 시간을 제외한 가용 시간만 반환한다")
+    @DisplayName("예약된 시간도 포함해 모든 가용 시간을 반환한다")
     void findAvailable() {
         long bookedTimeId = insertTime(LocalTime.of(10, 0));
         long freeTimeId = insertTime(LocalTime.of(11, 0));
@@ -93,8 +93,8 @@ class JdbcReservationTimeRepositoryTest {
 
         List<ReservationTime> available = reservationTimeRepository.findAvailable(date, themeId);
 
-        assertThat(available).hasSize(1);
-        assertThat(available.get(0).getId()).isEqualTo(freeTimeId);
+        assertThat(available).extracting(ReservationTime::getId)
+                .containsExactlyInAnyOrder(bookedTimeId, freeTimeId);
     }
 
     private long insertTime(LocalTime startAt) {
