@@ -1,6 +1,10 @@
 package roomescape.reservationwaiting.repository;
 
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.util.List;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,11 +18,6 @@ import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.service.ReservationWaitingService;
-
-import java.util.List;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -77,8 +76,8 @@ public class ReservationWaitingRepositoryTest {
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥2", reservation));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", reservation));
         List<ReservationWaitingTurnResponse> reservationWaitingTurnResponses = jdbcReservationWaitingRepository.findByName(
-                "현미밥1");
+                "현미밥2");
         System.out.println("reservationWaitingTurnResponses.size() = " + reservationWaitingTurnResponses.size());
-        assertThat(reservationWaitingTurnResponses.get(0).turn()).isEqualTo(1);
+        assertThat(reservationWaitingTurnResponses.get(0).turn()).isEqualTo(2);
     }
 }

@@ -10,6 +10,7 @@ import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
@@ -36,6 +37,10 @@ public class JdbcReservationRepository implements ReservationRepository {
             )
     );
 
+    private final RowMapper<Long> rowMapper2 = (resultSet, rowNum) -> (
+            resultSet.getLong("id")
+    );
+
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
@@ -51,7 +56,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return Reservation.restore(id, reservation.getName(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return Reservation.restore(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
+                reservation.getTheme());
     }
 
     @Override
@@ -100,5 +106,11 @@ public class JdbcReservationRepository implements ReservationRepository {
     public void deleteById(Long id) {
         String query = "delete from reservation where id = ?";
         jdbcTemplate.update(query, id);
+    }
+
+    @Override
+    public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
+        String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
+        return ReservationIdResponse.from(jdbcTemplate.query(query, rowMapper2, date, themeId, timeId).getFirst());
     }
 }

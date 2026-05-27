@@ -12,6 +12,7 @@ import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
+import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservation.dto.ReservationRequest;
 import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
@@ -47,11 +48,13 @@ public class ReservationService {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
+                request.themeId())) {
             throw new DuplicateReservationException();
         }
 
-        Reservation saved = reservationRepository.save(reservationFactory.create(request.name(), request.date(), time, theme));
+        Reservation saved = reservationRepository.save(
+                reservationFactory.create(request.name(), request.date(), time, theme));
         return ReservationResponse.from(saved);
     }
 
@@ -81,7 +84,8 @@ public class ReservationService {
         LocalDate newDate = request.date();
 
         Reservation changed = reservation.reschedule(newDate, newTime);
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, request.timeId(), reservation.getTheme().getId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, request.timeId(),
+                reservation.getTheme().getId())) {
             throw new DuplicateReservationException();
         }
 
@@ -93,5 +97,9 @@ public class ReservationService {
     private Reservation getById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
+    }
+
+    public ReservationIdResponse getReservationId(LocalDate date, Long themeId, Long timeId) {
+        return reservationRepository.findReservationId(date, themeId, timeId);
     }
 }

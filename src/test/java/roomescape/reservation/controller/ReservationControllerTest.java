@@ -129,4 +129,17 @@ class ReservationControllerTest {
                 .statusCode(400)
                 .body("errorCode", equalTo("PAST_RESERVATION_CANCEL"));
     }
+
+    @Test
+    @DisplayName("예약 ID 조회")
+    void 예약_ID_조회_성공() {
+        RestAssured.given().log().all()
+                .queryParam("date", "2099-12-01")
+                .queryParam("themeId", 1)
+                .queryParam("timeId", 1)
+                .when().get("/reservations/id")
+                .then().log().all()
+                .statusCode(200)
+                .body("id", equalTo(11));
+    }
 }
