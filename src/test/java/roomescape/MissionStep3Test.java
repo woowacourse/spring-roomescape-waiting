@@ -37,6 +37,7 @@ public class MissionStep3Test {
                 .body("size()", is(1));
 
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
                 .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(200);

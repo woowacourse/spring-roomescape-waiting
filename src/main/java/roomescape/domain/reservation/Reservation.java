@@ -7,30 +7,36 @@ import java.util.Objects;
 import roomescape.domain.theme.Theme;
 
 public class Reservation {
-    private final long id;
+    private final Long id;
     private final ReservationName reservationName;
     private final ReservationDate date;
     private final ReservationTime time;
     private final Theme theme;
+    private final LocalDateTime dateTime;
 
-    private Reservation(long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                        Theme theme) {
+    private Reservation(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
+                        Theme theme, LocalDateTime dateTime) {
         this.id = id;
         this.reservationName = Objects.requireNonNull(reservationName);
         this.date = Objects.requireNonNull(date);
         this.time = Objects.requireNonNull(time);
         this.theme = Objects.requireNonNull(theme);
+        this.dateTime = Objects.requireNonNull(dateTime);
     }
 
-    public static Reservation load(long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
-                                   Theme theme) {
-        return new Reservation(id, reservationName, date, time, theme);
+    public static Reservation load(Long id, ReservationName reservationName, ReservationDate date, ReservationTime time,
+                                   Theme theme, LocalDateTime dateTime) {
+        return new Reservation(id, reservationName, date, time, theme, dateTime);
     }
 
-    public static Reservation reserve(ReservationName reservationName, ReservationDate date, ReservationTime time,
-                                      Theme theme, LocalDateTime now) {
+    public static Reservation reserve(
+            ReservationName reservationName,
+            ReservationDate date,
+            ReservationTime time,
+            Theme theme, LocalDateTime now
+    ) {
         Objects.requireNonNull(now);
-        Reservation reservation = new Reservation(0L, reservationName, date, time, theme);
+        Reservation reservation = new Reservation(null, reservationName, date, time, theme, now);
         reservation.ensureNotPast(now);
         return reservation;
     }
@@ -66,4 +72,28 @@ public class Reservation {
     public Theme getTheme() {
         return theme;
     }
+
+    public LocalDateTime getDateTime() {
+        return dateTime;
+    }
+
+    @Override
+    public final boolean equals(Object o) {
+        if (this == o) {
+            return true;
+        }
+
+        if (!(o instanceof Reservation that)) return false;
+
+        if (id == null || that.id == null)
+            return false;
+
+        return id.equals(that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id != null ? id.hashCode() : System.identityHashCode(this);
+    }
+
 }

@@ -6,9 +6,11 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,6 +67,7 @@ public class MissionStep2Test {
         params.put("date", "2099-08-05");
         params.put("timeId", 1);
         params.put("themeId", 1);
+        params.put("createdAt", LocalDateTime.now().toString());
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -76,7 +79,13 @@ public class MissionStep2Test {
         Integer count = jdbcTemplate.queryForObject("SELECT count(1) from reservation", Integer.class);
         assertThat(count).isEqualTo(1);
 
+
+        params = new HashMap<>();
+        params.put("name", "브라운");
+
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(200);

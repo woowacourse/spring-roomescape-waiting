@@ -58,7 +58,12 @@ public class MissionStepTest {
                 .statusCode(200)
                 .body("size()", is(1));
 
+        params = new HashMap<>();
+        params.put("name", "브라운");
+
         RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
                 .when().delete("/reservations/1")
                 .then().log().all()
                 .statusCode(200);

@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.dto.ReservationDeleteDto;
+import roomescape.controller.dto.request.ReservationDeleteDto;
 import roomescape.controller.dto.request.ReservationCreateRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
 import roomescape.controller.dto.response.ReservationResponse;
-import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservation.ReservationResult;
 import roomescape.service.ReservationService;
 
 @RestController
@@ -31,7 +31,7 @@ public class ReservationController {
     @PostMapping("/reservations")
     @ResponseStatus(HttpStatus.CREATED)
     public ReservationResponse create(@Valid @RequestBody ReservationCreateRequest request) {
-        Reservation reservation = reservationService.reserve(request, LocalDateTime.now());
+        ReservationResult reservation = reservationService.reserve(request, LocalDateTime.now());
 
         return ReservationResponse.toDto(reservation);
     }
@@ -39,7 +39,7 @@ public class ReservationController {
     @GetMapping("/reservations")
     @ResponseStatus(HttpStatus.OK)
     public List<ReservationResponse> findList(@RequestParam(required = false) String name) {
-        List<Reservation> reservations = reservationService.findList(name);
+        List<ReservationResult> reservations = reservationService.findList(name);
 
         return reservations.stream()
                 .map(ReservationResponse::toDto)
@@ -49,8 +49,7 @@ public class ReservationController {
     @GetMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse find(@PathVariable long id) {
-        Reservation reservation = reservationService.find(id);
-
+        ReservationResult reservation = reservationService.find(id);
         return ReservationResponse.toDto(reservation);
     }
 
@@ -63,7 +62,7 @@ public class ReservationController {
     @PutMapping("/reservations/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ReservationResponse update(@Valid @RequestBody ReservationUpdateRequest request, @PathVariable long id) {
-        Reservation updated = reservationService.update(request, id, LocalDateTime.now());
+        ReservationResult updated = reservationService.update(request, id, LocalDateTime.now());
         return ReservationResponse.toDto(updated);
     }
 }

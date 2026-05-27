@@ -24,11 +24,13 @@ public class ReservationRepository {
             new ReservationDate(resultSet.getDate("date").toLocalDate()),
             ReservationTime.of(resultSet.getLong("time_id"), resultSet.getTime("start_at").toLocalTime()),
             Theme.load(resultSet.getLong("theme_id"), new ThemeName(resultSet.getString("theme_name")),
-                    resultSet.getString("description"), new ThumbnailUrl(resultSet.getString("thumbnail_url"))));
+                    resultSet.getString("description"), new ThumbnailUrl(resultSet.getString("thumbnail_url"))),
+            resultSet.getTimestamp("created_at").toLocalDateTime());
     private static final String SELECT_ALL = """
             SELECT r.id   AS reservation_id,
                    r.name,
                    r.date,
+                   r.created_at,
                    rt.id  AS time_id,
                    rt.start_at,
                    t.id   AS theme_id,
@@ -45,7 +47,8 @@ public class ReservationRepository {
                     name = ?,
                     date = ?,
                     time_id = ?,
-                    theme_id = ?
+                    theme_id = ?,
+                    created_at = ?
             WHERE id = ?
             """;
     private static final String SELECT_BY_ID = SELECT_ALL + "WHERE r.id = ?";
@@ -100,21 +103,24 @@ public class ReservationRepository {
                 "name", reservation.getName().getValue(),
                 "date", reservation.getDate().getDate(),
                 "time_id", reservation.getTime().getId(),
-                "theme_id", reservation.getTheme().getId()
+                "theme_id", reservation.getTheme().getId(),
+                "created_at", reservation.getDateTime()
         );
 
         long generatedKey = simpleJdbcInsert.executeAndReturnKey(params).longValue();
 
-        return Reservation.load(generatedKey, reservation.getName(), reservation.getDate(),
-                reservation.getTime(),
-                reservation.getTheme());
+        return Reservation.load(generatedKey,
+                reservation.getName(),
+                reservation.getDate(), reservation.getTime(),
+                reservation.getTheme()
+                , reservation.getDateTime());
     }
 
     public Reservation update(long id, Reservation target) {
         jdbcTemplate.update(UPDATE, target.getName().getValue(), target.getDate().getDate(), target.getTime().getId(),
                 target.getTheme().getId(), id);
 
-        return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme());
+        return Reservation.load(id, target.getName(), target.getDate(), target.getTime(), target.getTheme(), target.getDateTime());
     }
 
     public void deleteById(Long id) {
@@ -135,5 +141,26 @@ public class ReservationRepository {
     public boolean existsByTimeAndThemeAndDateAndName(Long timeId, Long themeId, LocalDate date, String name) {
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(EXISTS_BY_DATE_AND_TIME_AND_THEME_ID, Boolean.class, date, timeId, themeId, name));
+    }
+
+    public List<Reservation> findBy(ReservationTime time, Theme theme, ReservationDate date) {
+        String sql = """
+            SELECT r.id   AS reservation_id,
+                   r.name,
+                   r.date,
+                   r.created_at,
+                   rt.id  AS time_id,
+                   rt.start_at,
+                   t.id   AS theme_id,
+                   t.name AS theme_name,
+                   t.description,
+                   t.thumbnail_url
+            FROM reservation r
+            INNER JOIN reservation_time rt ON r.time_id  = rt.id
+            INNER JOIN theme             t  ON r.theme_id = t.id
+            WHERE date = ? AND t.id = ? AND rt.id = ?
+            """;
+
+        return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, date.getDate(), theme.getId(), time.getId());
     }
 }
