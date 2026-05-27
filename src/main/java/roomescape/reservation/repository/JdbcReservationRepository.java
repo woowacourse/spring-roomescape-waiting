@@ -79,7 +79,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
                                 ROW_NUMBER() OVER (
                                     PARTITION BY r.date, t.id, th.id, r.status
-                                    ORDER BY r.id
+                                    ORDER BY r.last_modified_at
                                 ) AS wait_number
 
                             FROM reservation r
@@ -90,8 +90,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                         ) x
                         WHERE x.reservation_id = ?
                         """,
-                reservationWaitingDtoRowMapper,
-                id
+                reservationWaitingDtoRowMapper, id
         ).stream().findFirst();
     }
 
@@ -125,7 +124,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<ReservationWaitingDto> findAllByGuestName(String guestName) {
+    public List<ReservationWaitingDto> findWaitingAllByGuestName(String guestName) {
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
@@ -146,7 +145,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     
                     ROW_NUMBER() OVER (
                         PARTITION BY r.date, t.id, th.id, r.status
-                        ORDER BY r.id
+                        ORDER BY r.last_modified_at
                     ) AS wait_number
                 FROM reservation r
                 INNER JOIN reservation_time t

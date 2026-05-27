@@ -56,7 +56,7 @@ public class ReservationService {
     }
 
     public List<ReservationWaitingResult> findByGuestName(String guestName) {
-        return reservationRepository.findAllByGuestName(guestName).stream()
+        return reservationRepository.findWaitingAllByGuestName(guestName).stream()
                 .map(ReservationWaitingResult::from)
                 .toList();
     }

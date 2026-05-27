@@ -16,7 +16,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAll(int page, int size);
 
-    List<ReservationWaitingDto> findAllByGuestName(String guestName);
+    List<ReservationWaitingDto> findWaitingAllByGuestName(String guestName);
 
     Reservation save(Reservation reservation);
 

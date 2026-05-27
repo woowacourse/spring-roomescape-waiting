@@ -24,7 +24,7 @@ public record ReservationWaitingDto(
                 reservation.getTime(),
                 reservation.getTheme(),
                 reservation.getStatus(),
-                waitNumber
+                reservation.getStatus() == Status.WAITING ? waitNumber : 0
         );
     }
 }

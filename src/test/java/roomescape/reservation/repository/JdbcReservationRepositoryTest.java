@@ -94,7 +94,7 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findAllByGuestName(reservation.getGuestName());
+        List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findWaitingAllByGuestName(reservation.getGuestName());
 
         // then
         assertThat(reservationWaitingDtos)
