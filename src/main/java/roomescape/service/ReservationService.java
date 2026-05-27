@@ -44,7 +44,7 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    public List<Reservation> getReservationsByName(String name) {
+    public List<ReservationWithStatus> getMyReservations(String name) {
         return reservationRepository.findByName(name);
     }
 

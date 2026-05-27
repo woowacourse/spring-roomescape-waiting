@@ -2,12 +2,12 @@ package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -28,6 +28,7 @@ import roomescape.repository.ThemeRepository;
 @Transactional
 class ReservationServiceTest {
 
+    private static final LocalDate FUTURE_FIRST_DATE = LocalDate.now().plusDays(1);
     private static final LocalDate FUTURE_SECOND_DATE = LocalDate.now().plusDays(2);
     private static final LocalTime TEN = LocalTime.of(10, 0);
 
@@ -203,38 +204,53 @@ class ReservationServiceTest {
     }
 
     @Test
-    void 자신의_이름에_해당하는_예약_목록을_조회한다() {
-        ReservationTime tenClock = createReservationTime(TEN);
+    void 내_예약_목록에서_예약과_대기를_함께_조회한다() {
         ReservationTime twelveClock = createReservationTime(LocalTime.of(12, 0));
         Theme theme = createTheme();
 
         String name = "브라운";
         String anotherName = "브리";
-        ReservationRequest requestBrown = new ReservationRequest(
+        ReservationRequest existingReservationRequest = new ReservationRequest(
                 name,
                 FUTURE_SECOND_DATE,
-                tenClock.getId(),
+                twelveClock.getId(),
                 theme.getId()
         );
-        ReservationRequest requestBrie = new ReservationRequest(
+        ReservationRequest myWaitingRequest = new ReservationRequest(
                 anotherName,
                 FUTURE_SECOND_DATE,
                 twelveClock.getId(),
                 theme.getId()
         );
+        ReservationRequest myReservedRequest = new ReservationRequest(
+                anotherName,
+                FUTURE_FIRST_DATE,
+                twelveClock.getId(),
+                theme.getId()
+        );
 
-        reservationService.reserveOrWait(requestBrown);
-        reservationService.reserveOrWait(requestBrie);
+        reservationService.reserveOrWait(existingReservationRequest);
+        reservationService.reserveOrWait(myReservedRequest);
+        reservationService.reserveOrWait(myWaitingRequest);
 
-        List<Reservation> reservations = reservationService.getReservationsByName(name);
+        List<ReservationWithStatus> myReservations = reservationService.getMyReservations(anotherName);
 
-        assertThat(reservations).hasSize(1);
-
-        Reservation result = reservations.getFirst();
-        assertThat(result.getName()).isEqualTo(name);
-        assertThat(result.getDate()).isEqualTo(FUTURE_SECOND_DATE);
-        assertThat(result.getTime().getId()).isEqualTo(tenClock.getId());
-        assertThat(result.getTheme().getId()).isEqualTo(theme.getId());
+        assertThat(myReservations).hasSize(2);
+        assertThat(myReservations)
+                .extracting(
+                        ReservationWithStatus::getName,
+                        ReservationWithStatus::getDate,
+                        reservation -> reservation.getTime().getId(),
+                        reservation -> reservation.getTheme().getId(),
+                        reservation -> reservation.getStatus(),
+                        ReservationWithStatus::getWaitingOrder
+                )
+                .containsExactly(
+                        tuple(anotherName, FUTURE_SECOND_DATE, twelveClock.getId(), theme.getId(),
+                                ReservationStatus.WAITING, 1),
+                        tuple(anotherName, FUTURE_FIRST_DATE, twelveClock.getId(), theme.getId(),
+                                ReservationStatus.RESERVED, null)
+                );
     }
 
     @Test
@@ -316,7 +332,7 @@ class ReservationServiceTest {
     @Sql("/data_relative_dates.sql")
     void 예약을_취소할_때_이미_지난_예약이면_예외() {
         String name = "김민수";
-        Reservation pastReservation = reservationService.getReservationsByName(name).getFirst();
+        ReservationWithStatus pastReservation = reservationService.getMyReservations(name).getFirst();
 
         LocalDateTime dateTime = LocalDateTime.of(
                 pastReservation.getDate(),
