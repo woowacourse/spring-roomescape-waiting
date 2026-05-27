@@ -334,4 +334,17 @@ class ReservationApiTest {
                 .statusCode(422)
                 .body("errorMessage", equalTo("이미 지나간 예약은 삭제할 수 없습니다."));
     }
+
+    @DisplayName("방탈출 예약 대기 삭제 API를 테스트합니다.")
+    @Test
+    void delete_waiting_reservation() {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+        Long waitingId = testHelper.insertWaiting("스타크", ReservationFixture.futureReservationDate(), themeId, timeId);
+
+        RestAssured.given()
+                .when().delete("/reservations/waitings/{id}", waitingId)
+                .then().log().all()
+                .statusCode(204);
+    }
 }

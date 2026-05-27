@@ -66,5 +66,4 @@ public class TestDataHelper {
                 "time_id", timeId
         )).longValue();
     }
-
 }
