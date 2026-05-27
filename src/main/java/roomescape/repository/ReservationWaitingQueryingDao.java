@@ -76,7 +76,7 @@ public class ReservationWaitingQueryingDao {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
-                    FROM reservation
+                    FROM waiting
                     WHERE name = ?
                     AND date = ?
                     AND time_id = ?
