@@ -23,13 +23,13 @@ import java.time.temporal.ChronoUnit;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.AcceptanceTest;
+import roomescape.reservation.domain.ReservationStatus;
 
 class ReservationControllerTest extends AcceptanceTest {
 
@@ -159,14 +159,13 @@ class ReservationControllerTest extends AcceptanceTest {
     }
 
     @Test
-    @DisplayName("예약된 날짜/시간/테마를 중복 예약하면 예외가 발생한다.")
-    @Disabled
-    void reserved_duplicated() {
+    @DisplayName("다른 사람이 예약한 날짜/시간/테마를 예약하면 대기 상태된다.")
+    void waited_duplicated_reserved() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
-        createReservationWithToken(memberToken, dateId, timeId, themeId);
+        createReservationWithToken(managerToken, dateId, timeId, themeId);
 
         Map<String, Object> params = new HashMap<>();
         params.put("dateId", dateId);
@@ -179,8 +178,8 @@ class ReservationControllerTest extends AcceptanceTest {
                 .body(params)
                 .when().post("/member/reservations")
                 .then().log().all()
-                .statusCode(RESERVATION_ALREADY_BOOKED.getHttpStatus().value())
-                .body("message", is(RESERVATION_ALREADY_BOOKED.getMessage()));
+                .statusCode(HttpStatus.OK.value())
+                .body("status", is(ReservationStatus.WAITING.name()));
     }
 
     @Test
