@@ -19,7 +19,6 @@ import roomescape.domain.reservation.error.type.ReservationErrorType;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
-import roomescape.global.error.type.ErrorType;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -167,21 +166,22 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public int countByIdLessThanEqualAndDateAndTimeAndTheme(Long reservationId, LocalDate date, Time time, Theme theme) {
+    public int countByIdLessThanEqualAndDateAndTimeAndTheme(Long reservationId, LocalDate date, Time time,
+        Theme theme) {
         String countSql = """
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE id <= :id
-                  AND date = :date
-                  AND time_id = :timeId
-                  AND theme_id = :themeId
-                  AND status = 'WAITING'
-                """;
+            SELECT COUNT(*)
+            FROM reservation
+            WHERE id <= :id
+              AND date = :date
+              AND time_id = :timeId
+              AND theme_id = :themeId
+              AND status = 'WAITING'
+            """;
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("id", reservationId)
-                .addValue("date", date)
-                .addValue("timeId", time.getId())
-                .addValue("themeId", theme.getId());
+            .addValue("id", reservationId)
+            .addValue("date", date)
+            .addValue("timeId", time.getId())
+            .addValue("themeId", theme.getId());
 
         return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
     }
@@ -266,7 +266,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservation(Reservation reservation) {
+    public boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
@@ -284,7 +284,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             "name", reservation.getName(),
             "timeId", reservation.getTime().getId(),
             "themeId", reservation.getTheme().getId(),
-            "status", reservation.getStatus().name()
+            "status", status.name()
         ));
 
         Boolean exists = jdbcTemplate.queryForObject(sql, parameters, Boolean.class);

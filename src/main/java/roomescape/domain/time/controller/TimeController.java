@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.time.dto.response.TimeResponseDto;
+import roomescape.domain.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.domain.time.service.TimeService;
 
 @RestController
@@ -24,8 +24,8 @@ public class TimeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<TimeResponseDto>> getAvailableTimes(@RequestParam LocalDate date,
+    public ResponseEntity<List<TimeAvailabilityResponseDto>> getAvailableTimes(@RequestParam LocalDate date,
         @RequestParam @Positive(message = "themeId의 값은 양수여야 합니다.") Long themeId) {
-        return ResponseEntity.ok(timeService.getAvailableTimes(date, themeId));
+        return ResponseEntity.ok(timeService.getTimeAvailabilities(date, themeId));
     }
 }

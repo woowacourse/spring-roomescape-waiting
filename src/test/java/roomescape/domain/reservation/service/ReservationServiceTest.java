@@ -21,8 +21,8 @@ import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
 import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.repository.JdbcReservationRepository;
@@ -957,7 +957,7 @@ class ReservationServiceTest {
                 // when & then
                 assertThatThrownBy(() -> reservationService.cancelReservation(savedReservation.getId(), "제이슨"))
                     .isInstanceOf(GeneralException.class)
-                    .hasMessage("이미 취소된 예약입니다.");
+                    .hasMessage("활성된 예약이 아닙니다.");
             }
 
             @Test

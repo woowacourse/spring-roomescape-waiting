@@ -20,6 +20,7 @@ import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.JdbcThemeRepository;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.dto.request.TimeCreateRequestDto;
+import roomescape.domain.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.domain.time.dto.response.TimeResponseDto;
 import roomescape.domain.time.entity.Time;
 import roomescape.domain.time.mapper.TimeMapper;
@@ -200,12 +201,14 @@ class TimeServiceTest {
 
                 LocalDate date = LocalDate.of(2026, 5, 10);
                 Long themeId = 1L;
-                List<TimeResponseDto> expected = List.of(TimeMapper.toResponseDto(time2),
-                    TimeMapper.toResponseDto(time3),
-                    TimeMapper.toResponseDto(time4));
+                List<TimeAvailabilityResponseDto> expected = List.of(
+                    TimeMapper.toAvailabilityResponseDto(time1, false),
+                    TimeMapper.toAvailabilityResponseDto(time2, true),
+                    TimeMapper.toAvailabilityResponseDto(time3, true),
+                    TimeMapper.toAvailabilityResponseDto(time4, true));
 
                 // when
-                List<TimeResponseDto> actual = timeService.getAvailableTimes(date, themeId);
+                List<TimeAvailabilityResponseDto> actual = timeService.getTimeAvailabilities(date, themeId);
 
                 // then
                 assertThat(actual).isEqualTo(expected);
@@ -222,7 +225,7 @@ class TimeServiceTest {
                 Long themeId = 999L;
 
                 // when & then
-                assertThatThrownBy(() -> timeService.getAvailableTimes(date, themeId))
+                assertThatThrownBy(() -> timeService.getTimeAvailabilities(date, themeId))
                     .isInstanceOfSatisfying(GeneralNotFoundException.class, exception -> {
                         assertThat(exception).hasMessage("조회할 자원이 존재하지 않습니다.");
                         assertThat(exception.getParameterErrors())

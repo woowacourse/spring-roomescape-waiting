@@ -12,8 +12,8 @@ import roomescape.domain.reservation.dto.request.ReservationUpdateRequestDto;
 import roomescape.domain.reservation.dto.response.ReservationByNameResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCancelResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationCreateResponseDto;
-import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.dto.response.ReservationEditableStatus;
+import roomescape.domain.reservation.dto.response.ReservationResponseDto;
 import roomescape.domain.reservation.entity.Reservation;
 import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.reservation.error.type.ReservationErrorType;
@@ -51,7 +51,8 @@ public class ReservationService {
     public List<ReservationByNameResponseDto> getReservationsByName(String name) {
         List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
         return reservations.stream()
-            .map(reservation -> ReservationMapper.toByNameResponseDto(reservation, getStatus(reservation), getWaitingNumber(reservation)))
+            .map(reservation -> ReservationMapper.toByNameResponseDto(reservation, getStatus(reservation),
+                getWaitingNumber(reservation)))
             .toList();
     }
 
@@ -80,7 +81,8 @@ public class ReservationService {
             return null;
         }
 
-        return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(), reservation.getDate(), reservation.getTime(), reservation.getTheme());
+        return reservationRepository.countByIdLessThanEqualAndDateAndTimeAndTheme(reservation.getId(),
+            reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
     private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
@@ -145,8 +147,8 @@ public class ReservationService {
             throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
         }
 
-        if (reservation.getStatus() == ReservationStatus.CANCELED) {
-            throw new GeneralException(ReservationErrorType.ALREADY_CANCELED);
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
         }
 
         if (reservation.getDate().isBefore(LocalDate.now(clock))) {
@@ -241,8 +243,12 @@ public class ReservationService {
         Reservation reservation = createReservation(requestDto);
         Reservation waitingReservation = reservation.toWaiting();
 
-        if (reservationRepository.existsReservation(waitingReservation)) {
+        if (reservationRepository.existsReservationAndStatus(waitingReservation, ReservationStatus.WAITING)) {
             throw new GeneralException(ReservationErrorType.ALREADY_WAITING);
+        }
+
+        if (reservationRepository.existsReservationAndStatus(reservation, ReservationStatus.ACTIVE)) {
+            throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
 
         try {

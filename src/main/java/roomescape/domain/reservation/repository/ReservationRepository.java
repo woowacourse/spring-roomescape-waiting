@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import roomescape.domain.reservation.entity.Reservation;
+import roomescape.domain.reservation.entity.ReservationStatus;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.time.entity.Time;
 
@@ -29,7 +30,7 @@ public interface ReservationRepository {
 
     boolean existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(LocalDate date, Time time, Theme theme);
 
-    boolean existsReservation(Reservation reservation);
+    boolean existsReservationAndStatus(Reservation reservation, ReservationStatus status);
 
     boolean existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(LocalDate date, Time time, Theme theme,
         Long id);

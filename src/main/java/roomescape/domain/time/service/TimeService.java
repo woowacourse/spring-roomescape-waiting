@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.reservation.repository.ReservationRepository;
 import roomescape.domain.theme.repository.ThemeRepository;
 import roomescape.domain.time.dto.request.TimeCreateRequestDto;
+import roomescape.domain.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.domain.time.dto.response.TimeResponseDto;
 import roomescape.domain.time.entity.Time;
 import roomescape.domain.time.error.type.TimeErrorType;
@@ -38,7 +39,7 @@ public class TimeService {
             .toList();
     }
 
-    public List<TimeResponseDto> getAvailableTimes(LocalDate date, Long themeId) {
+    public List<TimeAvailabilityResponseDto> getTimeAvailabilities(LocalDate date, Long themeId) {
         if (!themeRepository.existsThemeByIdAndDeletedAtIsNull(themeId)) {
             throw new GeneralNotFoundException(TimeErrorType.FIELD_RESOURCE_NOT_FOUND,
                 List.of(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다.")));
@@ -48,8 +49,7 @@ public class TimeService {
 
         return timeRepository.findAllByDeletedAtIsNull()
             .stream()
-            .filter(time -> !reservedTimeIds.contains(time.getId()))
-            .map(TimeMapper::toResponseDto)
+            .map(time -> TimeMapper.toAvailabilityResponseDto(time, !reservedTimeIds.contains(time.getId())))
             .toList();
     }
 

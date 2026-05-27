@@ -5,10 +5,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 
 import io.restassured.RestAssured;
+import io.restassured.common.mapper.TypeRef;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Objects;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.dto.request.ReservationCreateRequestDto;
 import roomescape.domain.theme.entity.Theme;
 import roomescape.domain.theme.repository.ThemeRepository;
+import roomescape.domain.time.dto.response.TimeAvailabilityResponseDto;
 import roomescape.domain.time.entity.Time;
 import roomescape.domain.time.repository.TimeRepository;
 
@@ -46,24 +49,23 @@ class ReservationAvailabilityFlowTest {
     }
 
     @Test
-    void 예약_가능_시간_조회_후_예약을_생성하면_같은_테마에서만_예약된_시간이_제외된다() {
+    void 예약_가능_시간_조회_후_예약을_생성하면_같은_테마에서만_예약된_시간의_available이_false가_된다() {
         // given
         LocalDate date = LocalDate.of(2099, 5, 1);
         Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
         Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
         Theme themeA = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-        Theme themeB = themeRepository.save(Theme.create("테마2", "설명2", "image2.png"));
 
         // when
-        List<Integer> beforeReservationTimeIds = given()
+        List<TimeAvailabilityResponseDto> beforeReservationTimes = given()
             .queryParam("date", date.toString())
             .queryParam("themeId", themeA.getId())
             .when().get("/api/times")
             .then()
             .statusCode(200)
             .extract()
-            .jsonPath()
-            .getList("id");
+            .as(new TypeRef<>() {
+            });
 
         given()
             .contentType(ContentType.JSON)
@@ -76,31 +78,28 @@ class ReservationAvailabilityFlowTest {
             .body("timeId", equalTo(time1.getId().intValue()))
             .body("themeId", equalTo(themeA.getId().intValue()));
 
-        List<Integer> sameThemeTimeIds = given()
+        List<TimeAvailabilityResponseDto> afterReservationTimes = given()
             .queryParam("date", date.toString())
             .queryParam("themeId", themeA.getId())
             .when().get("/api/times")
             .then()
             .statusCode(200)
             .extract()
-            .jsonPath()
-            .getList("id");
-
-        List<Integer> otherThemeTimeIds = given()
-            .queryParam("date", date.toString())
-            .queryParam("themeId", themeB.getId())
-            .when().get("/api/times")
-            .then()
-            .statusCode(200)
-            .extract()
-            .jsonPath()
-            .getList("id");
+            .as(new TypeRef<>() {
+            });
 
         // then
-        assertThat(beforeReservationTimeIds).containsExactly(time1.getId().intValue(), time2.getId().intValue());
+        boolean beforeAllAvailable = beforeReservationTimes.stream().allMatch(TimeAvailabilityResponseDto::available);
+        assertThat(beforeAllAvailable).isTrue();
 
-        assertThat(sameThemeTimeIds).containsExactly(time2.getId().intValue());
+        boolean afterNotAvailable = afterReservationTimes.stream()
+            .filter(time -> Objects.equals(time.id(), time1.getId()))
+            .noneMatch(TimeAvailabilityResponseDto::available);
 
-        assertThat(otherThemeTimeIds).containsExactly(time1.getId().intValue(), time2.getId().intValue());
+        boolean afterTimeContains = afterReservationTimes.stream()
+            .anyMatch(time -> Objects.equals(time.id(), time1.getId()));
+
+        assertThat(afterNotAvailable).isTrue();
+        assertThat(afterTimeContains).isTrue();
     }
 }
