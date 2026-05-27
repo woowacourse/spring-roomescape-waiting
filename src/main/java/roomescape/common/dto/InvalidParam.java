@@ -1,7 +1,8 @@
 package roomescape.common.dto;
 
 public record InvalidParam(
-        String name,
-        String reason
+    String name,
+    String reason
 ) {
+
 }

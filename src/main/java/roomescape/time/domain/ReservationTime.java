@@ -1,13 +1,14 @@
 package roomescape.time.domain;
 
+import static roomescape.time.exception.ReservationTimeErrorInformation.ID_IS_NULL;
+import static roomescape.time.exception.ReservationTimeErrorInformation.INACTIVE_TIME_NOT_ALLOWED;
+import static roomescape.time.exception.ReservationTimeErrorInformation.START_AT_IS_NULL;
+
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.time.exception.ReservationTimeException;
-
-import java.time.LocalTime;
-
-import static roomescape.time.exception.ReservationTimeErrorInformation.*;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)

@@ -1,16 +1,15 @@
 package roomescape.common.dto;
 
+import java.util.List;
 import org.springframework.http.HttpStatus;
 import roomescape.common.exception.ErrorInformation;
 
-import java.util.List;
-
 public record ErrorDetail(
-        int status,
-        HttpStatus error,
-        String errorCode,
-        String message,
-        List<InvalidParam> invalidParams
+    int status,
+    HttpStatus error,
+    String errorCode,
+    String message,
+    List<InvalidParam> invalidParams
 ) {
 
     public static ErrorDetail of(HttpStatus error, String errorCode, String message) {
@@ -19,12 +18,15 @@ public record ErrorDetail(
 
     public static ErrorDetail of(ErrorInformation errorInformation) {
         HttpStatus httpStatus = errorInformation.getHttpStatus();
-        return new ErrorDetail(httpStatus.value(), httpStatus, errorInformation.getErrorCode(), errorInformation.getMessage(), null);
+        return new ErrorDetail(httpStatus.value(), httpStatus, errorInformation.getErrorCode(),
+            errorInformation.getMessage(), null);
     }
 
-    public static ErrorDetail of(ErrorInformation errorInformation, List<InvalidParam> invalidParams) {
+    public static ErrorDetail of(ErrorInformation errorInformation,
+        List<InvalidParam> invalidParams) {
         HttpStatus httpStatus = errorInformation.getHttpStatus();
-        return new ErrorDetail(httpStatus.value(), httpStatus, errorInformation.getErrorCode(), errorInformation.getMessage(), invalidParams);
+        return new ErrorDetail(httpStatus.value(), httpStatus, errorInformation.getErrorCode(),
+            errorInformation.getMessage(), invalidParams);
     }
 
 }

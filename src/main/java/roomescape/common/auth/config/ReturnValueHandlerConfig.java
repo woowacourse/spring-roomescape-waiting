@@ -1,14 +1,13 @@
 package roomescape.common.auth.config;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodReturnValueHandler;
 import org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter;
 import roomescape.common.handler.TokenReturnValueHandler;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
 
 @Configuration
 public class ReturnValueHandlerConfig implements InitializingBean {
@@ -23,7 +22,8 @@ public class ReturnValueHandlerConfig implements InitializingBean {
     public void afterPropertiesSet() {
         List<HandlerMethodReturnValueHandler> handlers = new ArrayList<>();
         handlers.add(new TokenReturnValueHandler());
-        handlers.addAll(Objects.requireNonNull(requestMappingHandlerAdapter.getReturnValueHandlers()));
+        handlers.addAll(
+            Objects.requireNonNull(requestMappingHandlerAdapter.getReturnValueHandlers()));
         requestMappingHandlerAdapter.setReturnValueHandlers(handlers);
     }
 

@@ -1,16 +1,17 @@
 package roomescape.date.service;
 
+import static roomescape.date.exception.ReservationDateErrorInformation.DATE_ALREADY_EXISTS;
+import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
+import static roomescape.date.exception.ReservationDateErrorInformation.DATE_STATUS_UPDATE_FAILED;
+
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static roomescape.date.exception.ReservationDateErrorInformation.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -54,7 +55,7 @@ public class ReservationDateService {
 
     private ReservationDate getReservationDate(Long id) {
         return reservationDateRepository.findById(id)
-                .orElseThrow(() -> new ReservationDateException(DATE_NOT_FOUND));
+            .orElseThrow(() -> new ReservationDateException(DATE_NOT_FOUND));
     }
 
     private void validateDuplicateDateExist(LocalDate date) {

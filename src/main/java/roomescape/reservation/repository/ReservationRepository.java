@@ -1,10 +1,9 @@
 package roomescape.reservation.repository;
 
-import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
-
 import java.util.List;
 import java.util.Optional;
+import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 
 public interface ReservationRepository {
 

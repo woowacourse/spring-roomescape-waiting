@@ -1,13 +1,12 @@
 package roomescape.common.auth.config;
 
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import roomescape.common.auth.resolver.LoginMemberArgumentResolver;
 import roomescape.member.repository.MemberRepository;
-
-import java.util.List;
 
 @Configuration
 @RequiredArgsConstructor

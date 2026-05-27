@@ -1,11 +1,15 @@
 package roomescape.theme.domain;
 
+import static roomescape.theme.exception.ThemeErrorInformation.DESCRIPTION_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.ID_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.INACTIVE_THEME_NOT_ALLOWED;
+import static roomescape.theme.exception.ThemeErrorInformation.NAME_IS_NULL;
+import static roomescape.theme.exception.ThemeErrorInformation.THUMBNAIL_URL_IS_NULL;
+
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import roomescape.theme.exception.ThemeException;
-
-import static roomescape.theme.exception.ThemeErrorInformation.*;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -24,7 +28,8 @@ public class Theme {
         return new Theme(null, name, description, resolveThumbnailUrl(thumbnailUrl), true);
     }
 
-    public static Theme load(Long id, String name, String description, String thumbnailUrl, boolean isActive) {
+    public static Theme load(Long id, String name, String description, String thumbnailUrl,
+        boolean isActive) {
         validateId(id);
         validate(name, description, thumbnailUrl);
         return new Theme(id, name, description, resolveThumbnailUrl(thumbnailUrl), isActive);

@@ -1,5 +1,8 @@
 package roomescape.time.repository;
 
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -9,26 +12,22 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import roomescape.time.domain.ReservationTime;
 
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
-
 @Repository
 public class JdbcReservationTimeRepository implements ReservationTimeRepository {
 
     private final NamedParameterJdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
     private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) -> ReservationTime.load(
-            resultSet.getLong("id"),
-            resultSet.getTime("start_at").toLocalTime(),
-            resultSet.getBoolean("is_active")
+        resultSet.getLong("id"),
+        resultSet.getTime("start_at").toLocalTime(),
+        resultSet.getBoolean("is_active")
     );
 
     public JdbcReservationTimeRepository(NamedParameterJdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate.getJdbcTemplate())
-                .withTableName("reservation_time")
-                .usingGeneratedKeyColumns("id");
+            .withTableName("reservation_time")
+            .usingGeneratedKeyColumns("id");
     }
 
     @Override
@@ -45,7 +44,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
         try {
             return Optional.ofNullable(
-                    jdbcTemplate.queryForObject(sql, params, reservationTimeRowMapper));
+                jdbcTemplate.queryForObject(sql, params, reservationTimeRowMapper));
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
@@ -54,23 +53,24 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public ReservationTime save(ReservationTime reservationTime) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("start_at", reservationTime.getStartAt())
-                .addValue("is_active", reservationTime.isActive());
+            .addValue("start_at", reservationTime.getStartAt())
+            .addValue("is_active", reservationTime.isActive());
         Long savedId = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return ReservationTime.load(savedId, reservationTime.getStartAt(), reservationTime.isActive());
+        return ReservationTime.load(savedId, reservationTime.getStartAt(),
+            reservationTime.isActive());
     }
 
     @Override
     public boolean updateStatus(ReservationTime reservationTime) {
         String sql = """
-                UPDATE reservation_time 
-                SET is_active = :is_active
-                WHERE id = :id
-                """;
+            UPDATE reservation_time 
+            SET is_active = :is_active
+            WHERE id = :id
+            """;
 
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("id", reservationTime.getId())
-                .addValue("is_active", reservationTime.isActive());
+            .addValue("id", reservationTime.getId())
+            .addValue("is_active", reservationTime.isActive());
 
         int updateCount = jdbcTemplate.update(sql, params);
         return updateCount > 0;
@@ -87,14 +87,14 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservationTime> findAvailableByDateIdAndThemeId(Long dateId, Long themeId) {
         String sql = """
-                SELECT rt.*
-                FROM reservation_time rt
-                WHERE rt.is_active = true
-                """;
+            SELECT rt.*
+            FROM reservation_time rt
+            WHERE rt.is_active = true
+            """;
 
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("date_id", dateId)
-                .addValue("theme_id", themeId);
+            .addValue("date_id", dateId)
+            .addValue("theme_id", themeId);
 
         return jdbcTemplate.query(sql, params, reservationTimeRowMapper);
     }

@@ -3,12 +3,11 @@ package roomescape.common.auth.jwt;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
+import java.security.Key;
+import java.util.Date;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import roomescape.member.domain.Role;
-
-import java.security.Key;
-import java.util.Date;
 
 @Component
 public class JwtProvider {
@@ -24,13 +23,13 @@ public class JwtProvider {
 
     public String generateToken(Long id, String name, Role role) {
         return Jwts.builder()
-                .claim("id", String.valueOf(id))
-                .claim("name", name)
-                .claim("role", role.name())
-                .setSubject("Authorization")
-                .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
-                .signWith(key, SignatureAlgorithm.HS256)
-                .compact();
+            .claim("id", String.valueOf(id))
+            .claim("name", name)
+            .claim("role", role.name())
+            .setSubject("Authorization")
+            .setExpiration(new Date(System.currentTimeMillis() + tokenExpiration))
+            .signWith(key, SignatureAlgorithm.HS256)
+            .compact();
     }
 
 }

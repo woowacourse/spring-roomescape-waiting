@@ -1,10 +1,9 @@
 package roomescape.common.validation.validator;
 
+import java.util.List;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;
 import roomescape.common.validation.exception.RequestValidationException;
-
-import java.util.List;
 
 public class SpringCustomValidator implements Validator {
 

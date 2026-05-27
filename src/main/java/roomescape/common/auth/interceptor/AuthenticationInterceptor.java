@@ -1,5 +1,7 @@
 package roomescape.common.auth.interceptor;
 
+import static roomescape.common.auth.exception.AuthExceptionInformation.UN_AUTHORIZED;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -10,8 +12,6 @@ import roomescape.common.auth.annotation.AuthGuard;
 import roomescape.common.auth.exception.AuthException;
 import roomescape.common.auth.jwt.JwtValidator;
 
-import static roomescape.common.auth.exception.AuthExceptionInformation.UN_AUTHORIZED;
-
 @Component
 @RequiredArgsConstructor
 public class AuthenticationInterceptor implements HandlerInterceptor {
@@ -19,7 +19,8 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
     private final JwtValidator jwtValidator;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+        Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }

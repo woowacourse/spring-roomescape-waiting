@@ -1,80 +1,87 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>ENIGMA ROOMS - 관리자 로그인</title>
-    <link rel="stylesheet" th:href="@{/css/admin.css}">
-    <style>
-        .login-container {
-            max-width: 400px;
-            margin: 100px auto;
-            padding: 40px;
-            background: #1a1a1a;
-            border: 1px solid #333;
-            border-radius: 8px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        }
-        .login-container h2 {
-            margin-bottom: 24px;
-            text-align: center;
-            color: #d2b44c;
-        }
-        .form-group {
-            margin-bottom: 16px;
-        }
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            color: #b5b5b5;
-        }
-        .form-group input {
-            width: 100%;
-            padding: 12px;
-            background: #2a2a2a;
-            border: 1px solid #444;
-            color: white;
-            border-radius: 4px;
-        }
-        .button-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            margin-top: 24px;
-        }
-        .back-link {
-            text-align: center;
-            margin-top: 16px;
-        }
-        .back-link a {
-            color: #888;
-            text-decoration: none;
-            font-size: 0.9em;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>ENIGMA ROOMS - 관리자 로그인</title>
+  <link rel="stylesheet" th:href="@{/css/admin.css}">
+  <style>
+    .login-container {
+      max-width: 400px;
+      margin: 100px auto;
+      padding: 40px;
+      background: #1a1a1a;
+      border: 1px solid #333;
+      border-radius: 8px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    }
+
+    .login-container h2 {
+      margin-bottom: 24px;
+      text-align: center;
+      color: #d2b44c;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 8px;
+      color: #b5b5b5;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 12px;
+      background: #2a2a2a;
+      border: 1px solid #444;
+      color: white;
+      border-radius: 4px;
+    }
+
+    .button-group {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-top: 24px;
+    }
+
+    .back-link {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .back-link a {
+      color: #888;
+      text-decoration: none;
+      font-size: 0.9em;
+    }
+  </style>
 </head>
 <body>
 <header class="header">
-    <a class="logo" href="/">ENIGMA ROOMS</a>
+  <a class="logo" href="/">ENIGMA ROOMS</a>
 </header>
 
 <main class="container">
-    <div class="login-container">
-        <h2>관리자 로그인</h2>
-        <div class="form-group">
-            <label for="name">관리자 이름</label>
-            <input type="text" id="name" placeholder="관리자 이름을 입력하세요">
-        </div>
-        <div class="form-group">
-            <label for="password">비밀번호</label>
-            <input type="password" id="password" placeholder="비밀번호를 입력하세요">
-        </div>
-        <div class="button-group">
-            <button id="login-button" class="primary-button full" onclick="login()">로그인</button>
-        </div>
-        <div class="back-link">
-            <a href="/">일반 사용자 페이지로 돌아가기</a>
-        </div>
+  <div class="login-container">
+    <h2>관리자 로그인</h2>
+    <div class="form-group">
+      <label for="name">관리자 이름</label>
+      <input type="text" id="name" placeholder="관리자 이름을 입력하세요">
     </div>
+    <div class="form-group">
+      <label for="password">비밀번호</label>
+      <input type="password" id="password" placeholder="비밀번호를 입력하세요">
+    </div>
+    <div class="button-group">
+      <button id="login-button" class="primary-button full" onclick="login()">로그인</button>
+    </div>
+    <div class="back-link">
+      <a href="/">일반 사용자 페이지로 돌아가기</a>
+    </div>
+  </div>
 </main>
 
 <script th:src="@{/js/admin-login.js}"></script>

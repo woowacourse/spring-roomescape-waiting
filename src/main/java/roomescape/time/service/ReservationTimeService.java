@@ -1,5 +1,11 @@
 package roomescape.time.service;
 
+import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_ALREADY_EXISTS;
+import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
+import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_STATUS_UPDATE_FAILED;
+
+import java.time.LocalTime;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,11 +13,6 @@ import roomescape.time.controller.dto.request.ReservationTimeSaveDto;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.ReservationTimeException;
 import roomescape.time.repository.ReservationTimeRepository;
-
-import java.time.LocalTime;
-import java.util.List;
-
-import static roomescape.time.exception.ReservationTimeErrorInformation.*;
 
 @Service
 @Transactional(readOnly = true)
@@ -51,7 +52,7 @@ public class ReservationTimeService {
 
     private ReservationTime getReservationTime(Long id) {
         return reservationTimeRepository.findById(id)
-                .orElseThrow(() -> new ReservationTimeException(TIME_NOT_FOUND));
+            .orElseThrow(() -> new ReservationTimeException(TIME_NOT_FOUND));
     }
 
     private void validateDuplicateTimeExist(LocalTime startAt) {

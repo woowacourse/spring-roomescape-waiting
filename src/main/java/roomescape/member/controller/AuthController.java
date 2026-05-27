@@ -21,7 +21,7 @@ public class AuthController {
     public ResponseEntity<TokenDto> login(@RequestBody LoginDto dto) {
         String token = authService.login(dto.toCommand());
         return ResponseEntity.ok()
-                .body(TokenDto.from(token));
+            .body(TokenDto.from(token));
     }
 
 }

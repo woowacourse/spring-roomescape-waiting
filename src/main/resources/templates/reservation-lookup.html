@@ -1,55 +1,58 @@
 <!DOCTYPE html>
 <html lang="ko" xmlns:th="http://www.thymeleaf.org">
 <head>
-    <meta charset="UTF-8">
-    <title>ENIGMA ROOMS - 예약 조회</title>
-    <link rel="stylesheet" th:href="@{/css/user.css}">
+  <meta charset="UTF-8">
+  <title>ENIGMA ROOMS - 예약 조회</title>
+  <link rel="stylesheet" th:href="@{/css/user.css}">
 </head>
 <body>
 <header class="header">
-    <a class="logo" href="/">ENIGMA ROOMS</a>
+  <a class="logo" href="/">ENIGMA ROOMS</a>
 
-    <nav class="nav">
-        <a href="/reservation">예약하기</a>
-        <a href="/reservation-lookup">예약 조회</a>
-        <button class="logout-button" type="button" onclick="logout()">로그아웃</button>
-    </nav>
+  <nav class="nav">
+    <a href="/reservation">예약하기</a>
+    <a href="/reservation-lookup">예약 조회</a>
+    <button class="logout-button" type="button" onclick="logout()">로그아웃</button>
+  </nav>
 </header>
 
 <main class="container lookup-container">
-    <section class="lookup-hero">
-        <h1>예약 조회</h1>
-        <p>회원님의 예약 내역을 확인하세요.</p>
-    </section>
+  <section class="lookup-hero">
+    <h1>예약 조회</h1>
+    <p>회원님의 예약 내역을 확인하세요.</p>
+  </section>
 
-    <section id="lookup-result-section" class="lookup-result-section">
-        <div id="reservation-result-list" class="reservation-result-list"></div>
-    </section>
+  <section id="lookup-result-section" class="lookup-result-section">
+    <div id="reservation-result-list" class="reservation-result-list"></div>
+  </section>
 
-    <!-- 예약 변경 모달 -->
-    <div id="reschedule-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>예약 변경</h2>
-                <button type="button" class="close-button" onclick="closeRescheduleModal()">&times;</button>
-            </div>
-            <div class="modal-body">
-                <section class="step-section">
-                    <h2 style="font-size: 18px;"><span>01.</span> 날짜 선택</h2>
-                    <div id="reschedule-date-list" class="date-list"></div>
-                </section>
+  <!-- 예약 변경 모달 -->
+  <div id="reschedule-modal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2>예약 변경</h2>
+        <button type="button" class="close-button" onclick="closeRescheduleModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <section class="step-section">
+          <h2 style="font-size: 18px;"><span>01.</span> 날짜 선택</h2>
+          <div id="reschedule-date-list" class="date-list"></div>
+        </section>
 
-                <section class="form-group" style="margin-top: 32px;">
-                    <h2 style="font-size: 18px;"><span style="color: #d2b44c; margin-right: 8px;">02.</span> 시간 선택</h2>
-                    <div id="reschedule-time-list" class="time-list"></div>
-                </section>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="secondary-button" onclick="closeRescheduleModal()">취소</button>
-                <button type="button" class="primary-button" style="height: 42px; padding: 0 24px;" onclick="submitReschedule()">변경 확정</button>
-            </div>
-        </div>
+        <section class="form-group" style="margin-top: 32px;">
+          <h2 style="font-size: 18px;"><span style="color: #d2b44c; margin-right: 8px;">02.</span>
+            시간 선택</h2>
+          <div id="reschedule-time-list" class="time-list"></div>
+        </section>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="secondary-button" onclick="closeRescheduleModal()">취소</button>
+        <button type="button" class="primary-button" style="height: 42px; padding: 0 24px;"
+                onclick="submitReschedule()">변경 확정
+        </button>
+      </div>
     </div>
+  </div>
 </main>
 
 <script th:src="@{/js/reservation-lookup.js}"></script>

@@ -3,7 +3,7 @@ package roomescape.common.exception;
 import lombok.Getter;
 
 @Getter
-public class RoomEscapeException extends RuntimeException{
+public class RoomEscapeException extends RuntimeException {
 
     private final ErrorInformation errorInformation;
 

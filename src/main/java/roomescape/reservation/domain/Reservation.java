@@ -1,5 +1,20 @@
 package roomescape.reservation.domain;
 
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_CANCELED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_PAST;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_WAITING;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_DATE_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ID_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NAME_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_OWNER;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_PAST_DATETIME_NOT_ALLOWED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_THEME_IS_NULL;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_TIME_IS_NULL;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,12 +22,6 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-
-import static roomescape.reservation.exception.ReservationErrorInformation.*;
 
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,21 +35,25 @@ public class Reservation {
     private ReservationStatus status;
     private LocalDateTime reservedAt;
 
-    public static Reservation create(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
+    public static Reservation create(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme, LocalDateTime reservedAt) {
         return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, reservedAt);
     }
 
-    public static Reservation wait(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
+    public static Reservation wait(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme, LocalDateTime reservedAt) {
         return of(name, reservationDate, time, theme, ReservationStatus.WAITING, reservedAt);
     }
 
-    private static Reservation of(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+    private static Reservation of(String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
         validate(name, reservationDate, time, theme);
         validatePast(reservationDate.getDate(), time.getStartAt());
         return new Reservation(null, name, reservationDate, time, theme, status, reservedAt);
     }
 
-    public static Reservation load(Long id, String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
+    public static Reservation load(Long id, String name, ReservationDate reservationDate,
+        ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
         validate(name, reservationDate, time, theme);
         validateId(id);
         return new Reservation(id, name, reservationDate, time, theme, status, reservedAt);
@@ -54,7 +67,8 @@ public class Reservation {
         this.status = ReservationStatus.CANCELED;
     }
 
-    public void changeSchedule(String requesterName, ReservationDate newDate, ReservationTime newTime) {
+    public void changeSchedule(String requesterName, ReservationDate newDate,
+        ReservationTime newTime) {
         validateOwner(requesterName);
         validateNotCanceled();
         validateNotWaiting();
@@ -75,7 +89,8 @@ public class Reservation {
         this.time = newTime;
     }
 
-    private static void validate(String name, ReservationDate reservationDate, ReservationTime time, Theme theme) {
+    private static void validate(String name, ReservationDate reservationDate, ReservationTime time,
+        Theme theme) {
         validateName(name);
         validateDate(reservationDate);
         validateTime(time);

@@ -1,5 +1,10 @@
 package roomescape.theme.service;
 
+import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
+import static roomescape.theme.exception.ThemeErrorInformation.THEME_STATUS_UPDATE_FAILED;
+
+import java.time.LocalDate;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -7,12 +12,6 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.repository.projection.PopularThemeResult;
-
-import java.time.LocalDate;
-import java.util.List;
-
-import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
-import static roomescape.theme.exception.ThemeErrorInformation.THEME_STATUS_UPDATE_FAILED;
 
 @Service
 @Transactional(readOnly = true)
@@ -59,7 +58,7 @@ public class ThemeService {
 
     private Theme getTheme(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new ThemeException(THEME_NOT_FOUND));
+            .orElseThrow(() -> new ThemeException(THEME_NOT_FOUND));
     }
 
     private void validateIsUpdated(boolean isUpdated) {

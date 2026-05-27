@@ -1,10 +1,9 @@
 package roomescape.common.validation.validator;
 
-import roomescape.common.validation.annotation.NotBlank;
-
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import roomescape.common.validation.annotation.NotBlank;
 
 public class FieldBlankValidator {
 

@@ -1,6 +1,10 @@
 package roomescape.reservation.repository;
 
-import java.util.Map;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -14,12 +18,6 @@ import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -341,16 +339,16 @@ public class JdbcReservationRepository implements ReservationRepository {
         Long waitingTurn = rs.getObject("waiting_turn", Long.class);
 
         return new ReservationWithWaitingTurn(
-                rs.getLong("id"),
-                rs.getString("name"),
-                rs.getObject("date", LocalDate.class),
-                rs.getObject("start_at", LocalTime.class),
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("theme_thumbnail_url"),
-                ReservationStatus.valueOf(rs.getString("status")),
-                rs.getObject("reserved_at", LocalDateTime.class),
-                waitingTurn
+            rs.getLong("id"),
+            rs.getString("name"),
+            rs.getObject("date", LocalDate.class),
+            rs.getObject("start_at", LocalTime.class),
+            rs.getLong("theme_id"),
+            rs.getString("theme_name"),
+            rs.getString("theme_thumbnail_url"),
+            ReservationStatus.valueOf(rs.getString("status")),
+            rs.getObject("reserved_at", LocalDateTime.class),
+            waitingTurn
         );
     };
 

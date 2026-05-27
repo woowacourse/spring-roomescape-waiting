@@ -1,7 +1,10 @@
 package roomescape.common.auth.interceptor;
 
+import static roomescape.common.auth.exception.AuthExceptionInformation.FORBIDDEN;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import java.util.Arrays;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -12,10 +15,6 @@ import roomescape.common.auth.exception.AuthException;
 import roomescape.common.auth.jwt.JwtExtractor;
 import roomescape.member.domain.Role;
 
-import java.util.Arrays;
-
-import static roomescape.common.auth.exception.AuthExceptionInformation.FORBIDDEN;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -24,7 +23,8 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
     private final JwtExtractor jwtExtractor;
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
+    public boolean preHandle(HttpServletRequest request, HttpServletResponse response,
+        Object handler) throws Exception {
         if (!(handler instanceof HandlerMethod handlerMethod)) {
             return true;
         }
@@ -46,7 +46,7 @@ public class AuthorizationInterceptor implements HandlerInterceptor {
 
         Role requesterRole = Role.valueOf(jwtExtractor.getRole(token));
         boolean isAuthorized = Arrays.stream(permissionRoles)
-                .anyMatch(role -> role == requesterRole);
+            .anyMatch(role -> role == requesterRole);
         if (!isAuthorized) {
             throw new AuthException(FORBIDDEN);
         }

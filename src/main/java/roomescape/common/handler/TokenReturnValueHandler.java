@@ -21,7 +21,8 @@ public class TokenReturnValueHandler implements HandlerMethodReturnValueHandler 
     }
 
     @Override
-    public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType, ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
+    public void handleReturnValue(@Nullable Object returnValue, MethodParameter returnType,
+        ModelAndViewContainer mavContainer, NativeWebRequest webRequest) throws Exception {
         mavContainer.setRequestHandled(true);
 
         HttpServletResponse response = webRequest.getNativeResponse(HttpServletResponse.class);
@@ -44,7 +45,8 @@ public class TokenReturnValueHandler implements HandlerMethodReturnValueHandler 
         sendToken(tokenDto, request, response);
     }
 
-    private void sendToken(TokenDto tokenDto, HttpServletRequest request, HttpServletResponse response) {
+    private void sendToken(TokenDto tokenDto, HttpServletRequest request,
+        HttpServletResponse response) {
         if (isRoomEscapeApp(request)) {
             response.addHeader(HttpHeaders.SET_COOKIE, createTokenCookie(tokenDto).toString());
             return;
@@ -59,11 +61,11 @@ public class TokenReturnValueHandler implements HandlerMethodReturnValueHandler 
 
     private ResponseCookie createTokenCookie(TokenDto tokenDto) {
         return ResponseCookie.from("Authorization", tokenDto.token())
-                .httpOnly(true)
-                .path("/")
-                .sameSite("None")
-                .secure(false)
-                .build();
+            .httpOnly(true)
+            .path("/")
+            .sameSite("None")
+            .secure(false)
+            .build();
     }
 
 }

@@ -5,12 +5,11 @@ import io.jsonwebtoken.JwtParser;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Component;
-
 import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 @Component
 public class JwtExtractor {
@@ -26,16 +25,16 @@ public class JwtExtractor {
 
     public Optional<String> extractJwtToken(HttpServletRequest request) {
         return Optional.ofNullable(request.getHeader("Authorization"))
-                .filter(refreshToken -> refreshToken.startsWith("Bearer "))
-                .map(refreshToken -> refreshToken.replace("Bearer ", ""));
+            .filter(refreshToken -> refreshToken.startsWith("Bearer "))
+            .map(refreshToken -> refreshToken.replace("Bearer ", ""));
     }
 
-    public Long getId(String token){
+    public Long getId(String token) {
         String id = getClaimFromToken(token, "id");
         return Long.parseLong(id);
     }
 
-    public String getName(String token){
+    public String getName(String token) {
         return getClaimFromToken(token, "name");
     }
 
@@ -55,8 +54,8 @@ public class JwtExtractor {
 
     private Claims parseClaims(String token) {
         JwtParser parser = Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build();
+            .setSigningKey(key)
+            .build();
         Claims claims = parser.parseClaimsJws(token).getBody();
         return claims;
     }

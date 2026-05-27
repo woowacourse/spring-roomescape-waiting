@@ -1,5 +1,8 @@
 package roomescape.common.auth.resolver;
 
+import static roomescape.common.auth.exception.AuthExceptionInformation.UN_AUTHORIZED;
+import static roomescape.member.exception.MemberExceptionInformation.MEMBER_NOT_FOUND;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.core.MethodParameter;
 import org.springframework.lang.Nullable;
@@ -14,12 +17,9 @@ import roomescape.member.domain.Member;
 import roomescape.member.exception.MemberException;
 import roomescape.member.repository.MemberRepository;
 
-import static roomescape.common.auth.exception.AuthExceptionInformation.UN_AUTHORIZED;
-import static roomescape.member.exception.MemberExceptionInformation.MEMBER_NOT_FOUND;
-
 
 @Component
-public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver{
+public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
 
     private final MemberRepository memberRepository;
 
@@ -34,7 +34,9 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     @Nullable
     @Override
-    public Object resolveArgument(MethodParameter parameter, @Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest, @Nullable WebDataBinderFactory binderFactory) throws Exception {
+    public Object resolveArgument(MethodParameter parameter,
+        @Nullable ModelAndViewContainer mavContainer, NativeWebRequest webRequest,
+        @Nullable WebDataBinderFactory binderFactory) throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
         Long memberId = (Long) request.getAttribute("memberId");
         if (memberId == null) {
@@ -45,7 +47,7 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     private Member getMember(Long id) {
         return memberRepository.findById(id)
-                .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
+            .orElseThrow(() -> new MemberException(MEMBER_NOT_FOUND));
     }
 
 }

@@ -23,7 +23,7 @@ public class AuthService {
 
     private Member getMember(String name) {
         return memberRepository.findByName(name)
-                .orElseThrow(IllegalArgumentException::new);
+            .orElseThrow(IllegalArgumentException::new);
     }
 
 }
