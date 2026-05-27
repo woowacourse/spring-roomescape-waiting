@@ -104,6 +104,22 @@ class UserReservationServiceTest {
     }
 
     @Test
+    @DisplayName("중복 예약을 시도하면 ReservationConflictException이 발생한다")
+    void 중복_예약_시_예외가_발생한다() {
+        ReservationCreateCommand command = new ReservationCreateCommand(OWNER, FUTURE_DATE, 1L, 1L);
+        given(reservationTimeRepository.findById(1L)).willReturn(Optional.of(VALID_TIME));
+        given(reservationService.create(command)).willThrow(new ReservationConflictException("중복 예약"));
+
+        assertThrows(
+                ReservationConflictException.class,
+                () -> userReservationService.create(command)
+        );
+
+        verify(reservationTimeRepository, times(1)).findById(1L);
+        verify(reservationService, times(1)).create(command);
+    }
+
+    @Test
     @DisplayName("이름으로 예약 목록을 조회한다")
     void 이름으로_예약_목록을_조회한다() {
         ReservationWithWaitingOrder reservation = new ReservationWithWaitingOrder(
