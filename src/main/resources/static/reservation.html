@@ -205,30 +205,49 @@
             transition: border-color 0.15s, background 0.15s, transform 0.1s;
             user-select: none;
         }
-        .time-slot:hover:not(.booked) {
-            border-color: #f59e0b;
-            background: #1e293b;
+        .time-slot:hover {
             transform: translateY(-2px);
         }
-        .time-slot.selected {
-            border-color: #f59e0b;
-            background: linear-gradient(135deg, #f59e0b22, #fbbf2422);
-            color: #fbbf24;
-            box-shadow: 0 4px 14px #f59e0b33;
+        /* 예약 가능 (isAvailable = true) → 초록 계열 */
+        .time-slot.available:hover {
+            border-color: #22c55e;
+            background: #1e293b;
         }
-
-        .time-slot.booked {
-            opacity: 0.35;
-            cursor: not-allowed;
-            filter: grayscale(1);
-            position: relative;
+        .time-slot.available.selected {
+            border-color: #22c55e;
+            background: linear-gradient(135deg, #22c55e22, #16a34a22);
+            color: #4ade80;
+            box-shadow: 0 4px 14px #22c55e33;
         }
-        .time-slot.booked::after {
-            content: '예약됨';
+        .time-slot.available::after {
+            content: '예약 가능';
             display: block;
             font-size: 0.7rem;
-            color: #64748b;
-            font-weight: 400;
+            color: #4ade80;
+            font-weight: 600;
+            margin-top: 0.2rem;
+        }
+
+        /* 예약 대기 (isAvailable = false, 이미 예약됨) → 파랑 계열 */
+        .time-slot.waiting {
+            border-color: #3b82f655;
+        }
+        .time-slot.waiting:hover {
+            border-color: #3b82f6;
+            background: #1e293b;
+        }
+        .time-slot.waiting.selected {
+            border-color: #3b82f6;
+            background: linear-gradient(135deg, #3b82f622, #60a5fa22);
+            color: #60a5fa;
+            box-shadow: 0 4px 14px #3b82f633;
+        }
+        .time-slot.waiting::after {
+            content: '예약 대기';
+            display: block;
+            font-size: 0.7rem;
+            color: #60a5fa;
+            font-weight: 600;
             margin-top: 0.2rem;
         }
 
@@ -362,6 +381,7 @@
         date: null,
         timeId: null,
         timeName: null,
+        isWaiting: false,
     };
 
     /* ── 테마 로드 (sessionStorage) ── */
@@ -408,13 +428,10 @@
             }
 
             times.forEach(t => {
-                const booked = !t.isAvailable;
                 const slot = document.createElement('div');
-                slot.className = 'time-slot' + (booked ? ' booked' : '');
+                slot.className = 'time-slot ' + (t.isAvailable ? 'available' : 'waiting');
                 slot.textContent = t.startAt;
-                if (!booked) {
-                    slot.addEventListener('click', () => selectTime(slot, t));
-                }
+                slot.addEventListener('click', () => selectTime(slot, t));
                 grid.appendChild(slot);
             });
         } catch {
@@ -427,8 +444,12 @@
         el.classList.add('selected');
         state.timeId = t.id;
         state.timeName = t.startAt;
+        state.isWaiting = !t.isAvailable;
         setStep('time', 'done');
         setStep('name', 'active');
+
+        const btn = document.getElementById('submit-btn');
+        btn.textContent = state.isWaiting ? '예약 대기하기' : '예약하기';
         document.getElementById('name-input').focus();
     }
 
@@ -452,12 +473,16 @@
         const btn = document.getElementById('submit-btn');
         const errEl = document.getElementById('error-msg');
 
+        const waiting = state.isWaiting;
+        const endpoint = waiting ? '/waitings' : '/reservations';
+        const defaultLabel = waiting ? '예약 대기하기' : '예약하기';
+
         btn.disabled = true;
-        btn.textContent = '예약 중...';
+        btn.textContent = waiting ? '예약 대기 중...' : '예약 중...';
         errEl.style.display = 'none';
 
         try {
-            const res = await fetch('/reservations', {
+            const res = await fetch(endpoint, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -469,33 +494,38 @@
             });
 
             if (!res.ok) {
-                const msg = await readErrorMessage(res, '예약에 실패했습니다. 다시 시도해주세요.');
+                const msg = await readErrorMessage(res, '요청에 실패했습니다. 다시 시도해주세요.');
                 errEl.textContent = msg;
                 errEl.style.display = 'block';
                 btn.disabled = false;
-                btn.textContent = '예약하기';
+                btn.textContent = defaultLabel;
                 return;
             }
 
-            showSuccess(name);
+            showSuccess(name, waiting);
         } catch (e) {
             errEl.textContent = '네트워크 오류가 발생했습니다. 잠시 후 다시 시도해주세요.';
             errEl.style.display = 'block';
             btn.disabled = false;
-            btn.textContent = '예약하기';
+            btn.textContent = defaultLabel;
         }
     });
 
     /* ── 성공 화면 ── */
-    function showSuccess(name) {
+    function showSuccess(name, waiting) {
         const { theme, date, timeName } = state;
+        const icon = waiting ? '⏳' : '🎉';
+        const title = waiting ? '예약 대기가 등록되었습니다!' : '예약이 완료되었습니다!';
+        const detail = waiting
+            ? `${date} · ${timeName} 예약 대기 목록에 등록되었습니다.`
+            : `${date} · ${timeName} 예약이 확정되었습니다.`;
         document.getElementById('main').innerHTML = `
             <div class="success-box">
-                <div class="icon">🎉</div>
-                <h2>예약이 완료되었습니다!</h2>
+                <div class="icon">${icon}</div>
+                <h2>${title}</h2>
                 <p>
                     <strong>${name}</strong>님의 <strong>${theme.name}</strong><br>
-                    ${date} · ${timeName} 예약이 확정되었습니다.
+                    ${detail}
                 </p>
                 <a href="/" class="btn-home">메인으로 돌아가기</a>
             </div>

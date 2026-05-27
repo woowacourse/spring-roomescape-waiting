@@ -179,6 +179,25 @@
             font-weight: 700;
         }
 
+        /* ── 상태 배지 ── */
+        .res-status {
+            display: inline-block;
+            padding: 0.15rem 0.6rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: 700;
+        }
+        .res-status.reserved {
+            background: #14532d33;
+            border: 1px solid #22c55e55;
+            color: #4ade80;
+        }
+        .res-status.waiting {
+            background: #1e3a8a33;
+            border: 1px solid #3b82f655;
+            color: #60a5fa;
+        }
+
         .res-actions {
             display: flex;
             gap: 0.5rem;
@@ -429,7 +448,7 @@
             }
 
             const body = await res.json();
-            const reservations = body.reservations;
+            const reservations = body.userReservations;
             if (!reservations.length) {
                 container.innerHTML = '<p class="state-msg">예약 내역이 없습니다.</p>';
                 return;
@@ -442,6 +461,11 @@
     }
 
     function createCard(r) {
+        const isWaiting = r.status === 'WAITING';
+        const statusBadge = isWaiting
+            ? `<span class="res-status waiting">예약 대기 ${r.rank}번째</span>`
+            : `<span class="res-status reserved">예약 완료</span>`;
+
         const card = document.createElement('div');
         card.className = 'res-card';
         card.innerHTML = `
@@ -453,14 +477,17 @@
                     <span>${r.date}</span>
                     <span class="dot"></span>
                     <span>${r.time.startAt}</span>
+                    <span class="dot"></span>
+                    ${statusBadge}
                 </div>
             </div>
             <div class="res-actions">
-                <button class="btn-action edit">변경</button>
-                <button class="btn-action danger del">취소</button>
+                ${isWaiting ? '' : '<button class="btn-action edit">변경</button>'}
+                <button class="btn-action danger del">${isWaiting ? '대기 취소' : '취소'}</button>
             </div>
         `;
-        card.querySelector('.edit').addEventListener('click', () => openEditModal(r));
+        const editBtn = card.querySelector('.edit');
+        if (editBtn) editBtn.addEventListener('click', () => openEditModal(r));
         card.querySelector('.del').addEventListener('click', () => openCancelModal(r));
         return card;
     }
@@ -606,6 +633,8 @@
     document.getElementById('cancel-confirm').addEventListener('click', async () => {
         if (!cancelTarget) return;
         const r = cancelTarget;
+        const isWaiting = r.status === 'WAITING';
+        const resource = isWaiting ? 'waitings' : 'reservations';
         const btn = document.getElementById('cancel-confirm');
         const errEl = document.getElementById('cancel-error');
 
@@ -615,7 +644,7 @@
 
         try {
             const res = await fetch(
-                `/reservations/${r.id}?name=${encodeURIComponent(currentName)}`,
+                `/${resource}/${r.id}?name=${encodeURIComponent(currentName)}`,
                 { method: 'DELETE' }
             );
 
