@@ -33,10 +33,14 @@ CREATE TABLE reservation
     FOREIGN KEY (theme_id) REFERENCES theme (id)
 );
 
+CREATE UNIQUE INDEX unique_user_reservation
+    ON reservation (name, date, time_id, theme_id, is_deleted);
 CREATE UNIQUE INDEX unique_active_reservation
     ON reservation (date, time_id, theme_id, is_deleted, uniqueness_token);
+
 CREATE UNIQUE INDEX unique_theme_name
     ON theme (name, deleted_at);
+
 CREATE UNIQUE INDEX unique_time_start
     ON reservation_time (start_at, deleted_at);
 

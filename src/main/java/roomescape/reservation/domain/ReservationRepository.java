@@ -8,7 +8,6 @@ import roomescape.reservation.domain.dto.ReservationQueryResult;
 
 public interface ReservationRepository {
     Reservation save(Reservation reservation);
-    void updateById(Long id, Reservation changedReservation);
     Optional<Reservation> findById(Long id);
     Optional<Reservation> findNextPendingReservation(LocalDate date, Long timeId, Long themeId);
     List<Reservation> findAll();
@@ -21,7 +20,9 @@ public interface ReservationRepository {
     boolean existsActiveReservationByThemeAndTime(Long timeId, Long themeId, LocalDate date);
     boolean existsPendingReservationByName(Long timeId, Long themeId, LocalDate date, String name);
     int deleteById(Long id);
+    void updateDetails(Long id, Reservation changedReservation);
     void cancel(Reservation reservation);
+    void promoteToActive(Long id);
 
     default Reservation getById(final Long id) {
         return findById(id).orElseThrow(() -> new ReservationNotFoundException("해당 ID의 예약을 찾을 수 없습니다."));

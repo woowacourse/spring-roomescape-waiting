@@ -88,7 +88,7 @@ public class ReservationService {
                     reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
             nextPendingReservation.ifPresent(pending -> {
                 Reservation activeReservation = pending.active();
-                reservationRepository.updateById(activeReservation.getId(), activeReservation);
+                reservationRepository.promoteToActive(activeReservation.getId());
             });
         }
     }
@@ -102,7 +102,11 @@ public class ReservationService {
             throw new ReservationInUseException("이미 다른 예약이 존재합니다.");
         }
         Reservation changedReservation = reservation.changeTime(command.username(), command.date(), time, theme, clock);
-        reservationRepository.updateById(id, changedReservation);
+        try {
+            reservationRepository.updateDetails(id, changedReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("변경하려는 시간대에 방금 다른 예약이 확정되었습니다.");
+        }
         return ReservationInfo.from(changedReservation);
     }
 
@@ -114,8 +118,8 @@ public class ReservationService {
             throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
         }
         checkDuplicatePendingReservation(command.date(), command.username(), time, theme);
-        Reservation pendingReservation = reservation.pending(command.username(), command.date(), time, theme, clock);
-        reservationRepository.updateById(id, pendingReservation);
+        Reservation pendingReservation = reservation.pending(command.username(), clock);
+        reservationRepository.updateDetails(id, pendingReservation);
         return ReservationInfo.from(pendingReservation);
     }
 
@@ -128,7 +132,7 @@ public class ReservationService {
     private ReservationInfo savePendingReservation(ReservationCreateCommand command, ReservationTime time, Theme theme) {
         checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
         Reservation pendingReservation = command.toEntity(time, theme, clock)
-                .pending(command.name(), command.date(), time, theme, clock);
+                .pending(command.name(), clock);
         try {
             return ReservationInfo.from(reservationRepository.save(pendingReservation));
         } catch (DataIntegrityViolationException e) {

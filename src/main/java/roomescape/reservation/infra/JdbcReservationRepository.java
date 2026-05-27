@@ -97,7 +97,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public void updateById(final Long id, final Reservation reservation) {
+    public void updateDetails(final Long id, final Reservation reservation) {
         String sql = "UPDATE reservation "
                 + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status, uniqueness_token = :uniquenessToken "
                 + "WHERE id = :id AND is_deleted = 0";
@@ -110,6 +110,18 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("themeId", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
                 .addValue("uniquenessToken", uniquenessToken)
+                .addValue("id", id);
+
+        jdbcTemplate.update(sql, params);
+    }
+
+    @Override
+    public void promoteToActive(final Long id) {
+        String sql = "UPDATE reservation "
+                + "SET status = 'ACTIVE', uniqueness_token = 0 "
+                + "WHERE id = :id AND status = 'PENDING' AND is_deleted = 0";
+
+        SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("id", id);
 
         jdbcTemplate.update(sql, params);
