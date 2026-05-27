@@ -39,13 +39,6 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int countAllBy(LocalDate date, Long timeSlotId, Long themeId) {
-        return (int) storage.values().stream()
-                .filter(entry -> isTargetSchedule(entry, date, timeSlotId, themeId))
-                .count();
-    }
-
-    @Override
     public List<Waiting> findByName(String name) {
         return storage.values().stream()
                 .filter(entry -> entry.getName().equals(name))
