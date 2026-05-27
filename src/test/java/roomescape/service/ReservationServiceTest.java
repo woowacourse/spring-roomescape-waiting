@@ -66,6 +66,17 @@ class ReservationServiceTest {
                 .hasMessage(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION.getMessage());
     }
 
+    @DisplayName("이미 날짜가 지난 예약 대기는 취소할 수 없다.")
+    @Test
+    void 지나간_시간_예약_대기_취소_예외_테스트() {
+        LocalDateTime now = LocalDateTime.of(2026, 5, 27, 0, 0);
+        ReservationResponse waiting = reservationService.findAllByName("과거대기").get(0);
+
+        assertThatThrownBy(() -> reservationService.delete(now, waiting.reservationId(), "과거대기"))
+                .isInstanceOf(CustomException.class)
+                .hasMessage(ErrorCode.UNALLOWED_DELETE_PAST_RESERVATION.getMessage());
+    }
+
     @DisplayName("이미 예약된 슬롯에 다른 사용자가 예약하면 대기 순번을 가진 예약으로 등록된다.")
     @Test
     void 예약된_슬롯_대기_등록_테스트() {

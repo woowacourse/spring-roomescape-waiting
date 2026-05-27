@@ -75,3 +75,4 @@ INSERT INTO reservation (name, reservation_slot_id, status, updated_at) VALUES (
 INSERT INTO reservation (name, reservation_slot_id, status, updated_at) VALUES ('유지호', 20, 'RESERVED', '2026-05-27 10:19:00');
 INSERT INTO reservation (name, reservation_slot_id, status, updated_at) VALUES ('홍서연', 21, 'RESERVED', '2026-05-27 10:20:00');
 INSERT INTO reservation (name, reservation_slot_id, status, updated_at) VALUES ('백시우', 22, 'RESERVED', '2026-05-27 10:21:00');
+INSERT INTO reservation (name, reservation_slot_id, status, updated_at) VALUES ('과거대기', 1, 'RESERVED', '2026-05-27 10:22:00');
