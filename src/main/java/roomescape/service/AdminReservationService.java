@@ -69,11 +69,11 @@ public class AdminReservationService {
     }
 
     private void validateNoConflict(ReservationCreateCommand command) {
-        boolean conflict = reservationRepository.existsByDateAndTimeIdAndThemeId(
-                command.date(), command.timeId(), command.themeId());
+        boolean conflict = reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                command.name(), command.date(), command.timeId(), command.themeId());
         if (conflict) {
             throw new ReservationConflictException(
-                    "이미 예약된 시간입니다: %s, timeId=%d, themeId=%d"
+                    "이미 본인이 예약 또는 대기중인 시간입니다: %s, timeId=%d, themeId=%d"
                             .formatted(command.date(), command.timeId(), command.themeId())
             );
         }
