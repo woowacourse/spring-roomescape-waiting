@@ -7,17 +7,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
+import roomescape.test_config.fixture.SQLFixtureGenerator;
 import roomescape.theme.domain.Theme;
 
-import java.sql.Date;
-import java.sql.PreparedStatement;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -29,7 +24,7 @@ import java.util.Optional;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @JdbcTest
-@Import(JdbcReservationTimeRepository.class)
+@Import({JdbcReservationTimeRepository.class, SQLFixtureGenerator.class})
 class JdbcReservationTimeRepositoryTest {
 
     @Autowired
@@ -37,6 +32,9 @@ class JdbcReservationTimeRepositoryTest {
 
     @Autowired
     private JdbcTemplate jdbcTemplate;
+
+    @Autowired
+    private SQLFixtureGenerator sqlFixtureGenerator;
 
 
 
@@ -59,7 +57,7 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("삭제된 예약 시간은 id로 조회되지 않는다.")
     public void findById_softDelete() {
         // given
-        ReservationTime reservationTime = insertDeletedReservationTime(LocalTime.of(10, 0));
+        ReservationTime reservationTime = sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
 
         // when
         Optional<ReservationTime> found = reservationTimeRepository.findById(reservationTime.getId());
@@ -71,7 +69,7 @@ class JdbcReservationTimeRepositoryTest {
     @Test
     @DisplayName("모든 예약 시간 목록을 조회한다")
     void findAll() {
-        insertReservationTime(LocalTime.of(10, 0));
+        sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
 
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
 
@@ -83,8 +81,8 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("예약 시간 목록은 삭제되지 않은 예약 시간만 조회한다.")
     public void findAll_softDelete() {
         // given
-        insertDeletedReservationTime(LocalTime.of(10, 0));
-        ReservationTime activeTime = insertReservationTime(LocalTime.of(12, 0));
+        sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
+        ReservationTime activeTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
 
         // when
         List<ReservationTime> reservationTimes = reservationTimeRepository.findAll();
@@ -97,7 +95,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     void 예약_시간_존재_여부를_조회한다() {
-        insertReservationTime(LocalTime.of(10, 0));
+        sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
 
         boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
 
@@ -108,7 +106,7 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("삭제된 예약 시간은 존재하지 않는 것으로 조회한다.")
     public void existsByStartAt_softDelete() {
         // given
-        insertDeletedReservationTime(LocalTime.of(10, 0));
+        sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
 
         // when
         boolean exists = reservationTimeRepository.existsByStartAt(LocalTime.of(10, 0));
@@ -121,7 +119,7 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("예약 시간을 삭제한다.")
     void delete_success() {
         // given
-        ReservationTime reservationTime = insertReservationTime(LocalTime.of(10, 0));
+        ReservationTime reservationTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         LocalDateTime now = LocalDateTime.of(2026, 5, 15, 10, 0);
 
         // when
@@ -153,15 +151,15 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("이용 가능한 시간을 조회한다.")
     public void findAllByDateAndThemeIdWithAvailability() {
         // given
-        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = insertReservationTime(LocalTime.of(12, 0));
-        Theme targetTheme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Theme nonTargetTheme = insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        ReservationTime time2 = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
+        Theme targetTheme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        Theme nonTargetTheme = sqlFixtureGenerator.insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
 
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
-        insertReservation("브라운", targetDate, time, targetTheme);
-        insertReservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme);
-        insertReservation("브라운", targetDate, time, nonTargetTheme);
+        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, targetTheme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, nonTargetTheme, Status.WAITING);
 
         // when
         List<ReservationTimeAvailability> availableTimes = reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(targetDate, targetTheme.getId());
@@ -177,10 +175,10 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("삭제된 예약은 이용 가능한 시간 조회에서 제외한다.")
     public void findAllByDateAndThemeIdWithAvailability_softDelete() {
         // given
-        ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate date = LocalDate.of(2023, 8, 5);
-        insertDeletedReservation("브라운", date, time, theme);
+        sqlFixtureGenerator.insertDeletedReservation("브라운", date, time, theme);
 
         // when
         List<ReservationTimeAvailability> availableTimes =
@@ -197,9 +195,9 @@ class JdbcReservationTimeRepositoryTest {
     @DisplayName("삭제된 예약 시간은 이용 가능한 시간 조회에서 제외한다.")
     public void findAllByDateAndThemeIdWithAvailability_deletedReservationTime() {
         // given
-        insertDeletedReservationTime(LocalTime.of(10, 0));
-        ReservationTime activeTime = insertReservationTime(LocalTime.of(12, 0));
-        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
+        ReservationTime activeTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
+        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate date = LocalDate.of(2023, 8, 5);
 
         // when
@@ -213,93 +211,11 @@ class JdbcReservationTimeRepositoryTest {
                 .containsExactly(Tuple.tuple(activeTime, true));
     }
 
-    private ReservationTime insertReservationTime(LocalTime startAt) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at)
-                    VALUES (?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            return preparedStatement;
-        }, keyHolder);
-
-        return ReservationTime.of(getGeneratedId(keyHolder), startAt);
-    }
-
-    private ReservationTime insertDeletedReservationTime(LocalTime startAt) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation_time (start_at, deleted_at)
-                    VALUES (?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, startAt.toString());
-            preparedStatement.setTimestamp(2, Timestamp.valueOf(LocalDateTime.now()));
-            return preparedStatement;
-        }, keyHolder);
-
-        return ReservationTime.of(getGeneratedId(keyHolder), startAt);
-    }
-
-    private Theme insertTheme(String name, String description, String thumbnail) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
-
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO theme (name, description, thumbnail)
-                    VALUES (?, ?, ?)
-                    """, new String[]{"id"});
-            preparedStatement.setString(1, name);
-            preparedStatement.setString(2, description);
-            preparedStatement.setString(3, thumbnail);
-            return preparedStatement;
-        }, keyHolder);
-
-        return Theme.of(getGeneratedId(keyHolder), name, description, thumbnail);
-    }
-
-    private void insertReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
-                    VALUES (?, ?, ?, ?, ?)
-                    """);
-            preparedStatement.setString(1, guestName);
-            preparedStatement.setDate(2, Date.valueOf(date));
-            preparedStatement.setLong(3, time.getId());
-            preparedStatement.setLong(4, theme.getId());
-            preparedStatement.setString(5, Status.WAITING.toString());
-            return preparedStatement;
-        });
-    }
-
-    private void insertDeletedReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
-        jdbcTemplate.update(connection -> {
-            PreparedStatement preparedStatement = connection.prepareStatement("""
-                    INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
-                    VALUES (?, ?, ?, ?, ?)
-                    """);
-            preparedStatement.setString(1, guestName);
-            preparedStatement.setDate(2, Date.valueOf(date));
-            preparedStatement.setLong(3, time.getId());
-            preparedStatement.setLong(4, theme.getId());
-            preparedStatement.setString(5, Status.CANCELED.toString());
-            return preparedStatement;
-        });
-    }
-
     private Map<String, Object> findDeleteInfoById(Long id) {
         return jdbcTemplate.queryForMap("""
                 SELECT deleted_at, delete_token
                 FROM reservation_time
                 WHERE id = ?
                 """, id);
-    }
-
-    private Long getGeneratedId(KeyHolder keyHolder) {
-        return keyHolder.getKey().longValue();
     }
 }

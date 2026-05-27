@@ -34,6 +34,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.guest_name,
                     r.date,
                     r.status AS status,
+                    r.last_modified_at AS last_modified_at,
                     t.id AS time_id,
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
@@ -57,37 +58,38 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<ReservationWaitingDto> findWaitingById(Long id) {
         return jdbcTemplate.query("""
-            SELECT *
-            FROM (
-                SELECT
-                    r.id AS reservation_id,
-                    r.guest_name,
-                    r.date,
-                    r.status AS status,
+                        SELECT *
+                        FROM (
+                            SELECT
+                                r.id AS reservation_id,
+                                r.guest_name,
+                                r.date,
+                                r.status AS status,
+                                r.last_modified_at AS last_modified_at,
 
-                    t.id AS time_id,
-                    t.start_at,
-                    t.deleted_at AS time_deleted_at,
+                                t.id AS time_id,
+                                t.start_at,
+                                t.deleted_at AS time_deleted_at,
 
-                    th.id AS theme_id,
-                    th.name AS theme_name,
-                    th.description AS theme_description,
-                    th.thumbnail AS theme_thumbnail,
-                    th.deleted_at AS theme_deleted_at,
+                                th.id AS theme_id,
+                                th.name AS theme_name,
+                                th.description AS theme_description,
+                                th.thumbnail AS theme_thumbnail,
+                                th.deleted_at AS theme_deleted_at,
 
-                    ROW_NUMBER() OVER (
-                        PARTITION BY r.date, t.id, th.id, r.status
-                        ORDER BY r.id
-                    ) AS wait_number
+                                ROW_NUMBER() OVER (
+                                    PARTITION BY r.date, t.id, th.id, r.status
+                                    ORDER BY r.id
+                                ) AS wait_number
 
-                FROM reservation r
-                INNER JOIN reservation_time t
-                    ON r.time_id = t.id
-                INNER JOIN theme th
-                    ON r.theme_id = th.id
-            ) x
-            WHERE x.reservation_id = ?
-            """,
+                            FROM reservation r
+                            INNER JOIN reservation_time t
+                                ON r.time_id = t.id
+                            INNER JOIN theme th
+                                ON r.theme_id = th.id
+                        ) x
+                        WHERE x.reservation_id = ?
+                        """,
                 reservationWaitingDtoRowMapper,
                 id
         ).stream().findFirst();
@@ -101,9 +103,12 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.guest_name,
                     r.date,
                     r.status AS status,
+                    r.last_modified_at AS last_modified_at,
+    
                     t.id AS time_id,
                     t.start_at,
                     t.deleted_at AS time_deleted_at,
+    
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
@@ -127,6 +132,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     r.guest_name,
                     r.date,
                     r.status AS status,
+                    r.last_modified_at AS last_modified_at,
 
                     t.id AS time_id,
                     t.start_at,
@@ -159,8 +165,8 @@ public class JdbcReservationRepository implements ReservationRepository {
         jdbcTemplate.update(connection -> {
             PreparedStatement preparedStatement = connection.prepareStatement(
                     """
-                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status)
-                            VALUES (?, ?, ?, ?, ?)
+                            INSERT INTO reservation (guest_name, date, time_id, theme_id, status, last_modified_at)
+                            VALUES (?, ?, ?, ?, ?, ?)
                             """,
                     new String[]{"id"}
             );
@@ -169,6 +175,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             preparedStatement.setLong(3, reservation.getTime().getId());
             preparedStatement.setLong(4, reservation.getTheme().getId());
             preparedStatement.setString(5, reservation.getStatus().toString());
+            preparedStatement.setString(6, reservation.getLastModifiedAt().toString());
             return preparedStatement;
         }, keyHolder);
 
@@ -265,7 +272,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 resultSet.getDate("date").toLocalDate(),
                 reservationTime,
                 theme,
-                Status.from(resultSet.getString("status"))
+                Status.from(resultSet.getString("status")),
+                toLocalDateTime(resultSet.getTimestamp("last_modified_at"))
         );
     };
 
@@ -285,12 +293,14 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
 
         return ReservationWaitingDto.from(Reservation.of(
-                resultSet.getLong("reservation_id"),
-                resultSet.getString("guest_name"),
-                resultSet.getDate("date").toLocalDate(),
-                reservationTime,
-                theme,
-                Status.from(resultSet.getString("status"))),
+                        resultSet.getLong("reservation_id"),
+                        resultSet.getString("guest_name"),
+                        resultSet.getDate("date").toLocalDate(),
+                        reservationTime,
+                        theme,
+                        Status.from(resultSet.getString("status")),
+                        toLocalDateTime(resultSet.getTimestamp("last_modified_at"))
+                ),
                 resultSet.getLong("wait_number")
         );
     };

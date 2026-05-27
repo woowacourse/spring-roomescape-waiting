@@ -19,6 +19,7 @@ import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -104,6 +105,6 @@ class ReservationTimeServiceTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        return reservationRepository.save(Reservation.create(name, date, time, theme, Status.WAITING));
+        return reservationRepository.save(Reservation.create(name, date, time, theme, Status.WAITING, LocalDateTime.now()));
     }
 }

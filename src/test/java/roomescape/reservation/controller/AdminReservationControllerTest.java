@@ -20,6 +20,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.reservation.service.ReservationService;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -52,10 +53,12 @@ class AdminReservationControllerTest {
         // given
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
+
+        LocalDateTime now = LocalDateTime.now();
         List<Reservation> reservations = List.of(
-                Reservation.of(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED),
-                Reservation.of(2L, "포비", LocalDate.of(2023, 8, 6), time, theme, Status.WAITING),
-                Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING)
+                Reservation.of(1L, "브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED, now),
+                Reservation.of(2L, "포비", LocalDate.of(2023, 8, 6), time, theme, Status.WAITING, now),
+                Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING, now)
         );
         given(reservationService.findAllReservations(1, 20)).willReturn(reservations);
 
@@ -84,7 +87,7 @@ class AdminReservationControllerTest {
         ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
         Theme theme = Theme.of(1L, "레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme-1.png");
         List<Reservation> reservations = List.of(
-                Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme, Status.CONFIRMED)
+                Reservation.of(3L, "조이", LocalDate.of(2023, 8, 7), time, theme, Status.CONFIRMED, LocalDateTime.now())
         );
         given(reservationService.findAllReservations(2, 2)).willReturn(reservations);
 

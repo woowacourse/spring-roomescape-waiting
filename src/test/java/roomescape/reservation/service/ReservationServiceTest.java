@@ -358,6 +358,6 @@ class ReservationServiceTest {
     }
 
     private Reservation insertReservation(String name, LocalDate date, ReservationTime time, Theme theme, Status status) {
-        return reservationRepository.save(Reservation.create(name, date, time, theme, status));
+        return reservationRepository.save(Reservation.create(name, date, time, theme, status, LocalDateTime.now(clock)));
     }
 }

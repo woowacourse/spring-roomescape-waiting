@@ -24,19 +24,23 @@ public class Reservation {
     private final ReservationTime time;
     private final Theme theme;
     private final Status status;
+    private final LocalDateTime lastModifiedAt;
 
-    private Reservation(Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
-        validateReservation(guestName, date, time, theme);
+    private Reservation(
+            Long id, String guestName, LocalDate date, ReservationTime time, Theme theme, Status status, LocalDateTime lastModifiedAt) {
+        validateReservation(guestName, date, time, theme, lastModifiedAt);
         this.id = id;
         this.guestName = guestName;
         this.date = date;
         this.time = time;
         this.theme = theme;
         this.status = status;
+        this.lastModifiedAt = lastModifiedAt;
     }
 
-    public static Reservation create(String guestName, LocalDate date, ReservationTime time, Theme theme, Status status) {
-        return new Reservation(null, guestName, date, time, theme, status);
+    public static Reservation create(
+            String guestName, LocalDate date, ReservationTime time, Theme theme, Status status, LocalDateTime changedAt) {
+        return new Reservation(null, guestName, date, time, theme, status, changedAt);
     }
 
     public static Reservation of(
@@ -45,21 +49,23 @@ public class Reservation {
             LocalDate date,
             ReservationTime time,
             Theme theme,
-            Status status
+            Status status,
+            LocalDateTime changedAt
     ) {
-        return new Reservation(id, guestName, date, time, theme, status);
+        return new Reservation(id, guestName, date, time, theme, status, changedAt);
     }
 
     public Reservation withId(long id) {
         require(this.id == null, new DomainException(RESERVATION_ALREADY_HAS_ID));
-        return of(id, guestName, date, time, theme, status);
+        return of(id, guestName, date, time, theme, status, lastModifiedAt);
     }
 
-    private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme) {
+    private void validateReservation(String guestName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime changedAt) {
         requireNonBlank(guestName, new DomainException(INVALID_RESERVATION_GUEST_NAME));
         requireNonNull(date, new DomainException(INVALID_RESERVATION_DATE));
         requireNonNull(time, new DomainException(INVALID_RESERVATION_TIME));
         requireNonNull(theme, new DomainException(INVALID_THEME));
+        requireNonNull(changedAt, new DomainException(INVALID_LAST_MODIFIED_AT));
     }
 
     @Override
@@ -83,7 +89,7 @@ public class Reservation {
         return Objects.equals(this.guestName, guestName);
     }
 
-    public Reservation changeDateAndTime(LocalDate changedDate, ReservationTime changedTime, Status status) {
-        return of(id, guestName, changedDate, changedTime, theme, status);
+    public Reservation changeDateAndTimeAndStatus(LocalDate changedDate, ReservationTime changedTime, Status status) {
+        return of(id, guestName, changedDate, changedTime, theme, status, lastModifiedAt);
     }
 }

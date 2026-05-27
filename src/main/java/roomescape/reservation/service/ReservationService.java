@@ -32,6 +32,7 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
 
     private final ReservationValidator reservationValidator;
+    private final Clock clock;
 
     @Transactional
     public ReservationWaitingResult create(String guestName, LocalDate date, Long timeId, Long themeId) {
@@ -40,7 +41,7 @@ public class ReservationService {
 
         Status status = determineState(date, timeId, themeId);
 
-        Reservation reservation = Reservation.create(guestName, date, time, theme, status);
+        Reservation reservation = Reservation.create(guestName, date, time, theme, status, LocalDateTime.now(clock));
 
         reservationValidator.validateCreate(reservation);
 
@@ -66,7 +67,7 @@ public class ReservationService {
         ReservationTime changedTime = getReservationTime(timeId);
 
         Status status = determineState(date, timeId, reservation.getTheme().getId());
-        Reservation changedReservation = reservation.changeDateAndTime(date, changedTime, status);
+        Reservation changedReservation = reservation.changeDateAndTimeAndStatus(date, changedTime, status);
 
         reservationValidator.validateEdit(reservation, changedReservation, guestName);
 
