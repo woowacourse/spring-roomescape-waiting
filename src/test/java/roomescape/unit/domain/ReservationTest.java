@@ -1,6 +1,9 @@
-package roomescape.domain;
+package roomescape.unit.domain;
 
 import org.junit.jupiter.api.Test;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -40,5 +43,21 @@ class ReservationTest {
         LocalDateTime now = LocalDateTime.of(2026, 5, 14, 14, 30);
 
         assertThat(reservation.isPast(now)).isFalse();
+    }
+
+    @Test
+    void 예약자_이름과_같으면_isOwnedBy가_true() {
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(14, 0));
+        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 5, 14), time, ANY_THEME);
+
+        assertThat(reservation.isOwnedBy("브라운")).isTrue();
+    }
+
+    @Test
+    void 예약자_이름과_다르면_isOwnedBy가_false() {
+        ReservationTime time = new ReservationTime(1L, LocalTime.of(14, 0));
+        Reservation reservation = new Reservation("브라운", LocalDate.of(2026, 5, 14), time, ANY_THEME);
+
+        assertThat(reservation.isOwnedBy("티뉴")).isFalse();
     }
 }
