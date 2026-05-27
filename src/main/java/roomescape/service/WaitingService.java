@@ -2,18 +2,22 @@ package roomescape.service;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.SlotDao;
 import roomescape.dao.WaitingDao;
+import roomescape.dao.dto.RankedWaiting;
 import roomescape.domain.Slot;
 import roomescape.domain.Waiting;
 import roomescape.dto.request.WaitingRequest;
 import roomescape.dto.response.WaitingResponse;
+import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.code.SlotErrorCode;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.SlotException;
 import roomescape.exception.domain.WaitingException;
+
 
 @Service
 public class WaitingService {
@@ -52,6 +56,15 @@ public class WaitingService {
         if (reservationDao.existsBySlotIdAndName(slotId, name)) {
             throw new WaitingException(WaitingErrorCode.CANNOT_WAIT_OWN_RESERVATION);
         }
+    }
+
+    public List<WaitingWithRankResponse> getWaitingsByName(String name) {
+        List<RankedWaiting> allWithRankByName = waitingDao.findAllWithRankByName(name);
+        return allWithRankByName.stream()
+                .map(rankedWaiting -> WaitingWithRankResponse.from(
+                        new Waiting(rankedWaiting.id(), rankedWaiting.createdAt(),
+                                rankedWaiting.slotId(), rankedWaiting.name()), rankedWaiting.rank()))
+                .toList();
     }
 
     public void delete(long waitingId) {

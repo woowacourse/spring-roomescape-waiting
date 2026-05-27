@@ -1,10 +1,12 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.assertj.core.api.SoftAssertions.assertSoftly;
 
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.ServiceTest;
@@ -17,6 +19,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Slot;
 import roomescape.domain.Theme;
 import roomescape.dto.request.WaitingRequest;
+import roomescape.dto.response.WaitingWithRankResponse;
 import roomescape.exception.code.WaitingErrorCode;
 import roomescape.exception.domain.WaitingException;
 
@@ -71,6 +74,29 @@ class WaitingServiceTest extends ServiceTest {
                 .hasMessage(WaitingErrorCode.CANNOT_WAIT_OWN_RESERVATION.getMessage());
     }
 
+    @Test
+    void 이름에_해당하는_대기순번_목록을_조회한다() {
+        // given
+        Theme theme = saveTheme("테마1");
+        ReservationTime reservationTime = saveReservationTime(LocalTime.of(10, 0));
+        saveReservation("예약자", theme, reservationTime);
+
+        String testUser = "첫번째대기신청자";
+        saveWaiting(reservationTime, theme, testUser);
+        saveWaiting(reservationTime, theme, "두번째대기신청자");
+        saveWaiting(reservationTime, theme, "세번째대기신청자");
+
+        // when
+        List<WaitingWithRankResponse> response = waitingService.getWaitingsByName(testUser);
+
+        // then
+        assertSoftly(softly -> {
+            softly.assertThat(response.getFirst().rank()).isEqualTo(1);
+            softly.assertThat(response.getFirst().name()).isEqualTo(testUser);
+        });
+
+    }
+
     private Theme saveTheme(String name) {
         Theme theme = new Theme(
                 name,
@@ -101,5 +127,11 @@ class WaitingServiceTest extends ServiceTest {
                 name
         );
         return reservationDao.save(reservation);
+    }
+
+    private WaitingRequest saveWaiting(ReservationTime reservationTime, Theme theme, String name) {
+        WaitingRequest request1 = new WaitingRequest(LocalDate.now(clock), reservationTime.getId(), theme.getId(), name);
+        waitingService.create(request1);
+        return request1;
     }
 }
