@@ -5,7 +5,6 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -18,6 +17,7 @@ import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
@@ -95,9 +95,6 @@ public class ReservationService {
     }
 
     public List<ReservationWithStatusResult> findReservationsByName(String name) {
-
-        List<ReservationWithStatusResult> results = new ArrayList<>();
-
         List<ReservationWithStatusResult> reserved = reservationRepository.findAllByName(name)
                 .stream()
                 .map(
@@ -113,7 +110,6 @@ public class ReservationService {
                 )
                 .toList();
 
-        AtomicReference<Long> idx = new AtomicReference<>(1L);
         List<ReservationWithStatusResult> waiting = reservationWaitingRepository.findAllByName(name)
                 .stream()
                 .map(
@@ -124,12 +120,24 @@ public class ReservationService {
                                 reservationWaiting.getTime(),
                                 reservationWaiting.getTheme(),
                                 "waiting",
-                                idx.getAndSet(idx.get() + 1)
+                                calculateOrder(reservationWaiting)
                         )).toList();
+
+        List<ReservationWithStatusResult> results = new ArrayList<>();
 
         results.addAll(reserved);
         results.addAll(waiting);
+
         return results;
+    }
+
+    private long calculateOrder(ReservationWaiting reservationWaiting) {
+        return reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                reservationWaiting.getDate(),
+                reservationWaiting.getTime().getId(),
+                reservationWaiting.getTheme().getId(),
+                reservationWaiting.getId()
+        ) + 1;
     }
 
     public List<Reservation> findReservations() {

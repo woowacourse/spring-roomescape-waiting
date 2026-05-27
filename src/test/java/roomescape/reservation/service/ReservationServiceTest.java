@@ -27,6 +27,8 @@ import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
+import roomescape.reservation.service.dto.ReservationWithStatusResult;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
@@ -170,5 +172,60 @@ class ReservationServiceTest {
                         LocalDate.of(2026, 5, 15), 1L
                 ), 1L
         )).isInstanceOf(DuplicateReservationException.class);
+    }
+
+    @DisplayName("이름에 해당하는 예약들을 조회한다.")
+    @Test
+    void findReservationsByNameTest() {
+        //given
+        when(reservationRepository.findAllByName("브라운"))
+                .thenReturn(List.of(new Reservation(
+                        1L,
+                        "브라운",
+                        LocalDate.of(2026, 5, 15),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        new Theme(1L, "이름", "설명", "thumbnailUrl")
+                        ))
+                );
+
+        when(reservationWaitingRepository.findAllByName("브라운"))
+                .thenReturn(List.of(new ReservationWaiting(
+                                1L,
+                                "브라운",
+                                LocalDate.of(2026, 5, 15),
+                                new ReservationTime(2L, LocalTime.of(11, 0)),
+                                new Theme(1L, "이름", "설명", "thumbnailUrl")
+                        ))
+                );
+
+        when(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                any(), any(), any(), any()
+        )).thenReturn(0L);
+
+        //when
+        List<ReservationWithStatusResult> result = reservationService.findReservationsByName("브라운");
+
+        //then
+        assertThat(result.size()).isEqualTo(2);
+
+        assertThat(result).containsExactly(
+                new ReservationWithStatusResult(
+                        1L,
+                        "브라운",
+                        LocalDate.of(2026, 5, 15),
+                        new ReservationTime(1L, LocalTime.of(10, 0)),
+                        new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                        "reserved",
+                        0L
+                ), new ReservationWithStatusResult(
+                        1L,
+                        "브라운",
+                        LocalDate.of(2026, 5, 15),
+                        new ReservationTime(2L, LocalTime.of(11, 0)),
+                        new Theme(1L, "이름", "설명", "thumbnailUrl"),
+                        "waiting",
+                        1L
+                )
+        );
     }
 }

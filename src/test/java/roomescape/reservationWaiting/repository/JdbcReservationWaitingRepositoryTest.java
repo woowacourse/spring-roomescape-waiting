@@ -185,8 +185,8 @@ class JdbcReservationWaitingRepositoryTest {
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
         ReservationWaiting saved1 = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        ReservationWaiting saved2 = saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
-        ReservationWaiting saved3 = saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
         List<ReservationWaiting> result = reservationWaitingRepository.findAllByName("브라운");
@@ -199,5 +199,30 @@ class JdbcReservationWaitingRepositoryTest {
         return reservationWaitingRepository.save(
                 ReservationWaiting.of(name, date, time, theme)
         );
+    }
+
+    @DisplayName("날짜, 시간, 테마에 해당하는 예약 대기들에 대한 순번을 계산한다.")
+    @Test
+    void countByReservationDateAndTimeIdAndThemeIdAndIdLessThanTest() {
+        //given
+        ReservationTime time = createTime(LocalTime.of(10, 0));
+        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
+
+        ReservationWaiting brown = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting gump = saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
+        ReservationWaiting pobi = saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
+
+        //when & then
+        assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), brown.getId()
+        )).isEqualTo(0);
+
+        assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), gump.getId()
+        )).isEqualTo(1);
+
+        assertThat(reservationWaitingRepository.countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), pobi.getId()
+        )).isEqualTo(2);
     }
 }

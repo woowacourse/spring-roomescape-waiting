@@ -16,4 +16,6 @@ public interface ReservationWaitingRepository {
     boolean existByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name);
 
     int deleteById(Long id);
+
+    long countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id);
 }

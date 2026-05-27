@@ -144,4 +144,15 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         return jdbcTemplate.update(sql, id);
     }
+
+    @Override
+    public long countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id) {
+        String sql = """
+                SELECT COUNT(*)
+                FROM reservation_waiting 
+                WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND id < ?;
+                """;
+
+        return jdbcTemplate.queryForObject(sql, Long.class, date, timeId, themeId, id);
+    }
 }
