@@ -188,6 +188,28 @@
             margin: 0 0 6px;
             font-size: 17px;
             font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 999px;
+            font-size: 12px;
+            font-weight: 600;
+            line-height: 1.6;
+        }
+
+        .status-confirmed {
+            background: #e6f7ee;
+            color: #00875a;
+        }
+
+        .status-waiting {
+            background: #fff4e6;
+            color: #d97706;
         }
 
         .res-when {
@@ -278,12 +300,19 @@
         container.querySelectorAll('.res-card').forEach(setupCard);
     }
 
+    function statusBadge(waitingOrder) {
+        if (waitingOrder === 0) {
+            return '<span class="status-badge status-confirmed">예약 완료</span>';
+        }
+        return `<span class="status-badge status-waiting">대기 ${waitingOrder}번</span>`;
+    }
+
     function cardHtml(r) {
         return `
             <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
                 <div class="res-head">
                     <div>
-                        <p class="res-theme">${r.theme.name}</p>
+                        <p class="res-theme">${r.theme.name} ${statusBadge(r.waitingOrder)}</p>
                         <p class="res-when">${r.date} · ${r.time.startAt}</p>
                     </div>
                     <div class="res-actions">
