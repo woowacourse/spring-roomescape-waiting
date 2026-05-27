@@ -32,7 +32,7 @@ class ThemeServiceTest {
         Theme theme1 = Theme.of(1L, "테마1", "설명1", "url1");
         Theme theme2 = Theme.of(2L, "테마2", "설명2", "url2");
         when(reservationRepository.findThemeIdTop10(any(LocalDate.class), any(LocalDate.class)))
-            .thenReturn(List.of(1L, 2L));
+                .thenReturn(List.of(1L, 2L));
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme1));
         when(themeRepository.findById(2L)).thenReturn(Optional.of(theme2));
 

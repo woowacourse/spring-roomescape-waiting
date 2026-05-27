@@ -14,43 +14,43 @@ import roomescape.exception.RoomescapeException;
 class ReservationTest {
 
     private static final ReservationTime RESERVED_TIME = ReservationTime.of(
-        1L,
-        LocalTime.of(10, 0),
-        LocalTime.of(11, 0)
+            1L,
+            LocalTime.of(10, 0),
+            LocalTime.of(11, 0)
     );
     private static final Theme RESERVED_THEME = Theme.of(
-        1L,
-        "테마1",
-        "설명",
-        "https://example.com/image.png"
+            1L,
+            "테마1",
+            "설명",
+            "https://example.com/image.png"
     );
 
     @Test
     void 수정할_예약의_예약자_이름과_일치하면_정상_처리() {
         Reservation reservation = Reservation.of(
-            1L,
-            "카키",
-            LocalDate.of(2999, 12, 31),
-            RESERVED_TIME,
-            RESERVED_THEME
+                1L,
+                "카키",
+                LocalDate.of(2999, 12, 31),
+                RESERVED_TIME,
+                RESERVED_THEME
         );
 
         assertThatCode(() -> reservation.validateOwner("카키"))
-            .doesNotThrowAnyException();
+                .doesNotThrowAnyException();
     }
 
     @Test
     void 수정할_예약의_예약자_이름과_일치하면_에러() {
         Reservation reservation = Reservation.of(
-            1L,
-            "카키",
-            LocalDate.of(2026, 12, 31),
-            RESERVED_TIME,
-            RESERVED_THEME
+                1L,
+                "카키",
+                LocalDate.of(2026, 12, 31),
+                RESERVED_TIME,
+                RESERVED_THEME
         );
 
         assertThatThrownBy(() -> reservation.validateOwner("브리"))
-            .isInstanceOf(RoomescapeException.class)
-            .extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED_NAME);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED_NAME);
     }
 }

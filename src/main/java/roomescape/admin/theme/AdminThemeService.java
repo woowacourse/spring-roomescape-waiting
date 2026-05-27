@@ -1,16 +1,15 @@
 package roomescape.admin.theme;
 
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.admin.theme.dto.AdminThemeRequest;
 import roomescape.admin.theme.dto.AdminThemeResponse;
 import roomescape.admin.theme.dto.AdminThemesResponse;
+import roomescape.domain.reservation.ReservationRepository;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
-import roomescape.domain.reservation.ReservationRepository;
-
-import java.util.List;
-import roomescape.domain.theme.Theme;
 
 @Service
 public class AdminThemeService {
@@ -19,8 +18,8 @@ public class AdminThemeService {
     private final ReservationRepository reservationRepository;
 
     public AdminThemeService(
-        AdminThemeRepository adminThemeRepository,
-        ReservationRepository reservationRepository
+            AdminThemeRepository adminThemeRepository,
+            ReservationRepository reservationRepository
     ) {
         this.adminThemeRepository = adminThemeRepository;
         this.reservationRepository = reservationRepository;
@@ -30,9 +29,9 @@ public class AdminThemeService {
     public AdminThemeResponse createTheme(AdminThemeRequest request) {
         validateDuplicateTheme(request.name());
         Theme theme = Theme.of(
-            request.name(),
-            request.description(),
-            request.imageUrl()
+                request.name(),
+                request.description(),
+                request.imageUrl()
         );
 
         Theme saved = adminThemeRepository.save(theme);

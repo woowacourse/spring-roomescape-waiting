@@ -44,8 +44,8 @@ class AdminThemeServiceTest {
         AdminThemeResponse response = adminThemeService.createTheme(request);
 
         assertAll(
-            () -> assertThat(response.id()).isEqualTo(1L),
-            () -> assertThat(response.name()).isEqualTo("테마1")
+                () -> assertThat(response.id()).isEqualTo(1L),
+                () -> assertThat(response.name()).isEqualTo("테마1")
         );
     }
 
@@ -56,8 +56,8 @@ class AdminThemeServiceTest {
         when(adminThemeRepository.existsByName("테마1")).thenReturn(true);
 
         assertThatThrownBy(() -> adminThemeService.createTheme(request))
-            .isInstanceOf(RoomescapeException.class)
-            .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION_NAME);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION_NAME);
     }
 
     @Test
@@ -70,8 +70,8 @@ class AdminThemeServiceTest {
         AdminThemesResponse response = adminThemeService.getAllThemes();
 
         assertAll(
-            () -> assertThat(response.themes()).hasSize(2),
-            () -> assertThat(response.themes().get(0).name()).isEqualTo("테마1")
+                () -> assertThat(response.themes()).hasSize(2),
+                () -> assertThat(response.themes().get(0).name()).isEqualTo("테마1")
         );
     }
 
@@ -90,8 +90,8 @@ class AdminThemeServiceTest {
         when(adminThemeRepository.existsById(99L)).thenReturn(false);
 
         assertThatThrownBy(() -> adminThemeService.deleteTheme(99L))
-            .isInstanceOf(RoomescapeException.class)
-            .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
     }
 
     @Test
@@ -100,7 +100,7 @@ class AdminThemeServiceTest {
         when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
 
         assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
-            .isInstanceOf(RoomescapeException.class)
-            .extracting("errorCode").isEqualTo(ErrorCode.TIME_DELETE_NOT_ALLOWED);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_DELETE_NOT_ALLOWED);
     }
 }

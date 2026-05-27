@@ -2,7 +2,8 @@ package roomescape.domain.waiting;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertAll;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -20,7 +21,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import roomescape.domain.reservation.dto.MyReservationsResponse;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
 import roomescape.domain.theme.Theme;
@@ -65,7 +65,8 @@ class WaitingServiceTest {
             Waiting saved = Waiting.of(1L, "유저1", LocalDate.of(2099, 12, 31), time, theme);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L, request.name())).thenReturn(false);
+            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
+                    request.name())).thenReturn(false);
             when(waitingRepository.save(any(Waiting.class))).thenReturn(saved);
 
             waitingService.createWaiting(request);
@@ -110,7 +111,8 @@ class WaitingServiceTest {
             WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
             when(reservationTimeRepository.findById(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,request.name())).thenReturn(true);
+            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
+                    request.name())).thenReturn(true);
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
@@ -147,7 +149,8 @@ class WaitingServiceTest {
 
         @Test
         void 이름으로_조회() {
-            MyWaitingResult myWaitingResult = new MyWaitingResult(1L, "유저1", LocalDate.of(2099, 12, 31), time.getStartAt(), theme.getName(), 1);
+            MyWaitingResult myWaitingResult = new MyWaitingResult(1L, "유저1", LocalDate.of(2099, 12, 31),
+                    time.getStartAt(), theme.getName(), 1);
             when(waitingRepository.findByName("유저1")).thenReturn(List.of(myWaitingResult));
 
             MyWaitingsResponse response = waitingService.getMyWaitings("유저1");

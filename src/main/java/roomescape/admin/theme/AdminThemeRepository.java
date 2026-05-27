@@ -1,14 +1,13 @@
 package roomescape.admin.theme;
 
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-
-import java.util.List;
-import java.util.Optional;
 import roomescape.domain.theme.Theme;
 
 @Repository
@@ -20,22 +19,22 @@ public class AdminThemeRepository {
     public AdminThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-            .withTableName("theme")
-            .usingGeneratedKeyColumns("id");
+                .withTableName("theme")
+                .usingGeneratedKeyColumns("id");
     }
 
     private final RowMapper<Theme> rowMapper = (resultSet, rowNum) -> Theme.of(
-        resultSet.getLong("id"),
-        resultSet.getString("name"),
-        resultSet.getString("description"),
-        resultSet.getString("image_url")
+            resultSet.getLong("id"),
+            resultSet.getString("name"),
+            resultSet.getString("description"),
+            resultSet.getString("image_url")
     );
 
     public Theme save(Theme theme) {
         SqlParameterSource parameters = new MapSqlParameterSource()
-            .addValue("name", theme.getName())
-            .addValue("description", theme.getDescription())
-            .addValue("image_url", theme.getImageUrl());
+                .addValue("name", theme.getName())
+                .addValue("description", theme.getDescription())
+                .addValue("image_url", theme.getImageUrl());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Theme.of(id, theme.getName(), theme.getDescription(), theme.getImageUrl());
     }
@@ -48,8 +47,8 @@ public class AdminThemeRepository {
     public Optional<Theme> findById(Long id) {
         String query = "select * from theme where id = ?";
         return jdbcTemplate.query(query, rowMapper, id)
-            .stream()
-            .findFirst();
+                .stream()
+                .findFirst();
     }
 
     public List<Theme> findAll() {

@@ -39,8 +39,8 @@ class ReservationTimeServiceTest {
         TimeResponse response = reservationTimeService.createTime(request);
 
         assertAll(
-            () -> assertThat(response.id()).isEqualTo(1L),
-            () -> assertThat(response.startAt()).isEqualTo(LocalTime.of(10, 0))
+                () -> assertThat(response.id()).isEqualTo(1L),
+                () -> assertThat(response.startAt()).isEqualTo(LocalTime.of(10, 0))
         );
     }
 
@@ -50,8 +50,8 @@ class ReservationTimeServiceTest {
         when(timeRepository.existsByStartAt(LocalTime.of(10, 0))).thenReturn(true);
 
         assertThatThrownBy(() -> reservationTimeService.createTime(request))
-            .isInstanceOf(RoomescapeException.class)
-            .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_TIME);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_TIME);
     }
 
     @Test
@@ -80,7 +80,7 @@ class ReservationTimeServiceTest {
         when(timeRepository.existsById(99L)).thenReturn(false);
 
         assertThatThrownBy(() -> reservationTimeService.deleteById(99L))
-            .isInstanceOf(RoomescapeException.class)
-            .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
     }
 }

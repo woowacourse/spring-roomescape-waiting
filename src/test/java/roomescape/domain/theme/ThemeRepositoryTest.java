@@ -29,7 +29,7 @@ class ThemeRepositoryTest {
     @BeforeEach
     void setUp() {
         jdbcTemplate.update(
-            "INSERT INTO theme (name, description, image_url) VALUES ('테마1', '설명1', 'https://example.com/1.jpg')"
+                "INSERT INTO theme (name, description, image_url) VALUES ('테마1', '설명1', 'https://example.com/1.jpg')"
         );
         themeId = jdbcTemplate.queryForObject("SELECT id FROM theme WHERE name = '테마1'", Long.class);
     }
@@ -43,10 +43,10 @@ class ThemeRepositoryTest {
             Optional<Theme> result = themeRepository.findById(themeId);
 
             assertAll(
-                () -> assertThat(result).isPresent(),
-                () -> assertThat(result.get().getName()).isEqualTo("테마1"),
-                () -> assertThat(result.get().getDescription()).isEqualTo("설명1"),
-                () -> assertThat(result.get().getImageUrl()).isEqualTo("https://example.com/1.jpg")
+                    () -> assertThat(result).isPresent(),
+                    () -> assertThat(result.get().getName()).isEqualTo("테마1"),
+                    () -> assertThat(result.get().getDescription()).isEqualTo("설명1"),
+                    () -> assertThat(result.get().getImageUrl()).isEqualTo("https://example.com/1.jpg")
             );
         }
 
@@ -65,17 +65,17 @@ class ThemeRepositoryTest {
         @Test
         void 저장된_테마를_전체_조회한다() {
             jdbcTemplate.update(
-                "INSERT INTO theme (name, description, image_url) VALUES ('테마2', '설명2', 'https://example.com/2.jpg')"
+                    "INSERT INTO theme (name, description, image_url) VALUES ('테마2', '설명2', 'https://example.com/2.jpg')"
             );
 
             List<Theme> result = themeRepository.findAll();
 
             assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(Theme::getName)
-                    .containsExactly("테마1", "테마2"),
-                () -> assertThat(result).extracting(Theme::getDescription)
-                    .containsExactly("설명1", "설명2")
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result).extracting(Theme::getName)
+                            .containsExactly("테마1", "테마2"),
+                    () -> assertThat(result).extracting(Theme::getDescription)
+                            .containsExactly("설명1", "설명2")
             );
         }
     }

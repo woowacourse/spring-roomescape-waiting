@@ -43,12 +43,12 @@ class ThemeControllerTest {
         insertReservation("유저3", within, timeId3, theme2);
 
         RestAssured.given().log().all()
-            .when().get("/themes/top")
-            .then().log().all()
-            .statusCode(200)
-            .body("size()", is(2))
-            .body("[0].name", is("테마1"))
-            .body("[1].name", is("테마2"));
+                .when().get("/themes/top")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[0].name", is("테마1"))
+                .body("[1].name", is("테마2"));
     }
 
     @Test
@@ -60,10 +60,10 @@ class ThemeControllerTest {
         insertReservation("유저1", pastDate, timeId, themeId);
 
         RestAssured.given().log().all()
-            .when().get("/themes/top")
-            .then().log().all()
-            .statusCode(200)
-            .body("size()", is(0));
+                .when().get("/themes/top")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
 
     @Test
@@ -72,38 +72,38 @@ class ThemeControllerTest {
         insertTheme("테마2");
 
         RestAssured.given().log().all()
-            .when().get("/themes")
-            .then().log().all()
-            .statusCode(200)
-            .body("size()", is(2))
-            .body("[0].name", is("테마1"))
-            .body("[1].name", is("테마2"));
+                .when().get("/themes")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(2))
+                .body("[0].name", is("테마1"))
+                .body("[1].name", is("테마2"));
     }
 
     private Long insertTheme(String name) {
         jdbcTemplate.update(
-            "INSERT INTO theme (name, description, image_url) VALUES (?, ?, ?)",
-            name, "설명", "https://example.com/image.jpg"
+                "INSERT INTO theme (name, description, image_url) VALUES (?, ?, ?)",
+                name, "설명", "https://example.com/image.jpg"
         );
         return jdbcTemplate.queryForObject(
-            "SELECT id FROM theme WHERE name = ?", Long.class, name
+                "SELECT id FROM theme WHERE name = ?", Long.class, name
         );
     }
 
     private Long insertTime(String startAt, String finishAt) {
         jdbcTemplate.update(
-            "INSERT INTO reservation_time (start_at, finish_at) VALUES (?, ?)",
-            startAt, finishAt
+                "INSERT INTO reservation_time (start_at, finish_at) VALUES (?, ?)",
+                startAt, finishAt
         );
         return jdbcTemplate.queryForObject(
-            "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt
+                "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt
         );
     }
 
     private void insertReservation(String name, LocalDate date, Long timeId, Long themeId) {
         jdbcTemplate.update(
-            "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-            name, date, timeId, themeId
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, date, timeId, themeId
         );
     }
 }

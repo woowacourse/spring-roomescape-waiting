@@ -31,9 +31,9 @@ class ReservationTimeRepositoryTest {
             ReservationTime saved = reservationTimeRepository.save(time);
 
             assertAll(
-                () -> assertThat(saved.getId()).isNotNull(),
-                () -> assertThat(saved.getStartAt()).isEqualTo(LocalTime.of(10, 0)),
-                () -> assertThat(saved.getFinishAt()).isEqualTo(LocalTime.of(11, 0))
+                    () -> assertThat(saved.getId()).isNotNull(),
+                    () -> assertThat(saved.getStartAt()).isEqualTo(LocalTime.of(10, 0)),
+                    () -> assertThat(saved.getFinishAt()).isEqualTo(LocalTime.of(11, 0))
             );
         }
     }
@@ -45,20 +45,20 @@ class ReservationTimeRepositoryTest {
         @Test
         void 저장된_예약_시간을_전체_조회한다() {
             ReservationTime first = reservationTimeRepository.save(
-                ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
+                    ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
             );
             ReservationTime second = reservationTimeRepository.save(
-                ReservationTime.of(LocalTime.of(12, 0), LocalTime.of(13, 0))
+                    ReservationTime.of(LocalTime.of(12, 0), LocalTime.of(13, 0))
             );
 
             List<ReservationTime> result = reservationTimeRepository.findAll();
 
             assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(ReservationTime::getId)
-                    .containsExactly(first.getId(), second.getId()),
-                () -> assertThat(result).extracting(ReservationTime::getStartAt)
-                    .containsExactly(LocalTime.of(10, 0), LocalTime.of(12, 0))
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result).extracting(ReservationTime::getId)
+                            .containsExactly(first.getId(), second.getId()),
+                    () -> assertThat(result).extracting(ReservationTime::getStartAt)
+                            .containsExactly(LocalTime.of(10, 0), LocalTime.of(12, 0))
             );
         }
     }
@@ -70,15 +70,15 @@ class ReservationTimeRepositoryTest {
         @Test
         void 존재하는_id면_예약_시간을_반환한다() {
             ReservationTime saved = reservationTimeRepository.save(
-                ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
+                    ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
             );
 
             Optional<ReservationTime> result = reservationTimeRepository.findById(saved.getId());
 
             assertAll(
-                () -> assertThat(result).isPresent(),
-                () -> assertThat(result.get().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
-                () -> assertThat(result.get().getFinishAt()).isEqualTo(LocalTime.of(11, 0))
+                    () -> assertThat(result).isPresent(),
+                    () -> assertThat(result.get().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
+                    () -> assertThat(result.get().getFinishAt()).isEqualTo(LocalTime.of(11, 0))
             );
         }
 
@@ -97,7 +97,7 @@ class ReservationTimeRepositoryTest {
         @Test
         void 존재하는_id면_true를_반환한다() {
             ReservationTime saved = reservationTimeRepository.save(
-                ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
+                    ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
             );
 
             boolean result = reservationTimeRepository.existsById(saved.getId());
@@ -143,7 +143,7 @@ class ReservationTimeRepositoryTest {
         @Test
         void 삭제하면_해당_예약_시간이_조회되지_않는다() {
             ReservationTime saved = reservationTimeRepository.save(
-                ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
+                    ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
             );
 
             reservationTimeRepository.deleteById(saved.getId());

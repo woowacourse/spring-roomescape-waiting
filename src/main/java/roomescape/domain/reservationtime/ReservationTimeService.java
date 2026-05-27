@@ -2,13 +2,12 @@ package roomescape.domain.reservationtime;
 
 import java.time.LocalTime;
 import java.util.List;
-
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.exception.ErrorCode;
-import roomescape.exception.RoomescapeException;
 import roomescape.domain.reservationtime.dto.TimeRequest;
 import roomescape.domain.reservationtime.dto.TimeResponse;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 
 @Service
 public class ReservationTimeService {
@@ -23,8 +22,8 @@ public class ReservationTimeService {
     public TimeResponse createTime(TimeRequest request) {
         validateDuplicateTime(request.startAt());
         ReservationTime time = ReservationTime.of(
-            request.startAt(),
-            request.finishAt()
+                request.startAt(),
+                request.finishAt()
         );
         ReservationTime saved = timeRepository.save(time);
         return TimeResponse.from(saved);
@@ -35,8 +34,8 @@ public class ReservationTimeService {
         List<ReservationTime> times = timeRepository.findAll();
 
         return times.stream()
-            .map(TimeResponse::from)
-            .toList();
+                .map(TimeResponse::from)
+                .toList();
     }
 
     @Transactional

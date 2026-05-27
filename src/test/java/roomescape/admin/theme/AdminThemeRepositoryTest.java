@@ -31,10 +31,10 @@ class AdminThemeRepositoryTest {
             Theme saved = adminThemeRepository.save(theme);
 
             assertAll(
-                () -> assertThat(saved.getId()).isNotNull(),
-                () -> assertThat(saved.getName()).isEqualTo("테마1"),
-                () -> assertThat(saved.getDescription()).isEqualTo("설명"),
-                () -> assertThat(saved.getImageUrl()).isEqualTo("https://example.com/image.jpg")
+                    () -> assertThat(saved.getId()).isNotNull(),
+                    () -> assertThat(saved.getName()).isEqualTo("테마1"),
+                    () -> assertThat(saved.getDescription()).isEqualTo("설명"),
+                    () -> assertThat(saved.getImageUrl()).isEqualTo("https://example.com/image.jpg")
             );
         }
     }
@@ -64,10 +64,10 @@ class AdminThemeRepositoryTest {
             Optional<Theme> result = adminThemeRepository.findById(saved.getId());
 
             assertAll(
-                () -> assertThat(result).isPresent(),
-                () -> assertThat(result.get().getName()).isEqualTo("테마1"),
-                () -> assertThat(result.get().getDescription()).isEqualTo("설명"),
-                () -> assertThat(result.get().getImageUrl()).isEqualTo("https://example.com/image.jpg")
+                    () -> assertThat(result).isPresent(),
+                    () -> assertThat(result.get().getName()).isEqualTo("테마1"),
+                    () -> assertThat(result.get().getDescription()).isEqualTo("설명"),
+                    () -> assertThat(result.get().getImageUrl()).isEqualTo("https://example.com/image.jpg")
             );
         }
 
@@ -91,11 +91,11 @@ class AdminThemeRepositoryTest {
             List<Theme> result = adminThemeRepository.findAll();
 
             assertAll(
-                () -> assertThat(result).hasSize(2),
-                () -> assertThat(result).extracting(Theme::getId)
-                    .containsExactly(first.getId(), second.getId()),
-                () -> assertThat(result).extracting(Theme::getName)
-                    .containsExactly("테마1", "테마2")
+                    () -> assertThat(result).hasSize(2),
+                    () -> assertThat(result).extracting(Theme::getId)
+                            .containsExactly(first.getId(), second.getId()),
+                    () -> assertThat(result).extracting(Theme::getName)
+                            .containsExactly("테마1", "테마2")
             );
         }
     }

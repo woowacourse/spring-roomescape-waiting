@@ -26,8 +26,7 @@ public enum ErrorCode {
     //422 - UNPROCESSABLE CONTENT
     RESERVATION_TIME_PASSED(HttpStatus.UNPROCESSABLE_ENTITY, "이미 지난 날짜의 예약은 생성할 수 없습니다."),
     RESERVATION_NOT_FOUND(HttpStatus.UNPROCESSABLE_ENTITY, "해당 예약은 점유되어있지 않습니다."),
-    WAITING_NOT_AVAILABLE(HttpStatus.UNPROCESSABLE_ENTITY, "예약이 이미 등록되어있습니다.")
-    ;
+    WAITING_NOT_AVAILABLE(HttpStatus.UNPROCESSABLE_ENTITY, "예약이 이미 등록되어있습니다.");
 
     private final HttpStatus status;
     private final String message;

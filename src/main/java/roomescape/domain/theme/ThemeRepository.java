@@ -16,10 +16,10 @@ public class ThemeRepository {
     }
 
     private final RowMapper<Theme> rowMapper = (resultSet, rowNum) -> Theme.of(
-        resultSet.getLong("id"),
-        resultSet.getString("name"),
-        resultSet.getString("description"),
-        resultSet.getString("image_url")
+            resultSet.getLong("id"),
+            resultSet.getString("name"),
+            resultSet.getString("description"),
+            resultSet.getString("image_url")
     );
 
     public Optional<Theme> findById(Long id) {
