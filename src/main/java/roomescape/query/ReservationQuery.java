@@ -21,7 +21,7 @@ public class ReservationQuery {
                     rs.getTime("res_start_at").toLocalTime(),
                     rs.getString("theme_name"),
                     rs.getString("res_status"),
-                    (Integer) rs.getObject("waiting_rank")
+                    rs.getInt("waiting_rank")
             );
 
     private final JdbcTemplate jdbcTemplate;

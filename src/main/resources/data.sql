@@ -59,7 +59,8 @@ VALUES (DATEADD('DAY', -1, CURRENT_DATE), 1, 1),
        (DATEADD('DAY', -11, CURRENT_DATE), 1, 5),
        (DATEADD('DAY', -12, CURRENT_DATE), 4, 6),
        (DATEADD('DAY', -12, CURRENT_DATE), 1, 7),
-       (DATEADD('DAY', -13, CURRENT_DATE), 5, 1);
+       (DATEADD('DAY', -13, CURRENT_DATE), 5, 1),
+       (DATEADD('DAY', 1, CURRENT_DATE), 1, 1);
 
 INSERT INTO reservation_entry (name, reservation_id, status, created_at)
 VALUES ('이프', 1, 'RESERVED', CURRENT_TIMESTAMP),
@@ -91,4 +92,8 @@ VALUES ('이프', 1, 'RESERVED', CURRENT_TIMESTAMP),
        ('아윤', 27, 'RESERVED', CURRENT_TIMESTAMP),
        ('유나', 28, 'RESERVED', CURRENT_TIMESTAMP),
        ('건우', 29, 'RESERVED', CURRENT_TIMESTAMP),
-       ('다온', 30, 'RESERVED', CURRENT_TIMESTAMP);
+       ('다온', 30, 'RESERVED', CURRENT_TIMESTAMP),
+       ('이프', 31, 'RESERVED', DATEADD('second', 0, CURRENT_TIMESTAMP)),
+       ('라텔', 31, 'WAITING', DATEADD('second', 1, CURRENT_TIMESTAMP)),
+       ('찰리', 31, 'WAITING', DATEADD('second', 2, CURRENT_TIMESTAMP)),
+       ('에코', 31, 'WAITING', DATEADD('second', 3, CURRENT_TIMESTAMP));

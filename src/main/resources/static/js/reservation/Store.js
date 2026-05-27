@@ -1,5 +1,13 @@
 import {getSearchParam} from "../common/helpers.js";
-import {changeReservation, createReservation, fetchReservation, fetchThemes, fetchThemeSlots} from "./api.js";
+import {
+  cancelReservation,
+  changeReservation,
+  createReservation,
+  createWaitingReservation,
+  fetchReservation,
+  fetchThemes,
+  fetchThemeSlots
+} from "./api.js";
 
 export default class Store {
   constructor() {
@@ -11,6 +19,7 @@ export default class Store {
     this.name = "";
     this.reservationId = getSearchParam("id");
     this.readonly = false;
+    this.originalReservation = null;
   }
 
   async initialize() {
@@ -24,6 +33,7 @@ export default class Store {
       this.selectedTimeId = reservation.time.id;
       this.name = reservation.entry.name;
       this.readonly = true;
+      this.originalReservation = reservation;
 
       await this.loadSlots();
     }
@@ -62,15 +72,42 @@ export default class Store {
   }
 
   canSubmit() {
+    const slot = this.selectedSlot();
     return Boolean(
         this.selectedThemeId &&
         this.selectedDate &&
         this.name &&
-        this.selectedTimeId
+        this.selectedTimeId &&
+        slot &&
+        slot.status !== "UNAVAILABLE"
     );
   }
 
-  submit() {
+  selectedSlot() {
+    return this.slots.find((slot) => slot.id === this.selectedTimeId) || null;
+  }
+
+  submitMode() {
+    const slot = this.selectedSlot();
+    if (!slot) {
+      return "reserve";
+    }
+    if (this.isSameAsOriginalReservation()) {
+      return "change";
+    }
+    return slot.status === "WAITING_AVAILABLE" ? "waiting" : "reserve";
+  }
+
+  isSameAsOriginalReservation() {
+    return Boolean(
+        this.originalReservation &&
+        Number(this.selectedThemeId) === this.originalReservation.theme.id &&
+        this.selectedDate === this.originalReservation.date &&
+        this.selectedTimeId === this.originalReservation.time.id
+    );
+  }
+
+  async submit() {
     const payload = {
       name: this.name,
       date: this.selectedDate,
@@ -79,10 +116,20 @@ export default class Store {
     };
 
     if (this.reservationId) {
+      if (this.submitMode() === "waiting") {
+        const result = await createWaitingReservation(payload);
+        await cancelReservation(this.reservationId);
+        return result;
+      }
+
       return changeReservation(this.reservationId, {
         date: payload.date,
         timeId: payload.timeId
       });
+    }
+
+    if (this.submitMode() === "waiting") {
+      return createWaitingReservation(payload);
     }
 
     return createReservation(payload);

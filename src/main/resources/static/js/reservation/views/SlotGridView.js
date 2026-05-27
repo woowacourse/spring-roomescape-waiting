@@ -31,12 +31,20 @@ export default class SlotGridView extends View {
     }
 
     slots.forEach((slot) => {
-      const button = createElement("button", "slot-btn", formatTime(slot.startAt));
+      const status = slot.status || (slot.isReservable ? "RESERVABLE" : "WAITING_AVAILABLE");
+      const button = createElement("button", "slot-btn");
       button.type = "button";
       button.dataset.id = slot.id;
+      button.appendChild(createElement("span", "slot-time", formatTime(slot.startAt)));
+      button.appendChild(createElement("span", "slot-status", this.statusText(status)));
 
-      if (!slot.isReservable) {
+      if (status === "WAITING_AVAILABLE") {
+        button.classList.add("waiting");
+      }
+
+      if (status === "UNAVAILABLE") {
         button.classList.add("disabled");
+        button.disabled = true;
       }
 
       if (slot.id === selectedTimeId) {
@@ -45,5 +53,15 @@ export default class SlotGridView extends View {
 
       this.element.appendChild(button);
     });
+  }
+
+  statusText(status) {
+    if (status === "WAITING_AVAILABLE") {
+      return "대기 가능";
+    }
+    if (status === "UNAVAILABLE") {
+      return "마감";
+    }
+    return "예약 가능";
   }
 }

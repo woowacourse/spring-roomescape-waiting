@@ -49,10 +49,11 @@ export default class Controller {
       try {
         await this.store.submit();
 
+        const submitMode = this.store.submitMode();
         this.views.toastView.show(
             this.store.reservationId
-                ? "예약이 변경되었습니다."
-                : "예약이 완료되었습니다."
+                ? submitMode === "waiting" ? "대기가 등록되었습니다." : "예약이 변경되었습니다."
+                : submitMode === "waiting" ? "대기가 등록되었습니다." : "예약이 완료되었습니다."
         );
 
         location.href = this.store.reservationId ? "/search" : "/";
@@ -88,7 +89,9 @@ export default class Controller {
       selectedDate: this.store.selectedDate,
       name: this.store.name,
       canSubmit: this.store.canSubmit(),
-      readonly: this.store.readonly
+      readonly: this.store.readonly,
+      isEdit: Boolean(this.store.reservationId),
+      submitMode: this.store.submitMode()
     });
 
     this.views.slotGridView.render(

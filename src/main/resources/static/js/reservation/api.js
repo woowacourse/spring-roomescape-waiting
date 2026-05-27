@@ -16,6 +16,14 @@ export function createReservation(payload) {
   });
 }
 
+export function createWaitingReservation(payload) {
+  return requestJson("/api/reservations/waiting", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(payload)
+  });
+}
+
 export function fetchReservation(id) {
   return requestJson(`/api/reservations/entries/${id}`);
 }
@@ -25,5 +33,11 @@ export function changeReservation(id, payload) {
     method: "PATCH",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(payload)
+  });
+}
+
+export function cancelReservation(id) {
+  return requestJson(`/api/reservations/entries/${id}`, {
+    method: "DELETE"
   });
 }

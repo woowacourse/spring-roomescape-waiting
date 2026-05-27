@@ -67,6 +67,11 @@ select {
 }
 
 .slot-btn {
+  display: flex;
+  min-height: 66px;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
   border: 1.5px solid var(--border);
   border-radius: 10px;
   background: var(--surface);
@@ -90,12 +95,34 @@ select {
   color: #fff;
 }
 
+.slot-btn.waiting {
+  background: #fffaf0;
+  border-color: #ffd591;
+  color: #ad6800;
+}
+
+.slot-btn.waiting.selected {
+  background: #f59f00;
+  border-color: #f59f00;
+  color: #fff;
+}
+
 .slot-btn.disabled {
   background: var(--bg);
   border-color: var(--border);
   color: var(--text-tertiary);
   cursor: not-allowed;
-  text-decoration: line-through;
+}
+
+.slot-time {
+  display: block;
+}
+
+.slot-status {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  font-weight: 600;
 }
 
 .slot-empty {

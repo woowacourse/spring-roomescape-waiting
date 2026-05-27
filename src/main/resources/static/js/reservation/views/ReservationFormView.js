@@ -54,7 +54,7 @@ export default class ReservationFormView extends View {
     }
   }
 
-  sync({ selectedThemeId, selectedDate, name, canSubmit, readonly }) {
+  sync({ selectedThemeId, selectedDate, name, canSubmit, readonly, isEdit, submitMode }) {
     this.themeSelect.value = selectedThemeId || "";
     this.dateInput.value = selectedDate || this.dateInput.value;
     this.nameInput.value = name;
@@ -62,6 +62,7 @@ export default class ReservationFormView extends View {
     this.themeSelect.disabled = readonly;
     this.nameInput.disabled = readonly;
 
+    this.submitButton.textContent = submitMode === "waiting" ? "대기 등록" : isEdit ? "예약 변경" : "예약 확정";
     this.submitButton.disabled = !canSubmit;
   }
 }
