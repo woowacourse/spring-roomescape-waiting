@@ -26,6 +26,7 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
@@ -80,6 +81,22 @@ class ReservationFacadeMockTest {
         assertThatThrownBy(() -> facade.addWaiting(request))
                 .isInstanceOf(BusinessRuleViolationException.class)
                 .hasMessageContaining("예약된 슬롯");
+    }
+
+    @Test
+    void 지난_예약에는_대기를_신청할_수_없다() {
+        Reservation past = new Reservation(99L, "티뉴", PAST_DATE, TIME, THEME);
+        given(reservationTimeService.findById(TIME_ID)).willReturn(TIME);
+        given(themeService.findById(THEME_ID)).willReturn(THEME);
+        given(reservationService.findByDateAndThemeId(PAST_DATE, THEME_ID))
+                .willReturn(new Reservations(List.of(past)));
+
+        ReservationWaitingRequest request = new ReservationWaitingRequest("민욱", PAST_DATE, TIME_ID, THEME_ID);
+
+        assertThatThrownBy(() -> facade.addWaiting(request))
+                .isInstanceOf(BusinessRuleViolationException.class)
+                .hasMessageContaining("지난 시각에는 대기");
+        verify(reservationWaitingService, never()).addWaiting(any(ReservationWaiting.class));
     }
 
     @Test

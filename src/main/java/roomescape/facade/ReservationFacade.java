@@ -1,5 +1,8 @@
 package roomescape.facade;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
@@ -18,10 +21,6 @@ import roomescape.service.ReservationTimeService;
 import roomescape.service.ReservationWaitingService;
 import roomescape.service.ThemeService;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-
 @Component
 public class ReservationFacade {
 
@@ -30,6 +29,7 @@ public class ReservationFacade {
     private static final String ALREADY_EXISTS_ADD_RESERVATION = "해당 날짜와 시간, 테마에 이미 예약이 존재합니다.";
     private static final String PAST_RESERVATION_REJECTED = "지난 시각에는 예약할 수 없습니다.";
     private static final String PAST_RESERVATION_UPDATE_REJECTED = "지난 시각으로 예약을 변경할 수 없습니다.";
+    private static final String PAST_RESERVATION_WAITING_REJECTED = "지난 시각에는 대기할 수 없습니다.";
     private static final String EXPIRED_RESERVATION_UPDATE_REJECTED = "이미 지난 예약은 변경할 수 없습니다.";
     private static final String OWNER_CANNOT_WAIT = "본인이 예약한 슬롯에는 대기를 신청할 수 없습니다.";
     private static final String ALREADY_WAITING = "이미 대기를 신청한 예약입니다.";
@@ -134,7 +134,9 @@ public class ReservationFacade {
         if (reservation.isOwnedBy(request.name())) {
             throw new BusinessRuleViolationException(OWNER_CANNOT_WAIT);
         }
-
+        if (reservation.isPast(LocalDateTime.now())) {
+            throw new BusinessRuleViolationException(PAST_RESERVATION_WAITING_REJECTED);
+        }
         if (reservationWaitingService.existBy(request.name(), reservation.getId())) {
             throw new BusinessRuleViolationException(ALREADY_WAITING);
         }
