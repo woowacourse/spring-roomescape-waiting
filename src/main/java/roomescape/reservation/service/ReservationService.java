@@ -8,6 +8,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
@@ -24,7 +25,6 @@ import java.util.List;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
-import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
@@ -49,23 +49,24 @@ public class ReservationService {
 
     @Transactional
     public Reservation reserve(String name, ReservationSaveCommand command) {
-        ReservationTime reservationTime = getReservationTime(command.timeId());
-        reservationTime.validateIsInactive();
+        ReservationTime time = getReservationTime(command.timeId());
+        time.validateIsInactive();
 
-        ReservationDate reservationDate = getReservationDate(command.dateId());
-        reservationDate.validateIsInactive();
+        ReservationDate date = getReservationDate(command.dateId());
+        date.validateIsInactive();
 
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        LocalDateTime now = LocalDateTime.now();
+        Reservations reservations = findTimeSlotReservations(date.getId(), time.getId(), theme.getId());
+        reservations.validateNotAlreadyBookedBy(name);
 
-        validateAlreadyBookedByMyself(name, reservationDate.getId(), reservationTime.getId(), theme.getId());
-        boolean isAlreadyBooked = checkAlreadyBookedByOthers(reservationDate.getId(), reservationTime.getId(), theme.getId());
-        if (isAlreadyBooked) {
-            return reservationRepository.save(Reservation.wait(name, reservationDate, reservationTime, theme, now));
+        LocalDateTime now = LocalDateTime.now();
+        if (reservations.hasReservedByOthers(name)) {
+            return reservationRepository.save(Reservation.wait(name, date, time, theme, now));
         }
-        return reservationRepository.save(Reservation.create(name, reservationDate, reservationTime, theme, now));
+
+        return reservationRepository.save(Reservation.create(name, date, time, theme, now));
     }
 
     @Transactional
@@ -140,13 +141,8 @@ public class ReservationService {
         return reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId);
     }
 
-    private void validateAlreadyBookedByMyself(String name, Long dateId, Long timeId, Long themeId) {
-        boolean isAlreadyBooked = reservationRepository.findByDateTimeAndThemeId(dateId, timeId, themeId)
-            .stream()
-            .anyMatch(reservation -> reservation.isOwner(name));
-        if (isAlreadyBooked) {
-            throw new ReservationException(RESERVATION_ALREADY_BOOKED);
-        }
+    private Reservations findTimeSlotReservations(Long dateId, Long timeId, Long themeId) {
+        return new Reservations(reservationRepository.findByDateTimeAndThemeId(dateId, timeId, themeId));
     }
 
 }

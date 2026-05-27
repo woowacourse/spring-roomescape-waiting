@@ -132,6 +132,10 @@ public class Reservation {
         return this.name.equals(requesterName);
     }
 
+    public boolean isReserved() {
+        return this.status == ReservationStatus.RESERVED;
+    }
+
     private void validateNotCanceled() {
         if (status == ReservationStatus.CANCELED) {
             throw new ReservationException(RESERVATION_ALREADY_CANCELED);
