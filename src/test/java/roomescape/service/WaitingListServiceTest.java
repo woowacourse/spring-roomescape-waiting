@@ -13,6 +13,7 @@ import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
@@ -35,6 +36,8 @@ class WaitingListServiceTest {
     ThemeRepository themeRepository;
     @Mock
     ReservationTimeRepository reservationTimeRepository;
+    @Mock
+    ReservationRepository reservationRepository;
 
     @InjectMocks
     WaitingListService waitingListService;
@@ -56,6 +59,9 @@ class WaitingListServiceTest {
         ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
         given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(true);
+
         WaitingList waitingList = WaitingList.create(date, name, theme, reservationTime);
         given(waitingListRepository.save(any(WaitingList.class))).willReturn(waitingList.withId(1));
 
@@ -168,11 +174,39 @@ class WaitingListServiceTest {
         ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
         given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
         given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(tomorrow, timeId, themeId)).willReturn(true);
         given(waitingListRepository.existsByNameAndThemeAndDateAndTime(name, themeId, tomorrow, timeId)).willReturn(true);
 
         // when & then
         assertThatThrownBy(() -> waitingListService.create(createCommand))
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.ALREADY_ON_WAITING_LIST);
+    }
+
+    @Test
+    void 예약_가능한_상태에서_예약대기_생성_시도시_예외발생() {
+        // given
+        String name = "김민준";
+        LocalDate date = LocalDate.now().plusDays(3);
+        Long timeId = 1L;
+        Long themeId = 1L;
+        WaitingListCreateCommand createCommand = new WaitingListCreateCommand(
+                name,
+                date,
+                timeId,
+                themeId
+        );
+        Theme theme = Theme.createWithId(themeId, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(timeId, LocalTime.of(10,0), LocalTime.of(11,0));
+        given(themeRepository.findById(themeId)).willReturn(Optional.of(theme));
+        given(reservationTimeRepository.findById(timeId)).willReturn(Optional.of(reservationTime));
+
+        given(reservationRepository.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)).willReturn(false);
+
+        // when & then
+        assertThatThrownBy(() -> waitingListService.create(createCommand))
+                .isInstanceOf(BusinessException.class)
+                .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_REQUIRED);
     }
 }

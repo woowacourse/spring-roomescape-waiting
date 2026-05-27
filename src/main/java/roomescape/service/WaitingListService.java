@@ -10,6 +10,7 @@ import roomescape.dto.WaitingListCreateCommand;
 import roomescape.dto.WaitingListResult;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
@@ -21,6 +22,7 @@ public class WaitingListService {
     private final WaitingListRepository waitingListRepository;
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
+    private final ReservationRepository reservationRepository;
 
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
         Theme findTheme = themeRepository.findById(createCommand.themeId())
@@ -34,6 +36,13 @@ public class WaitingListService {
         }
         if (waitingList.getReservationDate().isToday() && findReservationTime.isBefore()) {
             throw new BusinessException(ErrorCode.TIME_ALREADY_PASSED);
+        }
+
+        if (!reservationRepository.existsByDateAndTimeIdAndThemeId(
+                waitingList.getReservationDate().getDate(), findReservationTime.getId(), findTheme.getId()
+            )
+        ) {
+            throw new BusinessException(ErrorCode.WAITING_LIST_NOT_REQUIRED);
         }
 
         if (waitingListRepository.existsByNameAndThemeAndDateAndTime(
