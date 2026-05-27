@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import roomescape.domain.Waiting;
 
 public class FakeWaitingRepository implements WaitingRepository {
@@ -49,6 +50,11 @@ public class FakeWaitingRepository implements WaitingRepository {
         return storage.values().stream()
                 .filter(entry -> entry.getName().equals(name))
                 .toList();
+    }
+
+    @Override
+    public Optional<Waiting> findById(long id) {
+        return Optional.empty();
     }
 
     private Waiting createSavedWaiting(long id, Waiting waiting) {

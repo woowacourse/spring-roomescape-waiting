@@ -30,10 +30,6 @@ public class WaitingService {
         this.timeSlotRepository = timeSlotRepository;
     }
 
-    public int waitingNumber(Waiting waiting) {
-        return waitingRepository.calculateWaitingNumber(waiting);
-    }
-
     @Transactional
     public void saveWaiting(Waiting waiting) {
         validDuplicated(waiting);
@@ -46,13 +42,9 @@ public class WaitingService {
     @Transactional
     public void removeWaiting(Long id, String userName) {
         Waiting waiting = waitingRepository.findById(id)
-                        .orElseThrow(() -> new WaitingNotFoundException(id));
+                .orElseThrow(() -> new WaitingNotFoundException(id));
         waiting.validateModifiable(userName);
         waitingRepository.deleteById(id);
-    }
-
-    public Integer allWaitingOf(LocalDate date, Long timeSlotId, Long themeId) {
-        return waitingRepository.countAllBy(date, timeSlotId, themeId);
     }
 
     private void validReservation(Waiting waiting) {

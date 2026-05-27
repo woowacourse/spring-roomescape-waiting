@@ -66,7 +66,7 @@ class JdbcWaitingRepositoryTest {
     void deleteById() {
         Waiting waiting = new Waiting(null, "브라운", LocalDate.now(), 1L, 1L, null);
         jdbcWaitingRepository.save(waiting);
-        jdbcWaitingRepository.deleteById(waiting);
+        jdbcWaitingRepository.deleteById(1L);
     }
 
     @Test

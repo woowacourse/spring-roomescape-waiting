@@ -54,7 +54,7 @@ public class RoomescapeIntegrationTest {
     }
 
     @Test
-    @DisplayName("특정 사용자의 이름으로 본인의 예약 목록만 조회할 수 있다.")
+    @DisplayName("특정 사용자의 이름으로 본인의 예약과 대기 목록만 조회할 수 있다.")
     void getMyReservations() {
         insertTestData();
 

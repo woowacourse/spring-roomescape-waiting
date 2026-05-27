@@ -79,19 +79,6 @@ public class JdbcWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public int countAllBy(LocalDate date, Long timeSlotId, Long themeId) {
-        String sql = """
-                SELECT COUNT(*)
-                FROM waiting
-                WHERE date = ?
-                  AND time_id = ?
-                  AND theme_id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, Integer.class, date, timeSlotId, themeId);
-    }
-
-    @Override
     public List<Waiting> findByName(String name) {
         String sql = """
                 SELECT *
