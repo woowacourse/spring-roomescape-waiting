@@ -53,7 +53,6 @@ public class ReservationService {
         validateReservationDateTime(request.date(), timeQueryResult.startAt(), currentDateTime);
 
         ThemeQueryResult themeQueryResult = themeService.findById(request.themeId());
-        validateDuplicateReservation(request);
 
         Reservation reservation = request.toEntity(themeQueryResult.id(), timeQueryResult.id());
 
