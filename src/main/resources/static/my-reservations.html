@@ -300,11 +300,20 @@
         container.querySelectorAll('.res-card').forEach(setupCard);
     }
 
-    function statusBadge(waitingOrder) {
-        if (waitingOrder === 0) {
-            return '<span class="status-badge status-confirmed">예약 완료</span>';
+    function statusBadge(r) {
+        const isPast = new Date(`${r.date}T${r.time.startAt}`) < new Date();
+
+        if (r.waitingOrder === 0) {
+            return isPast
+                ? '<span class="status-badge status-confirmed" style="background: #e8e8ed; color: #8e8e93;">이용 완료</span>'
+                : '<span class="status-badge status-confirmed">예약 완료</span>';
         }
-        return `<span class="status-badge status-waiting">대기 ${waitingOrder}번</span>`;
+
+        if (isPast) {
+            return '<span class="status-badge status-waiting" style="background: #999; color: white;">대기 만료</span>';
+        }
+
+        return `<span class="status-badge status-waiting">대기 ${r.waitingOrder}번</span>`;
     }
 
     function cardHtml(r) {
@@ -312,7 +321,7 @@
             <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
                 <div class="res-head">
                     <div>
-                        <p class="res-theme">${r.theme.name} ${statusBadge(r.waitingOrder)}</p>
+                        <p class="res-theme">${r.theme.name} ${statusBadge(r)}</p>
                         <p class="res-when">${r.date} · ${r.time.startAt}</p>
                     </div>
                     <div class="res-actions">
