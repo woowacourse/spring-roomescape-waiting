@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS reservation_time;
 DROP TABLE IF EXISTS theme;
 
 CREATE TABLE reservation_time (
-    id       BIGINT     NOT NULL AUTO_INCREMENT,
-    start_at TIME       NOT NULL UNIQUE,
+    id                 BIGINT           NOT NULL AUTO_INCREMENT,
+    start_at           TIME             NOT NULL UNIQUE,
     PRIMARY KEY (id)
 );
 
