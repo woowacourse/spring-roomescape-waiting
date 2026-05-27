@@ -1,4 +1,4 @@
-package roomescape.repository;
+package roomescape.infra;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -9,6 +9,7 @@ import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.reservationStatus.*;
+import roomescape.repository.ReservationRepository;
 
 import java.time.LocalDate;
 import java.time.LocalTime;

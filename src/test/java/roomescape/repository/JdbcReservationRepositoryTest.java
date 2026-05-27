@@ -19,7 +19,7 @@ import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
-import roomescape.global.exception.CustomException;
+import roomescape.infra.JdbcReservationRepository;
 
 @JdbcTest
 @Sql({"/schema.sql", "/test-data.sql"})
