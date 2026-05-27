@@ -5,16 +5,22 @@ import static org.hamcrest.Matchers.notNullValue;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.exception.ProblemType;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationWaitingApiTest {
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     @Test
     void 예약된_슬롯에_대기를_신청한다() {
@@ -95,6 +101,22 @@ class ReservationWaitingApiTest {
     }
 
     @Test
+    void 지난_예약에는_대기를_신청할_수_없다() {
+        Integer timeId = createTime("13:30");
+        Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
+        insertPastReservation("티뉴", "2020-01-01", timeId, themeId);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(waitingRequest("민욱", "2020-01-01", timeId, themeId))
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(422)
+                .body("type", is(ProblemType.BUSINESS_RULE_VIOLATION.uri().toString()))
+                .body("detail", is("지난 시각에는 대기할 수 없습니다."));
+    }
+
+    @Test
     void 본인_대기를_취소하면_204를_반환한다() {
         Integer timeId = createTime("14:00");
         Integer themeId = createTheme("공포", "무서운 테마", "https://example.com/horror.jpg");
@@ -138,6 +160,13 @@ class ReservationWaitingApiTest {
                 .when().post("/waitings")
                 .then().statusCode(201)
                 .extract().jsonPath().get("id");
+    }
+
+    private void insertPastReservation(String name, String date, Integer timeId, Integer themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, LocalDate.parse(date), timeId, themeId
+        );
     }
 
     private Integer createReservation(String name, String date, Integer timeId, Integer themeId) {
