@@ -52,6 +52,10 @@ public class ReservationService {
         return reservationRepository.getById(id, "존재하지 않는 예약입니다.");
     }
 
+    public Waitlist getWaitlist(Long id) {
+        return waitlistRepository.getById(id, "존재하지 않는 예약 대기입니다.");
+    }
+
     @Transactional
     public ReservationWithStatus reserveOrWait(ReservationRequest request) {
         Reservation reservation = createReservation(
@@ -64,7 +68,7 @@ public class ReservationService {
         if (reservationRepository.existsBy(reservation)) {
             verifyNoDuplicateReservation(reservation);
             Long savedId = waitlistRepository.save(reservation);
-            Waitlist waitlist = waitlistRepository.getById(savedId, "존재하지 않는 예약 대기입니다.");
+            Waitlist waitlist = getWaitlist(savedId);
             int waitOrder = waitlistRepository.countBefore(waitlist) + 1;
             return ReservationWithStatus.waiting(waitlist, waitOrder);
         }

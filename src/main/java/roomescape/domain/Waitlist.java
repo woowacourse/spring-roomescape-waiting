@@ -1,7 +1,10 @@
 package roomescape.domain;
 
+import static roomescape.domain.exception.DomainErrorCode.UNAUTHORIZED_RESERVATION;
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import roomescape.domain.exception.RoomEscapeException;
 
 public class Waitlist {
 
@@ -36,6 +39,16 @@ public class Waitlist {
             Theme theme
     ) {
         this(null, name, date, createdAt, time, theme);
+    }
+
+    public void verifyCancelableBy(String name) {
+        verifyReservedBy(name, "본인의 대기 예약만 취소할 수 있습니다.");
+    }
+
+    private void verifyReservedBy(String other, String message) {
+        if (!this.name.equals(other)) {
+            throw new RoomEscapeException(UNAUTHORIZED_RESERVATION, message);
+        }
     }
 
     public Long getId() {
