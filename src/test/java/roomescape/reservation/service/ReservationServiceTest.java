@@ -13,12 +13,15 @@ import roomescape.fake.FakeReservationQueryRepository;
 import roomescape.fake.FakeReservationRepository;
 import roomescape.fake.FakeReservationTimeRepository;
 import roomescape.fake.FakeThemeRepository;
+import roomescape.fake.FakeWaitingRepository;
 import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.dto.ReservationCreateCommand;
 import roomescape.reservation.application.dto.ReservationQueryResult;
 import roomescape.reservation.application.dto.ReservationUpdateCommand;
 import roomescape.reservation.application.service.ReservationQueryService;
 import roomescape.reservation.application.service.ReservationService;
+import roomescape.reservation.domain.repository.WaitingRepository;
+import roomescape.reservation.infra.JdbcWaitingRepository;
 import roomescape.reservationtime.application.dto.ReservationTimeCreateCommand;
 import roomescape.reservationtime.application.dto.ReservationTimeQueryResult;
 import roomescape.reservationtime.application.service.ReservationTimeService;
@@ -34,6 +37,7 @@ class ReservationServiceTest {
     private ReservationService reservationService;
     private FakeReservationRepository reservationRepository;
     private FakeReservationTimeRepository timeRepository;
+    private FakeWaitingRepository fakeWaitingRepository;
     private FakeThemeRepository themeRepository;
 
     @BeforeEach
@@ -41,13 +45,14 @@ class ReservationServiceTest {
         themeRepository = new FakeThemeRepository();
         timeRepository = new FakeReservationTimeRepository();
         reservationRepository = new FakeReservationRepository(themeRepository, timeRepository);
+        fakeWaitingRepository = new FakeWaitingRepository();
         reservationQueryService = new ReservationQueryService(new FakeReservationQueryRepository(reservationRepository));
         themeService = new ThemeService(themeRepository, reservationQueryService);
         FakeAvailableReservationTimeRepository availableReservationTimeRepository =
                 new FakeAvailableReservationTimeRepository(timeRepository, reservationRepository);
         timeService = new ReservationTimeService(timeRepository, availableReservationTimeRepository,
                 reservationQueryService);
-        reservationService = new ReservationService(reservationRepository, themeService, timeService);
+        reservationService = new ReservationService(reservationRepository, fakeWaitingRepository, themeService, timeService);
     }
 
     @DisplayName("사용자의 방탈출 예약 시간 추가를 테스트합니다.")
