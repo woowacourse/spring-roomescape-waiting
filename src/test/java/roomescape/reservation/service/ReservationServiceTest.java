@@ -14,7 +14,6 @@ import java.util.List;
 
 import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.date.domain.ReservationDate;
@@ -114,7 +113,6 @@ class ReservationServiceTest {
                 .hasMessage(TIME_NOT_FOUND.getMessage());
     }
 
-
     @Test
     @DisplayName("예약시, 등록되지 않은 테마이면 예외를 발생한다.")
     void reserve_does_not_exist_theme() {
@@ -132,12 +130,13 @@ class ReservationServiceTest {
     @DisplayName("예약된 날짜/시간/테마를 중복 예약하면 대기 예약으로 들어간다.")
     void reserved_duplicated() {
         // given
+        String anotherName = "다른사람";
         Reservation reservation = reservation(name, reservationDate1, reservationTime1, theme1);
         ReservationSaveCommand duplicated = ReservationFixture.toCommand(reservationDate1, reservationTime1, theme1);
         save(reservation);
 
         // when
-        Reservation actual = reservationService.reserve(name, duplicated);
+        Reservation actual = reservationService.reserve(anotherName, duplicated);
 
         // then
         assertThat(actual.getStatus())
@@ -327,7 +326,6 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("일반유저가 이미 존재하는 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
-    @Disabled
     void changeSchedule_duplicated() {
         // given
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));
@@ -389,7 +387,6 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("관리자가 이미 존재하는 날짜/시간으로 예약을 변경하면 예외가 발생한다.")
-    @Disabled
     void changeScheduleByManager_duplicated() {
         // given
         Reservation saved = save(reservation(name, reservationDate1, reservationTime1, theme1));

@@ -4,9 +4,11 @@ import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
+
+import static roomescape.reservation.domain.ReservationStatus.RESERVED;
+import static roomescape.reservation.domain.ReservationStatus.WAITING;
 
 public class FakeReservationRepository implements ReservationRepository {
 
@@ -32,7 +34,16 @@ public class FakeReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
-        return List.of();
+        return store.values().stream()
+                .filter(reservation -> reservation.getDate().getId().equals(dateId))
+                .filter(reservation -> reservation.getTime().getId().equals(timeId))
+                .filter(reservation -> reservation.getTheme().getId().equals(themeId))
+                .filter(reservation ->
+                        reservation.getStatus() == RESERVED || reservation.getStatus() == WAITING)
+                .sorted(Comparator
+                        .comparing((Reservation r) -> r.getDate().getDate(), Comparator.reverseOrder())
+                        .thenComparing(r -> r.getTime().getStartAt()))
+                .toList();
     }
 
     @Override
@@ -59,7 +70,7 @@ public class FakeReservationRepository implements ReservationRepository {
                         reservation.getDate().getId().equals(dateId) &&
                                 reservation.getTime().getId().equals(timeId) &&
                                 reservation.getTheme().getId().equals(themeId) &&
-                                reservation.getStatus() == ReservationStatus.RESERVED
+                                reservation.getStatus() == RESERVED
                 );
     }
 
@@ -70,7 +81,7 @@ public class FakeReservationRepository implements ReservationRepository {
                         reservation.getName().equals(name) &&
                                 reservation.getDate().getId().equals(dateId) &&
                                 reservation.getTime().getId().equals(timeId) &&
-                                reservation.getStatus() == ReservationStatus.RESERVED
+                                reservation.getStatus() == RESERVED
                 );
     }
 

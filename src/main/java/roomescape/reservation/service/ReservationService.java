@@ -25,6 +25,7 @@ import java.util.List;
 
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_NOT_FOUND;
 import static roomescape.reservation.domain.ReservationStatus.CANCELED;
+import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_ALREADY_BOOKED;
 import static roomescape.reservation.exception.ReservationErrorInformation.RESERVATION_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorInformation.THEME_NOT_FOUND;
 import static roomescape.time.exception.ReservationTimeErrorInformation.TIME_NOT_FOUND;
@@ -94,7 +95,7 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        checkAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        validateAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
 
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
         reservationRepository.updateSchedule(reservation);
@@ -110,7 +111,7 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        checkAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        validateAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
 
         reservation.changeScheduleByManager(newDate, newTime);
         reservationRepository.updateSchedule(reservation);
@@ -135,6 +136,12 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
+    }
+
+    private void validateAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
+        if (checkAlreadyBookedByOthers(dateId, timeId, themeId)) {
+            throw new ReservationException(RESERVATION_ALREADY_BOOKED);
+        }
     }
 
     private boolean checkAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
