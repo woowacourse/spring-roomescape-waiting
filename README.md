@@ -79,7 +79,7 @@ PATCH /reservations/{reservationId}/cancel
 ---
 
 
-예약 플로우
+### 예약 플로우
 취소하고자 하는 예약이 PENDING이라면
 - [x] cancel로 상태 변경
 
@@ -93,7 +93,9 @@ PATCH /reservations/{reservationId}/cancel
 취소하고자 하는 예약이 COMPLETE, CANCELLED라면
 - [ ] 취소할 수 없다는 예외처리
 
+### 상태 변환 흐름
 
+![img_1.png](img_1.png)
 
 ### 2단계 - 내 예약 목록 조회 (상태 구분)
 
