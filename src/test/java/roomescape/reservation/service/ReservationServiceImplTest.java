@@ -282,7 +282,7 @@ class ReservationServiceImplTest {
 
         // then
         verify(reservationRepository).deleteById(1L);
-        verify(reservationRepository, never()).updateStatus(any());
+        verify(reservationRepository, never()).promoteToReserved(any());
     }
 
     @DisplayName("존재하지 않는 예약을 사용자가 취소하는 경우, ReservationNotFoundException이 발생한다.")
@@ -318,7 +318,7 @@ class ReservationServiceImplTest {
         Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(any())).thenReturn(Optional.of(reservation));
         when(reservationRepository.findEarliestWaiting(1L, 1L)).thenReturn(Optional.of(2L));
-        when(reservationRepository.updateStatus(2L)).thenReturn(true);
+        when(reservationRepository.promoteToReserved(2L)).thenReturn(true);
         when(reservationRepository.deleteById(1L)).thenReturn(true);
 
         // when
@@ -327,7 +327,7 @@ class ReservationServiceImplTest {
         // then
         verify(reservationRepository).findById(any());
         verify(reservationRepository).findEarliestWaiting(1L, 1L);
-        verify(reservationRepository).updateStatus(2L);
+        verify(reservationRepository).promoteToReserved(2L);
         verify(reservationRepository).deleteById(1L);
     }
 

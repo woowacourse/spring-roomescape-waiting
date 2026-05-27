@@ -5,6 +5,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,8 +34,10 @@ class JdbcReservationRepositoryTest {
 
         LocalDate date = LocalDate.of(2026, 5, 6);
         Long themeId = insertTheme("테마");
-        insertReservation("윤호준", timeId1, themeId);
-        insertReservation("박다혜", timeId2, themeId);
+        insertReservation("윤호준", timeId1, themeId, Status.RESERVED
+                , LocalDateTime.now());
+        insertReservation("박다혜", timeId2, themeId, Status.RESERVED
+                , LocalDateTime.now());
 
         assertThat(reservationRepository.findTimeIdsByThemeIdAndDate(themeId, date))
                 .containsExactly(timeId1, timeId2);
@@ -51,8 +54,8 @@ class JdbcReservationRepositoryTest {
         LocalDate date = LocalDate.of(2026, 5, 6);
         Long themeId = insertTheme("테마1");
         Long otherThemeId = insertTheme("테마2");
-        insertReservation("윤호준", timeId1, themeId);
-        insertReservation("박다혜", timeId2, otherThemeId);
+        insertReservation("윤호준", timeId1, themeId, Status.RESERVED, LocalDateTime.now());
+        insertReservation("박다혜", timeId2, otherThemeId, Status.RESERVED, LocalDateTime.now());
 
         assertThat(reservationRepository.findTimeIdsByThemeIdAndDate(themeId, date))
                 .containsExactly(timeId1);
@@ -78,6 +81,44 @@ class JdbcReservationRepositoryTest {
         assertThat(saved.getTime().getStartAt()).isEqualTo(time.getStartAt());
         assertThat(saved.getTime().getEndAt()).isEqualTo(time.getEndAt());
         assertThat(saved.getStatus()).isEqualTo(Status.RESERVED);
+    }
+
+    @DisplayName("가장 오래된 WAITING 대기의 id 값을 가져온다.")
+    @Test
+    void 예약_대기_id_반환_테스트() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        insertReservation("어셔1", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(1));
+        insertReservation("어셔2", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(2));
+        insertReservation("어셔3", timeId, themeId, Status.WAITING,  LocalDateTime.now().plusHours(3));
+
+        // when
+        Optional<Long> id = reservationRepository.findEarliestWaiting(timeId, themeId);
+
+        // then
+        assertThat(id).isPresent();
+        assertThat(id.get()).isEqualTo(1L);
+    }
+
+    @DisplayName("예약 대기 상태를 RESERVED로 승격한다.")
+    @Test
+    void 예약_대기_승격_테스트() {
+        // given
+        Long themeId = insertTheme("테마");
+        Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
+                LocalDateTime.now().plusHours(3).toString());
+        insertReservation("어셔1", timeId, themeId, Status.WAITING, LocalDateTime.now().plusHours(1));
+
+        // when
+        boolean affected = reservationRepository.promoteToReserved(1L);
+        Optional<Reservation> reservation = reservationRepository.findById(1L);
+
+        // then
+        assertThat(affected).isTrue();
+        assertThat(reservation).isPresent();
+        assertThat(reservation.get().getStatus()).isEqualTo(Status.RESERVED);
     }
 
     private Long insertTime(String startAt, String endAt) {
@@ -107,14 +148,14 @@ class JdbcReservationRepositoryTest {
         );
     }
 
-    private void insertReservation(String name, Long timeId, Long themeId) {
+    private void insertReservation(String name, Long timeId, Long themeId, Status status, LocalDateTime createdAt) {
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, time_id, theme_id, status, created_at) VALUES (?, ?, ?, ?, ?)",
                 name,
                 timeId,
                 themeId,
-                "RESERVED",
-                LocalDateTime.now()
+                status.name(),
+                createdAt.toString()
         );
     }
 }
