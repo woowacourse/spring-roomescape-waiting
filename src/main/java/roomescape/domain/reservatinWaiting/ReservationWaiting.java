@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
+import roomescape.exception.ExpiredDateTimeException;
 
 public class ReservationWaiting {
 
@@ -15,12 +16,12 @@ public class ReservationWaiting {
     private Long sequence;
     private final LocalDateTime createdAt;
 
-    public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
         this.name = name;
         this.date = date;
         this.time = time;
         this.theme = theme;
-        this.createdAt = createdAt;
+        this.createdAt = LocalDateTime.now();
     }
 
     public ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
@@ -63,5 +64,11 @@ public class ReservationWaiting {
 
     public LocalDateTime getCreatedAt() {
         return createdAt;
+    }
+
+    public void validatePastDateTime() {
+        if(LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+            throw new ExpiredDateTimeException();
+        }
     }
 }
