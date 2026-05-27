@@ -666,18 +666,12 @@
             return;
         }
 
-        const [reservations, waitings] = await Promise.all([
-            fetchOrEmpty(`/reservations?name=${encodeURIComponent(name)}`),
-            fetchOrEmpty(`/reservations/waitings?name=${encodeURIComponent(name)}`)
-        ]);
+        const items = await fetchOrEmpty(`/reservations?name=${encodeURIComponent(name)}`);
 
-        const items = [
-            ...reservations.map(r => ({...r, _type: 'RESERVED'})),
-            ...waitings.map(w => ({...w, _type: 'WAITING'}))
-        ].sort((a, b) => {
-            const k = (a.date + ' ' + (a.time?.startAt ?? ''));
+        items.sort((a, b) => {
+            const ka = (a.date + ' ' + (a.time?.startAt ?? ''));
             const kb = (b.date + ' ' + (b.time?.startAt ?? ''));
-            return k.localeCompare(kb);
+            return ka.localeCompare(kb);
         });
 
         const list = document.getElementById('reservationList');
@@ -692,10 +686,8 @@
     }
 
     function renderItem(item, name) {
-        if (item._type === 'WAITING') {
-            const positionLabel = item.waitingPosition != null
-                ? `대기 #${item.waitingPosition}`
-                : '대기';
+        if (item.status === '예약대기') {
+            const positionLabel = item.rank != null ? `대기 ${item.rank}번` : '대기';
             return `
                 <div class="reservation-item" id="waiting-item-${item.id}">
                     <div class="reservation-info">
