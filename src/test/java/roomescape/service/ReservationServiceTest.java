@@ -19,6 +19,7 @@ import roomescape.exception.PastTimeException;
 import roomescape.repository.FakeReservationRepository;
 import roomescape.repository.FakeThemeRepository;
 import roomescape.repository.FakeTimeSlotRepository;
+import roomescape.repository.FakeWaitingRepository;
 
 class ReservationServiceTest {
 
@@ -26,6 +27,7 @@ class ReservationServiceTest {
     private FakeReservationRepository reservationRepository;
     private FakeTimeSlotRepository timeSlotRepository;
     private FakeThemeRepository themeRepository;
+    private FakeWaitingRepository fakeWaitingRepository;
 
     private TimeSlot savedTimeSlot;
     private Theme savedTheme;
@@ -35,8 +37,10 @@ class ReservationServiceTest {
         timeSlotRepository = new FakeTimeSlotRepository();
         reservationRepository = new FakeReservationRepository();
         themeRepository = new FakeThemeRepository();
+        fakeWaitingRepository = new FakeWaitingRepository();
 
-        reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository);
+        reservationService = new ReservationService(reservationRepository, timeSlotRepository, themeRepository,
+                fakeWaitingRepository);
 
         savedTimeSlot = timeSlotRepository.save(TimeSlot.transientOf(LocalTime.of(10, 0)));
         savedTheme = themeRepository.save(Theme.transientOf("이름", "설명", "test.com"));

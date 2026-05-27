@@ -1,12 +1,13 @@
 package roomescape.service;
 
 import java.time.LocalDate;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Waiting;
+import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.DuplicateWaitingException;
 import roomescape.exception.WaitingNotFoundException;
+import roomescape.repository.ReservationRepository;
 import roomescape.repository.WaitingRepository;
 
 @Service
@@ -14,9 +15,11 @@ import roomescape.repository.WaitingRepository;
 public class WaitingService {
 
     private final WaitingRepository waitingRepository;
+    private final ReservationRepository reservationRepository;
 
-    public WaitingService(WaitingRepository waitingRepository) {
+    public WaitingService(WaitingRepository waitingRepository, ReservationRepository reservationRepository) {
         this.waitingRepository = waitingRepository;
+        this.reservationRepository = reservationRepository;
     }
 
     public int waitingNumber(Waiting waiting) {
@@ -25,7 +28,8 @@ public class WaitingService {
 
     @Transactional
     public void saveWaiting(Waiting waiting) {
-        validDuplicatedReservation(waiting);
+        validDuplicated(waiting);
+        validReservation(waiting);
         waitingRepository.save(waiting);
     }
 
@@ -39,10 +43,6 @@ public class WaitingService {
         return waitingRepository.countAllBy(date, timeSlotId, themeId);
     }
 
-    public List<Waiting> findWaitingByName(String name) {
-        return waitingRepository.findByName(name);
-    }
-
     private void existsWaiting(Waiting waiting) {
         int waitingNumber = waitingNumber(waiting);
         if (waitingNumber < 1) {
@@ -50,7 +50,17 @@ public class WaitingService {
         }
     }
 
-    private void validDuplicatedReservation(Waiting waiting) {
+    private void validReservation(Waiting waiting) {
+        reservationRepository.findByDateAndTimeIdAndThemeId(waiting.getDate(),
+                waiting.getTimeSlotId(), waiting.getThemeId()).ifPresent(reservation -> {
+            if (reservation.getName().equals(waiting.getName())) {
+                throw new DuplicateReservationException(reservation.getDate().toString(),
+                        reservation.getTimeSlot().getId(), reservation.getTheme().getId());
+            }
+        });
+    }
+
+    private void validDuplicated(Waiting waiting) {
         boolean isExists = waitingRepository.isExists(waiting);
         if (isExists) {
             throw new DuplicateWaitingException(waiting);

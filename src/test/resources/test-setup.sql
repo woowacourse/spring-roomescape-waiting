@@ -21,11 +21,12 @@ CREATE TABLE time_slot
 
 CREATE TABLE waiting
 (
-    created_at      TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    name            VARCHAR(250) NOT NULL,
-    date            DATE         NOT NULL,
-    time_id         BIGINT       NOT NULL,
-    theme_id        BIGINT       NOT NULL,
+    id         BIGINT       NOT NULL AUTO_INCREMENT,
+    created_at TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    name       VARCHAR(250) NOT NULL,
+    date       DATE         NOT NULL,
+    time_id    BIGINT       NOT NULL,
+    theme_id   BIGINT       NOT NULL,
     PRIMARY KEY (name, date, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES time_slot (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)

@@ -1,16 +1,12 @@
 package roomescape.repository;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
 import java.util.List;
 import java.util.Map;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
-import roomescape.domain.Theme;
-import roomescape.domain.TimeSlot;
 import roomescape.domain.Waiting;
 
 @Repository
@@ -99,21 +95,21 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public List<Waiting> findByName(String name) {
         String sql = """
-            SELECT *
-            FROM (
-                SELECT w.id,
-                       w.name,
-                       w.date,
-                       w.time_id,
-                       w.theme_id,
-                       ROW_NUMBER() OVER (
-                           PARTITION BY w.date, w.time_id, w.theme_id
-                           ORDER BY w.created_at ASC, w.id ASC
-                       ) AS waiting_number
-                FROM waiting w
-            ) ranked
-            WHERE ranked.name = ?
-            """;
+                SELECT *
+                FROM (
+                    SELECT id,
+                           name,
+                           date,
+                           time_id,
+                           theme_id,
+                           ROW_NUMBER() OVER (
+                               PARTITION BY date, time_id, theme_id
+                               ORDER BY created_at ASC, id ASC
+                           ) AS waiting_number
+                    FROM waiting
+                ) ranked
+                WHERE ranked.name = ?
+                """;
 
         return jdbcTemplate.query(sql, rowMapper(), name);
     }
