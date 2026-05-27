@@ -158,6 +158,155 @@ class RoomescapeApplicationTest {
                 .extract().jsonPath().getList(".").size();
     }
 
+    @Test
+    void 예약_생성_후_단건_조회가_된다() {
+        int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
+
+        RestAssured.given()
+                .when().get("/reservations/" + id)
+                .then().statusCode(200)
+                .body("name", org.hamcrest.Matchers.equalTo("zeze"))
+                .body("id", org.hamcrest.Matchers.equalTo(id));
+    }
+
+    @Test
+    void 예약_생성_후_전체_목록에서_조회된다() {
+        reserve("zeze", "2099-06-01", 1L, 1L, 201);
+        reserve("mingu", "2099-06-02", 1L, 1L, 201);
+
+        RestAssured.given()
+                .when().get("/reservations")
+                .then().statusCode(200)
+                .body("size()", is(2));
+    }
+
+    @Test
+    void 첫번째_예약은_승인_상태이다() {
+        int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
+
+        RestAssured.given()
+                .when().get("/reservations/" + id)
+                .then().statusCode(200)
+                .body("state", org.hamcrest.Matchers.equalTo("승인"))
+                .body("rank", org.hamcrest.Matchers.equalTo(1));
+    }
+
+    @Test
+    void 같은_슬롯에_두번째_예약은_대기_상태이다() {
+        String date = "2099-06-10";
+        reserveAndGetId("zeze", date, 1L, 1L);
+        int waitingId = reserveAndGetId("mingu", date, 1L, 1L);
+
+        RestAssured.given()
+                .when().get("/reservations/" + waitingId)
+                .then().statusCode(200)
+                .body("state", org.hamcrest.Matchers.equalTo("대기"))
+                .body("rank", org.hamcrest.Matchers.equalTo(2));
+    }
+
+    @Test
+    void 예약_수정_성공한다() {
+        int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
+
+        Map<String, Object> updateParams = new HashMap<>();
+        updateParams.put("name", "zeze");
+        updateParams.put("date", "2099-07-01");
+        updateParams.put("timeId", 1L);
+        updateParams.put("themeId", 1L);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(updateParams)
+                .when().put("/reservations/" + id)
+                .then().statusCode(200)
+                .body("date", org.hamcrest.Matchers.equalTo("2099-07-01"));
+    }
+
+    @Test
+    void 예약_삭제_성공한다() {
+        int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
+
+        Map<String, Object> deleteBody = new HashMap<>();
+        deleteBody.put("name", "zeze");
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(deleteBody)
+                .when().delete("/reservations/" + id)
+                .then().statusCode(200);
+
+        RestAssured.given()
+                .when().get("/reservations/" + id)
+                .then().statusCode(404);
+    }
+
+    @Test
+    void 예약_삭제시_이름이_다르면_401을_반환한다() {
+        int id = reserveAndGetId("zeze", "2099-06-01", 1L, 1L);
+
+        Map<String, Object> deleteBody = new HashMap<>();
+        deleteBody.put("name", "other");
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(deleteBody)
+                .when().delete("/reservations/" + id)
+                .then().statusCode(401);
+    }
+
+    @Test
+    void 예약_생성시_이름이_없으면_400을_반환한다() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("date", "2099-06-01");
+        params.put("timeId", 1L);
+        params.put("themeId", 1L);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().statusCode(400);
+    }
+
+    @Test
+    void 예약_생성시_timeId가_없으면_400을_반환한다() {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", "zeze");
+        params.put("date", "2099-06-01");
+        params.put("themeId", 1L);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().statusCode(400);
+    }
+
+    @Test
+    void 존재하지_않는_시간으로_예약시_404를_반환한다() {
+        reserve("zeze", "2099-06-01", 999L, 1L, 404);
+    }
+
+    @Test
+    void 존재하지_않는_테마로_예약시_404를_반환한다() {
+        reserve("zeze", "2099-06-01", 1L, 999L, 404);
+    }
+
+    private int reserveAndGetId(String name, String date, Long timeId, Long themeId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", name);
+        params.put("date", date);
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/reservations")
+                .then().statusCode(201)
+                .extract().jsonPath().getInt("id");
+    }
+
     private void reserve(String name, String date, Long timeId, Long themeId, int expectedStatusCode) {
         Map<String, Object> params = new HashMap<>();
         params.put("name", name);
