@@ -9,6 +9,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -109,9 +110,27 @@ class JdbcWaitingRepositoryTest {
             //then
             assertThat(find).isPresent();
         }
-
     }
 
+    @Test
+    @Sql("/find_own_waitings_after_today_test_data.sql")
+    void 본인의_현재_이후의_전체_대기_목록을_조회한다() {
+        //given
+        final String customerName = "재키";
+
+        //when
+        List<Waiting> waitings = jdbcWaitingRepository.findAllByCustomerNameAndReservationDateTimeAfter(
+                customerName,
+                NOW
+        );
+
+        //then
+        assertThat(waitings).hasSize(2);
+        assertThat(waitings).extracting(waiting ->
+                        LocalDateTime.of(waiting.getReservationDate(), waiting.getTime().getStartAt()))
+                .allMatch(dateTime -> dateTime.isAfter(NOW));
+
+    }
 
     private ReservationTime insertReservationTime(final String startAt) {
         jdbcTemplate.update(
