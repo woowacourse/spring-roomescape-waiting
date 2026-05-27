@@ -45,6 +45,7 @@ public class ReservationWaitingController {
             @PathVariable("waiting_id") final Long waitingId,
             @RequestParam final String name
     ) {
+        reservationWaitingService.deleteByIdAndName(waitingId, name);
         return ResponseEntity.noContent().build();
     }
 }

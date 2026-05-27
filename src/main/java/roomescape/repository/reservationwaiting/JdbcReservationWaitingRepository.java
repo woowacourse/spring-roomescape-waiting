@@ -37,4 +37,10 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
         return reservationWaiting.withId(key.longValue());
     }
+
+    @Override
+    public void deleteByIdAndName(Long id, String name) {
+        String sql = "DELETE FROM reservation_waiting WHERE id = ? AND name = ?";
+        jdbcTemplate.update(sql, id, name);
+    }
 }

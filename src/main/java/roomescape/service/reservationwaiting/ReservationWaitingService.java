@@ -46,4 +46,8 @@ public class ReservationWaitingService {
             );
         }
     }
+
+    public void deleteByIdAndName(Long waitingId, String name) {
+        reservationWaitingRepository.deleteByIdAndName(waitingId, name);
+    }
 }

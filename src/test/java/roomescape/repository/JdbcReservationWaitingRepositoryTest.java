@@ -85,6 +85,48 @@ class JdbcReservationWaitingRepositoryTest {
         ));
     }
 
+    @Test
+    @DisplayName("대기 ID와 이름으로 예약 대기를 삭제한다")
+    void deleteByIdAndName() {
+        Reservation reservation = createReservation();
+        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalTime.parse("12:00")
+        ));
+
+        jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "아루");
+
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE id = ?",
+                Integer.class,
+                saved.getId()
+        );
+
+        assertThat(count).isZero();
+    }
+
+    @Test
+    @DisplayName("대기 ID가 같아도 이름이 다르면 예약 대기를 삭제하지 않는다")
+    void deleteByIdAndDifferentName() {
+        Reservation reservation = createReservation();
+        ReservationWaiting saved = jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalTime.parse("12:00")
+        ));
+
+        jdbcReservationWaitingRepository.deleteByIdAndName(saved.getId(), "다른이름");
+
+        Integer count = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE id = ?",
+                Integer.class,
+                saved.getId()
+        );
+
+        assertThat(count).isOne();
+    }
+
     private Reservation createReservation() {
         Theme theme = jdbcThemeRepository.save(
                 Theme.createNew("미술관의 밤", "추리 테마", "https://example.com/theme.png")

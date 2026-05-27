@@ -2,6 +2,7 @@ package roomescape.reservationwaiting;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -103,6 +104,40 @@ class ReservationWaitingApiTest {
                 .andExpect(jsonPath("$.status").value(400));
     }
 
+    @Test
+    @DisplayName("예약 대기를 삭제한다")
+    void deleteReservationWaiting() throws Exception {
+        createReservationWaiting(1L, 1L, "아루");
+
+        mockMvc.perform(delete("/waitings/1")
+                        .param("name", "아루"))
+                .andExpect(status().isNoContent());
+
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE id = 1",
+                Integer.class
+        );
+        assert waitingCount != null;
+        assertThat(waitingCount).isZero();
+    }
+
+    @Test
+    @DisplayName("이름이 다르면 예약 대기를 삭제하지 않는다")
+    void deleteReservationWaitingWithDifferentName() throws Exception {
+        createReservationWaiting(1L, 1L, "아루");
+
+        mockMvc.perform(delete("/waitings/1")
+                        .param("name", "다른이름"))
+                .andExpect(status().isNoContent());
+
+        Integer waitingCount = jdbcTemplate.queryForObject(
+                "SELECT count(1) FROM reservation_waiting WHERE id = 1",
+                Integer.class
+        );
+        assert waitingCount != null;
+        assertThat(waitingCount).isOne();
+    }
+
     private void clearTables() {
         jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
@@ -146,6 +181,16 @@ class ReservationWaitingApiTest {
                 date,
                 themeId,
                 timeId
+        );
+    }
+
+    private void createReservationWaiting(final long id, final long reservationId, final String name) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (id, reservation_id, name, requested_at) VALUES (?, ?, ?, ?)",
+                id,
+                reservationId,
+                name,
+                "12:00:00"
         );
     }
 }
