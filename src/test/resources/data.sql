@@ -46,3 +46,6 @@ INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라�
 INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 8, 'CONFIRMED');
 INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 9, 'CONFIRMED');
 INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('브라운', DATEADD(DAY, -3, CURRENT_DATE), 1, 10, 'CONFIRMED');
+
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('그해', DATEADD(DAY, -6, CURRENT_DATE), 1, 1, 'WAITING');
+INSERT INTO reservation (name, date, time_id, theme_id, status) VALUES ('아나키', DATEADD(DAY, -6, CURRENT_DATE), 1, 1, 'WAITING');

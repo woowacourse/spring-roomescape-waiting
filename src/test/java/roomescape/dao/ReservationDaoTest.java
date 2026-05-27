@@ -7,17 +7,17 @@ import java.time.LocalDate;
 import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.dao.EmptyResultDataAccessException;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationOrder;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 
-@SpringBootTest
-@Transactional
+@JdbcTest
+@Import({ReservationDao.class, ReservationTimeDao.class, ThemeDao.class})
 class ReservationDaoTest {
 
     @Autowired
@@ -45,7 +45,7 @@ class ReservationDaoTest {
     @Test
     void 이름으로_예약_조회() {
         List<ReservationOrder> reservation = reservationDao.findByName("아나키");
-        assertThat(reservation).hasSize(1);
+        assertThat(reservation).hasSize(2);
     }
 
     @Test
@@ -53,6 +53,35 @@ class ReservationDaoTest {
         List<ReservationOrder> reservation = reservationDao.findByName("없는이름");
         assertThat(reservation).isEmpty();
     }
+
+    @Test
+    void 이름으로_예약_조회_시_대기_순번_부여() {
+        ReservationOrder firstWaiting = reservationDao.findByName("그해").stream()
+                .filter(r -> r.getStatus() == ReservationStatus.WAITING)
+                .findFirst()
+                .orElseThrow();
+        ReservationOrder secondWaiting = reservationDao.findByName("아나키").stream()
+                .filter(r -> r.getStatus() == ReservationStatus.WAITING)
+                .findFirst()
+                .orElseThrow();
+
+        assertThat(firstWaiting.getOrder()).isEqualTo(1);
+        assertThat(secondWaiting.getOrder()).isEqualTo(2);
+    }
+
+    @Test
+    void 대기_삭제_시_후순위_대기자_순번_당겨짐() {
+        reservationDao.delete(20L);
+
+        ReservationOrder secondWaiting = reservationDao.findByName("아나키").stream()
+                .filter(r -> r.getStatus() == ReservationStatus.WAITING)
+                .findFirst()
+                .orElseThrow();
+
+
+        assertThat(secondWaiting.getOrder()).isEqualTo(1);
+    }
+
 
     @Test
     void 예약_존재_여부_확인_존재하는_경우() {
@@ -102,7 +131,6 @@ class ReservationDaoTest {
     void 예약_삭제() {
         reservationDao.delete(1L);
 
-        assertThatThrownBy(() -> reservationDao.findById(1L))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+        assertThatThrownBy(() -> reservationDao.findById(1L)).isInstanceOf(EmptyResultDataAccessException.class);
     }
 }
