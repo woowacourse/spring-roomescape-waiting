@@ -46,3 +46,9 @@ VALUES ('user2', '2099-12-01', 2, 1);
 INSERT INTO reservation_waiting (name, reservation_id)
 VALUES ('user2', 1);
 
+INSERT INTO reservation_waiting (name, reservation_id)
+VALUES ('user1', 12);
+
+INSERT INTO reservation_waiting (name, reservation_id)
+VALUES ('user3', 1);
+
