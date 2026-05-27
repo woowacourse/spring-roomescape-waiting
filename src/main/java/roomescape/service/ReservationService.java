@@ -1,10 +1,12 @@
 package roomescape.service;
 
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.DuplicateReservationException;
 import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
@@ -79,9 +81,14 @@ public class ReservationService {
     }
 
     private Reservation save(Reservation reservation) {
-        Long id = reservationRepository.insert(reservation);
-        return reservationRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("생성된 예약을 찾을 수 없습니다."));
+        try {
+            Long id = reservationRepository.insert(reservation);
+            return reservationRepository.findById(id)
+                    .orElseThrow(() -> new IllegalArgumentException("생성된 예약을 찾을 수 없습니다."));
+        } catch (DuplicateKeyException e) {
+            throw new DuplicateReservationException("이미 예약된 시간입니다.");
+        }
+
     }
 
     private Reservation findReservation(Long id) {
