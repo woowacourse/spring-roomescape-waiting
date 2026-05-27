@@ -43,6 +43,7 @@ CREATE TABLE IF NOT EXISTS waiting_reservation
     theme_id BIGINT NOT NULL,
     created_at TIMESTAMP NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE (name, date_id, time_id, theme_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id),
     FOREIGN KEY (date_id) REFERENCES reservation_date (id),
     FOREIGN KEY (theme_id) REFERENCES theme (id)
