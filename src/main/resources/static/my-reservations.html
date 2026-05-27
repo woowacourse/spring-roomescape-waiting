@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>내 예약</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", sans-serif;
+            margin: 0;
+            background: #f5f5f7;
+            color: #1d1d1f;
+        }
+
+        header {
+            background: #1d1d1f;
+            color: #fff;
+            padding: 24px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 24px;
+        }
+
+        header a {
+            color: #aaa;
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        header a:hover {
+            color: #fff;
+        }
+
+        main {
+            max-width: 720px;
+            margin: 0 auto;
+            padding: 40px;
+        }
+
+        .lookup {
+            background: #fff;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            display: flex;
+            gap: 12px;
+        }
+
+        .lookup input {
+            flex: 1;
+            padding: 12px 14px;
+            font-size: 15px;
+            border: 1px solid #d2d2d7;
+            border-radius: 8px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .lookup input:focus {
+            border-color: #007aff;
+        }
+
+        .lookup button {
+            padding: 12px 24px;
+            background: #007aff;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .lookup button:hover {
+            background: #0066cc;
+        }
+
+        .lookup-error {
+            color: #ff3b30;
+            padding: 0 16px 16px;
+            font-size: 14px;
+        }
+
+        .reservation-card {
+            background: #fff;
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 12px;
+        }
+
+        .reservation-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            gap: 16px;
+            margin-bottom: 4px;
+        }
+
+        .reservation-theme {
+            font-weight: 600;
+            font-size: 18px;
+            margin: 0;
+        }
+
+        .reservation-when {
+            color: #666;
+            font-size: 15px;
+            margin: 4px 0 16px;
+        }
+
+        .actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .actions button {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+            border: 1px solid #d2d2d7;
+            background: #fff;
+            color: #1d1d1f;
+        }
+
+        .actions button:hover {
+            background: #f0f0f3;
+        }
+
+        .actions .cancel-btn {
+            color: #ff3b30;
+            border-color: #ffd5d2;
+        }
+
+        .actions .cancel-btn:hover {
+            background: #fff5f5;
+        }
+
+        .update-form {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f3;
+            display: none;
+        }
+
+        .update-form.active {
+            display: block;
+        }
+
+        .update-form-row {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .update-form-row label {
+            font-size: 13px;
+            color: #666;
+            width: 60px;
+        }
+
+        .update-form-row input[type="date"],
+        .update-form-row select {
+            flex: 1;
+            padding: 10px 12px;
+            font-size: 14px;
+            border: 1px solid #d2d2d7;
+            border-radius: 6px;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .update-form-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: flex-end;
+            margin-top: 12px;
+        }
+
+        .update-form-actions .submit-update {
+            background: #007aff;
+            color: #fff;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            font-family: inherit;
+        }
+
+        .update-form-actions .submit-update:disabled {
+            background: #d2d2d7;
+            cursor: not-allowed;
+        }
+
+        .card-message {
+            margin-top: 12px;
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 14px;
+            display: none;
+        }
+
+        .card-message.error {
+            background: #fff5f5;
+            color: #ff3b30;
+            display: block;
+        }
+
+        .card-message.success {
+            background: #d1f5d3;
+            color: #1d6b1f;
+            display: block;
+        }
+
+        .empty {
+            color: #999;
+            font-size: 14px;
+            padding: 32px 0;
+            text-align: center;
+        }
+
+        .toast {
+            position: fixed;
+            top: 100px;
+            left: 50%;
+            transform: translateX(-50%) translateY(-20px);
+            padding: 12px 24px;
+            background: #1d6b1f;
+            color: #fff;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.25s ease, transform 0.25s ease;
+            z-index: 1000;
+        }
+
+        .toast.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+    </style>
+</head>
+<body>
+<header>
+    <h1>🔑 내 예약</h1>
+    <a href="index.html">← 메인으로</a>
+</header>
+<main>
+    <div id="toast" class="toast"></div>
+    <div class="lookup">
+        <input type="text" id="name-input" placeholder="이름을 입력하세요" maxlength="30">
+        <button id="lookup-btn">조회</button>
+    </div>
+    <div id="lookup-error" class="lookup-error"></div>
+
+    <div id="reservation-list"></div>
+</main>
+
+<script>
+    let currentName = '';
+
+    document.getElementById('lookup-btn').addEventListener('click', lookup);
+    document.getElementById('name-input').addEventListener('keypress', e => {
+        if (e.key === 'Enter') lookup();
+    });
+
+    async function lookup() {
+        const name = document.getElementById('name-input').value.trim();
+        const errorEl = document.getElementById('lookup-error');
+        const listEl = document.getElementById('reservation-list');
+
+        errorEl.textContent = '';
+        listEl.innerHTML = '';
+
+        if (!name) {
+            errorEl.textContent = '이름을 입력해주세요.';
+            return;
+        }
+
+        currentName = name;
+
+        try {
+            const res = await fetch(`/user/reservations?name=${encodeURIComponent(name)}`);
+            if (!res.ok) {
+                const msg = await extractErrorMessage(res);
+                errorEl.textContent = msg;
+                return;
+            }
+            const reservations = await res.json();
+            if (reservations.length === 0) {
+                listEl.innerHTML = `<p class="empty">${name}님 이름으로 된 예약이 없습니다.</p>`;
+                return;
+            }
+            listEl.innerHTML = reservations.map(renderCard).join('');
+            attachCardHandlers();
+        } catch (e) {
+            errorEl.textContent = '예약 목록을 불러오지 못했습니다.';
+        }
+    }
+
+    function renderCard(r) {
+        return `
+            <div class="reservation-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
+                <div class="reservation-header">
+                    <div>
+                        <p class="reservation-theme">${escapeHtml(r.theme.name)}</p>
+                        <p class="reservation-when">
+                            <span class="current-date">${r.date}</span>
+                            <span class="current-time">${r.time.startAt}</span>
+                        </p>
+                    </div>
+                    <div class="actions">
+                        <button class="update-btn">변경</button>
+                        <button class="cancel-btn">취소</button>
+                    </div>
+                </div>
+
+                <div class="update-form">
+                    <div class="update-form-row">
+                        <label>날짜</label>
+                        <input type="date" class="update-date">
+                    </div>
+                    <div class="update-form-row">
+                        <label>시간</label>
+                        <select class="update-time" disabled>
+                            <option>날짜를 먼저 선택하세요</option>
+                        </select>
+                    </div>
+                    <div class="update-form-actions">
+                        <button class="submit-update" disabled>변경 확정</button>
+                    </div>
+                </div>
+
+                <div class="card-message"></div>
+            </div>
+        `;
+    }
+
+    function attachCardHandlers() {
+        document.querySelectorAll('.reservation-card').forEach(card => {
+            const id = card.dataset.id;
+            const themeId = card.dataset.themeId;
+
+            card.querySelector('.cancel-btn').addEventListener('click',
+                () => onCancel(card, id));
+
+            card.querySelector('.update-btn').addEventListener('click',
+                () => onToggleUpdate(card));
+
+            card.querySelector('.update-date').addEventListener('change',
+                e => onDateChange(card, themeId, e.target.value));
+
+            card.querySelector('.update-time').addEventListener('change',
+                e => onTimeChange(card, e.target.value));
+
+            card.querySelector('.submit-update').addEventListener('click',
+                () => onSubmitUpdate(card, id, themeId));
+        });
+    }
+
+    async function onCancel(card, id) {
+        if (!confirm('정말 이 예약을 취소하시겠습니까?')) return;
+
+        const msgEl = card.querySelector('.card-message');
+        msgEl.className = 'card-message';
+
+        try {
+            const res = await fetch(
+                `/user/reservations/${id}?name=${encodeURIComponent(currentName)}`,
+                {method: 'DELETE'}
+            );
+            if (res.status === 204) {
+                showToast('예약이 취소되었습니다.');
+                await lookup();
+                return;
+            }
+            const msg = await extractErrorMessage(res);
+            msgEl.className = 'card-message error';
+            msgEl.textContent = msg;
+        } catch (e) {
+            msgEl.className = 'card-message error';
+            msgEl.textContent = '취소에 실패했습니다.';
+        }
+    }
+
+    function onToggleUpdate(card) {
+        const form = card.querySelector('.update-form');
+        form.classList.toggle('active');
+        if (form.classList.contains('active')) {
+            const dateInput = card.querySelector('.update-date');
+            dateInput.min = new Date().toISOString().split('T')[0];
+        }
+    }
+
+    async function onDateChange(card, themeId, date) {
+        const timeSelect = card.querySelector('.update-time');
+        const submitBtn = card.querySelector('.submit-update');
+
+        timeSelect.innerHTML = '<option>불러오는 중...</option>';
+        timeSelect.disabled = true;
+        submitBtn.disabled = true;
+
+        if (!date) return;
+
+        try {
+            const res = await fetch(
+                `/user/themes/${themeId}/available-times?date=${date}`
+            );
+            if (!res.ok) {
+                timeSelect.innerHTML = '<option>시간 조회 실패</option>';
+                return;
+            }
+            const times = await res.json();
+            if (times.length === 0) {
+                timeSelect.innerHTML = '<option>예약 가능한 시간이 없습니다</option>';
+                return;
+            }
+            timeSelect.innerHTML = '<option value="">시간을 선택하세요</option>'
+                + times.map(t => `<option value="${t.id}">${t.startAt}</option>`).join('');
+            timeSelect.disabled = false;
+        } catch (e) {
+            timeSelect.innerHTML = '<option>시간 조회 실패</option>';
+        }
+    }
+
+    function onTimeChange(card, timeId) {
+        const submitBtn = card.querySelector('.submit-update');
+        submitBtn.disabled = !timeId;
+    }
+
+    async function onSubmitUpdate(card, id, themeId) {
+        const date = card.querySelector('.update-date').value;
+        const timeSelect = card.querySelector('.update-time');
+        const timeId = timeSelect.value;
+        const timeText = timeSelect.selectedOptions[0]?.text || '';  // ← 추가
+        const msgEl = card.querySelector('.card-message');
+
+        msgEl.className = 'card-message';
+
+        try {
+            const res = await fetch(`/user/reservations/${id}`, {
+                method: 'PATCH',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({
+                    name: currentName,
+                    date: date,
+                    timeId: Number(timeId)
+                })
+            });
+
+            if (res.ok) {
+                showToast(`${date} ${timeText}로 변경되었습니다.`);
+                await lookup();
+                return;
+            }
+
+            const msg = await extractErrorMessage(res);
+            msgEl.className = 'card-message error';
+            msgEl.textContent = msg;
+        } catch (e) {
+            console.error('변경 처리 중 오류:', e);
+            msgEl.className = 'card-message error';
+            msgEl.textContent = '변경에 실패했습니다.';
+        }
+    }
+
+    async function extractErrorMessage(res) {
+        try {
+            const body = await res.json();
+            return body.message || '알 수 없는 오류가 발생했습니다.';
+        } catch {
+            return '알 수 없는 오류가 발생했습니다.';
+        }
+    }
+
+    function showToast(message) {
+        const toast = document.getElementById('toast');
+        toast.textContent = message;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 2000);
+    }
+
+    function escapeHtml(s) {
+        return String(s)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;');
+    }
+</script>
+</body>
+</html>
