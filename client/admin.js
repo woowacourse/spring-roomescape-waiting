@@ -186,8 +186,7 @@ function renderScheduleList(schedules) {
 }
 
 async function loadReservations() {
-  const storeId = Number(document.getElementById("reservation-store-id").value);
-  const reservations = await api(`/manager/stores/${storeId}/reservations`);
+  const reservations = await api("/manager/reservations");
   renderReservationList(reservations);
 }
 
@@ -317,7 +316,6 @@ document.getElementById("reservation-form").addEventListener("submit", async (e)
         date,
         timeId,
         themeId,
-        storeId: Number(document.getElementById("reservation-store-id").value),
       }),
     });
     await loadReservations();
@@ -351,8 +349,7 @@ document.getElementById("reservation-delete-form").addEventListener("submit", as
       return;
     }
 
-    const storeId = Number(document.getElementById("reservation-store-id").value);
-    await api(`/manager/stores/${storeId}/reservations/${id}`, { method: "DELETE" });
+    await api(`/manager/reservations/${id}`, { method: "DELETE" });
     await loadReservations();
     setStatus(`예약 #${id} 삭제 완료`);
     e.target.reset();
@@ -364,6 +361,47 @@ document.getElementById("reservation-delete-form").addEventListener("submit", as
     setStatus(error.message, true);
     await showResultModal({
       title: "예약 삭제 실패",
+      message: error.message,
+      isError: true,
+    });
+  }
+});
+
+document.getElementById("reservation-update-form").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  try {
+    const id = Number(document.getElementById("reservation-update-id").value);
+    const dateInput = document.getElementById("reservation-update-date").value;
+    const timeIdInput = document.getElementById("reservation-update-time-id").value;
+    const payload = {};
+    if (dateInput) payload.date = dateInput;
+    if (timeIdInput) payload.timeId = Number(timeIdInput);
+
+    const confirmed = await confirmAction({
+      title: "예약 수정 확인",
+      message: `예약 ID ${id}를 수정할까요?`,
+      okLabel: "수정",
+    });
+    if (!confirmed) {
+      setStatus("예약 수정 취소");
+      return;
+    }
+
+    await api(`/manager/reservations/${id}`, {
+      method: "PATCH",
+      body: JSON.stringify(payload),
+    });
+    await loadReservations();
+    setStatus(`예약 #${id} 수정 완료`);
+    e.target.reset();
+    await showResultModal({
+      title: "예약 수정 성공",
+      message: `예약 ID ${id}가 수정되었습니다.`,
+    });
+  } catch (error) {
+    setStatus(error.message, true);
+    await showResultModal({
+      title: "예약 수정 실패",
       message: error.message,
       isError: true,
     });
@@ -578,7 +616,5 @@ loginFormEl.addEventListener("submit", async (e) => {
 });
 
 setTodayDefault();
-setAdminAuthState(Boolean(getAccessToken()));
-if (getAccessToken()) {
-  authStatusEl.textContent = "로그인 상태입니다.";
-}
+setAdminAuthState(false);
+authStatusEl.textContent = "관리자 계정으로 로그인하세요.";

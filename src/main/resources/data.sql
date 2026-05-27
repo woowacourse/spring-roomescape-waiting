@@ -92,7 +92,8 @@ INSERT INTO member (name, password, role)
 VALUES ('kim', 'kimpass', 'USER'),
        ('lee', 'leepass', 'USER'),
        ('park', 'parkpass', 'USER'),
-       ('oh', 'ohpass', 'USER');
+       ('oh', 'ohpass', 'USER'),
+       ('manager', 'mpass', 'MANAGER');
 
 INSERT INTO reservation (member_id, schedule_id)
 VALUES (1, 1),  -- 5월 5일 10시 세기의 도둑 예약

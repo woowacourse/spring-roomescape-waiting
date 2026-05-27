@@ -81,10 +81,19 @@
             <button type="submit" class="danger-button">예약 삭제</button>
           </form>
         </article>
+
+        <article class="admin-card">
+          <h3>예약 수정</h3>
+          <form id="reservation-update-form" class="row-form admin-form">
+            <label>예약 ID <input type="number" id="reservation-update-id" min="1" required></label>
+            <label>변경 날짜 <input type="date" id="reservation-update-date"></label>
+            <label>변경 시간 ID <input type="number" id="reservation-update-time-id" min="1"></label>
+            <button type="submit" class="search-button">예약 수정</button>
+          </form>
+        </article>
       </div>
 
       <div class="reservation-toolbar">
-        <label>매장 ID <input type="number" id="reservation-store-id" min="1" value="1" required></label>
         <button id="reservation-refresh" class="search-button">예약 목록 조회</button>
       </div>
       <ul id="reservation-list" class="list reservation-list"></ul>
