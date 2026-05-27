@@ -111,20 +111,21 @@ class JdbcReservationRepositoryTest {
 
     @Test
     @DisplayName("날짜+시간+테마 조합의 예약 존재 여부를 확인한다")
-    void existsByDateAndTimeIdAndThemeId() {
+    void existsByNameAndDateAndTimeIdAndThemeId() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         insertReservation("브라운", DATE, time, theme);
 
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(DATE, time.getId(), theme.getId()))
+        assertThat(
+                reservationRepository.existsByNameAndDateAndTimeIdAndThemeId("브라운", DATE, time.getId(), theme.getId()))
                 .isTrue();
-        assertThat(reservationRepository.existsByDateAndTimeIdAndThemeId(
-                LocalDate.of(2099, 1, 1), time.getId(), theme.getId())).isFalse();
+        assertThat(reservationRepository.existsByNameAndDateAndTimeIdAndThemeId(
+                "브라운", LocalDate.of(2099, 1, 1), time.getId(), theme.getId())).isFalse();
     }
 
     @Test
     @DisplayName("특정 예약을 제외한 날짜+시간+테마 조합의 예약 존재 여부를 확인한다")
-    void existsByDateAndTimeIdAndThemeIdAndIdNot() {
+    void existsByNameAndDateAndTimeIdAndThemeIdAndIdNot() {
         ReservationTime time = insertTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("무인도 탈출");
         Reservation saved = insertReservation("브라운", DATE, time, theme);
