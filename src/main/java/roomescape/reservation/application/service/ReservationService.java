@@ -96,14 +96,7 @@ public class ReservationService {
 
         if (oldestWaiting.isPresent()) {
             Waiting waiting = oldestWaiting.get();
-            Reservation waitingToReservation = Reservation.builder()
-                    .id(reservation.getId())
-                    .name(waiting.getName())
-                    .date(waiting.getDate())
-                    .themeId(waiting.getThemeId())
-                    .timeId(waiting.getTimeId())
-                    .build();
-            reservationRepository.update(waitingToReservation);
+            reservationRepository.updateWaitingOwner(reservation.getId(), waiting.getName());
             return waitingRepository.delete(waiting.getId());
         }
 

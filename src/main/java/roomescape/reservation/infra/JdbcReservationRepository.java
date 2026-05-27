@@ -13,6 +13,7 @@ import roomescape.global.RoomEscapeException;
 import roomescape.reservation.application.exception.ReservationErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.repository.ReservationRepository;
+import roomescape.reservation.domain.repository.WaitingRepository;
 import roomescape.reservation.domain.repository.dto.ReservationDetail;
 
 @Repository
@@ -164,6 +165,19 @@ public class JdbcReservationRepository implements ReservationRepository {
                 timeId,
                 id
         );
+    }
+
+    @Override
+    public void updateWaitingOwner(Long id, String name) {
+        int updatedRowCount = jdbcTemplate.update(
+                "UPDATE reservation SET name = ? WHERE id = ?",
+                name,
+                id
+        );
+
+        if (updatedRowCount == 0) {
+            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_NOT_FOUND);
+        }
     }
 
     private Reservation mapReservation(Long id, String name, LocalDate date, Long themeId, Long timeId) {
