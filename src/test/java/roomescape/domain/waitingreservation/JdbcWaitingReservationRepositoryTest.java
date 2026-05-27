@@ -44,8 +44,8 @@ class JdbcWaitingReservationRepositoryTest {
         jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", DATE_ID, PLAY_DAY.toString());
         jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", TIME_ID, START_AT.toString());
         jdbcTemplate.update(
-            "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
-            THEME_ID, "공포", "테마 내용", "/themes/scary"
+                "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
+                THEME_ID, "공포", "테마 내용", "/themes/scary"
         );
 
         date = ReservationDate.of(DATE_ID, PLAY_DAY);
@@ -59,7 +59,7 @@ class JdbcWaitingReservationRepositoryTest {
         waitingReservationRepository.save(waitingReservation);
 
         assertThatThrownBy(() -> waitingReservationRepository.save(waitingReservation))
-            .isInstanceOf(DuplicateKeyException.class);
+                .isInstanceOf(DuplicateKeyException.class);
     }
 
     @Test
@@ -68,7 +68,11 @@ class JdbcWaitingReservationRepositoryTest {
         waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 8, 10, 0)));
         waitingReservationRepository.save(waiting("보예", LocalDateTime.of(2026, 5, 9, 10, 0)));
 
-        WaitingReservation oldest = waitingReservationRepository.findOldest().orElseThrow();
+        WaitingReservation oldest = waitingReservationRepository.findOldestBySlot(
+                date.getId(),
+                time.getId(),
+                theme.getId()
+        ).orElseThrow();
 
         assertThat(oldest.getName()).isEqualTo("이산");
         assertThat(oldest.getDate().getId()).isEqualTo(DATE_ID);
@@ -82,7 +86,30 @@ class JdbcWaitingReservationRepositoryTest {
 
     @Test
     void 예약_대기가_없으면_가장_먼저_신청한_예약_대기를_조회할_수_없다() {
-        assertThat(waitingReservationRepository.findOldest()).isEmpty();
+        assertThat(waitingReservationRepository.findOldestBySlot(
+                        date.getId(),
+                        time.getId(),
+                        theme.getId()
+                )
+        ).isEmpty();
+    }
+
+    @Test
+    void 특정_슬롯에서_가장_먼저_신청한_예약_대기를_가져온다() {
+        Slot otherSlot = insertSlot(
+                102L, LocalDate.of(2026, 5, 11),
+                202L, LocalTime.of(11, 0),
+                302L, "스릴러"
+        );
+        waitingReservationRepository.save(waiting("다른슬롯", otherSlot, LocalDateTime.of(2026, 5, 6, 10, 0)));
+        waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 7, 10, 0)));
+        waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 8, 10, 0)));
+
+        WaitingReservation oldest = waitingReservationRepository
+                .findOldestBySlot(DATE_ID, TIME_ID, THEME_ID)
+                .orElseThrow();
+
+        assertThat(oldest.getName()).isEqualTo("이산");
     }
 
     @Test
@@ -91,17 +118,17 @@ class JdbcWaitingReservationRepositoryTest {
         waitingReservationRepository.save(waiting("이산", LocalDateTime.of(2026, 5, 8, 10, 0)));
 
         Slot secondSlot = insertSlot(
-            102L, LocalDate.of(2026, 5, 11),
-            202L, LocalTime.of(11, 0),
-            302L, "스릴러"
+                102L, LocalDate.of(2026, 5, 11),
+                202L, LocalTime.of(11, 0),
+                302L, "스릴러"
         );
         waitingReservationRepository.save(waiting("이산", secondSlot, LocalDateTime.of(2026, 5, 7, 11, 0)));
         waitingReservationRepository.save(waiting("브리", secondSlot, LocalDateTime.of(2026, 5, 8, 11, 0)));
 
         Slot thirdSlot = insertSlot(
-            103L, LocalDate.of(2026, 5, 12),
-            203L, LocalTime.of(13, 0),
-            303L, "미스터리"
+                103L, LocalDate.of(2026, 5, 12),
+                203L, LocalTime.of(13, 0),
+                303L, "미스터리"
         );
         waitingReservationRepository.save(waiting("나무", thirdSlot, LocalDateTime.of(2026, 5, 7, 12, 0)));
         waitingReservationRepository.save(waiting("고래", thirdSlot, LocalDateTime.of(2026, 5, 8, 12, 0)));
@@ -111,16 +138,17 @@ class JdbcWaitingReservationRepositoryTest {
 
         assertThat(waitings).hasSize(3);
         assertThat(waitings).extracting(result -> result.waitingReservation().getName())
-            .containsOnly("이산");
+                .containsOnly("이산");
         assertThat(waitings).extracting(result -> result.waitingReservation().getDate().getId())
-            .containsExactly(DATE_ID, 102L, 103L);
+                .containsExactly(DATE_ID, 102L, 103L);
         assertThat(waitings).extracting(WaitingReservationWithRank::rank)
-            .containsExactly(2L, 1L, 3L);
+                .containsExactly(2L, 1L, 3L);
     }
 
     @Test
     void 대기_취소를_하면_정상_삭제한다() {
-        WaitingReservation actual = waitingReservationRepository.save(waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
+        WaitingReservation actual = waitingReservationRepository.save(
+                waiting("고래", LocalDateTime.of(2026, 5, 7, 10, 0)));
 
         waitingReservationRepository.deleteById(actual.getId());
 
@@ -136,24 +164,24 @@ class JdbcWaitingReservationRepositoryTest {
     }
 
     private Slot insertSlot(long dateId, LocalDate playDay, long timeId, LocalTime startAt, long themeId,
-        String themeName) {
+                            String themeName) {
         jdbcTemplate.update("insert into reservation_date(id, play_day) values (?, ?)", dateId, playDay.toString());
         jdbcTemplate.update("insert into reservation_time(id, start_at) values (?, ?)", timeId, startAt.toString());
         jdbcTemplate.update(
-            "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
-            themeId, themeName, "테마 내용", "/themes/" + themeId
+                "insert into theme(id, name, content, url) values (?, ?, ?, ?)",
+                themeId, themeName, "테마 내용", "/themes/" + themeId
         );
         return new Slot(
-            ReservationDate.of(dateId, playDay),
-            ReservationTime.of(timeId, startAt),
-            Theme.of(themeId, themeName, "테마 내용", "/themes/" + themeId)
+                ReservationDate.of(dateId, playDay),
+                ReservationTime.of(timeId, startAt),
+                Theme.of(themeId, themeName, "테마 내용", "/themes/" + themeId)
         );
     }
 
     private record Slot(
-        ReservationDate date,
-        ReservationTime time,
-        Theme theme
+            ReservationDate date,
+            ReservationTime time,
+            Theme theme
     ) {
     }
 

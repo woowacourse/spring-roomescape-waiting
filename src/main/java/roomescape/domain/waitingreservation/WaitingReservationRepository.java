@@ -10,7 +10,7 @@ public interface WaitingReservationRepository {
 
     boolean existsByNameAndDateIdAndTimeIdAndThemeId(String name, long dateId, long timeId, long themeId);
 
-    Optional<WaitingReservation> findOldest();
+    Optional<WaitingReservation> findOldestBySlot(long dateId, long timeId, long themeId);
 
     List<WaitingReservationWithRank> findAllByNameWithRank(String name);
 

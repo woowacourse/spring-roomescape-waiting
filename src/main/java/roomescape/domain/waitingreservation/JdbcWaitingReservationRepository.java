@@ -47,6 +47,21 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
                     limit 1
                     """;
 
+    private static final String FIND_OLDEST_BY_SLOT_SQL =
+            """
+                    select wr.id, wr.name, wr.created_at,
+                           rd.id as date_id, rd.play_day,
+                           rt.id as time_id, rt.start_at,
+                           th.id as theme_id, th.name as theme_name, th.content as theme_content, th.url as theme_url
+                    from waiting_reservation wr
+                    join reservation_date rd on wr.date_id = rd.id
+                    join reservation_time rt on wr.time_id = rt.id
+                    join theme th on wr.theme_id = th.id
+                    where wr.date_id = ? and wr.time_id = ? and wr.theme_id = ?
+                    order by wr.created_at asc, wr.id asc
+                    limit 1
+                    """;
+
     private static final String FIND_ALL_BY_NAME_WITH_RANK_SQL =
             """
                     select ranked.id, ranked.name, ranked.created_at, ranked.waiting_rank,
@@ -115,8 +130,8 @@ public class JdbcWaitingReservationRepository implements WaitingReservationRepos
     }
 
     @Override
-    public Optional<WaitingReservation> findOldest() {
-        return jdbcTemplate.query(FIND_OLDEST_SQL, waitingReservationRowMapper())
+    public Optional<WaitingReservation> findOldestBySlot(long dateId, long timeId, long themeId) {
+        return jdbcTemplate.query(FIND_OLDEST_BY_SLOT_SQL, waitingReservationRowMapper(), dateId, timeId, themeId)
                 .stream()
                 .findFirst();
     }

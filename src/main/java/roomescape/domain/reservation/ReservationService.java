@@ -4,6 +4,7 @@ import jakarta.validation.Valid;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -17,6 +18,8 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeService;
 import roomescape.domain.theme.Theme;
 import roomescape.domain.theme.ThemeService;
+import roomescape.domain.waitingreservation.WaitingReservation;
+import roomescape.domain.waitingreservation.WaitingReservationRepository;
 import roomescape.support.exception.ReservationDateErrorCode;
 import roomescape.support.exception.ReservationErrorCode;
 import roomescape.support.exception.ReservationTimeErrorCode;
@@ -31,6 +34,7 @@ public class ReservationService {
     private final ReservationDateService reservationDateService;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
+    private final WaitingReservationRepository waitingReservationRepository;
 
     public ReservationCreationResponse createReservation(ReservationCreationRequest request) {
         ReservationDate reservationDate = reservationDateService.findById(request.dateId());
@@ -39,14 +43,14 @@ public class ReservationService {
         Theme theme = themeService.findById(request.themeId());
         validateNotDuplicated(request.dateId(), request.timeId(), request.themeId());
         Reservation savedReservation = reservationRepository.save(
-            request.toEntity(reservationDate, reservationTime, theme));
+                request.toEntity(reservationDate, reservationTime, theme));
         return ReservationCreationResponse.from(savedReservation);
     }
 
     public List<ReservationResponse> getAllReservations() {
         return reservationRepository.findAll().stream()
-            .map(ReservationResponse::from)
-            .toList();
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public void deleteReservation(Long id) {
@@ -58,13 +62,29 @@ public class ReservationService {
 
     public List<ReservationResponse> getReservationsByName(String name) {
         return reservationRepository.findByName(name).stream()
-            .map(ReservationResponse::from)
-            .toList();
+                .map(ReservationResponse::from)
+                .toList();
     }
 
     public void cancelReservation(Long id) {
         Reservation reservation = findById(id);
         validateModifiable(reservation);
+
+        Optional<WaitingReservation> waitingReservationOpt = waitingReservationRepository.findOldestBySlot(
+                reservation.getDate().getId(),
+                reservation.getTime().getId(),
+                reservation.getTheme().getId()
+        );
+        if (waitingReservationOpt.isPresent()) {
+            WaitingReservation waitingReservation = waitingReservationOpt.get();
+            reservationRepository.save(Reservation.createWithoutId(
+                    waitingReservation.getName(),
+                    waitingReservation.getDate(),
+                    waitingReservation.getTime(),
+                    waitingReservation.getTheme()
+            ));
+            waitingReservationRepository.deleteById(waitingReservation.getId());
+        }
         reservationRepository.deleteById(id);
     }
 
@@ -86,7 +106,7 @@ public class ReservationService {
 
     private Reservation findById(Long id) {
         return reservationRepository.findById(id)
-            .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
+                .orElseThrow(() -> new RoomescapeException(ReservationErrorCode.RESERVATION_NOT_FOUND));
     }
 
     private void validateNotDuplicated(Long dateId, Long timeId, Long themeId) {
