@@ -139,7 +139,7 @@ public class ReservationTimeDaoTest {
             INSERT_RESERVED_TIME_ON_TARGET_DATE_SQL
     })
     void 특정_날짜와_테마에_이미_예약된_시간은_예약불가능하다() {
-        Map<ReservationTime, Boolean> availableTimes = reservationTimeDao.findAvailableTimes(
+        Map<ReservationTime, Long> availableTimes = reservationTimeDao.findAvailableTimes(
                 LocalDate.of(2026, 5, 1),
                 1L
         );
@@ -152,9 +152,9 @@ public class ReservationTimeDaoTest {
                         Map.Entry::getValue
                 )
                 .containsExactlyInAnyOrder(
-                        tuple(1L, LocalTime.of(10, 0), false),
-                        tuple(2L, LocalTime.of(11, 0), false),
-                        tuple(3L, LocalTime.of(13, 0), true)
+                        tuple(1L, LocalTime.of(10, 0), 1L),
+                        tuple(2L, LocalTime.of(11, 0), 2L),
+                        tuple(3L, LocalTime.of(13, 0), null)
                 );
     }
 
@@ -167,7 +167,7 @@ public class ReservationTimeDaoTest {
             INSERT_RESERVED_TIME_ON_OTHER_DATE_SQL
     })
     void 다른_날짜의_예약은_예약가능여부에_영향을_주지_않는다() {
-        Map<ReservationTime, Boolean> availableTimes = reservationTimeDao.findAvailableTimes(
+        Map<ReservationTime, Long> availableTimes = reservationTimeDao.findAvailableTimes(
                 LocalDate.of(2026, 5, 1),
                 1L
         );
@@ -178,9 +178,9 @@ public class ReservationTimeDaoTest {
                         Map.Entry::getValue
                 )
                 .containsExactlyInAnyOrder(
-                        tuple(1L, true),
-                        tuple(2L, true),
-                        tuple(3L, true)
+                        tuple(1L, null),
+                        tuple(2L, null),
+                        tuple(3L, null)
                 );
     }
 
@@ -193,7 +193,7 @@ public class ReservationTimeDaoTest {
             INSERT_RESERVED_TIME_ON_OTHER_THEME_SQL
     })
     void 다른_테마의_예약은_예약가능여부에_영향을_주지_않는다() {
-        Map<ReservationTime, Boolean> availableTimes = reservationTimeDao.findAvailableTimes(
+        Map<ReservationTime, Long> availableTimes = reservationTimeDao.findAvailableTimes(
                 LocalDate.of(2026, 5, 1),
                 1L
         );
@@ -204,9 +204,9 @@ public class ReservationTimeDaoTest {
                         Map.Entry::getValue
                 )
                 .containsExactlyInAnyOrder(
-                        tuple(1L, true),
-                        tuple(2L, true),
-                        tuple(3L, true)
+                        tuple(1L, null),
+                        tuple(2L, null),
+                        tuple(3L, null)
                 );
     }
 }

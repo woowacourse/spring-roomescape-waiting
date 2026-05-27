@@ -8,17 +8,19 @@ import java.util.Map;
 public record AvailableTimeResponse(
         Long id,
         String time,
-        Boolean available
+        Boolean available,
+        Long reservationId
 ) {
-    public static AvailableTimeResponse from(ReservationTime reservationTime, Boolean available) {
+    public static AvailableTimeResponse from(ReservationTime reservationTime, Long reservationId) {
         return new AvailableTimeResponse(
                 reservationTime.getId(),
                 reservationTime.getStartAt().toString(),
-                available
+                reservationId == null,
+                reservationId
         );
     }
 
-    public static List<AvailableTimeResponse> fromAll(Map<ReservationTime, Boolean> reservationTimesAvailability) {
+    public static List<AvailableTimeResponse> fromAll(Map<ReservationTime, Long> reservationTimesAvailability) {
         return reservationTimesAvailability.entrySet().stream()
                 .map(entry -> from(entry.getKey(), entry.getValue()))
                 .toList();

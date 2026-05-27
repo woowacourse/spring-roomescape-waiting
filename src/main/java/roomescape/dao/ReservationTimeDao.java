@@ -64,36 +64,34 @@ public class ReservationTimeDao {
         return jdbcTemplate.update("delete from reservation_time where id = ?", id);
     }
 
-    public Map<ReservationTime, Boolean> findAvailableTimes(LocalDate date, Long id) {
+    public Map<ReservationTime, Long> findAvailableTimes(LocalDate date, Long id) {
         String sql = """
                 SELECT
                     rt.id AS time_id,
                     rt.start_at,
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM reservation r
-                        WHERE r.time_id = rt.id
-                          AND r.theme_id = ?
-                          AND r.date = ?
-                    ) AS available
-                FROM reservation_time rt;
+                    MIN(r.id) AS reservation_id
+                FROM reservation_time rt
+                LEFT JOIN reservation r
+                    ON r.time_id = rt.id
+                   AND r.theme_id = ?
+                   AND r.date = ?
+                GROUP BY rt.id, rt.start_at
+                ORDER BY rt.id;
                 """;
-        Map<ReservationTime, Boolean> reservationTimeBooleanMap = jdbcTemplate.query(sql, getMapResultSetExtractor(),
-                id, date);
-        return reservationTimeBooleanMap;
+        return jdbcTemplate.query(sql, getMapResultSetExtractor(), id, date);
     }
 
-    private ResultSetExtractor<Map<ReservationTime, Boolean>> getMapResultSetExtractor() {
+    private ResultSetExtractor<Map<ReservationTime, Long>> getMapResultSetExtractor() {
         return (ResultSet rs) -> {
-            Map<ReservationTime, Boolean> results = new LinkedHashMap<>();
+            Map<ReservationTime, Long> results = new LinkedHashMap<>();
 
             while (rs.next()) {
                 ReservationTime reservationTime = new ReservationTime(
                         rs.getLong("time_id"),
                         LocalTime.parse(rs.getString("start_at"))
                 );
-                boolean isAvailable = rs.getBoolean("available");
-                results.put(reservationTime, isAvailable);
+                long reservationId = rs.getLong("reservation_id");
+                results.put(reservationTime, rs.wasNull() ? null : reservationId);
             }
             return results;
         };

@@ -35,8 +35,8 @@ public class ReservationTimeService {
     }
 
     public List<AvailableTimeResponse> getAvailableTimes(LocalDate date, Long id) {
-        Map<ReservationTime, Boolean> reservationTimeBooleanMap = reservationTimeDao.findAvailableTimes(date, id);
-        return AvailableTimeResponse.fromAll(reservationTimeBooleanMap);
+        Map<ReservationTime, Long> reservationTimeReservationIdMap = reservationTimeDao.findAvailableTimes(date, id);
+        return AvailableTimeResponse.fromAll(reservationTimeReservationIdMap);
     }
 
     @Transactional
