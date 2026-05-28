@@ -1,8 +1,5 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
@@ -13,8 +10,12 @@ import roomescape.domain.Theme;
 import roomescape.dto.command.ThemeCommand;
 import roomescape.dto.response.ThemeResponse;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
+
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ThemeService {
     private static final int POPULAR_THEME_PERIOD_DAYS = 6;
 
@@ -26,6 +27,7 @@ public class ThemeService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional
     public ThemeResponse addTheme(ThemeCommand command) {
         validateUniqueTheme(command.name());
 
@@ -34,14 +36,12 @@ public class ThemeService {
         return ThemeResponse.from(savedTheme);
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> getThemes() {
         return themeDao.selectAll().stream()
                 .map(ThemeResponse::from)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<ThemeResponse> getPopularThemes(LocalDate today) {
         LocalDate startDate = today.minusDays(POPULAR_THEME_PERIOD_DAYS);
         LocalDate endDate = today.minusDays(1);
@@ -52,6 +52,7 @@ public class ThemeService {
                 .toList();
     }
 
+    @Transactional
     public void deleteTheme(long themeId) {
         Optional<Theme> theme = themeDao.selectById(themeId);
         if (theme.isEmpty()) {
