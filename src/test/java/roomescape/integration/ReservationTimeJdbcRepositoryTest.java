@@ -1,27 +1,20 @@
 package roomescape.integration;
 
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
-import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
-import roomescape.domain.ReservationTime;
-import roomescape.repository.ReservationTimeJdbcRepository;
+import static org.assertj.core.api.Assertions.assertThat;
 
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
+import org.springframework.context.annotation.Import;
+import roomescape.domain.ReservationTime;
+import roomescape.repository.ReservationTimeJdbcRepository;
 
 @JdbcTest
 @Import(ReservationTimeJdbcRepository.class)
-@TestPropertySource(properties = "spring.sql.init.data-locations=")
 class ReservationTimeJdbcRepositoryTest {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
 
     @Autowired
     private ReservationTimeJdbcRepository repository;

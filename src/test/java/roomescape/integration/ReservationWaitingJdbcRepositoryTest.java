@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.TestPropertySource;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
@@ -22,7 +21,6 @@ import roomescape.repository.ReservationWaitingJdbcRepository;
 
 @JdbcTest
 @Import(ReservationWaitingJdbcRepository.class)
-@TestPropertySource(properties = "spring.sql.init.data-locations=")
 class ReservationWaitingJdbcRepositoryTest {
 
     @Autowired
