@@ -344,7 +344,7 @@ main { padding: 48px 0 100px; }
 .time-slot.selected { border-color: var(--text); background: var(--surface-3); }
 .time-slot.reserved {
   background: var(--reserved-bg); border-color: var(--border);
-  color: var(--reserved-text); cursor: not-allowed;
+  color: var(--reserved-text); cursor: default;
 }
 .time-slot-badge {
   font-size: 9px; font-weight: 700;
@@ -352,6 +352,22 @@ main { padding: 48px 0 100px; }
   margin-top: 4px; color: var(--text-muted);
 }
 .time-slot.reserved .time-slot-badge { color: var(--reserved-text); }
+
+.btn-waiting {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 3px 10px;
+  font-size: 10px; font-weight: 700;
+  letter-spacing: 0.06em;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--text);
+  border-radius: 20px;
+  cursor: pointer;
+  transition: all var(--tr);
+  pointer-events: auto;
+}
+.btn-waiting:hover { background: var(--text); color: var(--bg); }
 
 .empty-state {
   text-align: center; color: var(--text-muted); font-size: 12px; padding: 36px 8px;

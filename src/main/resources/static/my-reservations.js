@@ -156,8 +156,8 @@ async function loadMyData() {
           <td>${w.date}</td>
           <td>${timeStart}</td>
           <td>${themeName}</td>
-          <td><button class="btn-delete" onclick="deleteWaiting(${w.id})">취소</button></td>
           <td>${w.waitingOrder}번째</td>
+          <td><button class="btn-delete" onclick="deleteWaiting(${w.id})">취소</button></td>
         </tr>
       `}).join('');
     }
@@ -356,19 +356,12 @@ async function submitModifyBooking() {
 
 // ===== Tabs =====
 function setupTabs() {
-  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+  document.querySelectorAll('.content-tab').forEach(btn => {
     btn.addEventListener('click', (e) => {
-      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.content-tab').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
       e.target.classList.add('active');
-      
-      const tab = e.target.dataset.tab;
-      if (tab === 'reservations') {
-        $('reservations-tab').style.display = 'block';
-        $('waiting-tab').style.display = 'none';
-      } else {
-        $('reservations-tab').style.display = 'none';
-        $('waiting-tab').style.display = 'block';
-      }
+      $(`${e.target.dataset.tab}-tab`).classList.add('active');
     });
   });
 }

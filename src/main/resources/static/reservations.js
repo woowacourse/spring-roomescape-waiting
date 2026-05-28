@@ -208,10 +208,10 @@ async function loadTimeSlots() {
       if (t.reserved) {
         slot.innerHTML = `
           <div>${label}</div>
-          <button class="btn-secondary" style="font-size: 12px; padding: 4px 8px; margin-top: 4px; pointer-events: auto;">예약 대기</button>
+          <div class="time-slot-badge">RESERVED</div>
+          <button class="btn-waiting">대기 신청</button>
         `;
-        const btn = slot.querySelector('button');
-        btn.addEventListener('click', (e) => {
+        slot.querySelector('button').addEventListener('click', (e) => {
           e.stopPropagation();
           openWaitingListModal(t.id, label);
         });
