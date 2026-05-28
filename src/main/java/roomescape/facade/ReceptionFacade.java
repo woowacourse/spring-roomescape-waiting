@@ -134,6 +134,6 @@ public class ReceptionFacade {
                 firstOrder.getReservationDate(), firstOrder.getTime().getId(), firstOrder.getTheme().getId());
 
         reservationService.save(request, firstOrder.getTime(), firstOrder.getTheme());
-        deleteWait(firstOrder.getId());
+        waitService.delete(firstOrder.getId());
     }
 }
