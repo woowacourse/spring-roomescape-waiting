@@ -12,18 +12,18 @@ VALUES ('10:00:00'),
 
 -- theme
 INSERT INTO theme (name, description, thumbnail)
-VALUES ('공포의 저택', '오래된 저택에서 탈출하세요', 'https://example.com/theme1.jpg'),
-       ('사라진 연구소', '비밀 연구소의 진실을 밝혀내세요', 'https://example.com/theme2.jpg'),
-       ('시간 여행자', '시간의 틈에서 탈출하세요', 'https://example.com/theme3.jpg'),
-       ('감옥 탈출', '제한 시간 안에 감옥을 탈출하세요', 'https://example.com/theme4.jpg'),
-       ('마법사의 방', '마법사의 숨겨진 방을 탐험하세요', 'https://example.com/theme5.jpg'),
-       ('좀비 바이러스', '바이러스가 퍼진 도시에서 살아남으세요', 'https://example.com/theme6.jpg'),
-       ('해적의 보물', '해적선에 숨겨진 보물을 찾으세요', 'https://example.com/theme7.jpg'),
-       ('스파이 미션', '비밀 요원이 되어 임무를 완수하세요', 'https://example.com/theme8.jpg'),
-       ('우주 정거장', '고장난 우주 정거장에서 탈출하세요', 'https://example.com/theme9.jpg'),
-       ('고대 유적', '고대 유적의 수수께끼를 풀어보세요', 'https://example.com/theme10.jpg'),
-       ('미스터리 호텔', '호텔에서 벌어진 사건을 해결하세요', 'https://example.com/theme11.jpg'),
-       ('지하 벙커', '폐쇄된 지하 벙커에서 탈출하세요', 'https://example.com/theme12.jpg');
+VALUES ('공포의 저택', '오래된 저택에서 탈출하세요', '/images/themes/haunted-house.jpg'),
+       ('사라진 연구소', '비밀 연구소의 진실을 밝혀내세요', '/images/themes/lost-lab.jpg'),
+       ('시간 여행자', '시간의 틈에서 탈출하세요', '/images/themes/time-traveler.jpg'),
+       ('감옥 탈출', '제한 시간 안에 감옥을 탈출하세요', '/images/themes/prison-break.jpg'),
+       ('마법사의 방', '마법사의 숨겨진 방을 탐험하세요', '/images/themes/wizard-room.jpg'),
+       ('좀비 바이러스', '바이러스가 퍼진 도시에서 살아남으세요', '/images/themes/zombie-virus.jpg'),
+       ('해적의 보물', '해적선에 숨겨진 보물을 찾으세요', '/images/themes/pirate-treasure.jpg'),
+       ('스파이 미션', '비밀 요원이 되어 임무를 완수하세요', '/images/themes/spy-mission.jpg'),
+       ('우주 정거장', '고장난 우주 정거장에서 탈출하세요', '/images/themes/space-station.jpg'),
+       ('고대 유적', '고대 유적의 수수께끼를 풀어보세요', '/images/themes/ancient-ruins.jpg'),
+       ('미스터리 호텔', '호텔에서 벌어진 사건을 해결하세요', '/images/themes/mystery-hotel.jpg'),
+       ('지하 벙커', '폐쇄된 지하 벙커에서 탈출하세요', '/images/themes/bunker.jpg');
 
 -- reservation
 -- theme_id 1: 12건
@@ -124,6 +124,24 @@ VALUES ('예약자1', '2026-05-05', 1, 10),
 -- theme_id 11: 1건
 INSERT INTO reservation (name, `date`, time_id, theme_id)
 VALUES ('예약자1', '2026-05-05', 1, 11);
+
+-- 인기 테마 조회용: 2026-05-27 기준 최근 7일 이내 데이터
+INSERT INTO reservation (name, `date`, time_id, theme_id)
+VALUES ('인기1', '2026-05-26', 1, 2),
+       ('인기2', '2026-05-26', 2, 2),
+       ('인기3', '2026-05-25', 3, 2),
+       ('인기4', '2026-05-24', 4, 2),
+       ('인기5', '2026-05-23', 5, 2),
+       ('인기6', '2026-05-26', 1, 3),
+       ('인기7', '2026-05-25', 2, 3),
+       ('인기8', '2026-05-24', 3, 3),
+       ('인기9', '2026-05-23', 4, 3),
+       ('인기10', '2026-05-26', 1, 5),
+       ('인기11', '2026-05-25', 2, 5),
+       ('인기12', '2026-05-24', 3, 5),
+       ('인기13', '2026-05-26', 1, 7),
+       ('인기14', '2026-05-25', 2, 7),
+       ('인기15', '2026-05-26', 1, 9);
 
 -- theme_id 12: 최근 7일 밖 데이터라 인기 순위에 포함되면 안 되는 데이터
 INSERT INTO reservation (name, `date`, time_id, theme_id)
