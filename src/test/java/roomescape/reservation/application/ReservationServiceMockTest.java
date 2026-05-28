@@ -28,7 +28,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationRepository;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
-import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
