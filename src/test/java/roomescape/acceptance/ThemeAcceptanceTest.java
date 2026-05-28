@@ -22,7 +22,7 @@ public class ThemeAcceptanceTest extends AcceptanceTest {
         ReservationSteps.createReservation("예약자", NOW_DATE, 1L, 1L);
 
         // 5. 특정 기간 내의 테마 랭킹 조회
-        ThemeSteps.checkThemeRanking("2026-05-01", "2026-05-07", 1);
+        ThemeSteps.checkThemeRanking("2026-04-20", "2026-05-01", 1);
 
         // 5. 예약 삭제
         ReservationSteps.deleteReservation(1L);
