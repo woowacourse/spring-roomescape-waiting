@@ -116,6 +116,13 @@ public class MissionStepTest {
     void 예약_대기_저장() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "리오",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
 
         Map<String, Object> waiting = new HashMap<>();
         waiting.put("name", "브라운");
