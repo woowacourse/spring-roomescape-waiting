@@ -41,6 +41,8 @@ function renderAvailableTimes(times) {
   }
 
   times.forEach((time) => {
+    if (time.alreadyBooked) return;
+    
     const button = document.createElement("button");
     button.className = "chip";
     button.type = "button";
@@ -51,6 +53,11 @@ function renderAvailableTimes(times) {
     }
     root.appendChild(button);
   });
+
+  if (root.children.length === 0) {
+    root.textContent = "변경 가능한 시간이 없습니다.";
+    selectedTimeId = null;
+  }
 }
 
 async function loadAvailableTimes() {

@@ -2,6 +2,7 @@ const $ = (selector) => document.querySelector(selector);
 
 const query = new URLSearchParams(window.location.search);
 const reservationId = query.get("id");
+const status = query.get("status") || "reserved";
 
 function setMessage(message) {
   $("#message").textContent = message;
@@ -52,11 +53,15 @@ $("#cancelForm").addEventListener("submit", async (event) => {
   }
 
   try {
-    await api(`/reservations/${reservationId}`, {
+    const endpoint = status === "waiting" 
+      ? `/reservations-waitings/${reservationId}` 
+      : `/reservations/${reservationId}`;
+
+    await api(endpoint, {
       method: "DELETE",
       headers: { Authorization: authName }
     });
-    setMessage("예약이 취소되었습니다. 잠시 후 사용자 페이지로 이동합니다.");
+    setMessage("정상적으로 취소되었습니다. 잠시 후 사용자 페이지로 이동합니다.");
     setTimeout(() => {
       window.location.href = "/index.html";
     }, 1200);

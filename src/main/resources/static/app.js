@@ -56,7 +56,13 @@ function renderAvailableTimes() {
     button.className = "chip";
     button.type = "button";
     button.dataset.timeId = time.id;
-    button.textContent = `${time.startAt} 예약`;
+    if (time.alreadyBooked) {
+      button.dataset.isWaiting = "true";
+      button.textContent = `${time.startAt} 대기 신청`;
+    } else {
+      button.dataset.isWaiting = "false";
+      button.textContent = `${time.startAt} 예약`;
+    }
     root.appendChild(button);
   });
 }
@@ -73,11 +79,12 @@ function renderReservations(reservations) {
   reservations.forEach((reservation) => {
     const row = document.createElement("div");
     row.className = "reservation-row";
+    const isWaiting = reservation.status === "waiting";
     row.innerHTML = `
-      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name}</span>
+      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${isWaiting ? '(대기)' : ''}</span>
       <div class="reservation-actions">
-        <button class="ghost reservation-update" data-id="${reservation.id}" data-theme-id="${reservation.theme?.id ?? ""}" type="button">변경</button>
-        <button class="danger reservation-delete" data-id="${reservation.id}" type="button">삭제</button>
+        ${!isWaiting ? `<button class="ghost reservation-update" data-id="${reservation.id}" data-theme-id="${reservation.theme?.id ?? ""}" type="button">변경</button>` : ''}
+        <button class="danger reservation-delete" data-id="${reservation.id}" data-status="${reservation.status || 'reserved'}" type="button">삭제</button>
       </div>
     `;
     root.appendChild(row);
@@ -168,7 +175,10 @@ $("#availableTimes").addEventListener("click", async (event) => {
   }
 
   try {
-    const created = await api("/reservations", {
+    const isWaiting = button.dataset.isWaiting === "true";
+    const endpoint = isWaiting ? "/reservations-waitings" : "/reservations";
+
+    const created = await api(endpoint, {
       method: "POST",
       body: JSON.stringify({
         name,
@@ -183,8 +193,8 @@ $("#availableTimes").addEventListener("click", async (event) => {
     $("#lookupName").value = name;
     await loadReservations();
     $("#reservationSuccess").textContent =
-      `예약 성공: #${created.id} / [${created.theme?.name ?? "선택 테마"}] ${created.date} ${created.time.startAt} / ${created.name}`;
-    setMessage("예약이 정상적으로 완료되었습니다.");
+      `${isWaiting ? '대기' : '예약'} 성공: #${created.id} / [${created.theme?.name ?? "선택 테마"}] ${created.date} ${created.time.startAt} / ${created.name}`;
+    setMessage(`${isWaiting ? '대기 신청이' : '예약이'} 정상적으로 완료되었습니다.`);
   } catch (error) {
     setMessage(error.message);
   }
@@ -210,7 +220,8 @@ $("#reservations").addEventListener("click", async (event) => {
     return;
   }
 
-  window.location.href = `/reservation-cancel.html?id=${encodeURIComponent(reservationId)}`;
+  const status = button.dataset.status || 'reserved';
+  window.location.href = `/reservation-cancel.html?id=${encodeURIComponent(reservationId)}&status=${encodeURIComponent(status)}`;
 });
 
 async function init() {
