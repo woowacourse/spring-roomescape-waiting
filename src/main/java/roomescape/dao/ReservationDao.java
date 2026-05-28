@@ -46,7 +46,8 @@ public class ReservationDao {
                 FROM reservation r
                 INNER JOIN reservation_time rt ON r.time_id = rt.id
                 INNER JOIN theme t ON r.theme_id = t.id
-                WHERE r.name = ?;
+                WHERE r.name = ?
+                ORDER BY r.date, rt.start_at ASC;
                 """;
         return jdbcTemplate.query(
                 sql,

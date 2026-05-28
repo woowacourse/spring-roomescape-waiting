@@ -1,27 +1,27 @@
 package roomescape.controller.dto.response;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import roomescape.service.dto.result.WaitingDetailResult;
+import roomescape.domain.reservation.ReservationStatus;
+import roomescape.service.dto.result.ReservationDetailResult;
 
-public record WaitingDetailResponse(
+public record ReservationDetailResponse(
         Long id,
         String name,
         LocalDate date,
         ReservationTimeResponse timeResponse,
         ThemeResponse themeResponse,
-        LocalDateTime createdAt,
-        int sequence
+        ReservationStatus status,
+        Integer sequence
 ) {
 
-    public static WaitingDetailResponse from(WaitingDetailResult result) {
-        return new WaitingDetailResponse(
+    public static ReservationDetailResponse from(ReservationDetailResult result) {
+        return new ReservationDetailResponse(
                 result.id(),
                 result.name(),
                 result.date(),
                 ReservationTimeResponse.from(result.timeResult()),
                 ThemeResponse.from(result.themeResult()),
-                result.createdAt(),
+                result.status(),
                 result.sequence()
         );
     }

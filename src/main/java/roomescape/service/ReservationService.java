@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.stream.Stream;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.ConflictException;
 import roomescape.common.exception.NotFoundException;
@@ -18,9 +19,9 @@ import roomescape.domain.reservation.UserName;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
 import roomescape.service.dto.command.ReservationCommand;
+import roomescape.service.dto.result.ReservationDetailResult;
 import roomescape.service.dto.result.ReservationDetailResults;
 import roomescape.service.dto.result.ReservationResult;
-import roomescape.service.dto.result.WaitingDetailResult;
 
 @Service
 public class ReservationService {
@@ -56,14 +57,12 @@ public class ReservationService {
         List<Reservation> reservations = reservationDao.findAllByUserName(userName);
         List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
 
-        return new ReservationDetailResults(
-                reservations.stream()
-                        .map(ReservationResult::from)
-                        .toList(),
-                waitings.stream()
-                        .map(WaitingDetailResult::from)
-                        .toList()
-        );
+        List<ReservationDetailResult> details = Stream.concat(
+                reservations.stream().map(ReservationDetailResult::fromReservation),
+                waitings.stream().map(ReservationDetailResult::fromWaiting)
+        ).toList();
+
+        return new ReservationDetailResults(details);
     }
 
     public ReservationResult save(ReservationCommand command) {

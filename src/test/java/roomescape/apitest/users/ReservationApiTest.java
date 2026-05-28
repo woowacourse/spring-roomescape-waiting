@@ -68,8 +68,8 @@ class ReservationApiTest {
         Long generatedId = createReservation(userName, FUTURE_DATE, timeId, themeId);
 
         JsonPath body = getReservationsByUserName(userName);
-        List<Long> ids = body.getList("reservationResponses.id", Long.class);
-        List<String> names = body.getList("reservationResponses.name", String.class);
+        List<Long> ids = body.getList("reservationDetailResponses.id", Long.class);
+        List<String> names = body.getList("reservationDetailResponses.name", String.class);
 
         assertThat(ids)
                 .hasSize(initialUserReservationSize + 1)
