@@ -38,7 +38,7 @@ public class Reservation {
         return slot;
     }
 
-    public long id() {
+    public Long id() {
         return id;
     }
 }
