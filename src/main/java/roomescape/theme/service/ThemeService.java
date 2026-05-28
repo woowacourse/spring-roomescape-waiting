@@ -9,9 +9,13 @@ import roomescape.theme.service.dto.ThemeSaveServiceRequest;
 
 public interface ThemeService {
     List<Theme> getAll();
+
     Theme create(ThemeSaveServiceRequest theme);
+
     void deleteById(Long id);
+
     List<ReservationTime> getAvailableTimes(Long themeId, LocalDate date);
+
     List<Theme> getBestThemes();
 
 }

@@ -68,7 +68,8 @@ public class RoomescapePageController {
 
     @GetMapping("/dashboard/reservations")
     public String reservationsPage(Model model) {
-        model.addAttribute("reservations", reservationService.getAll().stream().map(ReservationResponse::from).toList());
+        model.addAttribute("reservations",
+                reservationService.getAll().stream().map(ReservationResponse::from).toList());
         model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponse::from).toList());
         model.addAttribute("times", timeService.findAll().stream().map(TimeResponse::from).toList());
         return "dashboard/reservations";
@@ -302,7 +303,8 @@ public class RoomescapePageController {
                     .map(TimeResponse::from)
                     .toList();
         } catch (IllegalArgumentException | ThemeNotFoundException e) {
-            log.info("Failed to load available times for themeId={} date={}: {}", availableThemeId, availableDate, e.getMessage());
+            log.info("Failed to load available times for themeId={} date={}: {}", availableThemeId, availableDate,
+                    e.getMessage());
             model.addAttribute("availableTimeErrorMessage", "예약 가능 시간을 조회하지 못했습니다. 조회 조건을 확인해 주세요.");
             return List.of();
         }
@@ -312,7 +314,8 @@ public class RoomescapePageController {
         redirectAttributes.addFlashAttribute("successMessage", message);
     }
 
-    private void addExpectedErrorMessage(RedirectAttributes redirectAttributes, String userMessage, RuntimeException e) {
+    private void addExpectedErrorMessage(RedirectAttributes redirectAttributes, String userMessage,
+                                         RuntimeException e) {
         log.info("Dashboard request failed: {}", e.getMessage());
         redirectAttributes.addFlashAttribute("errorMessage", userMessage);
     }

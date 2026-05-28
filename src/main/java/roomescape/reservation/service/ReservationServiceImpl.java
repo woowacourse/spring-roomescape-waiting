@@ -124,7 +124,8 @@ public class ReservationServiceImpl implements ReservationService {
                     .ifPresent(waitingId -> {
                         if (!reservationRepository.promoteToReserved(waitingId)) {
                             throw new ReservationNotFoundException(id);
-                        }});
+                        }
+                    });
         }
         reservationRepository.deleteById(id);
     }

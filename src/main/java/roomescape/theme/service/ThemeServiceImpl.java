@@ -64,7 +64,7 @@ public class ThemeServiceImpl implements ThemeService {
     @Override
     @Transactional
     public void deleteById(Long id) {
-        if(!themeRepository.deleteById(id)) {
+        if (!themeRepository.deleteById(id)) {
             throw new ThemeNotFoundException(id);
         }
     }

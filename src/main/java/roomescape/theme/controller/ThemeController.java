@@ -19,11 +19,11 @@ import roomescape.theme.service.ThemeService;
 @RestController
 public class ThemeController {
     private final ThemeService themeService;
-    
+
     public ThemeController(ThemeService themeService) {
         this.themeService = themeService;
     }
-    
+
     @GetMapping("/themes")
     public ResponseEntity<List<ThemeResponse>> getAll() {
         List<ThemeResponse> body = themeService.getAll().stream()

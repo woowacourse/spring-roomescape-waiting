@@ -99,10 +99,10 @@ public class JdbcReservationRepository implements ReservationRepository {
     public List<Long> findTimeIdsByThemeIdAndDate(Long themeId, LocalDate date) {
         return jdbcTemplate.query(
                 """
-                SELECT r.time_id FROM reservation r
-                JOIN reservation_time rt ON r.time_id = rt.id
-                WHERE r.theme_id = ? AND rt.start_time >= ? AND rt.start_time < ?
-                """,
+                        SELECT r.time_id FROM reservation r
+                        JOIN reservation_time rt ON r.time_id = rt.id
+                        WHERE r.theme_id = ? AND rt.start_time >= ? AND rt.start_time < ?
+                        """,
                 (rs, rowNum) -> rs.getLong("time_id"),
                 themeId,
                 date.atStartOfDay(),

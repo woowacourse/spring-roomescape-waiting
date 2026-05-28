@@ -23,8 +23,7 @@ public class AdminHolidayController {
 
     private final HolidayService holidayService;
 
-    public AdminHolidayController(HolidayService holidayService)
-    {
+    public AdminHolidayController(HolidayService holidayService) {
         this.holidayService = holidayService;
     }
 

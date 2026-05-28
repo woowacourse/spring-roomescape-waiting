@@ -14,7 +14,7 @@ import java.sql.SQLException;
 import java.util.List;
 
 @Repository
-public class JdbcHolidayRepository implements HolidayRepository{
+public class JdbcHolidayRepository implements HolidayRepository {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert themeInsert;

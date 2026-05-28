@@ -7,6 +7,7 @@ import java.util.List;
 
 public interface HolidayRepository {
     Holiday save(Holiday holiday);
+
     List<Holiday> findAll();
 
     boolean existsByDate(LocalDate date);

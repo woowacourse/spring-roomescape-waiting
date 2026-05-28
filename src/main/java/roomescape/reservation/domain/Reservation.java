@@ -19,7 +19,7 @@ public class Reservation {
     }
 
     private Reservation(Long id, String name, ReservationTime time, Theme theme, Status status,
-                       LocalDateTime createdAt) {
+                        LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.time = time;
