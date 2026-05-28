@@ -1,6 +1,7 @@
 package roomescape.repository;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.WaitingReservation;
 
 import java.util.List;
 import java.util.Optional;
@@ -22,6 +23,8 @@ public interface ReservationRepository {
     List<Reservation> findByName(String name);
 
     List<Reservation> findByThemeSlotAndPending(Long themeSlotId);
+
+    List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId);
 
     void updateStatus(Reservation reservation);
 

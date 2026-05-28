@@ -17,6 +17,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
@@ -143,5 +144,25 @@ class JdbcReservationRepositoryTest {
         assertThat(reservation).isNotEmpty();
         assertThat(reservation.get().getName()).isEqualTo("브라운1");
 
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 대한 PENDING 예약을 ID순 대기 순번과 함께 조회한다.")
+    void findWaitingReservationsWithOrder() {
+        ThemeSlot themeSlot = saveThemeSlot(THEME_1, LocalDate.now(), TIME_10, false);
+        jdbcReservationRepository.save(new Reservation(1L, "브라운", themeSlot, ConfirmedStatus.getInstance()));
+        jdbcReservationRepository.save(new Reservation("브라운1", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운2", themeSlot));
+        jdbcReservationRepository.save(new Reservation("브라운3", themeSlot));
+
+        List<WaitingReservation> waitingReservations = jdbcReservationRepository.findWaitingReservationsWithOrder(
+                themeSlot.getId());
+
+        assertThat(waitingReservations)
+                .extracting(WaitingReservation::name)
+                .containsExactly("브라운1", "브라운2", "브라운3");
+        assertThat(waitingReservations)
+                .extracting(WaitingReservation::waitingOrder)
+                .containsExactly(1, 2, 3);
     }
 }

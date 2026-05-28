@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.util.*;
 
 import roomescape.domain.Reservation;
+import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.PendingStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
@@ -69,6 +70,25 @@ public class FakeReservationDao implements ReservationRepository {
                 .filter(reservation -> "PENDING".equals(reservation.getReservationStatusName()))
                 .sorted(Comparator.comparing(Reservation::getId))
                 .toList();
+    }
+
+    @Override
+    public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
+        List<Reservation> reservations = findByThemeSlotAndPending(themeSlotId);
+        List<WaitingReservation> waitingReservations = new ArrayList<>();
+        for (int index = 0; index < reservations.size(); index++) {
+            Reservation reservation = reservations.get(index);
+            waitingReservations.add(new WaitingReservation(
+                    reservation.getId(),
+                    reservation.getName(),
+                    reservation.getDate(),
+                    reservation.getTime(),
+                    reservation.getTheme(),
+                    reservation.getReservationStatusName(),
+                    index + 1
+            ));
+        }
+        return waitingReservations;
     }
 
     @Override

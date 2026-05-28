@@ -182,7 +182,7 @@ flowchart TD
     I --> J[reservation.status = CANCELLED 업데이트]
 
     J --> K[같은 theme/date/time의 PENDING 예약 조회]
-    K --> L[ORDER BY created_at ASC, id ASC LIMIT 1]
+    K --> L[ORDER BY id ASC LIMIT 1]
 
     L --> M{가장 빠른 PENDING 존재?}
 
@@ -202,20 +202,16 @@ flowchart TD
     A[동시 예약 요청 A, B 수신] --> B[요청 A INSERT]
     A --> C[요청 B INSERT]
 
-    B --> D[DB가 created_at, id 부여]
+    B --> D[DB가 id 부여]
     C --> D
 
     D --> E[예약 대기 목록 조회]
 
-    E --> F[ORDER BY created_at ASC, id ASC]
+    E --> F[ORDER BY id ASC]
 
-    F --> G{created_at이 같은가?}
+    F --> G[id가 작은 예약이 먼저]
 
-    G -- 아니오 --> H[created_at이 빠른 예약이 먼저]
-    G -- 예 --> I[id가 작은 예약이 먼저]
-
-    H --> J[최종 대기 순서 확정]
-    I --> J
+    G --> J[최종 대기 순서 확정]
 ```
 
 ---

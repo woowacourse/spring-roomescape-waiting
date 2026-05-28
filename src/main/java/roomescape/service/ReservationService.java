@@ -10,6 +10,7 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
+import roomescape.domain.WaitingReservation;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -77,12 +78,13 @@ public class ReservationService {
                 .toList();
 
         List<WaitingReservationResponse> waitingReservationResponses = new ArrayList<>();
-        // 예약이 PENDING이라면 themeSlot으로 repository에서 List<reservation>를 조회해서 대기 순번을 추출한다.
+        // 예약이 PENDING이라면 themeSlot으로 repository에서 대기 순번을 함께 조회한다.
         for (Reservation reservation : reservations) {
             if (reservation.isPendingStatus()) {
-                List<WaitingReservationResponse> pendingReservations = findWaitingReservationWithOrder(reservation.getThemeSlot().getId());
+                List<WaitingReservation> pendingReservations = findWaitingReservationsWithOrder(reservation.getThemeSlot().getId());
                 WaitingReservationResponse waitingReservationResponse = pendingReservations.stream()
                         .filter(each -> each.name().equals(reservation.getName()))
+                        .map(WaitingReservationResponse::from)
                         .findFirst()
                         .orElseThrow(() -> new IllegalArgumentException("존재하지 않습니다."));
 
@@ -148,14 +150,9 @@ public class ReservationService {
         return updateReservation;
     }
 
-    public List<WaitingReservationResponse> findWaitingReservationWithOrder(Long themeSlotId) {
-        List<WaitingReservationResponse> list = new ArrayList<>();
-        List<Reservation> reservations = reservationRepository.findByThemeSlotAndPending(themeSlotId);
-        for (int i = 1; i <= reservations.size(); i++) {
-            WaitingReservationResponse response = WaitingReservationResponse.from(i, reservations.get(i - 1));
-            list.add(response);
-        }
-        return list;
+    @Transactional(readOnly = true)
+    public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
+        return reservationRepository.findWaitingReservationsWithOrder(themeSlotId);
     }
 
     @NonNull

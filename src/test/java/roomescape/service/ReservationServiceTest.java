@@ -11,11 +11,11 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.controller.dto.MyReservationResponse;
-import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.CancelledStatus;
 import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.PendingStatus;
@@ -104,8 +104,8 @@ class ReservationServiceTest {
         Reservation reservation2 = reservationService.saveReservation("나피리", savedThemeSlot1.getId());
         Reservation reservation3 = reservationService.saveReservation("드레이븐", savedThemeSlot1.getId());
 
-        List<WaitingReservationResponse> responses = reservationService.findWaitingReservationWithOrder(savedThemeSlot1.getId());
-        assertThat(responses).extracting(WaitingReservationResponse::waitingOrder)
+        List<WaitingReservation> responses = reservationService.findWaitingReservationsWithOrder(savedThemeSlot1.getId());
+        assertThat(responses).extracting(WaitingReservation::waitingOrder)
                 .containsExactly(1, 2, 3);
     }
 

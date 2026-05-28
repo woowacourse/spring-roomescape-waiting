@@ -22,7 +22,7 @@ import java.util.Map;
  *  78       : CANCELLED, theme_slot_id=78 (2026-04-26, time_id=7, theme_id=2)
  *
  * 중복 예약 검증용 기존 예약:
- *   theme_slot_id=34 (theme_id=1, date=2026-05-27, time_id=3, CONFIRMED)
+ *   theme_slot_id=34 (theme_id=1, date=2028-05-27, time_id=3, CONFIRMED)
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -170,11 +170,11 @@ public class PolicyAcceptanceTest {
     // ── 예약 규칙: 중복 예약(409) ──────────────────────────────────────────────────
 
     @Test
-    @DisplayName("[예약] 같은 날짜·시간·테마에 이미 예약이 있으면 409를 반환한다.")
-    void 중복_예약_등록시_409() {
-        // theme_slot_id=34 는 이미 예약됨
+    @DisplayName("[예약] 같은 사용자가 같은 날짜·시간·테마에 이미 예약이 있으면 409를 반환한다.")
+    void 같은_사용자가_중복_예약_등록시_409() {
+        // theme_slot_id=34 는 미래 날짜에 게스트가 이미 예약함
         Map<String, Object> body = Map.of(
-                "name", "신규사용자",
+                "name", "게스트",
                 "themeSlotId", 34
         );
 

@@ -8,6 +8,7 @@ import roomescape.domain.Reservation;
 import roomescape.domain.Theme;
 import roomescape.domain.ThemeSlot;
 import roomescape.domain.Time;
+import roomescape.domain.WaitingReservation;
 import roomescape.domain.reservationStatus.*;
 
 import java.time.LocalDate;
@@ -278,6 +279,56 @@ public class JdbcReservationRepository implements ReservationRepository {
                 ORDER BY r.id
                 """;
         return jdbcTemplate.query(sql, rowMapper(), themeSlotId).stream().toList();
+    }
+
+    @Override
+    public List<WaitingReservation> findWaitingReservationsWithOrder(Long themeSlotId) {
+        String sql = """
+                SELECT
+                    r.id AS r_id,
+                    r.name,
+                    r.status,
+                    ts.date,
+                    t.id AS t_id,
+                    t.start_at,
+                    theme.id AS theme_id,
+                    theme.name AS theme_name,
+                    theme.description AS theme_description,
+                    theme.thumbnail_url AS theme_thumbnail_url,
+                    ROW_NUMBER() OVER (ORDER BY r.id ASC) AS waiting_order
+                FROM
+                    reservation r
+                        INNER JOIN
+                        theme_slot ts ON r.theme_slot_id = ts.id
+                        INNER JOIN
+                        time t ON ts.time_id = t.id
+                        INNER JOIN
+                        theme theme ON ts.theme_id = theme.id
+                WHERE ts.id = ?
+                AND r.status = 'PENDING'
+                ORDER BY r.id
+                """;
+        return jdbcTemplate.query(sql, waitingReservationRowMapper(), themeSlotId).stream().toList();
+    }
+
+    private RowMapper<WaitingReservation> waitingReservationRowMapper() {
+        return (rs, rowNum) -> new WaitingReservation(
+                rs.getLong("r_id"),
+                rs.getString("name"),
+                rs.getObject("date", LocalDate.class),
+                new Time(
+                        rs.getLong("t_id"),
+                        rs.getObject("start_at", LocalTime.class)
+                ),
+                new Theme(
+                        rs.getLong("theme_id"),
+                        rs.getString("theme_name"),
+                        rs.getString("theme_description"),
+                        rs.getString("theme_thumbnail_url")
+                ),
+                rs.getString("status"),
+                rs.getInt("waiting_order")
+        );
     }
 
     @Override
