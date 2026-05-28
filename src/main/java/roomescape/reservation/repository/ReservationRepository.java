@@ -22,7 +22,7 @@ public interface ReservationRepository {
 
     boolean deleteById(Long id);
 
-    boolean isDuplicated(Long themeId, ReservationTime time);
+    boolean hasConfirmedReservation(Long themeId, ReservationTime time);
 
     boolean existsByTimeId(Long timeId);
 

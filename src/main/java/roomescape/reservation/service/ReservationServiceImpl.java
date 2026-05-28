@@ -85,7 +85,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     private boolean isDuplicatedReservation(Long themeId, ReservationTime time) {
-        return reservationRepository.isDuplicated(themeId, time);
+        return reservationRepository.hasConfirmedReservation(themeId, time);
     }
 
     private ReservationTime findTime(Long timeId) {

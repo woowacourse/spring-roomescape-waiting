@@ -109,7 +109,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("특정 날짜와 테마의 예약이 존재한다면 true를 반환한다")
     @Test
-    void isDuplicated_예약_존재하면_true_반환() {
+    void hasConfirmedReservation_예약_존재하면_true_반환() {
         // given
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
@@ -119,7 +119,7 @@ class JdbcReservationRepositoryTest {
         insertReservation("어셔1", timeId, themeId, Status.RESERVED, LocalDateTime.now().plusHours(1));
 
         // when
-        boolean result = reservationRepository.isDuplicated(themeId, time);
+        boolean result = reservationRepository.hasConfirmedReservation(themeId, time);
 
         // then
         assertThat(result).isTrue();
@@ -127,7 +127,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("특정 날짜와 테마의 예약이 존재하지 않는다면 false를 반환한다")
     @Test
-    void isDuplicated_예약_존재하지_않으면_false_반환() {
+    void hasConfirmedReservation_예약_존재하지_않으면_false_반환() {
         // given
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
@@ -136,7 +136,7 @@ class JdbcReservationRepositoryTest {
                 LocalDateTime.now().plusHours(3));
 
         // when
-        boolean result = reservationRepository.isDuplicated(themeId, time);
+        boolean result = reservationRepository.hasConfirmedReservation(themeId, time);
 
         // then
         assertThat(result).isFalse();
@@ -144,7 +144,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("특정 날짜와 테마의 같은 이름의 예약이 존재한다면 true를 반환한다")
     @Test
-    void isDuplicatedWithName_예약_존재하면_true_반환() {
+    void hasConfirmedReservationWithName_예약_존재하면_true_반환() {
         // given
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),
@@ -162,7 +162,7 @@ class JdbcReservationRepositoryTest {
 
     @DisplayName("특정 날짜와 테마의 같은 이름의 예약이 존재하지 않으면 false를 반환한다")
     @Test
-    void isDuplicatedWithName_예약_존재하지_않으면_false_반환() {
+    void hasConfirmedReservationWithName_예약_존재하지_않으면_false_반환() {
         // given
         Long themeId = insertTheme("테마");
         Long timeId = insertTime(LocalDateTime.now().plusHours(1).toString(),

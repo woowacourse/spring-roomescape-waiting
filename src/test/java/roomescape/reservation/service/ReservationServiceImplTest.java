@@ -77,7 +77,7 @@ class ReservationServiceImplTest {
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
         when(holidayService.isHoliday(any())).thenReturn(false);
-        when(reservationRepository.isDuplicated(any(), any())).thenReturn(false);
+        when(reservationRepository.hasConfirmedReservation(any(), any())).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
         when(themeRepository.findById(1L)).thenReturn(theme);
 
@@ -102,7 +102,7 @@ class ReservationServiceImplTest {
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
         when(holidayService.isHoliday(any())).thenReturn(false);
-        when(reservationRepository.isDuplicated(any(), any())).thenReturn(true);
+        when(reservationRepository.hasConfirmedReservation(any(), any())).thenReturn(true);
         when(reservationRepository.save(any())).thenReturn(saved);
         when(themeRepository.findById(1L)).thenReturn(theme);
 
@@ -195,7 +195,7 @@ class ReservationServiceImplTest {
         when(timeService.findById(1L)).thenReturn(time);
         when(themeRepository.existsById(1L)).thenReturn(true);
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
-        when(reservationRepository.isDuplicated(any(), any())).thenReturn(true);
+        when(reservationRepository.hasConfirmedReservation(any(), any())).thenReturn(true);
         when(themeRepository.findById(1L)).thenReturn(theme);
         when(reservationRepository.isDuplicatedWithName(any(), any(), any())).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
@@ -367,7 +367,7 @@ class ReservationServiceImplTest {
         Reservation existing = new Reservation("라이", oldTime, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(2L)).thenReturn(newTime);
-        when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(false);
+        when(reservationRepository.hasConfirmedReservation(1L, newTime)).thenReturn(false);
         when(reservationRepository.update(any(), any(), any())).thenReturn(true);
 
         // when
@@ -428,7 +428,7 @@ class ReservationServiceImplTest {
         Reservation existing = new Reservation("라이", oldTime, new Theme("name", "description", "https://img.test/a.png").withId(1L), Status.RESERVED, LocalDateTime.now()).withId(1L);
         when(reservationRepository.findById(1L)).thenReturn(Optional.of(existing));
         when(timeService.findById(any())).thenReturn(newTime);
-        when(reservationRepository.isDuplicated(1L, newTime)).thenReturn(true);
+        when(reservationRepository.hasConfirmedReservation(1L, newTime)).thenReturn(true);
 
         // when & then
         assertThatThrownBy(() -> reservationService.update(1L, 2L))

@@ -85,9 +85,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean isDuplicated(Long themeId, ReservationTime time) {
+    public boolean hasConfirmedReservation(Long themeId, ReservationTime time) {
         Integer exists = jdbcTemplate.queryForObject(
-                "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ?)",
+                "SELECT EXISTS(SELECT 1 FROM reservation WHERE theme_id = ? AND time_id = ? AND status = 'RESERVED')",
                 Integer.class,
                 themeId,
                 time.getId()
