@@ -1,5 +1,17 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -12,6 +24,7 @@ import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
+import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -24,14 +37,6 @@ import roomescape.theme.repository.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.TimeService;
-
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceImplTest {
@@ -192,6 +197,7 @@ class ReservationServiceImplTest {
         when(holidayService.isHoliday(FUTURE_START.toLocalDate())).thenReturn(false);
         when(reservationRepository.isDuplicated(any(), any())).thenReturn(true);
         when(themeRepository.findById(1L)).thenReturn(theme);
+        when(reservationRepository.isDuplicatedWithName(any(), any(), any())).thenReturn(false);
         when(reservationRepository.save(any())).thenReturn(saved);
         ReservationSaveServiceDto dto = new ReservationSaveServiceDto("라이", 1L, 1L);
 
@@ -288,6 +294,21 @@ class ReservationServiceImplTest {
         verify(reservationRepository, never()).promoteToReserved(any());
     }
 
+    @DisplayName("자신의 예약이 아닌 예약을 취소하려는 경우, ForbiddenRequestException이 발생한다.")
+    @Test
+    void cancelForUser_자신_예약_아니면_예외() {
+        // given
+        Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
+        ReservationTime time = new ReservationTime(1L, FUTURE_START, FUTURE_END);
+        Reservation reservation = new Reservation("라이", time, theme, Status.RESERVED, LocalDateTime.now()).withId(1L);
+        when(reservationRepository.findById(1L)).thenReturn(Optional.of(reservation));
+
+        // when & then
+        assertThatThrownBy(() -> reservationService.cancelForUser(1L, "어셔"))
+                .isInstanceOf(ForbiddenRequestException.class)
+                .hasMessage("예약에 대한 접근 권한이 없습니다.");
+    }
+
     @DisplayName("존재하지 않는 예약을 사용자가 취소하는 경우, ReservationNotFoundException이 발생한다.")
     @Test
     void cancelForUser_존재하지_않는_예약이면_예외() {
@@ -334,6 +355,7 @@ class ReservationServiceImplTest {
         verify(reservationRepository).deleteById(1L);
     }
 
+    @DisplayName("예약 시간을 변경한다")
     @Test
     void update_정상_변경() {
         // given
