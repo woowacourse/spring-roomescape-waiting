@@ -1,9 +1,6 @@
 package roomescape.reservation.domain;
 
-import roomescape.date.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationException;
-import roomescape.theme.domain.Theme;
-import roomescape.time.domain.ReservationTime;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -16,17 +13,15 @@ public record Reservations(
 
     public Reservation reserve(
             String requesterName,
-            ReservationDate date,
-            ReservationTime time,
-            Theme theme,
+            ReservationSlot slot,
             LocalDateTime reservedAt
     ) {
         validateNotAlreadyBookedBy(requesterName);
         if (hasReservedByOthers(requesterName)) {
-            return Reservation.wait(requesterName, date, time, theme, reservedAt);
+            return Reservation.wait(requesterName, slot.date(), slot.time(), slot.theme(), reservedAt);
         }
 
-        return Reservation.reserve(requesterName, date, time, theme, reservedAt);
+        return Reservation.reserve(requesterName, slot.date(), slot.time(), slot.theme(), reservedAt);
     }
 
     public void validateNotAlreadyBookedBy(String requestName) {

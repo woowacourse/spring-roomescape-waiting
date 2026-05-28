@@ -8,6 +8,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -59,8 +60,10 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        Reservations reservationsOfTimeSlot = findTimeSlotReservations(date.getId(), time.getId(), theme.getId());
-        Reservation reservation = reservationsOfTimeSlot.reserve(name, date, time, theme, LocalDateTime.now());
+        ReservationSlot slot = ReservationSlot.of(date, time, theme);
+
+        Reservations reservationsOfTimeSlot = findTimeSlotReservations(slot);
+        Reservation reservation = reservationsOfTimeSlot.reserve(name, slot, LocalDateTime.now());
         return reservationRepository.save(reservation);
     }
 
@@ -89,7 +92,8 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        validateAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
+        validateAlreadyBookedByOthers(slot);
 
         reservation.changeSchedule(command.requesterName(), newDate, newTime);
         reservationRepository.updateSchedule(reservation);
@@ -105,7 +109,8 @@ public class ReservationService {
         ReservationDate newDate = getReservationDate(command.dateId());
         newDate.validateIsInactive();
 
-        validateAlreadyBookedByOthers(command.dateId(), command.timeId(), reservation.getTheme().getId());
+        ReservationSlot slot = ReservationSlot.of(newDate, newTime, reservation.getTheme());
+        validateAlreadyBookedByOthers(slot);
 
         reservation.changeScheduleByManager(newDate, newTime);
         reservationRepository.updateSchedule(reservation);
@@ -132,18 +137,22 @@ public class ReservationService {
                 .orElseThrow(() -> new ReservationException(RESERVATION_NOT_FOUND));
     }
 
-    private void validateAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
-        if (checkAlreadyBookedByOthers(dateId, timeId, themeId)) {
+    private void validateAlreadyBookedByOthers(ReservationSlot slot) {
+        if (checkAlreadyBookedByOthers(slot)) {
             throw new ReservationException(RESERVATION_ALREADY_BOOKED);
         }
     }
 
-    private boolean checkAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
-        return reservationRepository.existsReservedBySlot(dateId, timeId, themeId);
+    private boolean checkAlreadyBookedByOthers(ReservationSlot slot) {
+        return reservationRepository.existsReservedBySlot(slot.getDateId(), slot.getTimeId(), slot.getThemeId());
     }
 
-    private Reservations findTimeSlotReservations(Long dateId, Long timeId, Long themeId) {
-        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(dateId, timeId, themeId));
+    private Reservations findTimeSlotReservations(ReservationSlot slot) {
+        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(
+                slot.getDateId(),
+                slot.getTimeId(),
+                slot.getThemeId()
+        ));
     }
 
 }
