@@ -48,7 +48,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("예약 날짜가 유효하지 않습니다."));
+                .body("message", equalTo("선택하신 날짜에 예약할 수 없습니다. 예약 가능한 다른 날짜를 선택해 주세요."));
     }
 
     @Test
@@ -69,7 +69,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(422)
-                .body("message", equalTo("시작 시간이 유효하지 않습니다."));
+                .body("message", equalTo("과거 시간이거나 운영 정책에 맞지 않는 시작 시간입니다. 유효한 미래 시간을 입력하십시오."));
     }
 
     @Test
@@ -96,7 +96,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("예약이 이미 존재합니다."));
+                .body("message", equalTo("이미 예약된 시간대입니다. 다른 날짜나 시간을 선택해 주세요."));
     }
 
     @Test
@@ -123,7 +123,7 @@ public class ExceptionIntegrationTest {
                 .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("해당 예약 시간에 예약이 존재합니다."));
+                .body("message", equalTo("해당 시간에 등록된 예약 데이터가 존재합니다. 예약을 먼저 취소하거나 변경하십시오."));
     }
 
     @Test
@@ -151,7 +151,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -159,7 +159,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -167,7 +167,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
     }
 
     @Test
@@ -192,7 +192,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -225,7 +225,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -233,7 +233,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/admin/times")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("예약 시간 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("시간 형식이 올바르지 않습니다. 'HH:mm' 포맷에 맞춰 다시 입력하십시오."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -283,7 +283,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -291,7 +291,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
     }
 
     @Test
@@ -315,7 +315,7 @@ public class ExceptionIntegrationTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -323,6 +323,6 @@ public class ExceptionIntegrationTest {
                 .when().post("/admin/themes")
                 .then().log().all()
                 .statusCode(400)
-                .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
+                .body("message", equalTo("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
     }
 }

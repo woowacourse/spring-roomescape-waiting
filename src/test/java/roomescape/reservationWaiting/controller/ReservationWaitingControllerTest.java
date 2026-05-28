@@ -24,6 +24,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -57,7 +58,7 @@ class ReservationWaitingControllerTest {
         ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 5), time,
                 theme);
 
-        given(reservationWaitingService.save(any())).willReturn(reservationWaiting);
+        given(reservationWaitingService.save(any())).willReturn(ReservationWaitingResult.from(reservationWaiting));
 
         // when & then
         mockMvc.perform(post("/reservations-waitings")
@@ -80,7 +81,7 @@ class ReservationWaitingControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("예약 요청 형식이 유효하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
     }
 
     @Test
@@ -89,7 +90,7 @@ class ReservationWaitingControllerTest {
         // when & then
         mockMvc.perform(delete("/reservations-waitings/1"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("인증 헤더가 존재하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("인증 정보가 만료되었거나 없습니다. 다시 로그인한 후 시도해 주세요."));
     }
 
     @Test

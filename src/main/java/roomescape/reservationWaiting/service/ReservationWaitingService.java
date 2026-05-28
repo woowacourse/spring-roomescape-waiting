@@ -13,9 +13,10 @@ import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 
-@Transactional(readOnly = true)
 @Service
+@Transactional(readOnly = true)
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
@@ -31,7 +32,7 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public ReservationWaiting save(ReservationWaitingCommand command) {
+    public ReservationWaitingResult save(ReservationWaitingCommand command) {
         if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
                 command.date(), command.timeId(), command.themeId(), command.name())
         ) {
@@ -57,7 +58,8 @@ public class ReservationWaitingService {
         reservationWaiting.validateExpiry(clock);
 
         try {
-            return reservationWaitingRepository.save(reservationWaiting);
+            ReservationWaiting saved = reservationWaitingRepository.save(reservationWaiting);
+            return ReservationWaitingResult.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
         }

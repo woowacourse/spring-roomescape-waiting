@@ -21,6 +21,7 @@ import roomescape.theme.service.dto.AvailableTimesResult;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.repository.dto.AvailableTimeQueryResult;
 import roomescape.time.service.ReservationTimeService;
+import roomescape.time.service.dto.ReservationTimeResult;
 
 @WebMvcTest(ReservationTimeController.class)
 @Import(WebMvcConfig.class)
@@ -37,10 +38,10 @@ class ReservationTimeControllerTest {
 
     @Test
     @DisplayName("모든 예약 시간을 성공적으로 조회한다.")
-    void getAllTimes_Success() throws Exception {
+    void readAll_Success() throws Exception {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        given(reservationTimeService.findAll()).willReturn(List.of(time));
+        given(reservationTimeService.findAll()).willReturn(List.of(ReservationTimeResult.from(time)));
 
         // when & then
         mockMvc.perform(get("/times"))
@@ -51,7 +52,7 @@ class ReservationTimeControllerTest {
 
     @Test
     @DisplayName("예약 가능한 시간을 성공적으로 조회한다.")
-    void getAvailableTimes_Success() throws Exception {
+    void readAvailable_Success() throws Exception {
         // given
         AvailableTimesResult result = new AvailableTimesResult(List.of(
                 new AvailableTimeQueryResult(1L, LocalTime.of(10, 0))
@@ -69,7 +70,7 @@ class ReservationTimeControllerTest {
 
     @Test
     @DisplayName("예약 가능 시간 조회 시 파라미터가 누락되면 400 에러를 반환한다.")
-    void getAvailableTimes_MissingParams_BadRequest() throws Exception {
+    void readAvailable_MissingParams_BadRequest() throws Exception {
         // when & then
         mockMvc.perform(get("/times/available-times")
                         .param("date", "2026-05-05")) // themeId missing

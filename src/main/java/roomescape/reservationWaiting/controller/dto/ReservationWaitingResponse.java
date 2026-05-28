@@ -1,7 +1,7 @@
 package roomescape.reservationWaiting.controller.dto;
 
 import java.time.LocalDate;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.time.controller.dto.ReservationTimeResponse;
 
@@ -13,13 +13,13 @@ public record ReservationWaitingResponse(
         ThemeResponse theme
 ) {
 
-    public static ReservationWaitingResponse from(ReservationWaiting reservationWaiting) {
+    public static ReservationWaitingResponse from(ReservationWaitingResult result) {
         return new ReservationWaitingResponse(
-                reservationWaiting.id(),
-                reservationWaiting.name(),
-                reservationWaiting.date(),
-                ReservationTimeResponse.from(reservationWaiting.time()),
-                ThemeResponse.from(reservationWaiting.theme())
+                result.id(),
+                result.name(),
+                result.date(),
+                ReservationTimeResponse.from(result.time()),
+                ThemeResponse.from(result.theme())
         );
     }
 }

@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingResponse;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
 
 @RestController
@@ -31,7 +31,7 @@ public class ReservationWaitingController {
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
             @RequestBody ReservationWaitingRequest request) {
-        ReservationWaiting reservationWaiting = reservationWaitingService.save(request.toCommand());
+        ReservationWaitingResult reservationWaiting = reservationWaitingService.save(request.toCommand());
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
         return ResponseEntity

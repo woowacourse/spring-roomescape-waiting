@@ -25,7 +25,7 @@ public class ThemeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ThemeResponse>> getAllThemes() {
+    public ResponseEntity<List<ThemeResponse>> readAll() {
         List<ThemeResponse> responses = themeService.findAll()
                 .stream()
                 .map(ThemeResponse::from)
@@ -34,19 +34,21 @@ public class ThemeController {
     }
 
     @GetMapping(params = "popular=true")
-    public ResponseEntity<List<ThemeResponse>> getPopularThemes(
-            @RequestParam("period") int period,
-            @RequestParam("limit") int limit
+    public ResponseEntity<List<ThemeResponse>> readPopular(
+            @RequestParam("period") int period, @RequestParam("limit") int limit
     ) {
-        if (period < 1 || limit < 1) {
-            throw new InvalidRequestValueException();
-        }
-
+        validatePeriodAndLimit(period, limit);
         List<ThemeResponse> responses = reservationService.findPopularThemes(period, limit).popularThemes()
                 .stream()
                 .map(ThemeResponse::from)
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(responses);
+    }
+
+    private static void validatePeriodAndLimit(int period, int limit) {
+        if (period < 1 || limit < 1) {
+            throw new InvalidRequestValueException();
+        }
     }
 }

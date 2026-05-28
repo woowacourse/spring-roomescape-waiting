@@ -57,7 +57,7 @@ class MyReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("인증 헤더가 존재하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("인증 정보가 만료되었거나 없습니다. 다시 로그인한 후 시도해 주세요."));
     }
 
     @Test
@@ -89,7 +89,7 @@ class MyReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("예약 요청 형식이 유효하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
     }
 
     @Test
@@ -112,7 +112,7 @@ class MyReservationControllerTest {
         // when & then
         mockMvc.perform(delete("/reservations/1"))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.message").value("인증 헤더가 존재하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("인증 정보가 만료되었거나 없습니다. 다시 로그인한 후 시도해 주세요."));
     }
 
     @Test

@@ -59,8 +59,8 @@ class ReservationTimeServiceTest {
     @DisplayName("id에 해당하는 테마가 없으면 예외가 발생한다.")
     void deleteById_nonExistentTime_throwsNotFoundException() {
         //given
-        given(reservationTimeRepository.findById(1L))
-                .willReturn(Optional.empty());
+        given(reservationTimeRepository.deleteById(1L))
+                .willReturn(0);
 
         //when & then
         assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
@@ -72,9 +72,6 @@ class ReservationTimeServiceTest {
     @DisplayName("예약 시간 삭제시, 예약 시간이 사용 중이면 예외가 발생한다.")
     void deleteById_timeInUse_throwsDeleteFailedException() {
         //given
-        given(reservationTimeRepository.findById(1L))
-                .willReturn(Optional.of(new ReservationTime(1L, LocalTime.of(10, 0))));
-
         given(reservationTimeRepository.deleteById(1L))
                 .willThrow(new DataIntegrityViolationException("foreign key"));
 

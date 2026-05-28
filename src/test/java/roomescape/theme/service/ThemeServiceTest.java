@@ -50,8 +50,8 @@ class ThemeServiceTest {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
 
-        given(themeRepository.findById(1L))
-                .willReturn(Optional.empty());
+        given(themeRepository.deleteById(1L))
+                .willReturn(0);
 
         //when & then
         assertThatThrownBy(() -> themeService.deleteById(1L))
@@ -64,9 +64,6 @@ class ThemeServiceTest {
     void removeThemeById_in_use() {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
-
-        given(themeRepository.findById(1L))
-                .willReturn(Optional.of(new Theme(1L, "테마", "설명", "url")));
 
         given(themeRepository.deleteById(1L))
                 .willThrow(new DataIntegrityViolationException("foreign key"));

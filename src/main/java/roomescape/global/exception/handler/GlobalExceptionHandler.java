@@ -42,12 +42,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
-        Throwable cause = e.getCause();
-        while (cause != null) {
-            if (cause instanceof BusinessException businessException) {
-                return handleBusinessException(businessException);
-            }
-            cause = cause.getCause();
+        if (e.getMostSpecificCause() instanceof BusinessException businessException) {
+            return handleBusinessException(businessException);
         }
         return handleBusinessException(new InvalidRequestFormatException());
     }

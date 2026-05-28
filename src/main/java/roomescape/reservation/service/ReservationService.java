@@ -12,10 +12,12 @@ import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidRequestValueException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationDate;
 import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
+import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
@@ -24,12 +26,12 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.service.ReservationTimeService;
 
-@Transactional(readOnly = true)
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
 
-    private final ReservationRepository reservationRepository;
     private final Clock clock;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
@@ -44,51 +46,40 @@ public class ReservationService {
     }
 
     @Transactional
-    public Reservation save(ReservationCommand command, ReservationTime time, Theme theme) {
-        return saveInternal(command, time, theme);
-    }
-
-    private Reservation saveInternal(ReservationCommand command, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), time.id(), theme.id())) {
-            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
-        }
-        validateExpiry(command.date(), time.startAt());
+    public ReservationResult save(ReservationCommand command) {
         try {
-            return reservationRepository.save(
-                    Reservation.of(
-                            command.name(),
-                            command.date(),
-                            time,
-                            theme));
+            Reservation saved = reservationRepository.save(
+                    consistNewReservationObject(command)
+            );
+            return ReservationResult.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
     }
 
+    private Reservation consistNewReservationObject(ReservationCommand command) {
+        ReservationTime time = reservationTimeService.findById(command.timeId());
+        Theme theme = themeService.findById(command.themeId());
 
-    @Transactional
-    public Reservation save(ReservationCommand command) {
-        ReservationTime time = reservationTimeService.getReservationTime(command.timeId());
-        Theme theme = themeService.getTheme(command.themeId());
-        return saveInternal(command, time, theme);
+        validateExpiry(command.date(), time.startAt());
+        validateReservationUniqueness(command, time, theme);
+
+        return Reservation.of(command.name(), command.date(), time, theme);
+    }
+
+    private void validateReservationUniqueness(ReservationCommand command, ReservationTime time, Theme theme) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), time.id(), theme.id())) {
+            throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
+        }
     }
 
     @Transactional
     public void update(ReservationUpdateCommand command, Long id) {
         ReservationTime time = null;
         if (command.timeId() != null) {
-            time = reservationTimeService.getReservationTime(command.timeId());
+            time = reservationTimeService.findById(command.timeId());
         }
-        updateInternal(command, id, time);
-    }
-
-    @Transactional
-    public void update(ReservationUpdateCommand command, Long id, ReservationTime time) {
-        updateInternal(command, id, time);
-    }
-
-    private void updateInternal(ReservationUpdateCommand command, Long id, ReservationTime time) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationDomain(id);
         validateExpiry(reservation.date(), reservation.time().startAt());
         Reservation updated = updateField(command, reservation, time);
         validateExpiry(updated.date(), updated.time().startAt());
@@ -111,8 +102,10 @@ public class ReservationService {
         return reservationRepository.findAllByNameWithStatus(name);
     }
 
-    public List<Reservation> findAll() {
-        return reservationRepository.findAll();
+    public List<ReservationResult> findAll() {
+        return reservationRepository.findAll().stream()
+                .map(ReservationResult::from)
+                .toList();
     }
 
     public PopularThemesResult findPopularThemes(int period, int limit) {
@@ -133,27 +126,25 @@ public class ReservationService {
     }
 
     public void validateNotExpired(Long id) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationDomain(id);
         validateExpiry(reservation.date(), reservation.time().startAt());
     }
 
     private void validateExpiry(LocalDate date, LocalTime startAt) {
+        ReservationDate.of(date, clock);
         LocalDate nowDate = LocalDate.now(clock);
-        if (nowDate.isAfter(date)) {
-            throw new InvalidRequestValueException(ReservationErrorCode.INVALID_DATE.getMessage());
-        }
         if (nowDate.equals(date) && LocalTime.now(clock).isAfter(startAt)) {
             throw new InvalidRequestValueException(TimeErrorCode.INVALID_START_AT.getMessage());
         }
     }
 
-    private Reservation getReservation(Long id) {
+    public Reservation getReservationDomain(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage()));
     }
 
     public void validateOwnership(Long id, String name) {
-        Reservation reservation = getReservation(id);
+        Reservation reservation = getReservationDomain(id);
         if (!reservation.hasSameName(name)) {
             throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
         }

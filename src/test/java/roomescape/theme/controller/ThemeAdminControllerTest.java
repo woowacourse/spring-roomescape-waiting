@@ -22,6 +22,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.controller.dto.ThemeRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
+import roomescape.theme.service.dto.ThemeResult;
 
 @WebMvcTest(ThemeAdminController.class)
 @Import(WebMvcConfig.class)
@@ -41,12 +42,12 @@ class ThemeAdminControllerTest {
 
     @Test
     @DisplayName("테마를 성공적으로 생성한다.")
-    void createTheme_Success() throws Exception {
+    void create_Success() throws Exception {
         // given
         ThemeRequest request = new ThemeRequest("테마", "설명", "url");
         Theme theme = new Theme(1L, "테마", "설명", "url");
 
-        given(themeService.save(any())).willReturn(theme);
+        given(themeService.save(any())).willReturn(ThemeResult.from(theme));
 
         // when & then
         mockMvc.perform(post("/admin/themes")
@@ -60,7 +61,7 @@ class ThemeAdminControllerTest {
 
     @Test
     @DisplayName("테마 생성 시 필수 필드가 누락되면 400 에러를 반환한다.")
-    void createTheme_MissingFields_BadRequest() throws Exception {
+    void create_MissingFields_BadRequest() throws Exception {
         // given
         String requestBody = "{\"name\":\"\", \"description\":\"설명\", \"thumbnailUrl\":\"url\"}";
 
@@ -69,12 +70,12 @@ class ThemeAdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("테마 요청 형식이 유효하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("테마 입력 정보가 형식에 맞지 않습니다. 글자 수 제한 및 필수 입력 항목을 확인해 주세요."));
     }
 
     @Test
     @DisplayName("테마를 성공적으로 삭제한다.")
-    void deleteTheme_Success() throws Exception {
+    void delete_Success() throws Exception {
         // when & then
         mockMvc.perform(delete("/admin/themes/1"))
                 .andExpect(status().isNoContent());

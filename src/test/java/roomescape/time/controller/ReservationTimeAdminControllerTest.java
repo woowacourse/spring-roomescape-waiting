@@ -23,6 +23,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.controller.dto.ReservationTimeRequest;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
+import roomescape.time.service.dto.ReservationTimeResult;
 
 @WebMvcTest(ReservationTimeAdminController.class)
 @Import(WebMvcConfig.class)
@@ -47,7 +48,7 @@ class ReservationTimeAdminControllerTest {
         ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 0));
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
 
-        given(reservationTimeService.save(any())).willReturn(time);
+        given(reservationTimeService.save(any())).willReturn(ReservationTimeResult.from(time));
 
         // when & then
         mockMvc.perform(post("/admin/times")
@@ -70,12 +71,12 @@ class ReservationTimeAdminControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("예약 시간 요청 형식이 유효하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("시간 형식이 올바르지 않습니다. 'HH:mm' 포맷에 맞춰 다시 입력하십시오."));
     }
 
     @Test
     @DisplayName("예약 시간을 성공적으로 삭제한다.")
-    void deleteTime_Success() throws Exception {
+    void delete_Success() throws Exception {
         // when & then
         mockMvc.perform(delete("/admin/times/1"))
                 .andExpect(status().isNoContent());

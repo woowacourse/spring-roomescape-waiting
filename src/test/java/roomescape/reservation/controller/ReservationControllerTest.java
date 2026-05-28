@@ -26,6 +26,7 @@ import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.ReservationService;
+import roomescape.reservation.service.dto.ReservationResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
@@ -48,14 +49,14 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약을 성공적으로 생성한다.")
-    void createReservation_Success() throws Exception {
+    void create_Success() throws Exception {
         // given
         ReservationRequest request = new ReservationRequest("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
         Reservation reservation = new Reservation(1L, "브라운", LocalDate.of(2026, 5, 5), time, theme);
 
-        given(reservationService.save(any())).willReturn(reservation);
+        given(reservationService.save(any())).willReturn(ReservationResult.from(reservation));
 
         // when & then
         mockMvc.perform(post("/reservations")
@@ -69,7 +70,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("예약 생성 시 필수 필드가 누락되면 400 에러를 반환한다.")
-    void createReservation_MissingFields_BadRequest() throws Exception {
+    void create_MissingFields_BadRequest() throws Exception {
         // given
         String requestBody = "{\"name\":\"\", \"date\":\"2026-05-05\", \"timeId\":1, \"themeId\":1}";
 
@@ -78,12 +79,12 @@ class ReservationControllerTest {
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(requestBody))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.message").value("예약 요청 형식이 유효하지 않습니다."));
+                .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다. 안내된 양식에 맞춰 다시 입력해 주세요."));
     }
 
     @Test
     @DisplayName("이름으로 모든 예약을 성공적으로 조회한다.")
-    void getAllReservationsByName_Success() throws Exception {
+    void readAllByName_Success() throws Exception {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "테마", "설명", "url");
@@ -104,7 +105,7 @@ class ReservationControllerTest {
 
     @Test
     @DisplayName("이름으로 조회 시 파라미터가 누락되면 400 에러를 반환한다.")
-    void getAllReservationsByName_MissingName_BadRequest() throws Exception {
+    void readAllByName_MissingName_BadRequest() throws Exception {
         // when & then
         mockMvc.perform(get("/reservations"))
                 .andExpect(status().isBadRequest())

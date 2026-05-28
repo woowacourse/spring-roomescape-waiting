@@ -15,8 +15,9 @@ public class OwnerOnlyArgumentResolver implements HandlerMethodArgumentResolver 
 
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
-        return parameter.hasParameterAnnotation(OwnerOnly.class)
-                && String.class.isAssignableFrom(parameter.getParameterType());
+        boolean hasParameterAnnotation = parameter.hasParameterAnnotation(OwnerOnly.class);
+        boolean isAssignable = String.class.isAssignableFrom(parameter.getParameterType());
+        return hasParameterAnnotation && isAssignable;
     }
 
     @Override

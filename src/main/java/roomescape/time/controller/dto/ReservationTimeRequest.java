@@ -11,7 +11,11 @@ import roomescape.time.service.dto.ReservationTimeCommand;
 public record ReservationTimeRequest(LocalTime startAt) {
 
     public ReservationTimeRequest {
-        if (startAt == null) {
+        validateNotNull(startAt);
+    }
+
+    private void validateNotNull(Object value) {
+        if (value == null) {
             throw new InvalidRequestFormatException(TimeErrorCode.INVALID_FORMAT.getMessage());
         }
     }

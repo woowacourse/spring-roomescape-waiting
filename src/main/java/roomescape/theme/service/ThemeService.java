@@ -1,22 +1,20 @@
 package roomescape.theme.service;
 
 import java.util.List;
-import roomescape.global.exception.DuplicateException;
-import roomescape.theme.exception.ThemeErrorCode;
-import roomescape.global.exception.NotFoundException;
-import roomescape.global.exception.BadRequestException;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.global.exception.BadRequestException;
+import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.theme.domain.Theme;
-
-
-
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
+import roomescape.theme.service.dto.ThemeResult;
 
-@Transactional(readOnly = true)
 @Service
+@Transactional(readOnly = true)
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
@@ -26,44 +24,42 @@ public class ThemeService {
     }
 
     @Transactional
-    public Theme save(ThemeCommand command) {
-        if (themeRepository.existsByName(command.name())) {
-            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
-        }
+    public ThemeResult save(ThemeCommand command) {
+        validateThemeNameUniqueness(command.name());
+        Theme newTheme = Theme.of(command.name(), command.description(), command.thumbnailUrl());
 
         try {
-            return themeRepository.save(
-                    Theme.of(
-                            command.name(),
-                            command.description(),
-                            command.thumbnailUrl()
-                    )
-            );
+            Theme saved = themeRepository.save(newTheme);
+            return ThemeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
         }
     }
 
-    public List<Theme> findAll() {
-        return themeRepository.findAll();
+    private void validateThemeNameUniqueness(String name) {
+        if (themeRepository.existsByName(name)) {
+            throw new DuplicateException(ThemeErrorCode.DUPLICATE_THEME.getMessage());
+        }
     }
 
-    public Theme getTheme(Long id) {
+    public List<ThemeResult> findAll() {
+        return themeRepository.findAll().stream()
+                .map(ThemeResult::from)
+                .toList();
+    }
+
+    public Theme findById(Long id) {
         return themeRepository.findById(id)
-                .orElseThrow(() -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage()));
+                .orElseThrow(
+                        () -> new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage())
+                );
     }
 
     @Transactional
     public void deleteById(Long id) {
-        if (themeRepository.findById(id).isEmpty()) {
-            throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
-        }
-
         try {
             int affectedRow = themeRepository.deleteById(id);
-            int nonAffected = 0;
-
-            if (affectedRow == nonAffected) {
+            if (affectedRow == 0) {
                 throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
             }
         } catch (DataIntegrityViolationException e) {

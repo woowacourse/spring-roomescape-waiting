@@ -32,6 +32,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -75,7 +76,7 @@ class ReservationWaitingServiceTest {
                 .willReturn(new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme));
 
         //when
-        ReservationWaiting reservationWaiting = reservationWaitingService.save(
+        ReservationWaitingResult reservationWaiting = reservationWaitingService.save(
                 new ReservationWaitingCommand(
                         "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
                 )

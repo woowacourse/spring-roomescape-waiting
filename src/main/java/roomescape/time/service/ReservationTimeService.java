@@ -1,29 +1,23 @@
 package roomescape.time.service;
 
-import roomescape.global.exception.InvalidRequestValueException;
-
 import java.time.Clock;
-import roomescape.theme.exception.ThemeErrorCode;
-import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.global.exception.NotFoundException;
-import roomescape.global.exception.BadRequestException;
-import roomescape.time.exception.TimeErrorCode;
-import roomescape.global.exception.DuplicateException;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-
+import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.NotFoundException;
+import roomescape.reservation.domain.ReservationDate;
+import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.AvailableTimesResult;
 import roomescape.time.domain.ReservationTime;
-
-
-
+import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.repository.ReservationTimeRepository;
 import roomescape.time.service.dto.ReservationTimeCommand;
+import roomescape.time.service.dto.ReservationTimeResult;
 
 @Transactional(readOnly = true)
 @Service
@@ -33,40 +27,45 @@ public class ReservationTimeService {
     private final ThemeRepository themeRepository;
     private final Clock clock;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository, Clock clock) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
+                                  Clock clock) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
         this.clock = clock;
     }
 
     @Transactional
-    public ReservationTime save(ReservationTimeCommand command) {
-        if (reservationTimeRepository.existsByStartAt(command.startAt())) {
-            throw new DuplicateException(TimeErrorCode.DUPLICATE_TIME.getMessage());
-        }
-
+    public ReservationTimeResult save(ReservationTimeCommand command) {
+        validateReservationTimeUniqueness(command.startAt());
         ReservationTime reservationTime = ReservationTime.of(command.startAt());
 
         try {
-            return reservationTimeRepository.save(reservationTime);
+            ReservationTime saved = reservationTimeRepository.save(reservationTime);
+            return ReservationTimeResult.from(saved);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateException(TimeErrorCode.DUPLICATE_TIME.getMessage());
         }
     }
 
-    public List<ReservationTime> findAll() {
-        return reservationTimeRepository.findAll();
+    private void validateReservationTimeUniqueness(LocalTime startAt) {
+        if (reservationTimeRepository.existsByStartAt(startAt)) {
+            throw new DuplicateException(TimeErrorCode.DUPLICATE_TIME.getMessage());
+        }
     }
 
-    public ReservationTime getReservationTime(Long id) {
+    public List<ReservationTimeResult> findAll() {
+        return reservationTimeRepository.findAll().stream()
+                .map(ReservationTimeResult::from)
+                .toList();
+    }
+
+    public ReservationTime findById(Long id) {
         return reservationTimeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage()));
     }
 
     public AvailableTimesResult findAvailableTimes(Long themeId, LocalDate date) {
-        if (LocalDate.now(clock).isAfter(date)) {
-            throw new InvalidRequestValueException(ReservationErrorCode.INVALID_DATE.getMessage());
-        }
+        ReservationDate.of(date, clock);
 
         if (themeRepository.findById(themeId).isEmpty()) {
             throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
@@ -77,20 +76,13 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteById(Long id) {
-        if (reservationTimeRepository.findById(id).isEmpty()) {
-            throw new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage());
-        }
-
         try {
             int affectedRow = reservationTimeRepository.deleteById(id);
-            int nonAffected = 0;
-
-            if (affectedRow == nonAffected) {
+            if (affectedRow == 0) {
                 throw new NotFoundException(TimeErrorCode.TIME_NOT_FOUND.getMessage());
             }
         } catch (DataIntegrityViolationException e) {
             throw new roomescape.global.exception.DeleteFailedException(TimeErrorCode.TIME_IN_USE.getMessage());
         }
-
     }
 }
