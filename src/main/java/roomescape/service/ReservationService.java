@@ -80,7 +80,7 @@ public class ReservationService {
     @Transactional
     public Reservation saveWaiting(String name, LocalDate date, long timeId, long themeId) {
         if (!reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId)) {
-            return save(name, date, timeId, themeId);
+            throw new ReservationConflictException("예약 가능한 시간입니다. 일반 예약 API를 이용해주세요.");
         }
         if (reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(date, timeId, themeId, name)) {
             throw new ReservationConflictException("이미 예약된 시간입니다.");
