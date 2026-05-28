@@ -246,9 +246,9 @@ class ReservationControllerTest extends ControllerTest {
                 .body("message", equalTo("이미 예약된 시간입니다."));
     }
 
-    @DisplayName("빈 슬롯에 대기 신청하면 일반 예약으로 생성된다")
+    @DisplayName("빈 슬롯에 대기 신청하면 409")
     @Test
-    void 빈_슬롯에_대기_신청하면_일반_예약_생성() {
+    void 빈_슬롯에_대기_신청하면_409() {
         Map<String, Object> params = new HashMap<>();
         params.put("name", "브라운");
         params.put("date", LocalDate.now().plusDays(1).toString());
@@ -260,7 +260,8 @@ class ReservationControllerTest extends ControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(409)
+                .body("message", equalTo("예약 가능한 시간입니다. 일반 예약 API를 이용해주세요."));
     }
 
     @DisplayName("이미 예약된 슬롯에 다른 사람이 대기 신청하면 201")

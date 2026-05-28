@@ -116,13 +116,17 @@ class ReservationServiceTest {
     }
 
     @Test
-    void saveWaiting_정상_예약_저장() {
+    void saveWaiting_정상_예약_대기_저장() {
         fixClock();
         LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
         given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
         given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
-        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
-        given(reservationDao.save(any(Reservation.class)))
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(true);
+        given(reservationDao.existsReservationByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운"))
+                .willReturn(false);
+        given(reservationDao.existsByDateAndTimeIdAndThemeIdAndName(futureDate, 1L, 1L, "브라운"))
+                .willReturn(false);
+        given(reservationDao.saveWaiting(any(Reservation.class)))
                 .willReturn(new Reservation(10L, "브라운", futureDate, fixedNow, sampleTime, sampleTheme));
 
         Reservation result = reservationService.saveWaiting("브라운", futureDate, 1L, 1L);
@@ -144,6 +148,18 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.saveWaiting("브라운", futureDate, 1L, 1L))
                 .isInstanceOf(ReservationConflictException.class)
                 .hasMessage("이미 대기 신청한 시간입니다.");
+    }
+
+    @Test
+    void saveWaiting_빈_예약_슬롯이면_예외() {
+        LocalDate futureDate = fixedNow.toLocalDate().plusDays(1);
+        given(reservationTimeDao.findById(1L)).willReturn(Optional.of(sampleTime));
+        given(themeDao.findById(1L)).willReturn(Optional.of(sampleTheme));
+        given(reservationDao.existsByDateAndTimeIdAndThemeId(futureDate, 1L, 1L)).willReturn(false);
+
+        assertThatThrownBy(() -> reservationService.saveWaiting("브라운", futureDate, 1L, 1L))
+                .isInstanceOf(ReservationConflictException.class)
+                .hasMessage("예약 가능한 시간입니다. 일반 예약 API를 이용해주세요.");
     }
 
     @Test
