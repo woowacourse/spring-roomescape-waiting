@@ -35,13 +35,7 @@ public class Reservation {
             final Theme theme,
             final LocalDateTime now
     ) {
-        final Reservation reservation = new Reservation(
-                null,
-                new CustomerName(name),
-                date,
-                reservationTime,
-                theme
-        );
+        final Reservation reservation = new Reservation(null, new CustomerName(name), date, reservationTime, theme);
 
         reservation.validateNotPast(now);
         return reservation;
@@ -53,13 +47,16 @@ public class Reservation {
             final LocalDate date,
             final ReservationTime time,
             final Theme theme) {
-        return new Reservation(
-                id,
-                new CustomerName(name),
-                date,
-                time,
-                theme
-        );
+        return new Reservation(id, new CustomerName(name), date, time, theme);
+    }
+
+    public static Reservation promote(
+            final CustomerName customerName,
+            final LocalDate date,
+            final ReservationTime time,
+            final Theme theme
+    ) {
+        return new Reservation(null, customerName, date, time, theme);
     }
 
     public Reservation changeSchedule(
@@ -67,13 +64,7 @@ public class Reservation {
             final ReservationTime time,
             final LocalDateTime now
     ) {
-        final Reservation changed = new Reservation(
-                id,
-                customerName,
-                date,
-                time,
-                theme
-        );
+        final Reservation changed = new Reservation(id, customerName, date, time, theme);
 
         changed.validateNotPast(now);
         return changed;

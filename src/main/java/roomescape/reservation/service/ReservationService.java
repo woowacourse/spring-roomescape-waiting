@@ -180,20 +180,21 @@ public class ReservationService {
     }
 
     private void promoteEarliestWaiting(final Reservation cancelledReservation) {
+        if (!cancelledReservation.getDate().isAfter(LocalDate.now(clock))) {
+            return;
+        }
         waitingRepository.findEarliestBySlot(
                 cancelledReservation.getDate(),
                 cancelledReservation.getTime().getId(),
                 cancelledReservation.getTheme().getId()
         ).ifPresent(waiting -> {
             waitingRepository.deleteById(waiting.getId());
-            final Reservation promoted = Reservation.create(
-                waiting.getCustomerName().name(),
-                waiting.getReservationDate(),
-                waiting.getTime(),
-                waiting.getTheme(),
-                LocalDateTime.now(clock)
-            );
-            saveReservation(promoted);
+            saveReservation(Reservation.promote(
+                    waiting.getCustomerName(),
+                    waiting.getReservationDate(),
+                    waiting.getTime(),
+                    waiting.getTheme()
+            ));
         });
     }
 
