@@ -1,7 +1,6 @@
 package roomescape.service;
 
 import java.time.LocalTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,13 +42,6 @@ public class ReservationTimeService {
                     time.activate();
                     reservationTimeRepository.update(time);
                 });
-    }
-
-    public List<ReservationTimeResult> getAllReservationTimes() {
-        return reservationTimeRepository.findAllTimes()
-                .stream()
-                .map(ReservationTimeResult::from)
-                .toList();
     }
 
     private void validateAlreadyTime(LocalTime startAt) {

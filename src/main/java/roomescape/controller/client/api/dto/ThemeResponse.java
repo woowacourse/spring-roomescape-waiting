@@ -1,6 +1,6 @@
 package roomescape.controller.client.api.dto;
 
-import roomescape.service.result.ThemeResult;
+import roomescape.service.result.ThemeRegisterResult;
 
 public record ThemeResponse(
         long id,
@@ -9,7 +9,7 @@ public record ThemeResponse(
         String thumbnailImageUrl
 ) {
 
-    public static ThemeResponse from(ThemeResult themeResult) {
-        return new ThemeResponse(themeResult.id(), themeResult.name(), themeResult.description(), themeResult.thumbnailImageUrl());
+    public static ThemeResponse from(ThemeRegisterResult result) {
+        return new ThemeResponse(result.id(), result.name(), result.description(), result.thumbnailImageUrl());
     }
 }

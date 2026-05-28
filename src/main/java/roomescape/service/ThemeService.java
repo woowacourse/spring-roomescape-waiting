@@ -13,7 +13,6 @@ import roomescape.repository.ThemeRepository;
 import roomescape.repository.dto.TimeSlotProjection;
 import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.result.ThemeRegisterResult;
-import roomescape.service.result.ThemeResult;
 import roomescape.service.result.ThemeTimesResult;
 
 @Service
@@ -54,27 +53,6 @@ public class ThemeService {
         return reservationTimeRepository.findTimesByThemeWithReservationStatus(id, date)
                 .stream()
                 .map(projection -> toResultWithTimeCheck(projection, date))
-                .toList();
-    }
-
-    public List<ThemeResult> getAllThemes() {
-        return themeRepository.findAll()
-                .stream()
-                .map(ThemeResult::from)
-                .toList();
-    }
-
-    public List<ThemeResult> getAllActiveThemes() {
-        return themeRepository.findAllActiveThemes()
-                .stream()
-                .map(ThemeResult::from)
-                .toList();
-    }
-
-    public List<ThemeResult> getPopularThemes(LocalDate startDate, LocalDate endDate) {
-        return themeRepository.findTop10ByReservationCount(startDate, endDate)
-                .stream()
-                .map(ThemeResult::from)
                 .toList();
     }
 

@@ -86,8 +86,8 @@ class ThemeServiceTest {
         // when
         themeService.deactivate(registerResult.id());
 
-        // then: 같은 테마명으로 재등록 가능
-        assertThat(themeService.getAllActiveThemes()).isEmpty();
+        // then: 비활성화 후 활성 테마 없음
+        assertThat(themeRepository.findAllActiveThemes()).isEmpty();
     }
 
     @Test
@@ -100,8 +100,8 @@ class ThemeServiceTest {
         // when
         themeService.activate(registerResult.id());
 
-        // then: 같은 테마명으로 재등록 가능
-        assertThat(themeService.getAllActiveThemes()).hasSize(1);
+        // then: 활성화 후 활성 테마 1개
+        assertThat(themeRepository.findAllActiveThemes()).hasSize(1);
     }
 
     @ParameterizedTest

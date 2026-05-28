@@ -7,7 +7,7 @@ import roomescape.domain.ReservationEntry;
 public record ReservationResult(
         long reservationId,
         LocalDate date,
-        ThemeResult theme,
+        ThemeRegisterResult theme,
         ReservationTimeResult time,
         ReservationEntryResult entry
 ) {
@@ -36,7 +36,7 @@ public record ReservationResult(
         return new ReservationResult(
                 reservation.getId(),
                 reservation.getDate(),
-                ThemeResult.from(reservation.getTheme()),
+                ThemeRegisterResult.from(reservation.getTheme()),
                 ReservationTimeResult.from(reservation.getTime()),
                 entry == null ? null : ReservationEntryResult.from(entry)
         );
