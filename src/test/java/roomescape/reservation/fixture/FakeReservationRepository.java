@@ -75,29 +75,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByNameAndDateAndTime(String name, Long dateId, Long timeId) {
-        return store.values().stream()
-                .anyMatch(reservation ->
-                        reservation.getName().equals(name) &&
-                                reservation.getDate().getId().equals(dateId) &&
-                                reservation.getTime().getId().equals(timeId) &&
-                                reservation.getStatus() == RESERVED
-                );
-    }
-
-    @Override
-    public boolean existsByDateId(Long dateId) {
-        return store.values().stream()
-                .anyMatch(reservation -> reservation.getDate().getId().equals(dateId));
-    }
-
-    @Override
-    public boolean existsByTimeId(Long timeId) {
-        return store.values().stream()
-                .anyMatch(reservation -> reservation.getTime().getId().equals(timeId));
-    }
-
-    @Override
     public boolean updateStatus(Reservation reservation) {
         Optional<Reservation> findReservation = findById(reservation.getId());
         if (findReservation.isEmpty()) {

@@ -20,12 +20,6 @@ public interface ReservationRepository {
 
     boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId);
 
-    boolean existsByNameAndDateAndTime(String name, Long dateId, Long timeId);
-
-    boolean existsByDateId(Long dateId);
-
-    boolean existsByTimeId(Long timeId);
-
     boolean updateStatus(Reservation reservation);
 
     boolean updateSchedule(Reservation reservation);
