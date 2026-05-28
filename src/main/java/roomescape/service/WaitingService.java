@@ -46,6 +46,43 @@ public class WaitingService {
         Theme theme = themeRepository.findById(request.themeId())
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.THEME_NOT_FOUND));
 
+        ensureReservationExistsForWaiting(request, time, theme);
+        validateUniqueWaiting(request, time, theme);
+
+        Long latestWaitingNumber = getLatestWaitingNumber(request, time, theme);
+        Waiting newWaiting = Waiting.create(
+                request.name(),
+                request.date(),
+                time,
+                theme,
+                ++latestWaitingNumber
+        );
+        Waiting savedWaiting = waitingRepository.save(newWaiting);
+
+        return WaitingResponseDTO.from(savedWaiting);
+    }
+
+    private Long getLatestWaitingNumber(WaitingRequestDTO request, ReservationTime time, Theme theme) {
+        return waitingRepository.findMaxWaitingNumberBy(
+                request.date(),
+                time,
+                theme
+        ).orElse(0L);
+    }
+
+    private void validateUniqueWaiting(WaitingRequestDTO request, ReservationTime time, Theme theme) {
+        boolean isDuplicateWaiting = waitingRepository.existsByNameAndDateAndTimeAndTheme(
+                request.name(),
+                request.date(),
+                time,
+                theme
+        );
+        if (isDuplicateWaiting) {
+            throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
+        }
+    }
+
+    private void ensureReservationExistsForWaiting(WaitingRequestDTO request, ReservationTime time, Theme theme) {
         Reservation existReservation = reservationRepository.findByDateAndTimeAndTheme(
                 request.date(),
                 time,
@@ -57,34 +94,8 @@ public class WaitingService {
         if (existReservation.isSameName(request.name())) {
             throw new RoomEscapeException(WaitingErrorCode.CANNOT_WAITLIST_CONFIRMED_SLOT);
         }
-
-        boolean isDuplicateWaiting = waitingRepository.existsByNameAndDateAndTimeAndTheme(
-                request.name(),
-                request.date(),
-                time,
-                theme
-        );
-        if (isDuplicateWaiting) {
-            throw new RoomEscapeException(WaitingErrorCode.WAITING_DUPLICATE);
-        }
-
-        Long currentWaitingNumber = waitingRepository.findMaxWaitingNumberBy(
-                request.date(),
-                time,
-                theme
-        ).orElse(0L) + 1;
-
-        Waiting newWaiting = Waiting.create(
-                request.name(),
-                request.date(),
-                time,
-                theme,
-                currentWaitingNumber
-        );
-        Waiting savedWaiting = waitingRepository.save(newWaiting);
-
-        return WaitingResponseDTO.from(savedWaiting);
     }
+
     @Transactional
     public void deleteWaiting(Long id) {
         waitingRepository.delete(id);
