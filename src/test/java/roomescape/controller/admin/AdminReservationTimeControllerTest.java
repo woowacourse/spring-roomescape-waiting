@@ -35,7 +35,7 @@ public class AdminReservationTimeControllerTest {
                 .contentType(ContentType.JSON)
                 .body(request)
                 .when().post("/admin/times")
-                .then().statusCode(200);
+                .then().statusCode(201);
 
         RestAssured.given().log().all()
                 .when().get("/times")

@@ -9,12 +9,12 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.domain.ReservationStatus;
 import roomescape.dto.request.ReservationRequest;
 import roomescape.dto.request.UserReservationUpdateRequest;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.exception.IdNotFoundException;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -29,7 +29,8 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), timeId, 1L);
 
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(IdNotFoundException.class)
+                .hasMessageContaining("요청하신 시간 정보를 찾을 수 없습니다.");
     }
 
     @Test
@@ -38,7 +39,8 @@ class ReservationServiceTest {
         ReservationRequest request = new ReservationRequest("아나키", LocalDate.of(2026, 6, 1), 1L, themeId);
 
         assertThatThrownBy(() -> reservationService.save(request))
-                .isInstanceOf(EmptyResultDataAccessException.class);
+                .isInstanceOf(IdNotFoundException.class)
+                .hasMessageContaining("요청하신 테마를 찾을 수 없습니다.");
     }
 
     @Test

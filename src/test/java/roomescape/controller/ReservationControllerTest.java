@@ -34,7 +34,7 @@ public class ReservationControllerTest {
         reservation.put("themeId", 1);
 
         RestAssured.given().log().all().contentType(ContentType.JSON).body(reservation).when().post("/reservations")
-                .then().log().all().statusCode(200);
+                .then().log().all().statusCode(201);
 
         RestAssured.given().log().all().when().get("/reservations").then().log().all().statusCode(200)
                 .body("size()", is(22));
