@@ -23,7 +23,7 @@ public class ThemeService {
     private static final int RANK_DAYS_LIMIT = 7;
 
     private final ThemeRepository themeRepository;
-    private final ReservationSlotRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
 
     private final Clock clock;
 
@@ -39,7 +39,7 @@ public class ThemeService {
     }
 
     public void deleteTheme(Long id) {
-        if (reservationRepository.countByThemeId(id) > 0) {
+        if (reservationSlotRepository.countByThemeId(id) > 0) {
             throw new ConflictException(ThemeErrors.THEME_IN_USE);
         }
         themeRepository.deleteById(id);

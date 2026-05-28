@@ -12,14 +12,6 @@ public record ReservationSlotResponse(
     Long waitingNumber
 ) {
 
-    public static ReservationSlotResponse of(ReservationTime reservationTime, Long waitingNumber) {
-        return new ReservationSlotResponse(
-            reservationTime.getId(),
-            reservationTime.getStartAt(),
-            waitingNumber
-        );
-    }
-
     public static ReservationSlotResponse from(ReservationCountResult reservationCountResult) {
         return new ReservationSlotResponse(
             reservationCountResult.timeId(),

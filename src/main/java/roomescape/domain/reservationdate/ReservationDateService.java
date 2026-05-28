@@ -15,7 +15,7 @@ import roomescape.support.exception.errors.ReservationDateErrors;
 @RequiredArgsConstructor
 public class ReservationDateService {
 
-    private final ReservationSlotRepository reservationRepository;
+    private final ReservationSlotRepository reservationSlotRepository;
     private final ReservationDateRepository reservationDateRepository;
 
     public List<AdminReservationDateResponse> getAllReservationDateForAdmin() {
@@ -30,7 +30,7 @@ public class ReservationDateService {
     }
 
     public void deleteReservationDate(Long id) {
-        if (reservationRepository.countByReservationDateId(id) > 0) {
+        if (reservationSlotRepository.countByReservationDateId(id) > 0) {
             throw new ConflictException(ReservationDateErrors.RESERVATION_DATE_IN_USE);
         }
         reservationDateRepository.deleteById(id);
