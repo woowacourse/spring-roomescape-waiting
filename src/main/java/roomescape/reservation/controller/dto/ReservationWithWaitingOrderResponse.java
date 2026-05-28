@@ -2,18 +2,18 @@ package roomescape.reservation.controller.dto;
 
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
-import roomescape.theme.controller.dto.ThemeResponseDto;
+import roomescape.theme.controller.dto.ThemeResponse;
 
-public record ReservationWithWaitingOrderResponseDto(
+public record ReservationWithWaitingOrderResponse(
         Long id,
         String name,
-        ReservationTimeResponseDto time,
-        ThemeResponseDto theme,
+        ReservationTimeResponse time,
+        ThemeResponse theme,
         Status status,
         Integer waitingOrder
 ) {
-    public static ReservationWithWaitingOrderResponseDto from(ReservationWithWaitingOrder reservation) {
-        return new ReservationWithWaitingOrderResponseDto(
+    public static ReservationWithWaitingOrderResponse from(ReservationWithWaitingOrder reservation) {
+        return new ReservationWithWaitingOrderResponse(
                 reservation.id(),
                 reservation.name(),
                 reservation.time(),

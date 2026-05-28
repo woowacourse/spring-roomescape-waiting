@@ -16,8 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.theme.service.ThemeService;
-import roomescape.time.controller.dto.TimeResponseDto;
-import roomescape.time.controller.dto.TimeSaveRequestDto;
+import roomescape.time.controller.dto.TimeResponse;
+import roomescape.time.controller.dto.TimeSaveRequest;
 import roomescape.time.service.TimeService;
 
 @RestController
@@ -31,27 +31,27 @@ public class TimeController {
     }
 
     @PostMapping("/times")
-    public ResponseEntity<TimeResponseDto> create(@RequestBody @Valid TimeSaveRequestDto request) {
-        TimeResponseDto body = TimeResponseDto.from(timeService.create(request.startAt(), request.endAt()));
+    public ResponseEntity<TimeResponse> create(@RequestBody @Valid TimeSaveRequest request) {
+        TimeResponse body = TimeResponse.from(timeService.create(request.startAt(), request.endAt()));
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
 
     @GetMapping("/times")
-    public ResponseEntity<List<TimeResponseDto>> findAll() {
-        List<TimeResponseDto> body = timeService.findAll()
+    public ResponseEntity<List<TimeResponse>> findAll() {
+        List<TimeResponse> body = timeService.findAll()
                 .stream()
-                .map(TimeResponseDto::from)
+                .map(TimeResponse::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(body);
     }
 
     @GetMapping(value = "/times", params = {"themeId", "date"})
-    public ResponseEntity<List<TimeResponseDto>> getAvailableTimes(
+    public ResponseEntity<List<TimeResponse>> getAvailableTimes(
             @RequestParam Long themeId,
             @RequestParam LocalDate date
     ) {
-        List<TimeResponseDto> body = themeService.getAvailableTimes(themeId, date).stream()
-                .map(TimeResponseDto::from)
+        List<TimeResponse> body = themeService.getAvailableTimes(themeId, date).stream()
+                .map(TimeResponse::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(body);
     }

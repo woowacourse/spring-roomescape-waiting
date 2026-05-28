@@ -3,13 +3,13 @@ package roomescape.reservation.service;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.holiday.service.HolidayService;
-import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.repository.ReservationRepository;
-import roomescape.reservation.service.dto.ReservationSaveServiceDto;
+import roomescape.reservation.service.dto.ReservationSaveServiceRequest;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
@@ -45,7 +45,7 @@ public class ReservationServiceImpl implements ReservationService {
 
     @Transactional
     @Override
-    public Reservation create(ReservationSaveServiceDto request) {
+    public Reservation create(ReservationSaveServiceRequest request) {
         ReservationTime time = findTime(request.timeId());
         Long themeId = request.themeId();
         time.validateReservableSchedule();
@@ -103,9 +103,9 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
-    public List<ReservationWithWaitingOrderResponseDto> getAllByName(String name) {
+    public List<ReservationWithWaitingOrderResponse> getAllByName(String name) {
         return reservationRepository.findAllByName(name).stream()
-                .map(ReservationWithWaitingOrderResponseDto::from)
+                .map(ReservationWithWaitingOrderResponse::from)
                 .toList();
     }
 

@@ -33,6 +33,7 @@ public class AdminReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
+    @DisplayName("전체 예약 목록을 조회한다.")
     @Test
     void 예약_목록_조회_테스트() throws Exception {
         // given
@@ -50,6 +51,7 @@ public class AdminReservationControllerTest {
                 .andExpect(jsonPath("$[0].name").value("라이"));
     }
 
+    @DisplayName("예약을 생성한다.")
     @Test
     void 예약_생성_테스트() throws Exception {
         // given
@@ -127,6 +129,7 @@ public class AdminReservationControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @DisplayName("예약을 취소한다.")
     @Test
     void 예약_취소_테스트() throws Exception {
         // when & then

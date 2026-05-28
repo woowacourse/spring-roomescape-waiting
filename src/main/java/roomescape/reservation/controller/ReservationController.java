@@ -13,11 +13,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.controller.dto.ReservationResponseDto;
-import roomescape.reservation.controller.dto.ReservationSaveRequestDto;
-import roomescape.reservation.controller.dto.ReservationSaveResponseDto;
-import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
-import roomescape.reservation.controller.dto.UserReservationUpdateRequestDto;
+import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.ReservationSaveRequest;
+import roomescape.reservation.controller.dto.ReservationSaveResponse;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
+import roomescape.reservation.controller.dto.UserReservationUpdateRequest;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -31,8 +31,8 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationWithWaitingOrderResponseDto>> getAllByName(@RequestParam String name) {
-        List<ReservationWithWaitingOrderResponseDto> body = reservationService.getAllByName(name);
+    public ResponseEntity<List<ReservationWithWaitingOrderResponse>> getAllByName(@RequestParam String name) {
+        List<ReservationWithWaitingOrderResponse> body = reservationService.getAllByName(name);
         return ResponseEntity.ok(body);
     }
 
@@ -43,17 +43,17 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReservationResponseDto> update(
-            @PathVariable Long id, @RequestBody @Valid UserReservationUpdateRequestDto request) {
-        ReservationResponseDto body = ReservationResponseDto.from(
+    public ResponseEntity<ReservationResponse> update(
+            @PathVariable Long id, @RequestBody @Valid UserReservationUpdateRequest request) {
+        ReservationResponse body = ReservationResponse.from(
                 reservationService.update(id, request.timeId()));
         return ResponseEntity.ok(body);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationSaveResponseDto> create(
-            @RequestBody @Valid ReservationSaveRequestDto reservationRequest) {
-        ReservationSaveResponseDto body = ReservationSaveResponseDto.from(
+    public ResponseEntity<ReservationSaveResponse> create(
+            @RequestBody @Valid ReservationSaveRequest reservationRequest) {
+        ReservationSaveResponse body = ReservationSaveResponse.from(
                 reservationService.create(reservationRequest.toServiceDto()));
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }

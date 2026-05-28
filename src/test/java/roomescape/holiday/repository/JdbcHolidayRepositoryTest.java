@@ -1,5 +1,6 @@
 package roomescape.holiday.repository;
 
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,11 +22,13 @@ class JdbcHolidayRepositoryTest {
     @Autowired
     private JdbcHolidayRepository holidayRepository;
 
+    @DisplayName("JdbcHolidayRepository가 null이 아니다.")
     @Test
     public void JdbcHolidayIsNotNull() {
         assertThat(holidayRepository).isNotNull();
     }
 
+    @DisplayName("휴일을 저장한다.")
     @Test
     void save() {
         Holiday holiday = new Holiday(1L, LocalDate.of(2026, 5, 6));
@@ -35,6 +38,7 @@ class JdbcHolidayRepositoryTest {
         assertThat(saved.date()).isEqualTo(LocalDate.of(2026, 5, 6));
     }
 
+    @DisplayName("전체 휴일 목록을 조회한다.")
     @Test
     void findAll() {
         List<Holiday> holidays = List.of(new Holiday(1L, LocalDate.of(2026, 5, 6)),
@@ -52,6 +56,7 @@ class JdbcHolidayRepositoryTest {
         assertThat(results.getFirst().date()).isEqualTo(LocalDate.of(2026, 5, 6));
     }
 
+    @DisplayName("id로 휴일을 삭제한다.")
     @Test
     void delete() {
         Holiday holiday = new Holiday(1L, LocalDate.of(2026, 5, 6));
@@ -60,6 +65,7 @@ class JdbcHolidayRepositoryTest {
         assertThat(holidayRepository.findAll()).isEmpty();
     }
 
+    @DisplayName("날짜로 휴일 존재 여부를 확인한다.")
     @Test
     void existsByDate() {
         LocalDate date = LocalDate.of(2026, 5, 6);

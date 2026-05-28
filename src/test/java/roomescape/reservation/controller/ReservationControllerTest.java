@@ -19,15 +19,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
-import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
+import roomescape.reservation.controller.dto.ReservationTimeResponse;
+import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
-import roomescape.theme.controller.dto.ThemeResponseDto;
+import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -48,11 +48,11 @@ class ReservationControllerTest {
                 LocalDateTime.of(2030, 6, 1, 12, 0));
         Theme theme = new Theme("테마", "설명", "https://img.test/a.png").withId(1L);
         Theme theme2 = new Theme("테마", "설명", "https://img.test/a.png").withId(2L);
-        List<ReservationWithWaitingOrderResponseDto> reservationWithWaitingOrders = List.of(
-                new ReservationWithWaitingOrderResponseDto(1L, "라이", ReservationTimeResponseDto.from(time),
-                        ThemeResponseDto.from(theme), Status.RESERVED, 0),
-                new ReservationWithWaitingOrderResponseDto(1L, "라이", ReservationTimeResponseDto.from(time),
-                        ThemeResponseDto.from(theme2), Status.WAITING, 3)
+        List<ReservationWithWaitingOrderResponse> reservationWithWaitingOrders = List.of(
+                new ReservationWithWaitingOrderResponse(1L, "라이", ReservationTimeResponse.from(time),
+                        ThemeResponse.from(theme), Status.RESERVED, 0),
+                new ReservationWithWaitingOrderResponse(1L, "라이", ReservationTimeResponse.from(time),
+                        ThemeResponse.from(theme2), Status.WAITING, 3)
         );
         when(reservationService.getAllByName("라이")).thenReturn(reservationWithWaitingOrders);
 

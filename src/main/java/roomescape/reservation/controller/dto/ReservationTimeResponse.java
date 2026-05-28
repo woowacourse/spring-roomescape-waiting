@@ -6,16 +6,16 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 
 import roomescape.time.domain.ReservationTime;
 
-public record ReservationTimeResponseDto(
+public record ReservationTimeResponse(
     Long id,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime startAt,
     @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime endAt
 ) {
 
-    public static ReservationTimeResponseDto from(ReservationTime time) {
+    public static ReservationTimeResponse from(ReservationTime time) {
         if (time == null) {
             return null;
         }
-        return new ReservationTimeResponseDto(time.getId(), time.getStartAt(), time.getEndAt());
+        return new ReservationTimeResponse(time.getId(), time.getStartAt(), time.getEndAt());
     }
 }

@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.theme.controller.dto.ThemeResponseDto;
-import roomescape.theme.controller.dto.ThemeSaveRequestDto;
+import roomescape.theme.controller.dto.ThemeResponse;
+import roomescape.theme.controller.dto.ThemeSaveRequest;
 import roomescape.theme.service.ThemeService;
 
 @RestController
@@ -25,17 +25,17 @@ public class ThemeController {
     }
     
     @GetMapping("/themes")
-    public ResponseEntity<List<ThemeResponseDto>> getAll() {
-        List<ThemeResponseDto> body = themeService.getAll().stream()
-                .map(ThemeResponseDto::from)
+    public ResponseEntity<List<ThemeResponse>> getAll() {
+        List<ThemeResponse> body = themeService.getAll().stream()
+                .map(ThemeResponse::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(body);
     }
 
     @PostMapping("/themes")
-    public ResponseEntity<ThemeResponseDto> create(
-            @RequestBody @Valid ThemeSaveRequestDto themeRequest) {
-        ThemeResponseDto body = ThemeResponseDto.from(
+    public ResponseEntity<ThemeResponse> create(
+            @RequestBody @Valid ThemeSaveRequest themeRequest) {
+        ThemeResponse body = ThemeResponse.from(
                 themeService.create(themeRequest.toServiceDto()));
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }
@@ -47,9 +47,9 @@ public class ThemeController {
     }
 
     @GetMapping("/themes/best")
-    public ResponseEntity<List<ThemeResponseDto>> getBestThemes() {
-        List<ThemeResponseDto> body = themeService.getBestThemes().stream()
-                .map(ThemeResponseDto::from)
+    public ResponseEntity<List<ThemeResponse>> getBestThemes() {
+        List<ThemeResponse> body = themeService.getBestThemes().stream()
+                .map(ThemeResponse::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(body);
     }

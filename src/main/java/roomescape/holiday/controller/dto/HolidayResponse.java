@@ -4,10 +4,10 @@ import roomescape.holiday.domain.Holiday;
 
 import java.time.LocalDate;
 
-public record HolidayResponseDto(Long id, LocalDate date) {
+public record HolidayResponse(Long id, LocalDate date) {
 
-    public static HolidayResponseDto from(Holiday holiday) {
-        return new HolidayResponseDto(
+    public static HolidayResponse from(Holiday holiday) {
+        return new HolidayResponse(
                 holiday.id(),
                 holiday.date()
         );

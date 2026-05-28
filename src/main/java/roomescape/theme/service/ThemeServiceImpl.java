@@ -14,7 +14,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.dto.ThemeSaveServiceDto;
+import roomescape.theme.service.dto.ThemeSaveServiceRequest;
 import roomescape.time.service.TimeService;
 
 @Service
@@ -49,7 +49,7 @@ public class ThemeServiceImpl implements ThemeService {
     }
 
     @Override
-    public Theme create(ThemeSaveServiceDto theme) {
+    public Theme create(ThemeSaveServiceRequest theme) {
         Theme newTheme = new Theme(
                 theme.name(),
                 theme.description(),

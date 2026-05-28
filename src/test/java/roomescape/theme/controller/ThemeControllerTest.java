@@ -20,7 +20,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.service.ThemeService;
-import roomescape.theme.service.dto.ThemeSaveServiceDto;
+import roomescape.theme.service.dto.ThemeSaveServiceRequest;
 
 @WebMvcTest(ThemeController.class)
 class ThemeControllerTest {
@@ -53,7 +53,7 @@ class ThemeControllerTest {
     @Test
     void 테마_생성() throws Exception {
         Theme saved = new Theme("이름", "설명", "https://img.test/a.png").withId(1L);
-        Mockito.when(themeService.create(Mockito.any(ThemeSaveServiceDto.class)))
+        Mockito.when(themeService.create(Mockito.any(ThemeSaveServiceRequest.class)))
                 .thenReturn(saved);
 
         String requestBody = """

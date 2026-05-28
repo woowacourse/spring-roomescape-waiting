@@ -18,8 +18,8 @@ class HolidayServiceImplTest {
     @Mock
     private HolidayRepository holidayRepository;
 
-    @Test
     @DisplayName("삭제할 휴일이 없으면 404 반환")
+    @Test
     void delete_throwsException_whenHolidayNotFound() {
         long id = 1L;
         when(holidayRepository.deleteById(id)).thenReturn(false);

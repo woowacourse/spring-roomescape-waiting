@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.controller.dto.ReservationResponseDto;
-import roomescape.reservation.controller.dto.ReservationSaveRequestDto;
+import roomescape.reservation.controller.dto.ReservationResponse;
+import roomescape.reservation.controller.dto.ReservationSaveRequest;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -27,17 +27,17 @@ public class AdminReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponseDto>> getAll() {
-        List<ReservationResponseDto> body = reservationService.getAll().stream()
-                .map(ReservationResponseDto::from)
+    public ResponseEntity<List<ReservationResponse>> getAll() {
+        List<ReservationResponse> body = reservationService.getAll().stream()
+                .map(ReservationResponse::from)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(body);
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponseDto> create(
-            @RequestBody @Valid ReservationSaveRequestDto reservationRequest) {
-        ReservationResponseDto body = ReservationResponseDto.from(
+    public ResponseEntity<ReservationResponse> create(
+            @RequestBody @Valid ReservationSaveRequest reservationRequest) {
+        ReservationResponse body = ReservationResponse.from(
                 reservationService.create(reservationRequest.toServiceDto()));
         return ResponseEntity.status(HttpStatus.CREATED).body(body);
     }

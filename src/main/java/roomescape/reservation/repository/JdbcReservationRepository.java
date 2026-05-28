@@ -5,11 +5,11 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.reservation.controller.dto.ReservationTimeResponseDto;
+import roomescape.reservation.controller.dto.ReservationTimeResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
-import roomescape.theme.controller.dto.ThemeResponseDto;
+import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
@@ -226,8 +226,8 @@ public class JdbcReservationRepository implements ReservationRepository {
             return new ReservationWithWaitingOrder(
                     rs.getLong("id"),
                     rs.getString("name"),
-                    ReservationTimeResponseDto.from(time),
-                    ThemeResponseDto.from(theme),
+                    ReservationTimeResponse.from(time),
+                    ThemeResponse.from(theme),
                     Status.valueOf(rs.getString("status")),
                     rs.getInt("orderWaiting")
             );

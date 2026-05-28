@@ -23,7 +23,7 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
-import roomescape.theme.service.dto.ThemeSaveServiceDto;
+import roomescape.theme.service.dto.ThemeSaveServiceRequest;
 import roomescape.time.service.TimeService;
 
 @ExtendWith(MockitoExtension.class)
@@ -63,7 +63,7 @@ class ThemeServiceImplTest {
     @DisplayName("테마를 생성한다.")
     @Test
     void create_테마_생성() {
-        ThemeSaveServiceDto dto = new ThemeSaveServiceDto("이름", "설명", "https://url");
+        ThemeSaveServiceRequest dto = new ThemeSaveServiceRequest("이름", "설명", "https://url");
         Theme persisted = new Theme("이름", "설명", "https://url").withId(10L);
         when(themeRepository.save(any(Theme.class))).thenReturn(persisted);
 

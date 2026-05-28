@@ -5,6 +5,7 @@ import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
@@ -25,6 +26,7 @@ class ThemeIntegrationTest {
         RestAssured.port = port;
     }
 
+    @DisplayName("전체 테마 목록을 조회한다.")
     @Test
     void getAll() {
         Map<String, String> body = themeBody();
@@ -47,6 +49,7 @@ class ThemeIntegrationTest {
                 .body("[0].imageUrl", is("https://example.com/oriental.png"));
     }
 
+    @DisplayName("테마를 생성한다.")
     @Test
     void create() {
         Map<String, String> body = themeBody();
@@ -63,6 +66,7 @@ class ThemeIntegrationTest {
                 .body("imageUrl", is("https://example.com/oriental.png"));
     }
 
+    @DisplayName("테마를 삭제한다.")
     @Test
     void delete() {
         Map<String, String> body = themeBody();
@@ -86,6 +90,7 @@ class ThemeIntegrationTest {
                 .body("size()", is(0));
     }
 
+    @DisplayName("없는 테마 삭제 시 404 에러를 응답한다.")
     @Test
     void 없는_테마_삭제시_404_에러_응답() {
         RestAssured.given().log().all()

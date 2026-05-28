@@ -16,12 +16,11 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
-import roomescape.holiday.controller.dto.HolidayResponseDto;
+import roomescape.holiday.controller.dto.HolidayResponse;
 import roomescape.holiday.exception.HolidayNotFoundException;
 import roomescape.holiday.service.HolidayService;
 import roomescape.holiday.service.dto.HolidaySaveServiceDto;
-import roomescape.reservation.controller.dto.ReservationResponseDto;
-import roomescape.reservation.controller.dto.ReservationWithWaitingOrderResponseDto;
+import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.exception.DuplicateReservationException;
@@ -29,12 +28,12 @@ import roomescape.reservation.exception.ForbiddenRequestException;
 import roomescape.reservation.exception.PastReservationException;
 import roomescape.reservation.exception.ReservationNotFoundException;
 import roomescape.reservation.service.ReservationService;
-import roomescape.reservation.service.dto.ReservationSaveServiceDto;
-import roomescape.theme.controller.dto.ThemeResponseDto;
+import roomescape.reservation.service.dto.ReservationSaveServiceRequest;
+import roomescape.theme.controller.dto.ThemeResponse;
 import roomescape.theme.exception.ThemeNotFoundException;
 import roomescape.theme.service.ThemeService;
-import roomescape.theme.service.dto.ThemeSaveServiceDto;
-import roomescape.time.controller.dto.TimeResponseDto;
+import roomescape.theme.service.dto.ThemeSaveServiceRequest;
+import roomescape.time.controller.dto.TimeResponse;
 import roomescape.time.exception.ReservationTimeConflictException;
 import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.service.TimeService;
@@ -69,9 +68,9 @@ public class RoomescapePageController {
 
     @GetMapping("/dashboard/reservations")
     public String reservationsPage(Model model) {
-        model.addAttribute("reservations", reservationService.getAll().stream().map(ReservationResponseDto::from).toList());
-        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponseDto::from).toList());
-        model.addAttribute("times", timeService.findAll().stream().map(TimeResponseDto::from).toList());
+        model.addAttribute("reservations", reservationService.getAll().stream().map(ReservationResponse::from).toList());
+        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponse::from).toList());
+        model.addAttribute("times", timeService.findAll().stream().map(TimeResponse::from).toList());
         return "dashboard/reservations";
     }
 
@@ -81,7 +80,7 @@ public class RoomescapePageController {
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate availableDate,
             Model model
     ) {
-        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponseDto::from).toList());
+        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponse::from).toList());
         model.addAttribute("selectedAvailableThemeId", availableThemeId);
         model.addAttribute("selectedDate", availableDate);
         model.addAttribute("availableTimes", availableTimes(availableThemeId, availableDate, model));
@@ -90,20 +89,20 @@ public class RoomescapePageController {
 
     @GetMapping("/dashboard/themes")
     public String themesPage(Model model) {
-        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponseDto::from).toList());
-        model.addAttribute("bestThemes", themeService.getBestThemes().stream().map(ThemeResponseDto::from).toList());
+        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponse::from).toList());
+        model.addAttribute("bestThemes", themeService.getBestThemes().stream().map(ThemeResponse::from).toList());
         return "dashboard/themes";
     }
 
     @GetMapping("/dashboard/times")
     public String timesPage(Model model) {
-        model.addAttribute("times", timeService.findAll().stream().map(TimeResponseDto::from).toList());
+        model.addAttribute("times", timeService.findAll().stream().map(TimeResponse::from).toList());
         return "dashboard/times";
     }
 
     @GetMapping("/dashboard/holidays")
     public String holidaysPage(Model model) {
-        model.addAttribute("holidays", holidayService.getAll().stream().map(HolidayResponseDto::from).toList());
+        model.addAttribute("holidays", holidayService.getAll().stream().map(HolidayResponse::from).toList());
         return "dashboard/holidays";
     }
 
@@ -115,7 +114,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            reservationService.create(new ReservationSaveServiceDto(name, themeId, timeId));
+            reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId));
             addSuccessMessage(redirectAttributes, "예약을 생성했습니다.");
         } catch (PastReservationException | DuplicateReservationException |
                  IllegalArgumentException | ThemeNotFoundException | TimeNotFoundException e) {
@@ -126,8 +125,8 @@ public class RoomescapePageController {
 
     @GetMapping("/reservations")
     public String userReservationsPage(@RequestParam(required = false) String name, Model model) {
-        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponseDto::from).toList());
-        model.addAttribute("times", timeService.findAll().stream().map(TimeResponseDto::from).toList());
+        model.addAttribute("themes", themeService.getAll().stream().map(ThemeResponse::from).toList());
+        model.addAttribute("times", timeService.findAll().stream().map(TimeResponse::from).toList());
         if (name != null && !name.isBlank()) {
             model.addAttribute("reservations", reservationService.getAllByName(name));
             model.addAttribute("name", name);
@@ -143,7 +142,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            Reservation created = reservationService.create(new ReservationSaveServiceDto(name, themeId, timeId));
+            Reservation created = reservationService.create(new ReservationSaveServiceRequest(name, themeId, timeId));
             if (created.getStatus() == Status.WAITING) {
                 addSuccessMessage(redirectAttributes, "이미 예약된 슬롯이라 예약 대기로 등록되었습니다.");
             } else {
@@ -221,7 +220,7 @@ public class RoomescapePageController {
             RedirectAttributes redirectAttributes
     ) {
         try {
-            themeService.create(new ThemeSaveServiceDto(name, description, imageUrl));
+            themeService.create(new ThemeSaveServiceRequest(name, description, imageUrl));
             addSuccessMessage(redirectAttributes, "테마를 생성했습니다.");
         } catch (IllegalArgumentException e) {
             addExpectedErrorMessage(redirectAttributes, "테마 생성에 실패했습니다. 입력값을 다시 확인해 주세요.", e);
@@ -293,14 +292,14 @@ public class RoomescapePageController {
         return "redirect:/page/dashboard/holidays";
     }
 
-    private List<TimeResponseDto> availableTimes(Long availableThemeId, LocalDate availableDate, Model model) {
+    private List<TimeResponse> availableTimes(Long availableThemeId, LocalDate availableDate, Model model) {
         if (availableThemeId == null || availableDate == null) {
             return List.of();
         }
         try {
             return themeService.getAvailableTimes(availableThemeId, availableDate)
                     .stream()
-                    .map(TimeResponseDto::from)
+                    .map(TimeResponse::from)
                     .toList();
         } catch (IllegalArgumentException | ThemeNotFoundException e) {
             log.info("Failed to load available times for themeId={} date={}: {}", availableThemeId, availableDate, e.getMessage());

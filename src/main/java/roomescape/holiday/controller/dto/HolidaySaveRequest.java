@@ -6,7 +6,7 @@ import roomescape.holiday.service.dto.HolidaySaveServiceDto;
 
 import java.time.LocalDate;
 
-public record HolidaySaveRequestDto(Long id, @NotNull @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date) {
+public record HolidaySaveRequest(Long id, @NotNull @JsonFormat(pattern = "yyyy-MM-dd") LocalDate date) {
     public HolidaySaveServiceDto toServiceDto() {
         return new HolidaySaveServiceDto(date);
     }

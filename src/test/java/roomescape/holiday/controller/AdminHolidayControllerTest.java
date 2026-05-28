@@ -29,6 +29,7 @@ class AdminHolidayControllerTest {
     @MockitoBean
     private HolidayService holidayService;
 
+    @DisplayName("전체 휴일 목록을 조회한다.")
     @Test
     void 휴일_목록_조회() throws Exception {
         Holiday holiday1 = new Holiday(1L, LocalDate.of(2026,5,6));
