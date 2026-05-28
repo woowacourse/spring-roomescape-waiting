@@ -17,6 +17,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.Reservation;
+import roomescape.dto.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.exception.BusinessException;
@@ -182,5 +183,22 @@ class ReservationServiceTest {
         assertThat(responses).hasSize(2);
         assertThat(responses.get(0).reserved()).isTrue();
         assertThat(responses.get(1).reserved()).isFalse();
+    }
+
+    @Test
+    void 사용자명으로_예약_목록_조회() {
+        // given
+        String name = "검프";
+        Reservation reservation = Reservation.createWithId(1L, name, futureDate, time, theme);
+
+        given(reservationRepository.findByName(name)).willReturn(List.of(reservation));
+
+        // when
+        List<ReservationResult> responses = reservationService.getReservationsByName(name);
+
+        // then
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().name()).isEqualTo(name);
+        assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.RESERVATION);
     }
 }

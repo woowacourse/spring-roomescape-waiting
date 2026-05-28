@@ -6,12 +6,13 @@ import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 
-public record ReservationResult(
+public record ReservationResult (
         Long id,
         String name,
         LocalDate date,
         ReservationTimeResult time,
-        ThemeResult theme
+        ThemeResult theme,
+        ReservationStatus status
 ) {
 
     public static ReservationResult from(final Reservation reservation) {
@@ -23,7 +24,8 @@ public record ReservationResult(
                 reservation.getName(),
                 reservation.getDate(),
                 ReservationTimeResult.from(reservationTime),
-                ThemeResult.from(theme)
+                ThemeResult.from(theme),
+                ReservationStatus.RESERVATION
         );
     }
 }
