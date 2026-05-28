@@ -6,7 +6,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.EntityNotFoundException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
-import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
@@ -59,7 +58,7 @@ public class ReservationService {
         reservationRepository.save(currentReservation);
 
         Reservation savedNew = reservationRepository.save(newReservation);
-        return ReservationResult.from(savedNew, findSavedEntryId(savedNew, entry.getName(), added.getStatus()));
+        return ReservationResult.from(savedNew, savedNew.findEntryByNameAndStatus(entry.getName(), added.getStatus()).getId());
     }
 
     @Transactional
@@ -72,7 +71,7 @@ public class ReservationService {
                 });
         ReservationEntry added = reservation.joinWaitingList(command.name());
         Reservation saved = reservationRepository.save(reservation);
-        return ReservationResult.from(saved, findSavedEntryId(saved, command.name(), added.getStatus()));
+        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()).getId());
     }
 
     @Transactional
@@ -82,14 +81,6 @@ public class ReservationService {
 
         reservation.cancelEntry(entryId);
         reservationRepository.save(reservation);
-    }
-
-    private long findSavedEntryId(Reservation saved, String name, ReservationStatus status) {
-        return saved.getEntries().stream()
-                .filter(e -> e.getName().equals(name) && e.getStatus() == status)
-                .mapToLong(ReservationEntry::getId)
-                .findFirst()
-                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 엔트리를 찾을 수 없습니다."));
     }
 
     private Reservation findReservationByEntryIdWithThrow(long entryId) {

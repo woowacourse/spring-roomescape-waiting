@@ -100,6 +100,11 @@ public class Reservation {
                 .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
     }
 
+    public ReservationEntry findEntryByNameAndStatus(String name, ReservationStatus status) {
+        return entries.findByNameAndStatus(name, status)
+                .orElseThrow(() -> new EntityNotFoundException("저장된 예약 엔트리를 찾을 수 없습니다."));
+    }
+
     public void cancelEntry(long entryId) {
         ReservationEntry entry = entries.findById(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("예약 정보를 찾을 수 없습니다."));
