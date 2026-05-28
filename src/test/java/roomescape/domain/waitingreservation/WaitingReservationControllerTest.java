@@ -104,4 +104,17 @@ class WaitingReservationControllerTest {
             .then().log().all()
             .statusCode(204);
     }
+
+    @Test
+    void 예약_대기_목록과_순번을_조회한다() {
+        RestAssured.given().log().all()
+            .param("name", "고래")
+            .when().get("/waiting-reservations")
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(3))
+            .body("find {it.theme.name == '테스트테마'}.rank", is(2))
+            .body("find {it.theme.name == '공포테마'}.rank", is(3))
+            .body("find {it.theme.name == '스릴러테마'}.rank", is(1));
+    }
 }

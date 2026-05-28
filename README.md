@@ -71,7 +71,7 @@
     - 설명: 사용자 본인 예약 대기 취소
     - 응답 `204 No Content`
 
-- [ ] 예약 대기 목록 조회
+- [x] 예약 대기 목록 조회
 
   **`GET /waiting-reservations?name={name}`**
 
