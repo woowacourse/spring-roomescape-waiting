@@ -32,9 +32,6 @@ public interface ReservationRepository {
 
     boolean existsBySlotAndGuestNameExceptCanceled(LocalDate date, Long timeId, Long themeId, String guestName);
 
-    boolean existsBySlotAndGuestNameExceptCanceledAndIdNot(
-            LocalDate date, Long timeId, Long themeId, String guestName, Long excludedId);
-
     boolean existsBySlot(LocalDate date, Long timeId, Long themeId);
 
     boolean existsBySlotExceptReservation(LocalDate date, Long timeId, Long themeId, Long excludedId);

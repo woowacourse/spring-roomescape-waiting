@@ -8,8 +8,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.common.exception.DomainException;
+import roomescape.common.exception.GlobalErrorCode;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.Status;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.JdbcReservationRepository;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
@@ -356,8 +358,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("본인의 기존 날짜 및 시간으로 예약을 수정하면 확정 상태를 유지한다.")
-    public void editDateTime_success_sameSlot() {
+    @DisplayName("본인의 기존 날짜 및 시간으로 예약을 수정하면 예외가 발생한다.")
+    public void editDateTime_fail5() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -366,16 +368,11 @@ class ReservationServiceTest {
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
 
         Reservation reservation = insertReservation("브라운", date, time, theme, Status.CONFIRMED);
-        Reservation waiting = insertReservation("포비", date, time, theme, Status.WAITING);
 
-        // when
-        reservationService.editDateTime(reservation.getId(), date, time.getId(), reservation.getGuestName());
-
-        // then
-        assertThat(reservationRepository.findById(reservation.getId()).get().getStatus())
-                .isEqualTo(Status.CONFIRMED);
-        assertThat(reservationRepository.findById(waiting.getId()).get().getStatus())
-                .isEqualTo(Status.WAITING);
+        // when then
+        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(), reservation.getGuestName()))
+                .isInstanceOf(DomainException.class)
+                .hasMessage(CANNOT_EDIT_SAME_DATE_TIME.message());
     }
 
     @Test
@@ -411,7 +408,7 @@ class ReservationServiceTest {
             "2023-07-06, 09:59", // 시간이 지난 경우
     })
     @DisplayName("이미 지난 날짜 및 시간으로 예약을 수정하려는 경우 예외가 발생한다.")
-    public void editDateTime_fail5(LocalDate ed, LocalTime et) {
+    public void editDateTime_fail6(LocalDate ed, LocalTime et) {
         // given
         clock.setFixed(LocalDateTime.of(2023, 7, 6, 10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 6);
@@ -429,7 +426,7 @@ class ReservationServiceTest {
 
     @Test
     @DisplayName("본인의 예약이 아니면 예외가 발생한다.")
-    public void editDateTime_fail6() {
+    public void editDateTime_fail7() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -441,7 +438,7 @@ class ReservationServiceTest {
 
         // when then
         assertThatThrownBy(() -> reservationService.editDateTime(
-                reservation.getId(), reservation.getDate(), time.getId(), "other_guest"))
+                reservation.getId(), LocalDate.of(2023, 8, 11), time.getId(), "other_guest"))
                 .isInstanceOf(DomainException.class)
                 .hasMessage(CANNOT_EDIT_OTHER_GUEST_RESERVATION.message());
     }

@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.common.exception.DomainException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.ReservationRepository;
 
 import java.time.Clock;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static roomescape.reservation.exception.ReservationErrorCode.*;
@@ -23,11 +25,15 @@ public class ReservationValidator {
         validateNotPast(created);
     }
 
-    public void validateEdit(Reservation original, Reservation changed, String guestName) {
+    public void validateBeforeEdit(Reservation original, LocalDate changedDate, Long changedTimeId, String guestName) {
+        validateIsSameDateTime(original, changedDate, changedTimeId);
         validateIsMyReservation(guestName, original);
         validateAlreadyStarted(original);
+    }
+
+    public void validateEdit(Reservation changed) {
         validateNotPast(changed);
-        validateNotDuplicatedExcept(changed);
+        validateNotDuplicated(changed);
     }
 
     public void validateDelete(Reservation deleted, String guestName) {
@@ -46,15 +52,9 @@ public class ReservationValidator {
         }
     }
 
-    private void validateNotDuplicatedExcept(Reservation reservation) {
-        if (reservationRepository.existsBySlotAndGuestNameExceptCanceledAndIdNot(
-                reservation.getDate(),
-                reservation.getTime().getId(),
-                reservation.getTheme().getId(),
-                reservation.getGuestName(),
-                reservation.getId()
-        )) {
-            throw new DomainException(RESERVATION_ALREADY_EXISTS);
+    private static void validateIsSameDateTime(Reservation original, LocalDate changedDate, Long changedTimeId) {
+        if(original.isSameDateTime(changedDate, changedTimeId)) {
+            throw new DomainException(ReservationErrorCode.CANNOT_EDIT_SAME_DATE_TIME);
         }
     }
 

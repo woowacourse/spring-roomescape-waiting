@@ -64,28 +64,23 @@ public class ReservationService {
     }
 
     @Transactional
-    public void editDateTime(Long reservationId, LocalDate changedDate, Long timeId, String requestGuestName) {
+    public void editDateTime(Long reservationId, LocalDate changedDate, Long changedTimeId, String requestGuestName) {
         Reservation reservation = getReservation(reservationId);
-        ReservationTime changedTime = getReservationTime(timeId);
+        reservationValidator.validateBeforeEdit(reservation, changedDate, changedTimeId, requestGuestName);
+
+        ReservationTime changedTime = getReservationTime(changedTimeId);
 
         Reservation beforeReservation = Reservation.clone(reservation);
-        Status afterStatus = determineState(changedDate, timeId, reservation.getTheme().getId(), reservationId);
+        Status afterStatus = determineState(changedDate, changedTimeId, reservation.getTheme().getId(), reservationId);
         Reservation changedReservation = reservation.changeDateTimeAndStatus(
                 changedDate, changedTime, afterStatus, LocalDateTime.now(clock));
 
-        reservationValidator.validateEdit(reservation, changedReservation, requestGuestName);
+        reservationValidator.validateEdit(changedReservation);
 
         updateDateAndTimeAndStatus(changedReservation);
-        if (isVacatedConfirmedSlot(beforeReservation, changedReservation)) {
+        if (beforeReservation.isConfirmed()) {
             updateTopWaitingConfirmed(beforeReservation);
         }
-    }
-
-    private boolean isVacatedConfirmedSlot(Reservation beforeReservation, Reservation changedReservation) {
-        return beforeReservation.isConfirmed() &&
-                (!beforeReservation.getDate().equals(changedReservation.getDate()) ||
-                        !beforeReservation.getTimeId().equals(changedReservation.getTimeId()) ||
-                        !changedReservation.isConfirmed());
     }
 
     private void updateTopWaitingConfirmed(Reservation reservation) {

@@ -120,4 +120,8 @@ public class Reservation {
     public boolean isConfirmed() {
         return Status.CONFIRMED.equals(status);
     }
+
+    public boolean isSameDateTime(LocalDate date, Long timeId) {
+        return this.date.isEqual(date) && Objects.equals(this.time.getId(), timeId);
+    }
 }

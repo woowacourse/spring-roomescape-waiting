@@ -97,7 +97,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public List<Reservation> findAllByStatusCanceledNot(int page, int size) {
 
-        // todo 취소된 건 안보이게 하기, 프론트엔드 설명 리드미에 추가하기, 동일 날짜 및시간으로 수정 못하게 하기
+        // todo 프론트엔드 설명 리드미에 추가하기, 동일 날짜 및시간으로 수정 못하게 하기
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
@@ -271,22 +271,6 @@ public class JdbcReservationRepository implements ReservationRepository {
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != 'CANCELED'
                 """, Integer.class, date, timeId, themeId, guestName);
-        return count != null && count > 0;
-    }
-
-    @Override
-    public boolean existsBySlotAndGuestNameExceptCanceledAndIdNot(
-            LocalDate date, Long timeId, Long themeId, String guestName, Long excludedId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE date = ?
-                  AND time_id = ?
-                  AND theme_id = ?
-                  AND guest_name = ?
-                  AND status != 'CANCELED'
-                  AND id != ?
-                """, Integer.class, date, timeId, themeId, guestName, excludedId);
         return count != null && count > 0;
     }
 

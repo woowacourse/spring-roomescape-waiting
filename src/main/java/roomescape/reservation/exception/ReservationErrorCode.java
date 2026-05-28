@@ -13,6 +13,7 @@ public enum ReservationErrorCode implements ErrorPolicy {
     RESERVATION_ALREADY_EXISTS("이미 존재하는 예약입니다.", CONFLICT),
     RESERVATION_NOT_FOUND("존재하지 않는 예약입니다.", NOT_FOUND),
     PAST_RESERVATION_NOT_ALLOWED("이미 지난 시간에는 예약할 수 없습니다.", UNPROCESSABLE_ENTITY),
+    CANNOT_EDIT_SAME_DATE_TIME("기존 날짜,시간으로는 수정할 수 없습니다.", BAD_REQUEST),
     CANNOT_EDIT_ALREADY_STARTED_RESERVATION("이미 시작된 예약은 수정할 수 없습니다.", UNPROCESSABLE_ENTITY),
     CANNOT_EDIT_OTHER_GUEST_RESERVATION("본인의 예약만 수정할 수 있습니다.", FORBIDDEN);
 
