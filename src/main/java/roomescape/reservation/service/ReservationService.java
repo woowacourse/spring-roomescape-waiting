@@ -60,15 +60,9 @@ public class ReservationService {
         Theme theme = getTheme(command.themeId());
         theme.validateIsInactive();
 
-        Reservations reservations = findTimeSlotReservations(date.getId(), time.getId(), theme.getId());
-        reservations.validateNotAlreadyBookedBy(name);
-
-        LocalDateTime now = LocalDateTime.now();
-        if (reservations.hasReservedByOthers(name)) {
-            return reservationRepository.save(Reservation.wait(name, date, time, theme, now));
-        }
-
-        return reservationRepository.save(Reservation.create(name, date, time, theme, now));
+        Reservations reservationsOfTimeSlot = findTimeSlotReservations(date.getId(), time.getId(), theme.getId());
+        Reservation reservation = reservationsOfTimeSlot.reserve(name, date, time, theme, LocalDateTime.now());
+        return reservationRepository.save(reservation);
     }
 
     @Transactional
