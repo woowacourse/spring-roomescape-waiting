@@ -7,6 +7,7 @@ import java.util.regex.Pattern;
 
 public class ThumbnailUrl {
     private static final Pattern URL_PATTERN = Pattern.compile("^https?://.+");
+
     private final String value;
 
     public ThumbnailUrl(String value) {

@@ -23,12 +23,12 @@ public class ReservationName {
         }
     }
 
-    public String getValue() {
-        return value;
-    }
-
     public boolean isSame(String other) {
         return value.equals(other);
+    }
+
+    public String getValue() {
+        return value;
     }
 
     @Override

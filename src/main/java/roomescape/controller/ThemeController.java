@@ -20,7 +20,6 @@ import roomescape.service.ThemeService;
 
 @RestController
 public class ThemeController {
-
     private final ThemeService themeService;
 
     public ThemeController(ThemeService themeService) {

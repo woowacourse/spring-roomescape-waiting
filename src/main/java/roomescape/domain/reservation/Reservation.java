@@ -83,10 +83,13 @@ public class Reservation {
             return true;
         }
 
-        if (!(o instanceof Reservation that)) return false;
-
-        if (id == null || that.id == null)
+        if (!(o instanceof Reservation that)) {
             return false;
+        }
+
+        if (id == null || that.id == null) {
+            return false;
+        }
 
         return id.equals(that.id);
     }
@@ -95,5 +98,4 @@ public class Reservation {
     public int hashCode() {
         return id != null ? id.hashCode() : System.identityHashCode(this);
     }
-
 }
