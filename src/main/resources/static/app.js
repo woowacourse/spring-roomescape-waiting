@@ -195,7 +195,7 @@ $("#availableTimes").addEventListener("click", async (event) => {
 
   try {
     const isWaiting = button.dataset.action === "wait";
-    const created = await api(isWaiting ? "/reservations-waitings" : "/reservations", {
+    const created = await api(isWaiting ? "/reservation-waitings" : "/reservations", {
       method: "POST",
       body: JSON.stringify({
         name,

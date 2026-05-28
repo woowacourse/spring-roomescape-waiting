@@ -16,7 +16,7 @@ import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
 
 @RestController
-@RequestMapping("/reservations-waitings")
+@RequestMapping("/reservation-waitings")
 public class ReservationWaitingController {
 
     private final ReservationWaitingService reservationWaitingService;
@@ -32,7 +32,7 @@ public class ReservationWaitingController {
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
         return ResponseEntity
-                .created(URI.create("/reservations-waitings/" + response.id()))
+                .created(URI.create("/reservation-waitings/" + response.id()))
                 .body(response);
     }
 

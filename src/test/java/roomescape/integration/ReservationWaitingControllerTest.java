@@ -41,7 +41,7 @@ class ReservationWaitingControllerTest {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations-waitings")
+                .when().post("/reservation-waitings")
                 .then().statusCode(201);
     }
 
@@ -96,7 +96,7 @@ class ReservationWaitingControllerTest {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .header("Authorization", "gump")
-                .when().delete("/reservations-waitings/1")
+                .when().delete("/reservation-waitings/1")
                 .then().statusCode(204);
     }
 
@@ -110,7 +110,7 @@ class ReservationWaitingControllerTest {
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(reservationWaiting)
-                .when().post("/reservations-waitings")
+                .when().post("/reservation-waitings")
                 .then().statusCode(201);
     }
 }

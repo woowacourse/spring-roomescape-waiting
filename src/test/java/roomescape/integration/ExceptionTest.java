@@ -401,7 +401,7 @@ public class ExceptionTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations-waitings")
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(422)
                 .body("message", equalTo("예약 날짜가 유효하지 않습니다."));
@@ -431,7 +431,7 @@ public class ExceptionTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations-waitings")
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(422)
                 .body("message", equalTo("시작 시간이 유효하지 않습니다."));
@@ -465,7 +465,7 @@ public class ExceptionTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations-waitings")
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(201);
 
@@ -473,7 +473,7 @@ public class ExceptionTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
-                .when().post("/reservations-waitings")
+                .when().post("/reservation-waitings")
                 .then().log().all()
                 .statusCode(409)
                 .body("message", equalTo("예약 대기가 이미 존재합니다."));

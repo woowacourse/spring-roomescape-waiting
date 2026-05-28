@@ -55,7 +55,7 @@ $("#cancelForm").addEventListener("submit", async (event) => {
 
   try {
     const path = cancelType === "waiting"
-      ? `/reservations-waitings/${reservationId}`
+      ? `/reservation-waitings/${reservationId}`
       : `/reservations/${reservationId}`;
 
     await api(path, {

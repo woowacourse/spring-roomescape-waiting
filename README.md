@@ -10,7 +10,7 @@
 
 #### 메서드 / URL
 
-- POST /reservations-waitings
+- POST /reservation-waitings
     - 예약 대기 신청은 예약과는 구분되는 독립된 자원이기 때문에, `/reservations-waitings`로 url을 둔다.
 
 #### 요청
@@ -62,7 +62,7 @@ Location: /themes/{id}
 
 #### 메서드 / URL
 
-- DELETE /reservations-waitings/{id}
+- DELETE /reservation-waitings/{id}
 
 #### 요청
 
