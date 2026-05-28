@@ -1,5 +1,7 @@
 package roomescape.reservation.presentation;
 
+import static org.hamcrest.Matchers.equalTo;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.Clock;
@@ -76,7 +78,8 @@ class ReservationControllerTest {
                 .body(reservationRequest)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("status", equalTo("ACTIVE"));
 
         ReservationRequest newReservationRequest = new ReservationRequest(
                 "리사",
@@ -90,7 +93,8 @@ class ReservationControllerTest {
                 .body(newReservationRequest)
                 .post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("status", equalTo("PENDING"));
     }
 
     @Test
@@ -153,8 +157,9 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(reservationChangeRequest)
-                .when().patch("/reservations/" + reservationId + "/status")
+                .when().patch("/reservations/" + reservationId)
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .body("status", equalTo("PENDING"));
     }
 }

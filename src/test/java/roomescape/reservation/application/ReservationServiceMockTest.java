@@ -1,6 +1,7 @@
 package roomescape.reservation.application;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -105,13 +106,13 @@ class ReservationServiceMockTest {
     }
 
     @Test
-    @DisplayName("변경하려는 시간에 Active인 예약이 있고, 시간을 변경하면 정상 동작한다.")
+    @DisplayName("변경하려는 시간에 이미 예약이 존재하면 Pending 상태로 변경된다.")
     void normalPendingTest() {
         ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
-                .username("포비")
+                .name("포비")
                 .themeId(1L)
                 .timeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
         ReservationTime mockTime = ReservationTime.builder()
@@ -142,33 +143,26 @@ class ReservationServiceMockTest {
         when(themeRepository.getById(1L)).thenReturn(mockTheme);
         when(reservationRepository.getById(1L)).thenReturn(mockReservation);
 
-        when(reservationRepository.existsActiveReservationByThemeAndTime(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date()))
+        when(reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(
+                mockReservation.getId(), changeCommand.timeId(), changeCommand.themeId(), changeCommand.date()))
                 .thenReturn(true);
-
         when(reservationRepository.existsPendingReservationByName(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date(),
-                changeCommand.username()))
+                changeCommand.timeId(), changeCommand.themeId(), changeCommand.date(), changeCommand.name()))
                 .thenReturn(false);
 
-        ReservationInfo reservationInfo = reservationService.changeReservationStatusToPending(
-                mockReservation.getId(),
-                changeCommand);
+        ReservationInfo reservationInfo = reservationService.changeReservation(mockReservation.getId(), changeCommand);
         Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.PENDING);
+        verify(reservationRepository, times(1)).updateDetails(eq(mockReservation.getId()), any(Reservation.class));
     }
 
     @Test
-    @DisplayName("Active인 예약이 존재하지 않으면 예외를 발생한다.")
-    void notFoundActiveReservationTest() {
+    @DisplayName("변경하려는 시간에 예약이 없으면 Active 상태로 변경된다.")
+    void changeToActiveTest() {
         ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
-                .username("포비")
+                .name("포비")
                 .themeId(1L)
                 .timeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
         ReservationTime mockTime = ReservationTime.builder()
@@ -194,28 +188,28 @@ class ReservationServiceMockTest {
                 .createdAt(LocalDateTime.now(clock))
                 .build();
 
+        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
         when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
         when(themeRepository.getById(1L)).thenReturn(mockTheme);
-        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
 
-        when(reservationRepository.existsActiveReservationByThemeAndTime(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date()))
+        when(reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(
+                mockReservation.getId(), changeCommand.timeId(), changeCommand.themeId(), changeCommand.date()))
                 .thenReturn(false);
 
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationStatusToPending(mockReservation.getId(), changeCommand))
-                .isInstanceOf(IllegalStateReservationException.class);
+        ReservationInfo reservationInfo = reservationService.changeReservation(mockReservation.getId(), changeCommand);
+
+        Assertions.assertThat(reservationInfo.status()).isEqualTo(Status.ACTIVE);
+        verify(reservationRepository, times(1)).updateDetails(eq(mockReservation.getId()), any(Reservation.class));
     }
 
     @Test
-    @DisplayName("active인 예약이 존재하고, 이미 대기중이라면 예외를 발생한다.")
+    @DisplayName("변경하려는 시간에 이미 예약이 존재하고, 본인이 이미 대기 중이라면 예외가 발생한다.")
     void duplicatedTest() {
         ReservationChangeCommand changeCommand = ReservationChangeCommand.builder()
-                .username("포비")
+                .name("포비")
                 .themeId(1L)
                 .timeId(1L)
-                .date(LocalDate.now(clock))
+                .date(LocalDate.now(clock).plusDays(1))
                 .build();
 
         ReservationTime mockTime = ReservationTime.builder()
@@ -241,24 +235,20 @@ class ReservationServiceMockTest {
                 .createdAt(LocalDateTime.now(clock))
                 .build();
 
+        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
         when(reservationTimeRepository.getById(1L)).thenReturn(mockTime);
         when(themeRepository.getById(1L)).thenReturn(mockTheme);
-        when(reservationRepository.getById(1L)).thenReturn(mockReservation);
 
-        when(reservationRepository.existsActiveReservationByThemeAndTime(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date()))
+        when(reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(
+                mockReservation.getId(), changeCommand.timeId(), changeCommand.themeId(), changeCommand.date()))
                 .thenReturn(true);
 
         when(reservationRepository.existsPendingReservationByName(
-                changeCommand.timeId(),
-                changeCommand.themeId(),
-                changeCommand.date(),
-                changeCommand.username()))
+                changeCommand.timeId(), changeCommand.themeId(), changeCommand.date(), changeCommand.name()))
                 .thenReturn(true);
 
-        Assertions.assertThatThrownBy(() -> reservationService.changeReservationStatusToPending(mockReservation.getId(), changeCommand))
-                .isInstanceOf(DuplicatedReservationException.class);
+        Assertions.assertThatThrownBy(() -> reservationService.changeReservation(mockReservation.getId(), changeCommand))
+                .isInstanceOf(DuplicatedReservationException.class)
+                .hasMessage("이미 예약 대기 중입니다.");
     }
 }
