@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ThemeFixture;
 import roomescape.support.ApiTest;
@@ -81,6 +83,26 @@ public class ThemeApiTest {
                 .then().log().all()
                 .statusCode(400)
                 .body("errorMessage", equalTo("썸네일 이미지 URL은 비어있을 수 없습니다."));
+    }
+
+    @DisplayName("테마 생성 요청 값이 올바르지 않을 시 400 응답을 반환합니다.")
+    @ParameterizedTest
+    @CsvSource({
+            "name, '', 테마 이름은 비어있을 수 없습니다.",
+            "description, '', 테마 설명은 비어있을 수 없습니다.",
+            "thumbnailImgUrl, '', 썸네일 이미지 URL은 비어있을 수 없습니다."
+    })
+    void create_theme_with_invalid_params(String fieldName, String invalidValue, String expectedMessage) {
+        Map<String, String> params = new HashMap<>(ThemeFixture.horrorThemeParams());
+        params.put(fieldName, invalidValue);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/themes")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo(expectedMessage));
     }
 
     @DisplayName("중복된 테마 생성 시 409 응답을 반환합니다.")

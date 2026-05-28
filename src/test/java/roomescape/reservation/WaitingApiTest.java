@@ -9,6 +9,8 @@ import java.time.LocalTime;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ReservationFixture;
 import roomescape.fixture.ThemeFixture;
@@ -104,6 +106,33 @@ class WaitingApiTest {
                 .then().log().all()
                 .statusCode(422)
                 .body("errorMessage", equalTo("예약이 존재하지 않는 경우, 대기를 신청할 수 없습니다."));
+    }
+
+    @DisplayName("대기 예약 생성 요청 값이 올바르지 않을 시 400 응답 반환을 테스트합니다.")
+    @ParameterizedTest
+    @CsvSource({
+            "name, '', 이름은 비어있을 수 없습니다.",
+            "date, 2028/05/06, 날짜 형식은 yyyy-MM-dd 이어야 합니다.",
+            "date, , 날짜는 비어있을 수 없습니다.",
+            "themeId, , 테마는 비어있을 수 없습니다.",
+            "themeId, -1, 테마ID는 양수여야 합니다.",
+            "timeId, , 시간은 비어있을 수 없습니다.",
+            "timeId, -1, 시간ID는 양수여야 합니다."
+    })
+    void save_waiting_with_invalid_params(String fieldName, String invalidValue, String expectedMessage) {
+        Long themeId = testHelper.insertTheme(ThemeFixture.horrorThemeCreateCommand());
+        Long timeId = testHelper.insertReservationTime(LocalTime.of(9, 0));
+
+        Map<String, String> params = ReservationFixture.futureReservationParams(themeId, timeId);
+        params.put(fieldName, invalidValue);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/waitings")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo(expectedMessage));
     }
 
     @DisplayName("같은 사람이 이미 대기한 날짜와 시간으로 대기 예약 생성 시 409 응답 반환을 테스트합니다.")

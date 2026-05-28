@@ -9,9 +9,12 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.fixture.ThemeFixture;
 import roomescape.support.ApiTest;
@@ -46,6 +49,25 @@ class ReservationTimeApiTest {
                 .then().log().all()
                 .statusCode(400)
                 .body("errorMessage", equalTo("시간은 비어있을 수 없습니다."));
+    }
+
+    @DisplayName("예약 시간 생성 요청 값이 올바르지 않을 시 400 응답을 반환합니다.")
+    @ParameterizedTest
+    @CsvSource({
+            "startAt, , 시간은 비어있을 수 없습니다.",
+            "startAt, 09:00:00, 시간 형식은 HH:mm 이어야 합니다."
+    })
+    void save_time_with_invalid_params(String fieldName, String invalidValue, String expectedMessage) {
+        Map<String, String> params = new HashMap<>();
+        params.put(fieldName, invalidValue);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(params)
+                .when().post("/admin/times")
+                .then().log().all()
+                .statusCode(400)
+                .body("errorMessage", equalTo(expectedMessage));
     }
 
     @DisplayName("중복된 시간으로 예약 시간 추가 시 409 응답을 반환합니다.")
