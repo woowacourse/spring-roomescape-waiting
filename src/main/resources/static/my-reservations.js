@@ -13,6 +13,9 @@ const state = {
   
   currentCalendarYear: new Date().getFullYear(),
   currentCalendarMonth: new Date().getMonth(),
+
+  themesMap: {},
+  timesMap: {},
 };
 
 const $ = id => document.getElementById(id);
@@ -73,8 +76,12 @@ const api = {
     });
   },
 
-  del(url) {
-    return this.request(url, { method: 'DELETE' });
+  del(url, body) {
+    return this.request(url, { 
+      method: 'DELETE',
+      headers: body ? { 'Content-Type': 'application/json' } : undefined,
+      body: body ? JSON.stringify(body) : undefined,
+    });
   }
 };
 
@@ -84,8 +91,23 @@ function formatTime(t) {
   return t.substring(0, 5);
 }
 
-// ===== Load My Reservations =====
-async function loadMyReservations() {
+// ===== Load Metadata (Themes & Times) =====
+async function loadMetadata() {
+  try {
+    const [themes, times] = await Promise.all([
+      api.get('/themes'),
+      api.get('/times')
+    ]);
+    
+    themes.forEach(t => state.themesMap[t.id] = t);
+    times.forEach(t => state.timesMap[t.id] = t);
+  } catch(e) {
+    console.error("Failed to load metadata", e);
+  }
+}
+
+// ===== Load My Reservations and Waiting Lists =====
+async function loadMyData() {
   const name = $('search-name').value.trim();
   if (!name) {
     showToast(ERROR_MESSAGES['PERSON_NAME_NULL_OR_BLANK'], 'error');
@@ -93,28 +115,56 @@ async function loadMyReservations() {
   }
   state.currentName = name;
   
-  const tbody = $('my-reservations-tbody');
-  tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
+  const resTbody = $('my-reservations-tbody');
+  const waitTbody = $('my-waiting-tbody');
+  
+  resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
+  waitTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">조회 중입니다...</td></tr>`;
   
   try {
-    const data = await api.get(`/reservations?name=${encodeURIComponent(name)}`);
-    if (!data || data.length === 0) {
-      tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다. 다른 이름으로 조회해 보세요.</td></tr>`;
-      return;
+    const [reservations, waitingLists] = await Promise.all([
+      api.get(`/reservations?name=${encodeURIComponent(name)}`).catch(() => []),
+      api.get(`/waiting-list?name=${encodeURIComponent(name)}`).catch(() => [])
+    ]);
+
+    // Render Reservations
+    if (!reservations || reservations.length === 0) {
+      resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역이 없습니다.</td></tr>`;
+    } else {
+      resTbody.innerHTML = reservations.map(r => `
+        <tr>
+          <td>${r.id}</td>
+          <td>${r.date}</td>
+          <td>${formatTime(r.time.startAt)}</td>
+          <td>${r.theme.name}</td>
+          <td><button class="btn-ghost" style="padding:4px 12px;font-size:11px" onclick="openModifyModal(${r.id}, '${r.theme.name}', ${r.theme.id})">변경</button></td>
+          <td><button class="btn-delete" onclick="deleteReservation(${r.id})">취소</button></td>
+        </tr>
+      `).join('');
     }
-    
-    tbody.innerHTML = data.map(r => `
-      <tr>
-        <td>${r.id}</td>
-        <td>${r.date}</td>
-        <td>${formatTime(r.time.startAt)}</td>
-        <td>${r.theme.name}</td>
-        <td><button class="btn-ghost" style="padding:4px 12px;font-size:11px" onclick="openModifyModal(${r.id}, '${r.theme.name}', ${r.theme.id})">변경</button></td>
-        <td><button class="btn-delete" onclick="deleteReservation(${r.id})">취소</button></td>
-      </tr>
-    `).join('');
+
+    // Render Waiting Lists
+    if (!waitingLists || waitingLists.length === 0) {
+      waitTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">대기 내역이 없습니다.</td></tr>`;
+    } else {
+      waitTbody.innerHTML = waitingLists.map(w => {
+        const themeName = state.themesMap[w.themeId] ? state.themesMap[w.themeId].name : '알 수 없음';
+        const timeStart = state.timesMap[w.timeId] ? formatTime(state.timesMap[w.timeId].startAt) : '알 수 없음';
+        return `
+        <tr>
+          <td>${w.id}</td>
+          <td>${w.date}</td>
+          <td>${timeStart}</td>
+          <td>${themeName}</td>
+          <td><button class="btn-delete" onclick="deleteWaiting(${w.id})">취소</button></td>
+          <td>${w.waitingOrder}번째</td>
+        </tr>
+      `}).join('');
+    }
+
   } catch(e) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역을 불러오지 못했습니다.</td></tr>`;
+    resTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">예약 내역을 불러오지 못했습니다.</td></tr>`;
+    waitTbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:32px;color:var(--text-muted)">대기 내역을 불러오지 못했습니다.</td></tr>`;
     showToast(e.message, 'error');
   }
 }
@@ -124,7 +174,18 @@ async function deleteReservation(id) {
   try {
     await api.del(`/reservations/${id}?name=${encodeURIComponent(state.currentName)}`);
     showToast('예약이 성공적으로 취소되었습니다.', 'success');
-    loadMyReservations();
+    loadMyData();
+  } catch (e) {
+    showToast(e.message, 'error');
+  }
+}
+
+async function deleteWaiting(id) {
+  if (!confirm('정말 대기를 취소하시겠습니까?')) return;
+  try {
+    await api.del(`/waiting-list/${id}`, { name: state.currentName });
+    showToast('대기가 성공적으로 취소되었습니다.', 'success');
+    loadMyData();
   } catch (e) {
     showToast(e.message, 'error');
   }
@@ -285,7 +346,7 @@ async function submitModifyBooking() {
     await api.patch(`/reservations/${state.modifyingReservationId}`, requestBody);
     closeModifyModal();
     showToast('예약이 성공적으로 변경되었습니다! 🎉', 'success');
-    loadMyReservations();
+    loadMyData();
   } catch (e) {
     showToast(e.message, 'error');
   } finally {
@@ -293,13 +354,35 @@ async function submitModifyBooking() {
   }
 }
 
+// ===== Tabs =====
+function setupTabs() {
+  document.querySelectorAll('.nav-tab-btn').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      document.querySelectorAll('.nav-tab-btn').forEach(b => b.classList.remove('active'));
+      e.target.classList.add('active');
+      
+      const tab = e.target.dataset.tab;
+      if (tab === 'reservations') {
+        $('reservations-tab').style.display = 'block';
+        $('waiting-tab').style.display = 'none';
+      } else {
+        $('reservations-tab').style.display = 'none';
+        $('waiting-tab').style.display = 'block';
+      }
+    });
+  });
+}
+
 // ===== Init =====
 document.addEventListener('DOMContentLoaded', () => {
-  $('btn-search-reservation').addEventListener('click', loadMyReservations);
+  loadMetadata();
+  setupTabs();
+  
+  $('btn-search-reservation').addEventListener('click', loadMyData);
   
   // 엔터로 조회
   $('search-name').addEventListener('keyup', (e) => {
-    if (e.key === 'Enter') loadMyReservations();
+    if (e.key === 'Enter') loadMyData();
   });
 
   // Calendar nav

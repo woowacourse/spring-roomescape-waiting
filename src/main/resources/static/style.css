@@ -467,20 +467,22 @@ main { padding: 48px 0 100px; }
 .form-input::placeholder { color: var(--text-muted); }
 .modal-footer { padding: 0 22px 22px; display: flex; gap: 8px; justify-content: flex-end; }
 
-/* ===== Admin ===== */
+/* ===== Admin & My Reservations ===== */
 .admin-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 22px; }
 .admin-title { font-size: 20px; font-weight: 700; }
 .admin-subtitle { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
-.admin-tabs { display: flex; gap: 2px; margin-bottom: 22px; border-bottom: 1px solid var(--border); }
-.admin-tab {
+
+.content-tabs { display: flex; gap: 2px; margin-bottom: 14px; border-bottom: 1px solid var(--border); }
+.content-tab {
   padding: 9px 18px; font-size: 13px; font-weight: 500; color: var(--text-secondary);
   background: none; border: none; cursor: pointer;
   border-bottom: 2px solid transparent; transition: all var(--tr); margin-bottom: -1px;
 }
-.admin-tab:hover { color: var(--text); }
-.admin-tab.active { color: var(--text); border-bottom-color: var(--accent); }
-.admin-panel { display: none; }
-.admin-panel.active { display: block; }
+.content-tab:hover { color: var(--text); }
+.content-tab.active { color: var(--text); border-bottom-color: var(--accent); }
+.tab-content { display: none; }
+.tab-content.active { display: block; }
+
 .data-table-wrap { border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; }
 .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .data-table thead { background: var(--surface); }
