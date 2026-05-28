@@ -17,5 +17,5 @@ public interface ReservationWaitingRepository {
 
     int deleteById(Long id);
 
-    long countByDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id);
+    Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 }

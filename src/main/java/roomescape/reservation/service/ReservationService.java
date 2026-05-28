@@ -19,6 +19,9 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
+import roomescape.reservationWaiting.domain.ReservationWaiting;
+import java.util.Optional;
 
 @Service
 @Transactional(readOnly = true)
@@ -28,12 +31,16 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
 
+    private final ReservationWaitingRepository reservationWaitingRepository;
+
     public ReservationService(ReservationRepository reservationRepository,
                               ReservationTimeService reservationTimeService,
-                              ThemeService themeService) {
+                              ThemeService themeService,
+                              ReservationWaitingRepository reservationWaitingRepository) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     @Transactional
@@ -118,12 +125,27 @@ public class ReservationService {
     @Transactional
     public void deleteById(Long id, String name) {
         Reservation reservation = findById(id);
-        reservation.validateOwner(name);
+        if (name != null) {
+            reservation.validateOwner(name);
+        }
         reservation.validateExpiry();
 
         int affectedRow = reservationRepository.deleteById(id);
         if (affectedRow == 0) {
             throw new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
+        }
+
+        Optional<ReservationWaiting> firstWaitingOpt = reservationWaitingRepository.findFirstByDateAndTimeIdAndThemeId(
+                reservation.date(),
+                reservation.time().id(),
+                reservation.theme().id()
+        );
+
+        if (firstWaitingOpt.isPresent()) {
+            ReservationWaiting waiting = firstWaitingOpt.get();
+            Reservation newReservation = Reservation.of(waiting.name(), waiting.date(), waiting.time(), waiting.theme());
+            reservationRepository.save(newReservation);
+            reservationWaitingRepository.deleteById(waiting.id());
         }
     }
 

@@ -58,7 +58,7 @@ public class RoomEscapeE2ETest {
                 .body("size()", is(1));
 
         // 4. 브라운이 해당 시간에 예약을 생성한다.
-        ReservationRequest reservationRequest = new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId);
+        ReservationRequest reservationRequest = new ReservationRequest("brown", LocalDate.now().plusDays(1), timeId, themeId);
         Long reservationId = RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(reservationRequest)
@@ -75,7 +75,7 @@ public class RoomEscapeE2ETest {
                 .body("size()", is(0));
 
         // 6. 포비가 동일한 시간에 예약 대기를 신청한다.
-        ReservationWaitingRequest waitingRequest = new ReservationWaitingRequest("포비", LocalDate.now().plusDays(1), timeId, themeId);
+        ReservationWaitingRequest waitingRequest = new ReservationWaitingRequest("pobi", LocalDate.now().plusDays(1), timeId, themeId);
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(waitingRequest)
@@ -85,26 +85,28 @@ public class RoomEscapeE2ETest {
         // 7. 포비가 자신의 예약(대기 포함)을 조회하여 상태가 'WAITING'인지 확인한다.
         RestAssured.given()
                 .contentType(ContentType.JSON)
-                .queryParam("name", "포비")
+                .queryParam("name", "pobi")
                 .when().get("/reservations")
                 .then().statusCode(200)
                 .body("size()", is(1))
                 .body("[0].status", is("waiting"));
 
         // 8. 브라운이 자신의 예약을 취소한다.
-        RestAssured.given()
+        RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .header("Authorization", "브라운")
+                .header("Authorization", "brown")
                 .when().delete("/reservations/" + reservationId)
-                .then().statusCode(204);
+                .then().log().all()
+                .statusCode(204);
 
-        // 9. 포비가 자신의 예약(대기 포함)을 다시 조회하여 상태가 여전히 'WAITING'인지 확인한다. (아직 승급 로직 미구현으로 가정)
-        RestAssured.given()
+        // 9. 포비가 자신의 예약(대기 포함)을 다시 조회하여 상태가 'RESERVED'가 되었는지 확인한다. (대기 자동 승급)
+        RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .queryParam("name", "포비")
+                .queryParam("name", "pobi")
                 .when().get("/reservations")
-                .then().statusCode(200)
+                .then().log().all()
+                .statusCode(200)
                 .body("size()", is(1))
-                .body("[0].status", is("waiting"));
+                .body("[0].status", is("reserved"));
     }
 }

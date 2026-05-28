@@ -11,13 +11,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
-import roomescape.theme.domain.Theme;
-import roomescape.theme.repository.ThemeMapper;
-import roomescape.theme.repository.entity.ThemeEntity;
-import roomescape.time.domain.ReservationTime;
-import roomescape.time.repository.ReservationTimeMapper;
-import roomescape.time.repository.entity.ReservationTimeEntity;
 import roomescape.reservationWaiting.repository.entity.ReservationWaitingEntity;
+import roomescape.theme.repository.entity.ThemeEntity;
+import roomescape.time.repository.entity.ReservationTimeEntity;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -157,13 +153,26 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public long countByDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id) {
+    public Optional<ReservationWaiting> findFirstByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = """
-                SELECT COUNT(*)
-                FROM reservation_waiting 
-                WHERE reservation_date = ? AND time_id = ? AND theme_id = ? AND id < ?;
+                SELECT r.id AS reservation_waiting_id,
+                       r.name AS reservation_waiting_name,
+                       r.reservation_date AS reservation_waiting_date,
+                       r.time_id,
+                       t.start_at AS time_start_at,
+                       h.id AS theme_id,
+                       h.name AS theme_name,
+                       h.description AS theme_description,
+                       h.thumbnail_url AS theme_thumbnail_url
+                FROM reservation_waiting r
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme h ON r.theme_id = h.id
+                WHERE r.reservation_date = ? AND r.time_id = ? AND r.theme_id = ?
+                ORDER BY r.id ASC
+                LIMIT 1
                 """;
 
-        return jdbcTemplate.queryForObject(sql, Long.class, date, timeId, themeId, id);
+        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId)
+                .stream().findFirst();
     }
 }

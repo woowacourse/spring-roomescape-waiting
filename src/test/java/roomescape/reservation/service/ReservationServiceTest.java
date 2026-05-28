@@ -31,6 +31,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.service.ReservationTimeService;
+import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 
 @ExtendWith(MockitoExtension.class)
 class ReservationServiceTest {
@@ -43,6 +44,9 @@ class ReservationServiceTest {
 
     @Mock
     private ThemeService themeService;
+
+    @Mock
+    private ReservationWaitingRepository reservationWaitingRepository;
 
     @InjectMocks
     private ReservationService reservationService;

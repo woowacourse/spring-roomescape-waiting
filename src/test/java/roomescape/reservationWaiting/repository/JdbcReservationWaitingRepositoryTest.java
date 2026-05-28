@@ -201,28 +201,4 @@ class JdbcReservationWaitingRepositoryTest {
         );
     }
 
-    @Test
-    @DisplayName("날짜, 시간, 테마에 해당하는 예약 대기들에 대한 순번을 계산한다.")
-    void countByDateAndTimeIdAndThemeIdAndIdLessThan_multipleEntries_returnsCorrectOrder() {
-        //given
-        ReservationTime time = createTime(LocalTime.of(10, 0));
-        Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-
-        ReservationWaiting brown = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
-        ReservationWaiting gump = saveReservationWaiting("검프", LocalDate.of(2024, 5, 1), time, theme);
-        ReservationWaiting pobi = saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
-
-        //when & then
-        assertThat(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.id(), theme.id(), brown.id()
-        )).isEqualTo(0);
-
-        assertThat(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.id(), theme.id(), gump.id()
-        )).isEqualTo(1);
-
-        assertThat(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.id(), theme.id(), pobi.id()
-        )).isEqualTo(2);
-    }
 }
