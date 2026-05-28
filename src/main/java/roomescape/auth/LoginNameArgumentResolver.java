@@ -11,6 +11,9 @@ import roomescape.auth.annotation.LoginName;
 import roomescape.auth.exception.MissingAuthorizationHeaderException;
 
 public class LoginNameArgumentResolver implements HandlerMethodArgumentResolver {
+
+    private static final String NAME_ATTRIBUTE = "name";
+
     @Override
     public boolean supportsParameter(MethodParameter parameter) {
         boolean hasAnnotation = parameter.hasParameterAnnotation(LoginName.class);
@@ -26,7 +29,7 @@ public class LoginNameArgumentResolver implements HandlerMethodArgumentResolver 
             throws Exception {
         HttpServletRequest request = webRequest.getNativeRequest(HttpServletRequest.class);
 
-        String name = (String) request.getAttribute("name");
+        String name = (String) request.getAttribute(NAME_ATTRIBUTE);
 
         if (name == null) {
             throw new MissingAuthorizationHeaderException();

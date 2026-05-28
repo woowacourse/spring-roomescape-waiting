@@ -12,6 +12,9 @@ import roomescape.reservation.repository.ReservationRepository;
 @Component
 public class NameAuthenticationInterceptor implements HandlerInterceptor {
 
+    private static final String NAME_ATTRIBUTE = "name";
+    private static final String AUTHORIZATION_HEADER = "Authorization";
+
     private final ReservationRepository reservationRepository;
 
     public NameAuthenticationInterceptor(ReservationRepository reservationRepository) {
@@ -30,13 +33,13 @@ public class NameAuthenticationInterceptor implements HandlerInterceptor {
         }
 
         String name = extractName(request);
-        request.setAttribute("name", name);
+        request.setAttribute(NAME_ATTRIBUTE, name);
 
         return true;
     }
 
     private String extractName(HttpServletRequest request) {
-        String name = request.getHeader("Authorization");
+        String name = request.getHeader(AUTHORIZATION_HEADER);
 
         if (name == null || name.isBlank()) {
             throw new MissingAuthorizationHeaderException();
