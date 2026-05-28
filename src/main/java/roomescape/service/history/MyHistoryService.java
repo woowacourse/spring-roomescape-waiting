@@ -2,10 +2,6 @@ package roomescape.service.history;
 
 import java.util.List;
 import org.springframework.stereotype.Service;
-import roomescape.controller.history.ReservationHistoryStatus;
-import roomescape.controller.history.dto.HistoryResponse;
-import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
-import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.repository.history.MyHistory;
 import roomescape.repository.history.MyHistoryRepository;
 
@@ -18,21 +14,21 @@ public class MyHistoryService {
         this.myHistoryRepository = myHistoryRepository;
     }
 
-    public List<HistoryResponse> getAllByName(final String name) {
+    public List<MyHistoryResult> getAllByName(final String name) {
         return myHistoryRepository.findByUserName(name).stream()
-                .map(this::toResponse)
+                .map(this::toResult)
                 .toList();
     }
 
-    private HistoryResponse toResponse(final MyHistory history) {
-        return new HistoryResponse(
+    private MyHistoryResult toResult(final MyHistory history) {
+        return new MyHistoryResult(
                 history.reservationId(),
                 history.waitingId(),
                 ReservationHistoryStatus.valueOf(history.status()),
                 history.name(),
                 history.date(),
-                ThemeResponse.from(history.theme()),
-                ReservationTimeResponse.from(history.time()),
+                history.theme(),
+                history.time(),
                 history.sequence()
         );
     }

@@ -4,13 +4,13 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
-import roomescape.controller.history.ReservationHistoryStatus;
 import roomescape.controller.history.dto.HistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
+import roomescape.service.history.ReservationHistoryStatus;
 import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
@@ -118,6 +118,8 @@ public class ReservationPageModelAssembler {
             return List.of();
         }
 
-        return myHistoryService.getAllByName(reservationName);
+        return myHistoryService.getAllByName(reservationName).stream()
+                .map(HistoryResponse::from)
+                .toList();
     }
 }
