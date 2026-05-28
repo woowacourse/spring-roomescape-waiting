@@ -11,7 +11,6 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
-import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 
 import java.util.List;
 
@@ -72,9 +71,7 @@ public class ReservationWaitingRepositoryTest {
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥1", reservation));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥2", reservation));
         jdbcReservationWaitingRepository.save(reservationWaitingFactory.create("현미밥3", reservation));
-        List<ReservationWaitingTurnResponse> reservationWaitingTurnResponses = jdbcReservationWaitingRepository.findByName(
-                "현미밥2");
-        System.out.println("reservationWaitingTurnResponses.size() = " + reservationWaitingTurnResponses.size());
-        assertThat(reservationWaitingTurnResponses.get(0).turn()).isEqualTo(3);
+        List<Long> turns = jdbcReservationWaitingRepository.calculateTurn("현미밥2");
+        assertThat(turns.getFirst()).isEqualTo(3);
     }
 }

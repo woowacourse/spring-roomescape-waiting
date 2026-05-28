@@ -9,7 +9,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
-import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.theme.domain.Theme;
 
 import java.util.List;
@@ -20,29 +19,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
-    private final RowMapper<ReservationWaitingTurnResponse> rowMapper = (resultSet, rowNum) -> ReservationWaitingTurnResponse.from(
-            ReservationWaiting.restore(resultSet.getLong("reservation_waiting_id"),
-                    resultSet.getString("name"),
-                    Reservation.restore(
-                            resultSet.getLong("reservation_id"),
-                            resultSet.getString("reservation_name"),
-                            resultSet.getDate("reservation_date").toLocalDate(),
-                            ReservationTime.restore(
-                                    resultSet.getLong("time_id"),
-                                    resultSet.getTime("time_start_at").toLocalTime(),
-                                    resultSet.getTime("time_finish_at").toLocalTime()
-                            ),
-                            Theme.restore(
-                                    resultSet.getLong("theme_id"),
-                                    resultSet.getString("theme_name"),
-                                    resultSet.getString("theme_description"),
-                                    resultSet.getString("theme_image_url")
-                            )
-                    )),
-            resultSet.getLong("turn")
-    );
-
-    private final RowMapper<ReservationWaiting> rowMapper2 = (resultSet, rowNum) ->
+    private final RowMapper<ReservationWaiting> rowMapper = (resultSet, rowNum) ->
             ReservationWaiting.restore(resultSet.getLong("reservation_waiting_id"),
                     resultSet.getString("name"),
                     Reservation.restore(
@@ -62,6 +39,9 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                             )
                     )
             );
+
+    private final RowMapper<Long> turnMapper = (resultSet, rowNum) ->
+            resultSet.getLong("turn");
 
     public JdbcReservationWaitingRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -86,14 +66,26 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public List<ReservationWaitingTurnResponse> findByName(String name) {
+    public List<Long> calculateTurn(String name) {
+        String query = """
+                SELECT * FROM (
+                SELECT rw.id, rw.name, ROW_NUMBER() OVER(PARTITION BY r.id ORDER BY rw.id) as turn
+                FROM reservation_waiting rw
+                JOIN reservation r ON rw.reservation_id = r.id) sub
+                WHERE sub.name = ?
+                ORDER BY sub.id;
+                """;
+        return jdbcTemplate.query(query, turnMapper, name);
+    }
+
+    @Override
+    public List<ReservationWaiting> findByName(String name) {
         String query = """
                 SELECT * FROM (
                 SELECT rw.id as reservation_waiting_id, rw.name,
                        r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url,
-                       ROW_NUMBER() OVER(PARTITION BY r.id ORDER BY rw.id) as turn
+                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
                 FROM reservation_waiting rw
                 JOIN reservation r ON rw.reservation_id = r.id
                 JOIN reservation_time rt ON r.time_id = rt.id
@@ -125,6 +117,6 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 WHERE sub.reservation_waiting_id = ? 
                 ORDER BY reservation_waiting_id;
                 """;
-        return jdbcTemplate.queryForObject(query, rowMapper2, reservationWaitingId);
+        return jdbcTemplate.queryForObject(query, rowMapper, reservationWaitingId);
     }
 }

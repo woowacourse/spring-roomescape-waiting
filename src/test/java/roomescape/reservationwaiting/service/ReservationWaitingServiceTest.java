@@ -1,8 +1,5 @@
 package roomescape.reservationwaiting.service;
 
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,6 +10,9 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -70,6 +70,8 @@ public class ReservationWaitingServiceTest {
     @Test
     @DisplayName("사용자의 이름으로 대기 현황을 조회한다.")
     void 예약_대기_조회() {
-        assertThat(reservationWaitingService.getWaitingByName("현미밥").size()).isEqualTo(1);
+        reservationWaitingRequest = new ReservationWaitingRequest("현미밥", 11L);
+        response = reservationWaitingService.createWaiting(reservationWaitingRequest);
+        assertThat(reservationWaitingService.getWaitingByName("현미밥").size()).isEqualTo(2);
     }
 }
