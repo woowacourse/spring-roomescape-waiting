@@ -17,6 +17,13 @@ public class ReservationTime {
         return new ReservationTime(null, startAt);
     }
 
+    public ReservationTime updateId(Long id) {
+        return new ReservationTime(
+                id,
+                this.getStartAt()
+        );
+    }
+
     public Long getId() {
         return id;
     }

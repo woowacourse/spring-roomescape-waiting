@@ -12,6 +12,7 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.exception.ReservationNotFoundException;
+import roomescape.reservation.exception.ReservationSlotHasWaitingException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
@@ -55,6 +56,12 @@ public class ReservationService {
                 command.themeId())
         ) {
             throw new DuplicateReservationException();
+        }
+
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
+                command.date(), command.timeId(), command.themeId()
+        )) {
+            throw new ReservationSlotHasWaitingException();
         }
 
         ReservationTime time = getReservationTime(command.timeId());
@@ -157,14 +164,14 @@ public class ReservationService {
 
     @Transactional
     public void updateReservation(ReservationUpdateCommand command, Long id) {
-        Reservation reservation = getReservation(id);
+        Reservation original = getReservation(id);
 
         validateExpiry(
-                reservation.getDate(),
-                reservation.getTime().getStartAt()
+                original.getDate(),
+                original.getTime().getStartAt()
         );
 
-        Reservation updated = updateField(command, reservation);
+        Reservation updated = updateField(command, original);
 
         validateExpiry(
                 updated.getDate(),
@@ -180,8 +187,20 @@ public class ReservationService {
             throw new DuplicateReservationException();
         }
 
+        if (reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(
+                updated.getDate(),
+                updated.getTime().getId(),
+                updated.getTheme().getId()
+        )) {
+            throw new ReservationSlotHasWaitingException();
+        }
+
         try {
             reservationRepository.update(updated);
+
+            reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(
+                    original.getDate(), original.getTime().getId(), original.getTheme().getId()
+            ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
         } catch (DataIntegrityViolationException e) {
             throw new DuplicateReservationException();
         }
@@ -190,6 +209,18 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(ReservationNotFoundException::new);
+    }
+
+    private void promoteFirstWaitingForSameSlotToReservation(ReservationWaiting waiting) {
+        reservationWaitingRepository.deleteById(waiting.getId());
+
+        try {
+            reservationRepository.save(
+                    Reservation.of(waiting.getName(), waiting.getDate(), waiting.getTime(), waiting.getTheme())
+            );
+        } catch (DataIntegrityViolationException e) {
+            throw new DuplicateReservationException();
+        }
     }
 
     private Reservation updateField(ReservationUpdateCommand command, Reservation reservation) {
@@ -210,12 +241,19 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationById(Long id) {
+        Reservation reservation = reservationRepository.findById(id)
+                .orElseThrow(ReservationNotFoundException::new);
+
         int affectedRow = reservationRepository.deleteById(id);
         int nonAffected = 0;
 
         if (affectedRow == nonAffected) {
             throw new ReservationNotFoundException();
         }
+
+        reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(
+                reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
+        ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
     }
 
     public void validateReservationNotExpired(Long id) {

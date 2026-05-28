@@ -29,7 +29,6 @@ class ReservationWaitingControllerTest {
         //given
         createReservationTime("10:00");
         createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/image.png");
-
         createReservation("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
 
         Map<String, Object> body = new HashMap<>();
@@ -45,39 +44,6 @@ class ReservationWaitingControllerTest {
                 .when().post("/reservations-waitings")
                 .then().statusCode(201);
     }
-
-    @DisplayName("예약 대기 삭제에 성공하면 204을 반환한다.")
-    @Test
-    void deleteReservationWaitingTest() {
-        //given
-        createReservationTime("10:00");
-        createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/image.png");
-
-        createReservation("brown", LocalDate.of(2026, 5, 30), 1L, 1L);
-        createReservationWaiting("gump", LocalDate.of(2026, 5, 30), 1L, 1L);
-
-        //when & then
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .header("Authorization", "gump")
-                .when().delete("/reservations-waitings/1")
-                .then().statusCode(204);
-    }
-
-    private void createReservationWaiting(String name, LocalDate date, long timeId, long themeId) {
-        Map<String, Object> reservationWaiting = new HashMap<>();
-        reservationWaiting.put("name", name);
-        reservationWaiting.put("date", date.toString());
-        reservationWaiting.put("timeId", timeId);
-        reservationWaiting.put("themeId", themeId);
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservationWaiting)
-                .when().post("/reservations-waitings")
-                .then().statusCode(201);
-    }
-
 
     private void createReservationTime(String startAt) {
         Map<String, Object> reservationTime = new HashMap<>();
@@ -114,6 +80,37 @@ class ReservationWaitingControllerTest {
                 .contentType(ContentType.JSON)
                 .body(reservation)
                 .when().post("/reservations")
+                .then().statusCode(201);
+    }
+
+    @DisplayName("예약 대기 삭제에 성공하면 204를 반환한다.")
+    @Test
+    void deleteReservationWaitingTest() {
+        //given
+        createReservationTime("10:00");
+        createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/image.png");
+        createReservation("brown", LocalDate.of(2026, 5, 30), 1L, 1L);
+        createReservationWaiting("gump", LocalDate.of(2026, 5, 30), 1L, 1L);
+
+        //when & then
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .header("Authorization", "gump")
+                .when().delete("/reservations-waitings/1")
+                .then().statusCode(204);
+    }
+
+    private void createReservationWaiting(String name, LocalDate date, long timeId, long themeId) {
+        Map<String, Object> reservationWaiting = new HashMap<>();
+        reservationWaiting.put("name", name);
+        reservationWaiting.put("date", date.toString());
+        reservationWaiting.put("timeId", timeId);
+        reservationWaiting.put("themeId", themeId);
+
+        RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationWaiting)
+                .when().post("/reservations-waitings")
                 .then().statusCode(201);
     }
 }

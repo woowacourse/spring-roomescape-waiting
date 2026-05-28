@@ -11,9 +11,13 @@ public interface ReservationWaitingRepository {
 
     Optional<ReservationWaiting> findById(Long id);
 
+    Optional<ReservationWaiting> findByReservationDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+
     List<ReservationWaiting> findAllByName(String name);
 
     boolean existByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name);
+
+    boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     int deleteById(Long id);
 

@@ -358,6 +358,7 @@ class ConcurrencyTest {
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
         createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+
         reservationWaitingService.makeReservationWaiting(new ReservationWaitingCommand(
                 "포비",
                 LocalDate.of(2026, 5, 15),
@@ -367,7 +368,7 @@ class ConcurrencyTest {
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.deleteReservationWaiting(1L, "포비"),
+                () -> reservationWaitingService.deleteReservationWaitingById(1L, "포비"),
                 100,
                 ReservationWaitingNotFoundException.class
         );

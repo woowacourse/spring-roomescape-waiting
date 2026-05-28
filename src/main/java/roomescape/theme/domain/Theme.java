@@ -20,6 +20,15 @@ public class Theme {
         return new Theme(null, name, description, thumbnailUrl);
     }
 
+    public Theme updateId(Long id) {
+        return new Theme(
+                id,
+                this.name,
+                this.description,
+                this.thumbnailUrl
+        );
+    }
+
     public Long getId() {
         return id;
     }

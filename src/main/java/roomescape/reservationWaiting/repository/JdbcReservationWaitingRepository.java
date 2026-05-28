@@ -64,14 +64,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
         }, keyHolder);
 
         long id = keyHolder.getKey().longValue();
-
-        return new ReservationWaiting(
-                id,
-                reservationWaiting.getName(),
-                reservationWaiting.getDate(),
-                reservationWaiting.getTime(),
-                reservationWaiting.getTheme()
-        );
+        return reservationWaiting.updateId(id);
     }
 
     @Override
@@ -99,6 +92,30 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
+    public Optional<ReservationWaiting> findByReservationDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT r.id AS reservation_waiting_id,
+                       r.name AS reservation_waiting_name,
+                       r.reservation_date AS reservation_waiting_date,
+                       r.time_id,
+                       t.start_at AS time_start_at,
+                       h.id AS theme_id,
+                       h.name AS theme_name,
+                       h.description AS theme_description,
+                       h.thumbnail_url AS theme_thumbnail_url
+                FROM reservation_waiting r
+                INNER JOIN reservation_time t
+                  ON r.time_id = t.id
+                INNER JOIN theme h
+                  ON r.theme_id = h.id
+                WHERE r.reservation_date = ? AND time_id = ? AND theme_id = ?
+                """;
+
+        return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId)
+                .stream().findFirst();
+    }
+
+    @Override
     public List<ReservationWaiting> findAllByName(String name) {
         String sql = """
                 SELECT r.id AS reservation_waiting_id,
@@ -122,7 +139,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public boolean existByDateAndTimeIdAndThemeIdAndName(LocalDate date, Long timeId, Long themeId, String name) {
+    public boolean existByDateAndTimeIdAndThemeIdAndName(
+            LocalDate date, Long timeId, Long themeId, String name) {
         String sql = """
                 SELECT EXISTS (
                     SELECT 1
@@ -132,6 +150,20 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 """;
 
         Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId, name);
+        return Boolean.TRUE.equals(exists);
+    }
+
+    @Override
+    public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        String sql = """
+                SELECT EXISTS (
+                    SELECT 1
+                    FROM reservation_waiting
+                    WHERE reservation_date = ? AND time_id = ? AND theme_id = ?
+                )
+                """;
+
+        Boolean exists = jdbcTemplate.queryForObject(sql, Boolean.class, date, timeId, themeId);
         return Boolean.TRUE.equals(exists);
     }
 
@@ -146,7 +178,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public long countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(LocalDate date, Long timeId, Long themeId, Long id) {
+    public long countByReservationDateAndTimeIdAndThemeIdAndIdLessThan(
+            LocalDate date, Long timeId, Long themeId, Long id) {
         String sql = """
                 SELECT COUNT(*)
                 FROM reservation_waiting 

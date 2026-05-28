@@ -45,8 +45,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         }, keyHolder);
 
         Long id = keyHolder.getKey().longValue();
-
-        return new ReservationTime(id, reservationTime.getStartAt());
+        return reservationTime.updateId(id);
     }
 
     @Override

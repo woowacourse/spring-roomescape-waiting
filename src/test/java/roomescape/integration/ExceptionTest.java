@@ -376,4 +376,106 @@ public class ExceptionTest {
                 .statusCode(400)
                 .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
     }
+
+    @DisplayName("예약 대기 신청 날짜가 오늘 (5월 1일)보다 이전이면 예외가 발생한다.")
+    @Test
+    void createReservationWaiting_invalid_date() {
+        //given
+        jdbcTemplate.update(
+                "INSERT INTO reservation_time (start_at) VALUES (?)",
+                Time.valueOf(LocalTime.of(10, 0))
+        );
+
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "테마", "설명", "thumbnailUrl"
+        );
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-04-30");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
+
+        //when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(422)
+                .body("message", equalTo("예약 날짜가 유효하지 않습니다."));
+    }
+
+    @DisplayName("예약 대기 신청 시간이 오늘(5월 1일), 이 시간(09:00) 이전이면 예외가 발생한다.")
+    @Test
+    void createReservationWaiting_invalid_time() {
+        //given
+        jdbcTemplate.update(
+                "INSERT INTO reservation_time (start_at) VALUES (?)",
+                Time.valueOf(LocalTime.of(8, 0))
+        );
+
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "테마", "설명", "thumbnailUrl"
+        );
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-05-01");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
+
+        //when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(422)
+                .body("message", equalTo("시작 시간이 유효하지 않습니다."));
+    }
+
+    @DisplayName("예약 대기 신청 시, 동일한 예약자가 이미 예약 신청을 했으면 예외가 발생한다.")
+    @Test
+    void createReservationWaiting_duplicate_reservation() {
+        //given
+        jdbcTemplate.update(
+                "INSERT INTO reservation_time (start_at) VALUES (?)",
+                Time.valueOf(LocalTime.of(10, 0))
+        );
+
+        jdbcTemplate.update(
+                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
+                "테마", "설명", "thumbnailUrl"
+        );
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                "브라운", "2026-05-01", 1L, 1L
+        );
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "포비");
+        body.put("date", "2026-05-01");
+        body.put("timeId", 1L);
+        body.put("themeId", 1L);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(201);
+
+        //when & then
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations-waitings")
+                .then().log().all()
+                .statusCode(409)
+                .body("message", equalTo("예약 대기가 이미 존재합니다."));
+    }
 }

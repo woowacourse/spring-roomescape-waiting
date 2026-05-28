@@ -25,6 +25,16 @@ public class Reservation {
         return new Reservation(null, name, date, time, theme);
     }
 
+    public Reservation updateId(long id) {
+        return new Reservation(
+                id,
+                this.name,
+                this.date,
+                this.time,
+                this.theme
+        );
+    }
+
     public Reservation updateDate(LocalDate date) {
         return new Reservation(
                 this.id,

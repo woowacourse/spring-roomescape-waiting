@@ -11,10 +11,10 @@ import roomescape.reservation.exception.AuthorizationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
-import roomescape.reservationWaiting.exception.AlreadyReservedException;
+import roomescape.reservationWaiting.exception.AlreadyReservedSameSlotException;
 import roomescape.reservationWaiting.exception.DuplicateReservationWaitingException;
 import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
-import roomescape.reservationWaiting.exception.WaitingTargetReservationNotFoundException;
+import roomescape.reservationWaiting.exception.ReservationWaitingTargetNotFoundException;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.theme.domain.Theme;
@@ -29,30 +29,34 @@ import roomescape.time.repository.ReservationTimeRepository;
 public class ReservationWaitingService {
 
     private final ReservationWaitingRepository reservationWaitingRepository;
+    private final ReservationRepository reservationRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final ReservationRepository reservationRepository;
     private final Clock clock;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
+                                     ReservationRepository reservationRepository,
                                      ReservationTimeRepository reservationTimeRepository,
-                                     ThemeRepository themeRepository, ReservationRepository reservationRepository,
+                                     ThemeRepository themeRepository,
                                      Clock clock) {
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.reservationRepository = reservationRepository;
         this.clock = clock;
     }
 
+    @Transactional
     public ReservationWaiting makeReservationWaiting(ReservationWaitingCommand command) {
         if (reservationWaitingRepository.existByDateAndTimeIdAndThemeIdAndName(
-                command.date(), command.timeId(), command.themeId(), command.name())
-        ) {
+                command.date(), command.timeId(), command.themeId(), command.name()
+        )) {
             throw new DuplicateReservationWaitingException();
         }
 
-        ReservationTime time = getReservationTime(command.timeId());
+        ReservationTime time = reservationTimeRepository.findById(command.timeId())
+                .orElseThrow(TimeNotFoundException::new);
+
         validateExpiry(command.date(), time.getStartAt());
 
         Theme theme = themeRepository.findById(command.themeId())
@@ -60,10 +64,10 @@ public class ReservationWaitingService {
 
         Reservation reservation = reservationRepository.findByDateAndTimeIdAndThemeId(
                 command.date(), command.timeId(), command.themeId()
-        ).orElseThrow(WaitingTargetReservationNotFoundException::new);
+        ).orElseThrow(ReservationWaitingTargetNotFoundException::new);
 
-        if (reservation.getName().equals(command.name())) {
-            throw new AlreadyReservedException();
+        if (reservation.hasSameName(command.name())) {
+            throw new AlreadyReservedSameSlotException();
         }
 
         try {
@@ -80,28 +84,6 @@ public class ReservationWaitingService {
         }
     }
 
-    @Transactional
-    public void deleteReservationWaiting(Long id, String userName) {
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(id).orElseThrow(
-                ReservationWaitingNotFoundException::new
-        );
-
-        validateExpiry(reservationWaiting.getDate(), reservationWaiting.getTime().getStartAt());
-        if (!reservationWaiting.getName().equals(userName)) {
-            throw new AuthorizationException();
-        }
-
-        int count = reservationWaitingRepository.deleteById(id);
-        if (count == 0) {
-            throw new ReservationWaitingNotFoundException();
-        }
-    }
-
-    private ReservationTime getReservationTime(Long timeId) {
-        return reservationTimeRepository.findById(timeId)
-                .orElseThrow(TimeNotFoundException::new);
-    }
-
     private void validateExpiry(LocalDate date, LocalTime startAt) {
         LocalDate nowDate = LocalDate.now(clock);
 
@@ -114,4 +96,23 @@ public class ReservationWaitingService {
         }
     }
 
+    @Transactional
+    public void deleteReservationWaitingById(Long id, String userName) {
+        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(id)
+                .orElseThrow(ReservationWaitingNotFoundException::new);
+
+        validateExpiry(
+                reservationWaiting.getDate(),
+                reservationWaiting.getTime().getStartAt()
+        );
+
+        if (!reservationWaiting.getName().equals(userName)) {
+            throw new AuthorizationException();
+        }
+
+        int count = reservationWaitingRepository.deleteById(id);
+        if (count == 0) {
+            throw new ReservationWaitingNotFoundException();
+        }
+    }
 }
