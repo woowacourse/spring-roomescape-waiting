@@ -26,7 +26,8 @@ class ReservationControllerTest extends ControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("reservationStatus", equalTo("RESERVED"));
     }
 
     @DisplayName("사용자 예약 삭제")
@@ -59,7 +60,8 @@ class ReservationControllerTest extends ControllerTest {
                 .queryParam("username", "김철수")
                 .when().get("/reservations")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .body("reservations[0].reservationStatus", equalTo("RESERVED"));
     }
 
     @DisplayName("존재하지 않는 시간으로 예약하면 404")
@@ -288,7 +290,8 @@ class ReservationControllerTest extends ControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(201);
+                .statusCode(201)
+                .body("reservationStatus", equalTo("WAITING"));
     }
 
     @DisplayName("본인이 이미 예약한 슬롯에 대기 신청하면 409")
@@ -413,10 +416,24 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("대기 목록 조회 성공")
     @Test
     void 대기_목록_조회() {
+        String futureDate = LocalDate.now().plusDays(4).toString();
+        Map<String, Object> reservationParams = new HashMap<>();
+        reservationParams.put("name", "김철수");
+        reservationParams.put("date", futureDate);
+        reservationParams.put("timeId", 6);
+        reservationParams.put("themeId", 4);
+        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
+                .when().post("/reservations").then().statusCode(201);
+        reservationParams.put("name", "이든");
+        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
+                .when().post("/reservations/waiting").then().statusCode(201);
+
         RestAssured.given().log().all()
-                .queryParam("username", "이영희")
+                .queryParam("username", "이든")
                 .when().get("/reservations/waiting")
                 .then().log().all()
-                .statusCode(200);
+                .statusCode(200)
+                .body("reservations[0].waitingNumber", equalTo(1))
+                .body("reservations[0].reservationStatus", equalTo("WAITING"));
     }
 }
