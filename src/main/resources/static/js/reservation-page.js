@@ -152,7 +152,6 @@ loadTopAvailableTimes();
 // ==========================================
 let inlineEditState = {
     reservationId: null,
-    mode: "active",
     times: [],
     selectedTimeId: null,
     originalData: null
@@ -184,11 +183,6 @@ function renderMyReservations(reservations, username) {
                         <span class="${statusClass(reservation.status)}">${formatStatus(reservation)}</span>
                     </div>
 
-                    <div class="mode-toggle" role="group" aria-label="예약 변경 방식">
-                        <button type="button" class="mode-btn active" data-mode="active">확정 예약으로 변경</button>
-                        <button type="button" class="mode-btn" data-mode="pending">대기 예약으로 변경</button>
-                    </div>
-
                     <div style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
                         <input type="text" class="edit-name" value="${reservation.name}" placeholder="예약자 이름" required style="flex: 1; min-width: 80px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
                         <input type="date" class="edit-date" value="${reservation.date}" required style="flex: 1; min-width: 120px; padding: 0.5rem; border: 1px solid #cbd5e1; border-radius: 4px;">
@@ -197,7 +191,7 @@ function renderMyReservations(reservations, username) {
                         </select>
                     </div>
 
-                    <div class="edit-help hint">확정 변경은 빈 시간만 선택할 수 있고, 대기 변경은 이미 확정 예약이 있는 시간에 신청할 수 있습니다.</div>
+                    <div class="edit-help hint">원하시는 시간을 선택해주세요. 이미 예약이 꽉 찬 시간일 경우 자동으로 대기 예약 처리됩니다.</div>
                     <div class="edit-times time-grid empty-state" style="padding: 0.5rem; background: #f8fafc; border-radius: 4px; border: 1px dashed #cbd5e1;">
                         시간을 조회 중입니다...
                     </div>
@@ -214,38 +208,22 @@ function renderMyReservations(reservations, username) {
             const timesContainer = article.querySelector('.edit-times');
             const saveBtn = article.querySelector('.save-edit-btn');
             const cancelBtn = article.querySelector('.cancel-edit-btn');
-            const modeButtons = Array.from(article.querySelectorAll('.mode-btn'));
-            modeButtons.forEach((modeButton) => {
-                modeButton.classList.toggle("active", modeButton.dataset.mode === inlineEditState.mode);
-            });
 
             const loadInlineTimes = async () => {
                 saveBtn.disabled = true;
                 inlineEditState.selectedTimeId = null;
                 const date = dateInput.value;
                 const themeId = themeInput.value;
-                const mode = inlineEditState.mode;
 
                 timesContainer.innerHTML = "조회 중...";
                 timesContainer.className = "edit-times time-grid empty-state";
 
                 try {
-                    if (mode === "active") {
-                        const data = await request(`/times/available?themeId=${themeId}&date=${date}`);
-                        inlineEditState.times = data.times || [];
-                    } else {
-                        inlineEditState.times = await request("/times", { method: "GET" });
-                        if (date === reservation.date && String(themeId) === String(reservation.theme.id)) {
-                            inlineEditState.selectedTimeId = reservation.time.id;
-                        }
-                    }
+                    // 변경할 때는 모든 시간을 조회하여 선택할 수 있게 함
+                    inlineEditState.times = await request("/times", { method: "GET" });
 
-                    if (mode === "active" && date === reservation.date && String(themeId) === String(reservation.theme.id)) {
-                        const hasTime = inlineEditState.times.some(t => t.id === reservation.time.id);
-                        if (!hasTime) {
-                            inlineEditState.times.push(reservation.time);
-                            inlineEditState.times.sort((a, b) => a.startAt.localeCompare(b.startAt));
-                        }
+                    // 기존 예약과 날짜/테마가 같다면, 본인이 원래 예약했던 시간 자동 선택 유지
+                    if (date === reservation.date && String(themeId) === String(reservation.theme.id)) {
                         inlineEditState.selectedTimeId = reservation.time.id;
                     }
 
@@ -257,9 +235,7 @@ function renderMyReservations(reservations, username) {
 
             const renderInlineTimes = () => {
                 if (inlineEditState.times.length === 0) {
-                    timesContainer.innerHTML = inlineEditState.mode === "active"
-                        ? "선택한 날짜/테마에 빈 시간이 없습니다."
-                        : "등록된 운영 시간이 없습니다.";
+                    timesContainer.innerHTML = "등록된 운영 시간이 없습니다.";
                     saveBtn.disabled = true;
                     return;
                 }
@@ -281,13 +257,6 @@ function renderMyReservations(reservations, username) {
                 saveBtn.disabled = !inlineEditState.selectedTimeId;
             };
 
-            modeButtons.forEach((button) => {
-                button.onclick = () => {
-                    inlineEditState.mode = button.dataset.mode;
-                    modeButtons.forEach((modeButton) => modeButton.classList.toggle("active", modeButton === button));
-                    loadInlineTimes();
-                };
-            });
             dateInput.addEventListener('change', loadInlineTimes);
             themeInput.addEventListener('change', loadInlineTimes);
 
@@ -307,22 +276,20 @@ function renderMyReservations(reservations, username) {
 
                 clearFeedback(checkFeedback);
                 try {
-                    await request(`/reservations/${reservation.id}/${inlineEditState.mode}`, {
+                    // /reservations/{id} 경로로 순수 PATCH 전송 (상태나 mode 정보는 백엔드에서 중복 여부 확인 후 자동 처리)
+                    await request(`/reservations/${reservation.id}`, {
                         method: "PATCH",
                         body: JSON.stringify({
-                            username: newName,
+                            username: newName, // 백엔드 DTO에 맞게 name 혹은 username으로 사용하세요. (POST와 통일하여 name으로 작성했습니다)
                             date: dateInput.value,
                             themeId: Number(themeInput.value),
                             timeId: inlineEditState.selectedTimeId
                         })
                     });
 
-                    showFeedback(checkFeedback, "success", inlineEditState.mode === "active"
-                        ? "예약이 확정 상태로 변경되었습니다."
-                        : "예약이 대기 상태로 변경되었습니다.");
+                    showFeedback(checkFeedback, "success", "예약이 성공적으로 수정되었습니다.");
                     inlineEditState.reservationId = null;
 
-                    // 이름을 변경했다면, 검색창 이름도 갱신하여 재검색 유도
                     if (username !== newName) {
                         checkNameInput.value = newName;
                     }
@@ -357,7 +324,6 @@ function renderMyReservations(reservations, username) {
 
             article.querySelector('.inline-edit-btn').onclick = () => {
                 inlineEditState.reservationId = reservation.id;
-                inlineEditState.mode = reservation.status === "PENDING" ? "pending" : "active";
                 inlineEditState.originalData = reservation;
                 renderMyReservations(reservations, username);
             };
@@ -383,7 +349,7 @@ function renderMyReservations(reservations, username) {
 checkForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     clearFeedback(checkFeedback);
-    inlineEditState.reservationId = null; // 검색 시 진행중이던 수정 모드 초기화
+    inlineEditState.reservationId = null;
 
     const name = checkNameInput.value.trim();
     try {
