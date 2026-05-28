@@ -2,6 +2,8 @@ package roomescape.domain.waitingreservation;
 
 import java.time.Clock;
 import java.time.LocalDateTime;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.ReservationDate;
 import roomescape.domain.reservationdate.ReservationDateService;
@@ -14,6 +16,8 @@ import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRespon
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.WaitingReservationErrorCode;
 
+@Service
+@RequiredArgsConstructor
 public class WaitingReservationService {
 
     private final WaitingReservationRepository waitingReservationRepository;
@@ -22,22 +26,6 @@ public class WaitingReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final Clock clock;
-
-    public WaitingReservationService(
-        WaitingReservationRepository waitingReservationRepository,
-        ReservationRepository reservationRepository,
-        ReservationDateService reservationDateService,
-        ReservationTimeService reservationTimeService,
-        ThemeService themeService,
-        Clock clock
-    ) {
-        this.waitingReservationRepository = waitingReservationRepository;
-        this.reservationRepository = reservationRepository;
-        this.reservationDateService = reservationDateService;
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
-        this.clock = clock;
-    }
 
     public WaitingReservationCreationResponse createWaitingReservation(WaitingReservationCreationRequest request) {
         validateDuplicationOfWaitingReservation(request);
