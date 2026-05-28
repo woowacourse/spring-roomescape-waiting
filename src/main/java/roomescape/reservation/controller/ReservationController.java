@@ -18,8 +18,8 @@ import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.controller.dto.ReservationWaitingListResponse;
 import roomescape.reservation.controller.dto.ReservationWaitingResponse;
-import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.repository.dto.ReservationWaitingResult;
+import roomescape.reservation.service.ReservationService;
 
 @RestController
 @RequestMapping("/reservations")
@@ -57,8 +57,8 @@ public class ReservationController {
 
         return ResponseEntity.ok(
                 ReservationWaitingListResponse.from(result.stream()
-                                .map(ReservationWaitingResponse::from)
-                                .toList()
+                        .map(ReservationWaitingResponse::from)
+                        .toList()
                 )
         );
     }
@@ -69,7 +69,8 @@ public class ReservationController {
             @RequestBody @Valid ReservationEditRequest request,
             @CurrentUser String guestName
     ) {
-        ReservationWaitingResult result = reservationService.editDateTime(id, request.date(), request.timeId(), guestName);
+        ReservationWaitingResult result = reservationService.editDateTime(id, request.date(), request.timeId(),
+                guestName);
         return ResponseEntity.ok(ReservationWaitingResponse.from(result));
     }
 

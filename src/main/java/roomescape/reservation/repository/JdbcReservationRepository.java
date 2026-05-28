@@ -295,53 +295,70 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Optional<Long> findFirstWaitingIdBySlot(LocalDate date, Long timeId, Long themeId) {
         return jdbcTemplate.query("""
-                SELECT id
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
-                ORDER BY created_at, id
-                LIMIT 1
-                """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId, Status.WAITING.toString()).stream().findFirst();
+                        SELECT id
+                        FROM reservation
+                        WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?
+                        ORDER BY created_at, id
+                        LIMIT 1
+                        """, (rs, rowNum) -> rs.getLong("id"), date, timeId, themeId, Status.WAITING.toString()).stream()
+                .findFirst();
     }
 
     @Override
     public boolean existsByDateAndTimeIdAndThemeIdAndGuestNameExceptCanceled(
             LocalDate date, Long timeId, Long themeId, String guestName) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != ?
-                """, Integer.class, date, timeId, themeId, guestName, Status.CANCELED.toString());
-        return count != null && count > 0;
+        return existsReservation("""
+                        date = ? AND time_id = ? AND theme_id = ? AND guest_name = ? AND status != ?
+                        """,
+                date, timeId, themeId, guestName,
+                Status.CANCELED.toString()
+        );
     }
 
     @Override
-    public boolean existsReservationBySlot(LocalDate date, Long timeId, Long themeId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE date = ? AND time_id = ? AND theme_id = ? AND status = ?;
-                """, Integer.class, date, timeId, themeId, Status.CONFIRMED.toString());
-        return count != null && count > 0;
+    public boolean existsReservationBySlot(
+            LocalDate date,
+            Long timeId,
+            Long themeId
+    ) {
+        return existsReservation("""
+                        date = ? AND time_id = ? AND theme_id = ? AND status = ?
+                        """,
+                date, timeId, themeId,
+                Status.CONFIRMED.toString()
+        );
     }
 
     @Override
     public boolean existByTimeId(Long timeId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE time_id = ? AND status != ?
-                """, Integer.class, timeId, Status.CANCELED.toString());
-        return count != null && count > 0;
+        return existsReservation("""
+                        time_id = ? AND status != ?
+                        """,
+                timeId,
+                Status.CANCELED.toString()
+        );
     }
 
     @Override
     public boolean existByThemeId(Long themeId) {
-        Integer count = jdbcTemplate.queryForObject("""
-                SELECT COUNT(*)
-                FROM reservation
-                WHERE theme_id = ? AND status != ?
-                """, Integer.class, themeId, Status.CANCELED.toString());
-        return count != null && count > 0;
+        return existsReservation("""
+                        theme_id = ? AND status != ?
+                        """,
+                themeId,
+                Status.CANCELED.toString()
+        );
+    }
+
+    private boolean existsReservation(String condition, Object... args) {
+        Boolean exists = jdbcTemplate.queryForObject("""
+                SELECT EXISTS(
+                    SELECT 1
+                    FROM reservation
+                    WHERE
+                """ + condition + """
+                )
+                """, Boolean.class, args);
+        return Boolean.TRUE.equals(exists);
     }
 
     private Integer toConfirmedToken(Status status) {

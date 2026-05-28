@@ -367,7 +367,8 @@ class JdbcReservationRepositoryTest {
         Reservation reservation = insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
 
         // when
-        ReservationWaitingResult reservationWaitingResult = reservationRepository.findWaitingById(reservation.getId()).get();
+        ReservationWaitingResult reservationWaitingResult = reservationRepository.findWaitingById(reservation.getId())
+                .get();
 
         // then
         assertThat(reservationWaitingResult.waitNumber()).isEqualTo(2);

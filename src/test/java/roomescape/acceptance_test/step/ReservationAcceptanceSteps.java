@@ -177,7 +177,8 @@ public final class ReservationAcceptanceSteps {
     ) {
         assertThat(response.statusCode()).isEqualTo(200);
         assertThat(response.jsonPath().getList("reservations.id", Integer.class)).contains(waitingReservation.id());
-        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains(Status.WAITING.toString());
+        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains(
+                Status.WAITING.toString());
         assertThat(response.jsonPath().getList("reservations.waitNumber", Integer.class)).contains(waitingNumber);
     }
 
@@ -259,7 +260,8 @@ public final class ReservationAcceptanceSteps {
             ReservationInfo reservation
     ) {
         assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains(Status.CANCELED.toString());
+        assertThat(response.jsonPath().getList("reservations.status", String.class)).contains(
+                Status.CANCELED.toString());
     }
 
     public record ReservationInfo(

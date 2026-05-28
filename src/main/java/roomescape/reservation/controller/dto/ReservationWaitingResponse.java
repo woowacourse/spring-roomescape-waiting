@@ -6,6 +6,13 @@ import roomescape.theme.controller.dto.ThemeResponse;
 
 public sealed interface ReservationWaitingResponse permits NonWaitingReservationResponse, WaitingReservationResponse {
 
+    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
+        if (reservationWaitingResult.status().isWaiting()) {
+            return WaitingReservationResponse.from(reservationWaitingResult);
+        }
+        return NonWaitingReservationResponse.from(reservationWaitingResult);
+    }
+
     Long id();
 
     String guestName();
@@ -19,11 +26,4 @@ public sealed interface ReservationWaitingResponse permits NonWaitingReservation
     String status();
 
     boolean isConfirmed();
-
-    static ReservationWaitingResponse from(ReservationWaitingResult reservationWaitingResult) {
-        if (reservationWaitingResult.status().isWaiting()) {
-            return WaitingReservationResponse.from(reservationWaitingResult);
-        }
-        return NonWaitingReservationResponse.from(reservationWaitingResult);
-    }
 }

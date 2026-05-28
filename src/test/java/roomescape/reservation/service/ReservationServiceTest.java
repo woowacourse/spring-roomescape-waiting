@@ -259,7 +259,8 @@ class ReservationServiceTest {
                 reservation.getGuestName());
 
         // then
-        ReservationWaitingResult reservationWaitingResult = reservationRepository.findWaitingById(reservation.getId()).get();
+        ReservationWaitingResult reservationWaitingResult = reservationRepository.findWaitingById(reservation.getId())
+                .get();
 
         assertThat(reservationWaitingResult)
                 .extracting(ReservationWaitingResult::date, r -> r.time().getId())
