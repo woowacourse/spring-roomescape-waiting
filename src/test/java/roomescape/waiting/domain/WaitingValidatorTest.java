@@ -39,7 +39,7 @@ class WaitingValidatorTest {
         );
 
         // when & then
-        assertThatCode(() -> waitingValidator.validateAlreadyReservation(command))
+        assertThatCode(() -> waitingValidator.validateAlreadyWaiting(command))
                 .doesNotThrowAnyException();
     }
 
@@ -59,7 +59,7 @@ class WaitingValidatorTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> waitingValidator.validateAlreadyReservation(command))
+        assertThatThrownBy(() -> waitingValidator.validateAlreadyWaiting(command))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
     }
