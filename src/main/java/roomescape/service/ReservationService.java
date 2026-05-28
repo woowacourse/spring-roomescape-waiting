@@ -96,10 +96,11 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
+        boolean wasConfirmed = reservation.getReservationStatus().equals(ConfirmedStatus.getInstance());
         reservation.cancel();
         reservationRepository.updateStatus(reservation);
 
-        if (reservation.getReservationStatus().equals(ConfirmedStatus.getInstance())) {
+        if (wasConfirmed) {
 
             Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
 
