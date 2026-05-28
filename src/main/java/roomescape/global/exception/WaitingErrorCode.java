@@ -16,7 +16,8 @@ public enum WaitingErrorCode implements ErrorCode {
     WAITING_CREATE_IN_PAST(HttpStatus.BAD_REQUEST, "지난 일정으로 예약할 수 없습니다."),
     WAITING_MODIFY_IN_PAST(HttpStatus.BAD_REQUEST, "지난 일정의 예약은 수정 및 취소할 수 없습니다."),
     WAITING_ALREADY_PAST(HttpStatus.BAD_REQUEST, "이미 지난 예약은 취소할 수 없습니다."),
-    WAITING_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "수정할 수 있는 권한이 없습니다.");
+    WAITING_OWNER_MISMATCH(HttpStatus.FORBIDDEN, "수정할 수 있는 권한이 없습니다."),
+    WAITING_NOT_EXIST_RESERVATION(HttpStatus.BAD_REQUEST, "예약이 존재하지 않으면, 대기요청을 할 수 없습니다.");
 
     private final HttpStatus status;
     private final String message;

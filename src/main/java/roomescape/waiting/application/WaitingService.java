@@ -21,17 +21,20 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingReference waitingReference;
     private final WaitingValidator waitingValidator;
 
     public WaitingService(
             WaitingRepository waitingRepository,
             ReservationTimeRepository reservationTimeRepository,
             ThemeRepository themeRepository,
+            WaitingReference waitingReference,
             WaitingValidator waitingValidator
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingReference = waitingReference;
         this.waitingValidator = waitingValidator;
     }
 
@@ -42,6 +45,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> new BusinessException(WaitingErrorCode.WAITING_THEME_INVALID));
 
+        waitingReference.validateExistReservation(command);
         waitingValidator.validateAlreadyWaiting(command);
         Waiting waiting = Waiting.create(
                 command.name(),
