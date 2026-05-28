@@ -14,6 +14,7 @@ import roomescape.exception.KeyGenerationException;
 
 import java.sql.*;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @RequiredArgsConstructor
@@ -51,6 +52,29 @@ public class WaitingListRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    public List<WaitingList> findByName(String name) {
+        final String sql = """
+                SELECT
+                    w.id AS waiting_list_id,
+                    w.name AS waiting_list_name,
+                    w.date AS waiting_list_date,
+                    w.theme_id AS theme_id,
+                    w.created_at,
+                    t.id AS time_id,
+                    t.start_at AS time_start_at,
+                    t.end_at AS time_end_at,
+                    h.name AS theme_name,
+                    h.description AS theme_description,
+                    h.thumbnail_url AS theme_thumbnail_url
+                FROM waiting_list w
+                JOIN reservation_time t ON w.time_id = t.id
+                JOIN theme h ON w.theme_id = h.id 
+                WHERE w.name = ?
+                """;
+
+        return jdbcTemplate.query(sql, this::mapToDomain, name).stream().toList();
     }
 
     public int findWaitingOrderByIdAndThemeAndDateAndTime(final WaitingList waitingList) {

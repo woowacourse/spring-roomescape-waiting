@@ -9,9 +9,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.WaitingList;
-import roomescape.dto.WaitingListCreateCommand;
-import roomescape.dto.WaitingListDeleteCommand;
-import roomescape.dto.WaitingListResult;
+import roomescape.dto.*;
 import roomescape.exception.BusinessException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -22,8 +20,10 @@ import roomescape.repository.WaitingListRepository;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.BDDMockito.given;
@@ -313,5 +313,24 @@ class WaitingListServiceTest {
 
         // then
         verify(waitingListRepository, never()).deleteById(waitingListId);
+    }
+
+    @Test
+    void 사용자명으로_예약대기_목록_조회() {
+        // given
+        String name = "검프";
+        Theme theme = Theme.createWithId(1L, "테스트용", "테스트용 설명", "https:");
+        ReservationTime reservationTime = ReservationTime.createWithId(1L, LocalTime.now().plusHours(1), LocalTime.now().plusHours(2));
+        WaitingList waitingList = WaitingList.createWithId(1L, name, LocalDate.now().plusDays(1), theme, reservationTime, LocalDateTime.now().minusDays(1));
+
+        given(waitingListRepository.findByName(name)).willReturn(List.of(waitingList));
+
+        // when
+        List<WaitingListResult> responses = waitingListService.getWaitingListByName(name);
+
+        // then
+        assertThat(responses).hasSize(1);
+        assertThat(responses.getFirst().name()).isEqualTo(name);
+        assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.WAITING_LIST);
     }
 }

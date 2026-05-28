@@ -10,7 +10,8 @@ public record WaitingListResult(
         LocalDate date,
         Long timeId,
         Long themeId,
-        int waitingOrder
+        int waitingOrder,
+        ReservationStatus status
 ) {
     public static WaitingListResult from(WaitingList waitingList, int waitingOrder) {
         return new WaitingListResult(
@@ -19,7 +20,8 @@ public record WaitingListResult(
                 waitingList.getReservationDate().getDate(),
                 waitingList.getReservationTime().getId(),
                 waitingList.getTheme().getId(),
-                waitingOrder
+                waitingOrder,
+                ReservationStatus.WAITING_LIST
         );
     }
 }

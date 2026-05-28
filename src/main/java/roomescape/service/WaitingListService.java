@@ -16,6 +16,8 @@ import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.repository.WaitingListRepository;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @Service
 public class WaitingListService {
@@ -24,6 +26,15 @@ public class WaitingListService {
     private final ThemeRepository themeRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
+
+    public List<WaitingListResult> getWaitingListByName(String name) {
+        List<WaitingList> waitingLists = waitingListRepository.findByName(name);
+        return waitingLists.stream()
+                .map(waitingList -> WaitingListResult.from(
+                        waitingList, waitingListRepository.findWaitingOrderByIdAndThemeAndDateAndTime(waitingList)
+                        )
+                ).toList();
+    }
 
     public WaitingListResult create(final WaitingListCreateCommand createCommand) {
         Theme findTheme = themeRepository.findById(createCommand.themeId())
