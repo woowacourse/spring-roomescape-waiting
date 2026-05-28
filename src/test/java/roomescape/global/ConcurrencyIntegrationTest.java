@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.NotFoundException;
@@ -34,20 +33,21 @@ import roomescape.time.service.dto.ReservationTimeCommand;
 @SpringWebTest
 class ConcurrencyIntegrationTest {
 
-    @Autowired
-    DatabaseHelper databaseHelper;
+    private final DatabaseHelper databaseHelper;
+    private final ReservationService reservationService;
+    private final ReservationWaitingService reservationWaitingService;
+    private final ReservationTimeService reservationTimeService;
+    private final ThemeService themeService;
 
-    @Autowired
-    ReservationService reservationService;
-
-    @Autowired
-    ReservationWaitingService reservationWaitingService;
-
-    @Autowired
-    ReservationTimeService reservationTimeService;
-
-    @Autowired
-    private ThemeService themeService;
+    ConcurrencyIntegrationTest(DatabaseHelper databaseHelper, ReservationService reservationService,
+                               ReservationWaitingService reservationWaitingService,
+                               ReservationTimeService reservationTimeService, ThemeService themeService) {
+        this.databaseHelper = databaseHelper;
+        this.reservationService = reservationService;
+        this.reservationWaitingService = reservationWaitingService;
+        this.reservationTimeService = reservationTimeService;
+        this.themeService = themeService;
+    }
 
     @BeforeEach
     void setup() {
@@ -105,7 +105,7 @@ class ConcurrencyIntegrationTest {
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationService.save(new ReservationCommand(
                                 "name",
-                                LocalDate.of(2026, 5, 15),
+                                LocalDate.now().plusDays(7),
                                 1L,
                                 1L
                         )
@@ -163,11 +163,11 @@ class ConcurrencyIntegrationTest {
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
 
-        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.deleteById(1L),
+                () -> reservationService.deleteById(1L, "브라운"),
                 100,
                 NotFoundException.class
         );
@@ -225,8 +225,8 @@ class ConcurrencyIntegrationTest {
         createReservationTime("12:00");
         createTheme("테마", "설명", "thumbnailUrl");
 
-        Long reservationId1 = createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
-        Long reservationId2 = createReservation("코니", LocalDate.of(2026, 5, 15), 2L, 1L);
+        Long reservationId1 = createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
+        Long reservationId2 = createReservation("코니", LocalDate.now().plusDays(7), 2L, 1L);
 
         ExecutorService executorService = Executors.newFixedThreadPool(2);
         CountDownLatch readyLatch = new CountDownLatch(2);
@@ -240,12 +240,14 @@ class ConcurrencyIntegrationTest {
         //when
         List<Runnable> tasks = List.of(
                 () -> reservationService.update(
-                        new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 3L),
-                        reservationId1
+                        new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
+                        reservationId1,
+                        "브라운"
                 ),
                 () -> reservationService.update(
-                        new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 3L),
-                        reservationId2
+                        new ReservationUpdateCommand(LocalDate.now().plusDays(14), 3L),
+                        reservationId2,
+                        "코니"
                 )
         );
 
@@ -283,13 +285,13 @@ class ConcurrencyIntegrationTest {
         //given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
-        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
                 () -> reservationWaitingService.save(new ReservationWaitingCommand(
                                 "name",
-                                LocalDate.of(2026, 5, 15),
+                                LocalDate.now().plusDays(7),
                                 1L,
                                 1L
                         )
@@ -310,10 +312,10 @@ class ConcurrencyIntegrationTest {
         // given
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
-        createReservation("브라운", LocalDate.of(2026, 5, 15), 1L, 1L);
+        createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
         reservationWaitingService.save(new ReservationWaitingCommand(
                 "포비",
-                LocalDate.of(2026, 5, 15),
+                LocalDate.now().plusDays(7),
                 1L,
                 1L
         ));

@@ -31,16 +31,13 @@ public class MyReservationController {
             @PathVariable Long id,
             @RequestBody ReservationUpdateRequest request
     ) {
-        reservationService.validateOwnership(id, name);
-        reservationService.update(request.toCommand(), id);
+        reservationService.update(request.toCommand(), id, name);
     }
 
     @Authorized
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteMyReservation(@OwnerOnly String name, @PathVariable Long id) {
-        reservationService.validateOwnership(id, name);
-        reservationService.validateNotExpired(id);
-        reservationService.deleteById(id);
+        reservationService.deleteById(id, name);
     }
 }

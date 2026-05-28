@@ -1,6 +1,5 @@
 package roomescape.time.service;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.AvailableTimesResult;
@@ -25,13 +23,11 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
-    private final Clock clock;
 
-    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository, ThemeRepository themeRepository,
-                                  Clock clock) {
+    public ReservationTimeService(ReservationTimeRepository reservationTimeRepository,
+                                  ThemeRepository themeRepository) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
-        this.clock = clock;
     }
 
     @Transactional
@@ -65,8 +61,6 @@ public class ReservationTimeService {
     }
 
     public AvailableTimesResult findAvailableTimes(Long themeId, LocalDate date) {
-        ReservationDate.of(date, clock);
-
         if (themeRepository.findById(themeId).isEmpty()) {
             throw new NotFoundException(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
         }

@@ -1,7 +1,10 @@
 package roomescape.testSupport;
 
+import java.time.LocalDate;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.stereotype.Component;
 
+@Component
 public class DatabaseHelper {
 
     private final JdbcTemplate jdbcTemplate;
@@ -23,4 +26,21 @@ public class DatabaseHelper {
         jdbcTemplate.execute("SET REFERENTIAL_INTEGRITY TRUE");
     }
 
+    public void insertReservationDirectly(String name, LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, java.sql.Date.valueOf(date), timeId, themeId
+        );
+    }
+
+    public void insertReservationWaitingDirectly(String name, LocalDate date, Long timeId, Long themeId) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+                name, java.sql.Date.valueOf(date), timeId, themeId
+        );
+    }
+
+    public Long findFirstReservationId() {
+        return jdbcTemplate.queryForObject("SELECT MIN(id) FROM reservation", Long.class);
+    }
 }

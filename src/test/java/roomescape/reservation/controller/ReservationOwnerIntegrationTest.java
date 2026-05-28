@@ -14,7 +14,6 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.testSupport.DatabaseHelper;
@@ -23,11 +22,13 @@ import roomescape.testSupport.SpringWebTest;
 @SpringWebTest
 public class ReservationOwnerIntegrationTest {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+    private final JdbcTemplate jdbcTemplate;
+    private final DatabaseHelper databaseHelper;
 
-    @Autowired
-    DatabaseHelper databaseHelper;
+    public ReservationOwnerIntegrationTest(JdbcTemplate jdbcTemplate, DatabaseHelper databaseHelper) {
+        this.jdbcTemplate = jdbcTemplate;
+        this.databaseHelper = databaseHelper;
+    }
 
     @BeforeEach
     void setup() {
@@ -48,7 +49,7 @@ public class ReservationOwnerIntegrationTest {
     @Test
     @DisplayName("이름을 header로 넘겨 자신의 예약을 삭제한다.")
     void deleteMyReservationById_success() {
-        Long reservationId = setupDefaultReservation(LocalDate.of(2026, 5, 5));
+        Long reservationId = setupDefaultReservation(LocalDate.now().plusDays(7));
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
@@ -103,10 +104,10 @@ public class ReservationOwnerIntegrationTest {
     @Test
     @DisplayName("이름을 header로 넘겨서, 예약을 변경한다.")
     void updateMyReservation_success() {
-        Long reservationId = setupDefaultReservation(LocalDate.of(2026, 5, 5));
+        Long reservationId = setupDefaultReservation(LocalDate.now().plusDays(7));
         createReservationTime("11:00");
 
-        ReservationUpdateRequest paramsWithDate = new ReservationUpdateRequest(LocalDate.of(2026, 5, 10), null);
+        ReservationUpdateRequest paramsWithDate = new ReservationUpdateRequest(LocalDate.now().plusDays(14), null);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")
@@ -119,7 +120,7 @@ public class ReservationOwnerIntegrationTest {
         assertThat(jdbcTemplate.queryForObject(
                 "SELECT reservation_date FROM reservation WHERE id = ?",
                 Date.class,
-                reservationId).toLocalDate()).isEqualTo(LocalDate.of(2026, 5, 10));
+                reservationId).toLocalDate()).isEqualTo(LocalDate.now().plusDays(14));
 
         ReservationUpdateRequest paramsWithTimeId = new ReservationUpdateRequest(null, 2L);
 
@@ -233,10 +234,10 @@ public class ReservationOwnerIntegrationTest {
     @Test
     @DisplayName("예약 변경 시, 변경하려는 예약이 기존의 다른 예약과 겹치면 예외가 발생한다.")
     void updateMyReservation_duplicate() {
-        Long reservationId = setupDefaultReservation(LocalDate.of(2026, 5, 5));
-        createReservation("pobi", LocalDate.of(2026, 5, 6), 1L, 1L);
+        Long reservationId = setupDefaultReservation(LocalDate.now().plusDays(7));
+        createReservation("pobi", LocalDate.now().plusDays(8), 1L, 1L);
 
-        ReservationUpdateRequest paramsWithDate = new ReservationUpdateRequest(LocalDate.of(2026, 5, 6), null);
+        ReservationUpdateRequest paramsWithDate = new ReservationUpdateRequest(LocalDate.now().plusDays(8), null);
 
         RestAssured.given().log().all()
                 .header("Authorization", "brown")

@@ -12,7 +12,6 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
 import roomescape.time.controller.dto.ReservationTimeResponse;
@@ -20,8 +19,11 @@ import roomescape.time.controller.dto.ReservationTimeResponse;
 @SpringWebTest
 public class ReservationTimeIntegrationTest {
 
-    @Autowired
-    DatabaseHelper databaseHelper;
+    private final DatabaseHelper databaseHelper;
+
+    public ReservationTimeIntegrationTest(DatabaseHelper databaseHelper) {
+        this.databaseHelper = databaseHelper;
+    }
 
     @BeforeEach
     void setup() {
@@ -52,13 +54,13 @@ public class ReservationTimeIntegrationTest {
                         LocalTime.of(13, 0)
                 );
 
-        createReservation("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
-        createReservation("포비", LocalDate.of(2026, 5, 6), 2L, 2L);
+        createReservation("브라운", LocalDate.now().plusDays(1), 1L, 1L);
+        createReservation("포비", LocalDate.now().plusDays(2), 2L, 2L);
 
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 1L)).hasSize(3);
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 6), 1L)).hasSize(4);
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 5), 2L)).hasSize(4);
-        assertThat(getAvailableTimes(LocalDate.of(2026, 5, 6), 2L)).hasSize(3);
+        assertThat(getAvailableTimes(LocalDate.now().plusDays(1), 1L)).hasSize(3);
+        assertThat(getAvailableTimes(LocalDate.now().plusDays(2), 1L)).hasSize(4);
+        assertThat(getAvailableTimes(LocalDate.now().plusDays(1), 2L)).hasSize(4);
+        assertThat(getAvailableTimes(LocalDate.now().plusDays(2), 2L)).hasSize(3);
     }
 
     private List<ReservationTimeResponse> getAvailableTimes(LocalDate date, Long themeId) {

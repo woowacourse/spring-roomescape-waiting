@@ -1,12 +1,10 @@
 package roomescape.reservationWaiting.domain;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidRequestValueException;
 import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.reservation.domain.ReservationDate;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeErrorCode;
@@ -26,10 +24,11 @@ public record ReservationWaiting(
         return new ReservationWaiting(id, this.name, this.date, this.time, this.theme);
     }
 
-    public void validateExpiry(Clock clock) {
-        ReservationDate.of(date, clock);
-        LocalDate nowDate = LocalDate.now(clock);
-        if (nowDate.equals(date) && LocalTime.now(clock).isAfter(time.startAt())) {
+    public void validateExpiry() {
+        LocalDateTime current = LocalDateTime.now();
+        LocalDateTime targetTime = LocalDateTime.of(this.date, this.time.startAt());
+
+        if (current.isAfter(targetTime)) {
             throw new InvalidRequestValueException(TimeErrorCode.INVALID_START_AT.getMessage());
         }
     }

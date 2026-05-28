@@ -11,7 +11,6 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
@@ -19,8 +18,11 @@ import roomescape.testSupport.SpringWebTest;
 @SpringWebTest
 class ReservationWaitingControllerIntegrationTest {
 
-    @Autowired
-    DatabaseHelper databaseHelper;
+    private final DatabaseHelper databaseHelper;
+
+    ReservationWaitingControllerIntegrationTest(DatabaseHelper databaseHelper) {
+        this.databaseHelper = databaseHelper;
+    }
 
     @BeforeEach
     void setup() {
@@ -34,11 +36,11 @@ class ReservationWaitingControllerIntegrationTest {
         createReservationTime("10:00");
         createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/image.png");
 
-        createReservation("브라운", LocalDate.of(2026, 5, 5), 1L, 1L);
+        createReservation("브라운", LocalDate.now().plusDays(7), 1L, 1L);
 
         ReservationWaitingRequest body = new ReservationWaitingRequest(
                 "포비",
-                LocalDate.of(2026, 5, 5),
+                LocalDate.now().plusDays(7),
                 1L,
                 1L
         );
@@ -58,8 +60,8 @@ class ReservationWaitingControllerIntegrationTest {
         createReservationTime("10:00");
         createTheme("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/image.png");
 
-        createReservation("brown", LocalDate.of(2026, 5, 30), 1L, 1L);
-        createReservationWaiting("gump", LocalDate.of(2026, 5, 30), 1L, 1L);
+        createReservation("brown", LocalDate.now().plusDays(7), 1L, 1L);
+        createReservationWaiting("gump", LocalDate.now().plusDays(7), 1L, 1L);
 
         //when & then
         RestAssured.given()

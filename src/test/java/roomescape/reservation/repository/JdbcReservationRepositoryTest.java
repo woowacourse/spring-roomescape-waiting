@@ -1,8 +1,6 @@
 package roomescape.reservation.repository;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import roomescape.global.exception.NotFoundException;
-import roomescape.reservation.exception.ReservationErrorCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Time;
@@ -19,8 +17,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.jdbc.core.JdbcTemplate;
+import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
-
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.theme.domain.Theme;
@@ -29,13 +28,12 @@ import roomescape.time.domain.ReservationTime;
 @JdbcTest
 class JdbcReservationRepositoryTest {
 
-    @Autowired
-    JdbcTemplate jdbcTemplate;
-
-    ReservationRepository reservationRepository;
+    private final JdbcTemplate jdbcTemplate;
+    private final ReservationRepository reservationRepository;
 
     @Autowired
-    public JdbcReservationRepositoryTest(JdbcTemplate jdbcTemplate) {
+    public JdbcReservationRepositoryTest(JdbcTemplate jdbcTemplate1, JdbcTemplate jdbcTemplate) {
+        this.jdbcTemplate = jdbcTemplate1;
         this.reservationRepository = new JdbcReservationRepository(jdbcTemplate);
     }
 
@@ -98,7 +96,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
 
-        Reservation saved = saveReservation("브라운",  LocalDate.of(2024, 5, 1), time, theme);
+        Reservation saved = saveReservation("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
         reservationRepository.deleteById(saved.id());
@@ -158,7 +156,7 @@ class JdbcReservationRepositoryTest {
                 )
         );
 
-        Reservation updated = saved.updateDate(LocalDate.of(2024, 5, 5));
+        Reservation updated = saved.update(LocalDate.of(2024, 5, 5), null);
 
         // when
         reservationRepository.update(updated);
@@ -217,7 +215,7 @@ class JdbcReservationRepositoryTest {
                 )
         );
 
-        Reservation updated = saved.updateDate(LocalDate.of(2024, 5, 5));
+        Reservation updated = saved.update(LocalDate.of(2024, 5, 5), time);
 
         // when & then
         assertThatThrownBy(
@@ -322,8 +320,8 @@ class JdbcReservationRepositoryTest {
 
         // then
         assertThat(result).hasSize(1);
-        assertThat(result.get(0).status()).isEqualTo("waiting");
-        assertThat(result.get(0).waitingOrder()).isEqualTo(1L);
+        assertThat(result.getFirst().status()).isEqualTo("waiting");
+        assertThat(result.getFirst().waitingOrder()).isEqualTo(1L);
     }
 
 
@@ -344,9 +342,9 @@ class JdbcReservationRepositoryTest {
                 )
         );
 
-        saveReservation("브라운",today.minusDays(1), time, woowaTheme);
-        saveReservation("포비",today.minusDays(2), time, woowaTheme);
-        saveReservation("제이슨",today.minusDays(3), time, woowaTheme);
+        saveReservation("브라운", today.minusDays(1), time, woowaTheme);
+        saveReservation("포비", today.minusDays(2), time, woowaTheme);
+        saveReservation("제이슨", today.minusDays(3), time, woowaTheme);
         saveReservation("이든", today.minusDays(1), time, pairTheme);
         saveReservation("레아", today.minusDays(2), time, pairTheme);
         saveReservation("웨지", today.minusDays(1), time, carrotTheme);
@@ -423,7 +421,7 @@ class JdbcReservationRepositoryTest {
 
     private Reservation saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
         return reservationRepository.save(
-                Reservation.of( name, date, time, theme)
+                Reservation.of(name, date, time, theme)
         );
     }
 

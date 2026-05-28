@@ -6,12 +6,9 @@ import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.BDDMockito.given;
-import static org.mockito.BDDMockito.willThrow;
 
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -23,7 +20,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.InvalidRequestValueException;
-import roomescape.global.exception.BadRequestException;
 import roomescape.global.exception.DuplicateException;
 import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
 
@@ -45,9 +41,6 @@ class ReservationWaitingServiceTest {
     @Mock
     ReservationRepository reservationRepository;
 
-    @Mock
-    Clock clock;
-
     @InjectMocks
     ReservationWaitingService reservationWaitingService;
 
@@ -55,30 +48,25 @@ class ReservationWaitingServiceTest {
     @DisplayName("새로운 에약 대기를 신청한다.")
     void save_validCommand_returnsReservationWaiting() {
         //given
+        LocalDate futureDate = LocalDate.now().plusDays(7);
+
         given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .willReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
 
-        given(clock.instant()).willReturn(
-                LocalDate.of(2026, 5, 14)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        given(clock.getZone()).willReturn(ZoneId.systemDefault());
-
         given(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).willReturn(Optional.of(new Reservation(1L, "포비", LocalDate.of(2026, 5, 15), time, theme)));
+        ).willReturn(Optional.of(new Reservation(1L, "포비", futureDate, time, theme)));
 
         given(reservationWaitingRepository.save(any()))
-                .willReturn(new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme));
+                .willReturn(new ReservationWaiting(1L, "브라운", futureDate, time, theme));
 
         //when
         ReservationWaitingResult reservationWaiting = reservationWaitingService.save(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "브라운", futureDate, 1L, 1L
                 )
         );
 
@@ -96,7 +84,7 @@ class ReservationWaitingServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "브라운", LocalDate.now().plusDays(7), 1L, 1L
                 )
         )).isInstanceOf(DuplicateException.class)
                 .hasMessage(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
@@ -116,7 +104,7 @@ class ReservationWaitingServiceTest {
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "브라운", LocalDate.now().plusDays(7), 1L, 1L
                 )
         )).isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND.getMessage());
@@ -126,6 +114,8 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 생성 시, 해당 슬롯으로 자신이 예약을 했었다면 예외가 발생한다.")
     void save_alreadyReservedByRequester_throwsBadRequestException() {
         //given
+        LocalDate futureDate = LocalDate.now().plusDays(7);
+
         given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
                 .willReturn(false);
 
@@ -134,14 +124,14 @@ class ReservationWaitingServiceTest {
 
         given(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).willReturn(Optional.of(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme)));
+        ).willReturn(Optional.of(new Reservation(1L, "브라운", futureDate, time, theme)));
 
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
                 new ReservationWaitingCommand(
-                        "브라운", LocalDate.of(2026, 5, 15), 1L, 1L
+                        "브라운", futureDate, 1L, 1L
                 )
-        )).isInstanceOf(BadRequestException.class)
+        )).isInstanceOf(roomescape.global.exception.BadRequestException.class)
                 .hasMessage(ReservationWaitingErrorCode.ALREADY_RESERVED.getMessage());
     }
 
@@ -149,20 +139,15 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기를 아이디 기반으로 잘 삭제한다")
     void deleteReservationWaiting_success() {
         // given
+        LocalDate futureDate = LocalDate.now().plusDays(7);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
 
         given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
+                        1L, "브라운", futureDate, time, theme
                 )));
         given(reservationWaitingRepository.deleteById(any())).willReturn(1);
-        given(clock.instant()).willReturn(
-                LocalDate.of(2026, 5, 1)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
         // when, then
         assertDoesNotThrow(
@@ -186,19 +171,13 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기가 유효한 지 검증한다-과거이면 오류 발생")
     void deleteReservationWaiting_past() {
         // given
+        LocalDate pastDate = LocalDate.now().minusDays(7);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
+                        1L, "브라운", pastDate, time, theme
                 )));
-
-        given(clock.instant()).willReturn(
-                LocalDate.of(2026, 5, 14)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
         // when,then
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "브라운")).isInstanceOf(
@@ -209,19 +188,13 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기가 유효한 지 검증한다- 미래 오류 발생 X")
     void deleteReservationWaiting_future() {
         // given
+        LocalDate futureDate = LocalDate.now().plusDays(7);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 14), time, theme
+                        1L, "브라운", futureDate, time, theme
                 )));
-
-        given(clock.instant()).willReturn(
-                LocalDate.of(2026, 5, 1)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        given(clock.getZone()).willReturn(ZoneId.systemDefault());
         given(reservationWaitingRepository.deleteById(any())).willReturn(1);
 
         // when,then
@@ -234,19 +207,13 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기자와 삭제 신청자 이름이 다르면 오류가 발생한다")
     void deleteReservationWaiting_not_authorized() {
         // given
+        LocalDate futureDate = LocalDate.now().plusDays(7);
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
         given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 14), time, theme
+                        1L, "브라운", futureDate, time, theme
                 )));
-
-        given(clock.instant()).willReturn(
-                LocalDate.of(2026, 5, 1)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
         // when,then
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "검프")).isInstanceOf(

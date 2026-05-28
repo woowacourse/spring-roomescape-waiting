@@ -1,8 +1,6 @@
 package roomescape.reservationWaiting.controller;
 
 import java.net.URI;
-import roomescape.auth.Authorized;
-import roomescape.auth.OwnerOnly;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -12,11 +10,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-
+import roomescape.auth.Authorized;
+import roomescape.auth.OwnerOnly;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingResponse;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingResult;
 
 @RestController
 @RequestMapping("/reservations-waitings")
@@ -30,7 +29,8 @@ public class ReservationWaitingController {
 
     @PostMapping
     public ResponseEntity<ReservationWaitingResponse> createReservationWaiting(
-            @RequestBody ReservationWaitingRequest request) {
+            @RequestBody ReservationWaitingRequest request
+    ) {
         ReservationWaitingResult reservationWaiting = reservationWaitingService.save(request.toCommand());
         ReservationWaitingResponse response = ReservationWaitingResponse.from(reservationWaiting);
 
@@ -39,7 +39,6 @@ public class ReservationWaitingController {
                 .body(response);
     }
 
-    //- DELETE /reservations-waitings/{id}
     @Authorized
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
