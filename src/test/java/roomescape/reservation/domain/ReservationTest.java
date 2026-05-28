@@ -28,12 +28,12 @@ class ReservationTest {
     private final LocalDate date = LocalDate.now().plusMonths(1);
     private final ReservationDate reservationDate = ReservationDate.create(date);
     private final ReservationDate pastDate = ReservationDate.load(2L, LocalDate.now().minusDays(1),
-        true);
+            true);
     private final LocalTime startAt = LocalTime.of(15, 40);
     private final ReservationTime reservationTime = ReservationTime.create(startAt);
     private final Theme theme = Theme.load(1L, "테마", "설명", "썸네일", true);
     private final Reservation reservation = Reservation.load(1L, name, reservationDate,
-        reservationTime, theme, RESERVED, LocalDateTime.now());
+            reservationTime, theme, RESERVED, LocalDateTime.now());
 
     @Test
     @DisplayName("예약 id를 가져온다.")
@@ -92,13 +92,13 @@ class ReservationTest {
     void equals() {
         //given
         Reservation otherReservation = Reservation.load(1L, name, reservationDate, reservationTime,
-            theme, RESERVED, LocalDateTime.now());
+                theme, RESERVED, LocalDateTime.now());
 
         // when & then
         assertThat(reservation)
-            .usingRecursiveComparison()
-            .ignoringFields("reservedAt")
-            .isEqualTo(otherReservation);
+                .usingRecursiveComparison()
+                .ignoringFields("reservedAt")
+                .isEqualTo(otherReservation);
     }
 
     @Test
@@ -106,11 +106,11 @@ class ReservationTest {
     void unpersist_reservation_null_id() {
         // given & when
         Reservation unpersistReservation = Reservation.reserve("한다", reservationDate,
-            reservationTime, theme, LocalDateTime.now());
+                reservationTime, theme, LocalDateTime.now());
 
         // then
         assertThat(unpersistReservation.getId())
-            .isNull();
+                .isNull();
     }
 
     @Test
@@ -121,17 +121,13 @@ class ReservationTest {
         String emptyName = "";
 
         // when & then
-        assertThatThrownBy(
-            () -> Reservation.reserve(nullName, reservationDate, reservationTime, theme,
-                LocalDateTime.now()))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
+        assertThatThrownBy(() -> Reservation.reserve(nullName, reservationDate, reservationTime, theme, LocalDateTime.now()))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
 
-        assertThatThrownBy(
-            () -> Reservation.reserve(emptyName, reservationDate, reservationTime, theme,
-                LocalDateTime.now()))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
+        assertThatThrownBy(() -> Reservation.reserve(emptyName, reservationDate, reservationTime, theme, LocalDateTime.now()))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
     }
 
     @Test
@@ -141,10 +137,9 @@ class ReservationTest {
         ReservationTime nullTime = null;
 
         // when & then
-        assertThatThrownBy(
-            () -> Reservation.reserve(name, reservationDate, nullTime, theme, LocalDateTime.now()))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_TIME_IS_NULL.getMessage());
+        assertThatThrownBy(() -> Reservation.reserve(name, reservationDate, nullTime, theme, LocalDateTime.now()))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_TIME_IS_NULL.getMessage());
     }
 
     @Test
@@ -154,10 +149,9 @@ class ReservationTest {
         ReservationDate nullDate = null;
 
         // when & then
-        assertThatThrownBy(
-            () -> Reservation.reserve(name, nullDate, reservationTime, theme, LocalDateTime.now()))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_DATE_IS_NULL.getMessage());
+        assertThatThrownBy(() -> Reservation.reserve(name, nullDate, reservationTime, theme, LocalDateTime.now()))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_DATE_IS_NULL.getMessage());
     }
 
     @Test
@@ -179,11 +173,9 @@ class ReservationTest {
         Long nullId = null;
 
         // when & then
-        assertThatThrownBy(
-            () -> Reservation.load(nullId, name, reservationDate, reservationTime, theme, RESERVED,
-                LocalDateTime.now()))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_ID_IS_NULL.getMessage());
+        assertThatThrownBy(() -> Reservation.load(nullId, name, reservationDate, reservationTime, theme, RESERVED, LocalDateTime.now()))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ID_IS_NULL.getMessage());
     }
 
     @Test
@@ -191,14 +183,14 @@ class ReservationTest {
     void cancel() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
 
         // when
         reserved.cancel(name);
 
         // then
         assertThat(reserved.getStatus())
-            .isEqualTo(CANCELED);
+                .isEqualTo(CANCELED);
     }
 
     @Test
@@ -207,12 +199,12 @@ class ReservationTest {
         // given
         String notOwerName = "주주";
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
 
         // when & then
         assertThatThrownBy(() -> reserved.cancel(notOwerName))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_NOT_OWNER.getMessage());
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NOT_OWNER.getMessage());
     }
 
     @Test
@@ -220,13 +212,13 @@ class ReservationTest {
     void cancel_already_canceled() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         reserved.updateStatus(CANCELED);
 
         // when & then
         assertThatThrownBy(() -> reserved.cancel(name))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
     @Test
@@ -234,12 +226,12 @@ class ReservationTest {
     void cancel_past() {
         // given
         Reservation reserved = Reservation.load(2L, name, pastDate, reservationTime, theme,
-            RESERVED, LocalDateTime.now());
+                RESERVED, LocalDateTime.now());
 
         // when & then
         assertThatThrownBy(() -> reserved.cancel(name))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
 
     @Test
@@ -247,7 +239,7 @@ class ReservationTest {
     void changeSchedule() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
         ReservationTime changedTime = ReservationTimeFixture.activeTime15();
 
@@ -256,11 +248,11 @@ class ReservationTest {
 
         // then
         assertThat(reserved.getDate())
-            .usingRecursiveComparison()
-            .isEqualTo(changedDate);
+                .usingRecursiveComparison()
+                .isEqualTo(changedDate);
         assertThat(reserved.getTime())
-            .usingRecursiveComparison()
-            .isEqualTo(changedTime);
+                .usingRecursiveComparison()
+                .isEqualTo(changedTime);
     }
 
     @Test
@@ -269,14 +261,13 @@ class ReservationTest {
         // given
         String notOwerName = "다른사람";
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
 
         // when && then
-        Assertions.assertThatThrownBy(
-                () -> reserved.changeSchedule(notOwerName, changedDate, reservationTime))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_NOT_OWNER.getMessage());
+        Assertions.assertThatThrownBy(() -> reserved.changeSchedule(notOwerName, changedDate, reservationTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NOT_OWNER.getMessage());
     }
 
     @Test
@@ -284,15 +275,14 @@ class ReservationTest {
     void changeSchedule_already_canceled() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         reserved.updateStatus(CANCELED);
         ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
 
         // when && then
-        Assertions.assertThatThrownBy(
-                () -> reserved.changeSchedule(name, changedDate, reservationTime))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+        Assertions.assertThatThrownBy(() -> reserved.changeSchedule(name, changedDate, reservationTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
     @Test
@@ -300,13 +290,13 @@ class ReservationTest {
     void changeSchedule_past() {
         // given
         Reservation reserved = Reservation.load(2L, name, pastDate, reservationTime, theme,
-            RESERVED, LocalDateTime.now());
+                RESERVED, LocalDateTime.now());
         ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
 
         // when & then
         assertThatThrownBy(() -> reserved.changeSchedule(name, changedDate, reservationTime))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_PAST.getMessage());
     }
 
     @Test
@@ -314,12 +304,12 @@ class ReservationTest {
     void changeSchedule_new_datetime_is_past() {
         // given
         Reservation reserved = Reservation.load(2L, name, reservationDate, reservationTime, theme,
-            RESERVED, LocalDateTime.now());
+                RESERVED, LocalDateTime.now());
 
         // when & then
         assertThatThrownBy(() -> reserved.changeSchedule(name, pastDate, reservationTime))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -327,7 +317,7 @@ class ReservationTest {
     void changeScheduleByManager() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
         ReservationTime changedTime = ReservationTimeFixture.activeTime15();
 
@@ -336,11 +326,11 @@ class ReservationTest {
 
         // then
         assertThat(reserved.getDate())
-            .usingRecursiveComparison()
-            .isEqualTo(changedDate);
+                .usingRecursiveComparison()
+                .isEqualTo(changedDate);
         assertThat(reserved.getTime())
-            .usingRecursiveComparison()
-            .isEqualTo(changedTime);
+                .usingRecursiveComparison()
+                .isEqualTo(changedTime);
     }
 
     @Test
@@ -348,14 +338,14 @@ class ReservationTest {
     void changeScheduleByManager_pastDateTime() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         ReservationDate yesterday = ReservationDate.load(2L, LocalDate.now().minusDays(1), true);
         ReservationTime time = ReservationTimeFixture.activeTime15();
 
         // when & then
         assertThatThrownBy(() -> reserved.changeScheduleByManager(yesterday, time))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED.getMessage());
     }
 
     @Test
@@ -363,15 +353,14 @@ class ReservationTest {
     void changeScheduleByManager_already_canceled() {
         // given
         Reservation reserved = ReservationFixture.reservation(name, reservationDate,
-            reservationTime, theme);
+                reservationTime, theme);
         reserved.updateStatus(CANCELED);
         ReservationDate changedDate = ReservationDateFixture.activeOneWeekLater();
 
         // when && then
-        Assertions.assertThatThrownBy(
-                () -> reserved.changeScheduleByManager(changedDate, reservationTime))
-            .isInstanceOf(ReservationException.class)
-            .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
+        Assertions.assertThatThrownBy(() -> reserved.changeScheduleByManager(changedDate, reservationTime))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_ALREADY_CANCELED.getMessage());
     }
 
 }
