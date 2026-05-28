@@ -167,4 +167,23 @@ class WaitingJdbcTemplateRepositoryTest {
         assertThat(waitings.getFirst()).isEqualTo(savedWaiting);
         assertThat(waitings.getFirst().getRank()).isEqualTo(2L);
     }
+
+    @Test
+    @DisplayName("날짜와 시간과 테마가 모두 일치하는 예약 대기를 조회한다")
+    void 날짜와_시간과_테마가_모두_일치하는_예약_대기를_조회한다() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        Waiting savedWaiting = waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+
+        // when
+        Waiting foundWaiting = waitingRepository.findByDateAndTimeIdAndThemeId(
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        ).orElseThrow();
+
+        // then
+        assertThat(foundWaiting).isEqualTo(savedWaiting);
+    }
+
 }
