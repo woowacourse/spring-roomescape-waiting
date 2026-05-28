@@ -80,7 +80,7 @@ public class WaitingDao {
         params.put("date", waiting.getDate());
         params.put("time_id", waiting.getTime().getId());
         params.put("theme_id", waiting.getTheme().getId());
-        params.put("created_at", waiting.getCreatedAt().toLocalDate());
+        params.put("created_at", waiting.getCreatedAt());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Waiting(
@@ -114,7 +114,7 @@ public class WaitingDao {
                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
                            ROW_NUMBER() OVER (
                                PARTITION BY w.date, w.time_id, w.theme_id
-                               ORDER BY w.created_at ASC
+                               ORDER BY w.created_at, w.id ASC
                            ) AS sequence
                     FROM waiting w
                     INNER JOIN reservation_time rt ON w.time_id = rt.id
