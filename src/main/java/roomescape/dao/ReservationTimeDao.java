@@ -1,6 +1,6 @@
 package roomescape.dao;
 
-import static roomescape.dao.rowMapper.ReservationTimeMapper.RESERVATION_TIME_ROW_MAPPER;
+import static roomescape.dao.rowmapper.ReservationTimeMapper.RESERVATION_TIME_ROW_MAPPER;
 
 import java.util.HashMap;
 import java.util.List;
@@ -65,12 +65,12 @@ public class ReservationTimeDao {
 
     public boolean existsById(Long id) {
         Boolean result = jdbcTemplate.queryForObject("""
-        SELECT EXISTS(
-            SELECT 1
-            FROM reservation_time
-            WHERE id = ?
-        )
-        """,
+                        SELECT EXISTS(
+                            SELECT 1
+                            FROM reservation_time
+                            WHERE id = ?
+                        )
+                        """,
                 Boolean.class,
                 id
         );

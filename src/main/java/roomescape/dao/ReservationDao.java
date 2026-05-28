@@ -1,6 +1,6 @@
 package roomescape.dao;
 
-import static roomescape.dao.rowMapper.ReservationMapper.RESERVATION_ROW_MAPPER;
+import static roomescape.dao.rowmapper.ReservationMapper.RESERVATION_ROW_MAPPER;
 
 import java.time.LocalDate;
 import java.util.HashMap;

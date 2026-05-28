@@ -1,4 +1,4 @@
-package roomescape.dao.rowMapper;
+package roomescape.dao.rowmapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import roomescape.dao.dto.TimeQueryResult;
@@ -18,7 +18,7 @@ public final class ReservationTimeMapper {
                 rs.getLong("id"),
                 rs.getTime("start_at").toLocalTime()
         ),
-        rs.getBoolean("reserved"));
+                rs.getBoolean("reserved"));
     };
 
     private ReservationTimeMapper() {

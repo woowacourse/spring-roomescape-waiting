@@ -1,7 +1,7 @@
 package roomescape.dao;
 
-import static roomescape.dao.rowMapper.ReservationTimeMapper.RESERVATION_TIME_STATUS_ROW_MAPPER;
-import static roomescape.dao.rowMapper.ThemeMapper.THEME_ROW_MAPPER;
+import static roomescape.dao.rowmapper.ReservationTimeMapper.RESERVATION_TIME_STATUS_ROW_MAPPER;
+import static roomescape.dao.rowmapper.ThemeMapper.THEME_ROW_MAPPER;
 
 import java.time.LocalDate;
 import java.util.HashMap;
