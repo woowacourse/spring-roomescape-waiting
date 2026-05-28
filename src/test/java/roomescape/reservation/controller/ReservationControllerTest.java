@@ -40,6 +40,7 @@ class ReservationControllerTest {
     @MockitoBean
     private ReservationService reservationService;
 
+    @DisplayName("예약자의 이름으로, 예약자의 예약을 전부 조회한다.")
     @Test
     void 이름으로_예약_목록_전체_조회_테스트() throws Exception {
         // given
@@ -65,6 +66,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$[0].name").value("라이"));
     }
 
+    @DisplayName("이름과 id로 예약을 취소 시, 204를 반환한다.")
     @Test
     void 예약_취소_테스트() throws Exception {
         // when & then
@@ -101,6 +103,7 @@ class ReservationControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @DisplayName("예약 시간 변경하는 경우, 200을 반환한다.")
     @Test
     void 예약_변경_테스트() throws Exception {
         // given
@@ -199,6 +202,7 @@ class ReservationControllerTest {
                 .andExpect(status().isBadRequest());
     }
 
+    @DisplayName("예약 생성 후, 201을 반환한다.")
     @Test
     void 예약이_없는_경우_예약_생성_테스트() throws Exception {
         // given
@@ -227,6 +231,7 @@ class ReservationControllerTest {
                 .andExpect(jsonPath("$.status").value(Status.RESERVED.name()));
     }
 
+    @DisplayName("예약이 존재하는 경우, 예약 대기 생성 후, 201을 반환한다.")
     @Test
     void 예약이_존재하는_경우_예약대기_생성_테스트() throws Exception {
         // given
