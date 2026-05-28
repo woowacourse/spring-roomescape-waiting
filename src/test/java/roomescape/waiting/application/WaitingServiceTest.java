@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -17,6 +18,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
+import roomescape.waiting.application.WaitingReference;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingValidator;
 import roomescape.waiting.fake.FakeWaitingRepository;
@@ -26,6 +28,7 @@ class WaitingServiceTest {
     private FakeWaitingRepository waitingRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
+    private WaitingReference waitingReference;
     private WaitingService waitingService;
 
     @BeforeEach
@@ -33,10 +36,13 @@ class WaitingServiceTest {
         waitingRepository = new FakeWaitingRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
+        waitingReference = command -> {
+        };
         waitingService = new WaitingService(
                 waitingRepository,
                 reservationTimeRepository,
                 themeRepository,
+                waitingReference,
                 new WaitingValidator(waitingRepository)
         );
     }
