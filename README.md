@@ -59,6 +59,79 @@ Java 21
 > Base URL: `http://localhost:8080`  
 > Content-Type: `application/json`
 
+## 대기 API
+
+| Method | URL | Request | Success | 설명 |
+|--------|-----|---------|---------|------|
+| `POST` | `/waitings` | Body | `201 Created` | 대기 신청 |
+| `DELETE` | `/waitings/{id}?customer-name={customer-name}` | Path | `204 No Content` | 대기 취소 |
+
+<details>
+<summary>예약자 이름으로 대기 목록 조회 (<code>GET /waitings?customer-name={customer-name}</code>)</summary>
+
+```http
+GET /waitings?customer-name=홍길동
+```
+
+```json
+[
+  {
+    "id": 1,
+    "customerName": "홍길동",
+    "date": "2026-08-05",
+    "time": {
+      "startAt": "10:00:00"
+    },
+    "theme": {
+      "name": "링",
+      "description": "공포 테마",
+      "thumbnailUrl": "http:~"
+    },
+    "rank": 2
+  }
+]
+```
+
+</details>
+
+<details>
+<summary>대기 신청 (<code>POST /waitings</code>)</summary>
+
+```http
+POST /waitings
+Content-Type: application/json
+
+{
+  "customerName": "홍길동",
+  "date": "2026-08-05",
+  "timeId": 1,
+  "themeId": 1
+}
+```
+
+```json
+{
+  "id": 1
+}
+```
+
+</details>
+
+<details>
+<summary>대기 취소 (<code>DELETE /waitings/{id}?customer-name={customer-name}</code>)</summary>
+
+```http
+DELETE /waitings/1?customer-name=재키
+```
+
+```http
+204 No Content
+```
+
+</details>
+
+---
+
 ## 예약 API
 
 | Method | URL | Request | Success | 설명 |
@@ -503,77 +576,6 @@ DELETE /themes/1
 | 필수 값 누락 | `400 Bad Request` | 검증 메시지 |
 | 테마가 없음 | `404 Not Found` | `존재하지 않는 테마입니다.` |
 | 해당 테마에 예약이 있음 | `409 Conflict` | `해당 테마에 예약이 존재하여 삭제할 수 없습니다.` |
-
-</details>
-
-## 대기 API
-
-| Method | URL | Request | Success | 설명 |
-|--------|-----|---------|---------|------|
-| `POST` | `/waitings` | Body | `201 Created` | 대기 신청 |
-| `DELETE` | `/waitings/{id}?customer-name={customer-name}` | Path | `204 No Content` | 대기 취소 |
-
-<details>
-<summary>예약자 이름으로 대기 목록 조회 (<code>GET /waitings?customer-name={customer-name}</code>)</summary>
-
-```http
-GET /waitings?customer-name=홍길동
-```
-
-```json
-[
-  {
-    "id": 1,
-    "customerName": "홍길동",
-    "date": "2026-08-05",
-    "time": {
-      "startAt": "10:00:00"
-    },
-    "theme": {
-      "name": "링",
-      "description": "공포 테마",
-      "thumbnailUrl": "http:~"
-    },
-    "rank": 2
-  }
-]
-```
-
-</details>
-
-<details>
-<summary>대기 신청 (<code>POST /waitings</code>)</summary>
-
-```http
-POST /waitings
-Content-Type: application/json
-
-{
-  "customerName": "홍길동",
-  "date": "2026-08-05",
-  "timeId": 1,
-  "themeId": 1
-}
-```
-
-```json
-{
-  "id": 1
-}
-```
-
-</details>
-
-<details>
-<summary>대기 취소 (<code>DELETE /waitings/{id}?customer-name={customer-name}</code>)</summary>
-
-```http
-DELETE /waitings/1?customer-name=재키
-```
-
-```http
-204 No Content
-```
 
 </details>
 
