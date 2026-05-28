@@ -114,7 +114,7 @@ class ReservationTimeTest {
                 .doesNotThrowAnyException();
     }
 
-    @DisplayName("과거 시간을 변경하려 하면 PastReservationException이 발생한다.")
+    @DisplayName("과거 시간을 변경하려고 하면 PastReservationException이 발생한다.")
     @Test
     void validateUpdatableReservation_과거이면_예외() {
         // given
@@ -136,7 +136,7 @@ class ReservationTimeTest {
                 .doesNotThrowAnyException();
     }
 
-    @DisplayName("과거 시간을 취소하려 하면 PastReservationException이 발생한다.")
+    @DisplayName("과거 시간을 취소하려고 하면 PastReservationException이 발생한다.")
     @Test
     void validateNotPastForCancel_과거이면_예외() {
         // given
