@@ -248,7 +248,6 @@ class WaitingListServiceTest {
                 .isInstanceOf(BusinessException.class)
                         .hasFieldOrPropertyWithValue("errorCode", ErrorCode.WAITING_LIST_NOT_FOUND);
 
-        // then
         verify(waitingListRepository, never()).deleteById(waitingListId);
     }
 
@@ -269,7 +268,6 @@ class WaitingListServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.USER_NAME_NOT_MATCHED);
 
-        // then
         verify(waitingListRepository, never()).deleteById(waitingListId);
     }
 
@@ -290,7 +288,6 @@ class WaitingListServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.DATE_ALREADY_PASSED);
 
-        // then
         verify(waitingListRepository, never()).deleteById(waitingListId);
     }
 
@@ -311,7 +308,6 @@ class WaitingListServiceTest {
                 .isInstanceOf(BusinessException.class)
                 .hasFieldOrPropertyWithValue("errorCode", ErrorCode.TIME_ALREADY_PASSED);
 
-        // then
         verify(waitingListRepository, never()).deleteById(waitingListId);
     }
 
@@ -332,5 +328,18 @@ class WaitingListServiceTest {
         assertThat(responses).hasSize(1);
         assertThat(responses.getFirst().name()).isEqualTo(name);
         assertThat(responses.getFirst().status()).isEqualTo(ReservationStatus.WAITING_LIST);
+    }
+
+    @Test
+    void 없는_사용자명으로_예약대기_목록_조회() {
+        // given
+        String name = "검프";
+        given(waitingListRepository.findByName(name)).willReturn(List.of());
+
+        // when
+        List<WaitingListResult> responses = waitingListService.getWaitingListByName(name);
+
+        // then
+        assertThat(responses).hasSize(0);
     }
 }
