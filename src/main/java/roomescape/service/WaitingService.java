@@ -98,6 +98,10 @@ public class WaitingService {
 
     @Transactional
     public void deleteWaiting(Long id) {
+        Waiting existWaiting = waitingRepository.findById(id).orElseThrow(
+                () -> new RoomEscapeException(WaitingErrorCode.WAITING_NOT_FOUND)
+        );
+        existWaiting.validateNotPastTime(LocalDateTime.now());
         waitingRepository.delete(id);
     }
 }

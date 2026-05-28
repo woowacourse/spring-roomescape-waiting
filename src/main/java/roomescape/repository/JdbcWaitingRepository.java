@@ -115,6 +115,32 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
         return jdbcTemplate.query(sql, params, getWaitingRowMapper());
     }
+
+    @Override
+    public Optional<Waiting> findById(Long id) {
+        String sql = """
+                    select w.id as id,   
+                    w.name, w.date, w.waiting_number,
+                    t.id as reservation_time_id,
+                    t.start_at as time_value,
+                    th.id as reservation_theme_id,
+                    th.name as reservation_theme_name,
+                    th.description as reservation_theme_description,
+                    th.image_url as reservation_theme_image_url
+                    from waiting as w
+                    inner join reservation_time as t
+                    on w.time_id = t.id 
+                    inner join theme as th
+                    on w.theme_id = th.id
+                    where w.id = :id
+                """;
+
+        Map<String, Object> params = Map.of("id", id);
+
+        List<Waiting> results = jdbcTemplate.query(sql, params, getWaitingRowMapper());
+        return results.stream().findFirst();
+    }
+
     @Override
     public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
             ReservationTime time, Theme theme) {

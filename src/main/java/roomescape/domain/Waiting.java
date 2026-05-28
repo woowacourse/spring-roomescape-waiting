@@ -86,7 +86,7 @@ public class Waiting {
         LocalDateTime waitingDateTime = LocalDateTime.of(date, time.getStartAt());
 
         if (waitingDateTime.isBefore(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.RESERVATION_PAST_TIME);
+            throw new RoomEscapeException(WaitingErrorCode.WAITING_PAST_TIME);
         }
     }
 

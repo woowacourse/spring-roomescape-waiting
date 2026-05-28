@@ -16,5 +16,7 @@ public interface WaitingRepository {
 
     List<Waiting> findByName(String name);
 
+    Optional<Waiting> findById(Long id);
+
     void delete(Long id);
 }
