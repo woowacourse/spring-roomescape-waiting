@@ -10,11 +10,11 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.jdbc.Sql;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
+import roomescape.test_config.MutableTimeManager;
+import roomescape.test_config.TestTimeManagerConfig;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@Import(TestClockConfig.class)
+@Import(TestTimeManagerConfig.class)
 @Sql(value = "/acceptance-cleanup.sql", executionPhase = BEFORE_TEST_METHOD)
 public abstract class AcceptanceTestSupport {
 
@@ -22,11 +22,11 @@ public abstract class AcceptanceTestSupport {
     protected int port;
 
     @Autowired
-    protected MutableClock mutableClock;
+    protected MutableTimeManager mutableTimeManager;
 
     @BeforeEach
     void setUpAcceptanceTest() {
-        mutableClock.reset();
+        mutableTimeManager.reset();
         RestAssured.port = port;
     }
 

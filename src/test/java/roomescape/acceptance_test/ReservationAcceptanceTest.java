@@ -47,7 +47,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("관리자 예약 목록 조회")
     public void scenario1() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
@@ -66,7 +66,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("관리자 예약 삭제")
     public void scenario2() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, LocalTime.of(10, 30));
@@ -81,7 +81,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("내 예약 목록 조회")
     public void scenario3() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         ReservationInfo reservation = 특정_사용자_이름으로_예약_생성을_요청하고("brown");
@@ -96,7 +96,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("예약 수정")
     public void scenario4() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
         // given
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
@@ -115,14 +115,14 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("이미 시작된 예약 수정 실패")
     public void scenario5() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, LocalTime.of(10, 30));
         Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30))
         );
-        현재_시간이_예약_시작_이후가_되고(mutableClock);
+        현재_시간이_예약_시작_이후가_되고(mutableTimeManager);
         ReservationEditRequest editRequest = new ReservationEditRequest(변경_예약일, editedReservationTimeId.longValue());
 
         // when
@@ -135,14 +135,14 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("지난 날짜와 시간으로 예약 수정 실패")
     public void scenario6() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         ReservationInfo reservation = 예약_생성을_요청하고("brown", 예약일, LocalTime.of(10, 30));
         Integer editedReservationTimeId = 변경할_예약_시간_생성을_요청하고(
                 new ReservationTimeCreateRequest(LocalTime.of(11, 30))
         );
-        현재_시간이_변경하려는_예약_날짜와_시간_이후가_되고(mutableClock);
+        현재_시간이_변경하려는_예약_날짜와_시간_이후가_되고(mutableTimeManager);
         ReservationEditRequest editRequest = new ReservationEditRequest(
                 LocalDate.of(2026, 10, 10),
                 editedReservationTimeId.longValue()
@@ -161,7 +161,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("다른 사용자의 예약 수정 실패")
     public void scenario7() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
@@ -197,7 +197,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("내 예약 삭제")
     public void scenario8() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
 
         // given
         ReservationInfo reservation = 특정_사용자_이름으로_예약_생성을_요청하고("brown");
@@ -213,7 +213,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("이미 예약된 슬롯 대기 신청")
     void scenario9() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
@@ -227,7 +227,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("같은 게스트 같은 슬롯 중복 대기 실패")
     void scenario10() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
@@ -242,7 +242,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("대기 예약 취소 성공")
     void scenario11() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);
@@ -256,7 +256,7 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     @Test
     @DisplayName("내 예약 목록 조회 시 대기 순번 포함")
     void scenario12() {
-        mutableClock.setFixed(현재_날짜);
+        mutableTimeManager.setFixed(현재_날짜);
         Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
         Integer reservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
         예약_생성을_요청하고("brown", 예약일, reservationTimeId, themeId);

@@ -5,15 +5,14 @@ import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESER
 import static roomescape.reservationtime.exeption.ReservationTimeErrorCode.RESERVATION_TIME_NOT_FOUND;
 import static roomescape.theme.exception.ThemeErrorCode.THEME_NOT_FOUND;
 
-import java.time.Clock;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.DomainException;
+import roomescape.common.time.TimeManager;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -28,7 +27,7 @@ public class ReservationTimeService {
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
 
-    private final Clock clock;
+    private final TimeManager timeManager;
 
     @Transactional
     public ReservationTime create(LocalTime startAt) {
@@ -54,7 +53,7 @@ public class ReservationTimeService {
             throw new DomainException(RESERVATION_TIME_HAS_RESERVATION);
         }
 
-        if (!reservationTimeRepository.cancelById(id, LocalDateTime.now(clock))) {
+        if (!reservationTimeRepository.cancelById(id, timeManager.now())) {
             throw new DomainException(RESERVATION_TIME_NOT_FOUND);
         }
     }

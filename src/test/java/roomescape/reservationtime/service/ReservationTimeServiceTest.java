@@ -21,14 +21,14 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.test_config.TestClockConfig;
+import roomescape.test_config.TestTimeManagerConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 @JdbcTest
 @Import({
-        TestClockConfig.class,
+        TestTimeManagerConfig.class,
         ReservationTimeService.class,
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,

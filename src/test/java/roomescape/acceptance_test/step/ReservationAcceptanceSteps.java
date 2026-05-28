@@ -19,7 +19,7 @@ import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservation.controller.dto.ReservationEditRequest;
 import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
-import roomescape.test_config.MutableClock;
+import roomescape.test_config.MutableTimeManager;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
 
 public final class ReservationAcceptanceSteps {
@@ -202,12 +202,12 @@ public final class ReservationAcceptanceSteps {
         assertThat(response.jsonPath().getInt("id")).isEqualTo(reservation.id());
     }
 
-    public static void 현재_시간이_예약_시작_이후가_되고(MutableClock mutableClock) {
-        mutableClock.setFixed(LocalDateTime.of(2026, 10, 14, 10, 31));
+    public static void 현재_시간이_예약_시작_이후가_되고(MutableTimeManager mutableTimeManager) {
+        mutableTimeManager.setFixed(LocalDateTime.of(2026, 10, 14, 10, 31));
     }
 
-    public static void 현재_시간이_변경하려는_예약_날짜와_시간_이후가_되고(MutableClock mutableClock) {
-        mutableClock.setFixed(LocalDateTime.of(2026, 10, 10, 12, 0));
+    public static void 현재_시간이_변경하려는_예약_날짜와_시간_이후가_되고(MutableTimeManager mutableTimeManager) {
+        mutableTimeManager.setFixed(LocalDateTime.of(2026, 10, 10, 12, 0));
     }
 
     public static ExtractableResponse<Response> 지난_날짜와_시간으로_예약_수정을_요청하면(

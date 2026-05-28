@@ -29,15 +29,15 @@ import roomescape.reservation.service.validator.ReservationValidator;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.repository.JdbcReservationTimeRepository;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
-import roomescape.test_config.MutableClock;
-import roomescape.test_config.TestClockConfig;
+import roomescape.test_config.MutableTimeManager;
+import roomescape.test_config.TestTimeManagerConfig;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.theme.repository.ThemeRepository;
 
 @JdbcTest
 @Import({
-        TestClockConfig.class,
+        TestTimeManagerConfig.class,
         ReservationService.class,
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
@@ -59,7 +59,7 @@ class ReservationServiceTest {
     ThemeRepository themeRepository;
 
     @Autowired
-    MutableClock clock;
+    MutableTimeManager timeManager;
 
 
     @Test
@@ -70,7 +70,7 @@ class ReservationServiceTest {
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate date = LocalDate.of(2025, 5, 11);
 
-        clock.setFixed(LocalDate.of(2025, 5, 10));
+        timeManager.setFixed(LocalDate.of(2025, 5, 10));
 
         // when
         ReservationWaitingResult reservationWaitingResult =
@@ -84,7 +84,7 @@ class ReservationServiceTest {
     @DisplayName("예약이 존재하는 날짜, 시간, 테마로 새로운 예약을 추가하면 예약이 대기 상태로 들어간다.")
     public void create_success2() {
         // given
-        clock.setFixed(LocalDate.of(2025, 5, 10));
+        timeManager.setFixed(LocalDate.of(2025, 5, 10));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -108,7 +108,7 @@ class ReservationServiceTest {
         LocalDate pastDate = LocalDate.of(2023, 8, 5);
         LocalDate currentDate = LocalDate.of(2025, 5, 11);
 
-        clock.setFixed(currentDate);
+        timeManager.setFixed(currentDate);
 
         // when, then
         assertThatThrownBy(() -> reservationService.create("포비", pastDate, time.getId(), theme.getId()))
@@ -120,7 +120,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("확정 예약을 취소하면 같은 슬롯의 첫 번째 대기 예약이 확정된다.")
     void cancel_promoteWaitingReservation() {
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
@@ -138,7 +138,7 @@ class ReservationServiceTest {
     @Test
     @DisplayName("확정 예약의 날짜/시간을 변경하면 기존 슬롯의 첫 번째 대기 예약이 확정된다.")
     void editDateTime_promoteWaitingReservation() {
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         ReservationTime beforeTime = insertReservationTime(LocalTime.of(10, 0));
@@ -172,7 +172,7 @@ class ReservationServiceTest {
     @DisplayName("본인의 예약을 삭제한다.")
     public void cancelMine_success() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Reservation reservation = insertWaitingReservation(LocalDate.of(2023, 8, 10), time, "브라운");
@@ -200,7 +200,7 @@ class ReservationServiceTest {
     @DisplayName("이미 시작된 예약은 삭제할 수 없다.")
     public void cancelMine_fail2() {
         // given
-        clock.setFixed(LocalDate.of(2023, 8, 11));
+        timeManager.setFixed(LocalDate.of(2023, 8, 11));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Reservation reservation = insertWaitingReservation(LocalDate.of(2023, 8, 10), time, "브라운");
@@ -215,7 +215,7 @@ class ReservationServiceTest {
     @DisplayName("본인의 예약이 아니면 삭제할 수 없기 때문에 예외가 발생한다.")
     public void cancelMine_fail3() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Reservation reservation = insertWaitingReservation(LocalDate.of(2023, 8, 10), time, "브라운");
@@ -230,7 +230,7 @@ class ReservationServiceTest {
     @DisplayName("이미 취소된 예약은 삭제할 수 없다.")
     public void cancelMine_fail4() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
         Reservation reservation = insertReservation("브라운", LocalDate.of(2023, 8, 10), time, theme, Status.CANCELED);
@@ -252,7 +252,7 @@ class ReservationServiceTest {
         LocalDate editedDate = LocalDate.of(2023, 8, 10);
         ReservationTime editedTime = insertReservationTime(LocalTime.of(12, 0));
 
-        clock.setFixed(LocalDate.of(2023, 7, 20));
+        timeManager.setFixed(LocalDate.of(2023, 7, 20));
 
         // when
         reservationService.editDateTime(reservation.getId(), editedDate, editedTime.getId(),
@@ -285,7 +285,7 @@ class ReservationServiceTest {
     @DisplayName("수정하려는 예약 시간이 존재하지 않으면 예외가 발생한다.")
     public void editDateTime_fail2() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 20));
+        timeManager.setFixed(LocalDate.of(2023, 7, 20));
 
         ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 5);
@@ -305,7 +305,7 @@ class ReservationServiceTest {
     @DisplayName("이미 시작된 예약은 수정할 수 없다.")
     public void editDateTime_fail3() {
         // given
-        clock.setFixed(LocalDate.of(2023, 8, 6));
+        timeManager.setFixed(LocalDate.of(2023, 8, 6));
 
         ReservationTime existTime = insertReservationTime(LocalTime.of(10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 5);
@@ -325,7 +325,7 @@ class ReservationServiceTest {
     @DisplayName("수정하려는 날짜 및 시간에 예약이 존재하면 대기 상태가 된다.")
     public void editDateTime_change_waiting_status() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
 
@@ -349,7 +349,7 @@ class ReservationServiceTest {
     @DisplayName("이미 취소된 예약은 수정할 수 없다.")
     public void editDateTime_fail4_2() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate date = LocalDate.of(2023, 8, 10);
@@ -372,7 +372,7 @@ class ReservationServiceTest {
     @DisplayName("이미 지난 날짜 및 시간으로 예약을 수정하려는 경우 예외가 발생한다.")
     public void editDateTime_fail5(LocalDate ed, LocalTime et) {
         // given
-        clock.setFixed(LocalDateTime.of(2023, 7, 6, 10, 0));
+        timeManager.setFixed(LocalDateTime.of(2023, 7, 6, 10, 0));
         LocalDate existDate = LocalDate.of(2023, 8, 6);
         ReservationTime existTime = insertReservationTime(LocalTime.of(12, 0));
         Reservation reservation = insertWaitingReservation(existDate, existTime, "브라운");
@@ -390,7 +390,7 @@ class ReservationServiceTest {
     @DisplayName("본인의 예약이 아니면 예외가 발생한다.")
     public void editDateTime_fail6() {
         // given
-        clock.setFixed(LocalDate.of(2023, 7, 6));
+        timeManager.setFixed(LocalDate.of(2023, 7, 6));
 
         Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
 

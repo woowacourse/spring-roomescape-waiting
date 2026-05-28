@@ -6,11 +6,10 @@ import static roomescape.reservation.exception.ReservationErrorCode.PAST_RESERVA
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_CANCELED;
 import static roomescape.reservation.exception.ReservationErrorCode.RESERVATION_ALREADY_EXISTS;
 
-import java.time.Clock;
-import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import roomescape.common.exception.DomainException;
+import roomescape.common.time.TimeManager;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.repository.ReservationRepository;
 
@@ -19,7 +18,7 @@ import roomescape.reservation.repository.ReservationRepository;
 public class ReservationValidator {
 
     private final ReservationRepository reservationRepository;
-    private final Clock clock;
+    private final TimeManager timeManager;
 
     public void validateCreate(Reservation created) {
         validateNotDuplicatedExcept(created);
@@ -52,13 +51,13 @@ public class ReservationValidator {
     }
 
     private void validateNotPast(Reservation reservation) {
-        if (reservation.isPassed(LocalDateTime.now(clock))) {
+        if (reservation.isPassed(timeManager.now())) {
             throw new DomainException(PAST_RESERVATION_NOT_ALLOWED);
         }
     }
 
     private void validateAlreadyStarted(Reservation reservation) {
-        if (reservation.isPassed(LocalDateTime.now(clock))) {
+        if (reservation.isPassed(timeManager.now())) {
             throw new DomainException(CANNOT_EDIT_ALREADY_STARTED_RESERVATION);
         }
     }

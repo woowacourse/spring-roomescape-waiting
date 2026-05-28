@@ -63,14 +63,14 @@ public class ThemeAcceptanceTest extends AcceptanceTestSupport {
     @DisplayName("인기 테마 목록 조회")
     public void scenario3() {
         // given
-        mutableClock.setFixed(LocalDate.of(2026, 4, 1));
+        mutableTimeManager.setFixed(LocalDate.of(2026, 4, 1));
 
         PopularThemeIds themeIds = 여러_테마_생성을_요청하고();
         List<Integer> reservationTimeIds = 예약_시간_생성을_요청하고();
         기간_내_테마별_예약_수가_다르게_예약_생성을_요청하고(themeIds, reservationTimeIds, 기간_내_예약일);
         기간_밖_예약_생성을_요청하고(themeIds, reservationTimeIds, 기간_밖_예약일);
 
-        mutableClock.setFixed(인기_테마_조회_기준일);
+        mutableTimeManager.setFixed(인기_테마_조회_기준일);
 
         // when
         ExtractableResponse<Response> response = 인기_테마_목록_조회를_요청하면();
