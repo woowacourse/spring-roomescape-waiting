@@ -20,7 +20,7 @@ public class ReservationSlotService {
     private final ReservationDateRepository reservationDateRepository;
     private final ReservationRepository reservationRepository;
 
-    public List<ReservationSlotResponse> getReservationSlot(Long themeId, Long dateId) {
+    public List<ReservationSlotResponse> getReservationSlots(Long themeId, Long dateId) {
         validateThemeAndDateExists(themeId, dateId);
         List<ReservationCountResult> reservationCountResults = reservationRepository.countReservation(themeId, dateId);
 

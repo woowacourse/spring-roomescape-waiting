@@ -19,7 +19,7 @@ public class ReservationSlotController {
         @RequestParam Long themeId,
         @RequestParam Long dateId
     ) {
-        List<ReservationSlotResponse> response = reservationSlotService.getReservationSlot(themeId, dateId);
+        List<ReservationSlotResponse> response = reservationSlotService.getReservationSlots(themeId, dateId);
         return ResponseEntity.ok(response);
     }
 }
