@@ -110,6 +110,7 @@ public class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.create(request))
                 .isInstanceOf(ResourceNotFoundException.class);
+        verify(reservationQueryingDao).findReservationByThemeAndDateAndTime(2L, tomorrow, 1L);
     }
 
     @Test
