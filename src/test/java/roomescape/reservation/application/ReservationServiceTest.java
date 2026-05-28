@@ -111,7 +111,7 @@ class ReservationServiceTest {
 
         assertThatThrownBy(() -> reservationService.addReservation(pendingCommand))
                 .isInstanceOf(DuplicatedReservationException.class)
-                .hasMessageContaining("이미 예약 대기 중입니다.");
+                .hasMessageContaining("이미 예약 중입니다.");
     }
 
     @Test

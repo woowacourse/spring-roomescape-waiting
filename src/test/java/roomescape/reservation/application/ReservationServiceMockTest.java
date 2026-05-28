@@ -96,7 +96,7 @@ class ReservationServiceMockTest {
                 .thenReturn(mockTheme);
         when(reservationRepository.existsByReservationTimeAndThemeAndDate(command.timeId(), command.themeId(), command.date()))
                 .thenReturn(true);
-        when(reservationRepository.existsPendingReservationByName(command.timeId(), command.themeId(), command.date(), command.name()))
+        when(reservationRepository.existsReservationByName(command.timeId(), command.themeId(), command.date(), command.name()))
                 .thenReturn(false);
         when(reservationRepository.save(any(Reservation.class))).thenReturn(mockReservation);
 
@@ -145,7 +145,7 @@ class ReservationServiceMockTest {
         when(reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(
                 mockReservation.getId(), changeCommand.timeId(), changeCommand.themeId(), changeCommand.date()))
                 .thenReturn(true);
-        when(reservationRepository.existsPendingReservationByName(
+        when(reservationRepository.existsReservationByName(
                 changeCommand.timeId(), changeCommand.themeId(), changeCommand.date(), changeCommand.name()))
                 .thenReturn(false);
 
@@ -242,12 +242,12 @@ class ReservationServiceMockTest {
                 mockReservation.getId(), changeCommand.timeId(), changeCommand.themeId(), changeCommand.date()))
                 .thenReturn(true);
 
-        when(reservationRepository.existsPendingReservationByName(
+        when(reservationRepository.existsReservationByName(
                 changeCommand.timeId(), changeCommand.themeId(), changeCommand.date(), changeCommand.name()))
                 .thenReturn(true);
 
         Assertions.assertThatThrownBy(() -> reservationService.changeReservation(mockReservation.getId(), changeCommand))
                 .isInstanceOf(DuplicatedReservationException.class)
-                .hasMessage("이미 예약 대기 중입니다.");
+                .hasMessage("이미 예약 중입니다.");
     }
 }
