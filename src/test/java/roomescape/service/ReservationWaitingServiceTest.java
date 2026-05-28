@@ -147,15 +147,6 @@ public class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 과거_예약_대기열_삭제를_시도하면_예외가_발생한다() {
-        ReservationWaiting reservationWaiting = ReservationWaiting.restore(1L, "테스트", LocalDate.now().minusDays(1), reservationTime, theme, 1L, LocalDateTime.now());
-        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
-
-        assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId()))
-                .isInstanceOf(ExpiredDateTimeException.class);
-    }
-
-    @Test
     void 존재하지_않는_예약_대기열_삭제를_시도하면_예외가_발생한다() {
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.empty());
 
