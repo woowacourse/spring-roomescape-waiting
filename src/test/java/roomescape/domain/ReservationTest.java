@@ -13,6 +13,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.domain.fixture.ReservationTimeFixture;
 import roomescape.domain.fixture.ThemeFixture;
+import roomescape.exception.DuplicateEntityException;
+import roomescape.exception.EntityNotFoundException;
+import roomescape.exception.RoomEscapeException;
 
 class ReservationTest {
 
@@ -38,7 +41,7 @@ class ReservationTest {
     void 예약_일시와_테마_검증_통합_테스트(LocalDate date, Theme theme, ReservationTime reservationTime, String expectedMessage) {
         // when & then
         assertThatThrownBy(() -> Reservation.createSlot(date, theme, reservationTime))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining(expectedMessage);
     }
 
@@ -140,7 +143,7 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(() -> reservation.reserve("이프"))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이미 지난 예약입니다.");
     }
 

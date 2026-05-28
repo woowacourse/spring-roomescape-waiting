@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.exception;
 
 public class DuplicateEntityException extends RuntimeException {
 

@@ -5,7 +5,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import roomescape.domain.DuplicateEntityException;
+import roomescape.exception.DuplicateEntityException;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.fake.FakeThemeRepository;

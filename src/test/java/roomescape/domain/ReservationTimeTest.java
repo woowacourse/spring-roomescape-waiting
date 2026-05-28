@@ -6,6 +6,7 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import org.junit.jupiter.api.Test;
+import roomescape.exception.RoomEscapeException;
 
 class ReservationTimeTest {
 
@@ -13,7 +14,7 @@ class ReservationTimeTest {
     void 예약_시간을_생성_할_때_시작_시간_정보가_없다면_예외가_발생한다() {
         // when & then
         assertThatThrownBy(() -> new ReservationTime(null))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining("추가 할 예약 시작 시간 정보가 누락되었습니다");
     }
 
@@ -77,7 +78,7 @@ class ReservationTimeTest {
 
         // when
         assertThatThrownBy(time::deactivate)
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining("이미 비활성화 된 시간 정보입니다.");
     }
 
@@ -101,7 +102,7 @@ class ReservationTimeTest {
 
         // when
         assertThatThrownBy(time::activate)
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining("이미 활성화 된 시간 정보입니다.");
     }
 }

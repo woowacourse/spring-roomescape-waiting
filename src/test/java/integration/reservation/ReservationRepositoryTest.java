@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.domain.DuplicateEntityException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationStatus;
@@ -19,6 +18,7 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.TimeStatus;
 import roomescape.domain.fixture.ReservationFixture;
+import roomescape.exception.DuplicateEntityException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.dto.ReservationCondition;
 
