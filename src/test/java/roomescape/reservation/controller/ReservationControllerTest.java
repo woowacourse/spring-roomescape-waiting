@@ -11,6 +11,8 @@ import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -130,39 +132,44 @@ class ReservationControllerTest {
                 .body("message", org.hamcrest.Matchers.is("잘못된 요청입니다."));
     }
 
-    @Test
-    @Sql("/clear.sql")
-    void 예약자_이름으로_예약_및_대기_목록을_조회한다() {
-        // given
-        final String customerName = "코로구";
+    @Nested
+    @DisplayName("예약자 이름으로 예약 및 대기 목록을 조회한다")
+    class FindReservationsAndWaitingsByCustomerName {
 
-        insertReservationTime("10:00");
-        insertReservationTime("11:00");
+        @Test
+        @Sql("/clear.sql")
+        void 예약자_이름으로_예약_및_대기_목록을_조회한다() {
+            // given
+            final String customerName = "코로구";
 
-        insertTheme("링", "공포 테마", "http:~");
+            insertReservationTime("10:00");
+            insertReservationTime("11:00");
 
-        insertReservation(customerName, "2026-05-13", 1L, 1L);
-        insertReservation("재키", "2026-05-13", 2L, 1L);
+            insertTheme("링", "공포 테마", "http:~");
 
-        insertWaiting(customerName, "2026-05-13", 2L, 1L);
+            insertReservation(customerName, "2026-05-13", 1L, 1L);
+            insertReservation("재키", "2026-05-13", 2L, 1L);
 
-        // when
-        final Response response = RestAssured
-            .given().log().all()
-            .queryParam("customer-name", customerName)
-            .when().get("/reservations");
+            insertWaiting(customerName, "2026-05-13", 2L, 1L);
 
-        // then
-        final ReservationsAndWaitingsResponse body = response
-            .then().log().all()
-            .statusCode(200).extract()
-            .jsonPath().getObject(".", ReservationsAndWaitingsResponse.class);
+            // when
+            final Response response = RestAssured
+                .given().log().all()
+                .queryParam("customer-name", customerName)
+                .when().get("/reservations");
 
-        assertThat(body.reservations()).hasSize(1);
-        assertThat(body.reservations().getFirst().name()).isEqualTo(customerName);
-        assertThat(body.waitings()).hasSize(1);
-        assertThat(body.waitings().getFirst().customerName()).isEqualTo(customerName);
-        assertThat(body.waitings().getFirst().rank()).isEqualTo(1);
+            // then
+            final ReservationsAndWaitingsResponse body = response
+                .then().log().all()
+                .statusCode(200).extract()
+                .jsonPath().getObject(".", ReservationsAndWaitingsResponse.class);
+
+            assertThat(body.reservations()).hasSize(1);
+            assertThat(body.reservations().getFirst().name()).isEqualTo(customerName);
+            assertThat(body.waitings()).hasSize(1);
+            assertThat(body.waitings().getFirst().customerName()).isEqualTo(customerName);
+            assertThat(body.waitings().getFirst().rank()).isEqualTo(1);
+        }
     }
 
     @Test
