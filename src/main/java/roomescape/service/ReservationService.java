@@ -45,7 +45,7 @@ public class ReservationService {
         this.clock = clock;
     }
 
-    public List<ReservationResult> findAll() {
+    public List<ReservationResult> findReservations() {
         List<Reservation> reservations = reservationDao.findAll();
 
         return reservations.stream()
@@ -53,7 +53,7 @@ public class ReservationService {
                 .toList();
     }
 
-    public ReservationDetailResults findAllByUserName(String userName) {
+    public ReservationDetailResults findReservationsByUserName(String userName) {
         List<Reservation> reservations = reservationDao.findAllByUserName(userName);
         List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
 
@@ -67,7 +67,7 @@ public class ReservationService {
         );
     }
 
-    public ReservationResult save(ReservationCommand command) {
+    public ReservationResult registerReservation(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
 
         Reservation saved = reservationDao.save(reservation);
@@ -75,7 +75,7 @@ public class ReservationService {
         return ReservationResult.from(saved);
     }
 
-    public ReservationResult updateDateTime(Long id, ReservationCommand command) {
+    public ReservationResult changeDateTime(Long id, ReservationCommand command) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("변경하려는 예약이 존재하지 않습니다."));
 
@@ -131,11 +131,11 @@ public class ReservationService {
         }
     }
 
-    public void delete(Long id) {
+    public void deleteReservation(Long id) {
         reservationDao.delete(id);
     }
 
-    public void delete(Long id, String userName) {
+    public void deleteReservation(Long id, String userName) {
         Reservation origin = reservationDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
 

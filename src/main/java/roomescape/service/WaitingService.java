@@ -39,7 +39,7 @@ public class WaitingService {
         this.clock = clock;
     }
 
-    public WaitingResult save(WaitingCommand command) {
+    public WaitingResult registerWaiting(WaitingCommand command) {
         ReservationTime time = reservationTimeDao.findTimeById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
@@ -71,7 +71,7 @@ public class WaitingService {
         return WaitingResult.from(saved);
     }
 
-    public void delete(Long id, String userName) {
+    public void deleteWaiting(Long id, String userName) {
         Waiting origin = waitingDao.findById(id)
                 .orElseThrow(() -> new NotFoundException("삭제하려는 예약 대기가 존재하지 않습니다."));
 

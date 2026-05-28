@@ -28,7 +28,7 @@ public class AdminThemeController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<ThemeResponse> registerTheme(@Valid @ModelAttribute ThemeRequest request) {
-        ThemeResult result = themeService.create(ThemeCommand.from(request));
+        ThemeResult result = themeService.registerTheme(ThemeCommand.from(request));
         ThemeResponse response = ThemeResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -41,7 +41,7 @@ public class AdminThemeController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteTheme(@PathVariable Long id) {
-        themeService.delete(id);
+        themeService.deleteTheme(id);
         return ResponseEntity.noContent().build();
     }
 }

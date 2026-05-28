@@ -38,7 +38,7 @@ public class ReservationServiceTest {
                 themeId
         );
 
-        assertDoesNotThrow(() -> reservationService.save(command));
+        assertDoesNotThrow(() -> reservationService.registerReservation(command));
     }
 
     @Test
@@ -52,7 +52,7 @@ public class ReservationServiceTest {
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("존재하지 않는 시간입니다.");
     }
@@ -68,7 +68,7 @@ public class ReservationServiceTest {
                 invalidThemeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("존재하지 않는 테마입니다.");
     }
@@ -85,7 +85,7 @@ public class ReservationServiceTest {
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(UnprocessableEntityException.class)
                 .hasMessageContaining("이미 지난 시간입니다.");
     }
@@ -101,7 +101,7 @@ public class ReservationServiceTest {
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.save(command))
+        assertThatThrownBy(() -> reservationService.registerReservation(command))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("이미 존재하는 예약 건입니다.");
     }
@@ -118,7 +118,7 @@ public class ReservationServiceTest {
                 themeId
         );
 
-        assertThatThrownBy(() -> reservationService.updateDateTime(id, command))
+        assertThatThrownBy(() -> reservationService.changeDateTime(id, command))
                 .isInstanceOf(ForbiddenException.class)
                 .hasMessageContaining("다른 사람의 예약은 변경할 수 없습니다.");
     }

@@ -28,7 +28,7 @@ public class WaitingController {
 
     @PostMapping
     public ResponseEntity<WaitingResponse> registerWaiting(@Valid @RequestBody WaitingRequest request) {
-        WaitingResult result = waitingService.save(WaitingCommand.from(request));
+        WaitingResult result = waitingService.registerWaiting(WaitingCommand.from(request));
         WaitingResponse response = WaitingResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -41,7 +41,7 @@ public class WaitingController {
 
     @DeleteMapping(value = {"/{id}"})
     public ResponseEntity<WaitingResponse> deleteWaiting(@PathVariable long id, @RequestParam String name) {
-        waitingService.delete(id, name);
+        waitingService.deleteWaiting(id, name);
         return ResponseEntity.noContent().build();
     }
 }

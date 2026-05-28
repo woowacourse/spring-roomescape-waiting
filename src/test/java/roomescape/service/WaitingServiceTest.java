@@ -92,7 +92,7 @@ class WaitingServiceTest {
         given(waitingDao.save(any())).willReturn(saved);
         given(reservationDao.existsBy(date, theme, time)).willReturn(true);
 
-        WaitingResult result = waitingService.save(command);
+        WaitingResult result = waitingService.registerWaiting(command);
         assertThat(result.id()).isEqualTo(saved.getId());
         assertThat(result.name()).isEqualTo(saved.getName().value());
         assertThat(result.date()).isEqualTo(saved.getDate());
@@ -114,6 +114,6 @@ class WaitingServiceTest {
 
         given(waitingDao.findById(waitingId)).willReturn(Optional.of(origin));
 
-        assertDoesNotThrow(() -> waitingService.delete(waitingId, userName));
+        assertDoesNotThrow(() -> waitingService.deleteWaiting(waitingId, userName));
     }
 }

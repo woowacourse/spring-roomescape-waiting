@@ -30,22 +30,22 @@ public class ThemeService {
         this.clock = clock;
     }
 
-    public List<ThemeResult> findAllThemes() {
+    public List<ThemeResult> findThemes() {
         List<Theme> themes = themeDao.findAllThemes();
         return themes.stream()
                 .map(ThemeResult::from)
                 .toList();
     }
 
-    public List<ThemeResult> findTopTheme(Long count) {
+    public List<ThemeResult> findPopularThemes(int limit) {
         LocalDate today = LocalDate.now(clock);
-        List<Theme> topTheme = themeDao.findTopThemes(count, today);
-        return topTheme.stream()
+        List<Theme> popularThemes = themeDao.findPopularThemes(limit, today);
+        return popularThemes.stream()
                 .map(ThemeResult::from)
                 .toList();
     }
 
-    public ThemeResult create(ThemeCommand command) {
+    public ThemeResult registerTheme(ThemeCommand command) {
         MultipartFile file = command.file();
         String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
         String filePath = uploadDir + fileName;
@@ -76,11 +76,11 @@ public class ThemeService {
         return ThemeResult.from(saved);
     }
 
-    public void delete(Long id) {
+    public void deleteTheme(Long id) {
         themeDao.delete(id);
     }
 
-    public List<ReservationTimeDetailResult> findThemeSchedule(Long id, LocalDate date) {
+    public List<ReservationTimeDetailResult> findThemeSchedulesByDate(Long id, LocalDate date) {
         List<TimeQueryResult> availableTimes = themeDao.findTimeStatusBy(id, date);
 
         return availableTimes.stream()

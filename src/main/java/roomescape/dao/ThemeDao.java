@@ -48,7 +48,7 @@ public class ThemeDao {
         );
     }
 
-    public List<Theme> findTopThemes(Long count, LocalDate today) {
+    public List<Theme> findPopularThemes(int limit, LocalDate today) {
         return jdbcTemplate.query(
                 """
                            SELECT
@@ -66,7 +66,7 @@ public class ThemeDao {
                 THEME_ROW_MAPPER,
                 today.minusDays(7),
                 today,
-                count
+                limit
         );
     }
 

@@ -46,7 +46,7 @@ class ThemeDaoTest {
         );
         LocalDate today = LocalDate.parse(TODAY);
 
-        List<Theme> topThemes = themeDao.findTopThemes(10L, today);
+        List<Theme> topThemes = themeDao.findPopularThemes(10, today);
 
         // then
         assertThat(topThemes).hasSize(expectedNames.size());

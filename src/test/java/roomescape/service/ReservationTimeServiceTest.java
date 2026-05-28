@@ -26,7 +26,7 @@ class ReservationTimeServiceTest {
                 LocalTime.parse("19:00")
         );
 
-        assertDoesNotThrow(() -> reservationTimeService.save(command));
+        assertDoesNotThrow(() -> reservationTimeService.registerReservationTime(command));
     }
 
     @Test
@@ -34,7 +34,7 @@ class ReservationTimeServiceTest {
     void 예약_존재_시간_삭제_에러_테스트() {
         Long id = 1L;
 
-        assertThatThrownBy(() -> reservationTimeService.delete(id))
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(id))
                 .isInstanceOf(ConflictException.class)
                 .hasMessageContaining("예약이 존재하는 시간은 삭제할 수 없습니다.");
     }
@@ -44,7 +44,7 @@ class ReservationTimeServiceTest {
     void 없는_시간_삭제_에러_테스트() {
         Long id = 999L;
 
-        assertThatThrownBy(() -> reservationTimeService.delete(id))
+        assertThatThrownBy(() -> reservationTimeService.deleteReservationTime(id))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessageContaining("존재하지 않는 시간입니다.");
     }

@@ -34,7 +34,7 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<List<ReservationResponse>> getReservations() {
-        List<ReservationResponse> response = reservationService.findAll().stream()
+        List<ReservationResponse> response = reservationService.findReservations().stream()
                 .map(ReservationResponse::from)
                 .toList();
 
@@ -44,7 +44,7 @@ public class ReservationController {
     @GetMapping(params = "userName")
     public ResponseEntity<ReservationDetailResponses> getReservationsByUserName(
             @RequestParam("userName") String userName) {
-        ReservationDetailResults result = reservationService.findAllByUserName(userName);
+        ReservationDetailResults result = reservationService.findReservationsByUserName(userName);
 
         ReservationDetailResponses response = ReservationDetailResponses.from(result);
 
@@ -53,7 +53,7 @@ public class ReservationController {
 
     @PostMapping
     public ResponseEntity<ReservationResponse> registerReservation(@Valid @RequestBody ReservationRequest request) {
-        ReservationResult result = reservationService.save(ReservationCommand.from(request));
+        ReservationResult result = reservationService.registerReservation(ReservationCommand.from(request));
         ReservationResponse response = ReservationResponse.from(result);
 
         URI location = ServletUriComponentsBuilder.fromCurrentRequest()
@@ -67,7 +67,7 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ReservationResponse> modifyReservation(@PathVariable Long id,
                                                                  @Valid @RequestBody ReservationRequest request) {
-        ReservationResult result = reservationService.updateDateTime(id, ReservationCommand.from(request));
+        ReservationResult result = reservationService.changeDateTime(id, ReservationCommand.from(request));
         ReservationResponse response = ReservationResponse.from(result);
 
         return ResponseEntity.ok().body(response);
@@ -75,7 +75,7 @@ public class ReservationController {
 
     @DeleteMapping(value = "/{id}", params = "userName")
     public ResponseEntity<Void> deleteReservation(@PathVariable Long id, @RequestParam("userName") String userName) {
-        reservationService.delete(id);
+        reservationService.deleteReservation(id, userName);
         return ResponseEntity.noContent().build();
     }
 }
