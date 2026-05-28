@@ -3,6 +3,7 @@ package roomescape.domain.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Objects;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
 
@@ -18,7 +19,8 @@ public class Waiting {
         this(null, userName, date, time, theme, createdAt);
     }
 
-    public Waiting(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    public Waiting(Long id, UserName userName, LocalDate date, ReservationTime time, Theme theme,
+                   LocalDateTime createdAt) {
         this.id = id;
         validate(userName, date, time, theme, createdAt);
         this.userName = userName;
@@ -28,12 +30,19 @@ public class Waiting {
         this.createdAt = createdAt;
     }
 
-    private void validate(UserName userName, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    private void validate(UserName userName, LocalDate date, ReservationTime time, Theme theme,
+                          LocalDateTime createdAt) {
         Objects.requireNonNull(userName, "예약자 이름이 비어 있습니다.");
         Objects.requireNonNull(date, "예약 날짜가 비어 있습니다.");
         Objects.requireNonNull(time, "시간이 비어 있습니다.");
         Objects.requireNonNull(theme, "테마가 비어 있습니다.");
         Objects.requireNonNull(createdAt, "대기 신청 시간이 비어 있습니다.");
+    }
+
+    public void validateOwner(String name) {
+        if (!userName.isOwnedBy(name)) {
+            throw new ForbiddenException("다른 사람의 예약 대기는 취소/변경할 수 없습니다.");
+        }
     }
 
     public Long getId() {

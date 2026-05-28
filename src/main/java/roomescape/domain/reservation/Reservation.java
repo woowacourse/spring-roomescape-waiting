@@ -2,6 +2,7 @@ package roomescape.domain.reservation;
 
 import java.time.LocalDate;
 import java.util.Objects;
+import roomescape.common.exception.ForbiddenException;
 import roomescape.domain.reservation.theme.Theme;
 import roomescape.domain.reservation.time.ReservationTime;
 
@@ -34,7 +35,9 @@ public class Reservation {
     }
 
     public void validateOwner(String name) {
-        userName.validateOwner(name);
+        if (!userName.isOwnedBy(name)) {
+            throw new ForbiddenException("다른 사람의 예약은 취소/변경할 수 없습니다.");
+        }
     }
 
     public Long getId() {

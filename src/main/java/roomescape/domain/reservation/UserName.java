@@ -1,7 +1,5 @@
 package roomescape.domain.reservation;
 
-import roomescape.common.exception.UnprocessableEntityException;
-
 public record UserName(
         String value
 ) {
@@ -21,9 +19,7 @@ public record UserName(
         return new UserName(value);
     }
 
-    public void validateOwner(String name) {
-        if (!value.equals(name)) {
-            throw new UnprocessableEntityException("다른 사람의 예약은 취소/변경할 수 없습니다.");
-        }
+    public boolean isOwnedBy(String name) {
+        return value.equals(name);
     }
 }
