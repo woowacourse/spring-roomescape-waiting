@@ -12,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.service.dto.command.ReservationCommand;
@@ -119,7 +118,7 @@ public class ReservationServiceTest {
         );
 
         assertThatThrownBy(() -> reservationService.updateDateTime(id, command))
-                .isInstanceOf(ForbiddenException.class)
-                .hasMessageContaining("다른 사람의 예약은 변경할 수 없습니다.");
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessageContaining("다른 사람의 예약은 취소/변경할 수 없습니다.");
     }
 }

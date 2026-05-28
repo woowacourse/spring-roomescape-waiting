@@ -1,6 +1,7 @@
 package roomescape.apitest.users;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.Matchers.is;
 import static roomescape.config.FixedClockConfig.FUTURE_DATE;
 
 import io.restassured.RestAssured;
@@ -24,10 +25,9 @@ class ReservationApiTest {
     private final String userName = "브라운";
     private final Long timeId = 1L;
     private final Long themeId = 1L;
-    private int initialReservationSize;
-
     @Autowired
     JdbcTemplate jdbcTemplate;
+    private int initialReservationSize;
 
     @BeforeEach
     void setUp() {
@@ -90,6 +90,26 @@ class ReservationApiTest {
 
         assertThat(remainIds).hasSize(initialReservationSize);
         assertThat(remainIds).doesNotContain(generatedId);
+    }
+
+    @Test
+    void 본인_예약_취소_API() {
+        long id = 23L;
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + id + "?userName=" + userName)
+                .then().log().all()
+                .statusCode(204);
+    }
+
+    @Test
+    void 다른_사용자_예약_취소_API() {
+        long id = 23L;
+        String userName = "토리";
+        RestAssured.given().log().all()
+                .when().delete("/reservations/" + id + "?userName=" + userName)
+                .then().log().all()
+                .statusCode(422)
+                .body("message", is("다른 사람의 예약은 취소/변경할 수 없습니다."));
     }
 
     @Test
