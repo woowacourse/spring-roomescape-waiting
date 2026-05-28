@@ -212,6 +212,11 @@
             color: #d97706;
         }
 
+        .status-past {
+            background: #f0f0f3;
+            color: #86868b;
+        }
+
         .res-when {
             margin: 0;
             color: #666;
@@ -300,26 +305,28 @@
         container.querySelectorAll('.res-card').forEach(setupCard);
     }
 
-    function statusBadge(waitingOrder) {
+    function statusBadge(waitingOrder, past) {
+        if (past) {
+            return '<span class="status-badge status-past">지난 예약</span>';
+        }
         if (waitingOrder === 0) {
             return '<span class="status-badge status-confirmed">예약 완료</span>';
         }
         return `<span class="status-badge status-waiting">대기 ${waitingOrder}번</span>`;
     }
 
+    function isPast(dateStr, startAtStr) {
+        return new Date(`${dateStr}T${startAtStr}`).getTime() < Date.now();
+    }
+
     function cardHtml(r) {
-        return `
-            <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
-                <div class="res-head">
-                    <div>
-                        <p class="res-theme">${r.theme.name} ${statusBadge(r.waitingOrder)}</p>
-                        <p class="res-when">${r.date} · ${r.time.startAt}</p>
-                    </div>
+        const past = isPast(r.date, r.time.startAt);
+        const actions = past ? '' : `
                     <div class="res-actions">
                         <button class="btn btn-light btn-edit">변경</button>
                         <button class="btn btn-danger btn-cancel">취소</button>
-                    </div>
-                </div>
+                    </div>`;
+        const editForm = past ? '' : `
                 <div class="res-edit hidden">
                     <p class="step-label">새 날짜</p>
                     <input type="date" class="edit-date">
@@ -328,13 +335,23 @@
                         <p class="empty">날짜를 먼저 선택하세요.</p>
                     </div>
                     <button class="submit-btn btn-save" disabled>변경 저장</button>
-                </div>
+                </div>`;
+        return `
+            <div class="res-card" data-id="${r.id}" data-theme-id="${r.theme.id}">
+                <div class="res-head">
+                    <div>
+                        <p class="res-theme">${r.theme.name} ${statusBadge(r.waitingOrder, past)}</p>
+                        <p class="res-when">${r.date} · ${r.time.startAt}</p>
+                    </div>${actions}
+                </div>${editForm}
             </div>
         `;
     }
 
     function setupCard(card) {
-        card.querySelector('.btn-cancel').addEventListener('click', () => cancel(card.dataset.id));
+        const cancelBtn = card.querySelector('.btn-cancel');
+        if (!cancelBtn) return;
+        cancelBtn.addEventListener('click', () => cancel(card.dataset.id));
         card.querySelector('.btn-edit').addEventListener('click', () => {
             card.querySelector('.res-edit').classList.toggle('hidden');
         });

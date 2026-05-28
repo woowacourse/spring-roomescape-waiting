@@ -256,6 +256,22 @@ class UserReservationServiceTest {
     }
 
     @Test
+    @DisplayName("기존 예약이 과거이면 PastReservationException이 발생한다")
+    void 기존_예약이_과거이면_변경할_수_없다() {
+        Reservation reservation = new Reservation(1L, OWNER, PAST_DATE, VALID_TIME, VALID_THEME);
+        ReservationUpdateCommand command = new ReservationUpdateCommand(1L, OWNER, ANOTHER_FUTURE_DATE, 2L);
+        given(reservationRepository.findById(1L)).willReturn(Optional.of(reservation));
+
+        assertThrows(
+                PastReservationException.class,
+                () -> userReservationService.update(command)
+        );
+
+        verify(reservationRepository, times(1)).findById(1L);
+        verifyNoInteractions(reservationService, reservationTimeRepository);
+    }
+
+    @Test
     @DisplayName("변경하려는 시간이 이미 차 있으면 ReservationConflictException이 발생한다")
     void 변경_시간_충돌시_예외가_발생한다() {
         Reservation reservation = new Reservation(1L, OWNER, FUTURE_DATE, VALID_TIME, VALID_THEME);
