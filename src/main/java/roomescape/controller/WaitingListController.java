@@ -11,6 +11,7 @@ import roomescape.dto.WaitingListResult;
 import roomescape.service.WaitingListService;
 
 import java.net.URI;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/waiting-list")
@@ -18,6 +19,13 @@ import java.net.URI;
 public class WaitingListController {
 
     private final WaitingListService waitingListService;
+
+    @GetMapping
+    public ResponseEntity<List<WaitingListResult>> getWaitingListsByName(@RequestParam String name) {
+        final List<WaitingListResult> results = waitingListService.getWaitingListByName(name);
+        return ResponseEntity.ok().body(results);
+    }
+
 
     @PostMapping
     public ResponseEntity<WaitingListResult> create(@RequestBody @Valid WaitingListCreateCommand createCommand) {
