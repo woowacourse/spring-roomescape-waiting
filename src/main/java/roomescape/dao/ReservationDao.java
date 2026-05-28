@@ -9,7 +9,7 @@ import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationOrder;
+import roomescape.dto.projection.ReservationOrderProjection;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -61,7 +61,7 @@ public class ReservationDao {
         }, id);
     }
 
-    public List<ReservationOrder> findByName(String name) {
+    public List<ReservationOrderProjection> findByName(String name) {
         return jdbcTemplate.query("""
                     SELECT *
                     FROM (
@@ -84,7 +84,7 @@ public class ReservationDao {
             Reservation reservation = new Reservation(rs.getLong("id"), rs.getString("name"),
                     rs.getDate("date").toLocalDate(), time, theme, ReservationStatus.valueOf(rs.getString("status")));
 
-            return new ReservationOrder(reservation, rs.getLong("waiting_order"));
+            return new ReservationOrderProjection(reservation, rs.getLong("waiting_order"));
         }, name);
     }
 

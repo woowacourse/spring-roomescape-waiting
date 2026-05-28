@@ -10,7 +10,7 @@ import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationOrder;
+import roomescape.dto.projection.ReservationOrderProjection;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -33,7 +33,7 @@ public class ReservationService {
     }
 
     public List<ReservationOrderResponse> find(String name) {
-        List<ReservationOrder> response = reservationDao.findByName(name);
+        List<ReservationOrderProjection> response = reservationDao.findByName(name);
         return response.stream().map(ReservationOrderResponse::from).toList();
     }
 

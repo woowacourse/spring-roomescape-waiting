@@ -3,12 +3,12 @@ package roomescape.domain;
 import java.time.LocalDate;
 
 public class Reservation {
-    private Long id;
-    private String name;
-    private LocalDate date;
-    private ReservationTime time;
-    private Theme theme;
-    private ReservationStatus status;
+    private final Long id;
+    private final String name;
+    private final LocalDate date;
+    private final ReservationTime time;
+    private final Theme theme;
+    private final ReservationStatus status;
 
     public Reservation(String name, LocalDate date, ReservationTime time, Theme theme, ReservationStatus status) {
         this(null, name, date, time, theme, status);

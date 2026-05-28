@@ -4,7 +4,7 @@ import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeStatus;
+import roomescape.dto.projection.ReservationTimeStatusProjection;
 import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeStatusResponse;
@@ -25,7 +25,7 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTimeStatusResponse> findAvailableTime(Long id, String date) {
-        List<ReservationTimeStatus> availableTimes = reservationTimeDao.findAvailableTime(id, date);
+        List<ReservationTimeStatusProjection> availableTimes = reservationTimeDao.findAvailableTime(id, date);
 
         return availableTimes.stream()
                 .map(ReservationTimeStatusResponse::from)

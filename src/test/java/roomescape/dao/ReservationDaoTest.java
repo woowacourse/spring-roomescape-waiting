@@ -11,7 +11,7 @@ import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.EmptyResultDataAccessException;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationOrder;
+import roomescape.dto.projection.ReservationOrderProjection;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
@@ -46,25 +46,25 @@ class ReservationDaoTest {
 
     @Test
     void 이름으로_예약_조회() {
-        List<ReservationOrder> reservation = reservationDao.findByName("아나키");
+        List<ReservationOrderProjection> reservation = reservationDao.findByName("아나키");
 
         assertThat(reservation).hasSize(2);
     }
 
     @Test
     void 존재하지_않는_이름으로_조회하면_빈값_반환() {
-        List<ReservationOrder> reservation = reservationDao.findByName("없는이름");
+        List<ReservationOrderProjection> reservation = reservationDao.findByName("없는이름");
 
         assertThat(reservation).isEmpty();
     }
 
     @Test
     void 이름으로_예약_조회_시_대기_순번_부여() {
-        ReservationOrder firstWaiting = reservationDao.findByName("그해").stream()
+        ReservationOrderProjection firstWaiting = reservationDao.findByName("그해").stream()
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
                 .findFirst()
                 .orElseThrow();
-        ReservationOrder secondWaiting = reservationDao.findByName("아나키").stream()
+        ReservationOrderProjection secondWaiting = reservationDao.findByName("아나키").stream()
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
                 .findFirst()
                 .orElseThrow();
@@ -77,7 +77,7 @@ class ReservationDaoTest {
     void 대기_삭제_시_후순위_대기자_순번_재정렬() {
         reservationDao.delete(20L);
 
-        ReservationOrder secondWaiting = reservationDao.findByName("아나키").stream()
+        ReservationOrderProjection secondWaiting = reservationDao.findByName("아나키").stream()
                 .filter(r -> r.getStatus() == ReservationStatus.WAITING)
                 .findFirst()
                 .orElseThrow();

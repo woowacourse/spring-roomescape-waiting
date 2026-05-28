@@ -1,15 +1,12 @@
-package roomescape.domain;
+package roomescape.dto.projection;
 
 import java.time.LocalDate;
+import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 
-public class ReservationOrder {
-    private Reservation reservation;
-    private Long order;
-
-    public ReservationOrder(Reservation reservation, Long order) {
-        this.reservation = reservation;
-        this.order = order;
-    }
+public record ReservationOrderProjection(Reservation reservation, Long order) {
 
     public Long getId() {
         return reservation.getId();

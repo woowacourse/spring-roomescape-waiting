@@ -10,7 +10,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationTimeStatus;
+import roomescape.dto.projection.ReservationTimeStatusProjection;
 
 @Repository
 @Transactional(readOnly = true)
@@ -73,7 +73,7 @@ public class ReservationTimeDao {
                 (rs, rowNum) -> new ReservationTime(rs.getLong("id"), rs.getTime("start_at").toLocalTime()), timeId);
     }
 
-    public List<ReservationTimeStatus> findAvailableTime(Long id, String date) {
+    public List<ReservationTimeStatusProjection> findAvailableTime(Long id, String date) {
         return jdbcTemplate.query("""
                        SELECT t.id AS time_id, t.start_at,
                               CASE WHEN r.id IS NULL THEN 'AVAILABLE' ELSE 'CONFIRMED' END AS status
@@ -86,7 +86,7 @@ public class ReservationTimeDao {
                 """, (rs, rowNum) -> {
             ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
 
-            return new ReservationTimeStatus(time, ReservationStatus.valueOf(rs.getString("status")));
+            return new ReservationTimeStatusProjection(time, ReservationStatus.valueOf(rs.getString("status")));
 
         }, id, date);
     }
