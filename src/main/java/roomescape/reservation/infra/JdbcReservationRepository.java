@@ -69,7 +69,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .name(resultSet.getString("r_name"))
                 .date(resultSet.getDate("r_date").toLocalDate())
                 .status(Status.valueOf(resultSet.getString("r_status")))
-                .pendingIndex(resultSet.getLong("pending_index"))
+                .pendingIndex(resultSet.getObject("pending_index", Long.class))
                 .time(time)
                 .theme(theme)
                 .build();
@@ -99,7 +99,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public void updateDetails(final Long id, final Reservation reservation) {
         String sql = "UPDATE reservation "
-                + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status, uniqueness_token = :uniquenessToken "
+                + "SET date = :date, time_id = :timeId, theme_id = :themeId, status = :status, uniqueness_token = :uniquenessToken, created_at = :createdAt "
                 + "WHERE id = :id AND is_deleted = 0";
 
         long uniquenessToken = reservation.getStatus().equals(Status.ACTIVE) ? 0L : System.nanoTime();
@@ -110,6 +110,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 .addValue("themeId", reservation.getTheme().getId())
                 .addValue("status", reservation.getStatus().name())
                 .addValue("uniquenessToken", uniquenessToken)
+                .addValue("createdAt", reservation.getCreatedAt())
                 .addValue("id", id);
 
         jdbcTemplate.update(sql, params);
@@ -191,7 +192,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "    t.duration_time AS t_duration_time, "
                 + "    rt.id AS rt_id, "
                 + "    rt.start_at AS rt_start_at, "
-                + "("
+                + "CASE "
+                + "    WHEN r.status = 'PENDING' THEN ("
                 + "        SELECT COUNT(*) + 1 "
                 + "        FROM reservation p "
                 + "        WHERE p.date = r.date "
@@ -203,7 +205,9 @@ public class JdbcReservationRepository implements ReservationRepository {
                 + "                 p.created_at < r.created_at "
                 + "                 OR (p.created_at = r.created_at AND p.id < r.id) "
                 + "              )"
-                + ") AS pending_index "
+                + "    )"
+                + "    ELSE NULL "
+                + "END AS pending_index "
                 + "FROM reservation r "
                 + "INNER JOIN theme t ON r.theme_id = t.id "
                 + "INNER JOIN reservation_time rt ON r.time_id = rt.id "
