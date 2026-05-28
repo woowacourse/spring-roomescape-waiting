@@ -70,18 +70,33 @@ class JdbcReservationRepositoryTest {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Theme theme = themeRepository.save(Theme.create("테마1", "설명1", "image1.png"));
-            Reservation reservation = Reservation.create(
-                new ReserverName("예약자"), LocalDate.of(2026, 5, 1), time, theme);
+            ReserverName name = new ReserverName("예약자");
+            LocalDate date = LocalDate.of(2026, 5, 1);
+            Reservation reservation = Reservation.create(name, date, time, theme);
 
             // when
-            Reservation actual = reservationRepository.save(reservation);
+            Long savedReservationId = reservationRepository.save(reservation).getId();
+
+            Reservation expectedSavedReservation = Reservation.reconstruct(
+                savedReservationId, name, date, time, theme, ReservationStatus.ACTIVE);
 
             // then
-            assertThat(actual.getId()).isEqualTo(1L);
-            assertThat(actual.getName().value()).isEqualTo("예약자");
-            assertThat(actual.getDate()).isEqualTo(LocalDate.of(2026, 5, 1));
-            assertThat(actual.getTime().getId()).isEqualTo(time.getId());
-            assertThat(actual.getTheme().getId()).isEqualTo(theme.getId());
+            Reservation actualSavedReservation = jdbcTemplate.queryForObject(
+                "SELECT id, name, date, time_id, theme_id, status FROM reservation WHERE id = ?",
+                (rs, rowNum) -> Reservation.reconstruct(
+                    rs.getLong("id"),
+                    new ReserverName(rs.getString("name")),
+                    rs.getDate("date").toLocalDate(),
+                    Time.reconstruct(rs.getLong("time_id"), time.getStartAt(), null),
+                    Theme.reconstruct(rs.getLong("theme_id"), theme.getName(), theme.getDescription(), theme.getImageUrl(), null),
+                    ReservationStatus.valueOf(rs.getString("status"))
+                ),
+                savedReservationId
+            );
+
+            assertThat(actualSavedReservation).usingRecursiveComparison()
+                .isEqualTo(expectedSavedReservation);
+
             saveSucceeded = true;
         }
 

@@ -58,14 +58,27 @@ class JdbcTimeRepositoryTest {
         @Order(1)
         void 예약_시간을_저장한다() {
             // given
-            Time time = Time.create(LocalTime.of(10, 30));
+            LocalTime startAt = LocalTime.of(10, 30);
+            Time time = Time.create(startAt);
 
             // when
-            Time actual = timeRepository.save(time);
+            Long savedTimeId = timeRepository.save(time).getId();
+
+            Time expectedSavedTime = Time.reconstruct(savedTimeId, startAt, null);
 
             // then
-            assertThat(actual.getId()).isEqualTo(1L);
-            assertThat(actual.getStartAt()).isEqualTo(LocalTime.of(10, 30));
+            Time actualSavedTime = jdbcTemplate.queryForObject(
+                "SELECT id, start_at, deleted_at FROM reservation_time WHERE id = ?",
+                (rs, rowNum) -> Time.reconstruct(
+                    rs.getLong("id"),
+                    rs.getTime("start_at").toLocalTime(),
+                    rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
+                ),
+                savedTimeId
+            );
+
+            assertThat(actualSavedTime).usingRecursiveComparison()
+                .isEqualTo(expectedSavedTime);
             saveSucceeded = true;
         }
 

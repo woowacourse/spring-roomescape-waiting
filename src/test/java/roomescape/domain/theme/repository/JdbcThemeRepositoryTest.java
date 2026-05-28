@@ -69,16 +69,32 @@ class JdbcThemeRepositoryTest {
         @Order(1)
         void 테마를_저장한다() {
             // given
-            Theme theme = Theme.create("테마1", "설명1", "image1.png");
+            String name = "테마1";
+            String description = "설명1";
+            String imageUrl = "image1";
+            Theme theme = Theme.create(name, description, imageUrl);
 
             // when
-            Theme actual = themeRepository.save(theme);
+            Long savedThemeId = themeRepository.save(theme).getId();
+
+            Theme expectedSavedTheme = Theme.reconstruct(savedThemeId, name, description, imageUrl, null);
 
             // then
-            assertThat(actual.getId()).isEqualTo(1L);
-            assertThat(actual.getName()).isEqualTo("테마1");
-            assertThat(actual.getDescription()).isEqualTo("설명1");
-            assertThat(actual.getImageUrl()).isEqualTo("image1.png");
+            Theme actualSavedTheme = jdbcTemplate.queryForObject(
+                "SELECT id, name, description, image_url, deleted_at FROM theme WHERE id = ?",
+                (rs, rowNum) -> Theme.reconstruct(
+                    rs.getLong("id"),
+                    rs.getString("name"),
+                    rs.getString("description"),
+                    rs.getString("image_url"),
+                    rs.getTimestamp("deleted_at") != null ? rs.getTimestamp("deleted_at").toLocalDateTime() : null
+                ),
+                savedThemeId
+            );
+
+            assertThat(actualSavedTheme).usingRecursiveComparison()
+                .isEqualTo(expectedSavedTheme);
+
             saveSucceeded = true;
         }
 
