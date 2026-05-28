@@ -89,8 +89,8 @@ public class ReservationTimeDao {
                         rs.getLong("time_id"),
                         LocalTime.parse(rs.getString("start_at"))
                 );
-                long reservationId = rs.getLong("reservation_id");
-                results.put(reservationTime, rs.wasNull() ? null : reservationId);
+                Long reservationId = rs.getObject("reservation_id", Long.class);
+                results.put(reservationTime, reservationId);
             }
             return results;
         };
