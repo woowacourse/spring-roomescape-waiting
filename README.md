@@ -95,7 +95,8 @@
           "content": "오금이 저리는 공포입니다.",
           "url": "/themes/scary"
         },
-    	  "createdAt": "2026-05-26T11:00:55"
+        "rank" : 1,
+        "createdAt": "2026-05-26T11:00:55"
       },
         {
         "id": 2,
@@ -111,7 +112,8 @@
           "content": "오금이 저리는 공포입니다.",
           "url": "/themes/scary"
         },
-    	  "createdAt": "2026-05-26T11:00:55"
+        "rank" : 2,
+        "createdAt": "2026-05-26T11:00:55"
       },
       ...
     ]
