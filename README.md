@@ -19,7 +19,7 @@
     - [x] 예약이 없는 날짜 시간 테마에는 대기할 수 없다.
     - [x] 본인의 확정된 예약 슬롯에 대기를 신청할 수 없다.
 - [x] 본인의 이름으로 신청한 대기를 예약 목록과 함께 조회할 수 있다.
-  - [x] 대기에는 본인의 대기 순번도 함께 보여준다.
+    - [x] 대기에는 본인의 대기 순번도 함께 보여준다.
 - [x] 사용자는 본인의 대기를 취소할 수 있다.
 
   <br>
@@ -65,6 +65,23 @@
 
 errors는 입력값 검증 실패처럼 필드별 설명이 필요할 때만 포함한다.
 
+#### 방탈출 예약 대기 - 사이클1 추가  API
+
+**대기 API**
+
+| **HTTP Status** | **code**                        | **message**                    |
+|-----------------|---------------------------------|--------------------------------|
+| 400             | INVALID_NAME                    | 이름은 공백일 수 없으며 20자 이내여야 합니다.    |
+| 400             | INVALID_WAITING_NUMBER          | 대기 순서는 필수입니다.                  |
+| 404             | WAITING_NOT_FOUND               | 대기가 존재하지 않습니다.                 |
+| 409             | WAITING_DUPLICATE               | 이미 대기가 등록되어 있습니다.              |
+| 422             | WAITING_PAST_TIME               | 과거 대기는 선택할 수 없습니다.             |
+| 422             | IMMEDIATE_RESERVATION_AVAILABLE | 즉시 예약이 가능하므로, 대기 등록이 불가능합니다.   |
+| 422             | CANNOT_WAITLIST_CONFIRMED_SLOT  | 본인이 예약 확정한 슬롯에는 대기 등록이 불가능합니다. |
+
+<details>
+<summary>지난 미션에서 구현된 API</summary>
+
 **예약 API**
 
 | **HTTP Status** | **code**              | **message**                 |
@@ -98,9 +115,135 @@ errors는 입력값 검증 실패처럼 필드별 설명이 필요할 때만 포
 | 409             | THEME_DUPLICATE            | 같은 테마가 존재합니다.             |
 | 409             | RESERVATION_EXIST_ON_THEME | 예약이 존재하는 테마는 삭제할 수 없습니다.  |
 
+</details>
+
 <br>
 
 # 주요 API 명세
+
+#### 방탈출 예약 대기 - 사이클1 추가  API
+
+<details>
+<summary>다른 사용자에 의해 예약된 슬롯에 대기를 신청할 수 있다.</summary>
+
+- 다른 사용자에 의해 예약된 슬롯에 대기를 신청할 수 있다.
+    - HTTP method : POST
+
+  **Request**
+
+    - API path : /api/waiting
+    - Headers:
+        - Content-Type: application/json
+
+      ```json
+      {
+          "name": "코코",
+          "date": "2026-05-01",
+          "timeId": 1,
+          "themeId": 2
+      }
+      ```
+
+  **Response**
+
+    - status: 201 Created (성공적으로 대기가 등록됨)
+    - Headers:
+        - Location: /api/waiting/1
+    - Body
+
+      ```json
+      (Empty)
+      ```
+
+</details>
+
+<details>
+<summary>본인의 이름으로 신청한 대기와 예약을 함께 조회할 수 있다.</summary>
+
+- 본인의 이름으로 신청한 대기와 예약을 함께 조회할 수 있다.
+    - HTTP method : GET
+
+  **Request**
+
+    - API path : /api/reservations
+    - Query Parameters:
+    - name: 코코
+
+  **Response**
+
+    - status: 200 OK
+    - Headers:
+        - Content-Type: application/json
+    - Body
+
+      ```json
+      {
+        "reservations": [
+          {
+            "id": 1,
+            "name": "코코",
+            "date": "2026-05-01",
+            "time": {
+              "id": 1,
+              "startAt": "10:00"
+            },
+            "theme": {
+              "id": 2,
+              "name": "공포의 병원",
+              "description": "버려진 정신병원에서 탈출해야 합니다.",
+              "imageUrl": "https://picsum.photos/200/300",
+              "runningTime": 60
+            }
+          }
+        ],
+        "waitings": [
+          {
+            "id": 1,
+            "name": "코코",
+            "date": "2026-05-02",
+            "time": {
+              "id": 2,
+              "startAt": "11:00"
+            },
+            "theme": {
+              "id": 1,
+              "name": "우주 정거장",
+              "description": "무중력 상태에서의 사투!",
+              "imageUrl": "https://picsum.photos/200/400",
+              "runningTime": 70
+            },
+            "waitingNumber": 1
+          }
+        ]
+      }
+      ```
+
+</details>
+
+<details>
+<summary>본인의 대기를 취소할 수 있다.</summary>
+
+- 본인의 대기를 취소할 수 있다.
+    - HTTP method : DELETE
+
+  **Request**
+
+    - API path : /api/waiting/{id}
+    - Path Variable:
+        - id(Long) 취소할 대기의 고유 id
+
+  **Response**
+
+    - status: 204 No Content (성공적으로 대기가 취소됨)
+    - Body
+
+      ```json
+      (Empty)
+      ```
+
+</details>
+
+#### 지난 미션에서 구현된 API
 
 <details>
 <summary>관리자는 테마를 추가할 수 있다.</summary>
@@ -291,14 +434,5 @@ errors는 입력값 검증 실패처럼 필드별 설명이 필요할 때만 포
       ]
       ```
 
-  경로 설정 이유
-
-    - booked-times는 단순히 전체 시간 목록을 조회하는 것이 아니라, 특정 날짜와 테마에 있는 예약 현황을 필터링하여 보여주는 리소스이다. 따라서 이 데이터의 핵심 도메인인 예약 리소스의 하위 경로에
-      위치시키는 것이 구조적으로 타당하다고 판단했다.
-    - 또한, ReservationService는 예약을 생성하기 위해 이미 ReservationTimeRepository와 ThemeRepository를 모두 참조하고 있다. 즉, 서비스 계층에서 예약 현황과
-      시간, 테마 정보에 대한 도메인 지식을 자연스럽게 모두 가지고 있는 상태다. 반면 TimeService나 ThemeService에서 이 정보를 산출하려면 예약 도메인에 대한 새로운 의존성을 추가해야
-      하는데, 이는 서비스 간의 결합도를 높인다. 결과적으로 이미 필요한 정보를 모두 알고 있는 ReservationService에서 해당 데이터를 관리하는 것이 불필요한 결합을 줄인다고 생각했다.
-
 </details>
-
 
