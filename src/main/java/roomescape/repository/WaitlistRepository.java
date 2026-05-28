@@ -13,6 +13,10 @@ public interface WaitlistRepository {
 
     int countBefore(Waitlist waitlist);
 
+    boolean existsByTimeId(Long timeId);
+
+    boolean existsByThemeId(Long themeId);
+
     boolean existsBySameUser(Reservation reservation);
 
     Long save(Reservation reservation);

@@ -72,7 +72,11 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
                 WHERE date = ?
                     AND time_id = ?
                     AND theme_id = ?
-                    AND created_at < ?;
+                    AND created_at < ?
+                        OR (
+                            created_at = ?
+                            AND id < ?
+                        );
                 """;
 
         Integer count = jdbcTemplate.queryForObject(
@@ -81,10 +85,26 @@ public class JdbcWaitlistRepository implements WaitlistRepository {
                 waitlist.getDate(),
                 waitlist.getTime().getId(),
                 waitlist.getTheme().getId(),
-                waitlist.getCreatedAt()
+                waitlist.getCreatedAt(),
+                waitlist.getCreatedAt(),
+                waitlist.getId()
         );
 
         return count == null ? 0 : count;
+    }
+
+    @Override
+    public boolean existsByTimeId(Long timeId) {
+        String sql = "SELECT COUNT(*) FROM waitlist WHERE time_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, timeId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsByThemeId(Long themeId) {
+        String sql = "SELECT COUNT(*) FROM waitlist WHERE theme_id = ?";
+        Integer count = jdbcTemplate.queryForObject(sql, Integer.class, themeId);
+        return count != null && count > 0;
     }
 
     @Override

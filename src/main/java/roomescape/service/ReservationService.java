@@ -57,7 +57,7 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationWithStatus reserveOrWait(ReservationRequest request) {
+    public ReservationWithStatus applyReservation(ReservationRequest request) {
         Reservation reservation = createReservation(
                 request,
                 getReservationTime(request.timeId()),

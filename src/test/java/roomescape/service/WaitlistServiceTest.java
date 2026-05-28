@@ -52,8 +52,8 @@ public class WaitlistServiceTest {
                 theme.getId()
         );
 
-        reservationService.reserveOrWait(request);
-        ReservationWithStatus savedWaitlist = reservationService.reserveOrWait(waitlistRequest);
+        reservationService.applyReservation(request);
+        ReservationWithStatus savedWaitlist = reservationService.applyReservation(waitlistRequest);
 
         waitlistService.cancelMyWaitlist(savedWaitlist.getId(), "브리");
 
@@ -79,7 +79,7 @@ public class WaitlistServiceTest {
                 theme.getId()
         );
 
-        ReservationWithStatus savedWaitlist = reservationService.reserveOrWait(request);
+        ReservationWithStatus savedWaitlist = reservationService.applyReservation(request);
 
         assertThatThrownBy(() -> waitlistService.cancelMyWaitlist(savedWaitlist.getId(), "브리"))
                 .isInstanceOf(RoomEscapeException.class);

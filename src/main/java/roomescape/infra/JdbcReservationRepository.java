@@ -120,7 +120,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                                         before_w.created_at < w.created_at
                                         OR (
                                             before_w.created_at = w.created_at
-                                            AND before_w.id < w.id 
+                                            AND before_w.id < w.id
                                         )
                                     )
                            ) as waiting_order
@@ -129,7 +129,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                     INNER JOIN theme as th ON w.theme_id = th.id
                     WHERE w.name = ?
                 ) my_reservations
-                ORDER BY date DESC, time_value ASC; 
+                ORDER BY date DESC, time_value ASC;
                 """;
 
         return jdbcTemplate.query(sql, reservationWithStatusRowMapper, name, name);

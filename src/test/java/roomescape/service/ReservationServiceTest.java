@@ -53,7 +53,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(request);
+        ReservationWithStatus reservationWithStatus = reservationService.applyReservation(request);
 
         assertThat(reservationWithStatus.getId()).isNotNull();
         assertThat(reservationWithStatus.getName()).isEqualTo("브라운");
@@ -75,7 +75,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        assertThatThrownBy(() -> reservationService.reserveOrWait(request))
+        assertThatThrownBy(() -> reservationService.applyReservation(request))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -90,7 +90,7 @@ class ReservationServiceTest {
                 1L
         );
 
-        assertThatThrownBy(() -> reservationService.reserveOrWait(request))
+        assertThatThrownBy(() -> reservationService.applyReservation(request))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -106,7 +106,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.reserveOrWait(request);
+        reservationService.applyReservation(request);
 
         ReservationRequest waitlistFirstRequest = new ReservationRequest(
                 "워니",
@@ -114,7 +114,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        reservationService.reserveOrWait(waitlistFirstRequest);
+        reservationService.applyReservation(waitlistFirstRequest);
 
         String other = "브리";
         ReservationRequest waitlistSecondRequest = new ReservationRequest(
@@ -123,7 +123,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        ReservationWithStatus reservationWithStatus = reservationService.reserveOrWait(waitlistSecondRequest);
+        ReservationWithStatus reservationWithStatus = reservationService.applyReservation(waitlistSecondRequest);
 
         assertThat(reservationWithStatus.getId()).isNotNull();
         assertThat(reservationWithStatus.getName()).isEqualTo(other);
@@ -146,9 +146,9 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.reserveOrWait(request);
+        reservationService.applyReservation(request);
 
-        assertThatThrownBy(() -> reservationService.reserveOrWait(request))
+        assertThatThrownBy(() -> reservationService.applyReservation(request))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -164,7 +164,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.reserveOrWait(request);
+        reservationService.applyReservation(request);
 
         ReservationRequest waitlistRequest = new ReservationRequest(
                 "브리",
@@ -172,9 +172,9 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        reservationService.reserveOrWait(waitlistRequest);
+        reservationService.applyReservation(waitlistRequest);
 
-        assertThatThrownBy(() -> reservationService.reserveOrWait(waitlistRequest))
+        assertThatThrownBy(() -> reservationService.applyReservation(waitlistRequest))
                 .isInstanceOf(RoomEscapeException.class);
     }
 
@@ -190,7 +190,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.reserveOrWait(request);
+        reservationService.applyReservation(request);
 
         List<Reservation> reservations = reservationService.getReservations();
 
@@ -229,9 +229,9 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        reservationService.reserveOrWait(existingReservationRequest);
-        reservationService.reserveOrWait(myReservedRequest);
-        reservationService.reserveOrWait(myWaitingRequest);
+        reservationService.applyReservation(existingReservationRequest);
+        reservationService.applyReservation(myReservedRequest);
+        reservationService.applyReservation(myWaitingRequest);
 
         List<ReservationWithStatus> myReservations = reservationService.getMyReservations(anotherName);
 
@@ -265,7 +265,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        ReservationWithStatus savedReservation = reservationService.reserveOrWait(request);
+        ReservationWithStatus savedReservation = reservationService.applyReservation(request);
 
         Reservation reservation = reservationService.getReservation(savedReservation.getId());
 
@@ -288,7 +288,7 @@ class ReservationServiceTest {
                 theme.getId()
         );
 
-        ReservationWithStatus savedReservation = reservationService.reserveOrWait(request);
+        ReservationWithStatus savedReservation = reservationService.applyReservation(request);
 
         reservationService.deleteReservation(savedReservation.getId());
 
@@ -314,7 +314,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
+        ReservationWithStatus reservation = reservationService.applyReservation(request);
 
         reservationService.cancelMyReservation(reservation.getId(), name);
 
@@ -355,7 +355,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
+        ReservationWithStatus reservation = reservationService.applyReservation(request);
 
         ReservationTime updateTime = createReservationTime(LocalTime.of(12, 0));
         LocalDate updateDate = FUTURE_SECOND_DATE.plusDays(1);
@@ -398,7 +398,7 @@ class ReservationServiceTest {
                 reservationTime.getId(),
                 theme.getId()
         );
-        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
+        ReservationWithStatus reservation = reservationService.applyReservation(request);
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
                 FUTURE_SECOND_DATE.plusDays(1),
@@ -422,7 +422,7 @@ class ReservationServiceTest {
                 tenClock.getId(),
                 theme.getId()
         );
-        ReservationWithStatus reservation = reservationService.reserveOrWait(request);
+        ReservationWithStatus reservation = reservationService.applyReservation(request);
 
         ReservationRequest anotherRequest = new ReservationRequest(
                 "브리",
@@ -430,7 +430,7 @@ class ReservationServiceTest {
                 twelveClock.getId(),
                 theme.getId()
         );
-        reservationService.reserveOrWait(anotherRequest);
+        reservationService.applyReservation(anotherRequest);
 
         ReservationUpdateRequest updateRequest = new ReservationUpdateRequest(
                 FUTURE_SECOND_DATE.plusDays(1),

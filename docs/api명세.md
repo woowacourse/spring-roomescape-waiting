@@ -31,7 +31,7 @@ Content-Type: application/json
 
 ---
 
-### 생성, 대기 요청
+### 예약 신청 요청
 POST /reservations HTTP/1.1
 Content-Type: application/json
 
@@ -42,7 +42,7 @@ Content-Type: application/json
    "themeId": 1
 }
 
-### 생성, 대기 응답
+### 예약 신청 응답
 HTTP/1.1 201 Created
 Content-Type: application/json
 

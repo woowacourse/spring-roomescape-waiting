@@ -13,6 +13,7 @@ import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ReservationTimeRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,11 +21,13 @@ public class ReservationTimeService {
 
     private final ReservationTimeRepository reservationtimeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitlistRepository waitlistRepository;
 
     public ReservationTimeService(ReservationTimeRepository reservationtimeRepository,
-                                  ReservationRepository reservationRepository) {
+                                  ReservationRepository reservationRepository, WaitlistRepository waitlistRepository) {
         this.reservationtimeRepository = reservationtimeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitlistRepository = waitlistRepository;
     }
 
     public List<ReservationTime> getReservationTimes() {
@@ -52,7 +55,7 @@ public class ReservationTimeService {
 
     @Transactional
     public void deleteReservationTime(Long id) {
-        if (reservationRepository.existsByTimeId(id)) {
+        if (reservationRepository.existsByTimeId(id) || waitlistRepository.existsByTimeId(id)) {
             throw new RoomEscapeException(REFERENTIAL_INTEGRITY, "해당 시간을 사용 중인 예약이 존재하여 삭제할 수 없습니다.");
         }
 

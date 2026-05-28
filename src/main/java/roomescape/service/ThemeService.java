@@ -11,6 +11,7 @@ import roomescape.domain.exception.RoomEscapeException;
 import roomescape.dto.ThemeRequest;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @Service
 @Transactional(readOnly = true)
@@ -18,10 +19,13 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final WaitlistRepository waitlistRepository;
 
-    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository) {
+    public ThemeService(ThemeRepository themeRepository, ReservationRepository reservationRepository,
+                        WaitlistRepository waitlistRepository) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.waitlistRepository = waitlistRepository;
     }
 
     public List<Theme> getThemes() {
@@ -50,7 +54,7 @@ public class ThemeService {
 
     @Transactional
     public void deleteTheme(Long id) {
-        if (reservationRepository.existsByThemeId(id)) {
+        if (reservationRepository.existsByThemeId(id) || waitlistRepository.existsByThemeId(id)) {
             throw new RoomEscapeException(REFERENTIAL_INTEGRITY, "해당 테마를 사용 중인 예약이 존재하여 삭제할 수 없습니다.");
         }
 
