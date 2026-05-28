@@ -12,6 +12,7 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
+import roomescape.waiting.domain.WaitingValidator;
 
 @Service
 @Transactional(readOnly = true)
@@ -20,15 +21,18 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final WaitingValidator waitingValidator;
 
     public WaitingService(
             WaitingRepository waitingRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
+            ThemeRepository themeRepository,
+            WaitingValidator waitingValidator
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.waitingValidator = waitingValidator;
     }
 
     @Transactional
@@ -38,6 +42,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> new BusinessException(WaitingErrorCode.WAITING_THEME_INVALID));
 
+        waitingValidator.validateAlreadyReservation(command);
         Waiting waiting = Waiting.create(
                 command.name(),
                 command.date(),
