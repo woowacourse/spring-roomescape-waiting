@@ -54,7 +54,7 @@ class ReservationWaitingServiceTest {
         );
 
         // when
-        ReservationWaitingResponse response = waitingService.addReservationWaiting(command);
+        ReservationWaitingResponse response = waitingService.addReservationWaiting(command, LocalDateTime.now());
 
         // then
         assertThat(response)

@@ -32,13 +32,13 @@ public class ReservationWaitingService {
         this.reservationDao = reservationDao;
     }
 
-    public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command) {
+    public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
 
         validateReservationExists(command.reservationDate(), command.timeId(), command.themeId());
         validateUniqueReservationWaiting(command.name(), command.reservationDate(), command.timeId(), command.themeId());
-        validatePastDatetime(command.reservationDate(), reservationTime);
+        validatePastDatetime(command.reservationDate(), now, reservationTime);
 
         ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), LocalDateTime.now(), command.reservationDate(), reservationTime, theme);
         ReservationWaiting savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
@@ -78,8 +78,8 @@ public class ReservationWaitingService {
         }
     }
 
-    private void validatePastDatetime(LocalDate date, ReservationTime reservationTime) {
-        if (reservationTime.isPast(date, LocalDateTime.now())) {
+    private void validatePastDatetime(LocalDate date, LocalDateTime now, ReservationTime reservationTime) {
+        if (reservationTime.isPast(date, now)) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.PAST_DATETIME);
         }
     }
