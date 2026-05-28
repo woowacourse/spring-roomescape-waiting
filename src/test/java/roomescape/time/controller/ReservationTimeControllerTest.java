@@ -55,7 +55,7 @@ class ReservationTimeControllerTest {
     void readAvailable_Success() throws Exception {
         // given
         AvailableTimesResult result = new AvailableTimesResult(List.of(
-                new AvailableTimeQueryResult(1L, LocalTime.of(10, 0))
+                new AvailableTimeQueryResult(1L, LocalTime.of(10, 0), false)
         ));
         given(reservationTimeService.findAvailableTimes(any(), any())).willReturn(result);
 

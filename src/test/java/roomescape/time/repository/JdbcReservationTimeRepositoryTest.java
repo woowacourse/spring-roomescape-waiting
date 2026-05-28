@@ -129,7 +129,7 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약되지 않은 시간만 조회된다")
+    @DisplayName("모든 시간을 조회하고, 예약된 시간은 alreadyBooked=true 로 반환한다")
     void findAvailableTimes() {
         // given
         ReservationTime time1 = createTime(LocalTime.of(10, 0));
@@ -145,13 +145,15 @@ class JdbcReservationTimeRepositoryTest {
         List<AvailableTimeQueryResult> result = reservationTimeRepository.findAvailableTimes(themeId, date);
 
         // then
-        List<LocalTime> times = result.stream()
-                .map(AvailableTimeQueryResult::startAt).toList();
+        assertThat(result).hasSize(3);
+        
+        AvailableTimeQueryResult result1 = result.stream().filter(t -> t.id().equals(time1.id())).findFirst().get();
+        AvailableTimeQueryResult result2 = result.stream().filter(t -> t.id().equals(time2.id())).findFirst().get();
+        AvailableTimeQueryResult result3 = result.stream().filter(t -> t.id().equals(time3.id())).findFirst().get();
 
-        assertThat(times).containsExactly(
-                time2.startAt(),
-                time3.startAt()
-        );
+        assertThat(result1.alreadyBooked()).isTrue();
+        assertThat(result2.alreadyBooked()).isFalse();
+        assertThat(result3.alreadyBooked()).isFalse();
     }
 
     private ReservationTime createTime(LocalTime time) {

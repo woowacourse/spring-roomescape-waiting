@@ -10,6 +10,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.lang.NonNull;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.testSupport.DatabaseHelper;
@@ -31,51 +32,24 @@ public class RoomEscapeE2ETest {
     @Test
     @DisplayName("방탈출 예약 시스템 전체 시나리오를 테스트한다.")
     void roomEscapeE2EScenario() {
-        // 1. 관리자가 테마를 생성한다.
-        ThemeRequest themeRequest = new ThemeRequest("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/woowa.png");
-        Long themeId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(themeRequest)
-                .when().post("/admin/themes")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
+        Long themeId = createThemeByAdmin();
+        Long timeId = createReservationTimeByAdmin();
 
-        // 2. 관리자가 예약 시간을 생성한다.
-        ReservationTimeRequest timeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
-        Long timeId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(timeRequest)
-                .when().post("/admin/times")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
+        readAvailableTimeByBrown(themeId);
+        Long reservationId = createReservationByBrown(timeId, themeId);
 
-        // 3. 브라운이 예약 가능한 시간을 조회한다.
+        // 5. 브라운이 예약된 시간을 다시 조회하면 예약 여부가 alreadyBooked: true 로 나온다.
         RestAssured.given()
                 .queryParam("date", LocalDate.now().plusDays(1).toString())
                 .queryParam("themeId", themeId)
                 .when().get("/times/available-times")
                 .then().statusCode(200)
-                .body("size()", is(1));
-
-        // 4. 브라운이 해당 시간에 예약을 생성한다.
-        ReservationRequest reservationRequest = new ReservationRequest("brown", LocalDate.now().plusDays(1), timeId, themeId);
-        Long reservationId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservationRequest)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
-
-        // 5. 브라운이 예약된 시간을 다시 조회하면 빈 리스트가 나온다. (예약 불가)
-        RestAssured.given()
-                .queryParam("date", LocalDate.now().plusDays(1).toString())
-                .queryParam("themeId", themeId)
-                .when().get("/times/available-times")
-                .then().statusCode(200)
-                .body("size()", is(0));
+                .body("size()", is(1))
+                .body("[0].alreadyBooked", is(true));
 
         // 6. 포비가 동일한 시간에 예약 대기를 신청한다.
-        ReservationWaitingRequest waitingRequest = new ReservationWaitingRequest("pobi", LocalDate.now().plusDays(1), timeId, themeId);
+        ReservationWaitingRequest waitingRequest = new ReservationWaitingRequest("pobi", LocalDate.now().plusDays(1),
+                timeId, themeId);
         RestAssured.given()
                 .contentType(ContentType.JSON)
                 .body(waitingRequest)
@@ -108,5 +82,52 @@ public class RoomEscapeE2ETest {
                 .statusCode(200)
                 .body("size()", is(1))
                 .body("[0].status", is("reserved"));
+    }
+
+    @NonNull
+    private static Long createReservationByBrown(Long timeId, Long themeId) {
+        ReservationRequest reservationRequest = new ReservationRequest("brown", LocalDate.now().plusDays(1), timeId,
+                themeId);
+        Long reservationId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationRequest)
+                .when().post("/reservations")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+        return reservationId;
+    }
+
+    private static void readAvailableTimeByBrown(Long themeId) {
+        RestAssured.given()
+                .queryParam("date", LocalDate.now().plusDays(1).toString())
+                .queryParam("themeId", themeId)
+                .when().get("/times/available-times")
+                .then().statusCode(200)
+                .body("size()", is(1))
+                .body("[0].alreadyBooked", is(false));
+    }
+
+    @NonNull
+    private static Long createReservationTimeByAdmin() {
+        ReservationTimeRequest timeRequest = new ReservationTimeRequest(LocalTime.of(10, 0));
+        Long timeId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(timeRequest)
+                .when().post("/admin/times")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+        return timeId;
+    }
+
+    @NonNull
+    private static Long createThemeByAdmin() {
+        ThemeRequest themeRequest = new ThemeRequest("우아한 테마", "우아한테크코스 전용 테마입니다.", "https://example.com/woowa.png");
+        Long themeId = RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(themeRequest)
+                .when().post("/admin/themes")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+        return themeId;
     }
 }

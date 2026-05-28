@@ -4,6 +4,7 @@ import java.time.LocalTime;
 
 public record AvailableTimeQueryResult(
         Long id,
-        LocalTime startAt
+        LocalTime startAt,
+        boolean alreadyBooked
 ) {
 }

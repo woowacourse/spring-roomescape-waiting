@@ -20,7 +20,6 @@ public record Reservation(
         return new Reservation(null, name, date, time, theme);
     }
 
-
     public Reservation withId(Long id) {
         return new Reservation(id, this.name, this.date, this.time, this.theme);
     }

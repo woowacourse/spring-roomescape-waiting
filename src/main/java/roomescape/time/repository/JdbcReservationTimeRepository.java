@@ -98,19 +98,20 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<AvailableTimeQueryResult> findAvailableTimes(Long themeId, LocalDate date) {
         String sql = """
-               SELECT t.id, t.start_at
+               SELECT t.id, t.start_at,
+                      CASE WHEN r.id IS NOT NULL THEN true ELSE false END AS already_booked
                FROM reservation_time t 
                LEFT JOIN reservation r
                ON t.id = r.time_id
                AND r.theme_id = ?
                AND r.reservation_date = ?
-               WHERE r.id IS NULL
                """;
 
         RowMapper<AvailableTimeQueryResult> availableTimeRowMapper = (rs, rowNum) ->
                 new AvailableTimeQueryResult(
                         rs.getLong("id"),
-                        rs.getTime("start_at").toLocalTime()
+                        rs.getTime("start_at").toLocalTime(),
+                        rs.getBoolean("already_booked")
                 );
 
         return jdbcTemplate.query(sql, availableTimeRowMapper, themeId, date);
