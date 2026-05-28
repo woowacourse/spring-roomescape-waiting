@@ -228,7 +228,7 @@ public class UserReservationTest {
                 .then().log().all()
                 .statusCode(404)
                 .body("errorCode", is("RESERVATION_NOT_FOUND"))
-                .body("message", is("999번 예약을 찾을 수 없습니다."));
+                .body("message", is("999번 예약이 존재하지 않습니다."));
     }
 
     @Test
