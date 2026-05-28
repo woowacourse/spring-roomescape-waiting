@@ -43,4 +43,24 @@ class WaitingValidatorTest {
                 .doesNotThrowAnyException();
     }
 
+    @Test
+    @DisplayName("같은 슬롯에 이미 대기가 있으면 예외가 발생한다")
+    void 같은_슬롯에_이미_대기가_있으면_예외가_발생한다() {
+        // given
+        ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, time, theme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                time.getId(),
+                theme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingValidator.validateAlreadyReservation(command))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+    }
 }
