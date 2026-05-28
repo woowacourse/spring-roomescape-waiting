@@ -221,7 +221,7 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByReservationTimeAndThemeAndDate(final Long timeId, final Long themeId, final LocalDate date) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE time_id=:timeId AND theme_id=:themeId AND date=:date AND (status='ACTIVE' OR status='PENDING') AND is_deleted = 0)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("timeId", timeId, "themeId", themeId, "date", date),
                         Boolean.class));
@@ -230,7 +230,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public boolean existsByReservationTimeAndThemeAndDateAndIdNot(final Long id, final Long timeId, final Long themeId,
                                                                   final LocalDate date) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id != :id AND time_id=:timeId AND theme_id=:themeId AND date=:date AND status='ACTIVE' AND is_deleted = 0)";
+        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE id != :id AND time_id=:timeId AND theme_id=:themeId AND date=:date AND (status='ACTIVE' OR status='PENDING') AND is_deleted = 0)";
         return Boolean.TRUE.equals(
                 jdbcTemplate.queryForObject(sql, Map.of("id", id, "timeId", timeId, "themeId", themeId, "date", date),
                         Boolean.class));
@@ -240,14 +240,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean existsByTheme(final Long themeId) {
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND is_deleted = 0)";
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Map.of("themeId", themeId), Boolean.class));
-    }
-
-    @Override
-    public boolean existsActiveReservationByThemeAndTime(final Long timeId, final Long themeId, final LocalDate date) {
-        String sql = "SELECT EXISTS (SELECT 1 FROM reservation WHERE theme_id=:themeId AND time_id=:timeId AND date=:date AND status='ACTIVE')";
-        return Boolean.TRUE.equals(
-                jdbcTemplate.queryForObject(sql, Map.of("themeId", themeId, "timeId", timeId, "date", date),
-                        Boolean.class));
     }
 
     @Override

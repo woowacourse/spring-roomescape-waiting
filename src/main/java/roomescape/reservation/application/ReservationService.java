@@ -20,7 +20,6 @@ import roomescape.reservation.application.exception.ReservationNotFoundException
 import roomescape.reservation.domain.Status;
 import roomescape.reservation.domain.dto.ReservationQueryResult;
 import roomescape.reservation.domain.exception.DuplicatedReservationException;
-import roomescape.reservation.domain.exception.IllegalStateReservationException;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -84,12 +83,7 @@ public class ReservationService {
         Reservation canceledReservation = reservation.cancel(username, clock);
         reservationRepository.cancel(canceledReservation);
         if (reservation.getStatus().equals(Status.ACTIVE)) {
-            Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(
-                    reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
-            nextPendingReservation.ifPresent(pending -> {
-                Reservation activeReservation = pending.active();
-                reservationRepository.promoteToActive(activeReservation.getId());
-            });
+            promoteNextPendingReservation(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
         }
     }
 
@@ -97,36 +91,40 @@ public class ReservationService {
         Reservation reservation = reservationRepository.getById(id);
         ReservationTime time = timeRepository.getById(command.timeId());
         Theme theme = themeRepository.getById(command.themeId());
+
+        boolean isSlotChanged = !reservation.getDate().equals(command.date())
+                || !reservation.getTime().getId().equals(command.timeId())
+                || !reservation.getTheme().getId().equals(command.themeId());
+
+        ReservationInfo reservationInfo = attemptToChangeReservation(id, command, time, theme, reservation);
+
+        if (reservation.getStatus().equals(Status.ACTIVE) && isSlotChanged) {
+            promoteNextPendingReservation(reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId());
+        }
+        return reservationInfo;
+    }
+
+    private ReservationInfo attemptToChangeReservation(Long id, ReservationChangeCommand command, ReservationTime time,
+                                               Theme theme, Reservation reservation) {
         if (reservationRepository.existsByReservationTimeAndThemeAndDateAndIdNot(id, time.getId(), theme.getId(),
                 command.date())) {
-            throw new ReservationInUseException("이미 다른 예약이 존재합니다.");
+            return changePendingReservation(reservation, command, time, theme);
         }
-        Reservation changedReservation = reservation.changeTime(command.username(), command.date(), time, theme, clock);
         try {
-            reservationRepository.updateDetails(id, changedReservation);
+            Reservation changedReservation = reservation.changeTime(command.name(), command.date(), time, theme, Status.ACTIVE, clock);
+            reservationRepository.updateDetails(changedReservation.getId(), changedReservation);
+            return ReservationInfo.from(changedReservation);
         } catch (DataIntegrityViolationException e) {
-            throw new ReservationInUseException("변경하려는 시간대에 방금 다른 예약이 확정되었습니다.");
+            return changePendingReservation(reservation, command, time, theme);
         }
+    }
+
+    private ReservationInfo changePendingReservation(final Reservation reservation, final ReservationChangeCommand command, final ReservationTime time, Theme theme) {
+        checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
+        Reservation changedReservation = reservation.changeTime(command.name(), command.date(), time, theme, Status.PENDING,
+                clock);
+        reservationRepository.updateDetails(reservation.getId(), changedReservation);
         return ReservationInfo.from(changedReservation);
-    }
-
-    public ReservationInfo changeReservationStatusToPending(final Long id, final ReservationChangeCommand command) {
-        Reservation reservation = reservationRepository.getById(id);
-        ReservationTime time = timeRepository.getById(command.timeId());
-        Theme theme = themeRepository.getById(command.themeId());
-        if (!reservationRepository.existsActiveReservationByThemeAndTime(time.getId(), theme.getId(), command.date())) {
-            throw new IllegalStateReservationException("대기 상태로 변경할 수 없습니다.");
-        }
-        checkDuplicatePendingReservation(command.date(), command.username(), time, theme);
-        Reservation pendingReservation = reservation.pending(command.username(), clock);
-        reservationRepository.updateDetails(id, pendingReservation);
-        return ReservationInfo.from(pendingReservation);
-    }
-
-    private void checkDuplicatePendingReservation(final LocalDate date, final String username, final ReservationTime time, final Theme theme) {
-        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), date, username)) {
-            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
-        }
     }
 
     private ReservationInfo savePendingReservation(ReservationCreateCommand command, ReservationTime time, Theme theme) {
@@ -138,5 +136,19 @@ public class ReservationService {
         } catch (DataIntegrityViolationException e) {
             throw new ReservationInUseException("예약 처리 중 일시적인 문제가 발생했습니다. 다시 시도해주세요.");
         }
+    }
+
+    private void checkDuplicatePendingReservation(final LocalDate date, final String name, final ReservationTime time, final Theme theme) {
+        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), date, name)) {
+            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
+        }
+    }
+
+    private void promoteNextPendingReservation(final LocalDate date, final Long timeId, final Long themeId) {
+        Optional<Reservation> nextPendingReservation = reservationRepository.findNextPendingReservation(date, timeId, themeId);
+        nextPendingReservation.ifPresent(pending -> {
+                Reservation activeReservation = pending.active();
+                reservationRepository.promoteToActive(activeReservation.getId());
+        });
     }
 }

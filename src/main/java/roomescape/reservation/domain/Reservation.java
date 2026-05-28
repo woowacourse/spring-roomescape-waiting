@@ -53,7 +53,7 @@ public class Reservation {
         }
     }
 
-    public Reservation changeTime(final String username, final LocalDate date, final ReservationTime time, final Theme theme, final Clock clock) {
+    public Reservation changeTime(final String username, final LocalDate date, final ReservationTime time, final Theme theme, final Status status, final Clock clock) {
         checkChangeable(username, clock);
         time.checkValidDateTime(date, clock);
         return Reservation.builder()
@@ -62,8 +62,8 @@ public class Reservation {
                 .date(date)
                 .time(time)
                 .theme(theme)
-                .status(Status.ACTIVE)
-                .is_deleted(0L)
+                .status(status)
+                .is_deleted(is_deleted)
                 .createdAt(LocalDateTime.now(clock))
                 .build();
     }

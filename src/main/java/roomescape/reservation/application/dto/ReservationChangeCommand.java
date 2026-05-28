@@ -5,7 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record ReservationChangeCommand(
-        String username,
+        String name,
         Long timeId,
         Long themeId,
         LocalDate date

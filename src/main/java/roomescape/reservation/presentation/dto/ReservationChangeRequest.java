@@ -19,7 +19,7 @@ public record ReservationChangeRequest(
 ) {
     public ReservationChangeCommand toCommand() {
         return ReservationChangeCommand.builder()
-                .username(this.username)
+                .name(this.username)
                 .timeId(this.timeId)
                 .themeId(this.themeId)
                 .date(this.date)
