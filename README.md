@@ -35,7 +35,7 @@
 | 예약 생성       | `POST /reservations` | `{name, date, themeId, timeId}` | `{id, name, date, theme, time}` |
 | 예약 삭제       | `DELETE /reservations/{reservationId}` | - | - |
 | 예약 조회       | `GET /reservations` | - | `[{id, name, date, theme, time}, ...]` |
-| 예약 가능 시간 조회 | `GET /themes/{themeId}/times/available?date={yyyy-MM-dd}` | - | `[{id, startAt, reservable, waitable}, ...]` |
+| 예약 가능/대기 가능 시간 조회 | `GET /themes/{themeId}/times/available?date={yyyy-MM-dd}` | - | `[{id, startAt, status, reservable, waitable, past, waiting}, ...]` |
 
 
 ### Theme

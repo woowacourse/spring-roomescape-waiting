@@ -1,4 +1,4 @@
-package roomescape.controller.reservationtime.dto;
+package roomescape.domain.reservationtime;
 
 public enum ReservationTimeSlotStatus {
     PAST,

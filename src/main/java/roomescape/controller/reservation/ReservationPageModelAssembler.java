@@ -1,16 +1,13 @@
 package roomescape.controller.reservation;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Set;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.Model;
 import roomescape.controller.history.ReservationHistoryStatus;
 import roomescape.controller.history.dto.HistoryResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeResponse;
 import roomescape.controller.reservationtime.dto.ReservationTimeSlotResponse;
-import roomescape.controller.reservationtime.dto.ReservationTimeSlotStatus;
 import roomescape.controller.theme.dto.ThemeResponse;
 import roomescape.exception.ErrorCode;
 import roomescape.service.history.MyHistoryService;
@@ -88,34 +85,12 @@ public class ReservationPageModelAssembler {
             return List.of();
         }
 
-        Set<Long> availableTimeIds = reservationTimeService.findAvailableTimes(selectedDate, selectedThemeId).stream()
-                .map(reservationTime -> reservationTime.getId())
-                .collect(java.util.stream.Collectors.toSet());
-
-        return reservationTimeService.getAll().stream()
-                .map(reservationTime -> new ReservationTimeSlotResponse(
-                        reservationTime.getId(),
-                        reservationTime.getStartAt(),
-                        resolveSlotStatus(selectedDate, reservationTime.getStartAt(), availableTimeIds.contains(reservationTime.getId())),
-                        findWaitingId(myHistories, selectedDate, selectedThemeId, reservationTime.getId())
+        return reservationTimeService.findTimeSlots(selectedDate, selectedThemeId).stream()
+                .map(slot -> ReservationTimeSlotResponse.from(
+                        slot,
+                        findWaitingId(myHistories, selectedDate, selectedThemeId, slot.id())
                 ))
                 .toList();
-    }
-
-    private ReservationTimeSlotStatus resolveSlotStatus(
-            final LocalDate selectedDate,
-            final java.time.LocalTime startAt,
-            final boolean reservable
-    ) {
-        if (LocalDateTime.of(selectedDate, startAt).isBefore(LocalDateTime.now())) {
-            return ReservationTimeSlotStatus.PAST;
-        }
-
-        if (reservable) {
-            return ReservationTimeSlotStatus.RESERVABLE;
-        }
-
-        return ReservationTimeSlotStatus.WAITABLE;
     }
 
     private Long findWaitingId(

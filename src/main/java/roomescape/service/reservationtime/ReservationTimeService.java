@@ -5,12 +5,14 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeSlot;
+import roomescape.domain.reservationtime.ReservationTimeSlotStatus;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.ReservationTimeRepository;
 import roomescape.service.theme.ThemeService;
 
@@ -48,12 +50,21 @@ public class ReservationTimeService {
     }
 
     public List<ReservationTime> findAvailableTimes(final LocalDate date, final long themeId) {
+        return findTimeSlots(date, themeId).stream()
+                .filter(ReservationTimeSlot::reservable)
+                .map(slot -> ReservationTime.of(slot.id(), slot.startAt()))
+                .toList();
+    }
+
+    public List<ReservationTimeSlot> findTimeSlots(final LocalDate date, final long themeId) {
         themeService.getById(themeId);
         Set<Long> reservedTimeIds = Set.copyOf(reservationRepository.findReservedTimeIdsByDateAndThemeId(date, themeId));
 
         return reservationTimeRepository.findAll().stream()
-                .filter(reservationTime -> !reservedTimeIds.contains(reservationTime.getId()))
-                .filter(reservationTime -> isAvailableOn(date, reservationTime))
+                .map(reservationTime -> ReservationTimeSlot.of(
+                        reservationTime,
+                        resolveSlotStatus(date, reservationTime, reservedTimeIds.contains(reservationTime.getId()))
+                ))
                 .toList();
     }
 
@@ -77,17 +88,33 @@ public class ReservationTimeService {
                 .orElseThrow(() -> new ResourceNotFoundException(ErrorCode.RESERVATION_TIME_NOT_FOUND, "찾는 시간이 없습니다"));
     }
 
-    private boolean isAvailableOn(final LocalDate date, final ReservationTime reservationTime) {
+    private ReservationTimeSlotStatus resolveSlotStatus(
+            final LocalDate date,
+            final ReservationTime reservationTime,
+            final boolean reserved
+    ) {
+        if (isPast(date, reservationTime)) {
+            return ReservationTimeSlotStatus.PAST;
+        }
+
+        if (reserved) {
+            return ReservationTimeSlotStatus.WAITABLE;
+        }
+
+        return ReservationTimeSlotStatus.RESERVABLE;
+    }
+
+    private boolean isPast(final LocalDate date, final ReservationTime reservationTime) {
         LocalDate today = LocalDate.now();
 
         if (date.isBefore(today)) {
-            return false;
-        }
-
-        if (date.isAfter(today)) {
             return true;
         }
 
-        return !reservationTime.getStartAt().isBefore(LocalTime.now());
+        if (date.isAfter(today)) {
+            return false;
+        }
+
+        return reservationTime.getStartAt().isBefore(LocalTime.now());
     }
 }

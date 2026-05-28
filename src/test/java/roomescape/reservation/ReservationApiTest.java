@@ -208,8 +208,13 @@ class ReservationApiTest {
                 .when().get("/themes/1/times/available")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1))
-                .body("[0].startAt", is("11:00:00"));
+                .body("size()", is(2))
+                .body("[0].startAt", is("10:00:00"))
+                .body("[0].status", is("WAITABLE"))
+                .body("[0].waitable", is(true))
+                .body("[1].startAt", is("11:00:00"))
+                .body("[1].status", is("RESERVABLE"))
+                .body("[1].reservable", is(true));
     }
 
     @Test

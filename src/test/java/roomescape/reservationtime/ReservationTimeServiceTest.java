@@ -15,6 +15,8 @@ import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.reservationtime.ReservationTimeSlot;
+import roomescape.domain.reservationtime.ReservationTimeSlotStatus;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ResourceNotFoundException;
@@ -87,6 +89,32 @@ class ReservationTimeServiceTest {
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
                 .containsExactly(eleven.getId());
+    }
+
+    @Test
+    @DisplayName("예약 여부에 따라 시간 슬롯 상태를 조회한다")
+    void findTimeSlots() {
+        ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
+        ReservationRepository reservationRepository = mock(ReservationRepository.class);
+        ThemeService themeService = mock(ThemeService.class);
+        ReservationTimeService reservationTimeService = new ReservationTimeService(
+                reservationTimeRepository,
+                reservationRepository,
+                themeService
+        );
+        ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        ReservationTime eleven = ReservationTime.of(2L, LocalTime.parse("11:00"));
+        LocalDate date = LocalDate.parse("2026-08-06");
+
+        when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
+        when(reservationRepository.findReservedTimeIdsByDateAndThemeId(date, 1L)).thenReturn(List.of(1L));
+        when(reservationTimeRepository.findAll()).thenReturn(List.of(ten, eleven));
+
+        List<ReservationTimeSlot> slots = reservationTimeService.findTimeSlots(date, 1L);
+
+        assertThat(slots)
+                .extracting(ReservationTimeSlot::status)
+                .containsExactly(ReservationTimeSlotStatus.WAITABLE, ReservationTimeSlotStatus.RESERVABLE);
     }
 
     @Test
