@@ -30,7 +30,7 @@ class WaitingReservationControllerTest {
         params.put("name", "고래");
         params.put("dateId", 1);
         params.put("timeId", 1);
-        params.put("themeId", 1);
+        params.put("themeId", 4);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -40,7 +40,7 @@ class WaitingReservationControllerTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("name", is("고래"))
-                .body("theme.name", is("테스트테마"));
+                .body("theme.name", is("코미디테마"));
     }
 
     @Test
