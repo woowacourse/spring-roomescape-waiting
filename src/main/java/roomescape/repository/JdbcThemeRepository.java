@@ -52,7 +52,14 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public Optional<Theme> findById(Long id) {
-        String sql = "select id, name, description, image_url from theme where id = :id";
+        String sql = """
+                    SELECT id,
+                           name,
+                           description,
+                           image_url
+                    FROM theme
+                    WHERE id = :id
+                """;
 
         Map<String, Object> params = Map.of("id", id);
 
@@ -67,7 +74,13 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public List<Theme> findAll() {
-        String sql = "select id, name, description, image_url from theme";
+        String sql = """
+                    SELECT id,
+                           name,
+                           description,
+                           image_url
+                    FROM theme
+                """;
 
         return jdbcTemplate.query(
                 sql,
@@ -78,14 +91,19 @@ public class JdbcThemeRepository implements ThemeRepository {
     @Override
     public List<Theme> findPopularThemes(LocalDate startDate, LocalDate endDate, Long limit) {
         String sql = """
-                    SELECT t.id AS theme_id, t.name, t.description, t.image_url, COUNT(r.id) AS reservation_count
+                    SELECT t.id AS theme_id,
+                           t.name,
+                           t.description,
+                           t.image_url,
+                           COUNT(r.id) AS reservation_count
                     FROM theme AS t
                     LEFT JOIN reservation AS r
-                    ON r.theme_id = t.id
-                    AND r.date >= :startDate
-                    AND r.date < :endDate
+                      ON r.theme_id = t.id
+                      AND r.date >= :startDate
+                      AND r.date < :endDate
                     GROUP BY t.id
-                    ORDER BY reservation_count DESC, t.name ASC
+                    ORDER BY reservation_count DESC,
+                             t.name ASC
                     LIMIT :limit
                 """;
 
@@ -103,17 +121,27 @@ public class JdbcThemeRepository implements ThemeRepository {
 
     @Override
     public void delete(Long id) {
-        String sql = "delete from theme where id = :id";
+        String sql = """
+                    DELETE FROM theme
+                    WHERE id = :id
+                """;
         Map<String, Object> params = Map.of("id", id);
         jdbcTemplate.update(sql, params);
     }
 
     @Override
     public boolean existByThemeName(String name) {
-        String sql = "select count(*) from theme where name = :name";
+        String sql = """
+                    SELECT EXISTS (
+                      SELECT 1
+                      FROM theme
+                      WHERE name = :name
+                    )
+                """;
         Map<String, Object> params = Map.of("name", name);
-        Integer count = jdbcTemplate.queryForObject(sql, params, Integer.class);
-        return count > 0;
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, params, Boolean.class)
+        );
     }
 }
 

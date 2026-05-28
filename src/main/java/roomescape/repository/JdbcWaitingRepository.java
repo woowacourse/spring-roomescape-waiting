@@ -13,7 +13,6 @@ import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
 import roomescape.domain.Waiting;
@@ -69,7 +68,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public Optional<Long> findMaxWaitingNumberBy(LocalDate date, ReservationTime reservationTime,
-            Theme theme) {
+                                                 Theme theme) {
         String sql = """
                     SELECT MAX(waiting_number)
                     FROM waiting
@@ -89,26 +88,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public List<Waiting> findByName(String name) {
         String sql = """
-                    select w.id as id,  
-                    w.name, w.date, w.waiting_number,
-                    
-                    t.id as reservation_time_id,
-                    t.start_at as time_value,
-                    
-                    th.id as reservation_theme_id,
-                    th.name as reservation_theme_name,
-                    th.description as reservation_theme_description,
-                    th.image_url as reservation_theme_image_url
-                    
-                    from waiting as w
-                     
-                    inner join reservation_time as t
-                    on w.time_id = t.id 
-                    
-                    inner join theme as th
-                    on w.theme_id = th.id
-                    
-                    where w.name = :name
+                    SELECT w.id AS id,
+                           w.name,
+                           w.date,
+                           w.waiting_number,
+                           t.id AS reservation_time_id,
+                           t.start_at AS time_value,
+                           th.id AS reservation_theme_id,
+                           th.name AS reservation_theme_name,
+                           th.description AS reservation_theme_description,
+                           th.image_url AS reservation_theme_image_url
+                    FROM waiting AS w
+                    INNER JOIN reservation_time AS t
+                      ON w.time_id = t.id
+                    INNER JOIN theme AS th
+                      ON w.theme_id = th.id
+                    WHERE w.name = :name
                 """;
 
         Map<String, Object> params = Map.of("name", name);
@@ -119,20 +114,22 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public Optional<Waiting> findById(Long id) {
         String sql = """
-                    select w.id as id,   
-                    w.name, w.date, w.waiting_number,
-                    t.id as reservation_time_id,
-                    t.start_at as time_value,
-                    th.id as reservation_theme_id,
-                    th.name as reservation_theme_name,
-                    th.description as reservation_theme_description,
-                    th.image_url as reservation_theme_image_url
-                    from waiting as w
-                    inner join reservation_time as t
-                    on w.time_id = t.id 
-                    inner join theme as th
-                    on w.theme_id = th.id
-                    where w.id = :id
+                    SELECT w.id AS id,
+                           w.name,
+                           w.date,
+                           w.waiting_number,
+                           t.id AS reservation_time_id,
+                           t.start_at AS time_value,
+                           th.id AS reservation_theme_id,
+                           th.name AS reservation_theme_name,
+                           th.description AS reservation_theme_description,
+                           th.image_url AS reservation_theme_image_url
+                    FROM waiting AS w
+                    INNER JOIN reservation_time AS t
+                      ON w.time_id = t.id
+                    INNER JOIN theme AS th
+                      ON w.theme_id = th.id
+                    WHERE w.id = :id
                 """;
 
         Map<String, Object> params = Map.of("id", id);
@@ -143,16 +140,16 @@ public class JdbcWaitingRepository implements WaitingRepository {
 
     @Override
     public boolean existsByNameAndDateAndTimeAndTheme(String name, LocalDate date,
-            ReservationTime time, Theme theme) {
+                                                      ReservationTime time, Theme theme) {
         String sql = """
-                SELECT EXISTS (
-                    SELECT 1
-                    FROM waiting
-                    WHERE name = :name
-                      AND date = :date
-                      AND time_id = :time_id
-                      AND theme_id = :theme_id
-                )
+                    SELECT EXISTS (
+                      SELECT 1
+                      FROM waiting
+                      WHERE name = :name
+                        AND date = :date
+                        AND time_id = :time_id
+                        AND theme_id = :theme_id
+                    )
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -169,8 +166,8 @@ public class JdbcWaitingRepository implements WaitingRepository {
     @Override
     public void delete(Long id) {
         String sql = """
-                DELETE FROM waiting 
-                WHERE id = :id
+                    DELETE FROM waiting
+                    WHERE id = :id
                 """;
         Map<String, Object> params = Map.of("id", id);
         jdbcTemplate.update(sql, params);

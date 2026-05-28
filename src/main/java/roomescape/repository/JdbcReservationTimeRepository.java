@@ -42,7 +42,12 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public Optional<ReservationTime> findById(Long id) {
-        String sql = "select id, start_at from reservation_time where id = :id";
+        String sql = """
+                    SELECT id,
+                           start_at
+                    FROM reservation_time
+                    WHERE id = :id
+                """;
 
         Map<String, Object> params = Map.of("id", id);
 
@@ -60,7 +65,11 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public List<ReservationTime> findAll() {
-        String sql = "select id, start_at from reservation_time";
+        String sql = """
+                    SELECT id,
+                           start_at
+                    FROM reservation_time
+                """;
 
         return jdbcTemplate.query(
                 sql,
@@ -74,16 +83,15 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     @Override
     public List<ReservedTimeResponseDTO> findReservedTimes(LocalDate date, Long themeId) {
         String sql = """
-                SELECT
-                rt.id AS reservation_time_id,
-                rt.start_at AS start_at,
-                r.date AS date,
-                r.id AS reservation_id
-                FROM reservation_time AS rt
-                LEFT JOIN reservation AS r
-                ON rt.id = r.time_id
-                AND r.date = :date
-                AND r.theme_id = :theme_id
+                    SELECT rt.id AS reservation_time_id,
+                           rt.start_at AS start_at,
+                           r.date AS date,
+                           r.id AS reservation_id
+                    FROM reservation_time AS rt
+                    LEFT JOIN reservation AS r
+                      ON rt.id = r.time_id
+                      AND r.date = :date
+                      AND r.theme_id = :theme_id
                 """;
 
         SqlParameterSource params = new MapSqlParameterSource()
@@ -103,16 +111,26 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
 
     @Override
     public void delete(Long id) {
-        String sql = "delete from reservation_time where id = :id";
+        String sql = """
+                    DELETE FROM reservation_time
+                    WHERE id = :id
+                """;
         Map<String, Object> params = Map.of("id", id);
         jdbcTemplate.update(sql, params);
     }
 
     @Override
     public boolean existByStartAt(LocalTime startAt) {
-        String sql = "select count(*) from reservation_time where start_at = :start_at";
+        String sql = """
+                    SELECT EXISTS (
+                      SELECT 1
+                      FROM reservation_time
+                      WHERE start_at = :start_at
+                    )
+                """;
         Map<String, Object> params = Map.of("start_at", startAt);
-        Integer count = jdbcTemplate.queryForObject(sql, params, Integer.class);
-        return count > 0;
+        return Boolean.TRUE.equals(
+                jdbcTemplate.queryForObject(sql, params, Boolean.class)
+        );
     }
 }
