@@ -79,6 +79,6 @@ public class WaitingService {
             throw new ForbiddenException("다른 사람의 예약 대기는 삭제할 수 없습니다.");
         }
 
-        reservationDao.delete(id);
+        waitingDao.delete(id);
     }
 }

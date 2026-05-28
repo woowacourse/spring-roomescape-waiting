@@ -62,6 +62,7 @@ public class WaitingDaoTest {
         Long id = 1L;
 
         assertDoesNotThrow(() -> waitingDao.delete(id));
+        assertThat(waitingDao.findById(id)).isEmpty();
     }
 
     @Test
@@ -71,5 +72,20 @@ public class WaitingDaoTest {
         List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
 
         assertThat(waitings.size()).isEqualTo(1);
+    }
+
+    @Test
+    void 사용자가_동일한_예약에_이미_대기_중이면_True를_반환한다() {
+        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+        waitingDao.save(waiting);
+
+        assertThat(waitingDao.existsBy(waiting)).isTrue();
+    }
+
+    @Test
+    void 해당_예약에_대기가_존재하지_않으면_False를_반환한다() {
+        Waiting waiting = new Waiting(userName, date, time, theme, createdAt);
+
+        assertThat(waitingDao.existsBy(waiting)).isFalse();
     }
 }
