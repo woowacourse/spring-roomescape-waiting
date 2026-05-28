@@ -118,10 +118,10 @@ public class ReservationWaitingUpdatingDaoTest {
             )
             """;
 
-        assertThat(Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, 1L))).isTrue();
+        assertThat(jdbcTemplate.queryForObject(sql, Boolean.class, 1L)).isTrue();
 
         reservationWaitingUpdatingDao.delete(1L);
 
-         assertThat(Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, 1L))).isFalse();
+         assertThat(jdbcTemplate.queryForObject(sql, Boolean.class, 1L)).isFalse();
     }
 }

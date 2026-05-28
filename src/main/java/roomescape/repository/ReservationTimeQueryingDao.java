@@ -21,13 +21,11 @@ public class ReservationTimeQueryingDao {
         this.jdbcTemplate = jdbcTemplate;
     }
 
-    private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = new ReservationTime(
+    private final RowMapper<ReservationTime> reservationTimeRowMapper = (resultSet, rowNum) ->
+        new ReservationTime(
                 resultSet.getLong("id"),
                 resultSet.getObject("start_at", LocalTime.class)
         );
-        return reservationTime;
-    };
 
     private final RowMapper<AvailableReservationTime> availableReservationTimeRowMapper =(resultSet, rowNum) ->
         new AvailableReservationTime(

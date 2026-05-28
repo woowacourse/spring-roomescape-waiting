@@ -7,6 +7,7 @@ import roomescape.dto.reservationtime.ReservationTimeResponse;
 import roomescape.dto.theme.ThemeResponse;
 
 public record ReservationWaitingResponse(Long id, String name, LocalDate date, ReservationTimeResponse time, ThemeResponse theme, Long sequence, LocalDateTime createdAt) {
+
     public static ReservationWaitingResponse from(ReservationWaiting reservationWaiting) {
         ReservationTimeResponse reservationTimeResponse = ReservationTimeResponse.from(reservationWaiting.getTime());
         ThemeResponse themeResponse = ThemeResponse.from(reservationWaiting.getTheme());

@@ -9,12 +9,12 @@ import roomescape.exception.ExpiredDateTimeException;
 
 public class ReservationWaiting {
 
-    private Long id;
+    private final Long id;
     private final String name;
     private final LocalDate date;
     private final ReservationTime time;
     private final Theme theme;
-    private Long sequence;
+    private final Long sequence;
     private final LocalDateTime createdAt;
 
     private ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {

@@ -83,7 +83,7 @@ public class ReservationWaitingQueryingDao {
                     AND theme_id = ?
             )
             """;
-        return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId));
+        return jdbcTemplate.queryForObject(sql, Boolean.class, name, date, timeId, themeId);
     }
 
     public Optional<ReservationWaiting> findReservationWaitingById(long id) {
