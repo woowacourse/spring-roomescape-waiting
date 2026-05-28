@@ -14,10 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.annotation.DirtiesContext;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class RoomescapeApplicationTest {
 
     @LocalServerPort
@@ -31,6 +28,16 @@ class RoomescapeApplicationTest {
     @BeforeEach
     void setUp() {
         RestAssured.port = port;
+
+        jdbcTemplate.update("delete from waiting");
+        jdbcTemplate.update("delete from reservation");
+        jdbcTemplate.update("delete from reservation_time");
+        jdbcTemplate.update("delete from theme");
+
+        jdbcTemplate.update("alter table waiting alter column id restart with 1");
+        jdbcTemplate.update("alter table reservation alter column id restart with 1");
+        jdbcTemplate.update("alter table reservation_time alter column id restart with 1");
+        jdbcTemplate.update("alter table theme alter column id restart with 1");
 
         jdbcTemplate.update("insert into reservation_time (start_at) values ('10:00')");
         jdbcTemplate.update("insert into theme (name, description, url) values ('테스트', '설명', 'url')");
