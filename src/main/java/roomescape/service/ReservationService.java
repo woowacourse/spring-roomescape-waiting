@@ -6,7 +6,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.ConflictException;
-import roomescape.common.exception.ForbiddenException;
 import roomescape.common.exception.NotFoundException;
 import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.dao.ReservationDao;
@@ -69,20 +68,14 @@ public class ReservationService {
 
     public ReservationResult save(ReservationCommand command) {
         Reservation reservation = convertToReservation(null, command);
-
         Reservation saved = reservationDao.save(reservation);
 
         return ReservationResult.from(saved);
     }
 
     public ReservationResult updateDateTime(Long id, ReservationCommand command) {
-        Reservation origin = reservationDao.findById(id)
-                .orElseThrow(() -> new NotFoundException("변경하려는 예약이 존재하지 않습니다."));
-
-        if (!command.name().equals(origin.getName().value())) {
-            throw new ForbiddenException("다른 사람의 예약은 변경할 수 없습니다.");
-        }
-
+        Reservation origin = getReservation(id);
+        origin.validateOwner(command.name());
         Reservation modified = convertToReservation(id, command);
 
         boolean isSuccessful = reservationDao.update(modified);
@@ -136,15 +129,14 @@ public class ReservationService {
     }
 
     public void delete(Long id, String userName) {
-        Reservation origin = reservationDao.findById(id)
-                .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
-
-        if (!userName.equals(origin.getName().value())) {
-            throw new ForbiddenException("다른 사람의 예약은 삭제할 수 없습니다.");
-        }
-
+        Reservation origin = getReservation(id);
+        origin.validateOwner(userName);
         validatePastTime(origin.getDate(), origin.getTime());
-
         reservationDao.delete(id);
+    }
+
+    private Reservation getReservation(Long id) {
+        return reservationDao.findById(id)
+                .orElseThrow(() -> new NotFoundException("삭제하려는 예약이 존재하지 않습니다."));
     }
 }

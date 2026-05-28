@@ -33,6 +33,10 @@ public class Reservation {
         Objects.requireNonNull(theme, "테마가 비어 있습니다.");
     }
 
+    public void validateOwner(String name) {
+        userName.validateOwner(name);
+    }
+
     public Long getId() {
         return id;
     }

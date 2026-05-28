@@ -73,9 +73,9 @@ public class ReservationController {
         return ResponseEntity.ok().body(response);
     }
 
-    @DeleteMapping(value = "/{id}", params = "userName")
+    @DeleteMapping(value = "/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam("userName") String userName) {
-        reservationService.delete(id);
+        reservationService.delete(id, userName);
         return ResponseEntity.noContent().build();
     }
 }
