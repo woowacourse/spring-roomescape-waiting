@@ -27,7 +27,7 @@ public class WaitingController {
     }
 
     @PostMapping
-    public ResponseEntity<WaitingResponse> createWaiting(@Valid @RequestBody WaitingRequest request) {
+    public ResponseEntity<WaitingResponse> registerWaiting(@Valid @RequestBody WaitingRequest request) {
         WaitingResult result = waitingService.save(WaitingCommand.from(request));
         WaitingResponse response = WaitingResponse.from(result);
 
@@ -44,5 +44,4 @@ public class WaitingController {
         waitingService.delete(id, name);
         return ResponseEntity.noContent().build();
     }
-
 }

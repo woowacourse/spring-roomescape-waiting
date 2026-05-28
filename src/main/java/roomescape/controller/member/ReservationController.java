@@ -33,7 +33,7 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ReservationResponse>> read() {
+    public ResponseEntity<List<ReservationResponse>> getReservations() {
         List<ReservationResponse> response = reservationService.findAll().stream()
                 .map(ReservationResponse::from)
                 .toList();
@@ -42,7 +42,7 @@ public class ReservationController {
     }
 
     @GetMapping(params = "userName")
-    public ResponseEntity<ReservationDetailResponses> readAllByUserName(
+    public ResponseEntity<ReservationDetailResponses> getReservationsByUserName(
             @RequestParam("userName") String userName) {
         ReservationDetailResults result = reservationService.findAllByUserName(userName);
 
@@ -52,7 +52,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ReservationResponse> create(@Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> registerReservation(@Valid @RequestBody ReservationRequest request) {
         ReservationResult result = reservationService.save(ReservationCommand.from(request));
         ReservationResponse response = ReservationResponse.from(result);
 
@@ -65,8 +65,8 @@ public class ReservationController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReservationResponse> update(@PathVariable Long id,
-                                                      @Valid @RequestBody ReservationRequest request) {
+    public ResponseEntity<ReservationResponse> modifyReservation(@PathVariable Long id,
+                                                                 @Valid @RequestBody ReservationRequest request) {
         ReservationResult result = reservationService.updateDateTime(id, ReservationCommand.from(request));
         ReservationResponse response = ReservationResponse.from(result);
 
@@ -74,7 +74,7 @@ public class ReservationController {
     }
 
     @DeleteMapping(value = "/{id}", params = "userName")
-    public ResponseEntity<Void> delete(@PathVariable Long id, @RequestParam("userName") String userName) {
+    public ResponseEntity<Void> deleteReservation(@PathVariable Long id, @RequestParam("userName") String userName) {
         reservationService.delete(id);
         return ResponseEntity.noContent().build();
     }

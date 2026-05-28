@@ -27,7 +27,7 @@ public class AdminThemeController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<ThemeResponse> createTheme(@Valid @ModelAttribute ThemeRequest request) {
+    public ResponseEntity<ThemeResponse> registerTheme(@Valid @ModelAttribute ThemeRequest request) {
         ThemeResult result = themeService.create(ThemeCommand.from(request));
         ThemeResponse response = ThemeResponse.from(result);
 
