@@ -46,7 +46,7 @@ public class ReservationWaitingService {
 
         Reservation reservation = getReservationByThemeAndDateAndTime(reservationWaitingReq.themeId(), reservationWaitingReq.date(), reservationWaitingReq.timeId());
 
-        if(reservation.isReserved(reservationWaitingCommand.getName())) {
+        if(reservation.isReservedBy(reservationWaitingCommand.getName())) {
             throw new InvalidInputException("이미 등록된 예약이 있습니다.");
         }
 

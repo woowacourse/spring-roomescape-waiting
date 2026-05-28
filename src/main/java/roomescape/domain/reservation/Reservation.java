@@ -73,7 +73,7 @@ public class Reservation {
         return createdAt;
     }
 
-    public boolean isReserved(String name) {
+    public boolean isReservedBy(String name) {
         return this.name.equals(name);
     }
 

@@ -118,14 +118,14 @@ public class ReservationTest {
     void 예약자_이름이_일치하면_isReserved가_true를_반환한다() {
         Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now());
 
-        assertThat(reservation.isReserved("브라운")).isTrue();
+        assertThat(reservation.isReservedBy("브라운")).isTrue();
     }
 
     @Test
     void 예약자_이름이_다르면_isReserved가_false를_반환한다() {
         Reservation reservation = Reservation.restore(1L, "브라운", LocalDate.now().plusDays(1), reservationTime, theme, LocalDateTime.now());
 
-        assertThat(reservation.isReserved("네오")).isFalse();
+        assertThat(reservation.isReservedBy("네오")).isFalse();
     }
 
     @Test
