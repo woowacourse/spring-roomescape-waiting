@@ -1,35 +1,31 @@
 package roomescape.domain;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.exception.InvalidDomainException;
 
+/**
+ * ReservationTime 도메인 단위 테스트.
+ * 보호 대상: 시간 객체의 정합성(null 금지). 단순하지만 도메인 불변식이므로 단위로 검증한다.
+ */
 class ReservationTimeTest {
 
     @Test
-    @DisplayName("시작시간이 유효하면 예약시간을 생성한다")
-    void 시작시간이_유효하면_예약시간을_생성한다() {
-        assertDoesNotThrow(() -> ReservationTime.create(LocalTime.of(10, 0)));
+    @DisplayName("시작 시간이 null이면 예외")
+    void 시작시간_null() {
+        assertThatThrownBy(() -> ReservationTime.create(null))
+                .isInstanceOf(InvalidDomainException.class)
+                .hasMessage("예약 시간은 비어 있을 수 없습니다.");
     }
 
     @Test
-    @DisplayName("DB에서 재구성할 수 있다")
-    void DB에서_재구성할_수_있다() {
-        assertDoesNotThrow(() -> ReservationTime.withId(1L, LocalTime.of(10, 0)));
-    }
-
-    @Test
-    @DisplayName("시작시간이 null이면 예외가 발생한다")
-    void 시작시간이_null이면_예외가_발생한다() {
-        InvalidDomainException exception = assertThrows(
-                InvalidDomainException.class,
-                () -> ReservationTime.create(null)
-        );
-        assertEquals("예약 시간은 비어 있을 수 없습니다.", exception.getMessage());
+    @DisplayName("유효한 시작 시간은 허용")
+    void 정상_생성() {
+        assertThatCode(() -> ReservationTime.create(LocalTime.of(10, 0)))
+                .doesNotThrowAnyException();
     }
 }
