@@ -15,12 +15,10 @@ class ReservationTimeControllerTest extends ControllerTest {
     @Test
     void API_예약_시간_등록() {
         String createStartAt = "23:00";
-        Map<String, Object> params = new HashMap<>();
-        params.put("startAt", createStartAt);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationTimeParams(createStartAt))
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(201)
@@ -41,20 +39,7 @@ class ReservationTimeControllerTest extends ControllerTest {
     @DisplayName("API - 예약 시간 삭제")
     @Test
     void API_예약_시간_삭제() {
-        String createStartAt = "23:00";
-        Map<String, Object> params = new HashMap<>();
-        params.put("startAt", createStartAt);
-
-        long id = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/times")
-                .then().log().all()
-                .statusCode(201)
-                .body("startAt", equalTo(createStartAt))
-                .extract()
-                .jsonPath()
-                .getLong("id");
+        long id = createReservationTime("23:00");
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
@@ -73,12 +58,9 @@ class ReservationTimeControllerTest extends ControllerTest {
     @DisplayName("이미 존재하는 시간이면 409")
     @Test
     void 이미_존재하는_시간이면_400() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("startAt", "10:00");
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationTimeParams("10:00"))
                 .when().post("/times")
                 .then().log().all()
                 .statusCode(409)
@@ -93,5 +75,24 @@ class ReservationTimeControllerTest extends ControllerTest {
                 .then().log().all()
                 .statusCode(409)
                 .body("message", equalTo("예약에 사용 중인 시간은 삭제할 수 없습니다."));
+    }
+
+    private long createReservationTime(String startAt) {
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservationTimeParams(startAt))
+                .when().post("/times")
+                .then().log().all()
+                .statusCode(201)
+                .body("startAt", equalTo(startAt))
+                .extract()
+                .jsonPath()
+                .getLong("id");
+    }
+
+    private Map<String, Object> reservationTimeParams(String startAt) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("startAt", startAt);
+        return params;
     }
 }

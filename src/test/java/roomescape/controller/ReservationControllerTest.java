@@ -15,15 +15,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("사용자 예약 추가")
     @Test
     void 사용자_예약_추가_API() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("브라운", LocalDate.now().plusDays(1).toString(), 1, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
@@ -33,18 +27,7 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("사용자 예약 삭제")
     @Test
     void 사용자_예약_삭제() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1);
-        params.put("themeId", 1);
-
-        long id = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
+        long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/{id}", id)
@@ -67,15 +50,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("존재하지 않는 시간으로 예약하면 404")
     @Test
     void 존재하지_않는_시간으로_예약하면_400() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 999);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("브라운", LocalDate.now().plusDays(1).toString(), 999, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(404)
@@ -85,15 +62,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("존재하지 않는 테마로 예약하면 404")
     @Test
     void 존재하지_않는_테마로_예약하면_400() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1);
-        params.put("themeId", 999);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("브라운", LocalDate.now().plusDays(1).toString(), 1, 999))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(404)
@@ -103,16 +74,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("이미 예약된 시간이면 409")
     @Test
     void 이미_예약된_시간이면_409() {
-        // data.sql 첫 번째 예약: 2026-04-29, time_id=3, theme_id=1
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", "2026-04-29");
-        params.put("timeId", 3);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("브라운", "2026-04-29", 3, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
@@ -122,15 +86,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("과거 날짜로 예약하면 422")
     @Test
     void 과거_날짜로_예약하면_422() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", LocalDate.now().minusDays(1).toString());
-        params.put("timeId", 2);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("브라운", LocalDate.now().minusDays(1).toString(), 2, 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(422)
@@ -140,18 +98,7 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("예약 변경 성공")
     @Test
     void 예약_변경_성공() {
-        Map<String, Object> createParams = new HashMap<>();
-        createParams.put("name", "브라운");
-        createParams.put("date", LocalDate.now().plusDays(1).toString());
-        createParams.put("timeId", 1);
-        createParams.put("themeId", 1);
-
-        long id = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(createParams)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
+        long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
 
         Map<String, Object> updateParams = new HashMap<>();
         updateParams.put("date", LocalDate.now().plusDays(2).toString());
@@ -184,18 +131,7 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("과거 날짜로 예약 변경하면 422")
     @Test
     void 과거_날짜로_예약_변경하면_422() {
-        Map<String, Object> createParams = new HashMap<>();
-        createParams.put("name", "브라운");
-        createParams.put("date", LocalDate.now().plusDays(1).toString());
-        createParams.put("timeId", 1);
-        createParams.put("themeId", 1);
-
-        long id = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(createParams)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
+        long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
 
         Map<String, Object> updateParams = new HashMap<>();
         updateParams.put("date", LocalDate.now().minusDays(1).toString());
@@ -213,27 +149,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("이미 예약된 시간으로 변경하면 409")
     @Test
     void 이미_예약된_시간으로_변경하면_409() {
-        Map<String, Object> createParams = new HashMap<>();
-        createParams.put("name", "브라운");
-        createParams.put("date", LocalDate.now().plusDays(1).toString());
-        createParams.put("timeId", 1);
-        createParams.put("themeId", 1);
+        long id = createReservation("브라운", LocalDate.now().plusDays(1).toString(), 1, 1);
 
-        long id = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(createParams)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
-
-        // 같은 날짜·시간에 다른 예약 생성
-        Map<String, Object> anotherParams = new HashMap<>();
-        anotherParams.put("name", "포비");
-        anotherParams.put("date", LocalDate.now().plusDays(1).toString());
-        anotherParams.put("timeId", 2);
-        anotherParams.put("themeId", 1);
-        RestAssured.given().contentType(ContentType.JSON).body(anotherParams)
-                .when().post("/reservations").then().statusCode(201);
+        createReservation("포비", LocalDate.now().plusDays(1).toString(), 2, 1);
 
         Map<String, Object> updateParams = new HashMap<>();
         updateParams.put("date", LocalDate.now().plusDays(1).toString());
@@ -251,15 +169,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("빈 슬롯에 대기 신청하면 409")
     @Test
     void 빈_슬롯에_대기_신청하면_409() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "브라운");
-        params.put("date", LocalDate.now().plusDays(1).toString());
-        params.put("timeId", 1);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("브라운", LocalDate.now().plusDays(1).toString(), 1, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
@@ -270,24 +182,11 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void 예약된_슬롯에_대기_신청_성공() {
         String futureDate = LocalDate.now().plusDays(2).toString();
-
-        Map<String, Object> reservationParams = new HashMap<>();
-        reservationParams.put("name", "김철수");
-        reservationParams.put("date", futureDate);
-        reservationParams.put("timeId", 4);
-        reservationParams.put("themeId", 2);
-        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
-                .when().post("/reservations").then().statusCode(201);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "이영희");
-        params.put("date", futureDate);
-        params.put("timeId", 4);
-        params.put("themeId", 2);
+        createReservation("김철수", futureDate, 4, 2);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("이영희", futureDate, 4, 2))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(201)
@@ -297,16 +196,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("본인이 이미 예약한 슬롯에 대기 신청하면 409")
     @Test
     void 본인_예약_슬롯에_대기_신청하면_409() {
-        // data.sql: 김철수가 2026-05-10 time_id=3 theme_id=1 예약 보유
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "김철수");
-        params.put("date", "2026-05-10");
-        params.put("timeId", 3);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("김철수", "2026-05-10", 3, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
@@ -317,28 +209,12 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void 중복_대기_신청하면_409() {
         String futureDate = LocalDate.now().plusDays(3).toString();
-
-        Map<String, Object> reservationParams = new HashMap<>();
-        reservationParams.put("name", "김철수");
-        reservationParams.put("date", futureDate);
-        reservationParams.put("timeId", 5);
-        reservationParams.put("themeId", 3);
-        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
-                .when().post("/reservations").then().statusCode(201);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "이영희");
-        params.put("date", futureDate);
-        params.put("timeId", 5);
-        params.put("themeId", 3);
-
-        RestAssured.given().contentType(ContentType.JSON).body(params)
-                .when().post("/reservations/waiting")
-                .then().statusCode(201);
+        createReservation("김철수", futureDate, 5, 3);
+        createReservationWaiting("이영희", futureDate, 5, 3);
 
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("이영희", futureDate, 5, 3))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(409)
@@ -348,15 +224,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("존재하지 않는 시간으로 대기 신청하면 404")
     @Test
     void 존재하지_않는_시간으로_대기_신청하면_404() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "이영희");
-        params.put("date", "2026-05-10");
-        params.put("timeId", 999);
-        params.put("themeId", 1);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("이영희", "2026-05-10", 999, 1))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(404)
@@ -366,15 +236,9 @@ class ReservationControllerTest extends ControllerTest {
     @DisplayName("존재하지 않는 테마로 대기 신청하면 404")
     @Test
     void 존재하지_않는_테마로_대기_신청하면_404() {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "이영희");
-        params.put("date", "2026-05-10");
-        params.put("timeId", 3);
-        params.put("themeId", 999);
-
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(params)
+                .body(reservationParams("이영희", "2026-05-10", 3, 999))
                 .when().post("/reservations/waiting")
                 .then().log().all()
                 .statusCode(404)
@@ -385,27 +249,8 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void 대기_취소_성공() {
         String futureDate = LocalDate.now().plusDays(4).toString();
-
-        Map<String, Object> reservationParams = new HashMap<>();
-        reservationParams.put("name", "김철수");
-        reservationParams.put("date", futureDate);
-        reservationParams.put("timeId", 6);
-        reservationParams.put("themeId", 4);
-        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
-                .when().post("/reservations").then().statusCode(201);
-
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", "이영희");
-        params.put("date", futureDate);
-        params.put("timeId", 6);
-        params.put("themeId", 4);
-
-        long waitingId = RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().statusCode(201)
-                .extract().jsonPath().getLong("id");
+        createReservation("김철수", futureDate, 6, 4);
+        long waitingId = createReservationWaiting("이영희", futureDate, 6, 4);
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/waiting/{id}", waitingId)
@@ -417,16 +262,8 @@ class ReservationControllerTest extends ControllerTest {
     @Test
     void 대기_목록_조회() {
         String futureDate = LocalDate.now().plusDays(4).toString();
-        Map<String, Object> reservationParams = new HashMap<>();
-        reservationParams.put("name", "김철수");
-        reservationParams.put("date", futureDate);
-        reservationParams.put("timeId", 6);
-        reservationParams.put("themeId", 4);
-        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
-                .when().post("/reservations").then().statusCode(201);
-        reservationParams.put("name", "이든");
-        RestAssured.given().contentType(ContentType.JSON).body(reservationParams)
-                .when().post("/reservations/waiting").then().statusCode(201);
+        createReservation("김철수", futureDate, 6, 4);
+        createReservationWaiting("이든", futureDate, 6, 4);
 
         RestAssured.given().log().all()
                 .queryParam("username", "이든")
@@ -435,5 +272,32 @@ class ReservationControllerTest extends ControllerTest {
                 .statusCode(200)
                 .body("reservations[0].waitingNumber", equalTo(1))
                 .body("reservations[0].reservationStatus", equalTo("WAITING"));
+    }
+
+    private long createReservation(String name, String date, long timeId, long themeId) {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationParams(name, date, timeId, themeId))
+                .when().post("/reservations")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
+
+    private long createReservationWaiting(String name, String date, long timeId, long themeId) {
+        return RestAssured.given()
+                .contentType(ContentType.JSON)
+                .body(reservationParams(name, date, timeId, themeId))
+                .when().post("/reservations/waiting")
+                .then().statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
+
+    private Map<String, Object> reservationParams(String name, String date, long timeId, long themeId) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", name);
+        params.put("date", date);
+        params.put("timeId", timeId);
+        params.put("themeId", themeId);
+        return params;
     }
 }
