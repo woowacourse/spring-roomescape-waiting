@@ -161,7 +161,7 @@ public class ExceptionTest {
                 .when().delete("/admin/times/1")
                 .then().log().all()
                 .statusCode(409)
-                .body("message", equalTo("해당 예약 시간에 예약이 존재합니다."));
+                .body("message", equalTo("해당 예약 시간에 예약 또는 예약 대기가 존재합니다."));
     }
 
     @DisplayName("예약 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
