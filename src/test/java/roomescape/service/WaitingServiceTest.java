@@ -1,9 +1,12 @@
 package roomescape.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.BDDMockito.given;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static roomescape.config.FixedClockConfig.TODAY;
 
 import java.time.Clock;
@@ -16,6 +19,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import roomescape.common.exception.ForbiddenException;
+import roomescape.common.exception.NotFoundException;
+import roomescape.common.exception.UnprocessableEntityException;
 import roomescape.config.FixedClockConfig;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
@@ -102,6 +108,75 @@ class WaitingServiceTest {
     }
 
     @Test
+    public void 존재하지_않는_시간으로_대기를_신청하면_예외가_발생한다() {
+        WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 시간입니다.");
+
+        verify(waitingDao, never()).save(any());
+    }
+
+    @Test
+    public void 존재하지_않는_테마로_대기를_신청하면_예외가_발생한다() {
+        WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("존재하지 않는 테마입니다.");
+
+        verify(waitingDao, never()).save(any());
+    }
+
+    @Test
+    public void 예약이_없는_슬롯에_대기를_신청하면_예외가_발생한다() {
+        WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.existsBy(date, theme, time)).willReturn(false);
+
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("예약이 존재하지 않으면 예약 대기를 생성할 수 없습니다.");
+
+        verify(waitingDao, never()).save(any());
+    }
+
+    @Test
+    public void 본인이_이미_예약한_시간에_대기를_신청하면_예외가_발생한다() {
+        WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
+        given(reservationDao.existsByUserNameAndSlot(userName, date, theme, time)).willReturn(true);
+
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("본인이 이미 예약한 시간에는 대기를 신청할 수 없습니다.");
+
+        verify(waitingDao, never()).save(any());
+    }
+
+    @Test
+    public void 같은_슬롯에_대기를_중복으로_신청하면_예외가_발생한다() {
+        WaitingCommand command = new WaitingCommand(userName, date, timeId, themeId);
+        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
+        given(reservationDao.existsBy(date, theme, time)).willReturn(true);
+        given(waitingDao.existsBy(any())).willReturn(true);
+
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(UnprocessableEntityException.class)
+                .hasMessage("예약 대기는 중복으로 생성할 수 없습니다.");
+
+        verify(waitingDao, never()).save(any());
+    }
+
+    @Test
     public void 예약_대기_삭제_정상_테스트() {
         Waiting origin = new Waiting(
                 waitingId,
@@ -113,7 +188,38 @@ class WaitingServiceTest {
         );
 
         given(waitingDao.findById(waitingId)).willReturn(Optional.of(origin));
+        waitingService.delete(waitingId, userName);
+        verify(waitingDao).delete(waitingId);
+    }
 
-        assertDoesNotThrow(() -> waitingService.delete(waitingId, userName));
+    @Test
+    public void 존재하지_않는_예약_대기를_삭제하면_예외가_발생한다() {
+        given(waitingDao.findById(waitingId)).willReturn(Optional.empty());
+
+        assertThatThrownBy(() -> waitingService.delete(waitingId, userName))
+                .isInstanceOf(NotFoundException.class)
+                .hasMessage("삭제하려는 예약 대기가 존재하지 않습니다.");
+
+        verify(waitingDao, never()).delete(anyLong());
+    }
+
+    @Test
+    public void 타인의_예약_대기를_삭제하면_예외가_발생한다() {
+        String otherUser = "다른사람";
+        Waiting origin = new Waiting(
+                waitingId,
+                UserName.parse(otherUser),
+                date,
+                time,
+                theme,
+                createAt
+        );
+        given(waitingDao.findById(waitingId)).willReturn(Optional.of(origin));
+
+        assertThatThrownBy(() -> waitingService.delete(waitingId, userName))
+                .isInstanceOf(ForbiddenException.class)
+                .hasMessage("다른 사람의 예약 대기는 취소할 수 없습니다.");
+
+        verify(waitingDao, never()).delete(anyLong());
     }
 }
