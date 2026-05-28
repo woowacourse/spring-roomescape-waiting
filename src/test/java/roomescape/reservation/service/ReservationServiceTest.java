@@ -1,10 +1,16 @@
 package roomescape.reservation.service;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.LocalDate;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.PastTimeCancelException;
@@ -13,13 +19,8 @@ import roomescape.reservation.dto.ReservationResponse;
 import roomescape.reservation.dto.ReservationUpdateRequest;
 import roomescape.reservationtime.service.ReservationTimeService;
 
-import java.time.LocalDate;
-
-import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationServiceTest {
 
     @Autowired
@@ -27,6 +28,36 @@ class ReservationServiceTest {
 
     @Autowired
     private ReservationTimeService reservationTimeService;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private Long pastReservationId;
+    private Long futureReservationId1;
+    private Long futureReservationId2;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('18:00', '19:00')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마B', '설명B', 'https://b.com')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마C', '설명C', 'https://c.com')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마D', '설명D', 'https://d.com')");
+
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
+                LocalDate.now().minusDays(1));
+        pastReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
+        futureReservationId1 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user2', '2099-12-01', 2, 1)");
+        futureReservationId2 = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+    }
 
     @Test
     @DisplayName("예약 생성 성공")
@@ -59,20 +90,21 @@ class ReservationServiceTest {
     @Test
     @DisplayName("예약 삭제 후 해당 시간 예약 가능")
     void 예약_삭제_성공() {
-        LocalDate date = LocalDate.now().plusDays(11);
+        LocalDate date = LocalDate.of(2099, 12, 1);
+        assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(1);
+
+        reservationService.deleteReservation(futureReservationId1);
+
         assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(2);
-
-        reservationService.deleteReservation(11L);
-
-        assertThat(reservationTimeService.getAvailableTimes(date, 1L)).hasSize(3);
     }
 
     @Test
     @DisplayName("이미 지난 예약은 취소할 수 없다")
     void 과거_예약_취소_불가() {
-        assertThatThrownBy(() -> reservationService.deleteReservation(1L))
+        assertThatThrownBy(() -> reservationService.deleteReservation(pastReservationId))
                 .isInstanceOf(PastTimeCancelException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_RESERVATION_CANCEL))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.PAST_RESERVATION_CANCEL))
                 .hasMessage(ErrorCode.PAST_RESERVATION_CANCEL.getMessage());
     }
 
@@ -80,7 +112,7 @@ class ReservationServiceTest {
     @DisplayName("예약 수정 성공")
     void 예약_수정_성공() {
         ReservationResponse response = reservationService.updateReservation(
-                11L, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L));
+                futureReservationId1, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L));
         assertThat(response.date()).isEqualTo(LocalDate.of(2099, 12, 2));
     }
 
@@ -88,9 +120,10 @@ class ReservationServiceTest {
     @DisplayName("이미 지난 예약은 수정할 수 없다")
     void 과거_예약_수정_불가() {
         assertThatThrownBy(() -> reservationService.updateReservation(
-                1L, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L)))
+                pastReservationId, new ReservationUpdateRequest(LocalDate.of(2099, 12, 2), 2L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_RESERVATION_UPDATE))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.PAST_RESERVATION_UPDATE))
                 .hasMessage(ErrorCode.PAST_RESERVATION_UPDATE.getMessage());
     }
 
@@ -98,20 +131,21 @@ class ReservationServiceTest {
     @DisplayName("변경하려는 날짜·시간이 과거면 수정 불가")
     void 새시간_과거면_수정_불가() {
         assertThatThrownBy(() -> reservationService.updateReservation(
-                11L, new ReservationUpdateRequest(LocalDate.now().minusDays(1), 2L)))
+                futureReservationId1, new ReservationUpdateRequest(LocalDate.now().minusDays(1), 2L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_RESERVATION))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.PAST_TIME_RESERVATION))
                 .hasMessage(ErrorCode.PAST_TIME_RESERVATION.getMessage());
     }
 
     @Test
     @DisplayName("변경하려는 시간이 이미 예약된 경우 수정 불가")
     void 중복_예약_수정_불가() {
-        LocalDate date = LocalDate.now().plusDays(11);
         assertThatThrownBy(() -> reservationService.updateReservation(
-                12L, new ReservationUpdateRequest(date, 1L)))
+                futureReservationId2, new ReservationUpdateRequest(LocalDate.of(2099, 12, 1), 1L)))
                 .isInstanceOf(BusinessException.class)
-                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.DUPLICATE_RESERVATION))
+                .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
+                        ErrorCode.DUPLICATE_RESERVATION))
                 .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 }

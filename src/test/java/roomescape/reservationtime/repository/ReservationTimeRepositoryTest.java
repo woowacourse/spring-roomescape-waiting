@@ -5,16 +5,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
+
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationtime.domain.ReservationTimeFactory;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationTimeRepositoryTest {
 
     @Autowired
@@ -22,6 +25,19 @@ class ReservationTimeRepositoryTest {
 
     @Autowired
     private ReservationTimeFactory reservationTimeFactory;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('18:00', '19:00')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', ?, 1, 1)",
+                LocalDate.now().minusDays(1));
+    }
 
     @Test
     @DisplayName("시간 저장 성공")
@@ -54,7 +70,6 @@ class ReservationTimeRepositoryTest {
     void 시간_삭제_성공() {
         ReservationTime saved = timeRepository.save(reservationTimeFactory.create(LocalTime.of(20, 0), LocalTime.of(21, 0)));
         timeRepository.deleteById(saved.getId());
-
         assertThat(timeRepository.findAll()).hasSize(3);
     }
 

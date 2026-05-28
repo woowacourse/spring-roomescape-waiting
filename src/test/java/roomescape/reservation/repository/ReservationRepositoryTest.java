@@ -1,10 +1,13 @@
 package roomescape.reservation.repository;
 
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.test.context.jdbc.Sql;
+
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
@@ -15,7 +18,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationRepositoryTest {
 
     @Autowired
@@ -30,6 +33,21 @@ class ReservationRepositoryTest {
     @Autowired
     private ReservationFactory reservationFactory;
 
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    private Long futureReservationId;
+
+    @BeforeEach
+    void setUp() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00', '11:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('14:00', '15:00')");
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('18:00', '19:00')");
+        jdbcTemplate.update("INSERT INTO theme (name, description, image_url) VALUES ('테마A', '설명A', 'https://a.com')");
+        jdbcTemplate.update("INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('user1', '2099-12-01', 1, 1)");
+        futureReservationId = jdbcTemplate.queryForObject("SELECT MAX(id) FROM reservation", Long.class);
+    }
+
     @Test
     @DisplayName("예약 저장 성공")
     void 예약_저장_성공() {
@@ -43,8 +61,8 @@ class ReservationRepositoryTest {
     @Test
     @DisplayName("예약 삭제 성공")
     void 예약_삭제_성공() {
-        reservationRepository.deleteById(11L);
-        LocalDate date = LocalDate.now().plusDays(11);
+        reservationRepository.deleteById(futureReservationId);
+        LocalDate date = LocalDate.of(2099, 12, 1);
         assertThat(timeRepository.findAvailableByDateAndThemeId(date, 1L)).hasSize(3);
     }
 }
