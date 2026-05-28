@@ -42,13 +42,13 @@ public class WaitingService {
         validateNotOwnReservation(slot.getId(), request.name());
 
         Waiting waiting = new Waiting(LocalDateTime.now(clock), slot.getId(), request.name());
-        validateUniqueWaiting(waiting);
+        validateUniqueWaiting(slot.getId(), request.name());
         Waiting savedWaiting = waitingDao.save(waiting);
         return WaitingResponse.from(savedWaiting);
     }
 
-    private void validateUniqueWaiting(Waiting waiting) {
-        if (waitingDao.existsByCreatedAtAndSlotAndName(waiting.getSlotId(), waiting.getName())) {
+    private void validateUniqueWaiting(long slotId, String name) {
+        if (waitingDao.existsByCreatedAtAndSlotAndName(slotId, name)) {
             throw new WaitingException(WaitingErrorCode.WAITING_ALREADY_EXISTS);
         }
     }
