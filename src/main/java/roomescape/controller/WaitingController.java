@@ -18,7 +18,7 @@ import roomescape.service.WaitingService;
 @RequestMapping("/api/waiting")
 public class WaitingController {
 
-    WaitingService waitingService;
+    private final WaitingService waitingService;
 
     public WaitingController(WaitingService waitingService) {
         this.waitingService = waitingService;
