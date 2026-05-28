@@ -1,7 +1,7 @@
 package roomescape.service.reservationwaiting;
 
 import java.time.LocalDate;
-import java.time.LocalTime;
+import java.time.LocalDateTime;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
@@ -37,7 +37,7 @@ public class ReservationWaitingService {
 
         validateWaitableName(reservation, waitingName);
 
-        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(reservation, waitingName, LocalTime.now());
+        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(reservation, waitingName, LocalDateTime.now());
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 

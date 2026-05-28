@@ -240,7 +240,7 @@ class ReservationWaitingApiTest {
                 id,
                 reservationId,
                 name,
-                "12:00:00"
+                "2026-08-06 12:00:00"
         );
     }
 }
