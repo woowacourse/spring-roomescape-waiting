@@ -19,6 +19,7 @@ import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
+import roomescape.reservationWaiting.exception.ReservationWaitingNotFoundException;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.exception.ThemeNotFoundException;
@@ -212,7 +213,12 @@ public class ReservationService {
     }
 
     private void promoteFirstWaitingForSameSlotToReservation(ReservationWaiting waiting) {
-        reservationWaitingRepository.deleteById(waiting.getId());
+        int affectedRow = reservationWaitingRepository.deleteById(waiting.getId());
+        int nonAffected = 0;
+
+        if (affectedRow == nonAffected) {
+            throw new ReservationWaitingNotFoundException();
+        }
 
         try {
             reservationRepository.save(

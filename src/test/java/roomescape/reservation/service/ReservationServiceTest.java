@@ -325,6 +325,9 @@ class ReservationServiceTest {
                         theme))
                 );
 
+        when(reservationWaitingRepository.deleteById(any()))
+                .thenReturn(1);
+
         //when
         reservationService.updateReservation(
                 new ReservationUpdateCommand(
@@ -565,6 +568,9 @@ class ReservationServiceTest {
         when(reservationRepository.save(any()))
                 .thenThrow(DataIntegrityViolationException.class);
 
+        when(reservationWaitingRepository.deleteById(any()))
+                .thenReturn(1);
+
         //when & then
         assertThatThrownBy(() -> reservationService.updateReservation(
                 new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 2L), 1L
@@ -598,6 +604,9 @@ class ReservationServiceTest {
                 )));
 
         when(reservationRepository.deleteById(any()))
+                .thenReturn(1);
+
+        when(reservationWaitingRepository.deleteById(any()))
                 .thenReturn(1);
 
         //when
