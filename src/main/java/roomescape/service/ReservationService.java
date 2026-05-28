@@ -8,16 +8,16 @@ import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.dao.ReservationWaitingDao;
+import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationTime;
+import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.domain.ReservationTime;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -26,7 +26,7 @@ import java.util.Comparator;
 import java.util.List;
 
 @Service
-@Transactional
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationWaitingDao reservationWaitingDao;
@@ -41,6 +41,7 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
+    @Transactional
     public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
@@ -53,14 +54,12 @@ public class ReservationService {
         return ReservationResponse.from(savedReservation);
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         return reservationDao.select().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
-    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMyReservations(String name) {
         List<MyReservationResponse> reservations = reservationDao.selectByName(name).stream()
                 .map(MyReservationResponse::fromReservation)
@@ -84,6 +83,7 @@ public class ReservationService {
         return reservationResponses;
     }
 
+    @Transactional
     public ReservationResponse update(Long reservationId, UpdateReservationCommand command, LocalDateTime now) {
         getReservation(reservationId);
 
@@ -96,6 +96,7 @@ public class ReservationService {
         return ReservationResponse.from(updateReservation);
     }
 
+    @Transactional
     public void delete(Long reservationId) {
         int deleted = reservationDao.delete(reservationId);
         if (deleted == 0) {

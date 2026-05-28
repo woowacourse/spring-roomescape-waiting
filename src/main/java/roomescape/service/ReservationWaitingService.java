@@ -1,19 +1,20 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
+import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
+import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.domain.ReservationTime;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.Theme;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -32,6 +33,7 @@ public class ReservationWaitingService {
         this.reservationDao = reservationDao;
     }
 
+    @Transactional
     public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
@@ -47,6 +49,7 @@ public class ReservationWaitingService {
         return ReservationWaitingResponse.from(savedReservationWaiting, order);
     }
 
+    @Transactional
     public void delete(Long reservationWaitingId) {
         int deleted = reservationWaitingDao.delete(reservationWaitingId);
         if (deleted == 0) {
