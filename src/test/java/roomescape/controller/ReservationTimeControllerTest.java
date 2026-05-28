@@ -6,6 +6,7 @@ import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.util.HashMap;
 import java.util.Map;
+import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -35,99 +36,107 @@ public class ReservationTimeControllerTest {
     private static final String PASSWORD = "password";
     private static final String MANAGER_EMAIL = "manager-gangnam@email.com";
 
-    @Test
-    void 예약시간_조회시_성공하면_200을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
+    @Nested
+    class 예약시간_조회 {
+
+        @Test
+        void 성공하면_200을_반환한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservation-times")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(0));
+        }
     }
 
-    @Test
-    @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-    void 예약가능시간_조회시_성공하면_200을_반환한다() {
-        String cookie = authenticate();
-        createDefaultTimes(cookie);
-        createDefaultThemes(cookie);
+    @Nested
+    class 예약가능시간_조회 {
 
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(reservationParams())
-                .when().post("/api/v1/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .body("id", is(1));
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 성공하면_200을_반환한다() {
+            String cookie = authenticate();
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=" + AVAILABLE_TIME_TEST_DATE + "&themeId=1")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(3))
-                .body("find { it.id == 1 }.time", is("10:00"))
-                .body("find { it.id == 1 }.available", is(false))
-                .body("findAll { it.available == true }.size()", is(2));
-    }
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams())
+                    .when().post("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(201)
+                    .body("id", is(1));
 
-    @Test
-    @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-    void 예약생성시_같은_날짜와_시간이어도_테마가_다르면_201을_반환한다() {
-        String cookie = authenticate();
-        createDefaultTimes(cookie);
-        createDefaultThemes(cookie);
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservation-times/availability?date=" + AVAILABLE_TIME_TEST_DATE + "&themeId=1")
+                    .then().log().all()
+                    .statusCode(200)
+                    .body("size()", is(3))
+                    .body("find { it.id == 1 }.time", is("10:00"))
+                    .body("find { it.id == 1 }.available", is(false))
+                    .body("findAll { it.available == true }.size()", is(2));
+        }
 
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(reservationParams())
-                .when().post("/api/v1/reservations")
-                .then().log().all()
-                .statusCode(201);
+        @Test
+        @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
+        void 같은_날짜와_시간이어도_테마가_다르면_각각_예약_가능한_슬롯으로_취급된다() {
+            String cookie = authenticate();
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
-        RestAssured.given().log().all()
-                .header("Cookie", cookie)
-                .contentType(ContentType.JSON)
-                .body(reservationParams(Map.of("themeId", 2L)))
-                .when().post("/api/v1/reservations")
-                .then().log().all()
-                .statusCode(201);
-    }
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams())
+                    .when().post("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(201);
 
-    @Test
-    void 예약가능시간_조회시_date가_누락되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?themeId=1")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_003"));
-    }
+            RestAssured.given().log().all()
+                    .header("Cookie", cookie)
+                    .contentType(ContentType.JSON)
+                    .body(reservationParams(Map.of("themeId", 2L)))
+                    .when().post("/api/v1/reservations")
+                    .then().log().all()
+                    .statusCode(201);
+        }
 
-    @Test
-    void 예약가능시간_조회시_themeId가_누락되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=2026-05-15")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_003"));
-    }
+        @Test
+        void date가_누락되면_400을_반환한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservation-times/availability?themeId=1")
+                    .then().log().all()
+                    .statusCode(400)
+                    .body("errorCode", is("COMMON400_003"));
+        }
 
-    @Test
-    void 예약가능시간_조회시_date_형식이_잘못되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=2026/05/15&themeId=1")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_005"));
-    }
+        @Test
+        void themeId가_누락되면_400을_반환한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservation-times/availability?date=2026-05-15")
+                    .then().log().all()
+                    .statusCode(400)
+                    .body("errorCode", is("COMMON400_003"));
+        }
 
-    @Test
-    void 예약가능시간_조회시_themeId_형식이_잘못되면_400을_반환한다() {
-        RestAssured.given().log().all()
-                .when().get("/api/v1/reservation-times/availability?date=2026-05-15&themeId=abc")
-                .then().log().all()
-                .statusCode(400)
-                .body("errorCode", is("COMMON400_005"));
+        @Test
+        void date_형식이_잘못되면_400을_반환한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservation-times/availability?date=2026/05/15&themeId=1")
+                    .then().log().all()
+                    .statusCode(400)
+                    .body("errorCode", is("COMMON400_005"));
+        }
+
+        @Test
+        void themeId_형식이_잘못되면_400을_반환한다() {
+            RestAssured.given().log().all()
+                    .when().get("/api/v1/reservation-times/availability?date=2026-05-15&themeId=abc")
+                    .then().log().all()
+                    .statusCode(400)
+                    .body("errorCode", is("COMMON400_005"));
+        }
     }
 
     private String authenticate() {
@@ -141,7 +150,7 @@ public class ReservationTimeControllerTest {
                 .split(";")[0];
     }
 
-    private void createDefaultTimes(String unusedCookie) {
+    private void createDefaultTimesAsManager() {
         String managerCookie = authenticateAsManager();
         Map<String, String> time = new HashMap<>();
         time.put("startAt", "10:00");
@@ -171,7 +180,7 @@ public class ReservationTimeControllerTest {
                 .then().statusCode(201);
     }
 
-    private void createDefaultThemes(String unusedCookie) {
+    private void createDefaultThemesAsManager() {
         String managerCookie = authenticateAsManager();
         Map<String, Object> themeParams = new HashMap<>();
         themeParams.put("name", "이든의 공포 하우스");

@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.domain.ReservationWait;
@@ -51,19 +50,6 @@ class ReservationWaitDaoTest {
                    (2, 2, '2026-05-02', 2, 1, 1);
             """;
 
-    private static final String INSERT_TWO_STORES_SQL = """
-            INSERT INTO store (id, name)
-            VALUES (1, '강남점'),
-                   (2, '홍대점');
-            """;
-
-    private static final String INSERT_RESERVATIONS_ACROSS_STORES_SQL = """
-            INSERT INTO reservation (id, member_id, date, time_id, theme_id, store_id)
-            VALUES (1, 1, '2026-05-01', 1, 1, 1),
-                   (2, 2, '2026-05-02', 2, 1, 1),
-                   (3, 1, '2026-05-03', 3, 1, 2);
-            """;
-
     private static final String INSERT_TWO_RESERVATION_WAITS_SQL = """
             INSERT INTO reservation_wait (id, reservation_id, member_id)
             VALUES (1, 1, 2),
@@ -71,9 +57,7 @@ class ReservationWaitDaoTest {
             """;
 
     @Autowired
-    ReservationWaitDao dao;
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
+    ReservationWaitDao reservationWaitDao;
 
     @Test
     @Sql(statements = {
@@ -87,12 +71,12 @@ class ReservationWaitDaoTest {
         long reservationId = 1L;
         long memberId = 2L;
 
-        long waitId = dao.createReservationWait(memberId, reservationId);
+        long waitId = reservationWaitDao.createReservationWait(memberId, reservationId);
 
         assertThat(waitId).isPositive();
         assertThat(waitId).isEqualTo(1);
 
-        ReservationWait wait = dao.findReservationWaitById(waitId).get();
+        ReservationWait wait = reservationWaitDao.findReservationWaitById(waitId).get();
         assertThat(wait)
                 .extracting(
                         ReservationWait::getId,
@@ -114,7 +98,7 @@ class ReservationWaitDaoTest {
     void id로_예약대기를_조회한다() {
         long waitId = 1L;
 
-        Optional<ReservationWait> wait = dao.findReservationWaitById(waitId);
+        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(waitId);
         assertTrue(wait.isPresent());
         assertThat(wait.get())
                 .extracting(
@@ -137,7 +121,7 @@ class ReservationWaitDaoTest {
     void 존재하지_않는_id면_빈_Optional을_반환한다() {
         long waitId = 3L;
 
-        Optional<ReservationWait> wait = dao.findReservationWaitById(waitId);
+        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(waitId);
         assertThat(wait.isEmpty()).isTrue();
     }
 
@@ -154,8 +138,8 @@ class ReservationWaitDaoTest {
         long reservationId = 1L;
         long memberId = 2L;
 
-        dao.deleteByReservationIdAndMemberId(reservationId, memberId);
-        Optional<ReservationWait> wait = dao.findReservationWaitById(1L);
+        reservationWaitDao.deleteByReservationIdAndMemberId(reservationId, memberId);
+        Optional<ReservationWait> wait = reservationWaitDao.findReservationWaitById(1L);
         assertThat(wait.isEmpty()).isTrue();
     }
 
@@ -173,7 +157,7 @@ class ReservationWaitDaoTest {
                     """
     })
     void 가장_먼저_예약대기한_memberId를_반환한다() {
-        Optional<Long> earliestMemberId = dao.findEarliestMemberId(1L);
+        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberId(1L);
 
         assertThat(earliestMemberId).isPresent();
         assertThat(earliestMemberId.get()).isEqualTo(1L);
@@ -188,14 +172,14 @@ class ReservationWaitDaoTest {
             INSERT_TWO_RESERVATIONS_SQL
     })
     void 예약_대기자가_없으면_먼저_예약대기한_멤버는_없다() {
-        Optional<Long> earliestMemberId = dao.findEarliestMemberId(1L);
+        Optional<Long> earliestMemberId = reservationWaitDao.findEarliestMemberId(1L);
         assertThat(earliestMemberId).isEmpty();
     }
 
     @Test
     @Sql("/member-waitings.sql")
     void memberId로_내_예약대기_목록을_조회한다() {
-        List<WaitingResponseProjection> waitingResponseProjections = dao.findWaitingsByMemberId(1L);
+        List<WaitingResponseProjection> waitingResponseProjections = reservationWaitDao.findWaitingsByMemberId(1L);
 
         assertThat(waitingResponseProjections)
                 .hasSize(3)

@@ -53,10 +53,10 @@ public class ReservationControllerTest {
 
         @Test
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 성공하면_201을_반환한다() {
+        void 정상_요청이면_201과_id를_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -70,10 +70,10 @@ public class ReservationControllerTest {
 
         @Test
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
-        void 예약_가능한_시간이면_201을_반환한다() {
+        void 같은_날짜에_다른_시간이면_각각_201을_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -96,8 +96,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 이미_예약된_시간이면_409를_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -121,8 +121,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void date가_누락되면_400을_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             Map<String, Object> params = reservationParams();
             params.remove("date");
@@ -141,8 +141,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 날짜_형식이_잘못되면_400을_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -158,8 +158,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 지난_날짜이면_400을_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -181,8 +181,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 성공하면_204를_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -250,8 +250,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 예약대기가_있는_예약삭제하면_최근예약대기자로_바뀐다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -286,8 +286,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 사용자가_본인의_예약_시간을_변경할_수_있다() {
             String cookie = authenticate();
-            createDefaultThemes(cookie);
-            createDefaultTimes(cookie);
+            createDefaultThemesAsManager();
+            createDefaultTimesAsManager();
 
             Map<String, Object> params = new HashMap<>();
             params.put("date", LocalDate.now().plusDays(1).toString());
@@ -354,8 +354,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 토큰_로그인_후_Authorization_헤더로_예약을_생성할_수_있다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
             String accessToken = authenticateAsToken();
 
             RestAssured.given().log().all()
@@ -372,8 +372,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 토큰_로그인_후_Authorization_헤더로_본인_예약을_조회할_수_있다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -431,8 +431,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 없는_예약id로_예약대기_생성시_404를_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             Map<String, Object> waitTimeParams = new HashMap<>();
             waitTimeParams.put("reservationId", 1L);
@@ -451,8 +451,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 비회원으로_예약대기_생성시_401을_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             Map<String, Object> waitTimeParams = new HashMap<>();
             waitTimeParams.put("reservationId", 1L);
@@ -504,8 +504,8 @@ public class ReservationControllerTest {
         @Sql(statements = {INSERT_DEFAULT_STORE_SQL, INSERT_DEFAULT_MEMBER_SQL})
         void 예약대기를_삭제하면_204를_반환한다() {
             String cookie = authenticate();
-            createDefaultTimes(cookie);
-            createDefaultThemes(cookie);
+            createDefaultTimesAsManager();
+            createDefaultThemesAsManager();
 
             RestAssured.given().log().all()
                     .header("Cookie", cookie)
@@ -642,7 +642,7 @@ public class ReservationControllerTest {
                 .token();
     }
 
-    private void createDefaultTimes(String unusedCookie) {
+    private void createDefaultTimesAsManager() {
         String managerCookie = authenticateAsManager();
         Map<String, String> time = new HashMap<>();
         time.put("startAt", "10:00");
@@ -672,7 +672,7 @@ public class ReservationControllerTest {
                 .then().statusCode(201);
     }
 
-    private void createDefaultThemes(String unusedCookie) {
+    private void createDefaultThemesAsManager() {
         String managerCookie = authenticateAsManager();
         Map<String, Object> themeParams = new HashMap<>();
         themeParams.put("name", "이든의 공포 하우스");
