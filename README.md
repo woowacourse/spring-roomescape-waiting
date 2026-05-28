@@ -22,14 +22,20 @@
     "date": "2025-06-01",
     "time": { "id": 1, "startAt": "10:00" },
     "theme": { "id": 1, "name": "테마명", "description": "설명", "thumbnailUrl": "https://..." },
-    "status": "예약"
+    "status": "CONFIRMED",
+    "order": 0
   }
   ```
-  > 슬롯이 이미 예약된 경우 `status`가 `"대기"`로 반환됩니다.
+  > 슬롯이 이미 예약된 경우 `status`가 `"WAITING"`으로, `order`에 대기 순번(1~3)이 반환됩니다.
 
-### 예약 / 대기 취소
+### 예약 취소
 
 - **DELETE** `/reservations/{id}`
+- Response `204 No Content`
+
+### 대기 취소
+
+- **DELETE** `/reservations/waits/{id}`
 - Response `204 No Content`
 
 ---
@@ -38,7 +44,7 @@
 
 ### 내 예약 + 대기 목록 조회
 
-- **GET** `/reservations/mine`
+- **GET** `/reservations?name={name}`
 - Response `200 OK`
   ```json
   [
@@ -48,8 +54,8 @@
       "date": "2025-06-01",
       "time": { "id": 1, "startAt": "10:00" },
       "theme": { "id": 1, "name": "테마명", "description": "설명", "thumbnailUrl": "https://..." },
-      "status": "예약",
-      "waitingOrder": null
+      "status": "CONFIRMED",
+      "order": 0
     },
     {
       "id": 2,
@@ -57,8 +63,8 @@
       "date": "2025-06-02",
       "time": { "id": 2, "startAt": "14:00" },
       "theme": { "id": 1, "name": "테마명", "description": "설명", "thumbnailUrl": "https://..." },
-      "status": "대기",
-      "waitingOrder": 2
+      "status": "WAITING",
+      "order": 2
     }
   ]
   ```
