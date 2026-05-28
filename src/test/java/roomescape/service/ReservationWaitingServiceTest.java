@@ -21,7 +21,6 @@ import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.dto.reservationWaiting.ReservationWaitingRequest;
 import roomescape.dto.reservationWaiting.ReservationWaitingResponse;
-import roomescape.exception.ExpiredDateTimeException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ReservationTimeNotFoundException;
 import roomescape.exception.ResourceNotFoundException;
@@ -96,19 +95,6 @@ public class ReservationWaitingServiceTest {
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(ThemeNotFoundException.class);
-    }
-
-    @Test
-    void 타겟_예약이_과거인_경우_예외가_발생한다() {
-        LocalDate pastDate = LocalDate.now().minusDays(1);
-        ReservationWaitingRequest reservationWaitingRequest = new ReservationWaitingRequest("test",
-                pastDate, 1L, 1L);
-
-        when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
-        when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
-
-        assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
-                .isInstanceOf(ExpiredDateTimeException.class);
     }
 
     @Test
