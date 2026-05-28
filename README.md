@@ -26,7 +26,7 @@
 
 # API
 
-- 예약 대기 신청
+- [x] 예약 대기 신청
 
   **`POST /waiting-reservations`**
 
@@ -60,19 +60,19 @@
     ```
 
     - 에러 처리
-        - 중복 예약 대기 신청: 409 Conflict
-        - 예약 가능한 시간에 대기 신청: 409 Conflict
-        - 존재하지 않는 date/time/theme: 404 Not Found
-        - 요청 값 누락/형식 오류: 400 Bad Request
-- 예약 대기 취소
+        - [x] 중복 예약 대기 신청: 409 Conflict
+        - [x] 예약 가능한 시간에 대기 신청: 409 Conflict
+        - [x] 존재하지 않는 date/time/theme: 404 Not Found
+        - [ ] 요청 값 누락/형식 오류: 400 Bad Request
+- [ ] 예약 대기 취소
 
   **`DELETE /waiting-reservations/{id}`**
 
     - 설명: 사용자 본인 예약 대기 취소
     - 응답 `204 No Content`
     - 에러 처리
-        - 존재하지 않는 예약 대기: 404 Not Found
-- 예약 대기 목록 조회
+        - [ ] 존재하지 않는 예약 대기: 404 Not Found
+- [ ] 예약 대기 목록 조회
 
   **`GET /waiting-reservations?name={name}`**
 
@@ -120,8 +120,4 @@
     ```
 
     - 에러 처리
-        - name이 비어있는 경우: 400 Bad Request
-
-# 미정이
-
-- 사용자의 **예약과 대기가 상태로 구분**되어 함께 표시된다.
+        - [ ] name이 비어있는 경우: 400 Bad Request
