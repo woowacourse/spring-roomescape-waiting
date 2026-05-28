@@ -12,7 +12,6 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.domain.WaitingRepository;
-import roomescape.waiting.domain.WaitingValidator;
 
 @Service
 @Transactional(readOnly = true)

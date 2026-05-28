@@ -18,9 +18,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
-import roomescape.waiting.application.WaitingReference;
 import roomescape.waiting.domain.Waiting;
-import roomescape.waiting.domain.WaitingValidator;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
 class WaitingServiceTest {

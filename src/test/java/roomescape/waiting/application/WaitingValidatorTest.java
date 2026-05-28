@@ -1,4 +1,4 @@
-package roomescape.waiting.domain;
+package roomescape.waiting.application;
 
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -12,6 +12,7 @@ import roomescape.global.exception.customException.BusinessException;
 import roomescape.reservationTime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
+import roomescape.waiting.domain.Waiting;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
 class WaitingValidatorTest {

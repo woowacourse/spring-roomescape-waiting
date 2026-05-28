@@ -1,9 +1,10 @@
-package roomescape.waiting.domain;
+package roomescape.waiting.application;
 
 import org.springframework.stereotype.Component;
 import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
+import roomescape.waiting.domain.WaitingRepository;
 
 @Component
 public class WaitingValidator {
