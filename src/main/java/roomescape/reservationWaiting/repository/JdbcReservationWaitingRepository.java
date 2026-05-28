@@ -110,6 +110,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                   ON r.theme_id = h.id
                 WHERE r.reservation_date = ? AND time_id = ? AND theme_id = ?
                 ORDER BY r.id ASC
+                LIMIT 1
                 """;
 
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId)

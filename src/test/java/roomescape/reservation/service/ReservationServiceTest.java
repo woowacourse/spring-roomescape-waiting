@@ -451,7 +451,7 @@ class ReservationServiceTest {
         )).isInstanceOf(InvalidTimeStartAtValueException.class);
     }
 
-    @DisplayName("예약 변경 시, 날짜와 시간 모두 기존과 동일하면 아")
+    @DisplayName("예약 변경 시, 날짜와 시간이 모두 기존과 동일하면 변경하지 않는다.")
     @Test
     void updateReservationTest_not_changed() {
         //given
