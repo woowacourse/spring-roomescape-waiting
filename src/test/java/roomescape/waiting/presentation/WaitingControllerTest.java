@@ -177,6 +177,30 @@ class WaitingControllerTest {
     }
 
     @Test
+    @DisplayName("POST /waiting - 예약이 없는 슬롯이면 에러 응답을 반환한다")
+    void 예약이_없는_슬롯이면_에러_응답을_반환한다() throws Exception {
+        // given
+        LocalDate date = LocalDate.of(2026, 5, 5);
+        WaitingCreateCommand command = new WaitingCreateCommand("브라운", date, 1L, 1L);
+        willThrow(new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION))
+                .given(waitingService)
+                .save(command);
+
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", "브라운");
+        body.put("date", "2026-05-05");
+        body.put("timeId", 1);
+        body.put("themeId", 1);
+
+        // when & then
+        mockMvc.perform(post("/waiting")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(body)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.message").value("예약이 존재하지 않으면, 대기요청을 할 수 없습니다."));
+    }
+
+    @Test
     @DisplayName("DELETE /waiting/me/{id} - 본인의 예약 대기를 취소하면 204를 반환한다")
     void deleteUserWaiting_success() throws Exception {
         // when & then
