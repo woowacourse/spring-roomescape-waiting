@@ -87,6 +87,7 @@ public class JdbcReservationRepository implements ReservationRepository {
         INNER JOIN theme h
           ON r.theme_id = h.id
         WHERE r.name = ?
+        ORDER BY reservation_date ASC, time_start_at ASC, reservation_id ASC
         """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER, name);
@@ -171,6 +172,7 @@ public class JdbcReservationRepository implements ReservationRepository {
           ON r.time_id = t.id
         INNER JOIN theme h
           ON r.theme_id = h.id
+        ORDER BY reservation_date ASC, time_start_at ASC, reservation_id ASC
         """;
 
         return jdbcTemplate.query(sql, RESERVATION_ROW_MAPPER);

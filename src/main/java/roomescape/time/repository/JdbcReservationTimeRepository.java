@@ -82,6 +82,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = """
                 SELECT id, start_at
                 FROM reservation_time
+                ORDER BY start_at ASC
                 """;
 
         return jdbcTemplate.query(sql, RESERVATION_TIME_ROW_MAPPER);
@@ -102,6 +103,7 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
             AND w.reservation_date = ?
            WHERE r.id IS NULL
              AND w.id IS NULL
+           ORDER BY start_at ASC
            """;
 
         RowMapper<AvailableTimeQueryResult> availableTimeRowMapper = (rs, rowNum) ->

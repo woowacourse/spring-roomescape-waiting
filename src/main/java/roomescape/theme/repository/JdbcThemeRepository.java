@@ -79,6 +79,7 @@ public class JdbcThemeRepository implements ThemeRepository {
         String sql = """
                 SELECT id, name, description, thumbnail_url
                 FROM theme
+                ORDER BY name ASC
                 """;
 
         return jdbcTemplate.query(sql, THEME_ROW_MAPPER);
