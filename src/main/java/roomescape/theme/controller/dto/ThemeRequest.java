@@ -7,7 +7,8 @@ public record ThemeRequest(String name, String description, String thumbnailUrl)
 
     public ThemeRequest {
         if (name == null || name.isBlank()
-        || description == null || thumbnailUrl == null) {
+        || description == null || description.isBlank()
+                || thumbnailUrl == null || thumbnailUrl.isBlank()) {
             throw new InvalidThemeRequestFormatException();
         }
     }
