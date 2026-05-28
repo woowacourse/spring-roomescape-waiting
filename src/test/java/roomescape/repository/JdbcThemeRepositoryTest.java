@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
-import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
@@ -29,7 +28,6 @@ class JdbcThemeRepositoryTest {
     @Autowired
     ThemeRepository themeRepository;
 
-    @DisplayName("테마를 저장한다")
     @Test
     void 테마를_저장하면_id를_부여한다() {
         // given
@@ -42,7 +40,6 @@ class JdbcThemeRepositoryTest {
         assertThat(saved.getId()).isNotNull();
     }
 
-    @DisplayName("테마를 id로 조회한다")
     @Test
     void 테마를_id로_조회한다() {
         // given
@@ -61,7 +58,6 @@ class JdbcThemeRepositoryTest {
                 .isEqualTo(saved);
     }
 
-    @DisplayName("저장된 모든 테마를 조회한다")
     @Test
     void 저장된_모든_테마를_조회한다() {
         // given
@@ -84,7 +80,6 @@ class JdbcThemeRepositoryTest {
                 );
     }
 
-    @DisplayName("인기 테마의 id를 조회한다")
     @Test
     @Sql("/data.sql")
     void 최근_1주_동안의_예약_상위_10개의_테마를_조회한다() {
@@ -102,7 +97,6 @@ class JdbcThemeRepositoryTest {
                 );
     }
 
-    @DisplayName("id에 해당하는 테마를 삭제한다")
     @Test
     void 테마를_삭제한다() {
         // given
