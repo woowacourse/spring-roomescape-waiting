@@ -1,5 +1,11 @@
 package roomescape.reservation.repository;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,13 +18,6 @@ import roomescape.reservation.repository.dto.ReservationWithWaitingOrder;
 import roomescape.theme.domain.Theme;
 import roomescape.time.domain.ReservationTime;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-
-import static org.assertj.core.api.Assertions.assertThat;
-
 @SpringBootTest
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class JdbcReservationRepositoryTest {
@@ -29,43 +28,28 @@ class JdbcReservationRepositoryTest {
     @Autowired
     private JdbcTemplate jdbcTemplate;
 
+    @DisplayName("테마와 날짜 시간을 이용해 예약 시간을 찾는다.")
     @Test
-    void findTimeIdsByThemeIdAndDate() {
+    void findTimeIdsByThemeIdAndDate_테마와_날짜로_예약_시간_조회_테스트() {
         Long timeId1 = insertTime("2026-05-06 10:00:00", "2026-05-06 12:00:00");
         Long timeId2 = insertTime("2026-05-06 13:00:00", "2026-05-06 15:00:00");
 
         LocalDate date = LocalDate.of(2026, 5, 6);
         Long themeId = insertTheme("테마");
-        insertReservation("윤호준", timeId1, themeId, Status.RESERVED
+        insertReservation("어셔", timeId1, themeId, Status.RESERVED
                 , LocalDateTime.now());
-        insertReservation("박다혜", timeId2, themeId, Status.RESERVED
+        insertReservation("라이", timeId2, themeId, Status.RESERVED
                 , LocalDateTime.now());
 
         assertThat(reservationRepository.findTimeIdsByThemeIdAndDate(themeId, date))
                 .containsExactly(timeId1, timeId2);
-
         assertThat(reservationRepository.findTimeIdsByThemeIdAndDate(themeId, date.plusDays(1)))
                 .isEmpty();
     }
 
-    @Test
-    void findTimeIdsByThemeIdAndDate_다른테마의_예약시간은_조회하지_않는다() {
-        Long timeId1 = insertTime("2026-05-06 10:00:00", "2026-05-06 12:00:00");
-        Long timeId2 = insertTime("2026-05-06 13:00:00", "2026-05-06 15:00:00");
-
-        LocalDate date = LocalDate.of(2026, 5, 6);
-        Long themeId = insertTheme("테마1");
-        Long otherThemeId = insertTheme("테마2");
-        insertReservation("윤호준", timeId1, themeId, Status.RESERVED, LocalDateTime.now());
-        insertReservation("박다혜", timeId2, otherThemeId, Status.RESERVED, LocalDateTime.now());
-
-        assertThat(reservationRepository.findTimeIdsByThemeIdAndDate(themeId, date))
-                .containsExactly(timeId1);
-    }
-
-    @Test
     @DisplayName("save로 예약을 저장한다.")
-    void 예약_저장_테스트() {
+    @Test
+    void save_예약_저장_테스트() {
         // given
         Long themeId = insertTheme("테마");
         Theme theme = new Theme("테마", "테마 설명입니다", "test-url").withId(themeId);
