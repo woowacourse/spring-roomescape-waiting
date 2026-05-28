@@ -15,9 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.admin.api.dto.AdminReservationTimeRequest;
-import roomescape.controller.admin.api.dto.AdminReservationTimeResponse;
-import roomescape.query.ReservationTimeQuery;
+import roomescape.controller.admin.api.dto.request.AdminReservationTimeRequest;
+import roomescape.controller.admin.api.dto.response.AdminReservationTimeResponse;
+import roomescape.controller.admin.api.query.AdminReservationTimeQuery;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.result.ReservationTimeResult;
 
@@ -28,7 +28,7 @@ import roomescape.service.result.ReservationTimeResult;
 public class AdminReservationTimeApiController {
 
     private final ReservationTimeService reservationTimeService;
-    private final ReservationTimeQuery reservationTimeQuery;
+    private final AdminReservationTimeQuery reservationTimeQuery;
 
     @PostMapping
     public ResponseEntity<AdminReservationTimeResponse> register(

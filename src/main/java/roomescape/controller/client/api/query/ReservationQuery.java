@@ -1,4 +1,4 @@
-package roomescape.query;
+package roomescape.controller.client.api.query;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -8,6 +8,8 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
+import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
+import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 
 @Component
 @RequiredArgsConstructor

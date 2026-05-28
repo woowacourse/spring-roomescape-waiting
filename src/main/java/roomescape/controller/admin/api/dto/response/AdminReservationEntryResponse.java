@@ -1,20 +1,20 @@
-package roomescape.controller.client.api.dto;
+package roomescape.controller.admin.api.dto.response;
 
 import java.time.LocalDateTime;
 import roomescape.service.result.ReservationEntryResult;
 
-public record ReservationEntryResponse(
+public record AdminReservationEntryResponse(
         long id,
         String name,
         String status,
         LocalDateTime createdAt
 ) {
 
-    public static ReservationEntryResponse from(ReservationEntryResult result) {
+    public static AdminReservationEntryResponse from(ReservationEntryResult result) {
         if (result == null) {
             return null;
         }
-        return new ReservationEntryResponse(
+        return new AdminReservationEntryResponse(
                 result.id(),
                 result.name(),
                 result.status(),

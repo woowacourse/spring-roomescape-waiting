@@ -1,4 +1,4 @@
-package roomescape.controller.client.api.dto;
+package roomescape.controller.client.api.dto.response;
 
 import roomescape.service.result.ThemeRegisterResult;
 

@@ -70,25 +70,6 @@ class ReservationRepositoryTest extends BaseIntegrationTest {
     }
 
     @Test
-    void 모든_예약_목록을_조회한다() {
-        // given
-        dataSource.insertReservation("이프", LocalDate.now().minusDays(1), 1L, 1L);
-        dataSource.insertReservation("이프", LocalDate.now(), 1L, 1L);
-        dataSource.insertReservation("이프", LocalDate.now().plusDays(1), 1L, 1L);
-
-        // when
-        List<Reservation> reservations = reservationRepository.findAll();
-
-        // then
-        assertThat(reservations).hasSize(3);
-        assertThat(reservations)
-                .allSatisfy(reservation -> assertThat(reservation.getEntries())
-                        .singleElement()
-                        .extracting(ReservationEntry::getName, ReservationEntry::getStatus)
-                        .containsExactly("이프", ReservationStatus.RESERVED));
-    }
-
-    @Test
     void 존재하는_ID로_예약을_조회하면_엔트리와_함께_반환된다() {
         // given
         Reservation reservation = ReservationFixture.createWithAll("이프", LocalDate.now().plusDays(1), theme, reservationTime);

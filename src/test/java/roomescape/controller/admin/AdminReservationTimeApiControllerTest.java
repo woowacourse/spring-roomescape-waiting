@@ -23,9 +23,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminReservationTimeApiController;
-import roomescape.controller.admin.api.dto.AdminReservationTimeResponse;
+import roomescape.controller.admin.api.dto.response.AdminReservationTimeResponse;
+import roomescape.controller.admin.api.query.AdminReservationTimeQuery;
 import roomescape.controller.admin.fixture.AdminReservationTimeApiRequestFixture;
-import roomescape.query.ReservationTimeQuery;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.result.ReservationTimeResult;
@@ -37,7 +37,7 @@ class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
     private ReservationTimeService reservationTimeService;
 
     @MockitoBean
-    private ReservationTimeQuery reservationTimeQuery;
+    private AdminReservationTimeQuery reservationTimeQuery;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {

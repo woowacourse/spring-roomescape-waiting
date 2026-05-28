@@ -1,6 +1,5 @@
 package roomescape.repository;
 
-import java.util.List;
 import java.util.Optional;
 import roomescape.domain.Reservation;
 import roomescape.repository.dto.ReservationCondition;
@@ -8,8 +7,6 @@ import roomescape.repository.dto.ReservationCondition;
 public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
-
-    List<Reservation> findAll();
 
     Optional<Reservation> findById(long id);
 

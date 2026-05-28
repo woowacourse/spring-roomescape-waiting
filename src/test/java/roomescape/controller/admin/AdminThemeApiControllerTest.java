@@ -21,9 +21,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminThemeApiController;
-import roomescape.controller.admin.api.dto.AdminThemeRequest;
-import roomescape.controller.admin.api.dto.AdminThemeResponse;
-import roomescape.query.ThemeQuery;
+import roomescape.controller.admin.api.dto.request.AdminThemeRequest;
+import roomescape.controller.admin.api.dto.response.AdminThemeResponse;
+import roomescape.controller.admin.api.query.AdminThemeQuery;
 import roomescape.service.ThemeService;
 import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.result.ThemeRegisterResult;
@@ -35,7 +35,7 @@ class AdminThemeApiControllerTest extends BaseControllerUnitTest {
     private ThemeService themeService;
 
     @MockitoBean
-    private ThemeQuery themeQuery;
+    private AdminThemeQuery themeQuery;
 
     @BeforeEach
     public void setUp(WebApplicationContext webApplicationContext) {

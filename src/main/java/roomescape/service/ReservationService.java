@@ -1,6 +1,5 @@
 package roomescape.service;
 
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -83,13 +82,6 @@ public class ReservationService {
 
         reservation.cancelEntry(entryId);
         reservationRepository.save(reservation);
-    }
-
-    public List<ReservationResult> getAllReservations() {
-        return reservationRepository.findAll()
-                .stream()
-                .map(ReservationResult::from)
-                .toList();
     }
 
     private long findSavedEntryId(Reservation saved, String name, ReservationStatus status) {

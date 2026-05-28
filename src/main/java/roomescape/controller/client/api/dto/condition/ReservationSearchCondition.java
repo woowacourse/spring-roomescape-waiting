@@ -1,4 +1,4 @@
-package roomescape.query;
+package roomescape.controller.client.api.dto.condition;
 
 import jakarta.validation.constraints.NotBlank;
 import org.springframework.web.bind.annotation.RequestParam;

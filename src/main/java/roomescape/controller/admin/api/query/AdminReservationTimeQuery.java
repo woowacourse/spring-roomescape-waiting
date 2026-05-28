@@ -1,15 +1,15 @@
-package roomescape.query;
+package roomescape.controller.admin.api.query;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
-import roomescape.controller.admin.api.dto.AdminReservationTimeResponse;
+import roomescape.controller.admin.api.dto.response.AdminReservationTimeResponse;
 
 @Component
 @RequiredArgsConstructor
-public class ReservationTimeQuery {
+public class AdminReservationTimeQuery {
 
     private static final RowMapper<AdminReservationTimeResponse> RESERVATION_TIME_RESPONSE_MAPPER = (rs, rowNum) ->
             new AdminReservationTimeResponse(

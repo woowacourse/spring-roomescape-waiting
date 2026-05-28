@@ -39,14 +39,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        return reservationSlotDao.findAll()
-                .stream()
-                .map(this::withEntries)
-                .toList();
-    }
-
-    @Override
     public Optional<Reservation> findById(long id) {
         return reservationSlotDao.findById(id)
                 .map(this::withEntries);

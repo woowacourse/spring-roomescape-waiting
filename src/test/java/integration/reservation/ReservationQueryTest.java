@@ -9,9 +9,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.common.Page;
 import roomescape.common.Pageable;
-import roomescape.query.ReservationQuery;
-import roomescape.query.ReservationSearchCondition;
-import roomescape.query.ReservationSearchResponse;
+import roomescape.controller.client.api.query.ReservationQuery;
+import roomescape.controller.client.api.dto.condition.ReservationSearchCondition;
+import roomescape.controller.client.api.dto.response.ReservationSearchResponse;
 
 @Sql("/reservation-test-query.sql") // 총 21개 데이터
 class ReservationQueryTest extends BaseIntegrationTest {

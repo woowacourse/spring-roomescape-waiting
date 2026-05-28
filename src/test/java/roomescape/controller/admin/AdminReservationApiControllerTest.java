@@ -23,8 +23,9 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminReservationApiController;
-import roomescape.controller.admin.api.dto.AdminReservationRequest;
-import roomescape.controller.admin.api.dto.AdminReservationResponse;
+import roomescape.controller.admin.api.dto.request.AdminReservationRequest;
+import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
+import roomescape.controller.admin.api.query.AdminReservationQuery;
 import roomescape.controller.admin.fixture.AdminReservationApiRequestFixture;
 import roomescape.service.ReservationService;
 import roomescape.service.command.ReservationCommand;
@@ -36,6 +37,8 @@ class AdminReservationApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
     private ReservationService reservationService;
+    @MockitoBean
+    private AdminReservationQuery reservationQuery;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -98,8 +101,8 @@ class AdminReservationApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 전체_예약_정보_조회_요청시_200OK와_예약_정보들을_응답한다() {
         // given
-        List<ReservationResult> result = List.of();
-        when(reservationService.getAllReservations()).thenReturn(result);
+        List<AdminReservationResponse> result = List.of();
+        when(reservationQuery.getAllReservations()).thenReturn(result);
         
         // when & then
         RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
