@@ -111,7 +111,8 @@ public class ReservationService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 시간입니다."));
     }
 
-    private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId, ReservationTime time) {
+    private Reservation createReservation(String name, LocalDate date, Long timeId, Long themeId,
+                                          ReservationTime time) {
         reservationValidator.validateAlreadyReserved(date, timeId, themeId);
         Theme theme = findTheme(themeId);
 
