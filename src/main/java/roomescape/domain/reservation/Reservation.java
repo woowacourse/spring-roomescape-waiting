@@ -1,5 +1,6 @@
 package roomescape.domain.reservation;
 
+import java.time.LocalTime;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 
@@ -16,15 +17,7 @@ public class Reservation {
     private final Theme theme;
     private final LocalDateTime createdAt;
 
-    public Reservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+    private Reservation(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -33,12 +26,21 @@ public class Reservation {
         this.createdAt = createdAt;
     }
 
-    public Reservation withReservationId(Long id) {
-        return new Reservation(id, this.name, this.date, this.time, this.theme, this.createdAt);
+    public static Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
+        validatePastDateTime(date, time.getStartAt());
+        return new Reservation(null, name, date, time, theme, LocalDateTime.now());
     }
 
-    public Reservation withUpdatedDateAndTime(LocalDate date, ReservationTime time) {
-        return new Reservation(id, this.name, date, time, this.theme, this.createdAt);
+    public static Reservation restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme, LocalDateTime createdAt) {
+        return new Reservation(id, name, date, time, theme, createdAt);
+    }
+
+    public void validateModifiable() {
+        validatePastDateTime(date, time.getStartAt());
+    }
+
+    public Reservation withReservationId(Long id) {
+        return new Reservation(id, this.name, this.date, this.time, this.theme, this.createdAt);
     }
 
     public Long getId() {
@@ -69,8 +71,8 @@ public class Reservation {
         return this.name.equals(name);
     }
 
-    public void validatePastDateTime() {
-        if(LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+    private static void validatePastDateTime(LocalDate date, LocalTime time) {
+        if(LocalDateTime.of(date, time).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();
         }
     }

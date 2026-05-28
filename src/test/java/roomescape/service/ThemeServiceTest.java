@@ -1,24 +1,41 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.util.List;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
+import roomescape.dto.reservation.ReservationRequest;
+import roomescape.dto.reservationtime.ReservationTimeRequest;
 import roomescape.dto.theme.ThemeRequest;
+import roomescape.dto.theme.ThemeResponse;
+import roomescape.exception.ReferencedDataException;
+import roomescape.repository.ReservationQueryingDao;
+import roomescape.repository.ReservationTimeQueryingDao;
+import roomescape.repository.ReservationTimeUpdatingDao;
+import roomescape.repository.ReservationUpdatingDao;
 import roomescape.repository.ThemeQueryingDao;
 import roomescape.repository.ThemeUpdatingDao;
-import roomescape.dto.theme.ThemeResponse;
-
-import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @JdbcTest
-@Import({ThemeService.class, ThemeQueryingDao.class, ThemeUpdatingDao.class})
+@Import({ThemeService.class, ThemeQueryingDao.class, ThemeUpdatingDao.class,
+        ReservationService.class, ReservationQueryingDao.class, ReservationUpdatingDao.class,
+        ReservationTimeQueryingDao.class, ReservationTimeUpdatingDao.class})
 class ThemeServiceTest {
 
     @Autowired
     private ThemeService themeService;
+
+    @Autowired
+    private ReservationService reservationService;
+
+    @Autowired
+    private ReservationTimeUpdatingDao reservationTimeUpdatingDao;
 
     @Test
     void 테마_생성_성공() {
@@ -47,5 +64,15 @@ class ThemeServiceTest {
         themeService.delete(saved.getId());
 
         assertThat(themeService.findAll()).isEmpty();
+    }
+
+    @Test
+    void 예약이_존재하는_테마_삭제시_예외가_발생한다() {
+        ThemeResponse savedTheme = themeService.create(new ThemeRequest("명탐정의 부재", "탐험", "http://example.com"));
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, savedTheme.getId()));
+
+        assertThatThrownBy(() -> themeService.delete(savedTheme.getId()))
+                .isInstanceOf(ReferencedDataException.class);
     }
 }

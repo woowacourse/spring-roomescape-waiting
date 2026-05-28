@@ -59,42 +59,40 @@ public class ReservationService {
         Theme themeById = themeQueryingDao.findThemeById(reservationReq.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
 
-        Reservation reservationCommand = reservationReq.to(reservationTimeById, themeById);
-        reservationCommand.validatePastDateTime();
+        Reservation reservation = reservationReq.to(reservationTimeById, themeById);
 
         validateDuplicatedReservation(themeById.getId(), reservationReq.date(), reservationTimeById.getId());
 
-        Reservation reservation = reservationReq.to(reservationTimeById, themeById);
         Long generatedId = reservationUpdatingDao.insert(reservation);
         return ReservationResponse.from(reservation.withReservationId(generatedId));
     }
 
     public ReservationResponse update(Long id, ReservationRequest reservationReq) {
         Reservation existedReservation = getReservation(id);
-        existedReservation.validatePastDateTime();
+        existedReservation.validateModifiable();
 
         ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
+        Theme theme = themeQueryingDao.findThemeById(reservationReq.themeId())
+                .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
 
-        Reservation reservationCommand = reservationReq.to(newTime, null);
-        reservationCommand.validatePastDateTime();
+        Reservation reservation = reservationReq.to(newTime, theme);
         validateDuplicatedReservation(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
 
-        Reservation updatedReservation = existedReservation.withUpdatedDateAndTime(reservationReq.date(), newTime);
-        reservationUpdatingDao.update(id, updatedReservation);
-        return ReservationResponse.from(updatedReservation);
+        reservationUpdatingDao.update(id, reservation);
+        return ReservationResponse.from(reservation);
     }
 
     public void delete(Long id) {
         Reservation reservation = getReservation(id);
-        reservation.validatePastDateTime();
+        reservation.validateModifiable();
 
         reservationUpdatingDao.delete(id);
     }
 
     private Reservation getReservation(Long id) {
         return reservationQueryingDao.findReservationById(id)
-                .orElseThrow(() -> new ResourceNotFoundException(id + "번 예약이 존재하지 않습니다."));
+                .orElseThrow(() -> new ResourceNotFoundException(id + "번 예약을 찾을 수 없습니다."));
     }
 
     private void validateDuplicatedReservation(Long themeId, LocalDate date, Long timeId) {

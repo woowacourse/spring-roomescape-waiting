@@ -3,6 +3,7 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalDate;
@@ -64,7 +65,11 @@ public class ReservationWaitingServiceTest {
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
         when(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingRequest.name(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.timeId())).thenReturn(false);
         when(reservationQueryingDao.findReservationByThemeAndDateAndTime(reservationWaitingRequest.themeId(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId())).thenReturn(
-                Optional.of(new Reservation("test2", now, reservationTime, theme))
+                Optional.of(Reservation.create("test2", now, reservationTime, theme))
+        );
+        when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
+        when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(
+                Optional.of(new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now()))
         );
 
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingRequest);
@@ -127,7 +132,7 @@ public class ReservationWaitingServiceTest {
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
         when(reservationQueryingDao.findReservationByThemeAndDateAndTime(1L, now, 1L))
-                .thenReturn(Optional.of(new Reservation("테스트", now, reservationTime, theme)));
+                .thenReturn(Optional.of(Reservation.create("테스트", now, reservationTime, theme)));
 
         assertThatThrownBy(() -> reservationWaitingService.create(reservationWaitingRequest))
                 .isInstanceOf(InvalidInputException.class);
@@ -165,7 +170,7 @@ public class ReservationWaitingServiceTest {
         when(reservationTimeQueryingDao.findReservationTimeById(reservationWaitingRequest.timeId())).thenReturn(Optional.of(reservationTime));
         when(themeQueryingDao.findThemeById(reservationWaitingRequest.themeId())).thenReturn(Optional.of(theme));
         when(reservationQueryingDao.findReservationByThemeAndDateAndTime(reservationWaitingRequest.themeId(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId())).thenReturn(
-                Optional.of(new Reservation("test2", now, reservationTime, theme))
+                Optional.of(Reservation.create("test2", now, reservationTime, theme))
         );
         when(reservationWaitingQueryingDao.isExistByNameAndDateAndTimeIdAndThemeId(reservationWaitingRequest.name(), reservationWaitingRequest.date(), reservationWaitingRequest.timeId(), reservationWaitingRequest.timeId())).thenReturn(true);
 

@@ -36,7 +36,7 @@ public class ReservationQueryingDao {
                 resultSet.getString("theme_url")
         );
 
-        return new Reservation(
+        return Reservation.restore(
                 resultSet.getLong("reservation_id"),
                 resultSet.getString("reservation_name"),
                 resultSet.getObject("reservation_date", LocalDate.class),

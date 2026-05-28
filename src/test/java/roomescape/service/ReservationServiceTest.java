@@ -170,4 +170,33 @@ class ReservationServiceTest {
         assertThatThrownBy(() -> reservationService.update(999L, request))
                 .isInstanceOf(ResourceNotFoundException.class);
     }
+
+    @Test
+    void 예약_단건_조회_성공() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        ReservationResponse found = reservationService.read(created.getId());
+
+        assertThat(found.getId()).isEqualTo(created.getId());
+        assertThat(found.getName()).isEqualTo("브라운");
+    }
+
+    @Test
+    void 존재하지_않는_예약_단건_조회시_예외가_발생한다() {
+        assertThatThrownBy(() -> reservationService.read(999L))
+                .isInstanceOf(ResourceNotFoundException.class);
+    }
+
+    @Test
+    void 예약_삭제_성공() {
+        Long timeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(10, 0)));
+        Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
+        ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
+
+        reservationService.delete(created.getId());
+
+        assertThat(reservationService.readAll()).isEmpty();
+    }
 }
