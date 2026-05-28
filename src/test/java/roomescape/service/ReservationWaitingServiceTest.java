@@ -7,7 +7,6 @@ import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
 import roomescape.exception.*;
-import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
@@ -26,15 +25,15 @@ import static org.mockito.Mockito.*;
 
 class ReservationWaitingServiceTest {
 
-    private final ReservationRepository reservationRepository = mock();
     private final ReservationWaitingRepository reservationWaitingRepository = mock();
     private final ReservationTimeRepository reservationTimeRepository = mock();
     private final ThemeRepository themeRepository = mock();
+    private final ReservationWaitingValidator reservationWaitingValidator = mock();
     private final ReservationWaitingService service = new ReservationWaitingService(
-            reservationRepository,
             reservationWaitingRepository,
             reservationTimeRepository,
-            themeRepository);
+            themeRepository,
+            reservationWaitingValidator);
 
     private final LocalDate date = LocalDate.now().plusDays(1);
     private final ReservationTime time = new ReservationTime(1L, LocalTime.parse("08:00"));
@@ -82,12 +81,6 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(time));
         when(themeRepository.findBy(theme.getId()))
                 .thenReturn(Optional.of(theme));
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
-                .thenReturn(true);
-        when(reservationRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(false);
         when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
                 .thenReturn(id);
         when(reservationWaitingRepository.findById(id))
@@ -100,6 +93,7 @@ class ReservationWaitingServiceTest {
 
         // then
         ArgumentCaptor<ReservationWaiting> captor = ArgumentCaptor.forClass(ReservationWaiting.class);
+        verify(reservationWaitingValidator).validateWaiting(any(ReservationWaiting.class));
         verify(reservationWaitingRepository).insert(captor.capture());
 
         ReservationWaiting captured = captor.getValue();
@@ -118,64 +112,20 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    void 예약_가능한_시간에_대기_신청시_예외_발생() {
+    void 예약_대기_검증_실패시_저장하지_않는다() {
         // given
         String name = "브라운";
         when(reservationTimeRepository.findBy(time.getId()))
                 .thenReturn(Optional.of(time));
         when(themeRepository.findBy(theme.getId()))
                 .thenReturn(Optional.of(theme));
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
-                .thenReturn(false);
+        doThrow(new InvalidInputException("예약 가능한 시간에는 대기를 신청할 수 없습니다."))
+                .when(reservationWaitingValidator).validateWaiting(any(ReservationWaiting.class));
 
         // when & then
         assertThatThrownBy(() -> service.create(name, date, time.getId(), theme.getId()))
                 .isInstanceOf(InvalidInputException.class)
                 .hasMessage("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
-
-        verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
-    }
-
-    @Test
-    void 본인이_예약한_시간에_대기_신청시_예외_발생() {
-        // given
-        String name = "브라운";
-        when(reservationTimeRepository.findBy(time.getId()))
-                .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(theme.getId()))
-                .thenReturn(Optional.of(theme));
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
-                .thenReturn(true);
-        when(reservationRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> service.create(name, date, time.getId(), theme.getId()))
-                .isInstanceOf(WaitingNotAllowedForOwnReservationException.class)
-                .hasMessage("본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
-
-        verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
-    }
-
-    @Test
-    void 이미_대기한_시간에_대기_신청시_예외_발생() {
-        // given
-        String name = "브라운";
-        when(reservationTimeRepository.findBy(time.getId()))
-                .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(theme.getId()))
-                .thenReturn(Optional.of(theme));
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
-                .thenReturn(true);
-        when(reservationRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(true);
-
-        // when & then
-        assertThatThrownBy(() -> service.create(name, date, time.getId(), theme.getId()))
-                .isInstanceOf(DuplicateReservationException.class)
-                .hasMessage("이미 예약 대기를 신청한 시간입니다.");
 
         verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
     }
@@ -188,12 +138,6 @@ class ReservationWaitingServiceTest {
                 .thenReturn(Optional.of(time));
         when(themeRepository.findBy(theme.getId()))
                 .thenReturn(Optional.of(theme));
-        when(reservationRepository.existsWith(date, time.getId(), theme.getId()))
-                .thenReturn(true);
-        when(reservationRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(false);
-        when(reservationWaitingRepository.existsByNameWith(name, date, time.getId(), theme.getId()))
-                .thenReturn(false);
         when(reservationWaitingRepository.insert(any(ReservationWaiting.class)))
                 .thenThrow(new DuplicateKeyException("duplicate waiting"));
 
@@ -201,24 +145,6 @@ class ReservationWaitingServiceTest {
         assertThatThrownBy(() -> service.create(name, date, time.getId(), theme.getId()))
                 .isInstanceOf(DuplicateReservationException.class)
                 .hasMessage("이미 예약 대기를 신청한 시간입니다.");
-    }
-
-    @Test
-    void 지난_시간으로_예약_대기_신청시_예외_발생() {
-        // given
-        String name = "브라운";
-        LocalDate pastDate = LocalDate.now().minusDays(1);
-        when(reservationTimeRepository.findBy(time.getId()))
-                .thenReturn(Optional.of(time));
-        when(themeRepository.findBy(theme.getId()))
-                .thenReturn(Optional.of(theme));
-
-        // when & then
-        assertThatThrownBy(() -> service.create(name, pastDate, time.getId(), theme.getId()))
-                .isInstanceOf(PastReservationException.class)
-                .hasMessage("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다.");
-
-        verify(reservationWaitingRepository, never()).insert(any(ReservationWaiting.class));
     }
 
     @Test
@@ -266,6 +192,7 @@ class ReservationWaitingServiceTest {
         service.delete(id, name);
 
         // then
+        verify(reservationWaitingValidator).validateUpdatableReservation(waiting, name);
         verify(reservationWaitingRepository).delete(id);
     }
 
@@ -276,6 +203,8 @@ class ReservationWaitingServiceTest {
         ReservationWaiting waiting = new ReservationWaiting(id, "브라운", date, time, theme);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
+        doThrow(new ForbiddenReservationException("본인의 예약 대기만 취소할 수 있습니다."))
+                .when(reservationWaitingValidator).validateUpdatableReservation(waiting, "구구");
 
         // when & then
         assertThatThrownBy(() -> service.delete(id, "구구"))
@@ -298,6 +227,8 @@ class ReservationWaitingServiceTest {
                 theme);
         when(reservationWaitingRepository.findById(id))
                 .thenReturn(Optional.of(waiting));
+        doThrow(new PastReservationLockedException("이미 지난 예약 대기는 취소할 수 없습니다."))
+                .when(reservationWaitingValidator).validateUpdatableReservation(waiting, name);
 
         // when & then
         assertThatThrownBy(() -> service.delete(id, name))

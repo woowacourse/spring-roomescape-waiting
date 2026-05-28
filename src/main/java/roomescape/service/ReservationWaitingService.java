@@ -21,21 +21,21 @@ import java.util.List;
 @Service
 @Transactional(readOnly = true)
 public class ReservationWaitingService {
-    private final ReservationRepository reservationRepository;
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationTimeRepository reservationTimeRepository;
     private final ThemeRepository themeRepository;
+    private final ReservationWaitingValidator reservationWaitingValidator;
 
     public ReservationWaitingService(
-            ReservationRepository reservationRepository,
             ReservationWaitingRepository reservationWaitingRepository,
             ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
+            ThemeRepository themeRepository,
+            ReservationWaitingValidator reservationWaitingValidator
     ) {
-        this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
         this.themeRepository = themeRepository;
+        this.reservationWaitingValidator = reservationWaitingValidator;
     }
 
     public List<WaitingResult> findByName(String name) {
@@ -56,7 +56,7 @@ public class ReservationWaitingService {
         Theme theme = findTheme(themeId);
         ReservationWaiting waiting = new ReservationWaiting(null, name, date, time, theme);
 
-        validateWaiting(waiting);
+        reservationWaitingValidator.validateWaiting(waiting);
 
         ReservationWaiting saved = save(waiting);
         return new WaitingResult(
@@ -71,7 +71,7 @@ public class ReservationWaitingService {
     @Transactional
     public void delete(Long id, String name) {
         ReservationWaiting waiting = findWaiting(id);
-        validateUpdatableReservation(waiting, name);
+        reservationWaitingValidator.validateUpdatableReservation(waiting, name);
         reservationWaitingRepository.delete(id);
     }
 
@@ -108,58 +108,4 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
     }
 
-    private void validateWaiting(ReservationWaiting waiting) {
-        validateNotPastDateAndTime(waiting);
-        validateAlreadyReserved(waiting);
-        validateNotOwnReservationSlot(waiting);
-        validateNotDuplicateWaiting(waiting);
-    }
-
-    private void validateNotOwnReservationSlot(ReservationWaiting waiting) {
-        if (reservationRepository.existsByNameWith(
-                waiting.getName(),
-                waiting.getDate(),
-                waiting.getTime().getId(),
-                waiting.getTheme().getId())) {
-            throw new WaitingNotAllowedForOwnReservationException("본인이 예약한 시간에는 대기를 신청할 수 없습니다.");
-        }
-    }
-
-    private void validateAlreadyReserved(ReservationWaiting waiting) {
-        if (!reservationRepository.existsWith(
-                waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
-            throw new InvalidInputException("예약 가능한 시간에는 대기를 신청할 수 없습니다.");
-        }
-    }
-
-    private void validateNotPastDateAndTime(ReservationWaiting waiting) {
-        LocalDateTime reservationDateTime = LocalDateTime.of(waiting.getDate(), waiting.getTime().getStartAt());
-        if (reservationDateTime.isBefore(LocalDateTime.now())) {
-            throw new PastReservationException("이미 지난 시간으로는 예약 대기를 신청할 수 없습니다.");
-        }
-    }
-
-    private void validateNotDuplicateWaiting(ReservationWaiting waiting) {
-        if (reservationWaitingRepository.existsByNameWith(
-                waiting.getName(), waiting.getDate(), waiting.getTime().getId(), waiting.getTheme().getId())) {
-            throw new DuplicateReservationException("이미 예약 대기를 신청한 시간입니다.");
-        }
-    }
-
-    private void validateUpdatableReservation(ReservationWaiting waiting, String name) {
-        validateOwner(waiting, name);
-        validateReservationNotLocked(waiting);
-    }
-
-    private void validateOwner(ReservationWaiting waiting, String name) {
-        if (!waiting.isOwnedBy(name)) {
-            throw new ForbiddenReservationException("본인의 예약 대기만 취소할 수 있습니다.");
-        }
-    }
-
-    private void validateReservationNotLocked(ReservationWaiting waiting) {
-        if (waiting.isPast()) {
-            throw new PastReservationLockedException("이미 지난 예약 대기는 취소할 수 없습니다.");
-        }
-    }
 }
