@@ -53,6 +53,36 @@ public class JdbcReservationRepository implements ReservationRepository {
         );
     }
 
+    private Reservation mapReservation(ResultSet rs) throws SQLException {
+        return Reservation.reconstruct(
+            rs.getLong("id"),
+            new ReserverName(rs.getString("name")),
+            rs.getDate("date").toLocalDate(),
+            Time.reconstruct(
+                rs.getLong("time_id"),
+                rs.getTime("start_at").toLocalTime(),
+                getNullableLocalDateTime(rs, "time_deleted_at")
+            ),
+            Theme.reconstruct(
+                rs.getLong("theme_id"),
+                rs.getString("theme_name"),
+                rs.getString("description"),
+                rs.getString("image_url"),
+                getNullableLocalDateTime(rs, "theme_deleted_at")
+            ),
+            ReservationStatus.valueOf(rs.getString("status"))
+        );
+    }
+
+    private LocalDateTime getNullableLocalDateTime(ResultSet rs, String columnLabel)
+        throws SQLException {
+        java.sql.Timestamp timestamp = rs.getTimestamp(columnLabel);
+        if (timestamp == null) {
+            return null;
+        }
+        return timestamp.toLocalDateTime();
+    }
+
     @Override
     public List<Reservation> findReservationsByNameAndDeletedAtIsNull(String name) {
         String sql = """
@@ -185,36 +215,6 @@ public class JdbcReservationRepository implements ReservationRepository {
             .addValue("themeId", theme.getId());
 
         return jdbcTemplate.queryForObject(countSql, parameters, Integer.class);
-    }
-
-    private Reservation mapReservation(ResultSet rs) throws SQLException {
-        return Reservation.reconstruct(
-            rs.getLong("id"),
-            new ReserverName(rs.getString("name")),
-            rs.getDate("date").toLocalDate(),
-            Time.reconstruct(
-                rs.getLong("time_id"),
-                rs.getTime("start_at").toLocalTime(),
-                getNullableLocalDateTime(rs, "time_deleted_at")
-            ),
-            Theme.reconstruct(
-                rs.getLong("theme_id"),
-                rs.getString("theme_name"),
-                rs.getString("description"),
-                rs.getString("image_url"),
-                getNullableLocalDateTime(rs, "theme_deleted_at")
-            ),
-            ReservationStatus.valueOf(rs.getString("status"))
-        );
-    }
-
-    private LocalDateTime getNullableLocalDateTime(ResultSet rs, String columnLabel)
-        throws SQLException {
-        java.sql.Timestamp timestamp = rs.getTimestamp(columnLabel);
-        if (timestamp == null) {
-            return null;
-        }
-        return timestamp.toLocalDateTime();
     }
 
     @Override

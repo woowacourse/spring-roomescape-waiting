@@ -29,9 +29,7 @@ class ThemeServiceTest {
 
     @Mock
     private ThemeRepository themeRepository;
-
     private ThemeService themeService;
-
     private final Clock fixedClock = Clock.fixed(
         Instant.parse("2026-05-08T00:00:00Z"),
         ZoneId.of("Asia/Seoul")

@@ -105,7 +105,12 @@ public class JdbcTimeRepository implements TimeRepository {
 
     @Override
     public void deleteTimeById(Long id) {
-        final String sql = "UPDATE reservation_time SET deleted_at = CURRENT_TIMESTAMP WHERE id = :id AND deleted_at IS NULL";
+        final String sql = """
+            UPDATE reservation_time
+            SET deleted_at = CURRENT_TIMESTAMP
+            WHERE id = :id
+              AND deleted_at IS NULL
+            """;
         final SqlParameterSource parameters = new MapSqlParameterSource("id", id);
 
         int updatedRowCount = jdbcTemplate.update(sql, parameters);

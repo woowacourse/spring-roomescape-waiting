@@ -58,7 +58,8 @@ public class ReservationController {
     public ResponseEntity<ReservationCreateResponseDto> updateReservation(
         @PathVariable @Positive(message = "id의 값은 양수여야 합니다.") Long id,
         @Valid @RequestBody ReservationUpdateRequestDto requestDto) {
-        return ResponseEntity.ok(reservationService.updateReservation(id, reservationMapper.toUpdateCommand(requestDto)));
+        return ResponseEntity.ok(
+            reservationService.updateReservation(id, reservationMapper.toUpdateCommand(requestDto)));
     }
 
     @PatchMapping("/{id}/cancel")

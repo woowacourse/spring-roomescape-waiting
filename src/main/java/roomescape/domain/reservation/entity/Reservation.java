@@ -27,7 +27,9 @@ public class Reservation {
         return new Reservation(null, name, date, time, theme, ReservationStatus.ACTIVE);
     }
 
-    public static Reservation reconstruct(Long id, ReserverName name, LocalDate date, Time time, Theme theme, ReservationStatus status) {
+    public static Reservation reconstruct(
+        Long id, ReserverName name, LocalDate date,
+        Time time, Theme theme, ReservationStatus status) {
         return new Reservation(id, name, date, time, theme, status);
     }
 

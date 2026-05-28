@@ -48,8 +48,7 @@ public class ReservationService {
         return convertReservationsToDto(reservations);
     }
 
-    public List<ReservationResponseDto> getReservationsByName(String name) {
-        List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
+    private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
         return reservations.stream()
             .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
             .toList();
@@ -64,7 +63,8 @@ public class ReservationService {
             reservation.getDate(), reservation.getTime(), reservation.getTheme());
     }
 
-    private List<ReservationResponseDto> convertReservationsToDto(List<Reservation> reservations) {
+    public List<ReservationResponseDto> getReservationsByName(String name) {
+        List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
         return reservations.stream()
             .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
             .toList();
@@ -87,12 +87,33 @@ public class ReservationService {
         }
     }
 
+    private Reservation createReservation(ReservationCreateCommand command) {
+        List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
+
+        Time time = timeRepository.findTimeByIdAndDeletedAtIsNull(command.timeId()).orElse(null);
+        if (time == null) {
+            parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
+        }
+
+        Theme theme = themeRepository.findThemeByIdAndDeletedAtIsNull(command.themeId()).orElse(null);
+        if (theme == null) {
+            parameterErrorResponses.add(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다."));
+        }
+
+        if (!parameterErrorResponses.isEmpty()) {
+            throw new GeneralParametersException(ReservationErrorType.FIELD_RESOURCE_NOT_FOUND,
+                parameterErrorResponses);
+        }
+
+        return Reservation.create(command.name(), command.date(), time, theme);
+    }
+
     @Transactional
     public ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command) {
         Reservation existingReservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
-        if (!existingReservation.getName().equals(command.name())) {  // ReserverName.equals(ReserverName) — record 값 비교
+        if (!existingReservation.getName().equals(command.name())) {
             throw new GeneralException(ReservationErrorType.RESERVATION_UPDATE_FORBIDDEN);
         }
 
@@ -115,47 +136,6 @@ public class ReservationService {
         } catch (DuplicateKeyException e) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
-    }
-
-    @Transactional
-    public ReservationCancelResponseDto cancelReservation(Long id, String name) {
-        Reservation reservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
-            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
-
-        if (!reservation.getName().value().equals(name)) {
-            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
-        }
-
-        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
-            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
-        }
-
-        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
-            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
-        }
-
-        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
-    }
-
-    private Reservation createReservation(ReservationCreateCommand command) {
-        List<ParameterErrorResponseDto> parameterErrorResponses = new ArrayList<>();
-
-        Time time = timeRepository.findTimeByIdAndDeletedAtIsNull(command.timeId()).orElse(null);
-        if (time == null) {
-            parameterErrorResponses.add(new ParameterErrorResponseDto("timeId", "존재 하지 않는 시간대입니다."));
-        }
-
-        Theme theme = themeRepository.findThemeByIdAndDeletedAtIsNull(command.themeId()).orElse(null);
-        if (theme == null) {
-            parameterErrorResponses.add(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다."));
-        }
-
-        if (!parameterErrorResponses.isEmpty()) {
-            throw new GeneralParametersException(ReservationErrorType.FIELD_RESOURCE_NOT_FOUND,
-                parameterErrorResponses);
-        }
-
-        return Reservation.create(command.name(), command.date(), time, theme);
     }
 
     private Reservation createUpdateReservation(Reservation existingReservation, ReservationUpdateCommand command) {
@@ -205,6 +185,26 @@ public class ReservationService {
             throw new GeneralParametersException(ReservationErrorType.UPDATE_FIELD_RESOURCE_NOT_FOUND,
                 parameterErrorResponses);
         }
+    }
+
+    @Transactional
+    public ReservationCancelResponseDto cancelReservation(Long id, String name) {
+        Reservation reservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
+            .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
+
+        if (!reservation.getName().value().equals(name)) {
+            throw new GeneralException(ReservationErrorType.RESERVATION_CANCEL_FORBIDDEN);
+        }
+
+        if (reservation.getStatus() != ReservationStatus.ACTIVE) {
+            throw new GeneralException(ReservationErrorType.NOT_ACTIVE_RESERVATION);
+        }
+
+        if (reservation.getDate().isBefore(LocalDate.now(clock))) {
+            throw new GeneralException(ReservationErrorType.PAST_RESERVATION_CANCEL);
+        }
+
+        return reservationMapper.toCancelResponseDto(reservationRepository.update(reservation.cancel()));
     }
 
     @Transactional

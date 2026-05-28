@@ -31,6 +31,12 @@ public class ThemeService {
         return convertThemesToDto(themeRepository.findAllByDeletedAtIsNull());
     }
 
+    private List<ThemeResponseDto> convertThemesToDto(List<Theme> themes) {
+        return themes.stream()
+            .map(themeMapper::toResponseDto)
+            .toList();
+    }
+
     public List<ThemeResponseDto> getPopularThemes() {
         LocalDate today = LocalDate.now(clock);
         LocalDate startDate = today.minusDays(7);
@@ -38,12 +44,6 @@ public class ThemeService {
 
         return convertThemesToDto(
             themeRepository.findPopularThemesDateBetween(startDate, endDate, 10));
-    }
-
-    private List<ThemeResponseDto> convertThemesToDto(List<Theme> themes) {
-        return themes.stream()
-            .map(themeMapper::toResponseDto)
-            .toList();
     }
 
     @Transactional
