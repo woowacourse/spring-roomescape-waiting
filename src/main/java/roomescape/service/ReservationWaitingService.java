@@ -63,7 +63,6 @@ public class ReservationWaitingService {
     public void delete(Long id) {
         ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
-        reservationWaiting.validateModifiable();
 
         reservationWaitingUpdatingDao.delete(id);
     }

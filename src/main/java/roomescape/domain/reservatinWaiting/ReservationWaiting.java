@@ -64,10 +64,6 @@ public class ReservationWaiting {
         return createdAt;
     }
 
-    public void validateModifiable() {
-        validatePastDateTime(date, time.getStartAt());
-    }
-
     private static void validatePastDateTime(LocalDate date, LocalTime time) {
         if (LocalDateTime.of(date, time).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();

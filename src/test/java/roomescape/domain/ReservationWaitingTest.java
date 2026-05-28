@@ -30,6 +30,19 @@ public class ReservationWaitingTest {
                 .doesNotThrowAnyException();
     }
 
+    @Test
+    void create로_생성된_예약_대기는_id와_sequence가_null이다() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+
+        ReservationWaiting waiting = ReservationWaiting.create("브라운", futureDate, futureTime, theme);
+
+        assertThat(waiting.getId()).isNull();
+        assertThat(waiting.getSequence()).isNull();
+        assertThat(waiting.getName()).isEqualTo("브라운");
+        assertThat(waiting.getDate()).isEqualTo(futureDate);
+    }
+
     @ParameterizedTest
     @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
     void 과거_날짜_시간으로_예약_대기를_생성하면_예외가_발생한다(int day, int hour) {
@@ -45,7 +58,7 @@ public class ReservationWaitingTest {
         LocalDate pastDate = LocalDate.now().minusDays(1);
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.parse("10:00"));
 
-        assertThatCode(() -> ReservationWaiting.restore(1L, "브라운", pastDate, pastTime, theme,1L, LocalDateTime.now()))
+        assertThatCode(() -> ReservationWaiting.restore(1L, "브라운", pastDate, pastTime, theme, 1L, LocalDateTime.now()))
                 .doesNotThrowAnyException();
     }
 
@@ -54,31 +67,14 @@ public class ReservationWaitingTest {
         LocalDate date = LocalDate.now().plusDays(1);
         LocalDateTime createdAt = LocalDateTime.now();
 
-        ReservationWaiting reservationWaiting = ReservationWaiting.restore(1L, "브라운", date, reservationTime, theme, 1L, createdAt);
+        ReservationWaiting waiting = ReservationWaiting.restore(1L, "브라운", date, reservationTime, theme, 2L, createdAt);
 
-        assertThat(reservationWaiting.getId()).isEqualTo(1L);
-        assertThat(reservationWaiting.getName()).isEqualTo("브라운");
-        assertThat(reservationWaiting.getDate()).isEqualTo(date);
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 미래_날짜_시간의_예약_대기를_검증하면_정상_작동한다(int day, int hour) {
-        LocalDate futureDate = LocalDate.now().plusDays(day);
-        ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(hour));
-        ReservationWaiting reservationWaiting = ReservationWaiting.restore(1L, "브라운", futureDate, futureTime, theme, 1L, LocalDateTime.now());
-
-        assertThatCode(reservationWaiting::validateModifiable).doesNotThrowAnyException();
-    }
-
-    @ParameterizedTest
-    @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 과거_날짜_시간의_예약_대기를_검증하면_예외가_발생한다(int day, int hour) {
-        LocalDate pastDate = LocalDate.now().minusDays(day);
-        ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(hour));
-        ReservationWaiting reservationWaiting = ReservationWaiting.restore(1L, "브라운", pastDate, pastTime, theme, 1L, LocalDateTime.now());
-
-        assertThatThrownBy(reservationWaiting::validateModifiable)
-                .isExactlyInstanceOf(ExpiredDateTimeException.class);
+        assertThat(waiting.getId()).isEqualTo(1L);
+        assertThat(waiting.getName()).isEqualTo("브라운");
+        assertThat(waiting.getDate()).isEqualTo(date);
+        assertThat(waiting.getTime()).isEqualTo(reservationTime);
+        assertThat(waiting.getTheme()).isEqualTo(theme);
+        assertThat(waiting.getSequence()).isEqualTo(2L);
+        assertThat(waiting.getCreatedAt()).isEqualTo(createdAt);
     }
 }

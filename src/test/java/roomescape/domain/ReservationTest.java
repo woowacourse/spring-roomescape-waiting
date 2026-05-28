@@ -63,22 +63,54 @@ public class ReservationTest {
 
     @ParameterizedTest
     @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 미래_날짜_시간의_예약을_검증하면_정상_작동한다(int day, int hour) {
+    void 미래_날짜_시간의_예약은_수정_가능하다(int day, int hour) {
         LocalDate futureDate = LocalDate.now().plusDays(day);
         ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(hour));
         Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
 
-        assertThatCode(reservation::validateModifiable).doesNotThrowAnyException();
+        assertThatCode(() -> reservation.update("브라운", futureDate, futureTime, theme))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    void update로_변경된_예약의_필드가_올바르게_설정된다() {
+        LocalDate originalDate = LocalDate.now().plusDays(1);
+        ReservationTime originalTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        Reservation reservation = Reservation.restore(1L, "브라운", originalDate, originalTime, theme, LocalDateTime.now());
+
+        LocalDate newDate = LocalDate.now().plusDays(2);
+        ReservationTime newTime = new ReservationTime(2L, LocalTime.now().plusHours(2));
+        Theme newTheme = new Theme(2L, "새 테마", "설명", "url");
+        Reservation updated = reservation.update("네오", newDate, newTime, newTheme);
+
+        assertThat(updated.getName()).isEqualTo("네오");
+        assertThat(updated.getDate()).isEqualTo(newDate);
+        assertThat(updated.getTime()).isEqualTo(newTime);
+        assertThat(updated.getTheme()).isEqualTo(newTheme);
     }
 
     @ParameterizedTest
     @CsvSource(value = {"1, 0", "0, 1", "1, 1"})
-    void 과거_날짜_시간의_예약을_검증하면_예외가_발생한다(int day, int hour) {
+    void 과거_날짜_시간의_예약은_수정시_예외가_발생한다(int day, int hour) {
         LocalDate pastDate = LocalDate.now().minusDays(day);
         ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(hour));
         Reservation reservation = Reservation.restore(1L, "브라운", pastDate, pastTime, theme, LocalDateTime.now());
 
-        assertThatThrownBy(reservation::validateModifiable)
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        assertThatThrownBy(() -> reservation.update("브라운", futureDate, futureTime, theme))
+                .isExactlyInstanceOf(ExpiredDateTimeException.class);
+    }
+
+    @Test
+    void 미래_예약을_과거_날짜로_변경시_예외가_발생한다() {
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        ReservationTime futureTime = new ReservationTime(1L, LocalTime.now().plusHours(1));
+        Reservation reservation = Reservation.restore(1L, "브라운", futureDate, futureTime, theme, LocalDateTime.now());
+
+        LocalDate pastDate = LocalDate.now().minusDays(1);
+        ReservationTime pastTime = new ReservationTime(1L, LocalTime.now().minusHours(1));
+        assertThatThrownBy(() -> reservation.update("브라운", pastDate, pastTime, theme))
                 .isExactlyInstanceOf(ExpiredDateTimeException.class);
     }
 

@@ -35,7 +35,13 @@ public class Reservation {
         return new Reservation(id, name, date, time, theme, createdAt);
     }
 
-    public void validateModifiable() {
+    public Reservation update(String name, LocalDate date, ReservationTime time, Theme theme) {
+        validateModifiable();
+        validatePastDateTime(date, time.getStartAt());
+        return Reservation.create(name, date, time, theme);
+    }
+
+    private void validateModifiable() {
         validatePastDateTime(date, time.getStartAt());
     }
 

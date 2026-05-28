@@ -69,14 +69,13 @@ public class ReservationService {
 
     public ReservationResponse update(Long id, ReservationRequest reservationReq) {
         Reservation existedReservation = getReservation(id);
-        existedReservation.validateModifiable();
 
         ReservationTime newTime = reservationTimeQueryingDao.findReservationTimeById(reservationReq.timeId())
                 .orElseThrow(() -> new ReservationTimeNotFoundException(reservationReq.timeId()));
         Theme theme = themeQueryingDao.findThemeById(reservationReq.themeId())
                 .orElseThrow(() -> new ThemeNotFoundException(reservationReq.themeId()));
 
-        Reservation reservation = reservationReq.to(newTime, theme);
+        Reservation reservation = existedReservation.update(reservationReq.name(), reservationReq.date(), newTime, theme);
         validateDuplicatedReservation(existedReservation.getTheme().getId(), reservationReq.date(), newTime.getId());
 
         reservationUpdatingDao.update(id, reservation);
@@ -84,9 +83,6 @@ public class ReservationService {
     }
 
     public void delete(Long id) {
-        Reservation reservation = getReservation(id);
-        reservation.validateModifiable();
-
         reservationUpdatingDao.delete(id);
     }
 
