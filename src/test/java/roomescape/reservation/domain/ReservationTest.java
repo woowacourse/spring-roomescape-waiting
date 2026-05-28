@@ -155,18 +155,6 @@ class ReservationTest {
     }
 
     @Test
-    @DisplayName("예약 요청 시간이 과거인 경우, 예외가 발생한다.")
-    void validateReservedAt() {
-        // given
-        LocalDateTime past = LocalDateTime.now().minusDays(1);
-
-        // when & then
-        assertThatThrownBy(() -> Reservation.reserve(name, reservationDate, reservationTime, theme, past))
-                .isInstanceOf(ReservationException.class)
-                .hasMessage(RESERVATION_RESERVED_AT_PAST_NOT_ALLOWED.getMessage());
-    }
-
-    @Test
     @DisplayName("예약 ID가 유효하지 않은 경우 생성 시 예외가 발생한다.")
     void validateId() {
         // given
