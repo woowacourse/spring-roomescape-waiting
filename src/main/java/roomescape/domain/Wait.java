@@ -1,10 +1,10 @@
 package roomescape.domain;
 
-import roomescape.exception.CustomInvalidDomainException;
-import roomescape.exception.ErrorCode;
-
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
+import roomescape.exception.CustomInvalidDomainException;
+import roomescape.exception.ErrorCode;
 
 public class Wait {
 
@@ -15,7 +15,8 @@ public class Wait {
     private final ReservationTime time;
     private final Theme theme;
 
-    public Wait(Long id, LocalDateTime createAt, String name, LocalDate reservationDate, ReservationTime time, Theme theme) {
+    public Wait(Long id, LocalDateTime createAt, String name, LocalDate reservationDate, ReservationTime time,
+                Theme theme) {
         validate(createAt, name, reservationDate, time, theme);
         this.id = id;
         this.createdAt = createAt;
@@ -73,5 +74,22 @@ public class Wait {
         if (theme == null) {
             throw new CustomInvalidDomainException(ErrorCode.NOT_ALLOW_THEME_NULL);
         }
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Wait wait = (Wait) object;
+        return Objects.equals(id, wait.id) && Objects.equals(createdAt, wait.createdAt)
+                && Objects.equals(name, wait.name) && Objects.equals(reservationDate,
+                wait.reservationDate) && Objects.equals(time, wait.time) && Objects.equals(theme,
+                wait.theme);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, createdAt, name, reservationDate, time, theme);
     }
 }

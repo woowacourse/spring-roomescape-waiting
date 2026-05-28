@@ -1,5 +1,6 @@
 package roomescape.domain;
 
+import java.util.Objects;
 import roomescape.exception.CustomInvalidDomainException;
 import roomescape.exception.ErrorCode;
 
@@ -58,5 +59,21 @@ public class Theme {
 
     public String getThumbnailUrl() {
         return thumbnailUrl;
+    }
+
+    @Override
+    public boolean equals(Object object) {
+        if (object == null || getClass() != object.getClass()) {
+            return false;
+        }
+        Theme theme = (Theme) object;
+        return Objects.equals(id, theme.id) && Objects.equals(name, theme.name)
+                && Objects.equals(description, theme.description) && Objects.equals(thumbnailUrl,
+                theme.thumbnailUrl);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, description, thumbnailUrl);
     }
 }
