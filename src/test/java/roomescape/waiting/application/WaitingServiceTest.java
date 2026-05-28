@@ -18,6 +18,7 @@ import roomescape.theme.domain.ThemeRepository;
 import roomescape.theme.fake.FakeThemeRepository;
 import roomescape.waiting.application.dto.WaitingCreateCommand;
 import roomescape.waiting.domain.Waiting;
+import roomescape.waiting.domain.WaitingValidator;
 import roomescape.waiting.fake.FakeWaitingRepository;
 
 class WaitingServiceTest {
@@ -32,7 +33,12 @@ class WaitingServiceTest {
         waitingRepository = new FakeWaitingRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
-        waitingService = new WaitingService(waitingRepository, reservationTimeRepository, themeRepository);
+        waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                new WaitingValidator(waitingRepository)
+        );
     }
 
     @Test

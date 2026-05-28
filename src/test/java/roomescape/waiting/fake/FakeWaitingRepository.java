@@ -1,5 +1,6 @@
 package roomescape.waiting.fake;
 
+import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -34,6 +35,15 @@ public class FakeWaitingRepository implements WaitingRepository {
 
     public Optional<Waiting> findById(Long id) {
         return Optional.ofNullable(store.get(id));
+    }
+
+    @Override
+    public Optional<Waiting> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+        return store.values().stream()
+                .filter(waiting -> waiting.getDate().equals(date))
+                .filter(waiting -> waiting.getTime().getId().equals(timeId))
+                .filter(waiting -> waiting.getTheme().getId().equals(themeId))
+                .findFirst();
     }
 
     @Override
