@@ -323,14 +323,14 @@
     input[type="date"]:focus { border-color: var(--accent); }
 
     /* Time slots grid */
-    .time-slots {
+    .reservationTime-slots {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
       gap: 10px;
       margin-bottom: 24px;
     }
 
-    .time-slot {
+    .reservationTime-slot {
       padding: 10px 8px;
       border-radius: 8px;
       border: 1px solid var(--border);
@@ -343,7 +343,7 @@
       text-align: center;
     }
 
-    .time-slot small {
+    .reservationTime-slot small {
       display: block;
       margin-top: 4px;
       font-size: 11px;
@@ -351,34 +351,34 @@
       opacity: 0.82;
     }
 
-    .time-slot:hover:not(.unavailable) {
+    .reservationTime-slot:hover:not(.unavailable) {
       border-color: var(--accent);
       background: var(--accent-dim);
       color: var(--accent);
     }
 
-    .time-slot.selected {
+    .reservationTime-slot.selected {
       border-color: var(--accent);
       background: var(--accent);
       color: #0a0d1a;
       font-weight: 700;
     }
 
-    .time-slot.unavailable {
+    .reservationTime-slot.unavailable {
       opacity: 0.72;
       cursor: pointer;
       text-decoration: line-through;
       color: var(--muted);
     }
 
-    .time-slot.unavailable:hover {
+    .reservationTime-slot.unavailable:hover {
       border-color: var(--muted);
       background: rgba(255,255,255,0.04);
       color: var(--text);
       text-decoration: line-through;
     }
 
-    .time-slot.unavailable.selected {
+    .reservationTime-slot.unavailable.selected {
       border-color: var(--accent);
       background: var(--accent-dim);
       color: var(--accent);
@@ -697,10 +697,10 @@
           <div class="selected-theme-info" id="selected-theme-info-2"></div>
           <p style="font-size:13px;color:var(--muted);margin-bottom:16px;" id="selected-date-label"></p>
           <div class="loading-center" id="times-loading"><div class="spinner"></div></div>
-          <div class="time-slots" id="time-slots" style="display:none"></div>
-          <div class="btn-row" id="time-btn-row" style="display:none">
-            <button class="btn btn-accent" onclick="goToStep4()" id="confirm-time-btn">예약 확인 →</button>
-            <button class="btn btn-wait" onclick="submitWaiting()" id="wait-time-btn" style="display:none">예약 대기</button>
+          <div class="reservationTime-slots" id="reservationTime-slots" style="display:none"></div>
+          <div class="btn-row" id="reservationTime-btn-row" style="display:none">
+            <button class="btn btn-accent" onclick="goToStep4()" id="confirm-reservationTime-btn">예약 확인 →</button>
+            <button class="btn btn-wait" onclick="submitWaiting()" id="wait-reservationTime-btn" style="display:none">예약 대기</button>
             <button class="btn btn-ghost" onclick="goToStep(2)">← 뒤로</button>
           </div>
         </div>
@@ -720,7 +720,7 @@
             <span>날짜</span><span id="confirm-date">-</span>
           </div>
           <div class="confirm-row">
-            <span>시간</span><span id="confirm-time">-</span>
+            <span>시간</span><span id="confirm-reservationTime">-</span>
           </div>
           <div class="confirm-row">
             <span>예약자</span><span id="confirm-name">-</span>
@@ -966,8 +966,8 @@
 
     goToStep(3);
     document.getElementById('times-loading').style.display = 'flex';
-    document.getElementById('time-slots').style.display = 'none';
-    document.getElementById('time-btn-row').style.display = 'none';
+    document.getElementById('reservationTime-slots').style.display = 'none';
+    document.getElementById('reservationTime-btn-row').style.display = 'none';
 
     try {
       const times = await fetchJson(
@@ -986,11 +986,11 @@
 
   async function renderTimeSlots(times) {
     document.getElementById('times-loading').style.display = 'none';
-    const container = document.getElementById('time-slots');
+    const container = document.getElementById('reservationTime-slots');
     container.innerHTML = times.map(t => {
       const waitLabel = !t.isAvailable && t.waitNumber > 0 ? `<small>대기 ${t.waitNumber}명</small>` : '';
       return `
-        <div class="time-slot ${t.isAvailable ? '' : 'unavailable'}"
+        <div class="reservationTime-slot ${t.isAvailable ? '' : 'unavailable'}"
              onclick="${t.isAvailable ? `pickTime(${t.id}, '${t.startAt}')` : `pickWaitingTime(${t.id}, '${t.startAt}')`}"
              id="slot-${t.id}">
           <span>${t.startAt}</span>${waitLabel}
@@ -998,30 +998,30 @@
       `;
     }).join('');
     container.style.display = 'grid';
-    document.getElementById('time-btn-row').style.display = 'flex';
-    document.getElementById('confirm-time-btn').disabled = true;
-    document.getElementById('confirm-time-btn').style.display = 'inline-flex';
-    document.getElementById('wait-time-btn').style.display = 'none';
+    document.getElementById('reservationTime-btn-row').style.display = 'flex';
+    document.getElementById('confirm-reservationTime-btn').disabled = true;
+    document.getElementById('confirm-reservationTime-btn').style.display = 'inline-flex';
+    document.getElementById('wait-reservationTime-btn').style.display = 'none';
   }
 
   function pickTime(id, startAt) {
     selectedTime = { id, startAt };
     selectedWaitingTarget = null;
-    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    document.querySelectorAll('.reservationTime-slot').forEach(s => s.classList.remove('selected'));
     document.getElementById(`slot-${id}`).classList.add('selected');
-    document.getElementById('confirm-time-btn').disabled = false;
-    document.getElementById('confirm-time-btn').style.display = 'inline-flex';
-    document.getElementById('wait-time-btn').style.display = 'none';
+    document.getElementById('confirm-reservationTime-btn').disabled = false;
+    document.getElementById('confirm-reservationTime-btn').style.display = 'inline-flex';
+    document.getElementById('wait-reservationTime-btn').style.display = 'none';
   }
 
   function pickWaitingTime(id, startAt) {
     selectedTime = { id, startAt };
     selectedWaitingTarget = { id, startAt };
-    document.querySelectorAll('.time-slot').forEach(s => s.classList.remove('selected'));
+    document.querySelectorAll('.reservationTime-slot').forEach(s => s.classList.remove('selected'));
     document.getElementById(`slot-${id}`).classList.add('selected');
-    document.getElementById('confirm-time-btn').disabled = true;
-    document.getElementById('confirm-time-btn').style.display = 'none';
-    document.getElementById('wait-time-btn').style.display = 'inline-flex';
+    document.getElementById('confirm-reservationTime-btn').disabled = true;
+    document.getElementById('confirm-reservationTime-btn').style.display = 'none';
+    document.getElementById('wait-reservationTime-btn').style.display = 'inline-flex';
   }
 
   async function getAdminReservationsSafely() {
@@ -1049,7 +1049,7 @@
     renderReservationSummary({
       themeName: selectedTheme.name,
       date: selectedDate,
-      time: selectedTime?.startAt || '-',
+      reservationTime: selectedTime?.startAt || '-',
       name: username
     });
     document.getElementById('confirm-id-row').style.display = 'none';
@@ -1059,7 +1059,7 @@
   function renderReservationSummary(reservationSlot) {
     document.getElementById('confirm-theme').textContent = reservationSlot.themeName;
     document.getElementById('confirm-date').textContent = formatDate(reservationSlot.date);
-    document.getElementById('confirm-time').textContent = reservationSlot.time;
+    document.getElementById('confirm-reservationTime').textContent = reservationSlot.reservationTime;
     document.getElementById('confirm-name').textContent = reservationSlot.name || username;
   }
 
@@ -1135,8 +1135,8 @@
   async function reloadTimesForSelection() {
     goToStep(3);
     document.getElementById('times-loading').style.display = 'flex';
-    document.getElementById('time-slots').style.display = 'none';
-    document.getElementById('time-btn-row').style.display = 'none';
+    document.getElementById('reservationTime-slots').style.display = 'none';
+    document.getElementById('reservationTime-btn-row').style.display = 'none';
 
     try {
       const times = await fetchJson(
@@ -1188,7 +1188,7 @@
     renderReservationSummary({
       themeName: reservation.themeName,
       date: reservation.date,
-      time: reservation.time,
+      reservationTime: reservation.reservationTime,
       name: reservation.name || username
     });
     document.getElementById('confirm-actions').innerHTML = `
@@ -1226,7 +1226,7 @@
           <img src="${r.themeThumbnailUrl}" alt="${r.themeName}" onerror="this.style.background='#1f2937'">
           <div class="reservationSlot-info">
             <div class="reservationSlot-theme">${r.themeName}</div>
-            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.time}${waitingMeta(r)}</div>
+            <div class="reservationSlot-meta">📅 ${formatDate(r.date)} &nbsp; ⏰ ${r.reservationTime}${waitingMeta(r)}</div>
           </div>
           <div class="reservationSlot-actions">${reservationActions(r)}</div>
         </div>

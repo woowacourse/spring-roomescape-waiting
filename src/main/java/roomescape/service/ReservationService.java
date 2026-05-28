@@ -8,35 +8,32 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import roomescape.domain.Reservation;
-import roomescape.domain.Schedule;
-import roomescape.domain.Status;
-import roomescape.domain.Theme;
-import roomescape.domain.Time;
+import roomescape.domain.*;
+import roomescape.domain.ReservationTime;
 import roomescape.dto.ReservationRequest;
 import roomescape.dto.ReservationResponse;
 import roomescape.exception.CustomException;
 import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationDao;
 import roomescape.repository.ScheduleDao;
-import roomescape.repository.TimeDao;
+import roomescape.repository.ReservationTimeDao;
 
 @Service
 public class ReservationService {
 
     private final ScheduleDao scheduleDao;
     private final ReservationDao reservationDao;
-    private final TimeDao timeDao;
+    private final ReservationTimeDao reservationTimeDao;
 
-    public ReservationService(ScheduleDao scheduleDao, ReservationDao reservationDao, TimeDao timeDao) {
+    public ReservationService(ScheduleDao scheduleDao, ReservationDao reservationDao, ReservationTimeDao reservationTimeDao) {
         this.scheduleDao = scheduleDao;
         this.reservationDao = reservationDao;
-        this.timeDao = timeDao;
+        this.reservationTimeDao = reservationTimeDao;
     }
 
     @Transactional
     public ReservationResponse save(LocalDateTime now, ReservationRequest request) {
-        Time reservationTime = timeDao.findById(request.timeId());
+        ReservationTime reservationTime = reservationTimeDao.findById(request.timeId());
         LocalDateTime dateTime = LocalDateTime.of(request.date(), reservationTime.getStartAt());
         validateDateAndTimeNotPast(now, dateTime);
 
@@ -63,8 +60,8 @@ public class ReservationService {
     @Transactional
     public void update(Long reservationId, LocalDateTime now, ReservationRequest request) {
         try {
-            Time time = timeDao.findById(request.timeId());
-            LocalDateTime targetDateTime = LocalDateTime.of(request.date(), time.getStartAt());
+            ReservationTime reservationTime = reservationTimeDao.findById(request.timeId());
+            LocalDateTime targetDateTime = LocalDateTime.of(request.date(), reservationTime.getStartAt());
             validateDateAndTimeNotPast(now, targetDateTime);
 
             Reservation reservation = reservationDao.findById(reservationId);

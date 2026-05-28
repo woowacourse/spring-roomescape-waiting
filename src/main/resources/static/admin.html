@@ -342,7 +342,7 @@
     .toast.error { background: var(--danger); color: white; }
 
     /* Time pill */
-    .time-pill {
+    .reservationTime-pill {
       display: inline-flex;
       align-items: center;
       gap: 8px;
@@ -354,7 +354,7 @@
       font-weight: 500;
     }
 
-    .time-pills {
+    .reservationTime-pills {
       display: flex;
       flex-wrap: wrap;
       gap: 8px;
@@ -472,14 +472,14 @@
     <h3>⏰ 시간 추가</h3>
     <div class="form-group">
       <label>시작 시간 (HH:MM)</label>
-      <input type="time" id="new-time" value="10:00">
+      <input type="reservationTime" id="new-reservationTime" value="10:00">
     </div>
     <button class="btn btn-accent" onclick="createTime()">시간 추가</button>
   </div>
 
   <div class="section-divider">등록된 시간</div>
   <div class="loading-center" id="times-loading"><div class="spinner"></div></div>
-  <div class="time-pills" id="time-pills" style="display:none"></div>
+  <div class="reservationTime-pills" id="reservationTime-pills" style="display:none"></div>
   <div class="empty-state" id="times-empty" style="display:none">
     <div class="icon">⏰</div>
     <p>등록된 시간이 없습니다.</p>
@@ -562,7 +562,7 @@
           <td class="muted">${r.id}</td>
           <td>${r.themeName}</td>
           <td class="muted">${r.date}</td>
-          <td class="muted">${r.time}</td>
+          <td class="muted">${r.reservationTime}</td>
         </tr>
       `).join('');
       document.getElementById('res-table-wrap').style.display = 'block';
@@ -653,7 +653,7 @@
 
   async function loadTimes() {
     document.getElementById('times-loading').style.display = 'flex';
-    document.getElementById('time-pills').style.display = 'none';
+    document.getElementById('reservationTime-pills').style.display = 'none';
     document.getElementById('times-empty').style.display = 'none';
 
     try {
@@ -666,9 +666,9 @@
         return;
       }
 
-      const pills = document.getElementById('time-pills');
+      const pills = document.getElementById('reservationTime-pills');
       pills.innerHTML = times.map(t => `
-        <div class="time-pill" id="time-pill-${t.id}">
+        <div class="reservationTime-pill" id="reservationTime-pill-${t.id}">
           ${t.startAt}
           <button style="background:none;border:none;color:#6b7280;cursor:pointer;font-size:14px;line-height:1;padding:0 0 0 4px;"
                   onclick="deleteTime(${t.id}, '${t.startAt}')" title="삭제">×</button>
@@ -682,7 +682,7 @@
   }
 
   async function createTime() {
-    const val = document.getElementById('new-time').value;
+    const val = document.getElementById('new-reservationTime').value;
 
     try {
       await fetchJson(`${API}/admin/times`, {
@@ -702,12 +702,12 @@
     if (!confirm(`${startAt} 시간을 삭제하시겠습니까?\n해당 시간에 예약이 있는 경우 삭제되지 않을 수 있습니다.`)) return;
     try {
       await fetchEmpty(`${API}/admin/times/${id}`, { method: 'DELETE' }, '삭제에 실패했습니다.');
-      document.getElementById(`time-pill-${id}`)?.remove();
+      document.getElementById(`reservationTime-pill-${id}`)?.remove();
       showToast(`${startAt} 시간이 삭제되었습니다.`);
 
-      const remaining = document.querySelectorAll('.time-pill');
+      const remaining = document.querySelectorAll('.reservationTime-pill');
       if (!remaining.length) {
-        document.getElementById('time-pills').style.display = 'none';
+        document.getElementById('reservationTime-pills').style.display = 'none';
         document.getElementById('times-empty').style.display = 'block';
       }
     } catch (e) {

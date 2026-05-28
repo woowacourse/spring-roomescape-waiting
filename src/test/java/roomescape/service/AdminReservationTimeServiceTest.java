@@ -17,7 +17,7 @@ import roomescape.exception.ErrorCode;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
-class AdminTimeServiceTest {
+class AdminReservationTimeServiceTest {
 
     @Autowired
     private AdminTimeService adminTimeService;

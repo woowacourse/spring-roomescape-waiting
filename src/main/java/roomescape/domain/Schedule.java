@@ -9,16 +9,16 @@ public class Schedule {
 
     private final Long id;
     private final LocalDate date;
-    private final Time time;
+    private final ReservationTime reservationTime;
     private final Theme theme;
 
-    public Schedule(Long id, LocalDate date, Time time, Theme theme) {
+    public Schedule(Long id, LocalDate date, ReservationTime reservationTime, Theme theme) {
         validateDate(date);
-        validateTime(time);
+        validateTime(reservationTime);
         validateTheme(theme);
         this.id = id;
         this.date = date;
-        this.time = time;
+        this.reservationTime = reservationTime;
         this.theme = theme;
     }
 
@@ -28,8 +28,8 @@ public class Schedule {
         }
     }
 
-    private void validateTime(Time time) {
-        if (time == null) {
+    private void validateTime(ReservationTime reservationTime) {
+        if (reservationTime == null) {
             throw new CustomException(ErrorCode.RESERVATION_TIME_NULL);
         }
     }
@@ -48,8 +48,8 @@ public class Schedule {
         return date;
     }
 
-    public Time getTime() {
-        return time;
+    public ReservationTime getTime() {
+        return reservationTime;
     }
 
     public Theme getTheme() {

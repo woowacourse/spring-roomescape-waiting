@@ -10,9 +10,9 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
+import roomescape.domain.ReservationTime;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
-import roomescape.domain.Time;
 
 @Repository
 public class ScheduleDao {
@@ -23,7 +23,7 @@ public class ScheduleDao {
     private final RowMapper<Schedule> scheduleRowMapper = (rs, rowNum) -> new Schedule(
             rs.getLong("id"),
             rs.getDate("date").toLocalDate(),
-            new Time(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
+            new ReservationTime(rs.getLong("time_id"), rs.getTime("time_value").toLocalTime()),
             new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("theme_description"), rs.getString("theme_thumbnail"))
     );
 

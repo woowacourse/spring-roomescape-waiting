@@ -8,7 +8,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import roomescape.domain.Reservation;
 import roomescape.domain.Schedule;
 import roomescape.domain.Theme;
-import roomescape.domain.Time;
+import roomescape.domain.ReservationTime;
 
 public record ReservationResponse(
         Long reservationId,
@@ -24,7 +24,7 @@ public record ReservationResponse(
 
     public static ReservationResponse from(Reservation reservation, Schedule schedule, int order) {
         Theme theme = schedule.getTheme();
-        Time time = schedule.getTime();
+        ReservationTime reservationTime = schedule.getTime();
 
         return new ReservationResponse(
                 reservation.getId(),
@@ -34,7 +34,7 @@ public record ReservationResponse(
                 theme.getName(),
                 theme.getDescription(),
                 theme.getThumbnailUrl(),
-                time.getStartAt(),
+                reservationTime.getStartAt(),
                 order
         );
     }

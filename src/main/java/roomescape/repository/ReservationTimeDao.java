@@ -9,20 +9,20 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
 
-import roomescape.domain.Time;
+import roomescape.domain.ReservationTime;
 
 @Repository
-public class TimeDao {
+public class ReservationTimeDao {
 
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert jdbcInsert;
 
-    private final RowMapper<Time> timeRowMapper = (rs, rowNum) -> new Time(
+    private final RowMapper<ReservationTime> timeRowMapper = (rs, rowNum) -> new ReservationTime(
             rs.getLong("id"),
             rs.getTime("start_at").toLocalTime()
     );
 
-    public TimeDao(JdbcTemplate jdbcTemplate) {
+    public ReservationTimeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("reservation_time")
@@ -33,11 +33,11 @@ public class TimeDao {
         return jdbcInsert.executeAndReturnKey(Map.of("start_at", startAt)).longValue();
     }
 
-    public Time findById(long id) {
+    public ReservationTime findById(long id) {
         return jdbcTemplate.queryForObject("select id, start_at from reservation_time where id = ?", timeRowMapper, id);
     }
 
-    public List<Time> findAll() {
+    public List<ReservationTime> findAll() {
         return jdbcTemplate.query("SELECT id, start_at FROM reservation_time", timeRowMapper);
     }
 
