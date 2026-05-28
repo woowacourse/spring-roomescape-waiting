@@ -1,5 +1,12 @@
 package roomescape.reservationwaiting.domain;
 
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.LocalTime;
+import java.time.ZoneId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.business.BusinessException;
@@ -7,14 +14,12 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-
-import static org.assertj.core.api.Assertions.assertThatCode;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
-
 class ReservationWaitingTest {
-    private final ReservationWaitingFactory factory = new ReservationWaitingFactory();
+    private final Clock clock = Clock.fixed(
+            LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+    private final ReservationWaitingFactory factory = new ReservationWaitingFactory(clock);
     private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
     private final Theme theme = Theme.restore(1L, "테마1", "설명", "https://image.com");
     private final LocalDate futureDate = LocalDate.now().plusDays(1);

@@ -4,8 +4,10 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import roomescape.exception.business.BusinessException;
@@ -14,7 +16,11 @@ import roomescape.theme.domain.Theme;
 
 class ReservationTest {
 
-    private final ReservationFactory factory = new ReservationFactory();
+    private final Clock clock = Clock.fixed(
+            LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+            ZoneId.systemDefault()
+    );
+    private final ReservationFactory factory = new ReservationFactory(clock);
     private final ReservationTime time = ReservationTime.restore(1L, LocalTime.of(10, 0), LocalTime.of(11, 0));
     private final Theme theme = Theme.restore(1L, "테마1", "설명", "https://image.com");
     private final LocalDate futureDate = LocalDate.now().plusDays(1);
@@ -77,13 +83,13 @@ class ReservationTest {
     @DisplayName("과거 예약이면 isPast가 true를 반환한다")
     void isPast_과거면_true() {
         Reservation past = Reservation.restore(1L, "현미밥", LocalDate.now().minusDays(1), time, theme);
-        assertThat(past.isPast()).isTrue();
+        assertThat(past.isPast(clock)).isTrue();
     }
 
     @Test
     @DisplayName("미래 예약이면 isPast가 false를 반환한다")
     void isPast_미래면_false() {
         Reservation future = Reservation.restore(1L, "현미밥", LocalDate.now().plusDays(1), time, theme);
-        assertThat(future.isPast()).isFalse();
+        assertThat(future.isPast(clock)).isFalse();
     }
 }

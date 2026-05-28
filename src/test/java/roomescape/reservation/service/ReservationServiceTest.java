@@ -3,12 +3,17 @@ package roomescape.reservation.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Primary;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.jdbc.Sql;
 import roomescape.exception.ErrorCode;
@@ -22,16 +27,12 @@ import roomescape.reservationtime.service.ReservationTimeService;
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @Sql(scripts = {"/truncate.sql"}, executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD)
 class ReservationServiceTest {
-
     @Autowired
     private ReservationService reservationService;
-
     @Autowired
     private ReservationTimeService reservationTimeService;
-
     @Autowired
     private JdbcTemplate jdbcTemplate;
-
     private Long pastReservationId;
     private Long futureReservationId1;
     private Long futureReservationId2;
@@ -139,6 +140,17 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("오늘 날짜에 이미 지난 시각으로 예약 불가")
+    void 오늘_날짜_지난_시각_예약_불가() {
+        assertThatThrownBy(() -> reservationService.createReservation(
+                new ReservationRequest("현미밥", LocalDate.now(), 1L, 1L)))
+                .isInstanceOf(BusinessException.class)
+                .satisfies(
+                        e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(ErrorCode.PAST_TIME_CREATE))
+                .hasMessage(ErrorCode.PAST_TIME_CREATE.getMessage());
+    }
+
+    @Test
     @DisplayName("변경하려는 시간이 이미 예약된 경우 수정 불가")
     void 중복_예약_수정_불가() {
         assertThatThrownBy(() -> reservationService.updateReservation(
@@ -147,5 +159,18 @@ class ReservationServiceTest {
                 .satisfies(e -> assertThat(((BusinessException) e).getErrorCode()).isEqualTo(
                         ErrorCode.DUPLICATE_RESERVATION))
                 .hasMessage(ErrorCode.DUPLICATE_RESERVATION.getMessage());
+    }
+
+    @TestConfiguration
+    static class FixedClockConfig {
+        @Bean
+        @Primary
+            // 서비스에서 이 Clock 빈을 우선적으로 사용
+        Clock fixedClock() {
+            return Clock.fixed(
+                    LocalDate.now().atTime(14, 0).atZone(ZoneId.systemDefault()).toInstant(),
+                    ZoneId.systemDefault()
+            );
+        }
     }
 }
