@@ -36,6 +36,7 @@ public class Reservation {
 
     private static Reservation of(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, ReservationStatus status, LocalDateTime reservedAt) {
         validate(name, reservationDate, time, theme);
+        validateReservedAtIsNotPast(reservedAt);
         validatePast(reservationDate.getDate(), time.getStartAt());
         return new Reservation(null, name, reservationDate, time, theme, status, reservedAt);
     }
@@ -103,6 +104,12 @@ public class Reservation {
     private static void validatePast(LocalDate date, LocalTime time) {
         if (isPast(date, time)) {
             throw new ReservationException(RESERVATION_PAST_DATETIME_NOT_ALLOWED);
+        }
+    }
+
+    private static void validateReservedAtIsNotPast(LocalDateTime reservedAt) {
+        if (reservedAt.isBefore(LocalDateTime.now())) {
+            throw new ReservationException(RESERVATION_RESERVED_AT_PAST_NOT_ALLOWED);
         }
     }
 

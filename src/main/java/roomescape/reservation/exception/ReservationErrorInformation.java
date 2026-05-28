@@ -23,6 +23,7 @@ public enum ReservationErrorInformation implements ErrorInformation {
     RESERVATION_PAST_DATETIME_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "RES_011", "과거 날짜/시간은 예약할 수 없습니다."),
     RESERVATION_NEW_SCHEDULE_PAST_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "RES_012", "과거 날짜/시간으로 예약 일정을 변경할 수 없습니다."),
     RESERVATION_ALREADY_WAITING(HttpStatus.BAD_REQUEST, "RES_013", "이미 대기중인 예약입니다."),
+    RESERVATION_RESERVED_AT_PAST_NOT_ALLOWED(HttpStatus.BAD_REQUEST, "RES_014", "예약 요청 시간은 과거일 수 없습니다."),
     ;
 
     private final HttpStatus httpStatus;
