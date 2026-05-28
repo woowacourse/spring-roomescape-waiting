@@ -1,71 +1,61 @@
 package roomescape.date.controller;
 
-import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.is;
-import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
-import static roomescape.date.fixture.ReservationDateApiFixture.updateDateStatus;
-
-import io.restassured.RestAssured;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static roomescape.common.TestAuthRequestPostProcessors.member;
 
 import java.time.LocalDate;
-
+import java.util.Collections;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.common.AcceptanceTest;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.common.annotation.ControllerSliceTest;
+import roomescape.common.auth.jwt.JwtExtractor;
+import roomescape.common.auth.jwt.JwtValidator;
+import roomescape.date.domain.ReservationDate;
+import roomescape.date.service.ReservationDateService;
 
-class ReservationDateControllerTest extends AcceptanceTest {
+@ControllerSliceTest(controllers = ReservationDateController.class)
+class ReservationDateControllerTest {
 
+    @Autowired
+    private MockMvc mockMvc;
+
+    @MockitoBean
+    private ReservationDateService reservationDateService;
+
+    @MockitoBean
+    private JwtExtractor jwtExtractor;
+
+    @MockitoBean
+    private JwtValidator jwtValidator;
 
     @Nested
     @DisplayName("getReservationDates 메서드는")
-    class GetReservationDatesTest {
-
-
-        @Test
-        @DisplayName("내 예약을 조회한다")
-        void 성공1() {
-            RestAssured.given().log().all()
-                .when().get("/member/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
-        }
-
+    class GetReservationDates {
 
         @Test
-        @DisplayName("미래 예약만 조회한다")
-        @Sql(
-            scripts = "classpath:past-reservation-date.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-        )
-        void 성공2() {
-            String tomorrow = LocalDate.now().plusDays(1).toString();
-            Integer futureDateId = createReservationDate(managerToken, tomorrow);
-            updateDateStatus(managerToken, futureDateId, true);
+        @DisplayName("예약 날짜 목록을 조회한다")
+        void getReservationDates() throws Exception {
+            // given
+            LocalDate date = LocalDate.parse("2026-05-20");
+            ReservationDate reservationDate = ReservationDate.load(1L, date, true);
 
-            RestAssured.given().log().all()
-                .when().get("/member/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1))
-                .body("date", contains(tomorrow));
-        }
+            // when
+            when(reservationDateService.readDatesAfterToday())
+                .thenReturn(Collections.singletonList(reservationDate));
 
-
-        @Test
-        @DisplayName("활성화된 예약만 조회한다")
-        void 성공3() {
-            Integer activeDateId = createReservationDate(managerToken,
-                LocalDate.now().plusDays(1).toString());
-            updateDateStatus(managerToken, activeDateId, true);
-
-            RestAssured.given().log().all()
-                .when().get("/member/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+            // then
+            mockMvc.perform(get("/member/dates").with(member()))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$[0].id").value(reservationDate.getId()))
+                .andExpect(jsonPath("$[0].date").value(date.toString()))
+                .andExpect(jsonPath("$[0].isActive").value(reservationDate.isActive()));
         }
     }
 }

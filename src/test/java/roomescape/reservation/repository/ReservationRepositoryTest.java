@@ -10,8 +10,6 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-
-import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
@@ -101,7 +99,7 @@ class ReservationRepositoryTest {
             Reservation actual = jdbcReservationRepository.findById(saved.getId()).get();
 
             // then
-            Assertions.assertThat(actual)
+            assertThat(actual)
                 .usingRecursiveComparison()
                 .isEqualTo(saved);
         }
@@ -117,7 +115,7 @@ class ReservationRepositoryTest {
             Optional<Reservation> actual = jdbcReservationRepository.findById(wrongId);
 
             // then
-            Assertions.assertThat(actual)
+            assertThat(actual)
                 .isEmpty();
         }
     }
@@ -174,7 +172,7 @@ class ReservationRepositoryTest {
                 name);
 
             // then
-            Assertions.assertThat(actual)
+            assertThat(actual)
                 .usingRecursiveComparison()
                 .isEqualTo(reservations);
         }
@@ -242,7 +240,7 @@ class ReservationRepositoryTest {
                 canceledReservation.getId()).get();
 
             // then
-            Assertions.assertThat(afterReservation.getStatus())
+            assertThat(afterReservation.getStatus())
                 .isEqualTo(ReservationStatus.CANCELED);
         }
     }
@@ -263,7 +261,7 @@ class ReservationRepositoryTest {
             jdbcReservationRepository.updateSchedule(saved);
 
             // then
-            Assertions.assertThat(jdbcReservationRepository.findById(saved.getId()).get())
+            assertThat(jdbcReservationRepository.findById(saved.getId()).get())
                 .usingRecursiveComparison()
                 .isEqualTo(saved);
         }

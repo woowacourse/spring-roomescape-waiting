@@ -1,130 +1,149 @@
 package roomescape.date.controller;
 
-import static org.hamcrest.Matchers.is;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static roomescape.date.exception.ReservationDateErrorInformation.DATE_ALREADY_EXISTS;
-import static roomescape.date.exception.ReservationDateErrorInformation.DATE_IS_NULL;
-import static roomescape.date.fixture.ReservationDateApiFixture.createReservationDate;
-import static roomescape.date.fixture.ReservationDateApiFixture.updateDateStatus;
-import static roomescape.reservation.fixture.ReservationApiFixture.createReservationWithToken;
-import static roomescape.theme.fixture.ThemeApiFixture.createTheme;
-import static roomescape.time.fixture.ReservationTimeApiFixture.createReservationTime;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.List;
+import java.util.Optional;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.test.context.jdbc.Sql;
-import roomescape.common.AcceptanceTest;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import roomescape.common.auth.jwt.JwtExtractor;
+import roomescape.common.auth.jwt.JwtProvider;
+import roomescape.common.auth.jwt.JwtValidator;
+import roomescape.date.domain.ReservationDate;
+import roomescape.date.exception.ReservationDateException;
+import roomescape.date.service.ReservationDateService;
+import roomescape.member.domain.Role;
+import roomescape.member.repository.MemberRepository;
 
-class ReservationDateAdminControllerTest extends AcceptanceTest {
+@WebMvcTest(ReservationDateAdminController.class)
+class ReservationDateAdminControllerTest {
 
-    private final String date = LocalDate.of(2099, 1, 1).toString();
+    @Autowired
+    private MockMvc mockMvc;
 
+    @MockitoBean
+    private ReservationDateService reservationDateService;
 
-    @Nested
-    @DisplayName("getReservationDates 메서드는")
-    class GetReservationDatesTest {
+    @MockitoBean
+    private JwtValidator jwtValidator;
 
+    @MockitoBean
+    private JwtExtractor jwtExtractor;
 
-        @Test
-        @DisplayName("예약 날짜 목록을 조회한다")
-        void 성공1() {
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .when().get("/admin/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(0));
-        }
+    @MockitoBean
+    private JwtProvider jwtProvider;
 
-        @Test
-        @DisplayName("미래 예약 목록만 조회한다")
-        @Sql(
-            scripts = "classpath:past-reservation-date.sql",
-            executionPhase = Sql.ExecutionPhase.BEFORE_TEST_METHOD
-        )
-        void 성공2() {
-            String tomorrow = LocalDate.now().plusDays(1).toString();
-            Integer id = createReservationDate(managerToken, tomorrow);
-            updateDateStatus(managerToken, id, true);
+    @MockitoBean
+    private MemberRepository memberRepository;
 
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .when().get("/admin/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2));
-        }
+    private String managerToken;
+
+    @BeforeEach
+    void setUp() {
+        managerToken = "Bearer mock-manager-token";
+        when(jwtExtractor.extractJwtToken(any())).thenReturn(Optional.of("mock-manager-token"));
+        when(jwtExtractor.getRole("mock-manager-token")).thenReturn(Role.MANAGER.name());
+        when(jwtValidator.validateJwtToken("mock-manager-token")).thenReturn(true);
     }
 
+
     @Nested
-    @DisplayName("Create 메서드는")
+    @DisplayName("create 메서드는")
     class CreateTest {
 
 
         @Test
-        @DisplayName("예약 날짜를 생성한다")
-        void 성공() {
-            Map<String, String> params = new HashMap<>();
-            params.put("date", date);
+        @DisplayName("예약을 생성한다")
+        void 성공() throws Exception {
+            LocalDate date = LocalDate.of(2026, 5, 20);
+            ReservationDate reservationDate = ReservationDate.load(1L, date, true);
 
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("date", is(date));
+            when(reservationDateService.register(date))
+                .thenReturn(reservationDate);
 
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .when().get("/admin/dates")
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(1));
+            String request = """
+                {
+                  "date": "%s"
+                }
+                """.formatted(date);
+
+            mockMvc.perform(post("/admin/dates")
+                    .header(HttpHeaders.AUTHORIZATION, managerToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(request))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(reservationDate.getId()))
+                .andExpect(jsonPath("$.date").value(date.toString()))
+                .andExpect(jsonPath("$.isActive").value(reservationDate.isActive()));
+
+            verify(reservationDateService).register(date);
         }
 
 
         @Test
-        @DisplayName("이미 등록된 날짜로 재등록을 시도하면 예외가 발생한다")
-        void 실패1() {
-            createReservationDate(managerToken, date);
+        @DisplayName("요청 본문에 필수 필드가 누락되면 400을 반환한다")
+        void 실패1() throws Exception {
+            String request = """
+                {
+                  "date": null
+                }
+                """;
 
-            Map<String, String> params = new HashMap<>();
-            params.put("date", date);
+            mockMvc.perform(post("/admin/dates")
+                    .header(HttpHeaders.AUTHORIZATION, managerToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.invalidParams[0].name").value("date"))
+                .andExpect(jsonPath("$.invalidParams[0].reason").value("date는 필수 입력입니다."));
 
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/dates")
-                .then().log().all()
-                .statusCode(HttpStatus.CONFLICT.value())
-                .body("message", is(DATE_ALREADY_EXISTS.getMessage()));
+            verifyNoInteractions(reservationDateService);
         }
 
 
         @Test
-        @DisplayName("요청 본문에 날짜가 없는 경우 예외가 발생한다")
-        void 실패2() {
-            Map<String, Object> params = new HashMap<>();
-            params.put("date", null);
+        @DisplayName("이미 예약된 슬롯인 경우 409를 반환한다")
+        void 실패2() throws Exception {
+            LocalDate date = LocalDate.of(2026, 5, 20);
 
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/admin/dates")
-                .then().log().all()
-                .statusCode(DATE_IS_NULL.getHttpStatus().value())
-                .body("message", is("요청 값 검증에 실패했습니다."));
+            when(reservationDateService.register(date))
+                .thenThrow(new ReservationDateException(DATE_ALREADY_EXISTS));
+
+            String request = """
+                {
+                  "date": "%s"
+                }
+                """.formatted(date);
+
+            mockMvc.perform(post("/admin/dates")
+                    .header(HttpHeaders.AUTHORIZATION, managerToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(request))
+                .andExpect(status().isConflict())
+                .andExpect(jsonPath("$.status").value(DATE_ALREADY_EXISTS.getHttpStatus().value()))
+                .andExpect(jsonPath("$.error").value(DATE_ALREADY_EXISTS.getHttpStatus().name()))
+                .andExpect(jsonPath("$.errorCode").value(DATE_ALREADY_EXISTS.getErrorCode()))
+                .andExpect(jsonPath("$.message").value(DATE_ALREADY_EXISTS.getMessage()));
+
+            verify(reservationDateService).register(date);
         }
     }
 
@@ -134,24 +153,77 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
 
 
         @Test
-        @DisplayName("예약이 이미 된 날짜를 관리자가 비활성화할 수 있다")
-        void 성공() {
-            Integer dateId = createReservationDate(managerToken, date);
-            Integer timeId = createReservationTime(managerToken, "10:00");
-            Integer themeId = createTheme(managerToken, "테마1");
+        @DisplayName("예약 정보를 변경한다")
+        void 성공() throws Exception {
+            LocalDate date = LocalDate.of(2026, 5, 20);
+            boolean changeStatus = false;
+            ReservationDate reservationDate = ReservationDate.load(1L, date, changeStatus);
 
-            createReservationWithToken(managerToken, dateId, timeId, themeId);
+            when(reservationDateService.updateStatus(reservationDate.getId(), changeStatus))
+                .thenReturn(reservationDate);
 
-            Map<String, Object> updateParams = new HashMap<>();
-            updateParams.put("isActive", false);
+            String request = """
+                {
+                  "isActive": %s
+                }
+                """.formatted(changeStatus);
 
-            RestAssured.given().log().all()
-                .header(HttpHeaders.AUTHORIZATION, managerToken)
-                .contentType(ContentType.JSON)
-                .body(updateParams)
-                .when().patch("/admin/dates/" + dateId + "/status")
-                .then().log().all()
-                .statusCode(200);
+            mockMvc.perform(patch("/admin/dates/{id}/status", reservationDate.getId())
+                    .header(HttpHeaders.AUTHORIZATION, managerToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(request))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(reservationDate.getId()))
+                .andExpect(jsonPath("$.date").value(date.toString()))
+                .andExpect(jsonPath("$.isActive").value(changeStatus));
+
+            verify(reservationDateService).updateStatus(reservationDate.getId(), changeStatus);
+        }
+
+
+        @Test
+        @DisplayName("요청 본문에 필수 필드가 없는 경우 400을 반환한다")
+        void 실패() throws Exception {
+            String request = """
+                {
+                  "isActive": null
+                }
+                """;
+
+            mockMvc.perform(patch("/admin/dates/1/status")
+                    .header(HttpHeaders.AUTHORIZATION, managerToken)
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .content(request))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.invalidParams[0].name").value("isActive"))
+                .andExpect(jsonPath("$.invalidParams[0].reason").value("isActive는 필수 입력입니다."));
+
+            verifyNoInteractions(reservationDateService);
+        }
+    }
+
+    @Nested
+    @DisplayName("getReservationDates 메서드는")
+    class GetReservationDatesTest {
+
+
+        @Test
+        @DisplayName("예약 날짜를 조회한다")
+        void 성공() throws Exception {
+            LocalDate date = LocalDate.of(2026, 5, 20);
+            ReservationDate reservationDate = ReservationDate.load(1L, date, true);
+
+            when(reservationDateService.readDates())
+                .thenReturn(List.of(reservationDate));
+
+            mockMvc.perform(get("/admin/dates").header(HttpHeaders.AUTHORIZATION, managerToken))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.size()").value(1))
+                .andExpect(jsonPath("$[0].id").value(reservationDate.getId()))
+                .andExpect(jsonPath("$[0].date").value(date.toString()))
+                .andExpect(jsonPath("$[0].isActive").value(reservationDate.isActive()));
+
+            verify(reservationDateService).readDates();
         }
     }
 }
