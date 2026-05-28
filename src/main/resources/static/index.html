@@ -78,6 +78,14 @@
             gap: 24px;
             margin-bottom: 32px;
             color: var(--surface);
+            position: sticky;
+            top: 0;
+            padding: 14px 0;
+            background: rgba(15, 15, 15, 0.72);
+            -webkit-backdrop-filter: blur(12px);
+            backdrop-filter: blur(12px);
+            z-index: 20;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
         }
 
         .brand {
@@ -166,10 +174,32 @@
             border-radius: var(--radius);
             padding: 28px;
             box-shadow: var(--shadow-card);
+            animation: slideUp 0.45s ease-out backwards;
+            transition: box-shadow 200ms ease, transform 200ms ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 16px 40px rgba(12, 10, 8, 0.22);
         }
 
         .card + .card {
             margin-top: 24px;
+        }
+
+        .card:nth-of-type(1) { animation-delay: 0.00s; }
+        .card:nth-of-type(2) { animation-delay: 0.08s; }
+        .card:nth-of-type(3) { animation-delay: 0.16s; }
+        .card:nth-of-type(4) { animation-delay: 0.24s; }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(14px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .card-header {
@@ -549,6 +579,185 @@
             display: none;
         }
 
+        /* ─── reservation/waiting compact cards ──── */
+
+        .reservation-row.compact {
+            padding: 14px 16px;
+            transition: transform 140ms ease, box-shadow 140ms ease;
+        }
+
+        .reservation-row.compact:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(12, 10, 8, 0.08);
+        }
+
+        .row-left {
+            display: flex;
+            gap: 14px;
+            align-items: center;
+            flex: 1;
+            min-width: 0;
+        }
+
+        .date-chip {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 52px;
+            height: 56px;
+            background: var(--accent-soft);
+            border-radius: var(--radius-sm);
+            color: var(--accent-strong);
+            flex-shrink: 0;
+        }
+
+        .date-chip .day {
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+
+        .date-chip .month {
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            margin-top: 2px;
+        }
+
+        .row-body {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            min-width: 0;
+            flex: 1;
+        }
+
+        .row-body .row-title {
+            font-weight: 700;
+            font-size: 1rem;
+            color: var(--text);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .row-body .row-meta {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 0.85rem;
+            color: var(--muted);
+            flex-wrap: wrap;
+        }
+
+        .row-body .row-meta .time {
+            color: var(--text-soft);
+            font-weight: 600;
+        }
+
+        .row-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .pill {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.01em;
+        }
+
+        .pill--confirmed {
+            background: var(--success-soft);
+            color: var(--success);
+        }
+
+        .pill--waiting {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .btn-icon {
+            width: 30px;
+            height: 30px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0;
+            background: transparent;
+            border: 1px solid var(--line);
+            border-radius: 999px;
+            cursor: pointer;
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1;
+            transition: all 120ms ease;
+        }
+
+        .btn-icon:hover {
+            background: var(--danger-soft);
+            border-color: var(--danger);
+            color: var(--danger);
+        }
+
+        /* ─── time slot grouping ─────────────────── */
+
+        .time-group {
+            margin-bottom: 14px;
+        }
+
+        .time-group:last-child {
+            margin-bottom: 0;
+        }
+
+        .time-group-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.78rem;
+            font-weight: 600;
+            color: var(--muted);
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        /* ─── section title with icon ────────────── */
+
+        .card-title-with-icon {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        /* ─── richer empty state ─────────────────── */
+
+        .empty.empty--rich {
+            padding: 36px 24px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .empty .empty-icon {
+            font-size: 2rem;
+            opacity: 0.5;
+        }
+
+        .empty .empty-hint {
+            font-size: 0.78rem;
+            color: var(--muted);
+            opacity: 0.7;
+        }
+
         .reservation-row .info {
             display: flex;
             flex-direction: column;
@@ -722,18 +931,42 @@
             }
 
             .topbar {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-wrap: wrap;
                 gap: 12px;
+                padding: 10px 0;
             }
 
             .card {
                 padding: 20px;
             }
 
-            .reservation-row {
-                flex-direction: column;
-                align-items: flex-start;
+            /* compact row stays horizontal but tightens spacing */
+            .reservation-row.compact {
+                padding: 10px 12px;
+                gap: 8px;
+            }
+
+            .date-chip {
+                width: 44px;
+                height: 48px;
+            }
+
+            .date-chip .day {
+                font-size: 1.2rem;
+            }
+
+            .row-body .row-title {
+                font-size: 0.92rem;
+            }
+
+            .row-body .row-meta {
+                font-size: 0.78rem;
+                gap: 6px;
+            }
+
+            /* hide the pill on mobile — chip color already conveys the status */
+            .row-actions .pill {
+                display: none;
             }
         }
     </style>
@@ -781,7 +1014,7 @@
 
     <section class="card">
         <div class="card-header">
-            <h2 class="card-title">최근 인기 테마</h2>
+            <h2 class="card-title card-title-with-icon"><span aria-hidden="true">🔥</span>최근 인기 테마</h2>
             <p class="card-subtitle">지난 7일간 예약이 많았던 테마입니다.</p>
         </div>
         <div id="popularRow" class="popular-row">
@@ -794,7 +1027,7 @@
 
     <section class="card">
         <div class="card-header">
-            <h2 class="card-title">예약하기</h2>
+            <h2 class="card-title card-title-with-icon"><span aria-hidden="true">📅</span>예약하기</h2>
             <p class="card-subtitle">매장 → 테마 → 날짜 → 시간 순으로 선택합니다.</p>
         </div>
 
@@ -823,7 +1056,7 @@
         <div class="field">
             <span class="field-label">시간</span>
             <p id="userTimeHint" class="field-hint">매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.</p>
-            <div id="userTimeGrid" class="time-grid"></div>
+            <div id="userTimeGrid"></div>
         </div>
 
         <div class="button-row">
@@ -833,7 +1066,7 @@
 
     <section class="card">
         <div class="card-header">
-            <h2 class="card-title">내 예약 / 대기</h2>
+            <h2 class="card-title card-title-with-icon"><span aria-hidden="true">📋</span>내 예약 / 대기</h2>
             <p class="card-subtitle">내가 만든 예약과 신청한 대기를 함께 확인합니다.</p>
         </div>
         <div class="button-row" style="margin-bottom: 16px;">
@@ -986,6 +1219,24 @@
         tabWaitings.classList.toggle("active", !isReservations);
         reservationsPane.classList.toggle("hidden", !isReservations);
         waitingsPane.classList.toggle("hidden", isReservations);
+    }
+
+    // ─── lookup helpers ──────────────────────────
+    const MONTH_LABELS = ["JAN","FEB","MAR","APR","MAY","JUN","JUL","AUG","SEP","OCT","NOV","DEC"];
+    const themeName = id => state.themes.find(t => t.id === id)?.name ?? `테마 #${id}`;
+    const storeName = id => state.stores.find(s => s.id === id)?.name ?? `매장 #${id}`;
+
+    function dateChip(dateStr) {
+        const [, m, d] = dateStr.split("-").map(Number);
+        return `<div class="date-chip"><span class="day">${String(d).padStart(2, "0")}</span><span class="month">${MONTH_LABELS[m - 1]}</span></div>`;
+    }
+
+    function formatCreatedAt(iso) {
+        // "2026-05-23T16:20:00" → "5/23 16:20"
+        const [date, time] = iso.split("T");
+        const [, mm, dd] = date.split("-");
+        const hhmm = time ? time.slice(0, 5) : "";
+        return `${Number(mm)}/${Number(dd)} ${hhmm}`.trim();
     }
 
     // Manager view
@@ -1210,6 +1461,7 @@
         userTimeGrid.innerHTML = "";
         userTimeHint.textContent = "매장, 테마, 날짜를 모두 선택하면 가능한 시간이 표시됩니다.";
         updateReserveButton();
+        loadMyReservations();
     }
 
     function renderStoreSelect() {
@@ -1300,13 +1552,34 @@
                 updateReserveButton();
                 return;
             }
-            userTimeGrid.innerHTML = data.map(item => {
+            const renderSlot = item => {
                 const isSelected = state.userSelectedTimeId === item.id;
                 const reservationIdAttr = item.reservationId != null ? `data-reservation-id="${item.reservationId}"` : "";
                 const slotClass = ["time-slot", isSelected ? "selected" : "", item.available ? "" : "wait-eligible"].filter(Boolean).join(" ");
                 const titleAttr = item.available ? "" : `title="이미 예약된 슬롯 — 대기 신청"`;
                 return `<button type="button" class="${slotClass}" data-time-id="${item.id}" ${reservationIdAttr} ${titleAttr}>${item.time.slice(0, 5)}</button>`;
-            }).join("");
+            };
+
+            const groups = [
+                { label: "오전", icon: "☀️", items: [] },
+                { label: "오후", icon: "🌤", items: [] },
+                { label: "저녁", icon: "🌙", items: [] },
+            ];
+            data.forEach(item => {
+                const hour = Number(item.time.slice(0, 2));
+                if (hour < 12) groups[0].items.push(item);
+                else if (hour < 18) groups[1].items.push(item);
+                else groups[2].items.push(item);
+            });
+
+            userTimeGrid.innerHTML = groups
+                .filter(g => g.items.length)
+                .map(g => `
+                    <div class="time-group">
+                        <div class="time-group-label"><span aria-hidden="true">${g.icon}</span>${g.label}</div>
+                        <div class="time-grid">${g.items.map(renderSlot).join("")}</div>
+                    </div>
+                `).join("");
 
             userTimeGrid.querySelectorAll("[data-time-id]").forEach(el => {
                 el.addEventListener("click", async () => {
@@ -1363,21 +1636,31 @@
             if (!reservations.length) {
                 myReservationsList.innerHTML = "";
                 myReservationsEmpty.classList.remove("hidden");
-                myReservationsEmpty.textContent = "현재 예약된 항목이 없습니다.";
+                myReservationsEmpty.classList.add("empty--rich");
+                myReservationsEmpty.innerHTML = `
+                    <span class="empty-icon" aria-hidden="true">🗒️</span>
+                    <span>아직 예약이 없습니다</span>
+                    <span class="empty-hint">위에서 매장·테마·날짜·시간을 골라 예약해 보세요</span>
+                `;
             } else {
                 myReservationsEmpty.classList.add("hidden");
                 myReservationsList.innerHTML = reservations.map(r => `
-                    <div class="reservation-row">
-                        <div class="info">
-                            <div class="info-line">
-                                <span class="info-main">${r.date}</span>
-                                <span class="info-main">${r.time.startAt.slice(0, 5)}</span>
-                            </div>
-                            <div class="info-line">
-                                <span class="info-sub">테마 #${r.themeId} · 예약 ID ${r.id}</span>
+                    <div class="reservation-row compact">
+                        <div class="row-left">
+                            ${dateChip(r.date)}
+                            <div class="row-body">
+                                <div class="row-title">${themeName(r.themeId)}</div>
+                                <div class="row-meta">
+                                    <span class="time">${r.time.startAt.slice(0, 5)}</span>
+                                    <span>·</span>
+                                    <span>${storeName(r.storeId)}</span>
+                                </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-danger" data-cancel-id="${r.id}">예약 취소</button>
+                        <div class="row-actions">
+                            <span class="pill pill--confirmed">확정</span>
+                            <button type="button" class="btn-icon" data-cancel-id="${r.id}" title="예약 취소" aria-label="예약 취소">✕</button>
+                        </div>
                     </div>
                 `).join("");
 
@@ -1398,21 +1681,32 @@
             if (!waitings.length) {
                 myWaitingsList.innerHTML = "";
                 myWaitingsEmpty.classList.remove("hidden");
-                myWaitingsEmpty.textContent = "신청한 대기가 없습니다.";
+                myWaitingsEmpty.classList.add("empty--rich");
+                myWaitingsEmpty.innerHTML = `
+                    <span class="empty-icon" aria-hidden="true">⏳</span>
+                    <span>신청한 대기가 없습니다</span>
+                    <span class="empty-hint">이미 예약된 시간 슬롯을 클릭해 대기 신청해 보세요</span>
+                `;
             } else {
                 myWaitingsEmpty.classList.add("hidden");
                 myWaitingsList.innerHTML = waitings.map(w => `
-                    <div class="reservation-row">
-                        <div class="info">
-                            <div class="info-line">
-                                <span class="info-main">예약 #${w.reservationId}</span>
-                                <span class="info-main">대기 ${w.order}순위</span>
+                    <div class="reservation-row compact">
+                        <div class="row-left">
+                            <div class="date-chip" style="background: #fef3c7; color: #92400e;">
+                                <span class="day">${w.order}</span>
+                                <span class="month">위</span>
                             </div>
-                            <div class="info-line">
-                                <span class="info-sub">신청 ${w.createdAt}</span>
+                            <div class="row-body">
+                                <div class="row-title">예약 #${w.reservationId}</div>
+                                <div class="row-meta">
+                                    <span>신청 ${formatCreatedAt(w.createdAt)}</span>
+                                </div>
                             </div>
                         </div>
-                        <button type="button" class="btn btn-sm btn-danger" data-cancel-wait="${w.reservationId}">대기 취소</button>
+                        <div class="row-actions">
+                            <span class="pill pill--waiting">대기</span>
+                            <button type="button" class="btn-icon" data-cancel-wait="${w.reservationId}" title="대기 취소" aria-label="대기 취소">✕</button>
+                        </div>
                     </div>
                 `).join("");
 
