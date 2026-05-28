@@ -129,7 +129,7 @@ class JdbcReservationTimeRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약되지 않은 시간만 조회된다")
+    @DisplayName("예약되지 않은 시간만 조회된다.")
     void findAvailableTimes() {
         // given
         ReservationTime time1 = createTime(LocalTime.of(10, 0));
@@ -154,6 +154,31 @@ class JdbcReservationTimeRepositoryTest {
         );
     }
 
+    @Test
+    @DisplayName("예약 대기가 있는 시간은 예약 가능한 시간 목록에서 제외된다.")
+    void findAvailableTimes_exclude_reservation_waiting() {
+        // given
+        ReservationTime time1 = createTime(LocalTime.of(10, 0));
+        ReservationTime time2 = createTime(LocalTime.of(11, 0));
+        ReservationTime time3 = createTime(LocalTime.of(12, 0));
+
+        LocalDate date = LocalDate.of(2025, 1, 1);
+
+        Long themeId = createTheme();
+        createReservationWaiting(time1, date, themeId);
+        createReservation(time2, date, themeId);
+
+        // when
+        List<AvailableTimeQueryResult> result = reservationTimeRepository.findAvailableTimes(themeId, date);
+
+        // then
+        List<LocalTime> times = result.stream()
+                .map(AvailableTimeQueryResult::startAt)
+                .toList();
+
+        assertThat(times).containsExactly(time3.getStartAt());
+    }
+
     private ReservationTime createTime(LocalTime time) {
         return reservationTimeRepository.save(
                 ReservationTime.of(time)
@@ -175,6 +200,14 @@ class JdbcReservationTimeRepositoryTest {
     private void createReservation(ReservationTime time, LocalDate date, Long themeId) {
         jdbcTemplate.update("""
             insert into reservation(name, reservation_date, time_id, theme_id)
+            values (?, ?, ?, ?)
+        """, "브라운", date, time.getId(), themeId
+        );
+    }
+
+    private void createReservationWaiting(ReservationTime time, LocalDate date, Long themeId) {
+        jdbcTemplate.update("""
+            insert into reservation_waiting(name, reservation_date, time_id, theme_id)
             values (?, ?, ?, ?)
         """, "브라운", date, time.getId(), themeId
         );
