@@ -23,6 +23,7 @@ CREATE TABLE waiting
     theme_id   BIGINT       NOT NULL,
     created_at VARCHAR(255) NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE (date, theme_id, time_id, name),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
 );
@@ -36,6 +37,7 @@ CREATE TABLE reservation
     theme_id   BIGINT       NOT NULL,
     created_at VARCHAR(255) NOT NULL,
     PRIMARY KEY (id),
+    UNIQUE (date, theme_id, time_id),
     FOREIGN KEY (time_id) REFERENCES reservation_time (id) ON DELETE RESTRICT,
     FOREIGN KEY (theme_id) REFERENCES theme (id) ON DELETE RESTRICT
 );
