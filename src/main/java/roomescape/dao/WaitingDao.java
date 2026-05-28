@@ -80,7 +80,7 @@ public class WaitingDao {
         params.put("date", waiting.getDate());
         params.put("time_id", waiting.getTime().getId());
         params.put("theme_id", waiting.getTheme().getId());
-        params.put("created_at", waiting.getCreatedAt().toLocalDate());
+        params.put("created_at", waiting.getCreatedAt());
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
         return new Waiting(
