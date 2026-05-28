@@ -53,13 +53,10 @@ public class ReservationServiceImpl implements ReservationService {
         validateThemeId(themeId);
         validateNotHoliday(time);
         Theme theme = themeRepository.findById(themeId);
-        Status status = Status.RESERVED;
         if (reservationRepository.isDuplicatedWithName(request.name(), themeId, time)) {
             throw new DuplicateReservationException();
         }
-        if (isDuplicatedReservation(themeId, time)) {
-            status = Status.WAITING;
-        }
+        Status status = Status.from(reservationRepository.hasConfirmedReservation(themeId, time));
         Reservation newReservation = new Reservation(request.name(),
                 time,
                 theme,
@@ -67,7 +64,6 @@ public class ReservationServiceImpl implements ReservationService {
                 LocalDateTime.now());
         return reservationRepository.save(newReservation);
     }
-
 
     private void validateThemeId(Long themeId) {
         if (themeId == null) {
@@ -82,10 +78,6 @@ public class ReservationServiceImpl implements ReservationService {
         if (holidayService.isHoliday(time.getDate())) {
             throw new IllegalArgumentException("휴일은 예약이 불가합니다.");
         }
-    }
-
-    private boolean isDuplicatedReservation(Long themeId, ReservationTime time) {
-        return reservationRepository.hasConfirmedReservation(themeId, time);
     }
 
     private ReservationTime findTime(Long timeId) {
@@ -138,7 +130,7 @@ public class ReservationServiceImpl implements ReservationService {
         reservation.getTime().validateUpdatableReservation();
         ReservationTime newTime = findTime(timeId);
         newTime.validateReservableSchedule();
-        if (isDuplicatedReservation(reservation.getTheme().getId(), newTime)) {
+        if (reservationRepository.hasConfirmedReservation(reservation.getTheme().getId(), newTime)) {
             throw new DuplicateReservationException();
         }
         boolean updated = reservationRepository.update(id, timeId, LocalDateTime.now());
