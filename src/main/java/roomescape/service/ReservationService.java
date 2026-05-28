@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.stereotype.Service;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
@@ -85,11 +86,11 @@ public class ReservationService {
     }
 
     private ReservationTime getValidReservationTime(Long timeId) {
-        ReservationTime time = reservationTimeDao.findTimeById(timeId);
-        if (time == null) {
-            throw new IdNotFoundException("요청하신 시간 정보를 찾을 수 없습니다. 선택하신 시간이 정확한지 다시 한번 확인해 주세요.");
+        try {
+            return reservationTimeDao.findTimeById(timeId);
+        } catch (EmptyResultDataAccessException e) {
+            throw new IdNotFoundException("요청하신 시간 정보를 찾을 수 없습니다.  선택하신 시간이 정확한지 다시 한번 확인해 주세요.");
         }
-        return time;
     }
 
     private Theme getValidTheme(Long themeId) {
@@ -115,4 +116,3 @@ public class ReservationService {
         return ReservationStatus.CONFIRMED;
     }
 }
-
