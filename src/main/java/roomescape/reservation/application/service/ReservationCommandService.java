@@ -48,17 +48,12 @@ public class ReservationCommandService {
             throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
         }
 
-        try {
-            Reservation reservation = request.toReservation(slot);
-            Reservation savedReservation = reservationRepository.save(reservation);
-            return ReservationApplicationResult.confirmed(
-                    savedReservation,
-                    ThemeResult.from(theme),
-                    ReservationTimeResult.from(time)
-            );
-        } catch (DataIntegrityViolationException e) {
-            throw new ConflictException("이미 해당 날짜와 시간에 예약이 존재합니다.");
-        }
+        Reservation savedReservation = saveReservation(request.toReservation(slot));
+        return ReservationApplicationResult.confirmed(
+                savedReservation,
+                ThemeResult.from(theme),
+                ReservationTimeResult.from(time)
+        );
     }
 
     public ReservationApplicationResult update(Long reservationId, ReservationUpdateCommand request) {
@@ -116,13 +111,19 @@ public class ReservationCommandService {
         firstWaitingBySlot.ifPresent(waiting -> {
             waitingRepository.delete(waiting.getId());
 
-            reservationRepository.save(
-                    Reservation.builder()
-                            .name(waiting.getName())
-                            .slot(waiting.getSlot())
-                            .build()
-            );
+            saveReservation(Reservation.builder()
+                    .name(waiting.getName())
+                    .slot(waiting.getSlot())
+                    .build());
         });
+    }
+
+    private Reservation saveReservation(Reservation reservation) {
+        try {
+            return reservationRepository.save(reservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new ConflictException("변경하려는 날짜와 시간에 이미 예약이 존재합니다.");
+        }
     }
 
     private void validateNoDuplicateReservationSlot(Reservation reservation) {
