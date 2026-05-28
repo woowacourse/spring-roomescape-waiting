@@ -20,16 +20,15 @@ import roomescape.exception.ErrorCode;
 class AdminReservationTimeServiceTest {
 
     @Autowired
-    private AdminTimeService adminTimeService;
+    private AdminReservationTimeService adminReservationTimeService;
 
     @DisplayName("이미 사용중인 시간은 삭제하면 에러를 던진다.")
     @Test
     void 시간_삭제_예외_테스트(){
         long timeId = 1L;
-        assertThatThrownBy(() -> adminTimeService.delete(timeId))
+        assertThatThrownBy(() -> adminReservationTimeService.delete(timeId))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.UNALLOWED_DELETE_RESERVED_TIME.getMessage());
-
     }
 
     @DisplayName("이미 사용중인 시간은 추가하면 에러를 던진다.")
@@ -37,9 +36,8 @@ class AdminReservationTimeServiceTest {
     void 시간_추가_예외_테스트(){
         LocalTime startAt = LocalTime.of(10,0,0);
         TimeRequest request = new TimeRequest(startAt);
-        assertThatThrownBy(() -> adminTimeService.save(request))
+        assertThatThrownBy(() -> adminReservationTimeService.save(request))
                 .isInstanceOf(CustomException.class)
                 .hasMessage(ErrorCode.ALREADY_EXISTS_TIME.getMessage());
-
     }
 }

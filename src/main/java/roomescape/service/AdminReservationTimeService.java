@@ -14,11 +14,11 @@ import roomescape.exception.ErrorCode;
 import roomescape.repository.ReservationTimeDao;
 
 @Service
-public class AdminTimeService {
+public class AdminReservationTimeService {
 
     private final ReservationTimeDao reservationTimeDao;
 
-    public AdminTimeService(ReservationTimeDao reservationTimeDao) {
+    public AdminReservationTimeService(ReservationTimeDao reservationTimeDao) {
         this.reservationTimeDao = reservationTimeDao;
     }
 

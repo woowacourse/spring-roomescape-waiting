@@ -18,28 +18,28 @@ import org.springframework.web.bind.annotation.RestController;
 import jakarta.validation.Valid;
 import roomescape.dto.TimeRequest;
 import roomescape.dto.TimeResponse;
-import roomescape.service.AdminTimeService;
+import roomescape.service.AdminReservationTimeService;
 
 @RequestMapping("/admin/times")
 @RestController
 @Validated
-public class AdminTimeController {
+public class AdminReservationTimeController {
 
-    private final AdminTimeService adminTimeService;
+    private final AdminReservationTimeService adminReservationTimeService;
 
-    public AdminTimeController(AdminTimeService adminTimeService) {
-        this.adminTimeService = adminTimeService;
+    public AdminReservationTimeController(AdminReservationTimeService adminReservationTimeService) {
+        this.adminReservationTimeService = adminReservationTimeService;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<TimeResponse> getTimes() {
-        return adminTimeService.findAll();
+        return adminReservationTimeService.findAll();
     }
 
     @PostMapping
     public ResponseEntity<TimeResponse> createTime(@Valid @RequestBody TimeRequest request) {
-        TimeResponse response = adminTimeService.save(request);
+        TimeResponse response = adminReservationTimeService.save(request);
         URI location = URI.create("/times/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
@@ -47,6 +47,6 @@ public class AdminTimeController {
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void deleteTime(@PathVariable Long id) {
-        adminTimeService.delete(id);
+        adminReservationTimeService.delete(id);
     }
 }
