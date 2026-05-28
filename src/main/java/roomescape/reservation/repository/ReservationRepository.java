@@ -5,6 +5,7 @@ import roomescape.reservation.domain.Status;
 import roomescape.reservation.repository.dto.ReservationWaitingDto;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public interface ReservationRepository {
 
     Optional<ReservationWaitingDto> findWaitingById(Long id);
 
-    List<Reservation> findAll(int page, int size);
+    List<Reservation> findAllByStatusCanceledNot(int page, int size);
 
     List<ReservationWaitingDto> findWaitingAllByGuestName(String guestName);
 
@@ -22,7 +23,8 @@ public interface ReservationRepository {
 
     Reservation save(Reservation reservation);
 
-    boolean updateDateAndTimeAndStatus(Long id, LocalDate date, Long timeId, Status status);
+    boolean updateDateAndTimeAndStatus(
+            Long id, LocalDate date, Long timeId, Status status, LocalDateTime lastModifiedAt);
 
     boolean updateStatus(Long id, Status status);
 
@@ -30,7 +32,12 @@ public interface ReservationRepository {
 
     boolean existsBySlotAndGuestNameExceptCanceled(LocalDate date, Long timeId, Long themeId, String guestName);
 
+    boolean existsBySlotAndGuestNameExceptCanceledAndIdNot(
+            LocalDate date, Long timeId, Long themeId, String guestName, Long excludedId);
+
     boolean existsBySlot(LocalDate date, Long timeId, Long themeId);
+
+    boolean existsBySlotExceptReservation(LocalDate date, Long timeId, Long themeId, Long excludedId);
 
     boolean existByTimeId(Long timeId);
 

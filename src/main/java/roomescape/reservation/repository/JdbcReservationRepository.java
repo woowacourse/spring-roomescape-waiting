@@ -95,7 +95,9 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll(int page, int size) {
+    public List<Reservation> findAllByStatusCanceledNot(int page, int size) {
+
+        // todo 취소된 건 안보이게 하기, 프론트엔드 설명 리드미에 추가하기, 동일 날짜 및시간으로 수정 못하게 하기
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
@@ -118,7 +120,8 @@ public class JdbcReservationRepository implements ReservationRepository {
                     ON r.time_id = t.id
                 INNER JOIN theme th
                     ON r.theme_id = th.id
-                ORDER BY r.id
+                WHERE r.status != 'CANCELED'
+                ORDER BY r.date, t.start_at
                 LIMIT ? OFFSET ?
                 """, reservationRowMapper, size, (page - 1) * size);
     }
@@ -226,16 +229,18 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean updateDateAndTimeAndStatus(Long id, LocalDate date, Long timeId, Status status) {
+    public boolean updateDateAndTimeAndStatus(
+            Long id, LocalDate date, Long timeId, Status status, LocalDateTime lastModifiedAt) {
         String sql = """
                 UPDATE reservation
-                SET date = ?, time_id = ?, status = ?
+                SET date = ?, time_id = ?, status = ?, last_modified_at = ?
                 WHERE id = ?
                 """;
         int count = jdbcTemplate.update(sql,
                 date,
                 timeId,
                 status.toString(),
+                lastModifiedAt,
                 id);
         return count == 1;
     }
@@ -270,12 +275,42 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
+    public boolean existsBySlotAndGuestNameExceptCanceledAndIdNot(
+            LocalDate date, Long timeId, Long themeId, String guestName, Long excludedId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE date = ?
+                  AND time_id = ?
+                  AND theme_id = ?
+                  AND guest_name = ?
+                  AND status != 'CANCELED'
+                  AND id != ?
+                """, Integer.class, date, timeId, themeId, guestName, excludedId);
+        return count != null && count > 0;
+    }
+
+    @Override
     public boolean existsBySlot(LocalDate date, Long timeId, Long themeId) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
                 FROM reservation
                 WHERE date = ? AND time_id = ? AND theme_id = ? AND status = 'CONFIRMED';
                 """, Integer.class, date, timeId, themeId);
+        return count != null && count > 0;
+    }
+
+    @Override
+    public boolean existsBySlotExceptReservation(LocalDate date, Long timeId, Long themeId, Long excludedId) {
+        Integer count = jdbcTemplate.queryForObject("""
+                SELECT COUNT(*)
+                FROM reservation
+                WHERE date = ?
+                  AND time_id = ?
+                  AND theme_id = ?
+                  AND status = 'CONFIRMED'
+                  AND id != ?
+                """, Integer.class, date, timeId, themeId, excludedId);
         return count != null && count > 0;
     }
 

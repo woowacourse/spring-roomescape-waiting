@@ -25,6 +25,9 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.groups.Tuple.tuple;
+import static roomescape.reservation.domain.Status.*;
+import static roomescape.reservation.domain.Status.CONFIRMED;
+import static roomescape.reservation.domain.Status.WAITING;
 
 @JdbcTest
 @Import({JdbcReservationRepository.class, SQLFixtureGenerator.class})
@@ -46,7 +49,7 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
         Optional<Reservation> optionalReservation = reservationRepository.findById(reservation.getId());
@@ -65,24 +68,23 @@ class JdbcReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("예약의 목록을 페이지 단위로 조회한다")
-    void findAllWithPaging() {
+    @DisplayName("예약의 목록 중 취소된 예약을 제외하고 페이지 단위로 조회한다")
+    void findAllByStatusCanceledNotWithPaging() {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
-        Reservation reservation2 = sqlFixtureGenerator.insertReservation("포비", LocalDate.of(2023, 8, 6), time, theme, Status.WAITING);
-        sqlFixtureGenerator.insertReservation("조이", LocalDate.of(2023, 8, 7), time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, CONFIRMED);
+        sqlFixtureGenerator.insertReservation("포비", LocalDate.of(2023, 8, 6), time, theme, WAITING);
+        Reservation included = sqlFixtureGenerator.insertReservation("조이", LocalDate.of(2023, 8, 7), time, theme, WAITING);
+        Reservation excepted = sqlFixtureGenerator.insertReservation("벨로", LocalDate.of(2023, 8, 8), time, theme, CANCELED);
 
         // when
-        List<Reservation> reservations = reservationRepository.findAll(2, 1);
+        List<Reservation> reservations = reservationRepository.findAllByStatusCanceledNot(2, 2);
 
         // then
         assertThat(reservations)
-                .extracting(Reservation::getId, Reservation::getGuestName, Reservation::getDate)
-                .containsExactly(
-                        tuple(reservation2.getId(), "포비", LocalDate.of(2023, 8, 6))
-                );
+                .contains(included)
+                .doesNotContain(excepted);
     }
 
     @Test
@@ -91,7 +93,7 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
         List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findWaitingAllByGuestName(reservation.getGuestName());
@@ -124,11 +126,11 @@ class JdbcReservationRepositoryTest {
         LocalDate date = LocalDate.of(2023, 8, 5);
 
         sqlFixtureGenerator.insertReservation(
-                "브라운", date, time, theme, Status.CONFIRMED, LocalDateTime.of(2023, 8, 1, 9, 0));
+                "브라운", date, time, theme, CONFIRMED, LocalDateTime.of(2023, 8, 1, 9, 0));
         sqlFixtureGenerator.insertReservation(
-                "주디", date, time, theme, Status.WAITING, LocalDateTime.of(2023, 8, 1, 9, 1));
+                "주디", date, time, theme, WAITING, LocalDateTime.of(2023, 8, 1, 9, 1));
         Reservation reservation = sqlFixtureGenerator.insertReservation(
-                "초코칩", date, time, theme, Status.WAITING, LocalDateTime.of(2023, 8, 1, 9, 2));
+                "초코칩", date, time, theme, WAITING, LocalDateTime.of(2023, 8, 1, 9, 2));
 
         // when
         List<ReservationWaitingDto> reservationWaitingDtos = reservationRepository.findWaitingAllByGuestName("초코칩");
@@ -147,8 +149,8 @@ class JdbcReservationRepositoryTest {
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate date = LocalDate.of(2023, 8, 5);
 
-        Reservation first = sqlFixtureGenerator.insertReservation("토비", date, time, theme, Status.WAITING);
-        Reservation second = sqlFixtureGenerator.insertReservation("브라운", date, time, theme, Status.WAITING);
+        Reservation first = sqlFixtureGenerator.insertReservation("토비", date, time, theme, WAITING);
+        Reservation second = sqlFixtureGenerator.insertReservation("브라운", date, time, theme, WAITING);
 
         // when
         Optional<Reservation> result = reservationRepository.findBySlotAndStatusWaitingAndWaitingNumberIsOne(date, time.getId(), theme.getId());
@@ -167,7 +169,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Reservation reservation = Reservation.create(
-                "브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING, LocalDateTime.now());
+                "브라운", LocalDate.of(2023, 8, 5), time, theme, WAITING, LocalDateTime.now());
 
         // when
         Reservation saved = reservationRepository.save(reservation);
@@ -191,16 +193,18 @@ class JdbcReservationRepositoryTest {
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
 
         ReservationTime beforeTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
-        Status beforeStatus = Status.WAITING;
+        Status beforeStatus = WAITING;
         LocalDate beforeDate = LocalDate.of(2023, 8, 5);
         Reservation reservation = sqlFixtureGenerator.insertReservation("브라운", beforeDate, beforeTime, theme, beforeStatus);
 
         LocalDate updatedDate = LocalDate.of(2023, 9, 7);
         ReservationTime updatedTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
-        Status updatedStatus = Status.CONFIRMED;
+        Status updatedStatus = CONFIRMED;
+        LocalDateTime lastModifiedAt = LocalDateTime.of(2023, 9, 1, 10, 0);
 
         // when
-        boolean result = reservationRepository.updateDateAndTimeAndStatus(reservation.getId(), updatedDate, updatedTime.getId(), updatedStatus);
+        boolean result = reservationRepository.updateDateAndTimeAndStatus(
+                reservation.getId(), updatedDate, updatedTime.getId(), updatedStatus, lastModifiedAt);
 
         // then
         assertThat(result).isTrue();
@@ -208,18 +212,20 @@ class JdbcReservationRepositoryTest {
         Map<String, Object> map = findReservationById(reservation.getId());
         LocalDate date = ((Date) map.get("date")).toLocalDate();
         Long timeId = ((Number) map.get("time_id")).longValue();
-        Status status = Status.from((String) map.get("status"));
+        Status status = from((String) map.get("status"));
+        LocalDateTime updatedLastModifiedAt = ((java.sql.Timestamp) map.get("last_modified_at")).toLocalDateTime();
         assertThat(date).isEqualTo(updatedDate);
         assertThat(timeId).isEqualTo(updatedTime.getId());
         assertThat(status).isEqualTo(updatedStatus);
+        assertThat(updatedLastModifiedAt).isEqualTo(lastModifiedAt);
     }
 
     @Test
     @DisplayName("예약의 상태를 수정한다.")
     public void updateStatus() {
         // given
-        Status beforeStatus = Status.WAITING;
-        Status updatedStatus = Status.CONFIRMED;
+        Status beforeStatus = WAITING;
+        Status updatedStatus = CONFIRMED;
 
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
@@ -234,7 +240,7 @@ class JdbcReservationRepositoryTest {
         assertThat(result).isTrue();
 
         Map<String, Object> map = findReservationById(reservation.getId());
-        Status status = Status.from((String) map.get("status"));
+        Status status = from((String) map.get("status"));
         assertThat(status).isEqualTo(updatedStatus);
     }
 
@@ -247,7 +253,7 @@ class JdbcReservationRepositoryTest {
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Theme theme2 = sqlFixtureGenerator.insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
-        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, theme, WAITING);
 
         // when
         boolean exists = reservationRepository.existsBySlotAndGuestNameExceptCanceled(targetDate, time.getId(), theme.getId(), "브라운");
@@ -298,8 +304,8 @@ class JdbcReservationRepositoryTest {
 
         LocalDate targetDate = LocalDate.of(2023, 8, 5);
 
-        sqlFixtureGenerator.insertReservation(target1, targetDate, time, theme, Status.CONFIRMED);
-        sqlFixtureGenerator.insertReservation(target2, targetDate, otherTime, theme, Status.CONFIRMED);
+        sqlFixtureGenerator.insertReservation(target1, targetDate, time, theme, CONFIRMED);
+        sqlFixtureGenerator.insertReservation(target2, targetDate, otherTime, theme, CONFIRMED);
 
         // when
         boolean exists = reservationRepository
@@ -352,7 +358,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         ReservationTime time2 = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
         boolean exists = reservationRepository.existByTimeId(time.getId());
@@ -385,7 +391,7 @@ class JdbcReservationRepositoryTest {
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
         Theme theme2 = sqlFixtureGenerator.insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
-        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
         boolean exists = reservationRepository.existByThemeId(theme.getId());
@@ -417,9 +423,9 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED);
-        sqlFixtureGenerator.insertReservation("주디", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
-        Reservation reservation = sqlFixtureGenerator.insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, CONFIRMED);
+        sqlFixtureGenerator.insertReservation("주디", LocalDate.of(2023, 8, 5), time, theme, WAITING);
+        Reservation reservation = sqlFixtureGenerator.insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
         ReservationWaitingDto reservationWaitingDto = reservationRepository.findWaitingById(reservation.getId()).get();
@@ -434,9 +440,9 @@ class JdbcReservationRepositoryTest {
         // given
         ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
         Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, Status.CONFIRMED);
-        sqlFixtureGenerator.insertReservation("주디", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
-        Reservation reservation = sqlFixtureGenerator.insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, Status.WAITING);
+        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2023, 8, 5), time, theme, CONFIRMED);
+        sqlFixtureGenerator.insertReservation("주디", LocalDate.of(2023, 8, 5), time, theme, WAITING);
+        Reservation reservation = sqlFixtureGenerator.insertReservation("초코칩", LocalDate.of(2023, 8, 5), time, theme, WAITING);
 
         // when
         boolean result = reservationRepository.existsBySlot(reservation.getDate(), time.getId(), theme.getId());
