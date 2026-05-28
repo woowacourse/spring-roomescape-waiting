@@ -36,7 +36,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsByDeletedAtIsNull() {
+    public List<Reservation> findReservationsByNotDeleted() {
         return jdbcTemplate.query(
             """
                 SELECT r.id, r.name, r.date, r.status,
@@ -84,7 +84,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findReservationsByNameAndDeletedAtIsNull(String name) {
+    public List<Reservation> findReservationsByNameAndNotDeleted(String name) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
@@ -107,7 +107,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public Optional<Reservation> findReservationByIdAndDeletedAtIsNull(Long id) {
+    public Optional<Reservation> findReservationByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT r.id, r.name, r.date, r.status,
                    rt.id AS time_id, rt.start_at, rt.deleted_at AS time_deleted_at,
@@ -130,7 +130,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Long> findTimeIdsByDateAndThemeIdAndDeletedAtIsNull(LocalDate date, Long themeId) {
+    public List<Long> findTimeIdsByDateAndThemeIdAndNotDeleted(LocalDate date, Long themeId) {
         String sql = """
             SELECT r.time_id
             FROM reservation r
@@ -228,7 +228,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservationByIdAndDeletedAtIsNull(Long id) {
+    public boolean existsReservationByIdAndNotDeleted(Long id) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
@@ -244,7 +244,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(LocalDate date, Time time, Theme theme) {
+    public boolean existsReservationByDateAndTimeAndThemeAndNotDeleted(LocalDate date, Time time, Theme theme) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1
@@ -293,8 +293,8 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(LocalDate date, Time time,
-        Theme theme, Long id) {
+    public boolean existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(LocalDate date, Time time,
+                                                                               Theme theme, Long id) {
         String sql = """
             SELECT EXISTS (
                 SELECT 1

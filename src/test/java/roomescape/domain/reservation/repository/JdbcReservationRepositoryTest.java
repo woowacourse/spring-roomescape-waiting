@@ -103,7 +103,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date, time, theme));
 
             // then
-            assertThat(reservationRepository.findReservationsByDeletedAtIsNull())
+            assertThat(reservationRepository.findReservationsByNotDeleted())
                 .extracting(Reservation::getId, r -> r.getName().value())
                 .containsExactly(tuple(actual.getId(), "예약자2"));
         }
@@ -150,7 +150,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), LocalDate.of(2026, 5, 2), time2, theme2));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByDeletedAtIsNull();
+            List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
 
             // then
             assertThat(actual)
@@ -180,7 +180,7 @@ class JdbcReservationRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByDeletedAtIsNull();
+            List<Reservation> actual = reservationRepository.findReservationsByNotDeleted();
 
             // then
             assertThat(actual)
@@ -218,7 +218,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(deletedReservation.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndDeletedAtIsNull("브라운");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
 
             // then
             assertThat(actual)
@@ -235,7 +235,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), LocalDate.of(2026, 5, 1), time, theme));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndDeletedAtIsNull("제이슨");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("제이슨");
 
             // then
             assertThat(actual).isEmpty();
@@ -252,7 +252,7 @@ class JdbcReservationRepositoryTest {
             themeRepository.deleteThemeById(theme.getId());
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndDeletedAtIsNull("브라운");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
 
             // then
             assertThat(actual).hasSize(1);
@@ -276,7 +276,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("브라운"), date.minusDays(1), time3, theme));
 
             // when
-            List<Reservation> actual = reservationRepository.findReservationsByNameAndDeletedAtIsNull("브라운");
+            List<Reservation> actual = reservationRepository.findReservationsByNameAndNotDeleted("브라운");
 
             // then
             assertThat(actual)
@@ -317,7 +317,7 @@ class JdbcReservationRepositoryTest {
             timeRepository.deleteTimeById(deletedTime.getId());
 
             // when
-            List<Long> actual = reservationRepository.findTimeIdsByDateAndThemeIdAndDeletedAtIsNull(
+            List<Long> actual = reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(
                 date, theme1.getId());
 
             // then
@@ -408,7 +408,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.save(Reservation.create(new ReserverName("예약자"), date, time, theme));
 
             // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(
+            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
                 date, time, theme);
 
             // then
@@ -426,7 +426,7 @@ class JdbcReservationRepositoryTest {
             reservationRepository.update(reservation.cancel());
 
             // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(
+            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(
                 date, time, theme);
 
             // then
@@ -459,7 +459,7 @@ class JdbcReservationRepositoryTest {
 
             // then
             assertThat(actual.getId()).isEqualTo(reservation.getId());
-            assertThat(reservationRepository.findReservationByIdAndDeletedAtIsNull(reservation.getId()))
+            assertThat(reservationRepository.findReservationByIdAndNotDeleted(reservation.getId()))
                 .get()
                 .extracting(
                     r -> r.getName().value(),
@@ -531,7 +531,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자"), date, time, theme));
 
             // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(
+            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
                 date, time, theme, reservation.getId());
 
             // then
@@ -549,7 +549,7 @@ class JdbcReservationRepositoryTest {
                 Reservation.create(new ReserverName("예약자2"), date.plusDays(1), time, theme));
 
             // when
-            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(
+            boolean actual = reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
                 date, time, theme, reservation.getId());
 
             // then
@@ -579,11 +579,11 @@ class JdbcReservationRepositoryTest {
             reservationRepository.deleteReservationById(reservation1.getId());
 
             // then
-            assertThat(reservationRepository.findReservationsByDeletedAtIsNull())
+            assertThat(reservationRepository.findReservationsByNotDeleted())
                 .extracting(Reservation::getId)
                 .containsExactly(reservation2.getId());
             assertThat(countDeletedReservationById(reservation1.getId())).isEqualTo(1);
-            assertThat(reservationRepository.existsReservationByIdAndDeletedAtIsNull(reservation1.getId())).isFalse();
+            assertThat(reservationRepository.existsReservationByIdAndNotDeleted(reservation1.getId())).isFalse();
         }
 
         @Test

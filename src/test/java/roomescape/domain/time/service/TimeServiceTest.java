@@ -82,7 +82,7 @@ class TimeServiceTest {
             Time reservedTime = Time.reconstruct(1L, LocalTime.of(10, 0), null);
             Time availableTime = Time.reconstruct(2L, LocalTime.of(11, 0), null);
             when(themeRepository.existsThemeByIdAndDeletedAtIsNull(themeId)).thenReturn(true);
-            when(reservationRepository.findTimeIdsByDateAndThemeIdAndDeletedAtIsNull(date, themeId))
+            when(reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(date, themeId))
                 .thenReturn(List.of(1L));
             when(timeRepository.findAllByDeletedAtIsNull()).thenReturn(List.of(reservedTime, availableTime));
 

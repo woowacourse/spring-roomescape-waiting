@@ -44,7 +44,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> getReservations() {
-        List<Reservation> reservations = reservationRepository.findReservationsByDeletedAtIsNull();
+        List<Reservation> reservations = reservationRepository.findReservationsByNotDeleted();
         return convertReservationsToDto(reservations);
     }
 
@@ -64,7 +64,7 @@ public class ReservationService {
     }
 
     public List<ReservationResponseDto> getReservationsByName(String name) {
-        List<Reservation> reservations = reservationRepository.findReservationsByNameAndDeletedAtIsNull(name);
+        List<Reservation> reservations = reservationRepository.findReservationsByNameAndNotDeleted(name);
         return reservations.stream()
             .map(reservation -> reservationMapper.toResponseDto(reservation, getWaitingNumber(reservation)))
             .toList();
@@ -74,7 +74,7 @@ public class ReservationService {
     public ReservationCreateResponseDto saveReservation(ReservationCreateCommand command) {
         Reservation reservation = createReservation(command);
 
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNull(reservation.getDate(),
+        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeleted(reservation.getDate(),
             reservation.getTime(),
             reservation.getTheme())) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
@@ -110,7 +110,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationCreateResponseDto updateReservation(Long id, ReservationUpdateCommand command) {
-        Reservation existingReservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
+        Reservation existingReservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         if (!existingReservation.getName().equals(command.name())) {
@@ -126,7 +126,7 @@ public class ReservationService {
         }
 
         Reservation updateReservation = createUpdateReservation(existingReservation, command);
-        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndDeletedAtIsNullAndIdNot(
+        if (reservationRepository.existsReservationByDateAndTimeAndThemeAndNotDeletedAndIdNot(
             updateReservation.getDate(), updateReservation.getTime(), updateReservation.getTheme(), id)) {
             throw new GeneralException(ReservationErrorType.ALREADY_RESERVED);
         }
@@ -189,7 +189,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationCancelResponseDto cancelReservation(Long id, String name) {
-        Reservation reservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         if (!reservation.getName().value().equals(name)) {
@@ -209,7 +209,7 @@ public class ReservationService {
 
     @Transactional
     public void deleteReservationById(Long id) {
-        if (!reservationRepository.existsReservationByIdAndDeletedAtIsNull(id)) {
+        if (!reservationRepository.existsReservationByIdAndNotDeleted(id)) {
             throw new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND);
         }
 
@@ -238,7 +238,7 @@ public class ReservationService {
 
     @Transactional
     public ReservationCancelResponseDto cancelWaitingReservation(Long id, String name) {
-        Reservation reservation = reservationRepository.findReservationByIdAndDeletedAtIsNull(id)
+        Reservation reservation = reservationRepository.findReservationByIdAndNotDeleted(id)
             .orElseThrow(() -> new GeneralException(ReservationErrorType.RESERVATION_NOT_FOUND));
 
         if (!reservation.getName().value().equals(name)) {

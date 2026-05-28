@@ -47,7 +47,7 @@ public class TimeService {
                 List.of(new ParameterErrorResponseDto("themeId", "존재 하지 않는 테마입니다.")));
         }
 
-        List<Long> reservedTimeIds = reservationRepository.findTimeIdsByDateAndThemeIdAndDeletedAtIsNull(date, themeId);
+        List<Long> reservedTimeIds = reservationRepository.findTimeIdsByDateAndThemeIdAndNotDeleted(date, themeId);
 
         return timeRepository.findAllByDeletedAtIsNull()
             .stream()
