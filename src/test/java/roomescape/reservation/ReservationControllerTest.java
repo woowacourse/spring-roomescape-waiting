@@ -64,6 +64,7 @@ public class ReservationControllerTest {
         waiting.put("date", "2026-05-05");
         waiting.put("timeId", 1);
         waiting.put("themeId", 1);
+        waiting.put("reservationId", null);
         return waiting;
     }
 
@@ -79,7 +80,7 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("success", is(true))
-                .body("data.id", is(5))
+                .body("data.id", is(6))
                 .body("data.memberId", is(1))
                 .body("data.scheduleId", is(4));
     }
@@ -134,10 +135,10 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))
-                .body("data.size()", is(1))
-                .body("data[0].id", is(waitingId))
-                .body("data[0].status", is("WAITING"))
-                .body("data[0].waitingOrder", is(1));
+                .body("data.size()", is(2))
+                .body("data[1].id", is(waitingId))
+                .body("data[1].status", is("WAITING"))
+                .body("data[1].waitingOrder", is(1));
     }
 
     @Test
@@ -150,7 +151,7 @@ public class ReservationControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))
-                .body("data.size()", is(4));
+                .body("data.size()", is(5));
     }
 
     @Test

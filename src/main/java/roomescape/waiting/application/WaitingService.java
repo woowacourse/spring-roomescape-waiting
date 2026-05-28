@@ -2,8 +2,10 @@ package roomescape.waiting.application;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.EscapeRoomException;
+import roomescape.reservation.Reservation;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
@@ -21,9 +23,14 @@ public class WaitingService {
     private final WaitingRepository waitingRepository;
     private final ReservationRepository reservationRepository;
 
+    @Transactional
     public WaitingResponse save(WaitingRequest body, long memberId) {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
+
+        if (body.reservationId() != null) {
+            deleteReservationIfPresent(body.reservationId(), memberId);
+        }
 
         validateMemberNotAlreadyReserved(memberId, scheduleId);
         validateMemberNotAlreadyWaiting(memberId, scheduleId);
@@ -51,7 +58,7 @@ public class WaitingService {
 
     private void validateMemberNotAlreadyReserved(long memberId, long scheduleId) {
         if (reservationRepository.existsByMemberIdAndScheduleId(memberId, scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
+            throw new EscapeRoomException(ErrorCode.WAITING_ON_OWN_RESERVATION_NOT_ALLOWED);
         }
     }
 
@@ -66,5 +73,16 @@ public class WaitingService {
                 && !waitingRepository.existsByScheduleId(scheduleId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_TARGET_BAD_REQUEST);
         }
+    }
+
+    private void deleteReservationIfPresent(long reservationId, long memberId) {
+        Reservation reservation = reservationRepository.findById(reservationId)
+                .orElseThrow(() -> new EscapeRoomException(ErrorCode.RESERVATION_NOT_FOUND, reservationId));
+
+        if (!Objects.equals(reservation.getMemberId(), memberId)) {
+            throw new EscapeRoomException(ErrorCode.RESERVATION_NOT_OWNED_BY_MEMBER, reservationId);
+        }
+
+        reservationRepository.deleteById(reservationId);
     }
 }

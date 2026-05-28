@@ -50,7 +50,7 @@ class JdbcScheduleRepositoryTest {
     void 스케줄_전체_조회_레포지토리_테스트() {
         List<Schedule> schedules = repository.findAll();
 
-        assertThat(schedules).hasSize(5);
+        assertThat(schedules).hasSize(6);
     }
 
     @Test

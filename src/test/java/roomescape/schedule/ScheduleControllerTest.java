@@ -57,7 +57,7 @@ class ScheduleControllerTest {
                 .then().log().all()
                 .statusCode(201)
                 .body("success", is(true))
-                .body("data.id", is(6))
+                .body("data.id", is(7))
                 .body("data.date", is("2026-05-06"))
                 .body("data.time_id", is(1))
                 .body("data.theme_id", is(4));
@@ -73,7 +73,7 @@ class ScheduleControllerTest {
                 .then().log().all()
                 .statusCode(200)
                 .body("success", is(true))
-                .body("data.size()", is(5));
+                .body("data.size()", is(6));
     }
 
     @Test
@@ -108,11 +108,11 @@ class ScheduleControllerTest {
                 .when().post("/api/manager/schedules")
                 .then().log().all()
                 .statusCode(201)
-                .body("data.id", is(6));
+                .body("data.id", is(7));
 
         RestAssured.given().log().all()
                 .header("Authorization", "Bearer " + accessToken)
-                .when().delete("/api/manager/schedules/6")
+                .when().delete("/api/manager/schedules/7")
                 .then().log().all()
                 .statusCode(204);
     }

@@ -18,7 +18,8 @@ VALUES ('2026-05-05', 1, 1), -- id=1
        ('2026-05-05', 2, 2), -- id=2
        ('2026-05-05', 3, 3), -- id=3
        ('2026-05-05', 4, 4), -- id=4
-       ('2026-05-06', 2, 2); -- id=5
+       ('2026-05-06', 2, 2), -- id=5
+       ('2026-05-06', 3, 2); -- id=6
 
 INSERT INTO member (name, password, role)
 VALUES ('a', 'test1', 'USER'),
@@ -26,10 +27,9 @@ VALUES ('a', 'test1', 'USER'),
        ('c', 'test3', 'USER'),
        ('d', 'test4', 'MANAGER');
 
-
-INSERT
-INTO reservation (member_id, schedule_id)
+INSERT INTO reservation (member_id, schedule_id)
 VALUES (1, 1),
        (1, 2),
        (1, 3),
-       (1, 5);
+       (1, 5),
+       (2, 6);

@@ -49,7 +49,7 @@ class JdbcReservationRepositoryTest {
 
         List<ReservationDetailProjection> reservations = reservationRepository.findAll();
 
-        assertThat(reservations).hasSize(5);
+        assertThat(reservations).hasSize(6);
         assertThat(reservations).extracting(ReservationDetailProjection::id)
                 .contains(savedReservation.getId());
     }
@@ -62,7 +62,7 @@ class JdbcReservationRepositoryTest {
         reservationRepository.deleteByIdAndMemberId(savedReservation.getId(), MEMBER_ID);
 
         List<ReservationDetailProjection> reservations = reservationRepository.findAll();
-        assertThat(reservations).hasSize(4);
+        assertThat(reservations).hasSize(5);
         assertThat(reservations).extracting(ReservationDetailProjection::id)
                 .doesNotContain(savedReservation.getId());
     }
