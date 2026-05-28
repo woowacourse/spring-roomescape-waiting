@@ -61,3 +61,15 @@ VALUES ('보예', 1, 1, 1),
        ('아이큐', 10, 1, 9),
        ('쿠다', 11, 3, 6),
        ('고래', 11, 4, 10);
+
+-- 고래 대기 데이터
+-- 슬롯1 (date+1, time2, theme1): 이산이 먼저 대기 → 고래 2순위
+-- 슬롯2 (date+2, time2, theme11): 고래만 대기 → 고래 1순위
+-- 슬롯3 (date+3, time3, theme6): 보예·나무가 먼저 대기 → 고래 3순위
+INSERT INTO waiting_reservation (name, date_id, time_id, theme_id, created_at)
+VALUES ('이산', 5, 2, 1,  CURRENT_TIMESTAMP - INTERVAL '3' HOUR),
+       ('고래', 5, 2, 1,  CURRENT_TIMESTAMP - INTERVAL '2' HOUR),
+       ('고래', 6, 2, 11, CURRENT_TIMESTAMP - INTERVAL '2' HOUR),
+       ('보예', 7, 3, 6,  CURRENT_TIMESTAMP - INTERVAL '4' HOUR),
+       ('나무', 7, 3, 6,  CURRENT_TIMESTAMP - INTERVAL '3' HOUR),
+       ('고래', 7, 3, 6,  CURRENT_TIMESTAMP - INTERVAL '2' HOUR);

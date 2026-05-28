@@ -89,7 +89,7 @@
                         <input id="reservation-name" name="name" type="text" maxlength="20"
                                placeholder="공백 없이 이름을 입력하세요" 
                                pattern="^[^\s]+$" title="공백은 포함될 수 없습니다." required>
-                        <button type="submit" class="primary-button full-width">예약 확정</button>
+                        <button type="submit" id="reservation-submit-button" class="primary-button full-width">예약 확정</button>
                         <p id="reservation-message" class="form-message" aria-live="polite"></p>
                     </form>
                 </div>
@@ -109,16 +109,23 @@
                     <form id="search-form" class="reservation-form search-form-inline">
                         <label for="search-name">예약자 이름 <span class="input-hint">(공백 없이 입력)</span></label>
                         <input id="search-name" name="name" type="text" maxlength="20"
-                               placeholder="공백 없이 이름을 입력하세요" 
+                               placeholder="공백 없이 이름을 입력하세요"
                                pattern="^[^\s]+$" title="공백은 포함될 수 없습니다." required>
                         <button type="submit" class="primary-button">검색하기</button>
                     </form>
                 </div>
                 <div id="search-result-container" class="search-result-stack" hidden>
                     <div class="result-divider"></div>
-                    <div id="search-results" class="search-results-grid">
-                        <!-- 검색 결과가 여기에 렌더링됩니다. -->
+                    <div class="my-reservation-tabs">
+                        <button type="button" class="my-reservation-tab active" data-result-tab="reservations-result">
+                            예약 <span id="reservation-count" class="tab-count"></span>
+                        </button>
+                        <button type="button" class="my-reservation-tab" data-result-tab="waiting-result">
+                            대기 <span id="waiting-count" class="tab-count"></span>
+                        </button>
                     </div>
+                    <div id="reservations-result" class="search-results-grid"></div>
+                    <div id="waiting-result" class="search-results-grid" hidden></div>
                 </div>
                 <p id="search-message" class="form-message" aria-live="polite"></p>
             </section>

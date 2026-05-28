@@ -383,6 +383,10 @@ input {
     gap: 16px;
 }
 
+.search-results-grid[hidden] {
+    display: none;
+}
+
 .reservation-card {
     padding: 24px;
     border-radius: 20px;
@@ -550,22 +554,76 @@ input {
     color: var(--blue);
 }
 
+.my-reservation-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.my-reservation-tab {
+    padding: 8px 20px;
+    border: 2px solid var(--line);
+    border-radius: 20px;
+    background: var(--surface);
+    color: var(--muted);
+    font-size: 0.95rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+}
+
+.my-reservation-tab:hover {
+    border-color: var(--blue);
+    color: var(--blue);
+}
+
+.my-reservation-tab.active {
+    border-color: var(--blue);
+    background: var(--blue);
+    color: #fff;
+}
+
+.tab-count {
+    display: inline-block;
+    min-width: 20px;
+    padding: 0 5px;
+    border-radius: 10px;
+    background: rgba(255,255,255,0.3);
+    font-size: 0.8rem;
+    margin-left: 4px;
+}
+
+.my-reservation-tab:not(.active) .tab-count {
+    background: var(--line);
+    color: var(--muted);
+}
+
 .time-card.unavailable {
-    background: #f8fafc;
-    border-color: #e5e7eb;
-    color: #9ca3af;
-    cursor: not-allowed;
-    pointer-events: none;
+    background: #fffbeb;
+    border-color: #fcd34d;
+    color: #92400e;
+    cursor: pointer;
+}
+
+.time-card.unavailable:hover {
+    border-color: #f59e0b;
+    background: #fef3c7;
+}
+
+.time-card.unavailable:has(input:checked) {
+    border-color: #f59e0b;
+    background: #fef3c7;
+    box-shadow: 0 0 0 2px #fcd34d;
 }
 
 .time-card.unavailable .time-value,
 .time-card.unavailable .time-status {
-    color: #9ca3af;
+    color: #92400e;
 }
 
 .time-card.unavailable .card-pill {
-    background: #f1f5f9;
-    color: #94a3b8;
+    background: #fde68a;
+    color: #92400e;
 }
 
 .modal {

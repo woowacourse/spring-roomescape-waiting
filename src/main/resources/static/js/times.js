@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
         times: [],
         selectedThemeId: null,
         selectedDateId: null,
+        selectedTimeAvailable: null,
         updateState: {
             reservationId: null,
             themeId: null,
@@ -54,7 +55,11 @@ document.addEventListener("DOMContentLoaded", () => {
         "PAST_TIME_NOT_ALLOWED": "현재보다 이전 시간은 예약할 수 없습니다. 현재 시각 이후의 시간을 선택해 주세요.",
         "THEME_IN_USE": "현재 예약이 진행 중인 테마는 변경할 수 없습니다. 관리자에게 문의해 주세요.",
         "RESERVATION_DATE_IN_USE": "예약이 존재하는 날짜는 변경할 수 없습니다. 예약을 먼저 확인해 주세요.",
-        "RESERVATION_TIME_IN_USE": "예약이 존재하는 시간은 변경할 수 없습니다. 예약을 먼저 확인해 주세요."
+        "RESERVATION_TIME_IN_USE": "예약이 존재하는 시간은 변경할 수 없습니다. 예약을 먼저 확인해 주세요.",
+
+        "DUPLICATE_WAITING_RESERVATION": "이미 해당 슬롯에 대기 신청이 되어 있습니다.",
+        "AVAILABLE_SLOT_NOT_WAITABLE": "예약 가능한 시간대에는 대기를 신청할 수 없습니다. 바로 예약해 주세요.",
+        "WAITING_RESERVATION_NOT_FOUND": "해당 대기 내역을 찾을 수 없습니다."
     };
 
     function getFriendlyErrorMessage(error, defaultMsg) {
@@ -199,15 +204,36 @@ document.addEventListener("DOMContentLoaded", () => {
         `).join("");
     }
 
+    const reservationSubmitButton = document.getElementById("reservation-submit-button");
+
+    function updateSubmitButton() {
+        if (state.selectedTimeAvailable === false) {
+            reservationSubmitButton.textContent = "대기 신청";
+            reservationSubmitButton.classList.remove("primary-button");
+            reservationSubmitButton.classList.add("secondary-button");
+        } else {
+            reservationSubmitButton.textContent = "예약 확정";
+            reservationSubmitButton.classList.remove("secondary-button");
+            reservationSubmitButton.classList.add("primary-button");
+        }
+    }
+
     function renderTimes() {
         timeList.innerHTML = state.times.map((time) => `
             <label class="time-card time-card-refined ${time.available ? "available" : "unavailable"}">
-                <input type="radio" name="timeId" value="${time.timeId}" form="reservation-form" ${time.available ? "" : "disabled"}>
+                <input type="radio" name="timeId" value="${time.timeId}" form="reservation-form" data-available="${time.available}">
                 <span class="card-pill">${time.available ? "OPEN" : "CLOSED"}</span>
                 <span class="time-value">${time.startAt}</span>
-                <span class="time-status">${time.available ? "예약 가능" : "마감"}</span>
+                <span class="time-status">${time.available ? "예약 가능" : "대기 신청 가능"}</span>
             </label>
         `).join("");
+
+        timeList.querySelectorAll('input[name="timeId"]').forEach((input) => {
+            input.addEventListener("change", () => {
+                state.selectedTimeAvailable = input.dataset.available === "true";
+                updateSubmitButton();
+            });
+        });
     }
 
     async function fetchJson(url) {
@@ -300,8 +326,11 @@ document.addEventListener("DOMContentLoaded", () => {
         message.textContent = "";
         message.className = "form-message";
 
+        const isWaiting = state.selectedTimeAvailable === false;
+        const url = isWaiting ? "/waiting-reservations" : "/reservations";
+
         try {
-            const response = await fetch("/reservations", {
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -313,12 +342,14 @@ document.addEventListener("DOMContentLoaded", () => {
             const result = await response.json();
 
             if (!response.ok) {
-                message.textContent = getFriendlyErrorMessage(result, "예약 요청 중 문제가 발생했습니다.");
+                message.textContent = getFriendlyErrorMessage(result, isWaiting ? "대기 신청 중 문제가 발생했습니다." : "예약 요청 중 문제가 발생했습니다.");
                 message.classList.add("error");
                 return;
             }
 
-            message.textContent = result.name + "님의 예약이 완료되었습니다.";
+            message.textContent = isWaiting
+                ? `${result.name}님의 대기 신청이 완료되었습니다.`
+                : `${result.name}님의 예약이 완료되었습니다.`;
             message.classList.add("success");
 
             window.setTimeout(() => {
@@ -331,9 +362,23 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     const searchForm = document.getElementById("search-form");
-    const searchResults = document.getElementById("search-results");
     const searchResultContainer = document.getElementById("search-result-container");
     const searchMessage = document.getElementById("search-message");
+    const reservationsResult = document.getElementById("reservations-result");
+    const waitingResult = document.getElementById("waiting-result");
+    const reservationCount = document.getElementById("reservation-count");
+    const waitingCount = document.getElementById("waiting-count");
+    const resultTabs = document.querySelectorAll("[data-result-tab]");
+
+    resultTabs.forEach((tab) => {
+        tab.addEventListener("click", () => {
+            resultTabs.forEach((t) => t.classList.remove("active"));
+            tab.classList.add("active");
+            const target = tab.dataset.resultTab;
+            reservationsResult.hidden = target !== "reservations-result";
+            waitingResult.hidden = target !== "waiting-result";
+        });
+    });
 
     searchForm.addEventListener("submit", async (event) => {
         event.preventDefault();
@@ -342,43 +387,73 @@ document.addEventListener("DOMContentLoaded", () => {
         searchMessage.className = "form-message";
 
         try {
-            const results = await fetchJson(`/reservations?name=${encodeURIComponent(name)}`);
-            if (results.length === 0) {
+            const [reservations, waitingReservations] = await Promise.all([
+                fetchJson(`/reservations?name=${encodeURIComponent(name)}`),
+                fetchJson(`/waiting-reservations?name=${encodeURIComponent(name)}`)
+            ]);
+
+            if (reservations.length === 0 && waitingReservations.length === 0) {
                 searchMessage.textContent = "검색 결과가 없습니다.";
                 searchResultContainer.hidden = true;
                 return;
             }
 
-            searchResults.innerHTML = results.map((res) => `
-                <article class="reservation-card">
-                    <div class="reservation-card-main">
-                        <img class="reservation-card-thumb" src="${getThemeImage()}" alt="${res.theme.name}">
-                        <div class="reservation-card-info">
-                            <span class="reservation-card-tag">RESERVATION</span>
-                            <h3 class="reservation-card-title">${res.theme.name}</h3>
-                            <div class="reservation-card-meta">
-                                📅 <span>${res.date}</span>
-                            </div>
-                            <div class="reservation-card-meta">
-                                ⏰ <span>${res.time.startAt}</span>
-                            </div>
-                            <div class="reservation-card-meta">
-                                👤 <span>${res.name}님</span>
+            reservationsResult.innerHTML = reservations.length === 0
+                ? `<p class="form-message">예약 내역이 없습니다.</p>`
+                : reservations.map((res) => `
+                    <article class="reservation-card">
+                        <div class="reservation-card-main">
+                            <img class="reservation-card-thumb" src="${getThemeImage()}" alt="${res.theme.name}">
+                            <div class="reservation-card-info">
+                                <span class="reservation-card-tag">예약</span>
+                                <h3 class="reservation-card-title">${res.theme.name}</h3>
+                                <div class="reservation-card-meta">📅 <span>${res.date}</span></div>
+                                <div class="reservation-card-meta">⏰ <span>${res.time.startAt}</span></div>
+                                <div class="reservation-card-meta">👤 <span>${res.name}님</span></div>
                             </div>
                         </div>
-                    </div>
-                    <div class="reservation-card-actions">
-                        <button type="button" class="update-button" 
-                            data-update-id="${res.id}" 
-                            data-theme-id="${res.theme.id}" 
-                            data-theme-name="${res.theme.name}">정보 수정</button>
-                        <button type="button" class="danger-button" data-cancel-id="${res.id}">예약 취소</button>
-                    </div>
-                </article>
-            `).join("");
+                        <div class="reservation-card-actions">
+                            <button type="button" class="update-button"
+                                data-update-id="${res.id}"
+                                data-theme-id="${res.theme.id}"
+                                data-theme-name="${res.theme.name}">정보 수정</button>
+                            <button type="button" class="danger-button" data-cancel-id="${res.id}">예약 취소</button>
+                        </div>
+                    </article>
+                `).join("");
+
+            waitingResult.innerHTML = waitingReservations.length === 0
+                ? `<p class="form-message">대기 내역이 없습니다.</p>`
+                : waitingReservations.map((res) => `
+                    <article class="reservation-card">
+                        <div class="reservation-card-main">
+                            <img class="reservation-card-thumb" src="${getThemeImage()}" alt="${res.theme.name}">
+                            <div class="reservation-card-info">
+                                <span class="reservation-card-tag" style="background:#f59e0b">대기 ${res.rank}순위</span>
+                                <h3 class="reservation-card-title">${res.theme.name}</h3>
+                                <div class="reservation-card-meta">📅 <span>${res.date}</span></div>
+                                <div class="reservation-card-meta">⏰ <span>${res.time.startAt}</span></div>
+                                <div class="reservation-card-meta">👤 <span>${res.name}님</span></div>
+                            </div>
+                        </div>
+                        <div class="reservation-card-actions">
+                            <button type="button" class="danger-button" data-cancel-waiting-id="${res.id}">대기 취소</button>
+                        </div>
+                    </article>
+                `).join("");
+
+            reservationCount.textContent = reservations.length;
+            waitingCount.textContent = waitingReservations.length;
+
+            // 탭 초기 상태: 예약 탭 활성화
+            resultTabs.forEach((t) => t.classList.remove("active"));
+            resultTabs[0].classList.add("active");
+            reservationsResult.hidden = false;
+            waitingResult.hidden = true;
 
             searchResultContainer.hidden = false;
             bindCancelButtons();
+            bindCancelWaitingButtons();
             bindUpdateButtons();
         } catch (error) {
             searchMessage.textContent = error.message;
@@ -386,6 +461,30 @@ document.addEventListener("DOMContentLoaded", () => {
             searchResultContainer.hidden = true;
         }
     });
+
+    function bindCancelWaitingButtons() {
+        document.querySelectorAll("[data-cancel-waiting-id]").forEach((button) => {
+            button.addEventListener("click", async () => {
+                const id = button.dataset.cancelWaitingId;
+                if (!window.confirm("정말 대기를 취소하시겠습니까?")) {
+                    return;
+                }
+
+                try {
+                    const response = await fetch(`/waiting-reservations/${id}`, { method: "DELETE" });
+                    if (!response.ok) {
+                        const error = await response.json().catch(() => ({}));
+                        alert(getFriendlyErrorMessage(error, "대기 취소에 실패했습니다."));
+                        return;
+                    }
+                    alert("대기가 취소되었습니다.");
+                    searchForm.dispatchEvent(new Event("submit"));
+                } catch (error) {
+                    alert("서버와 통신 중 오류가 발생했습니다.");
+                }
+            });
+        });
+    }
 
     function bindCancelButtons() {
         document.querySelectorAll("[data-cancel-id]").forEach((button) => {
