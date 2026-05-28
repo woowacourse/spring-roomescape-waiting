@@ -220,7 +220,7 @@ function renderAvailableTimes(items) {
     const timeLabel = item.timeInformation.time;
     button.type = "button";
     button.className = `chip${item.isAvailable ? "" : " waitable"}`;
-    button.textContent = `${timeLabel} ${item.isAvailable ? "(예약)" : "(대기)"}`;
+    button.textContent = `${timeLabel} (${item.isAvailable ? "예약 가능" : "대기 가능"})`;
     if (!item.isAvailable) {
       button.addEventListener("click", async () => {
         await requestWaiting(timeId, timeLabel);
@@ -376,9 +376,53 @@ function closeMenuPanels() {
   document.querySelectorAll(".menu-panel").forEach((panel) => panel.classList.add("hidden"));
 }
 
-function renderEditAvailableTimes(items, currentTime) {
+async function requestEditWaiting(timeId, timeLabel) {
+  try {
+    if (!editingReservation) {
+      throw new Error("수정 중인 예약 정보를 찾을 수 없습니다.");
+    }
+    if (!currentLoginName) {
+      throw new Error("로그인 후 대기 신청할 수 있습니다.");
+    }
+
+    const date = editReservationDateEl.value;
+    const confirmed = await confirmAction({
+      title: "대기 신청 확인",
+      message: `예약자 ${currentLoginName}\n날짜 ${date}\n테마 ${editingReservation.themeName}\n시간 ${timeLabel}\n\n기존 예약은 유지하고 이 시간에 대기를 신청하시겠습니까?`,
+      okLabel: "대기 신청",
+    });
+    if (!confirmed) {
+      setStatus("대기 신청이 취소되었습니다.");
+      return;
+    }
+
+    const waiting = await api("/user/waitings", {
+      method: "POST",
+      body: JSON.stringify({
+        date,
+        timeId,
+        themeId: editingReservation.themeId,
+      }),
+    });
+
+    editReservationModalEl.classList.add("hidden");
+    myReservationSectionEl.classList.remove("hidden");
+    await loadMyReservations();
+    await refreshAvailableTimesForCurrentSelection();
+    setStatus(`대기 신청 완료: ${timeLabel} / ${waiting.waitingOrder}번째`);
+    await showResultModal({
+      title: "대기 신청 성공",
+      message: `${currentLoginName}님의 대기가 신청되었습니다.\n대기 순번: ${waiting.waitingOrder}`,
+    });
+  } catch (error) {
+    await showErrorModal("대기 신청 실패", error);
+  }
+}
+
+function renderEditAvailableTimes(items, currentTime, selectedDate) {
   editAvailableTimesEl.innerHTML = "";
-  selectedEditTimeId = currentTime.id;
+  const isOriginalDate = selectedDate === editingReservation.date;
+  selectedEditTimeId = isOriginalDate ? currentTime.id : null;
 
   if (!items.length) {
     const empty = document.createElement("span");
@@ -390,20 +434,24 @@ function renderEditAvailableTimes(items, currentTime) {
 
   items.forEach((item) => {
     const button = document.createElement("button");
-    const isCurrent = item.timeInformation.id === currentTime.id;
+    const timeId = item.timeInformation.id;
+    const timeLabel = item.timeInformation.time;
+    const isCurrent = isOriginalDate && timeId === currentTime.id;
     const available = item.isAvailable || isCurrent;
     button.type = "button";
-    button.className = `chip${available ? "" : " disabled"}${isCurrent ? " selected" : ""}`;
-    button.textContent = `${item.timeInformation.time}`;
+    button.className = `chip${available ? "" : " waitable"}${isCurrent ? " selected" : ""}`;
+    button.textContent = `${timeLabel} (${isCurrent ? "현재 예약" : item.isAvailable ? "예약 가능" : "대기 가능"})`;
     if (!available) {
-      button.disabled = true;
+      button.addEventListener("click", async () => {
+        await requestEditWaiting(timeId, timeLabel);
+      });
       editAvailableTimesEl.appendChild(button);
       return;
     }
     button.addEventListener("click", () => {
       editAvailableTimesEl.querySelectorAll(".chip").forEach((chip) => chip.classList.remove("selected"));
       button.classList.add("selected");
-      selectedEditTimeId = item.timeInformation.id;
+      selectedEditTimeId = timeId;
     });
     editAvailableTimesEl.appendChild(button);
   });
@@ -412,7 +460,7 @@ function renderEditAvailableTimes(items, currentTime) {
 async function loadEditTimesByDate(date) {
   if (!editingReservation) return;
   const items = await api(`/user/times/availability?date=${date}&themeId=${editingReservation.themeId}`);
-  renderEditAvailableTimes(items, editingReservation.time);
+  renderEditAvailableTimes(items, editingReservation.time, date);
 }
 
 document.getElementById("theme-by-date-form").addEventListener("submit", async (e) => {

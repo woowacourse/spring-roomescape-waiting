@@ -197,7 +197,18 @@ button:disabled {
   color: #8a5a00;
 }
 
+#edit-available-times .chip.waitable {
+  border-color: #f59f00;
+  background: #fff9db;
+  color: #8a5a00;
+}
+
 #available-times .chip.waitable:hover {
+  border-color: #f08c00;
+  background: #ffec99;
+}
+
+#edit-available-times .chip.waitable:hover {
   border-color: #f08c00;
   background: #ffec99;
 }
@@ -561,6 +572,15 @@ button:disabled {
   justify-content: center;
   padding: 16px;
   z-index: 1000;
+}
+
+#edit-reservation-modal {
+  z-index: 1000;
+}
+
+#confirm-modal,
+#result-modal {
+  z-index: 1100;
 }
 
 .modal-card {
