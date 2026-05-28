@@ -1,9 +1,9 @@
 package roomescape.reservation.controller;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservation;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
-import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservation;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
+import static roomescape.testSupport.RestAssuredTestHelper.createTheme;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -16,9 +16,9 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
+import roomescape.testSupport.DatabaseHelper;
+import roomescape.testSupport.SpringWebTest;
 
 @SpringWebTest
 public class ReservationOwnerIntegrationTest {
@@ -37,7 +37,7 @@ public class ReservationOwnerIntegrationTest {
     private Long setupDefaultReservation(LocalDate date) {
         createReservationTime("10:00");
         createTheme("테마", "설명", "thumbnailUrl");
-        
+
         jdbcTemplate.update(
                 "INSERT INTO reservation (name, reservation_date, time_id, theme_id) VALUES (?, ?, ?, ?)",
                 "brown", Date.valueOf(date), 1L, 1L
@@ -97,7 +97,7 @@ public class ReservationOwnerIntegrationTest {
                 .contentType(ContentType.JSON)
                 .when().delete("/reservations/" + reservationId)
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(422);
     }
 
     @Test
@@ -195,7 +195,7 @@ public class ReservationOwnerIntegrationTest {
                 .body(params)
                 .when().patch("/reservations/" + reservationId)
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(422);
     }
 
     @Test
@@ -211,7 +211,7 @@ public class ReservationOwnerIntegrationTest {
                 .body(params)
                 .when().patch("/reservations/" + reservationId)
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(422);
     }
 
     @Test

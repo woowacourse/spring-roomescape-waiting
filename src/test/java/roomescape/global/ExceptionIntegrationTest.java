@@ -1,8 +1,8 @@
 package roomescape.global;
 
 import static org.hamcrest.Matchers.equalTo;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
-import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
+import static roomescape.testSupport.RestAssuredTestHelper.createTheme;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -12,8 +12,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
+import roomescape.testSupport.DatabaseHelper;
+import roomescape.testSupport.SpringWebTest;
 
 @SpringWebTest
 public class ExceptionIntegrationTest {
@@ -128,7 +128,7 @@ public class ExceptionIntegrationTest {
 
     @Test
     @DisplayName("예약 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
-    void  makeReservation_invalid_name_form() {
+    void makeReservation_invalid_name_form() {
         Map<String, Object> valid = Map.of(
                 "name", "브라운",
                 "date", "2026-05-01",
@@ -305,7 +305,6 @@ public class ExceptionIntegrationTest {
 
         Map<String, Object> withoutDescription = new HashMap<>(valid);
         withoutDescription.put("description", null);
-
 
         Map<String, Object> withoutThumbnailUrl = new HashMap<>(valid);
         withoutThumbnailUrl.put("thumbnailUrl", null);

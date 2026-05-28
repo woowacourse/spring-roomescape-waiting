@@ -1,4 +1,4 @@
-package roomescape.integration.support;
+package roomescape.testSupport;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;

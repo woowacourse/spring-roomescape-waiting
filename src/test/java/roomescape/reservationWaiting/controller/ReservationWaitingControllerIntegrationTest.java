@@ -1,9 +1,9 @@
 package roomescape.reservationWaiting.controller;
 
-import static roomescape.integration.support.RestAssuredTestHelper.createReservation;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservationWaiting;
-import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservation;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservationWaiting;
+import static roomescape.testSupport.RestAssuredTestHelper.createTheme;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
@@ -12,9 +12,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
+import roomescape.testSupport.DatabaseHelper;
+import roomescape.testSupport.SpringWebTest;
 
 @SpringWebTest
 class ReservationWaitingControllerIntegrationTest {

@@ -1,9 +1,9 @@
 package roomescape.reservation.controller;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservation;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
-import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservation;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
+import static roomescape.testSupport.RestAssuredTestHelper.createTheme;
 
 import io.restassured.RestAssured;
 import java.time.LocalDate;
@@ -13,8 +13,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
+import roomescape.testSupport.DatabaseHelper;
+import roomescape.testSupport.SpringWebTest;
 import roomescape.time.controller.dto.ReservationTimeResponse;
 
 @SpringWebTest

@@ -1,9 +1,9 @@
 package roomescape.global;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservation;
-import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
-import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservation;
+import static roomescape.testSupport.RestAssuredTestHelper.createReservationTime;
+import static roomescape.testSupport.RestAssuredTestHelper.createTheme;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -19,13 +19,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.NotFoundException;
-import roomescape.integration.support.DatabaseHelper;
-import roomescape.integration.support.SpringWebTest;
+import roomescape.reservation.service.ReservationService;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
-import roomescape.reservation.service.ReservationService;
-import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 import roomescape.reservationWaiting.service.ReservationWaitingService;
+import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
+import roomescape.testSupport.DatabaseHelper;
+import roomescape.testSupport.SpringWebTest;
 import roomescape.theme.service.ThemeService;
 import roomescape.theme.service.dto.ThemeCommand;
 import roomescape.time.service.ReservationTimeService;

@@ -35,8 +35,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException e) {
-        System.out.println("====== GlobalExceptionHandler CAUGHT BusinessException: " + e.getMessage() + " ======");
-        e.printStackTrace();
         return ResponseEntity
                 .status(e.getStatus())
                 .body(ErrorResponse.of(e));
