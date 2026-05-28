@@ -179,6 +179,11 @@ public class ReservationService {
                 updated.getTime().getStartAt()
         );
 
+        if (original.getDate().equals(updated.getDate())
+                && original.getTime().equals(updated.getTime())) {
+            return;
+        }
+
         if (reservationRepository.existByDateAndTimeIdAndThemeIdExceptId(
                 updated.getDate(),
                 updated.getTime().getId(),

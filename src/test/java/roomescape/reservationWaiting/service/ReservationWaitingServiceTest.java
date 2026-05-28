@@ -1,6 +1,7 @@
 package roomescape.reservationWaiting.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
@@ -229,7 +230,7 @@ class ReservationWaitingServiceTest {
     }
 
     @Test
-    @DisplayName("예약 대기를 아이디 기반으로 잘 삭제한다")
+    @DisplayName("아이디를 기반으로 예약 대기를 삭제한다.")
     void deleteReservationWaiting_ById_success() {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -239,7 +240,7 @@ class ReservationWaitingServiceTest {
                 Optional.of(new ReservationWaiting(
                         1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
                 )));
-        when(reservationWaitingRepository.deleteById(any())).thenReturn(0);
+        when(reservationWaitingRepository.deleteById(any())).thenReturn(1);
         when(clock.instant()).thenReturn(
                 LocalDate.of(2026, 5, 1)
                         .atStartOfDay(ZoneId.systemDefault())
@@ -248,8 +249,8 @@ class ReservationWaitingServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         // when, then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "브라운")).isInstanceOf(
-                ReservationWaitingNotFoundException.class);
+        assertThatCode(() -> reservationWaitingService.deleteReservationWaitingById(1L, "브라운"))
+                .doesNotThrowAnyException();
     }
 
     @Test

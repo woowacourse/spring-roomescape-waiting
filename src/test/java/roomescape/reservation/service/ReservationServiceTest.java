@@ -451,6 +451,45 @@ class ReservationServiceTest {
         )).isInstanceOf(InvalidTimeStartAtValueException.class);
     }
 
+    @DisplayName("예약 변경 시, 날짜와 시간 모두 기존과 동일하면 아")
+    @Test
+    void updateReservationTest_not_changed() {
+        //given
+        when(reservationRepository.findById(any()))
+                .thenReturn(Optional.of(new Reservation(
+                        1L,
+                        "브라운",
+                        LocalDate.of(2026, 5, 16),
+                        new ReservationTime(1L, LocalTime.of(11, 0)),
+                        new Theme(1L, "이름", "설명", "thumbnailUrl")
+                )));
+
+        when(clock.instant()).thenReturn(
+                LocalDate.of(2026, 5, 15)
+                        .atTime(10, 30)
+                        .atZone(ZoneId.systemDefault())
+                        .toInstant()
+        );
+        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+
+        when(reservationTimeRepository.findById(any()))
+                .thenReturn(Optional.of(new ReservationTime(1L, LocalTime.of(11, 0))));
+
+        //when
+        reservationService.updateReservation(
+                new ReservationUpdateCommand(LocalDate.of(2026, 5, 16), 1L), 1L
+        );
+
+        //then
+        verify(reservationRepository, never())
+                .existByDateAndTimeIdAndThemeIdExceptId(any(), any(), any(), any());
+        verify(reservationWaitingRepository, never())
+                .existsByDateAndTimeIdAndThemeId(any(), any(), any());
+        verify(reservationRepository, never())
+                .update(any());
+
+    }
+
     @DisplayName("예약 변경 시, 변경할 슬롯에 이미 예약이 있으면 예외가 발생한다.")
     @Test
     void updateReservationTest_duplicate() {
