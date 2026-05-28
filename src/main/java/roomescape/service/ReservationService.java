@@ -94,16 +94,6 @@ public class ReservationService {
         return reservationDao.saveWaiting(reservation);
     }
 
-    private ReservationTime validateReservationTime(long timeId) {
-        return reservationTimeDao.findById(timeId)
-                .orElseThrow(() -> new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다."));
-    }
-
-    private Theme validateTheme(long themeId) {
-        return themeDao.findById(themeId)
-                .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
-    }
-
     @Transactional
     public void deleteWaiting(long id) {
         reservationDao.findByWaitingId(id).ifPresent(reservation -> {
@@ -115,5 +105,15 @@ public class ReservationService {
     @Transactional(readOnly = true)
     public List<ReservationWaiting> findAllWaitingByName(String username) {
         return reservationDao.findAllWaitingByName(username);
+    }
+
+    private ReservationTime validateReservationTime(long timeId) {
+        return reservationTimeDao.findById(timeId)
+                .orElseThrow(() -> new ReservationTimeNotFoundException("존재하지 않는 예약 시간입니다."));
+    }
+
+    private Theme validateTheme(long themeId) {
+        return themeDao.findById(themeId)
+                .orElseThrow(() -> new ThemeNotFoundException("존재하지 않는 테마입니다."));
     }
 }

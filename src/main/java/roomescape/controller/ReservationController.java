@@ -1,6 +1,7 @@
 package roomescape.controller;
 
 import java.net.URI;
+import java.util.Comparator;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -14,8 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ReservationRequest;
-import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
+import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationWaitingResponse;
 import roomescape.controller.dto.response.ReservationWaitingsResponse;
 import roomescape.controller.dto.response.ReservationsResponse;
@@ -35,7 +36,7 @@ public class ReservationController {
     public ResponseEntity<ReservationsResponse> getReservations(@RequestParam String username) {
         List<ReservationResponse> responses = reservationService.findAllByName(username)
                 .stream()
-                .map(r -> ReservationResponse.from(r, r.getTheme()))
+                .map(r -> ReservationResponse.fromReserved(r, r.getTheme()))
                 .toList();
         return ResponseEntity.ok(new ReservationsResponse(responses));
     }
@@ -44,7 +45,7 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
         Reservation reservation = reservationService.save(
                 request.name(), request.date(), request.timeId(), request.themeId());
-        ReservationResponse response = ReservationResponse.from(reservation, reservation.getTheme());
+        ReservationResponse response = ReservationResponse.fromReserved(reservation, reservation.getTheme());
         URI location = URI.create("/reservations/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
@@ -54,7 +55,7 @@ public class ReservationController {
             @PathVariable long id,
             @Valid @RequestBody ReservationUpdateRequest request) {
         Reservation reservation = reservationService.update(id, request.date(), request.timeId());
-        return ResponseEntity.ok(ReservationResponse.from(reservation, reservation.getTheme()));
+        return ResponseEntity.ok(ReservationResponse.fromReserved(reservation, reservation.getTheme()));
     }
 
     @DeleteMapping("/{id}")
@@ -67,8 +68,8 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservationWaiting(@Valid @RequestBody ReservationRequest request) {
         Reservation reservation = reservationService.saveWaiting(
                 request.name(), request.date(), request.timeId(), request.themeId());
-        ReservationResponse response = ReservationResponse.from(reservation, reservation.getTheme());
-        URI location = URI.create("/reservations/" + response.id());
+        ReservationResponse response = ReservationResponse.fromWaiting(reservation, reservation.getTheme());
+        URI location = URI.create("/reservations/waiting/" + response.id());
         return ResponseEntity.created(location).body(response);
     }
 

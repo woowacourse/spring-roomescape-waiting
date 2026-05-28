@@ -14,7 +14,8 @@ public record ReservationWaitingResponse(
         String themeDescription,
         String themeThumbnailUrl,
         @JsonFormat(pattern = "HH:mm") LocalTime time,
-        long waitingNumber
+        long waitingNumber,
+        ReservationStatus reservationStatus
 ) {
     public static ReservationWaitingResponse from(Reservation reservation, Theme theme, long waitingNumber) {
         return new ReservationWaitingResponse(
@@ -24,7 +25,8 @@ public record ReservationWaitingResponse(
                 theme.getDescription(),
                 theme.getThumbnailUrl(),
                 reservation.getTime().getStartAt(),
-                waitingNumber
+                waitingNumber,
+                ReservationStatus.WAITING
         );
     }
 }
