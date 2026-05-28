@@ -1,7 +1,6 @@
 package roomescape.controller;
 
 import java.net.URI;
-import java.util.Comparator;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -16,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.dto.request.ReservationRequest;
 import roomescape.controller.dto.request.ReservationUpdateRequest;
+import roomescape.controller.dto.response.MyReservationResponse;
+import roomescape.controller.dto.response.MyReservationsResponse;
 import roomescape.controller.dto.response.ReservationResponse;
 import roomescape.controller.dto.response.ReservationWaitingResponse;
 import roomescape.controller.dto.response.ReservationWaitingsResponse;
@@ -86,5 +87,14 @@ public class ReservationController {
                 .map(r -> ReservationWaitingResponse.from(r.reservation(), r.reservation().getTheme(), r.waitingNumber()))
                 .toList();
         return ResponseEntity.ok(new ReservationWaitingsResponse(responses));
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<MyReservationsResponse> getMyReservations(@RequestParam String username) {
+        List<MyReservationResponse> responses = reservationService.getMyReservations(username)
+                .stream()
+                .map(MyReservationResponse::from)
+                .toList();
+        return ResponseEntity.ok(new MyReservationsResponse(responses));
     }
 }

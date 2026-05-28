@@ -3,17 +3,16 @@ package roomescape.service;
 import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Comparator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.dao.ReservationDao;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
-import roomescape.domain.Reservation;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
+import roomescape.domain.*;
 import roomescape.service.dto.Page;
 import roomescape.service.exception.ReservationConflictException;
 import roomescape.service.exception.ReservationNotFoundException;
@@ -21,6 +20,7 @@ import roomescape.service.exception.ReservationTimeNotFoundException;
 import roomescape.service.exception.ThemeNotFoundException;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationTimeDao reservationTimeDao;
@@ -65,12 +65,10 @@ public class ReservationService {
         });
     }
 
-    @Transactional(readOnly = true)
     public List<Reservation> findAllByName(String username) {
         return reservationDao.findByName(username);
     }
 
-    @Transactional(readOnly = true)
     public Page<Reservation> findAllWithCount(int page, int size) {
         List<Reservation> reservations = reservationDao.findAll(page, size);
         long totalCount = reservationDao.count();
@@ -102,9 +100,23 @@ public class ReservationService {
         });
     }
 
-    @Transactional(readOnly = true)
     public List<ReservationWaiting> findAllWaitingByName(String username) {
         return reservationDao.findAllWaitingByName(username);
+    }
+
+    public List<MyReservation> getMyReservations(String name) {
+        List<MyReservation> reservations = findAllByName(name).stream()
+                .map(MyReservation::reserved)
+                .toList();
+        List<MyReservation> waitings = findAllWaitingByName(name).stream()
+                .map(waiting -> MyReservation.waiting(waiting.reservation(), waiting.waitingNumber()))
+                .toList();
+        return Stream.concat(reservations.stream(), waitings.stream())
+                .sorted(Comparator
+                        .comparing((MyReservation r) -> r.reservation().getDate())
+                        .thenComparing(r -> r.reservation().getTime().getStartAt())
+                        .thenComparing(MyReservation::reservationType))
+                .toList();
     }
 
     private ReservationTime validateReservationTime(long timeId) {
