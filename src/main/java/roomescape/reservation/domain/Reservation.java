@@ -86,7 +86,7 @@ public class Reservation {
         }
 
         Reservation that = (Reservation) o;
-        return Objects.equals(getId(), that.getId());
+        return id != null && Objects.equals(getId(), that.getId());
     }
 
     @Override

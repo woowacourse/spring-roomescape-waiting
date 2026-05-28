@@ -52,7 +52,7 @@ public class Theme {
         }
 
         Theme theme = (Theme) o;
-        return Objects.equals(getId(), theme.getId());
+        return id != null && Objects.equals(getId(), theme.getId());
     }
 
     @Override

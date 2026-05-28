@@ -39,7 +39,7 @@ public class ReservationTime {
         }
 
         ReservationTime that = (ReservationTime) o;
-        return Objects.equals(getId(), that.getId());
+        return id != null && Objects.equals(getId(), that.getId());
     }
 
     @Override

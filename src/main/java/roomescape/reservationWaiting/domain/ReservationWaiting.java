@@ -65,7 +65,7 @@ public class ReservationWaiting {
             return false;
         }
         ReservationWaiting that = (ReservationWaiting) o;
-        return Objects.equals(id, that.id);
+        return id != null && Objects.equals(id, that.id);
     }
 
     @Override
