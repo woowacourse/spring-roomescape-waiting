@@ -26,7 +26,7 @@ public class Reservation {
     private ReservationStatus status;
     private LocalDateTime reservedAt;
 
-    public static Reservation create(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
+    public static Reservation reserve(String name, ReservationDate reservationDate, ReservationTime time, Theme theme, LocalDateTime reservedAt) {
         return of(name, reservationDate, time, theme, ReservationStatus.RESERVED, reservedAt);
     }
 

@@ -61,7 +61,7 @@ class UnitReservationDateAdminControllerTest {
 
     @Test
     @DisplayName("날짜를 정상적으로 등록하면, 등록한 날짜 정보를 반환한다.")
-    void create() throws Exception {
+    void reserve() throws Exception {
         LocalDate date = LocalDate.of(2026, 5, 20);
         ReservationDate reservationDate = ReservationDate.load(1L, date, true);
 
@@ -88,7 +88,7 @@ class UnitReservationDateAdminControllerTest {
 
     @Test
     @DisplayName("날짜등록시 date가 null인지 검증한다.")
-    void create_date_input_null() throws Exception {
+    void reserve_date_input_null() throws Exception {
         String request = """
                 {
                   "date": null
@@ -108,7 +108,7 @@ class UnitReservationDateAdminControllerTest {
 
     @Test
     @DisplayName("중복 날짜 예외 발생시, 에러 응답 바디가 스펙대로 반환된다.")
-    void create_already_exists() throws Exception {
+    void reserve_already_exists() throws Exception {
         LocalDate date = LocalDate.of(2026, 5, 20);
 
         when(reservationDateService.register(date))

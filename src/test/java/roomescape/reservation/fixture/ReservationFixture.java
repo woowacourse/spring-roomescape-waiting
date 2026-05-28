@@ -19,7 +19,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        return Reservation.create(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
+        return Reservation.reserve(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
     public static Reservation waitReservation(
@@ -37,7 +37,7 @@ public class ReservationFixture {
             ReservationTime time,
             Theme theme
     ) {
-        Reservation reservation = Reservation.create(name, date, time, theme, LocalDateTime.now());
+        Reservation reservation = Reservation.reserve(name, date, time, theme, LocalDateTime.now());
         reservation.updateStatus(ReservationStatus.CANCELED);
         return reservation;
     }

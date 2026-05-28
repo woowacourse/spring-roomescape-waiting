@@ -39,7 +39,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("예약 날짜를 생성한다.")
-    void create_reservation_date() {
+    void reserve_reservation_date() {
         Map<String, String> params = new HashMap<>();
         params.put("date", date);
 
@@ -62,7 +62,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("이미 등록된 날짜를 또 등록하면 예외가 발생한다.")
-    void create_duplicated_date() {
+    void reserve_duplicated_date() {
         createReservationDate(managerToken, date);
 
         Map<String, String> params = new HashMap<>();
@@ -80,7 +80,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("예약 날짜를 생성한 뒤 조회한다.")
-    void createAndGetReservationDates() {
+    void reserveAndGetReservationDates() {
         Map<String, String> params = new HashMap<>();
         params.put("date", date);
 
@@ -102,7 +102,7 @@ class ReservationDateAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("date가 없으면 예약 날짜 생성에 실패한다.")
-    void create_reservation_date_without_date() {
+    void reserve_reservation_date_without_date() {
         Map<String, Object> params = new HashMap<>();
         params.put("date", null);
 

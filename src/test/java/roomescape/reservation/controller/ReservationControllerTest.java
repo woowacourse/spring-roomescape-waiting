@@ -43,7 +43,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("사용자는 예약을 생성한다.")
-    void create_reservation() {
+    void reserve_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
@@ -97,7 +97,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_date_id() {
+    void reserve_reservation_without_date_id() {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
@@ -118,7 +118,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_time_id() {
+    void reserve_reservation_without_time_id() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer themeId = createTheme(managerToken, themeName);
 
@@ -139,7 +139,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_theme_id() {
+    void reserve_reservation_without_theme_id() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
 
@@ -437,7 +437,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("비활성화된 날짜로 예약을 생성하면 예외가 발생한다.")
-    void create_reservation_with_inactive_date() {
+    void reserve_reservation_with_inactive_date() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
@@ -460,7 +460,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("비활성화된 시간으로 예약을 생성하면 예외가 발생한다.")
-    void create_reservation_with_inactive_time() {
+    void reserve_reservation_with_inactive_time() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
@@ -483,7 +483,7 @@ class ReservationControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("비활성화된 테마로 예약을 생성하면 예외가 발생한다.")
-    void create_reservation_with_inactive_theme() {
+    void reserve_reservation_with_inactive_theme() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);

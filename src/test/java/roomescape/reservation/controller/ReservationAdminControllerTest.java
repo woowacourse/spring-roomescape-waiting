@@ -42,7 +42,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("관리자는 예약을 생성한다.")
-    void create_reservation() {
+    void reserve_reservation() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
@@ -82,7 +82,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("dateId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_date_id() {
+    void reserve_reservation_without_date_id() {
         Integer timeId = createReservationTime(managerToken, startAt);
         Integer themeId = createTheme(managerToken, themeName);
 
@@ -103,7 +103,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("timeId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_time_id() {
+    void reserve_reservation_without_time_id() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer themeId = createTheme(managerToken, themeName);
 
@@ -124,7 +124,7 @@ class ReservationAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("themeId가 없으면 예약 생성에 실패한다.")
-    void create_reservation_without_theme_id() {
+    void reserve_reservation_without_theme_id() {
         Integer dateId = createReservationDate(managerToken, date);
         Integer timeId = createReservationTime(managerToken, startAt);
 

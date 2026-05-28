@@ -26,7 +26,7 @@ public record Reservations(
             return Reservation.wait(requesterName, date, time, theme, reservedAt);
         }
 
-        return Reservation.create(requesterName, date, time, theme, reservedAt);
+        return Reservation.reserve(requesterName, date, time, theme, reservedAt);
     }
 
     public void validateNotAlreadyBookedBy(String requestName) {

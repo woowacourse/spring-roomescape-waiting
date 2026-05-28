@@ -55,7 +55,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("관리자는 예약 시간을 생성한다.")
-    void create_reservation_time() {
+    void reserve_reservation_time() {
         Integer timeId = createReservationTime(managerToken, startAt1);
 
         RestAssured.given().log().all()
@@ -70,7 +70,7 @@ class ReservationTimeAdminControllerTest extends AcceptanceTest {
 
     @Test
     @DisplayName("startAt이 없으면 예약 시간 생성에 실패한다.")
-    void create_reservation_time_without_start_at() {
+    void reserve_reservation_time_without_start_at() {
         Map<String, Object> params = new HashMap<>();
         params.put("startAt", null);
 

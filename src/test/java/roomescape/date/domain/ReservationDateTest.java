@@ -13,7 +13,7 @@ class ReservationDateTest {
 
     @Test
     @DisplayName("유효한 날짜로 ReservationDate를 등록할 수 있다.")
-    void create_with_valid_field() {
+    void reserve_with_valid_field() {
         // given
         LocalDate validDate = LocalDate.of(2099, 1, 1);
 
@@ -24,7 +24,7 @@ class ReservationDateTest {
 
     @Test
     @DisplayName("오늘 날짜로 ReservationDate를 등록할 수 있다.")
-    void create_with_today() {
+    void reserve_with_today() {
         // given
         LocalDate today = LocalDate.now();
 
@@ -35,7 +35,7 @@ class ReservationDateTest {
 
     @Test
     @DisplayName("유효한 날짜로 ReservationDate를 생성하면 입력한 날짜를 그대로 유지한다.")
-    void create_compare_date_field() {
+    void reserve_compare_date_field() {
         // given
         LocalDate validDate = LocalDate.of(2099, 1, 1);
 
@@ -91,7 +91,7 @@ class ReservationDateTest {
 
     @Test
     @DisplayName("등록할 날짜가 null이면 예외가 발생한다.")
-    void create_null_date() {
+    void reserve_null_date() {
         // given
         LocalDate nullDate = null;
 
@@ -103,7 +103,7 @@ class ReservationDateTest {
 
     @Test
     @DisplayName("등록할 날짜가 과거이면 예외가 발생한다.")
-    void create_before_date() {
+    void reserve_before_date() {
         // given
         LocalDate pastDate = LocalDate.of(2000, 1, 1);
 

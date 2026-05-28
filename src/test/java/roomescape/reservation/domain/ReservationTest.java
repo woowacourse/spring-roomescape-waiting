@@ -105,7 +105,7 @@ class ReservationTest {
     @DisplayName("아직 DB에 추가되지 않은 예약은 id가 없다.")
     void unpersist_reservation_null_id() {
         // given & when
-        Reservation unpersistReservation = Reservation.create("한다", reservationDate,
+        Reservation unpersistReservation = Reservation.reserve("한다", reservationDate,
             reservationTime, theme, LocalDateTime.now());
 
         // then
@@ -122,13 +122,13 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(
-            () -> Reservation.create(nullName, reservationDate, reservationTime, theme,
+            () -> Reservation.reserve(nullName, reservationDate, reservationTime, theme,
                 LocalDateTime.now()))
             .isInstanceOf(ReservationException.class)
             .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
 
         assertThatThrownBy(
-            () -> Reservation.create(emptyName, reservationDate, reservationTime, theme,
+            () -> Reservation.reserve(emptyName, reservationDate, reservationTime, theme,
                 LocalDateTime.now()))
             .isInstanceOf(ReservationException.class)
             .hasMessage(RESERVATION_NAME_IS_NULL.getMessage());
@@ -142,7 +142,7 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(
-            () -> Reservation.create(name, reservationDate, nullTime, theme, LocalDateTime.now()))
+            () -> Reservation.reserve(name, reservationDate, nullTime, theme, LocalDateTime.now()))
             .isInstanceOf(ReservationException.class)
             .hasMessage(RESERVATION_TIME_IS_NULL.getMessage());
     }
@@ -155,9 +155,21 @@ class ReservationTest {
 
         // when & then
         assertThatThrownBy(
-            () -> Reservation.create(name, nullDate, reservationTime, theme, LocalDateTime.now()))
+            () -> Reservation.reserve(name, nullDate, reservationTime, theme, LocalDateTime.now()))
             .isInstanceOf(ReservationException.class)
             .hasMessage(RESERVATION_DATE_IS_NULL.getMessage());
+    }
+
+    @Test
+    @DisplayName("예약 요청 시간이 과거인 경우, 예외가 발생한다.")
+    void validateReservedAt() {
+        // given
+        LocalDateTime past = LocalDateTime.now().minusDays(1);
+
+        // when & then
+        assertThatThrownBy(() -> Reservation.reserve(name, reservationDate, reservationTime, theme, past))
+                .isInstanceOf(ReservationException.class)
+                .hasMessage(RESERVATION_RESERVED_AT_PAST_NOT_ALLOWED.getMessage());
     }
 
     @Test

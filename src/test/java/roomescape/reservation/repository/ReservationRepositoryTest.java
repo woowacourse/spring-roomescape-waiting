@@ -100,8 +100,8 @@ class ReservationRepositoryTest {
     void findAll() {
         // given
         List<Reservation> reservations = List.of(
-                Reservation.create(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()),
-                Reservation.create(name, reservationDate1, reservationTime2, theme, LocalDateTime.now())
+                Reservation.reserve(name, reservationDate1, reservationTime1, theme, LocalDateTime.now()),
+                Reservation.reserve(name, reservationDate1, reservationTime2, theme, LocalDateTime.now())
         );
         saveAll(reservations);
 
