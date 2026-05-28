@@ -186,12 +186,12 @@ public class ReservationService {
                 cancelledReservation.getTheme().getId()
         ).ifPresent(waiting -> {
             waitingRepository.deleteById(waiting.getId());
-            final Reservation promoted = Reservation.of(
-                    null,
-                    waiting.getCustomerName().name(),
-                    waiting.getReservationDate(),
-                    waiting.getTime(),
-                    waiting.getTheme()
+            final Reservation promoted = Reservation.create(
+                waiting.getCustomerName().name(),
+                waiting.getReservationDate(),
+                waiting.getTime(),
+                waiting.getTheme(),
+                LocalDateTime.now(clock)
             );
             saveReservation(promoted);
         });
