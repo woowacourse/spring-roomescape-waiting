@@ -42,7 +42,7 @@ public class ReservationWaitingService {
         validateUniqueReservationWaiting(command.name(), command.reservationDate(), command.timeId(), command.themeId());
         validatePastDatetime(command.reservationDate(), now, reservationTime);
 
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), LocalDateTime.now(), command.reservationDate(), reservationTime, theme);
+        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, command.reservationDate(), reservationTime, theme);
         ReservationWaiting savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
 
         int order = reservationWaitingDao.countOrder(command.reservationDate(), command.timeId(), command.themeId(), savedReservationWaiting.getId());
