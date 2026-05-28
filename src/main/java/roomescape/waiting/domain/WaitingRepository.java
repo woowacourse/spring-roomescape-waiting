@@ -7,7 +7,7 @@ import java.util.Optional;
 public interface WaitingRepository {
     Waiting save(Waiting waiting);
     Optional<Waiting> findById(Long id);
-    Optional<Waiting> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<Waiting> findByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId);
     void deleteByIdAndName(Long id, String name);
     List<Waiting> findByName(String name);
 }

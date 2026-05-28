@@ -38,8 +38,9 @@ public class FakeWaitingRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Waiting> findByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
         return store.values().stream()
+                .filter(waiting -> waiting.getName().equals(name))
                 .filter(waiting -> waiting.getDate().equals(date))
                 .filter(waiting -> waiting.getTime().getId().equals(timeId))
                 .filter(waiting -> waiting.getTheme().getId().equals(themeId))

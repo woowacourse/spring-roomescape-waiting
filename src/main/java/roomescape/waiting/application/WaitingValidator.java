@@ -15,10 +15,14 @@ public class WaitingValidator {
         this.waitingRepository = waitingRepository;
     }
 
-    public void validateAlreadyWaiting(WaitingCreateCommand createCommand) {
+    public void validateAlreadyMyWaiting(WaitingCreateCommand createCommand) {
         boolean exists = waitingRepository
-                .findByDateAndTimeIdAndThemeId(createCommand.date(), createCommand.timeId(), createCommand.themeId())
-                .isPresent();
+                .findByNameAndDateAndTimeIdAndThemeId(
+                        createCommand.name(),
+                        createCommand.date(),
+                        createCommand.timeId(),
+                        createCommand.themeId()
+                ).isPresent();
         if (exists) {
             throw new BusinessException(WaitingErrorCode.WAITING_ALREADY_EXISTS);
         }

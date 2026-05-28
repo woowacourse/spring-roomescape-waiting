@@ -63,7 +63,7 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
         ) ranked_waiting
         WHERE waiting_name = ?
         """;
-    private static final String FIND_BY_DATE_AND_TIME_ID_AND_THEME_ID_QUERY = """
+    private static final String FIND_BY_NAME_AND_DATE_AND_TIME_ID_AND_THEME_ID_QUERY = """
         SELECT *
         FROM (
             SELECT w.id,
@@ -84,7 +84,8 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
             JOIN reservation_time rt ON w.time_id = rt.id
             JOIN theme t ON w.theme_id = t.id
         ) ranked_waiting
-        WHERE date = ?
+        WHERE waiting_name = ?
+          AND date = ?
           AND time_id = ?
           AND theme_id = ?
         """;
@@ -135,7 +136,8 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
                 "created_at", waiting.getCreatedAt()
         );
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return waiting.appendId(id);
+        return findById(id)
+                .orElseGet(() -> waiting.appendId(id));
     }
 
     @Override
@@ -150,10 +152,11 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
     }
 
     @Override
-    public Optional<Waiting> findByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<Waiting> findByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
         List<Waiting> waiting = jdbcTemplate.query(
-                FIND_BY_DATE_AND_TIME_ID_AND_THEME_ID_QUERY,
+                FIND_BY_NAME_AND_DATE_AND_TIME_ID_AND_THEME_ID_QUERY,
                 ROW_MAPPER,
+                name,
                 date,
                 timeId,
                 themeId

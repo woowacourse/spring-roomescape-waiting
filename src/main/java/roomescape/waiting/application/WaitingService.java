@@ -45,7 +45,7 @@ public class WaitingService {
                 .orElseThrow(() -> new BusinessException(WaitingErrorCode.WAITING_THEME_INVALID));
 
         waitingReference.validateExistReservation(command);
-        waitingValidator.validateAlreadyWaiting(command);
+        waitingValidator.validateAlreadyMyWaiting(command);
         Waiting waiting = Waiting.create(
                 command.name(),
                 command.date(),

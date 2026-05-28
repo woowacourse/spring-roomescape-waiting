@@ -27,26 +27,8 @@ class WaitingValidatorTest {
     }
 
     @Test
-    @DisplayName("같은 슬롯에 대기가 없으면 예외가 발생하지 않는다")
-    void 같은_슬롯에_대기가_없으면_예외가_발생하지_않는다() {
-        // given
-        ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
-        Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
-        WaitingCreateCommand command = new WaitingCreateCommand(
-                "브라운",
-                LocalDate.now().plusDays(1),
-                time.getId(),
-                theme.getId()
-        );
-
-        // when & then
-        assertThatCode(() -> waitingValidator.validateAlreadyWaiting(command))
-                .doesNotThrowAnyException();
-    }
-
-    @Test
-    @DisplayName("같은 슬롯에 이미 대기가 있으면 예외가 발생한다")
-    void 같은_슬롯에_이미_대기가_있으면_예외가_발생한다() {
+    @DisplayName("같은 슬롯에 다른 사용자의 대기가 있으면 예외가 발생하지 않는다")
+    void validateAlreadyMyWaiting_success_with_other_user_waiting() {
         // given
         ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
         Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
@@ -60,7 +42,27 @@ class WaitingValidatorTest {
         );
 
         // when & then
-        assertThatThrownBy(() -> waitingValidator.validateAlreadyWaiting(command))
+        assertThatCode(() -> waitingValidator.validateAlreadyMyWaiting(command))
+                .doesNotThrowAnyException();
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 같은 사용자의 대기가 있으면 예외가 발생한다")
+    void validateAlreadyMyWaiting_fail_with_same_user_waiting() {
+        // given
+        ReservationTime time = ReservationTime.createRow(1L, LocalTime.of(10, 0));
+        Theme theme = Theme.createRow(1L, "공포", "설명", "https://good.com");
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("브라운", date, time, theme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                time.getId(),
+                theme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingValidator.validateAlreadyMyWaiting(command))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
     }

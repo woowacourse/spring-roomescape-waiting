@@ -75,6 +75,21 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
+    @DisplayName("예약 대기를 저장하면 같은 슬롯의 대기 순번을 포함한 대기 객체를 반환한다")
+    void save_success_with_rank() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        Waiting waiting = Waiting.create("브라운", date, savedTime, savedTheme);
+
+        // when
+        Waiting savedWaiting = waitingRepository.save(waiting);
+
+        // then
+        assertThat(savedWaiting.getRank()).isEqualTo(2L);
+    }
+
+    @Test
     @DisplayName("예약 대기 저장 시 waiting 테이블에 값이 저장된다")
     void save_persist_waiting_row() {
         // given
@@ -169,14 +184,16 @@ class WaitingJdbcTemplateRepositoryTest {
     }
 
     @Test
-    @DisplayName("날짜와 시간과 테마가 모두 일치하는 예약 대기를 조회한다")
-    void 날짜와_시간과_테마가_모두_일치하는_예약_대기를_조회한다() {
+    @DisplayName("이름과 날짜와 시간과 테마가 모두 일치하는 예약 대기를 조회한다")
+    void findByNameAndDateAndTimeIdAndThemeId_success() {
         // given
         LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
         Waiting savedWaiting = waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
 
         // when
-        Waiting foundWaiting = waitingRepository.findByDateAndTimeIdAndThemeId(
+        Waiting foundWaiting = waitingRepository.findByNameAndDateAndTimeIdAndThemeId(
+                "브라운",
                 date,
                 savedTime.getId(),
                 savedTheme.getId()
@@ -184,14 +201,20 @@ class WaitingJdbcTemplateRepositoryTest {
 
         // then
         assertThat(foundWaiting).isEqualTo(savedWaiting);
+        assertThat(foundWaiting.getRank()).isEqualTo(2L);
     }
 
     @Test
-    @DisplayName("날짜와 시간과 테마가 모두 일치하는 예약 대기가 없으면 빈 Optional을 반환한다")
-    void 날짜와_시간과_테마가_모두_일치하는_예약_대기가_없으면_빈_옵셔널을_반환한다() {
+    @DisplayName("같은 슬롯에 다른 사용자의 예약 대기만 있으면 빈 Optional을 반환한다")
+    void findByNameAndDateAndTimeIdAndThemeId_returns_empty_with_other_user_waiting() {
+        // given
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+
         // when & then
-        assertThat(waitingRepository.findByDateAndTimeIdAndThemeId(
-                LocalDate.now().plusDays(1),
+        assertThat(waitingRepository.findByNameAndDateAndTimeIdAndThemeId(
+                "브라운",
+                date,
                 savedTime.getId(),
                 savedTheme.getId()
         )).isEmpty();

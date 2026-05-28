@@ -140,7 +140,50 @@ public class MissionStepTest {
                 .body("name", is("브라운"))
                 .body("date", is(TODAY.plusDays(1).toString()))
                 .body("time.id", is(1))
-                .body("theme.id", is(1));
+                .body("theme.id", is(1))
+                .body("rank", is(1));
+    }
+
+    @Test
+    void 같은_슬롯에_여러_사용자가_예약_대기를_신청할_수_있다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
+        jdbcTemplate.update(
+                "INSERT INTO reservation (name, date, time_id, theme_id, created_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP)",
+                "리오",
+                TODAY.plusDays(1).toString(),
+                1,
+                1
+        );
+
+        Map<String, Object> firstWaiting = new HashMap<>();
+        firstWaiting.put("name", "브라운");
+        firstWaiting.put("date", TODAY.plusDays(1).toString());
+        firstWaiting.put("timeId", 1);
+        firstWaiting.put("themeId", 1);
+
+        Map<String, Object> secondWaiting = new HashMap<>();
+        secondWaiting.put("name", "흑곰");
+        secondWaiting.put("date", TODAY.plusDays(1).toString());
+        secondWaiting.put("timeId", 1);
+        secondWaiting.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(firstWaiting)
+                .when().post("/waiting")
+                .then().log().all()
+                .statusCode(201)
+                .body("rank", is(1));
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(secondWaiting)
+                .when().post("/waiting")
+                .then().log().all()
+                .statusCode(201)
+                .body("name", is("흑곰"))
+                .body("rank", is(2));
     }
 
     @Test

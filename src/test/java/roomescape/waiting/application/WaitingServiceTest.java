@@ -109,13 +109,37 @@ class WaitingServiceTest {
     }
 
     @Test
-    @DisplayName("같은 슬롯에 이미 대기가 있으면 예약 대기 저장 시 예외가 발생한다")
-    void 같은_슬롯에_이미_대기가_있으면_예약_대기_저장_시_예외가_발생한다() {
+    @DisplayName("같은 슬롯에 다른 사용자의 대기가 있어도 예약 대기를 저장한다")
+    void save_success_with_other_user_waiting() {
         // given
         ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
         Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
         LocalDate date = LocalDate.now().plusDays(1);
         waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when
+        Waiting waiting = waitingService.save(command);
+
+        // then
+        assertThat(waiting.getName()).isEqualTo("브라운");
+        assertThat(waiting.getDate()).isEqualTo(date);
+        assertThat(waitingRepository.findById(waiting.getId())).contains(waiting);
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 같은 사용자의 대기가 있으면 예약 대기 저장 시 예외가 발생한다")
+    void save_fail_with_same_user_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
         WaitingCreateCommand command = new WaitingCreateCommand(
                 "브라운",
                 date,
