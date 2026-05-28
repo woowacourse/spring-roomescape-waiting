@@ -137,6 +137,33 @@ class ReservationTimeRepositoryTest {
     }
 
     @Nested
+    @DisplayName("id로 예약 시간 조회 (FOR UPDATE)")
+    class FindByIdForUpdate {
+
+        @Test
+        void 존재하는_id면_예약_시간을_반환한다() {
+            ReservationTime saved = reservationTimeRepository.save(
+                    ReservationTime.of(LocalTime.of(10, 0), LocalTime.of(11, 0))
+            );
+
+            Optional<ReservationTime> result = reservationTimeRepository.findByIdForUpdate(saved.getId());
+
+            assertAll(
+                    () -> assertThat(result).isPresent(),
+                    () -> assertThat(result.get().getStartAt()).isEqualTo(LocalTime.of(10, 0)),
+                    () -> assertThat(result.get().getFinishAt()).isEqualTo(LocalTime.of(11, 0))
+            );
+        }
+
+        @Test
+        void 존재하지_않는_id면_빈_Optional을_반환한다() {
+            Optional<ReservationTime> result = reservationTimeRepository.findByIdForUpdate(999L);
+
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("id로 예약 시간 삭제")
     class DeleteById {
 

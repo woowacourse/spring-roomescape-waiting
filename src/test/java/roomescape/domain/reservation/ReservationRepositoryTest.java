@@ -288,6 +288,57 @@ class ReservationRepositoryTest {
     }
 
     @Nested
+    @DisplayName("id로 예약 존재 여부 조회 (FOR UPDATE)")
+    class ExistsByIdForUpdate {
+
+        @Test
+        void 존재하는_id면_true를_반환한다() {
+            Reservation saved = reservationRepository.save(
+                    Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme)
+            );
+
+            boolean result = reservationRepository.existsByIdForUpdate(saved.getId());
+
+            assertThat(result).isTrue();
+        }
+
+        @Test
+        void 존재하지_않는_id면_false를_반환한다() {
+            boolean result = reservationRepository.existsByIdForUpdate(999L);
+
+            assertThat(result).isFalse();
+        }
+    }
+
+    @Nested
+    @DisplayName("날짜/시간/테마로 예약자 이름 조회 (FOR UPDATE)")
+    class FindNameByDateAndTimeIdAndThemeIdForUpdate {
+
+        @Test
+        void 해당_날짜_시간_테마의_예약이_있으면_예약자_이름을_반환한다() {
+            reservationRepository.save(Reservation.of("유저1", LocalDate.of(2099, 12, 31), time, theme));
+
+            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
+                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            );
+
+            assertAll(
+                    () -> assertThat(result).isPresent(),
+                    () -> assertThat(result.get()).isEqualTo("유저1")
+            );
+        }
+
+        @Test
+        void 해당_날짜_시간_테마의_예약이_없으면_빈_Optional을_반환한다() {
+            Optional<String> result = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
+                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId()
+            );
+
+            assertThat(result).isEmpty();
+        }
+    }
+
+    @Nested
     @DisplayName("예약 날짜와 시간 수정")
     class UpdateDateAndTime {
 
