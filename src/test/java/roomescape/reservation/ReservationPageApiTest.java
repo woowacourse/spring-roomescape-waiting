@@ -115,6 +115,22 @@ class ReservationPageApiTest {
     }
 
     @Test
+    void 대기자가_있는_예약_취소_시_에러코드와_함께_리다이렉트한다() {
+        createTheme(1L, "미술관의 밤");
+        createReservationTime(1L, "10:00:00");
+        createReservation("brown", LocalDate.now().plusDays(1), 1L, 1L);
+        createReservationWaiting(1L, "aru");
+
+        RestAssured.given().log().all()
+                .redirects().follow(false)
+                .formParam("reservationName", "brown")
+                .when().post("/pages/user/reservations/1/delete")
+                .then().log().all()
+                .statusCode(302)
+                .header("Location", containsString("errorCode=RESERVATION_HAS_WAITINGS"));
+    }
+
+    @Test
     void 이미_차있는_시간으로_변경하면_에러코드와_함께_리다이렉트한다() {
         createTheme(1L, "미술관의 밤");
         createReservationTime(1L, "10:00:00");
@@ -209,6 +225,15 @@ class ReservationPageApiTest {
                 Date.valueOf(date),
                 themeId,
                 timeId
+        );
+    }
+
+    private void createReservationWaiting(final long reservationId, final String name) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (reservation_id, name, requested_at) VALUES (?, ?, ?)",
+                reservationId,
+                name,
+                "2026-08-06 12:00:00"
         );
     }
 

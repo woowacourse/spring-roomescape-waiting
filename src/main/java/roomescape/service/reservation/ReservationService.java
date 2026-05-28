@@ -4,13 +4,14 @@ import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.Reservation;
-import roomescape.repository.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.ResourceNotFoundException;
+import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservationtime.ReservationTimeService;
-import roomescape.domain.theme.Theme;
 import roomescape.service.theme.ThemeService;
 
 @Service
@@ -19,17 +20,20 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationValidator reservationValidator;
+    private final ReservationWaitingRepository reservationWaitingRepository;
 
     public ReservationService(
             final ReservationRepository reservationRepository,
             final ReservationTimeService reservationTimeService,
             final ThemeService themeService,
-            final ReservationValidator reservationValidator
+            final ReservationValidator reservationValidator,
+            final ReservationWaitingRepository reservationWaitingRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationValidator = reservationValidator;
+        this.reservationWaitingRepository = reservationWaitingRepository;
     }
 
     public List<Reservation> getAll() {
@@ -52,6 +56,7 @@ public class ReservationService {
     }
 
     public void deleteById(final long id) {
+        validateReservationHasNoWaitings(id);
         int affectedRowCount = reservationRepository.deleteById(id);
 
         if(affectedRowCount <= 0) {
@@ -69,6 +74,7 @@ public class ReservationService {
                 ));
 
         reservationValidator.validateCancelable(reservation);
+        validateReservationHasNoWaitings(reservation.getId());
 
         int affectedRowCount = reservationRepository.deleteById(reservation.getId());
 
@@ -93,6 +99,7 @@ public class ReservationService {
                 ));
 
         reservationValidator.validateUpdatable(reservation);
+        validateReservationHasNoWaitings(reservation.getId());
 
         ReservationTime reservationTime = reservationTimeService.getById(timeId);
         Reservation updatedReservation = reservation.withDateAndTime(date, reservationTime);
@@ -108,5 +115,14 @@ public class ReservationService {
         }
 
         return reservationRepository.update(updatedReservation);
+    }
+
+    private void validateReservationHasNoWaitings(final long reservationId) {
+        if (reservationWaitingRepository.existsByReservationId(reservationId)) {
+            throw new ConflictException(
+                    ErrorCode.RESERVATION_HAS_WAITINGS,
+                    "대기자가 있는 예약은 변경하거나 삭제할 수 없습니다."
+            );
+        }
     }
 }

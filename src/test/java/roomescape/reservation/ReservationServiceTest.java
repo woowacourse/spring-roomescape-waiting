@@ -19,6 +19,7 @@ import roomescape.exception.ConflictException;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
+import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 import roomescape.service.reservation.ReservationService;
 import roomescape.service.reservation.ReservationValidator;
 import roomescape.service.reservationtime.ReservationTimeService;
@@ -119,6 +120,15 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("대기자가 있는 예약은 삭제할 수 없다")
+    void deleteByIdWithWaitings() {
+        Fixture fixture = new Fixture();
+        when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
+
+        assertThrows(ConflictException.class, () -> fixture.reservationService.deleteById(1L));
+    }
+
+    @Test
     @DisplayName("지난 예약은 취소할 수 없다")
     void deleteByIdAndNamePastReservation() {
         Fixture fixture = new Fixture();
@@ -129,6 +139,23 @@ class ReservationServiceTest {
         Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(), theme, time);
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
+
+        assertThrows(
+                ConflictException.class,
+                () -> fixture.reservationService.deleteByIdAndName(1L, "쿠다")
+        );
+    }
+
+    @Test
+    @DisplayName("대기자가 있는 내 예약은 취소할 수 없다")
+    void deleteByIdAndNameWithWaitings() {
+        Fixture fixture = new Fixture();
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now().plusDays(1), theme, time);
+
+        when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
+        when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
 
         assertThrows(
                 ConflictException.class,
@@ -188,6 +215,28 @@ class ReservationServiceTest {
     }
 
     @Test
+    @DisplayName("대기자가 있는 예약은 변경할 수 없다")
+    void updateByIdAndNameWithWaitings() {
+        Fixture fixture = new Fixture();
+        Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
+        ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now().plusDays(1), theme, time);
+
+        when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
+        when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
+
+        assertThrows(
+                ConflictException.class,
+                () -> fixture.reservationService.updateByIdAndName(
+                        1L,
+                        "쿠다",
+                        LocalDate.now().plusDays(2),
+                        2L
+                )
+        );
+    }
+
+    @Test
     @DisplayName("이미 지난 예약은 변경할 수 없다")
     void updateByIdAndNamePastReservation() {
         Fixture fixture = new Fixture();
@@ -215,7 +264,14 @@ class ReservationServiceTest {
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
         private final ReservationValidator reservationValidator = new ReservationValidator();
+        private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
         private final ReservationService reservationService =
-                new ReservationService(reservationRepository, reservationTimeService, themeService, reservationValidator);
+                new ReservationService(
+                        reservationRepository,
+                        reservationTimeService,
+                        themeService,
+                        reservationValidator,
+                        reservationWaitingRepository
+                );
     }
 }

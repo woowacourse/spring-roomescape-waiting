@@ -73,7 +73,8 @@
 
 ## DB 설계
 
-대기 기능은 별도 `reservation_waiting` 테이블로 분리한다. 대기 데이터는 예약 데이터를 참조하며, 예약 취소 시 첫 번째 대기자를 기존 예약의 예약자로 승격한 뒤 해당 대기 데이터를 삭제한다.
+대기 기능은 별도 `reservation_waiting` 테이블로 분리한다. 대기 데이터는 예약 데이터를 참조한다.
+아직 예약 취소 시 대기자 승격 정책을 적용하지 않으므로, 대기자가 있는 예약은 변경하거나 삭제할 수 없게 막는다.
 
 ### Reservation
 
@@ -163,6 +164,7 @@ CREATE TABLE theme
 - `MY_RESERVATION_NOT_FOUND`
 - `WAITING_NOT_FOUND`
 - `RESERVATION_DUPLICATED`
+- `RESERVATION_HAS_WAITINGS`
 - `RESERVATION_WAITING_DUPLICATED`
 - `RESERVATION_TIME_IN_USE`
 - `THEME_IN_USE`

@@ -99,6 +99,22 @@ class ReservationApiTest {
     }
 
     @Test
+    void 대기자가_있는_예약_삭제_시_409를_반환한다() {
+        createTheme();
+        createReservationTime("15:40");
+        LocalDate futureDate = LocalDate.now().plusDays(1);
+        createReservation("브라운", futureDate.toString(), 1L, 1L);
+        insertReservationWaiting(1L, "코니");
+
+        RestAssured.given().log().all()
+                .when().delete("/reservations/1")
+                .then().log().all()
+                .statusCode(409)
+                .body("code", is("RESERVATION_HAS_WAITINGS"))
+                .body("status", is(409));
+    }
+
+    @Test
     void DB_조회_API_전환() {
         jdbcTemplate.update("INSERT INTO theme (id, name, description, thumbnail_url) VALUES (?, ?, ?, ?)",
                 1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
@@ -351,10 +367,21 @@ class ReservationApiTest {
         );
     }
 
+    private void insertReservationWaiting(final Long reservationId, final String name) {
+        jdbcTemplate.update(
+                "INSERT INTO reservation_waiting (reservation_id, name, requested_at) VALUES (?, ?, ?)",
+                reservationId,
+                name,
+                "2026-08-06 12:00:00"
+        );
+    }
+
     private void clearTables() {
+        jdbcTemplate.update("DELETE FROM reservation_waiting");
         jdbcTemplate.update("DELETE FROM reservation");
         jdbcTemplate.update("DELETE FROM reservation_time");
         jdbcTemplate.update("DELETE FROM theme");
+        jdbcTemplate.update("ALTER TABLE reservation_waiting ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE reservation_time ALTER COLUMN id RESTART WITH 1");
         jdbcTemplate.update("ALTER TABLE theme ALTER COLUMN id RESTART WITH 1");

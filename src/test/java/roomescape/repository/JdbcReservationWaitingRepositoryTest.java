@@ -87,6 +87,23 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
+    @DisplayName("예약 ID로 대기 존재 여부를 확인한다")
+    void existsByReservationId() {
+        Reservation reservation = createReservation();
+        jdbcReservationWaitingRepository.save(ReservationWaiting.createNew(
+                reservation,
+                "아루",
+                LocalDateTime.parse("2026-08-06T12:00")
+        ));
+
+        boolean exists = jdbcReservationWaitingRepository.existsByReservationId(reservation.getId());
+        boolean notExists = jdbcReservationWaitingRepository.existsByReservationId(999L);
+
+        assertThat(exists).isTrue();
+        assertThat(notExists).isFalse();
+    }
+
+    @Test
     @DisplayName("대기 ID와 이름으로 예약 대기를 삭제한다")
     void deleteByIdAndName() {
         Reservation reservation = createReservation();
