@@ -139,7 +139,7 @@ public class ReservationService {
     }
 
     private boolean checkAlreadyBookedByOthers(Long dateId, Long timeId, Long themeId) {
-        return reservationRepository.existsByDateAndTimeAndThemeId(dateId, timeId, themeId);
+        return reservationRepository.existsReservedBySlot(dateId, timeId, themeId);
     }
 
     private Reservations findTimeSlotReservations(Long dateId, Long timeId, Long themeId) {

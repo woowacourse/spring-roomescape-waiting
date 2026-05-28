@@ -57,34 +57,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAll() {
-        String sql = """
-                SELECT
-                    r.id AS reservation_id,
-                    r.name,
-                    r.status,
-                    r.reserved_at,
-                    d.id as date_id,
-                    d.date,
-                    d.is_active as date_is_active,
-                    t.id as time_id,
-                    t.start_at,
-                    t.is_active as time_is_active,
-                    th.id AS theme_id,
-                    th.name AS theme_name,
-                    th.description,
-                    th.thumbnail_url,
-                    th.is_active
-                FROM reservation r
-                INNER JOIN reservation_date d ON r.date_id = d.id
-                INNER JOIN reservation_time t ON r.time_id = t.id
-                INNER JOIN theme th ON r.theme_id = th.id
-                """;
-
-        return jdbcTemplate.query(sql, reservationRowMapper);
-    }
-
-    @Override
     public Optional<Reservation> findById(Long id) {
         String sql = """
                 SELECT
@@ -116,6 +88,34 @@ public class JdbcReservationRepository implements ReservationRepository {
         } catch (EmptyResultDataAccessException e) {
             return Optional.empty();
         }
+    }
+
+    @Override
+    public List<Reservation> findAll() {
+        String sql = """
+                SELECT
+                    r.id AS reservation_id,
+                    r.name,
+                    r.status,
+                    r.reserved_at,
+                    d.id as date_id,
+                    d.date,
+                    d.is_active as date_is_active,
+                    t.id as time_id,
+                    t.start_at,
+                    t.is_active as time_is_active,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description,
+                    th.thumbnail_url,
+                    th.is_active
+                FROM reservation r
+                INNER JOIN reservation_date d ON r.date_id = d.id
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme th ON r.theme_id = th.id
+                """;
+
+        return jdbcTemplate.query(sql, reservationRowMapper);
     }
 
     @Override
@@ -156,6 +156,46 @@ public class JdbcReservationRepository implements ReservationRepository {
         return jdbcTemplate.query(sql, params, reservationRowMapper);
     }
 
+    public List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName) {
+        String sql = """
+                SELECT
+                    r.id,
+                    r.name,
+                    d.date,
+                    t.start_at,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    r.status,
+                    r.reserved_at,
+                    -- [대기 순번 계산]
+                    -- WAITING 상태일 때만 순번 계산, RESERVED는 NULL 반환
+                    CASE 
+                        WHEN r.status = 'WAITING' THEN (
+                            SELECT COUNT(*) + 1 
+                            FROM reservation wait
+                            WHERE wait.date_id = r.date_id
+                              AND wait.time_id = r.time_id
+                              AND wait.theme_id = r.theme_id
+                              AND wait.status = 'WAITING'
+                              AND (wait.reserved_at < r.reserved_at 
+                                   OR (wait.reserved_at = r.reserved_at AND wait.id < r.id))
+                        )
+                        ELSE NULL 
+                    END AS waiting_turn
+                FROM reservation r
+                INNER JOIN reservation_date d ON r.date_id = d.id
+                INNER JOIN reservation_time t ON r.time_id = t.id
+                INNER JOIN theme th ON r.theme_id = th.id
+                WHERE r.name = :memberName
+                ORDER BY r.reserved_at ASC
+                """;
+
+        MapSqlParameterSource params = new MapSqlParameterSource("memberName", memberName);
+
+        return jdbcTemplate.query(sql, params, reservationWithWaitingTurnRowMapper);
+    }
+
     @Override
     public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
@@ -178,7 +218,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId) {
+    public boolean existsReservedBySlot(Long dateId, Long timeId, Long themeId) {
         String sql = """
                 SELECT COUNT(*) 
                 FROM reservation 
@@ -220,46 +260,6 @@ public class JdbcReservationRepository implements ReservationRepository {
 
         int updatedCount = jdbcTemplate.update(sql, params);
         return updatedCount > 0;
-    }
-
-    public List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName) {
-        String sql = """
-                SELECT
-                    r.id,
-                    r.name,
-                    d.date,
-                    t.start_at,
-                    th.id AS theme_id,
-                    th.name AS theme_name,
-                    th.thumbnail_url AS theme_thumbnail_url,
-                    r.status,
-                    r.reserved_at,
-                    -- [대기 순번 계산]
-                    -- WAITING 상태일 때만 순번 계산, RESERVED는 NULL 반환
-                    CASE 
-                        WHEN r.status = 'WAITING' THEN (
-                            SELECT COUNT(*) + 1 
-                            FROM reservation wait
-                            WHERE wait.date_id = r.date_id
-                              AND wait.time_id = r.time_id
-                              AND wait.theme_id = r.theme_id
-                              AND wait.status = 'WAITING'
-                              AND (wait.reserved_at < r.reserved_at 
-                                   OR (wait.reserved_at = r.reserved_at AND wait.id < r.id))
-                        )
-                        ELSE NULL 
-                    END AS waiting_turn
-                FROM reservation r
-                INNER JOIN reservation_date d ON r.date_id = d.id
-                INNER JOIN reservation_time t ON r.time_id = t.id
-                INNER JOIN theme th ON r.theme_id = th.id
-                WHERE r.name = :memberName
-                ORDER BY r.reserved_at ASC
-                """;
-
-        MapSqlParameterSource params = new MapSqlParameterSource("memberName", memberName);
-
-        return jdbcTemplate.query(sql, params, reservationWithWaitingTurnRowMapper);
     }
 
     private final RowMapper<ReservationWithWaitingTurn> reservationWithWaitingTurnRowMapper = (rs, rowNum) -> {

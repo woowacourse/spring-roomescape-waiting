@@ -8,20 +8,21 @@ import java.util.Optional;
 
 public interface ReservationRepository {
 
-    List<Reservation> findAll();
-
     Optional<Reservation> findById(Long id);
+
+    List<Reservation> findAll();
 
     List<Reservation> findReservedAndWaitingBySlot(Long dateId, Long timeId, Long themeId);
 
+    List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName);
+
     Reservation save(Reservation reservation);
 
-    boolean existsByDateAndTimeAndThemeId(Long dateId, Long timeId, Long themeId);
+    boolean existsReservedBySlot(Long dateId, Long timeId, Long themeId);
 
     boolean updateStatus(Reservation reservation);
 
     boolean updateSchedule(Reservation reservation);
 
-    List<ReservationWithWaitingTurn> findMyReservationsWithWaitingTurn(String memberName);
 
 }

@@ -7,7 +7,6 @@ import static roomescape.reservation.fixture.ReservationFixture.reservation;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -166,9 +165,9 @@ class ReservationRepositoryTest {
         Long wrongDateId = reservationDate2.getId();
 
         // when & then
-        assertThat(jdbcReservationRepository.existsByDateAndTimeAndThemeId(reservationDate1.getId(), reservationTime1.getId(), theme.getId()))
+        assertThat(jdbcReservationRepository.existsReservedBySlot(reservationDate1.getId(), reservationTime1.getId(), theme.getId()))
                 .isTrue();
-        assertThat(jdbcReservationRepository.existsByDateAndTimeAndThemeId(wrongDateId, reservationTime1.getId(), theme.getId()))
+        assertThat(jdbcReservationRepository.existsReservedBySlot(wrongDateId, reservationTime1.getId(), theme.getId()))
                 .isFalse();
     }
 
