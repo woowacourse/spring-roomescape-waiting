@@ -4,7 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Waiting;
 import roomescape.domain.WaitingWithRank;
-import roomescape.repository.WaitingDao;
+import roomescape.dao.WaitingDao;
 
 import java.time.LocalDate;
 import java.util.List;

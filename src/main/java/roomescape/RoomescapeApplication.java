@@ -3,7 +3,9 @@ package roomescape;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
+
 import java.time.Clock;
+import java.time.ZoneId;
 
 @SpringBootApplication
 public class RoomescapeApplication {
@@ -14,6 +16,6 @@ public class RoomescapeApplication {
 
     @Bean
     public Clock clock() {
-        return Clock.systemDefaultZone();
+        return Clock.system(ZoneId.of("Asia/Seoul"));
     }
 }

@@ -5,7 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.repository.ReservationTimeDao;
+import roomescape.dao.ReservationTimeDao;
 
 import java.time.LocalTime;
 

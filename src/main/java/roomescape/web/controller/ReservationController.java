@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.web.controller;
 
 import jakarta.validation.Valid;
 import java.net.URI;
@@ -16,10 +16,9 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
-import roomescape.domain.Waiting;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.request.ReservationUpdateRequest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.web.dto.request.ReservationRequest;
+import roomescape.web.dto.request.ReservationUpdateRequest;
+import roomescape.web.dto.response.ReservationResponse;
 import roomescape.service.ReservationCommandService;
 import roomescape.service.ReservationQueryService;
 import roomescape.service.WaitingQueryService;
@@ -46,7 +45,7 @@ public class ReservationController {
     @PostMapping
     public ResponseEntity<ReservationResponse> createReservation(@Valid @RequestBody ReservationRequest request) {
         ReservationResponse reservationResponse = ReservationResponse.from(
-                reservationCommandService.create(request.name(), request.date(), request.timeId(), request.themeId()));
+                reservationCommandService.create(ReservationRequest.toReservationCommand(request)));
 
         Long savedId = reservationResponse.id();
 

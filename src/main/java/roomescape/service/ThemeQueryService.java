@@ -4,7 +4,7 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
-import roomescape.repository.ThemeDao;
+import roomescape.dao.ThemeDao;
 
 import java.util.List;
 

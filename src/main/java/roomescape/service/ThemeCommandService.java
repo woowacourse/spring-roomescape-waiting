@@ -5,7 +5,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import roomescape.domain.Theme;
 import roomescape.exception.DeletionNotAllowedException;
-import roomescape.repository.ThemeDao;
+import roomescape.dao.ThemeDao;
 
 @Service
 @RequiredArgsConstructor

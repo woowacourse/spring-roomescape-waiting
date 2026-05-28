@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.web.controller;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.domain.Theme;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.web.dto.response.ThemeResponse;
 import roomescape.service.ThemeQueryService;
 
 import java.time.Clock;

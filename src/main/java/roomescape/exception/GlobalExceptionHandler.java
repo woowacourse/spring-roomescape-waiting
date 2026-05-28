@@ -11,7 +11,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import roomescape.dto.response.ErrorResponse;
+import roomescape.web.dto.response.ErrorResponse;
 
 import java.util.List;
 import java.util.stream.Collectors;

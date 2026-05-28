@@ -3,7 +3,7 @@ package roomescape.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.domain.ReservationTime;
-import roomescape.repository.ReservationTimeDao;
+import roomescape.dao.ReservationTimeDao;
 
 import java.time.LocalDate;
 import java.util.List;

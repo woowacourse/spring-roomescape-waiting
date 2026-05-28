@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.web.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.Theme;
-import roomescape.dto.request.ThemeRequest;
-import roomescape.dto.response.ThemeResponse;
+import roomescape.web.dto.request.ThemeRequest;
+import roomescape.web.dto.response.ThemeResponse;
 import roomescape.service.ThemeCommandService;
 import roomescape.service.ThemeQueryService;
 

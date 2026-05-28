@@ -1,19 +1,13 @@
-package roomescape.controller;
+package roomescape.web.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.Waiting;
-import roomescape.dto.request.WaitingRequest;
-import roomescape.dto.response.WaitingResponse;
+import roomescape.web.dto.request.WaitingRequest;
+import roomescape.web.dto.response.WaitingResponse;
 import roomescape.service.WaitingCommandService;
 import roomescape.service.WaitingQueryService;
 
@@ -51,7 +45,4 @@ public class WaitingController {
         waitingCommandService.cancel(id, name);
         return ResponseEntity.noContent().build();
     }
-
-
-
 }

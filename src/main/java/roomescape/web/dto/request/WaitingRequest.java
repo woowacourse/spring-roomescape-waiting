@@ -1,4 +1,4 @@
-package roomescape.dto.request;
+package roomescape.web.dto.request;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.validation.constraints.Min;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.NotNull;
 
 import java.time.LocalDate;
 
-public record ReservationRequest(
+public record WaitingRequest(
         @NotBlank(message = "이름은 필수입니다.")
         String name,
 

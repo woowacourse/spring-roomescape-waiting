@@ -1,4 +1,4 @@
-package roomescape.controller;
+package roomescape.web.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 import roomescape.domain.Reservation;
-import roomescape.dto.request.ReservationRequest;
-import roomescape.dto.response.ReservationResponse;
+import roomescape.web.dto.request.ReservationRequest;
+import roomescape.web.dto.response.ReservationResponse;
 import roomescape.service.ReservationCommandService;
 import roomescape.service.ReservationQueryService;
 
