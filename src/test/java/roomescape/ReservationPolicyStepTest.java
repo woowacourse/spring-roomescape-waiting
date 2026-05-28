@@ -18,9 +18,9 @@ import org.springframework.context.annotation.Primary;
 import roomescape.domain.policy.ReservationPolicy;
 import roomescape.exception.client.BusinessRuleViolationException;
 import roomescape.exception.client.InvalidCommandException;
-import roomescape.service.ReservationService;
-import roomescape.service.ReservationTimeService;
-import roomescape.service.dto.ReservationCreateCommand;
+import roomescape.application.ReservationService;
+import roomescape.application.ReservationTimeService;
+import roomescape.application.dto.command.ReservationCreateCommand;
 import roomescape.support.ReservationTestHelper;
 import roomescape.support.TestFutureOnlyPolicy;
 
