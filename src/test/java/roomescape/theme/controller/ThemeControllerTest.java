@@ -31,6 +31,7 @@ class ThemeControllerTest {
     @MockitoBean
     private ThemeService themeService;
 
+    @DisplayName("전체 테마를 조회한다.")
     @Test
     void 테마_목록_조회() throws Exception {
         Theme theme1 = new Theme("이름1", "설명1", "https://img.test/1.png").withId(1L);
@@ -48,7 +49,7 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$[1].name").value("이름2"));
     }
 
-    @DisplayName("이름, 설명으로 테마를 생성한다.")
+    @DisplayName("이름, 설명으로 테마를 생성 후 201을 반환한다.")
     @Test
     void 테마_생성() throws Exception {
         Theme saved = new Theme("이름", "설명", "https://img.test/a.png").withId(1L);
@@ -73,7 +74,7 @@ class ThemeControllerTest {
                 .andExpect(jsonPath("$.imageUrl").value("https://img.test/a.png"));
     }
 
-    @DisplayName("테마 ID로 테마를 삭제한다.")
+    @DisplayName("테마 ID로 테마를 삭제 후 204를 반환한다.")
     @Test
     void 테마_삭제() throws Exception {
         Long id = 1L;
