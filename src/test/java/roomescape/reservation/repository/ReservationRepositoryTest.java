@@ -6,6 +6,7 @@ import static roomescape.reservation.fixture.ReservationFixture.reservation;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -117,10 +118,10 @@ class ReservationRepositoryTest {
     @DisplayName("특정 슬롯의 예약+대기 목록을 조회하면 예약요청시각을 기준으로 오름차순 정렬된다.")
     void findAllByName() {
         // given
-        LocalDateTime firstReservedAt = LocalDateTime.now().plusHours(1);
-        LocalDateTime secondReservedAt = LocalDateTime.now().plusHours(2);
-        LocalDateTime thirdReservedAt = LocalDateTime.now().plusHours(3);
-        LocalDateTime fourthReservedAt = LocalDateTime.now().plusHours(4);
+        LocalDateTime firstReservedAt = LocalDateTime.now().plusHours(1).truncatedTo(ChronoUnit.MICROS);
+        LocalDateTime secondReservedAt = LocalDateTime.now().plusHours(2).truncatedTo(ChronoUnit.MICROS);
+        LocalDateTime thirdReservedAt = LocalDateTime.now().plusHours(3).truncatedTo(ChronoUnit.MICROS);
+        LocalDateTime fourthReservedAt = LocalDateTime.now().plusHours(4).truncatedTo(ChronoUnit.MICROS);
 
         saveAll(List.of(
                 ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme, firstReservedAt),
