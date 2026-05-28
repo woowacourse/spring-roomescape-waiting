@@ -35,6 +35,6 @@ public record ReservationWaitingRequest (String name, LocalDate date, Long timeI
     }
 
     public ReservationWaiting to(ReservationTime reservationTime, Theme theme) {
-        return new ReservationWaiting(name, date, reservationTime, theme);
+        return ReservationWaiting.create(name, date, reservationTime, theme);
     }
 }

@@ -2,6 +2,7 @@ package roomescape.domain.reservatinWaiting;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.theme.Theme;
 import roomescape.exception.ExpiredDateTimeException;
@@ -16,15 +17,7 @@ public class ReservationWaiting {
     private Long sequence;
     private final LocalDateTime createdAt;
 
-    public ReservationWaiting(String name, LocalDate date, ReservationTime time, Theme theme) {
-        this.name = name;
-        this.date = date;
-        this.time = time;
-        this.theme = theme;
-        this.createdAt = LocalDateTime.now();
-    }
-
-    public ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
+    private ReservationWaiting(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
         this.id = id;
         this.name = name;
         this.date = date;
@@ -32,6 +25,15 @@ public class ReservationWaiting {
         this.theme = theme;
         this.sequence = sequence;
         this.createdAt = createdAt;
+    }
+
+    public static ReservationWaiting create(String name, LocalDate date, ReservationTime time, Theme theme) {
+        validatePastDateTime(date, time.getStartAt());
+        return new ReservationWaiting(null, name, date, time, theme, null, LocalDateTime.now());
+    }
+
+    public static ReservationWaiting restore(Long id, String name, LocalDate date, ReservationTime time, Theme theme, Long sequence, LocalDateTime createdAt) {
+        return new ReservationWaiting(id, name, date, time, theme, sequence, createdAt);
     }
 
     public Long getId() {
@@ -62,8 +64,12 @@ public class ReservationWaiting {
         return createdAt;
     }
 
-    public void validatePastDateTime() {
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+    public void validateModifiable() {
+        validatePastDateTime(date, time.getStartAt());
+    }
+
+    private static void validatePastDateTime(LocalDate date, LocalTime time) {
+        if (LocalDateTime.of(date, time).isBefore(LocalDateTime.now())) {
             throw new ExpiredDateTimeException();
         }
     }

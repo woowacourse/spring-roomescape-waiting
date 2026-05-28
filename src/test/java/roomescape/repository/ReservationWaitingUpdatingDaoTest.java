@@ -62,7 +62,7 @@ public class ReservationWaitingUpdatingDaoTest {
                 resultSet.getString("theme_url")
         );
 
-        return new ReservationWaiting(
+        return ReservationWaiting.restore(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getObject("date", LocalDate.class),
@@ -95,7 +95,7 @@ public class ReservationWaitingUpdatingDaoTest {
 
     @Test
     void 예약_대기를_제대로_생성한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting("테스트", LocalDate.parse("2027-05-27"), reservationTime, theme);
+        ReservationWaiting reservationWaiting = ReservationWaiting.create("테스트", LocalDate.parse("2027-05-27"), reservationTime, theme);
 
         reservationWaitingUpdatingDao.create(reservationWaiting);
 

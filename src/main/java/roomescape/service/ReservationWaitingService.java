@@ -43,7 +43,6 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new ThemeNotFoundException(reservationWaitingReq.themeId()));
 
         ReservationWaiting reservationWaitingCommand = reservationWaitingReq.to(reservationTimeById, themeById);
-        reservationWaitingCommand.validatePastDateTime();
 
         Reservation reservation = getReservationByThemeAndDateAndTime(reservationWaitingReq.themeId(), reservationWaitingReq.date(), reservationWaitingReq.timeId());
 
@@ -64,8 +63,7 @@ public class ReservationWaitingService {
     public void delete(Long id) {
         ReservationWaiting reservationWaiting =  reservationWaitingQueryingDao.findReservationWaitingById(id)
                 .orElseThrow(() -> new ResourceNotFoundException(id + "번 대기열이 존재하지 않습니다."));
-
-        reservationWaiting.validatePastDateTime();
+        reservationWaiting.validateModifiable();
 
         reservationWaitingUpdatingDao.delete(id);
     }

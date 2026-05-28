@@ -69,7 +69,7 @@ public class ReservationWaitingServiceTest {
         );
         when(reservationWaitingUpdatingDao.create(any())).thenReturn(1L);
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(
-                Optional.of(new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now()))
+                Optional.of(ReservationWaiting.restore(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now()))
         );
 
         ReservationWaitingResponse reservationWaitingResponse = reservationWaitingService.create(reservationWaitingRequest);
@@ -140,7 +140,7 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 예약_대기열이_정상_삭제된다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now());
+        ReservationWaiting reservationWaiting = ReservationWaiting.restore(1L, "테스트", now, reservationTime, theme, 1L, LocalDateTime.now());
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatCode(() -> reservationWaitingService.delete(reservationWaiting.getId())).doesNotThrowAnyException();
@@ -148,7 +148,7 @@ public class ReservationWaitingServiceTest {
 
     @Test
     void 과거_예약_대기열_삭제를_시도하면_예외가_발생한다() {
-        ReservationWaiting reservationWaiting = new ReservationWaiting(1L, "테스트", LocalDate.now().minusDays(1), reservationTime, theme, 1L, LocalDateTime.now());
+        ReservationWaiting reservationWaiting = ReservationWaiting.restore(1L, "테스트", LocalDate.now().minusDays(1), reservationTime, theme, 1L, LocalDateTime.now());
         when(reservationWaitingQueryingDao.findReservationWaitingById(1L)).thenReturn(Optional.of(reservationWaiting));
 
         assertThatThrownBy(() -> reservationWaitingService.delete(reservationWaiting.getId()))

@@ -2,18 +2,41 @@ package roomescape.controller;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.annotation.DirtiesContext;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import static org.hamcrest.Matchers.is;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 public class ThemeTest {
+
+    @LocalServerPort
+    private int port;
+
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
+
+    @BeforeEach
+    void setUp() {
+        RestAssured.port = port;
+
+        jdbcTemplate.update("delete from waiting");
+        jdbcTemplate.update("delete from reservation");
+        jdbcTemplate.update("delete from reservation_time");
+        jdbcTemplate.update("delete from theme");
+
+        jdbcTemplate.update("alter table waiting alter column id restart with 1");
+        jdbcTemplate.update("alter table reservation alter column id restart with 1");
+        jdbcTemplate.update("alter table reservation_time alter column id restart with 1");
+        jdbcTemplate.update("alter table theme alter column id restart with 1");
+    }
 
     @Test
     void 테마_관리_API() {

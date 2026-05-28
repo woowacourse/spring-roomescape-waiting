@@ -61,7 +61,7 @@ public class ReservationWaitingQueryingDao {
                 resultSet.getString("theme_url")
         );
 
-        return new ReservationWaiting(
+        return ReservationWaiting.restore(
                 resultSet.getLong("id"),
                 resultSet.getString("name"),
                 resultSet.getObject("date", LocalDate.class),
