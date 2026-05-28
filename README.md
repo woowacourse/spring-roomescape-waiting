@@ -63,7 +63,7 @@
         - [x] 중복 예약 대기 신청: 409 Conflict
         - [x] 예약 가능한 시간에 대기 신청: 409 Conflict
         - [x] 존재하지 않는 date/time/theme: 404 Not Found
-        - [ ] 요청 값 누락/형식 오류: 400 Bad Request
+        - [x] 요청 값 누락/형식 오류: 400 Bad Request
 - [x] 예약 대기 취소
 
   **`DELETE /waiting-reservations/{id}`**
@@ -119,4 +119,4 @@
     ```
 
     - 에러 처리
-        - [ ] name이 비어있는 경우: 400 Bad Request
+        - [x] name이 비어있는 경우: 400 Bad Request
