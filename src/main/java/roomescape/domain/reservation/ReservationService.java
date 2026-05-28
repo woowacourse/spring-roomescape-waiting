@@ -89,7 +89,6 @@ public class ReservationService {
             .orElseThrow(() -> new NotFoundException(ReservationErrors.RESERVATION_NOT_FOUND));
         reservationRepository.deleteById(id);
         reorderWaitingNumbers(reservation.getReservationSlot());
-        deleteEmptyReservationSlot(reservation);
     }
 
     @Transactional
@@ -99,7 +98,6 @@ public class ReservationService {
         validateUserCanDeleteReservation(reservation);
         reservationRepository.deleteById(id);
         reorderWaitingNumbers(reservation.getReservationSlot());
-        deleteEmptyReservationSlot(reservation);
     }
 
     @Transactional
@@ -107,57 +105,52 @@ public class ReservationService {
         Reservation reservation = reservationRepository.findById(id)
             .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
 
-        ReservationSlot reservationSlot = reservation.getReservationSlot();
+        ReservationSlot oldSlot = reservation.getReservationSlot();
 
-        ReservationTime reservationTime = reservationSlot.getTime();
-        ReservationDate reservationDate = reservationSlot.getDate();
+        ReservationTime reservationTime = oldSlot.getTime();
+        ReservationDate reservationDate = oldSlot.getDate();
         reservationTime = getReservationTime(request, reservationTime);
         reservationDate = getReservationDate(request, reservationDate);
         validateReservationScheduleToCreate(reservationDate, reservationTime);
-        Theme theme = reservationSlot.getTheme();
+        Theme theme = oldSlot.getTheme();
         User user = reservation.getUser();
 
-        ReservationSlot updatedReservationSlot = getOrCreateReservationSlot(reservationDate, reservationTime, theme);
-        boolean sameReservationSlot = reservationSlot.getId().equals(updatedReservationSlot.getId());
-        if (!sameReservationSlot) {
-            validateUserReservationNotDuplicated(user, updatedReservationSlot);
+        ReservationSlot newSlot = getOrCreateReservationSlot(reservationDate, reservationTime, theme);
+        boolean sameReservationSlot = oldSlot.getId().equals(newSlot.getId());
+        if (sameReservationSlot) {
+            reservationRepository.update(reservation.getId(), reservation.update(clock));
+            reorderWaitingNumbers(oldSlot);
+            return;
         }
+        validateUserReservationNotDuplicated(user, newSlot);
 
-        Long reservationCount = reservation.getWaitingNumber();
-        ReservationStatus reservationStatus = reservation.getStatus();
-        if (!sameReservationSlot) {
-            reservationCount = reservationRepository.countByReservationSlotId(updatedReservationSlot.getId());
-            reservationStatus = decideWaitingStatus(reservationCount);
-        }
+        Long reservationCount = reservationRepository.countByReservationSlotId(newSlot.getId());
+        ReservationStatus reservationStatus = decideWaitingStatus(reservationCount);
 
         Reservation updatedReservation = reservation.update(
-            updatedReservationSlot,
+            newSlot,
             reservationCount,
             reservationStatus,
             clock
         );
 
-        reservationRepository.update(reservation.getId(), updatedReservation)
-            .orElseThrow(() -> new NotFoundException(ReservationErrors.USER_RESERVATION_NOT_FOUND));
+        reservationRepository.update(reservation.getId(), updatedReservation);
 
-        if (!sameReservationSlot) {
-            reorderWaitingNumbers(reservationSlot);
-        }
-
-        deleteEmptyReservationSlot(reservation);
+        reorderWaitingNumbers(oldSlot);
+        reorderWaitingNumbers(newSlot);
     }
 
-    private void deleteEmptyReservationSlot(Reservation reservation) {
-        Long remainReservationCount = reservationRepository
-            .countByReservationSlotId(reservation.getReservationSlot().getId());
+    private void deleteEmptyReservationSlot(ReservationSlot reservationSlot) {
+        Long remainReservationCount = reservationRepository.countByReservationSlotId(reservationSlot.getId());
         if (remainReservationCount == 0) {
-            reservationSlotRepository.deleteById(reservation.getReservationSlot().getId());
+            reservationSlotRepository.deleteById(reservationSlot.getId());
         }
     }
 
     private void reorderWaitingNumbers(ReservationSlot reservationSlot) {
         List<Reservation> reservations = reservationRepository.findAllByReservationIdOrder(reservationSlot.getId());
         if (reservations.isEmpty()) {
+            deleteEmptyReservationSlot(reservationSlot);
             return;
         }
         reservationRepository.updateWaitingNumbers(reservations);
@@ -207,16 +200,16 @@ public class ReservationService {
     }
 
     private ReservationDate getReservationDate(UpdateReservationRequest request, ReservationDate reservationDate) {
-        if (request.startWhen() != null) {
-            reservationDate = reservationDateRepository.findByDate(request.startWhen())
+        if (request.dateId() != null) {
+            reservationDate = reservationDateRepository.findById(request.dateId())
                 .orElseThrow(() -> new NotFoundException(ReservationDateErrors.RESERVATION_DATE_NOT_EXIST));
         }
         return reservationDate;
     }
 
     private ReservationTime getReservationTime(UpdateReservationRequest request, ReservationTime reservationTime) {
-        if (request.startAt() != null) {
-            reservationTime = reservationTimeRepository.findByStartAt(request.startAt())
+        if (request.timeId() != null) {
+            reservationTime = reservationTimeRepository.findById(request.timeId())
                 .orElseThrow(() -> new NotFoundException(ReservationTimeErrors.RESERVATION_TIME_NOT_EXIST));
         }
         return reservationTime;

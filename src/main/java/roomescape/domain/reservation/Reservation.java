@@ -85,6 +85,18 @@ public class Reservation {
         );
     }
 
+    public Reservation update(Clock clock) {
+        return new Reservation(
+            id,
+            reservationSlot,
+            user,
+            waitingNumber,
+            status,
+            createdAt,
+            LocalDateTime.now(clock)
+        );
+    }
+
     public static Reservation of(
         long id,
         ReservationSlot reservation,
