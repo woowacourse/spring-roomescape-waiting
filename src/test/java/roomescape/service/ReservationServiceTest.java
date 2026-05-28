@@ -51,8 +51,8 @@ class ReservationServiceTest {
 
         ReservationResponse saved = reservationService.create(request);
 
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getName()).isEqualTo("브라운");
+        assertThat(saved.id()).isNotNull();
+        assertThat(saved.name()).isEqualTo("브라운");
     }
 
     @Test
@@ -125,9 +125,9 @@ class ReservationServiceTest {
 
         Long newTimeId = reservationTimeUpdatingDao.insert(new ReservationTimeRequest(LocalTime.of(11, 0)));
         ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().plusDays(2), newTimeId, themeId);
-        ReservationResponse updated = reservationService.update(created.getId(), newReservationReq);
+        ReservationResponse updated = reservationService.update(created.id(), newReservationReq);
 
-        assertThat(updated.getDate()).isEqualTo(LocalDate.now().plusDays(2));
+        assertThat(updated.date()).isEqualTo(LocalDate.now().plusDays(2));
     }
 
     @Test
@@ -140,7 +140,7 @@ class ReservationServiceTest {
         ReservationRequest newReservationReq = new ReservationRequest("브라운", LocalDate.now().minusDays(1), newTimeId, themeId);
 
 
-        assertThatThrownBy(() -> reservationService.update(created.getId(), newReservationReq))
+        assertThatThrownBy(() -> reservationService.update(created.id(), newReservationReq))
                 .isInstanceOf(ExpiredDateTimeException.class);
     }
 
@@ -157,7 +157,7 @@ class ReservationServiceTest {
 
         //중복 예약 시도시 예외 발생해야함
         ReservationRequest updated = new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId2, themeId);
-        assertThatThrownBy(() -> reservationService.update(created.getId(), updated))
+        assertThatThrownBy(() -> reservationService.update(created.id(), updated))
                 .isInstanceOf(ReservationAlreadyExistException.class);
     }
 
@@ -177,10 +177,10 @@ class ReservationServiceTest {
         Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
 
-        ReservationResponse found = reservationService.read(created.getId());
+        ReservationResponse found = reservationService.read(created.id());
 
-        assertThat(found.getId()).isEqualTo(created.getId());
-        assertThat(found.getName()).isEqualTo("브라운");
+        assertThat(found.id()).isEqualTo(created.id());
+        assertThat(found.name()).isEqualTo("브라운");
     }
 
     @Test
@@ -195,7 +195,7 @@ class ReservationServiceTest {
         Long themeId = themeUpdatingDao.insert(new ThemeRequest("테마", "설명", "http://example.com"));
         ReservationResponse created = reservationService.create(new ReservationRequest("브라운", LocalDate.now().plusDays(1), timeId, themeId));
 
-        reservationService.delete(created.getId());
+        reservationService.delete(created.id());
 
         assertThat(reservationService.readAll()).isEmpty();
     }
