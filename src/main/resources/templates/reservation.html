@@ -122,6 +122,18 @@
       cursor: not-allowed;
     }
 
+    .time-btn.booked {
+      border-color: #c9b8b0;
+      background: #fdf5f3;
+      color: var(--muted);
+    }
+
+    .time-btn.booked.selected {
+      border-color: var(--warning);
+      background: #fff3df;
+      color: var(--warning);
+    }
+
     .submit-btn {
       width: 100%;
       margin-top: 22px;
@@ -137,6 +149,14 @@
 
     .submit-btn:hover {
       background: var(--accent-dark);
+    }
+
+    .submit-btn.waiting-mode {
+      background: var(--warning);
+    }
+
+    .submit-btn.waiting-mode:hover {
+      background: #8a4a00;
     }
 
     .message {
@@ -194,13 +214,16 @@
 
 <script>
   let selectedTimeId = null;
+  let selectedTimeIsBooked = false;
   let allTimes = [];
+  let currentBookedTimeIds = [];
 
   document.addEventListener('DOMContentLoaded', () => {
     const params = new URLSearchParams(window.location.search);
     const themeId = params.get('themeId');
     const datePicker = document.getElementById('date-picker');
     const message = document.getElementById('reservation-message');
+    const submitBtn = document.getElementById('reserve-btn');
 
     datePicker.min = toDateValue(new Date());
 
@@ -222,7 +245,7 @@
 
     datePicker.addEventListener('change', loadBookedTimes);
 
-    document.getElementById('reserve-btn').addEventListener('click', () => {
+    submitBtn.addEventListener('click', () => {
       const name = document.getElementById('user-name').value.trim();
       const date = datePicker.value;
       clearMessage();
@@ -238,23 +261,39 @@
         return;
       }
 
-      fetch('/api/reservations', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ themeId: Number(themeId), name, date, timeId: selectedTimeId })
-      })
-      .then(handleResponse)
-      .then(() => {
-        showMessage('예약이 완료되었습니다.', true);
-        window.location.href = '/';
-      })
-      .catch(error => showMessage(toErrorMessage(error, '예약에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
+      if (selectedTimeIsBooked) {
+        fetch('/api/waiting', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ themeId: Number(themeId), name, date, timeId: selectedTimeId })
+        })
+        .then(handleResponse)
+        .then(() => {
+          showMessage('대기 신청이 완료되었습니다.', true);
+          setTimeout(() => window.location.href = '/', 1500);
+        })
+        .catch(error => showMessage(toErrorMessage(error, '대기 신청에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
+      } else {
+        fetch('/api/reservations', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ themeId: Number(themeId), name, date, timeId: selectedTimeId })
+        })
+        .then(handleResponse)
+        .then(() => {
+          showMessage('예약이 완료되었습니다.', true);
+          setTimeout(() => window.location.href = '/', 1500);
+        })
+        .catch(error => showMessage(toErrorMessage(error, '예약에 실패했습니다. 입력한 정보를 다시 확인해주세요.')));
+      }
     });
 
     function loadBookedTimes() {
       const selectedDate = datePicker.value;
       selectedTimeId = null;
+      selectedTimeIsBooked = false;
       clearMessage();
+      updateSubmitButton();
 
       if (!selectedDate) {
         renderTimeButtons([]);
@@ -263,11 +302,11 @@
 
       fetchJson(`/api/reservations/booked-times?themeId=${encodeURIComponent(themeId)}&selectedDate=${encodeURIComponent(selectedDate)}`)
       .then(times => {
-        const bookedTimeIds = times
+        currentBookedTimeIds = times
         .filter(time => time.reserved === true)
         .map(time => time.timeId);
 
-        renderTimeButtons(bookedTimeIds);
+        renderTimeButtons(currentBookedTimeIds);
       })
       .catch(error => showMessage(toErrorMessage(error, '예약된 시간을 불러오지 못했습니다.')));
     }
@@ -296,23 +335,48 @@
 
         btn.type = 'button';
         btn.className = 'time-btn';
-        btn.textContent = time.startAt;
-        btn.disabled = isBooked || isPast || !selectedDate;
-        btn.title = isBooked ? '이미 예약된 시간입니다.' : isPast ? '현재 시간 이전입니다.' : '';
+        if (isBooked) {
+          btn.classList.add('booked');
+        }
+        btn.textContent = isBooked ? `${time.startAt} (예약됨)` : time.startAt;
+        btn.disabled = isPast || !selectedDate;
+        btn.title = isPast ? '현재 시간 이전입니다.' : '';
 
         btn.addEventListener('click', () => {
           document.querySelectorAll('.time-btn').forEach(button => button.classList.remove('selected'));
           btn.classList.add('selected');
           selectedTimeId = time.id;
+          selectedTimeIsBooked = isBooked;
           clearMessage();
+          updateSubmitButton();
         });
         timeList.appendChild(btn);
       });
 
-      const availableCount = [...timeList.children].filter(button => !button.disabled).length;
-      timeHint.textContent = selectedDate
-              ? availableCount > 0 ? '선택 가능한 시간만 활성화되어 있습니다.' : '선택 가능한 시간이 없습니다. 다른 날짜를 골라주세요.'
-              : '날짜를 선택하면 예약 가능한 시간이 표시됩니다.';
+      const availableCount = [...timeList.children].filter(button => !button.disabled && !button.classList.contains('booked')).length;
+      const bookedCount = [...timeList.children].filter(button => !button.disabled && button.classList.contains('booked')).length;
+
+      if (selectedDate) {
+        if (availableCount > 0) {
+          timeHint.textContent = `선택 가능한 시간: ${availableCount}개${bookedCount > 0 ? ` / 대기 신청 가능: ${bookedCount}개` : ''}`;
+        } else if (bookedCount > 0) {
+          timeHint.textContent = `모든 시간이 예약되었습니다. 대기 신청이 가능합니다.`;
+        } else {
+          timeHint.textContent = '선택 가능한 시간이 없습니다. 다른 날짜를 골라주세요.';
+        }
+      } else {
+        timeHint.textContent = '날짜를 선택하면 예약 가능한 시간이 표시됩니다.';
+      }
+    }
+
+    function updateSubmitButton() {
+      if (selectedTimeIsBooked) {
+        submitBtn.textContent = '대기 신청';
+        submitBtn.classList.add('waiting-mode');
+      } else {
+        submitBtn.textContent = '예약하기';
+        submitBtn.classList.remove('waiting-mode');
+      }
     }
 
     function isPastDateTime(dateValue, timeId) {

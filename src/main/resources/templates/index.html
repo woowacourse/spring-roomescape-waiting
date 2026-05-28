@@ -186,6 +186,18 @@
       background: #fff3df;
     }
 
+    .badge.waiting {
+      color: #6b5d56;
+      background: #fdf5f3;
+      border: 1px solid #e8ddd8;
+    }
+
+    .waiting-number {
+      font-size: 13px;
+      color: var(--muted);
+      margin-top: 4px;
+    }
+
     .edit-grid {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -327,16 +339,22 @@
       .catch(error => showReservationMessage(toErrorMessage(error, '예약을 조회하지 못했습니다.')));
     }
 
-    function renderReservations(reservations) {
+    function renderReservations(data) {
       reservationList.innerHTML = '';
+      const reservations = data.reservations;
+      const waitings = data.waitings || [];
 
-      if (reservations.length === 0) {
+      if (reservations.length === 0 && waitings.length === 0) {
         showReservationMessage('조회된 예약이 없습니다.', false, true);
         return;
       }
 
       reservations.forEach(reservation => {
         reservationList.appendChild(createReservationCard(reservation));
+      });
+
+      waitings.forEach(waiting => {
+        reservationList.appendChild(createWaitingCard(waiting));
       });
     }
 
@@ -401,6 +419,47 @@
 
       card.appendChild(head);
       card.appendChild(editGrid);
+      card.appendChild(actions);
+      return card;
+    }
+
+    function createWaitingCard(waiting) {
+      const card = document.createElement('article');
+      card.className = 'reservation-card';
+
+      const head = document.createElement('div');
+      head.className = 'reservation-head';
+
+      const titleBox = document.createElement('div');
+      const title = document.createElement('h3');
+      title.textContent = waiting.theme.name;
+      const summary = document.createElement('p');
+      summary.textContent = `${waiting.date} ${waiting.time.startAt} · ${waiting.theme.runningTime}분`;
+      titleBox.appendChild(title);
+      titleBox.appendChild(summary);
+
+      const badge = document.createElement('span');
+      badge.className = 'badge waiting';
+      badge.textContent = '대기 신청';
+      const waitingNumberDiv = document.createElement('div');
+      waitingNumberDiv.className = 'waiting-number';
+      waitingNumberDiv.textContent = `대기 순번: ${waiting.waitingNumber}번`;
+      badge.appendChild(document.createElement('br'));
+      badge.appendChild(waitingNumberDiv);
+
+      head.appendChild(titleBox);
+      head.appendChild(badge);
+
+      const actions = document.createElement('div');
+      actions.className = 'reservation-actions';
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'danger-btn';
+      deleteBtn.textContent = '대기 취소';
+      deleteBtn.addEventListener('click', () => deleteWaiting(waiting.id));
+      actions.appendChild(deleteBtn);
+
+      card.appendChild(head);
       card.appendChild(actions);
       return card;
     }
@@ -475,6 +534,18 @@
         searchReservations();
       })
       .catch(error => showReservationMessage(toErrorMessage(error, '예약을 취소하지 못했습니다.')));
+    }
+
+    function deleteWaiting(id) {
+      clearReservationMessage();
+
+      fetch(`/api/waiting/${id}`, { method: 'DELETE' })
+      .then(handleResponse)
+      .then(() => {
+        showReservationMessage('대기 신청을 취소했습니다.', true);
+        searchReservations();
+      })
+      .catch(error => showReservationMessage(toErrorMessage(error, '대기 신청을 취소하지 못했습니다.')));
     }
 
     function isPastReservation(reservation) {

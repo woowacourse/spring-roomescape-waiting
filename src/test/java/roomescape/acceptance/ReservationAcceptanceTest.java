@@ -168,6 +168,53 @@ public class ReservationAcceptanceTest {
     }
 
     @Test
+    void 이름으로_예약을_조회한다() {
+        Map<String, String> timeParams = new HashMap<>();
+        timeParams.put("startAt", "10:00");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(timeParams)
+                .when().post("/api/admin/times")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, String> themeParams = new HashMap<>();
+        themeParams.put("name", "귀신찾기");
+        themeParams.put("description", "귀신찾기을 찾는 테마입니다.");
+        themeParams.put("imageUrl", "https://image.png");
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(themeParams)
+                .when().post("/api/admin/themes")
+                .then().log().all()
+                .statusCode(201);
+
+        Map<String, Object> reservation = new HashMap<>();
+        reservation.put("name", "브라운");
+        reservation.put("date", "2026-08-05");
+        reservation.put("timeId", 1);
+        reservation.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(reservation)
+                .when().post("/api/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/api/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("reservations.size()", is(1))
+                .body("reservations[0].name", is("브라운"))
+                .body("waitings.size()", is(0));
+    }
+
+    @Test
     void 예약을_수정한다() {
         Map<String, String> firstTimeParams = new HashMap<>();
         firstTimeParams.put("startAt", "10:00");

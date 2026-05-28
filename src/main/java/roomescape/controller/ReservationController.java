@@ -48,7 +48,7 @@ public class ReservationController {
     }
 
     @GetMapping
-    public ResponseEntity<UserBookingResponseDTO> findReservationsByName(
+    public ResponseEntity<UserBookingResponseDTO> findUserBookingByName(
             @RequestParam @NotBlank(message = "이름은 한 글자 이상이어야 합니다.") String name) {
         return ResponseEntity.ok(reservationService.findReservationsAndWaitingByName(name));
     }
