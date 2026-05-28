@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,26 +40,34 @@ public class ReservationService {
 
     @Transactional
     public ReservationResult change(long entryId, ReservationChangeCommand command) {
-        Reservation currentReservation = reservationRepository.findByEntryIdForUpdate(entryId)
+        Reservation current = reservationRepository.findByEntryIdForUpdate(entryId)
                 .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
-        ReservationEntry entry = currentReservation.findReservedEntry(entryId);
+        ReservationEntry entry = current.findReservedEntry(entryId);
 
-        ReservationTime time = findTimeWithThrow(command.timeId());
-        if (currentReservation.isSameSlot(command.date(), time)) {
-            return ReservationResult.from(currentReservation, entryId);
+        ReservationTime newTime = findTimeWithThrow(command.timeId());
+        if (current.isSameSlot(command.date(), newTime)) {
+            return ReservationResult.from(current, entry);
         }
 
-        Theme theme = currentReservation.getTheme();
-        ReservationCondition condition = command.toCondition(theme.getId());
-        Reservation newReservation = reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
-                .orElseGet(() -> Reservation.createSlot(command.date(), theme, time));
-        ReservationEntry added = newReservation.reserve(entry.getName());
+        return moveEntry(entry, current, command.date(), newTime);
+    }
 
-        currentReservation.cancelEntry(entryId);
-        reservationRepository.save(currentReservation);
+    private ReservationResult moveEntry(ReservationEntry entry, Reservation current,
+                                        LocalDate date, ReservationTime newTime) {
+        Reservation target = findOrCreateSlot(date, current.getTheme(), newTime);
+        ReservationEntry moved = target.reserve(entry.getName());
 
-        Reservation savedNew = reservationRepository.save(newReservation);
-        return ReservationResult.from(savedNew, savedNew.findEntryByNameAndStatus(entry.getName(), added.getStatus()).getId());
+        current.cancelEntry(entry.getId());
+        reservationRepository.save(current);
+
+        Reservation saved = reservationRepository.save(target);
+        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(entry.getName(), moved.getStatus()));
+    }
+
+    private Reservation findOrCreateSlot(LocalDate date, Theme theme, ReservationTime time) {
+        ReservationCondition condition = new ReservationCondition(date, theme.getId(), time.getId());
+        return reservationRepository.findByDateAndThemeAndTimeForUpdate(condition)
+                .orElseGet(() -> Reservation.createSlot(date, theme, time));
     }
 
     @Transactional
@@ -71,7 +80,7 @@ public class ReservationService {
                 });
         ReservationEntry added = reservation.joinWaitingList(command.name());
         Reservation saved = reservationRepository.save(reservation);
-        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()).getId());
+        return ReservationResult.from(saved, saved.findEntryByNameAndStatus(command.name(), added.getStatus()));
     }
 
     @Transactional
@@ -101,6 +110,8 @@ public class ReservationService {
     }
 
     public ReservationResult getReservationEntry(long entryId) {
-        return ReservationResult.from(findReservationByEntryIdWithThrow(entryId), entryId);
+        Reservation reservation = findReservationByEntryIdWithThrow(entryId);
+        ReservationEntry reservationEntry = reservation.findReservedEntry(entryId);
+        return ReservationResult.from(reservation, reservationEntry);
     }
 }
