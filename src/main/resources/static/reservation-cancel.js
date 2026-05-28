@@ -2,6 +2,7 @@ const $ = (selector) => document.querySelector(selector);
 
 const query = new URLSearchParams(window.location.search);
 const reservationId = query.get("id");
+const cancelType = query.get("type") === "waiting" ? "waiting" : "reservation";
 
 function setMessage(message) {
   $("#message").textContent = message;
@@ -31,12 +32,13 @@ async function api(path, options = {}) {
 function initPage() {
   if (!reservationId) {
     $("#cancelReservation").disabled = true;
-    $("#reservationInfo").textContent = "예약 번호가 없어 취소를 진행할 수 없습니다.";
+    $("#reservationInfo").textContent = "취소할 항목 번호가 없어 진행할 수 없습니다.";
     setMessage("잘못된 접근입니다. 사용자 예약 페이지에서 다시 시도해 주세요.");
     return false;
   }
 
-  $("#reservationInfo").textContent = `예약 번호 #${reservationId} 를 취소합니다.`;
+  const label = cancelType === "waiting" ? "예약 대기" : "예약";
+  $("#reservationInfo").textContent = `${label} 번호 #${reservationId} 를 취소합니다.`;
   return true;
 }
 
@@ -52,11 +54,15 @@ $("#cancelForm").addEventListener("submit", async (event) => {
   }
 
   try {
-    await api(`/reservations/${reservationId}`, {
+    const path = cancelType === "waiting"
+      ? `/reservations-waitings/${reservationId}`
+      : `/reservations/${reservationId}`;
+
+    await api(path, {
       method: "DELETE",
       headers: { Authorization: authName }
     });
-    setMessage("예약이 취소되었습니다. 잠시 후 사용자 페이지로 이동합니다.");
+    setMessage("취소되었습니다. 잠시 후 사용자 페이지로 이동합니다.");
     setTimeout(() => {
       window.location.href = "/index.html";
     }, 1200);

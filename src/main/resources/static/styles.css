@@ -104,6 +104,10 @@ button:hover { filter: brightness(1.05); }
   border: 1px solid #e2e8f0;
   border-radius: 10px;
 }
+.reservation-waiting {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+}
 .reservation-text {
   color: var(--muted);
 }
@@ -118,10 +122,22 @@ button:hover { filter: brightness(1.05); }
 
 .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
 .chip { background: #0369a1; }
+.chip-waiting { background: #7c3aed; }
 .chip-selected {
   background: #0284c7;
   outline: 2px solid #075985;
 }
+.status-badge {
+  display: inline-block;
+  margin-right: 8px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.82rem;
+  font-weight: 700;
+}
+.status-reserved { background: #15803d; }
+.status-waiting { background: #7c3aed; }
 .list { color: var(--muted); }
 .rank-list { margin: 12px 0 0; padding-left: 20px; }
 .rank-list li { margin-bottom: 8px; }
