@@ -1,5 +1,6 @@
 package roomescape.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -20,9 +21,11 @@ public class ThemeService {
     public static final int MAX_RANKING_PERIOD = 366;
 
     private final ThemeRepository themeRepository;
+    private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository, Clock clock) {
         this.themeRepository = themeRepository;
+        this.clock = clock;
     }
 
     @Transactional
@@ -62,7 +65,7 @@ public class ThemeService {
     }
 
     private void validateRankingPeriod(LocalDate startDate, LocalDate endDate) {
-        LocalDate localDate = LocalDate.now();
+        LocalDate localDate = LocalDate.now(clock);
 
         if (startDate.isAfter(localDate) || endDate.isAfter(localDate)) {
             throw new CustomInvalidRequestException(ErrorCode.FUTURE_RANKING_PERIOD);
