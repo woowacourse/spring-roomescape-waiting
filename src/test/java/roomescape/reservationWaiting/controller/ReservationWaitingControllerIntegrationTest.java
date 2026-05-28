@@ -11,6 +11,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.reservationWaiting.controller.dto.ReservationWaitingRequest;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
@@ -18,11 +19,8 @@ import roomescape.testSupport.SpringWebTest;
 @SpringWebTest
 class ReservationWaitingControllerIntegrationTest {
 
-    private final DatabaseHelper databaseHelper;
-
-    ReservationWaitingControllerIntegrationTest(DatabaseHelper databaseHelper) {
-        this.databaseHelper = databaseHelper;
-    }
+    @Autowired
+    private DatabaseHelper databaseHelper;
 
     @BeforeEach
     void setup() {

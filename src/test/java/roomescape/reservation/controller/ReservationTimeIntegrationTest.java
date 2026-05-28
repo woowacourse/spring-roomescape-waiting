@@ -12,6 +12,7 @@ import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
 import roomescape.time.controller.dto.ReservationTimeResponse;
@@ -19,11 +20,8 @@ import roomescape.time.controller.dto.ReservationTimeResponse;
 @SpringWebTest
 public class ReservationTimeIntegrationTest {
 
-    private final DatabaseHelper databaseHelper;
-
-    public ReservationTimeIntegrationTest(DatabaseHelper databaseHelper) {
-        this.databaseHelper = databaseHelper;
-    }
+    @Autowired
+    private DatabaseHelper databaseHelper;
 
     @BeforeEach
     void setup() {

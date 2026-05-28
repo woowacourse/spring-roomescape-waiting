@@ -2,9 +2,7 @@ package roomescape.testSupport;
 
 import java.time.LocalDate;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.stereotype.Component;
 
-@Component
 public class DatabaseHelper {
 
     private final JdbcTemplate jdbcTemplate;

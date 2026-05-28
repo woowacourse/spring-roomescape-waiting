@@ -12,6 +12,7 @@ import java.time.LocalDate;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.testSupport.DatabaseHelper;
 import roomescape.testSupport.SpringWebTest;
@@ -19,13 +20,11 @@ import roomescape.testSupport.SpringWebTest;
 @SpringWebTest
 public class ThemeControllerIntegrationTest {
 
-    private final DatabaseHelper helper;
-    private final JdbcTemplate jdbcTemplate;
+    @Autowired
+    private DatabaseHelper helper;
 
-    public ThemeControllerIntegrationTest(DatabaseHelper helper, JdbcTemplate jdbcTemplate) {
-        this.helper = helper;
-        this.jdbcTemplate = jdbcTemplate;
-    }
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
     private void insertReservationDirectly(String name, LocalDate date, Long timeId, Long themeId) {
         jdbcTemplate.update(

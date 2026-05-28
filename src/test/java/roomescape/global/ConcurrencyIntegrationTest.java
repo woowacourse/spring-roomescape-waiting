@@ -15,6 +15,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.NotFoundException;
@@ -33,21 +34,16 @@ import roomescape.time.service.dto.ReservationTimeCommand;
 @SpringWebTest
 class ConcurrencyIntegrationTest {
 
-    private final DatabaseHelper databaseHelper;
-    private final ReservationService reservationService;
-    private final ReservationWaitingService reservationWaitingService;
-    private final ReservationTimeService reservationTimeService;
-    private final ThemeService themeService;
-
-    ConcurrencyIntegrationTest(DatabaseHelper databaseHelper, ReservationService reservationService,
-                               ReservationWaitingService reservationWaitingService,
-                               ReservationTimeService reservationTimeService, ThemeService themeService) {
-        this.databaseHelper = databaseHelper;
-        this.reservationService = reservationService;
-        this.reservationWaitingService = reservationWaitingService;
-        this.reservationTimeService = reservationTimeService;
-        this.themeService = themeService;
-    }
+    @Autowired
+    private DatabaseHelper databaseHelper;
+    @Autowired
+    private ReservationService reservationService;
+    @Autowired
+    private ReservationWaitingService reservationWaitingService;
+    @Autowired
+    private ReservationTimeService reservationTimeService;
+    @Autowired
+    private ThemeService themeService;
 
     @BeforeEach
     void setup() {

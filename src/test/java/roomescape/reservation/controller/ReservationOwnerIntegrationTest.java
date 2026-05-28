@@ -14,6 +14,7 @@ import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.testSupport.DatabaseHelper;
@@ -22,13 +23,11 @@ import roomescape.testSupport.SpringWebTest;
 @SpringWebTest
 public class ReservationOwnerIntegrationTest {
 
-    private final JdbcTemplate jdbcTemplate;
-    private final DatabaseHelper databaseHelper;
+    @Autowired
+    private JdbcTemplate jdbcTemplate;
 
-    public ReservationOwnerIntegrationTest(JdbcTemplate jdbcTemplate, DatabaseHelper databaseHelper) {
-        this.jdbcTemplate = jdbcTemplate;
-        this.databaseHelper = databaseHelper;
-    }
+    @Autowired
+    private DatabaseHelper databaseHelper;
 
     @BeforeEach
     void setup() {
