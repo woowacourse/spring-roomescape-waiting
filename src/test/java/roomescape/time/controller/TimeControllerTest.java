@@ -1,5 +1,6 @@
 package roomescape.time.controller;
 
+import static org.mockito.Mockito.verify;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -37,7 +38,7 @@ class TimeControllerTest {
     @MockitoBean
     private ThemeService themeService;
 
-    @DisplayName("날짜, 테마 ID로 예약 가능한 시간 목록을 조회한다.")
+    @DisplayName("날짜, 테마 ID로 예약 가능한 시간 목록을 조회 후 200을 반환한다.")
     @Test
     void 가능한_시간_목록_조회() throws Exception {
         Long themeId = 1L;
@@ -59,7 +60,7 @@ class TimeControllerTest {
                 .andExpect(jsonPath("$[1].id").value(2));
     }
 
-    @DisplayName("전체 시간 목록을 조회한다.")
+    @DisplayName("전체 시간 목록을 조회 후 200을 반환한다.")
     @Test
     void 전체_시간_목록_조회() throws Exception {
         List<ReservationTime> times = List.of(
@@ -76,7 +77,7 @@ class TimeControllerTest {
                 .andExpect(jsonPath("$[0].startAt").value("2030-06-01T10:00"));
     }
 
-    @DisplayName("시간 슬롯을 생성한다.")
+    @DisplayName("시간 슬롯을 생성한 후, 201을 반환한다.")
     @Test
     void 시간_생성() throws Exception {
         ReservationTime saved = new ReservationTime(1L,
@@ -101,13 +102,13 @@ class TimeControllerTest {
                 .andExpect(jsonPath("$.endAt").value("2030-06-01T12:00"));
     }
 
-    @DisplayName("시간 슬롯을 삭제한다.")
+    @DisplayName("시간 슬롯을 삭제한")
     @Test
     void 시간_삭제() throws Exception {
         mockMvc.perform(delete("/times/{id}", 1L))
                 .andExpect(status().isNoContent());
 
-        Mockito.verify(timeService).deleteById(1L);
+        verify(timeService).deleteById(1L);
     }
 
     @DisplayName("존재하지 않는 시간 슬롯 삭제 요청인 경우, 404를 반환한다.")
