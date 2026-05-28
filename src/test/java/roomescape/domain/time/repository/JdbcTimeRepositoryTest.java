@@ -52,7 +52,7 @@ class JdbcTimeRepositoryTest {
     @Nested
     @Order(1)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class SaveTest {
+    class 예약_시간_저장 {
 
         @Test
         @Order(1)
@@ -87,7 +87,7 @@ class JdbcTimeRepositoryTest {
     @Nested
     @Order(2)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class FindAllTimesTest {
+    class 예약_시간_목록_조회 {
 
         @BeforeEach
         void assumeSaveWorks() {
@@ -118,7 +118,7 @@ class JdbcTimeRepositoryTest {
     }
 
     @Nested
-    class FindTimeByIdTest {
+    class 예약_시간_ID_조회 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -150,7 +150,7 @@ class JdbcTimeRepositoryTest {
     }
 
     @Nested
-    class ExistsTimeByStartAtTest {
+    class 예약_시간_시작_시간_존재_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -181,7 +181,7 @@ class JdbcTimeRepositoryTest {
     }
 
     @Nested
-    class ExistsTimeByIdTest {
+    class 예약_시간_ID_존재_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -211,7 +211,7 @@ class JdbcTimeRepositoryTest {
     }
 
     @Nested
-    class DeleteTimeByIdTest {
+    class 예약_시간_삭제 {
 
         @BeforeEach
         void assumeBasicsWork() {

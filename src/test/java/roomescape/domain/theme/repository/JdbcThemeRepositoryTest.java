@@ -63,7 +63,7 @@ class JdbcThemeRepositoryTest {
     @Nested
     @Order(1)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class SaveTest {
+    class 테마_저장 {
 
         @Test
         @Order(1)
@@ -99,7 +99,7 @@ class JdbcThemeRepositoryTest {
     @Nested
     @Order(2)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class FindAllThemesTest {
+    class 테마_목록_조회 {
 
         @BeforeEach
         void assumeSaveWorks() {
@@ -145,7 +145,7 @@ class JdbcThemeRepositoryTest {
     }
 
     @Nested
-    class FindThemeByIdTest {
+    class 테마_ID_조회 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -177,7 +177,7 @@ class JdbcThemeRepositoryTest {
     }
 
     @Nested
-    class DeleteThemeByIdTest {
+    class 테마_삭제 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -216,7 +216,7 @@ class JdbcThemeRepositoryTest {
     }
 
     @Nested
-    class ExistsThemeByIdTest {
+    class 테마_ID_존재_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -246,7 +246,7 @@ class JdbcThemeRepositoryTest {
     }
 
     @Nested
-    class ExistsThemeByNameTest {
+    class 테마_이름_존재_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -289,7 +289,7 @@ class JdbcThemeRepositoryTest {
     }
 
     @Nested
-    class FindPopularThemesDateBetweenTest {
+    class 인기_테마_조회 {
 
         @BeforeEach
         void assumeBasicsWork() {

@@ -62,7 +62,7 @@ class JdbcReservationRepositoryTest {
     @Nested
     @Order(1)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class SaveTest {
+    class 예약_저장 {
 
         @Test
         @Order(1)
@@ -129,7 +129,7 @@ class JdbcReservationRepositoryTest {
     @Nested
     @Order(2)
     @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
-    class FindAllReservationsTest {
+    class 예약_목록_조회 {
 
         @BeforeEach
         void assumeSaveWorks() {
@@ -195,7 +195,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class FindReservationsByNameTest {
+    class 이름으로_예약_조회 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -286,7 +286,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class FindTimeIdsByDateAndThemeIdTest {
+    class 날짜와_테마로_예약된_시간_조회 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -326,7 +326,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class CountByIdLessThanEqualAndDateAndTimeAndThemeTest {
+    class 예약_대기_순번_조회 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -392,7 +392,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class ExistsReservationByDateAndTimeAndThemeTest {
+    class 날짜_시간_테마_예약_존재_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -435,7 +435,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class UpdateTest {
+    class 예약_수정 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -472,7 +472,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class ExistsReservationTest {
+    class 예약_상태_존재_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -514,7 +514,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class ExistsReservationByDateAndTimeAndThemeAndIdNotTest {
+    class 다른_예약_중복_여부_확인 {
 
         @BeforeEach
         void assumeBasicsWork() {
@@ -558,7 +558,7 @@ class JdbcReservationRepositoryTest {
     }
 
     @Nested
-    class DeleteReservationByIdTest {
+    class 예약_삭제 {
 
         @BeforeEach
         void assumeBasicsWork() {
