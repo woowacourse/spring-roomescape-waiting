@@ -17,59 +17,37 @@ public class ThemeDao {
 
     public ThemeDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("theme")
-                .usingGeneratedKeyColumns("id");
+        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("theme").usingGeneratedKeyColumns("id");
     }
 
     public Theme findThemeById(Long id) {
-        return jdbcTemplate.queryForObject(
-                "SELECT id, name, description, url FROM theme WHERE id = ?",
-                (rs, rowNum) -> new Theme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("url")
-                ),
-                id
-        );
+        return jdbcTemplate.queryForObject("SELECT id, name, description, url FROM theme WHERE id = ?",
+                (rs, rowNum) -> new Theme(rs.getLong("id"), rs.getString("name"), rs.getString("description"),
+                        rs.getString("url")), id);
     }
 
     public List<Theme> findAllThemes() {
-        return jdbcTemplate.query(
-                "SELECT id, name, description, url FROM theme",
-                (rs, rowNum) -> new Theme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("url")
-                )
-        );
+        return jdbcTemplate.query("SELECT id, name, description, url FROM theme",
+                (rs, rowNum) -> new Theme(rs.getLong("id"), rs.getString("name"), rs.getString("description"),
+                        rs.getString("url")));
     }
 
     public List<Theme> findTopThemes(Long count) {
-        return jdbcTemplate.query(
-                """
-                           SELECT
-                           t.id,
-                           t.name,
-                           t.description,
-                           t.url,
-                           COUNT(r.id) AS reservation_count
-                           FROM theme t
-                           INNER JOIN reservation r ON t.id = r.theme_id
-                           WHERE r.date BETWEEN DATEADD('DAY', -7, CURRENT_DATE) AND DATEADD('DAY',-1,CURRENT_DATE)
-                           GROUP BY t.id, t.name
-                           ORDER BY reservation_count DESC
-                           LIMIT ?;
-                        """, (rs, rowNum) -> new Theme(
-                        rs.getLong("id"),
-                        rs.getString("name"),
-                        rs.getString("description"),
-                        rs.getString("url")
-                ),
-                count
-        );
+        return jdbcTemplate.query("""
+                   SELECT
+                   t.id,
+                   t.name,
+                   t.description,
+                   t.url,
+                   COUNT(r.id) AS reservation_count
+                   FROM theme t
+                   INNER JOIN reservation r ON t.id = r.theme_id
+                   WHERE r.date BETWEEN DATEADD('DAY', -7, CURRENT_DATE) AND DATEADD('DAY',-1,CURRENT_DATE)
+                   GROUP BY t.id, t.name
+                   ORDER BY reservation_count DESC
+                   LIMIT ?;
+                """, (rs, rowNum) -> new Theme(rs.getLong("id"), rs.getString("name"), rs.getString("description"),
+                rs.getString("url")), count);
     }
 
     @Transactional
@@ -81,12 +59,7 @@ public class ThemeDao {
 
         Long id = jdbcInsert.executeAndReturnKey(params).longValue();
 
-        return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getUrl()
-        );
+        return new Theme(id, theme.getName(), theme.getDescription(), theme.getUrl());
     }
 
     @Transactional

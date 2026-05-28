@@ -36,7 +36,7 @@ public class ThemeService {
 
     public ThemeResponse create(ThemeRequest request) {
         MultipartFile file = request.file();
-        String fileName = UUID.randomUUID().toString() + "_" + file.getOriginalFilename();
+        String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String filePath = uploadDir + fileName;
 
         try {

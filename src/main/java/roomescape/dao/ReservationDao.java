@@ -22,137 +22,82 @@ public class ReservationDao {
 
     public ReservationDao(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
-        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("reservation")
+        this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate).withTableName("reservation")
                 .usingGeneratedKeyColumns("id");
     }
 
     public List<Reservation> findAll() {
-        return jdbcTemplate.query(
-                """
-                            SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
-                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                            r.status
-                            FROM reservation r
-                            INNER JOIN reservation_time rt ON r.time_id = rt.id
-                            INNER JOIN theme t ON r.theme_id = t.id;
-                        """,
-                (rs, rowNum) -> {
-                    ReservationTime time = new ReservationTime(
-                            rs.getLong("time_id"),
-                            rs.getTime("start_at").toLocalTime()
-                    );
-                    Theme theme = new Theme(
-                            rs.getLong("theme_id"),
-                            rs.getString("theme_name"),
-                            rs.getString("description"),
-                            rs.getString("url")
-                    );
-                    return new Reservation(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getDate("date").toLocalDate(),
-                            time,
-                            theme,
-                            ReservationStatus.valueOf(rs.getString("status"))
-                    );
-                }
-        );
+        return jdbcTemplate.query("""
+                    SELECT r.id,r.name,r.date,rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                    r.status
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id;
+                """, (rs, rowNum) -> {
+            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
+            Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
+                    rs.getString("url"));
+            return new Reservation(rs.getLong("id"), rs.getString("name"), rs.getDate("date").toLocalDate(), time,
+                    theme, ReservationStatus.valueOf(rs.getString("status")));
+        });
     }
 
     public Reservation findById(Long id) {
-        return jdbcTemplate.queryForObject(
-                """
-                            SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                            r.status
-                            FROM reservation r
-                            INNER JOIN reservation_time rt ON r.time_id = rt.id
-                            INNER JOIN theme t ON r.theme_id = t.id
-                            WHERE r.id = ?
-                        """,
-                (rs, rowNum) -> {
-                    ReservationTime time = new ReservationTime(
-                            rs.getLong("time_id"),
-                            rs.getTime("start_at").toLocalTime()
-                    );
-                    Theme theme = new Theme(
-                            rs.getLong("theme_id"),
-                            rs.getString("theme_name"),
-                            rs.getString("description"),
-                            rs.getString("url")
-                    );
-                    return new Reservation(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getDate("date").toLocalDate(),
-                            time,
-                            theme,
-                            ReservationStatus.valueOf(rs.getString("status"))
-                    );
-                },
-                id
-        );
+        return jdbcTemplate.queryForObject("""
+                    SELECT r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                    r.status
+                    FROM reservation r
+                    INNER JOIN reservation_time rt ON r.time_id = rt.id
+                    INNER JOIN theme t ON r.theme_id = t.id
+                    WHERE r.id = ?
+                """, (rs, rowNum) -> {
+            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
+            Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
+                    rs.getString("url"));
+            return new Reservation(rs.getLong("id"), rs.getString("name"), rs.getDate("date").toLocalDate(), time,
+                    theme, ReservationStatus.valueOf(rs.getString("status")));
+        }, id);
     }
 
     public List<ReservationOrder> findByName(String name) {
         return jdbcTemplate.query("""
-                            SELECT *
-                            FROM (
-                                SELECT
-                                    r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
-                                    t.id AS theme_id, t.name AS theme_name, t.description, t.url,
-                                    r.status,
-                                    CASE WHEN r.status = 'WAITING'
-                                         THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
-                                    END AS waiting_order
-                                FROM reservation r
-                                INNER JOIN reservation_time rt ON r.time_id = rt.id
-                                INNER JOIN theme t ON r.theme_id = t.id
-                            ) sub
-                            WHERE sub.name = ?
-                        """,
-                (rs, rowNum) -> {
-                    ReservationTime time = new ReservationTime(
-                            rs.getLong("time_id"),
-                            rs.getTime("start_at").toLocalTime()
-                    );
-                    Theme theme = new Theme(
-                            rs.getLong("theme_id"),
-                            rs.getString("theme_name"),
-                            rs.getString("description"),
-                            rs.getString("url")
-                    );
-                    Reservation reservation = new Reservation(
-                            rs.getLong("id"),
-                            rs.getString("name"),
-                            rs.getDate("date").toLocalDate(),
-                            time,
-                            theme,
-                            ReservationStatus.valueOf(rs.getString("status"))
-                    );
+                    SELECT *
+                    FROM (
+                        SELECT
+                            r.id, r.name, r.date, rt.id AS time_id, rt.start_at,
+                            t.id AS theme_id, t.name AS theme_name, t.description, t.url,
+                            r.status,
+                            CASE WHEN r.status = 'WAITING'
+                                 THEN ROW_NUMBER() OVER (PARTITION BY r.date, r.theme_id, r.time_id, r.status ORDER BY r.id)
+                            END AS waiting_order
+                        FROM reservation r
+                        INNER JOIN reservation_time rt ON r.time_id = rt.id
+                        INNER JOIN theme t ON r.theme_id = t.id
+                    ) sub
+                    WHERE sub.name = ?
+                """, (rs, rowNum) -> {
+            ReservationTime time = new ReservationTime(rs.getLong("time_id"), rs.getTime("start_at").toLocalTime());
+            Theme theme = new Theme(rs.getLong("theme_id"), rs.getString("theme_name"), rs.getString("description"),
+                    rs.getString("url"));
+            Reservation reservation = new Reservation(rs.getLong("id"), rs.getString("name"),
+                    rs.getDate("date").toLocalDate(), time, theme, ReservationStatus.valueOf(rs.getString("status")));
 
-                    return new ReservationOrder(reservation, rs.getLong("waiting_order"));
-                },
-                name
-        );
+            return new ReservationOrder(reservation, rs.getLong("waiting_order"));
+        }, name);
     }
 
     public boolean existsBy(LocalDate date, Theme theme, ReservationTime time) {
         Boolean result = jdbcTemplate.queryForObject("""
-                        SELECT EXISTS(
-                            SELECT *
-                            FROM reservation
-                            WHERE date = ?
-                                AND time_id = ?
-                                AND theme_id = ?
-                        )
-                        """,
-                Boolean.class,
-                date,
-                time.getId(),
-                theme.getId()
-        );
+                SELECT EXISTS(
+                    SELECT *
+                    FROM reservation
+                    WHERE date = ?
+                        AND time_id = ?
+                        AND theme_id = ?
+                )
+                """, Boolean.class, date, time.getId(), theme.getId());
         return Boolean.TRUE.equals(result);
     }
 
@@ -172,16 +117,11 @@ public class ReservationDao {
 
     @Transactional
     public Reservation update(Long id, LocalDate date, Long timeId) {
-        jdbcTemplate.update(
-                """
-                            UPDATE reservation
-                            SET date = ?, time_id = ?
-                            WHERE id = ?
-                        """,
-                date,
-                timeId,
-                id
-        );
+        jdbcTemplate.update("""
+                    UPDATE reservation
+                    SET date = ?, time_id = ?
+                    WHERE id = ?
+                """, date, timeId, id);
         return findById(id);
     }
 
