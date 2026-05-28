@@ -23,6 +23,7 @@ import roomescape.date.repository.JdbcReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationStatus;
 import roomescape.reservation.fixture.ReservationFixture;
+import roomescape.reservation.repository.dto.ReservationWithWaitingTurn;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.JdbcThemeRepository;
 import roomescape.time.domain.ReservationTime;
@@ -114,27 +115,33 @@ class ReservationRepositoryTest {
     }
 
     @Test
-    @DisplayName("나의 예약들을 조회하면 날짜는 내림차순, 시간은 오름차순으로 정렬해 모두 조회한다.")
+    @DisplayName("특정 슬롯의 예약+대기 목록을 조회하면 예약요청시각을 기준으로 오름차순 정렬된다.")
     void findAllByName() {
         // given
-        List<Reservation> reservations = saveAll(List.of(
-                ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme),
-                ReservationFixture.reservation(name, reservationDate1, reservationTime2, theme),
-                ReservationFixture.reservation(name, reservationDate2, reservationTime1, theme),
-                ReservationFixture.reservation(name, reservationDate2, reservationTime2, theme)
+        LocalDateTime firstReservedAt = LocalDateTime.now().plusHours(1);
+        LocalDateTime secondReservedAt = LocalDateTime.now().plusHours(2);
+        LocalDateTime thirdReservedAt = LocalDateTime.now().plusHours(3);
+        LocalDateTime fourthReservedAt = LocalDateTime.now().plusHours(4);
+
+        saveAll(List.of(
+                ReservationFixture.reservation(name, reservationDate1, reservationTime1, theme, firstReservedAt),
+                ReservationFixture.reservation(name, reservationDate1, reservationTime2, theme, secondReservedAt),
+                ReservationFixture.reservation(name, reservationDate2, reservationTime1, theme, thirdReservedAt),
+                ReservationFixture.reservation(name, reservationDate2, reservationTime2, theme, fourthReservedAt)
         ));
-        reservations.sort(
-                Comparator.comparing((Reservation reservation) -> reservation.getDate().getDate(), Comparator.reverseOrder())
-                        .thenComparing(reservation -> reservation.getTime().getStartAt())
-        );
 
         // when
-        List<Reservation> actual = jdbcReservationRepository.findAllByNameOrderByDateAndTime(name);
+        List<ReservationWithWaitingTurn> result = jdbcReservationRepository.findMyReservationsWithWaitingTurn(name);
 
         // then
-        Assertions.assertThat(actual)
-                .usingRecursiveComparison()
-                .isEqualTo(reservations);
+        Assertions.assertThat(result)
+                .extracting(ReservationWithWaitingTurn::reservedAt)
+                .containsExactly(
+                        firstReservedAt,
+                        secondReservedAt,
+                        thirdReservedAt,
+                        fourthReservedAt
+                );
     }
 
     @Test
