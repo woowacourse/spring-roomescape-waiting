@@ -1,6 +1,8 @@
 package roomescape.reservationwaiting.service;
 
 import java.time.Clock;
+import java.util.List;
+import java.util.stream.IntStream;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -13,9 +15,6 @@ import roomescape.reservationwaiting.dto.ReservationWaitingRequest;
 import roomescape.reservationwaiting.dto.ReservationWaitingResponse;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.reservationwaiting.repository.ReservationWaitingRepository;
-
-import java.util.List;
-import java.util.stream.IntStream;
 
 @Service
 @Transactional(readOnly = true)
@@ -63,14 +62,10 @@ public class ReservationWaitingService {
 
     public List<ReservationWaitingTurnResponse> getWaitingByName(String name) {
         List<ReservationWaiting> reservationWaitings = reservationWaitingRepository.findByName(name);
-        List<Long> turns = getTurnByName(name);
+        List<Long> turns = reservationWaitingRepository.calculateTurn(name);
 
         return IntStream.range(0, turns.size())
                 .mapToObj(i -> ReservationWaitingTurnResponse.from(reservationWaitings.get(i), turns.get(i)))
                 .toList();
-    }
-
-    private List<Long> getTurnByName(String name) {
-        return reservationWaitingRepository.calculateTurn(name);
     }
 }

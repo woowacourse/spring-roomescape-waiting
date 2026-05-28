@@ -8,7 +8,7 @@ public record TimeResponse(
         LocalTime startAt
 ) {
 
-    public static TimeResponse of(ReservationTime saved) {
+    public static TimeResponse from(ReservationTime saved) {
         return new TimeResponse(saved.getId(), saved.getStartAt());
     }
 }

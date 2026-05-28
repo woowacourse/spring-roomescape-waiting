@@ -39,7 +39,7 @@ public class ThemeService {
                 .collect(Collectors.toMap(Theme::getId, theme -> theme));
         return themeIds.stream()
                 .map(themeMap::get)
-                .map(ThemeResponse::of)
+                .map(ThemeResponse::from)
                 .collect(Collectors.toList());
     }
 }

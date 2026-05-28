@@ -34,18 +34,18 @@ public class ReservationTimeService {
     public TimeResponse createTime(TimeRequest request) {
         ReservationTime time = reservationTimeFactory.create(request.startAt(), request.finishAt());
         ReservationTime saved = timeRepository.save(time);
-        return TimeResponse.of(saved);
+        return TimeResponse.from(saved);
     }
 
     public List<TimeResponse> getAllTimes() {
         return timeRepository.findAll().stream()
-                .map(TimeResponse::of)
+                .map(TimeResponse::from)
                 .collect(Collectors.toList());
     }
 
     public List<TimeResponse> getAvailableTimes(LocalDate date, Long themeId) {
         return timeRepository.findAvailableByDateAndThemeId(date, themeId).stream()
-                .map(TimeResponse::of)
+                .map(TimeResponse::from)
                 .collect(Collectors.toList());
     }
 

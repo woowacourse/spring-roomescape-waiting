@@ -9,7 +9,7 @@ public record ThemeResponse(
         String imageUrl
 ) {
 
-    public static ThemeResponse of(Theme theme) {
+    public static ThemeResponse from(Theme theme) {
         return new ThemeResponse(
                 theme.getId(),
                 theme.getName(),

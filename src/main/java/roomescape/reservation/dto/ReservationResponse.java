@@ -18,7 +18,7 @@ public record ReservationResponse(
                 reservation.getId(),
                 reservation.getName(),
                 reservation.getDate(),
-                TimeResponse.of(reservation.getTime()),
+                TimeResponse.from(reservation.getTime()),
                 reservation.getTheme().getId(),
                 reservation.getTheme().getName()
         );
