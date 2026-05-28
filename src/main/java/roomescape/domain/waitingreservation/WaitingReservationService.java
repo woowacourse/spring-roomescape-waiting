@@ -36,6 +36,7 @@ public class WaitingReservationService {
         ReservationDate date = reservationDateService.findById(request.dateId());
         ReservationTime time = reservationTimeService.findById(request.timeId());
         Theme theme = themeService.findById(request.themeId());
+        validateNotPast(date, time);
         validateSlotIsReserved(request);
 
         WaitingReservation waitingReservation = request.toEntity(date, time, theme, LocalDateTime.now(clock));
@@ -57,6 +58,13 @@ public class WaitingReservationService {
         );
         if (!reserved) {
             throw new RoomescapeException(WaitingReservationErrorCode.AVAILABLE_SLOT_NOT_WAITABLE);
+        }
+    }
+
+    private void validateNotPast(ReservationDate date, ReservationTime time) {
+        LocalDateTime reservationDateTime = LocalDateTime.of(date.getPlayDay(), time.getStartAt());
+        if (reservationDateTime.isBefore(LocalDateTime.now(clock))) {
+            throw new RoomescapeException(WaitingReservationErrorCode.PAST_TIME_NOT_ALLOWED);
         }
     }
 

@@ -73,6 +73,9 @@ class WaitingReservationServiceTest {
             LocalDateTime.of(2026, 5, 5, 14, 0)
         );
 
+        when(reservationDateService.findById(1L)).thenReturn(date);
+        when(reservationTimeService.findById(2L)).thenReturn(time);
+        when(themeService.findById(3L)).thenReturn(theme);
         when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(true);
         when(waitingReservationRepository.save(any(WaitingReservation.class))).thenReturn(savedWaiting);
 
@@ -87,8 +90,14 @@ class WaitingReservationServiceTest {
 
     @Test
     void 비어있는_슬롯에_대기를_신청하면_예외가_발생한다() {
+        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 10));
+        ReservationTime time = ReservationTime.of(2L, LocalTime.of(10, 0));
+        Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
         WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
 
+        when(reservationDateService.findById(1L)).thenReturn(date);
+        when(reservationTimeService.findById(2L)).thenReturn(time);
+        when(themeService.findById(3L)).thenReturn(theme);
         when(reservationRepository.existsByDateIdAndTimeIdAndThemeId(1L, 2L, 3L)).thenReturn(false);
 
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
@@ -105,5 +114,21 @@ class WaitingReservationServiceTest {
         assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
             .isInstanceOf(RoomescapeException.class)
             .hasMessageContaining("중복으로 대기 신청을 할 수 없습니다.");
+    }
+
+    @Test
+    void 과거_시간에는_예약_대기를_신청할_수_없다() {
+        ReservationDate date = ReservationDate.of(1L, LocalDate.of(2026, 5, 5));
+        ReservationTime time = ReservationTime.of(2L, LocalTime.of(13, 59));
+        Theme theme = Theme.of(3L, "공포", "테마 내용", "/themes/scary");
+        WaitingReservationCreationRequest request = new WaitingReservationCreationRequest("고래", 1L, 2L, 3L);
+
+        when(reservationDateService.findById(1L)).thenReturn(date);
+        when(reservationTimeService.findById(2L)).thenReturn(time);
+        when(themeService.findById(3L)).thenReturn(theme);
+
+        assertThatThrownBy(() -> waitingReservationService.createWaitingReservation(request))
+            .isInstanceOf(RoomescapeException.class)
+            .hasMessageContaining("과거 시간에는 예약 대기를 신청할 수 없습니다.");
     }
 }
