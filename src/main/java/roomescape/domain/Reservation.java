@@ -30,6 +30,10 @@ public class Reservation {
         }
     }
 
+    public Reservation withSlot(Slot newSlot) {
+        return new Reservation(id, username, newSlot);
+    }
+
     public String username() {
         return username;
     }

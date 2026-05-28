@@ -12,6 +12,7 @@ import roomescape.exception.ResourceNotFoundException;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ReservationTimeDao {
@@ -30,43 +31,38 @@ public class ReservationTimeDao {
                 .withTableName("reservation_time")
                 .usingGeneratedKeyColumns("id");
     }
-    
 
-    public ReservationTime save(LocalTime startAt) {
+    public ReservationTime save(ReservationTime time) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("start_at", startAt);
+                .addValue("start_at", time.startAt());
 
-        Number newId = insertExecutor.executeAndReturnKey(params);
+        long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        return ReservationTime.create(
-                newId.longValue(),
-                startAt
-        );
+        return ReservationTime.create(id, time.startAt());
     }
 
-    public void deleteByTimeId(long timeId) {
+    public void deleteById(long id) {
         String sql = "DELETE FROM reservation_time WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, timeId);
+        int affected = jdbcTemplate.update(sql, id);
 
-        if(affected == 0) {
+        if (affected == 0) {
             throw new ResourceNotFoundException("요청한 시간을 찾을 수 없습니다.");
         }
     }
 
-    public ReservationTime findById(long timeId) {
+    public Optional<ReservationTime> findById(long id) {
         String sql = "SELECT id, start_at FROM reservation_time WHERE id = ?";
-        return jdbcTemplate.query(sql, rowMapper, timeId)
+        return jdbcTemplate.query(sql, rowMapper, id)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 시간을 찾을 수 없습니다."));
+                .findFirst();
     }
 
-    public List<ReservationTime> findAllReservationTimes() {
+    public List<ReservationTime> findAll() {
         String sql = "SELECT id, start_at FROM reservation_time";
         return jdbcTemplate.query(sql, rowMapper);
     }
 
-    public List<ReservationTime> findAvailableReservationTimes(LocalDate date, long themeId) {
+    public List<ReservationTime> findAvailable(LocalDate date, long themeId) {
         String sql = """
                 SELECT rt.id, rt.start_at
                 FROM reservation_time rt

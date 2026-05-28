@@ -14,12 +14,12 @@ public class ThemeCommandService {
     private final ThemeDao themeDao;
 
     public Theme create(String name, String thumbnailUrl, String description) {
-        return themeDao.save(name, thumbnailUrl, description);
+        return themeDao.save(new Theme(null, name, thumbnailUrl, description));
     }
 
     public void delete(long themeId) {
         try {
-            themeDao.delete(themeId);
+            themeDao.deleteById(themeId);
         } catch (DataIntegrityViolationException e) {
             throw new DeletionNotAllowedException("예약이 존재하는 테마는 삭제할 수 없습니다.");
         }

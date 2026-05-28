@@ -27,19 +27,18 @@ public class ReservationCommandService {
     private final Clock clock;
 
     private ReservationTime findTimeReference(long timeId) {
-        try {
-            return reservationTimeDao.findById(timeId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 예약 시간입니다.");
-        }
+        return reservationTimeDao.findById(timeId)
+                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 시간입니다."));
     }
 
     private Theme findThemeReference(long themeId) {
-        try {
-            return themeDao.findById(themeId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 테마입니다.");
-        }
+        return themeDao.findById(themeId)
+                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
+    }
+
+    private Reservation findReservation(long reservationId) {
+        return reservationDao.findById(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
     }
 
     public Reservation create(String name, LocalDate date, long timeId, long themeId) {
@@ -51,22 +50,22 @@ public class ReservationCommandService {
         if (reservationDao.findBySlot(slot).isPresent()) {
             throw new DuplicateException("해당 날짜와 시간에 이미 예약이 존재합니다.");
         }
-        return reservationDao.save(name, date, timeId, themeId);
+        return reservationDao.save(new Reservation(null, name, slot));
     }
 
     public void delete(long reservationId) {
-        reservationDao.delete(reservationId);
+        reservationDao.deleteById(reservationId);
     }
 
     public void cancel(long reservationId) {
-        Reservation reservation = reservationDao.findById(reservationId);
+        Reservation reservation = findReservation(reservationId);
         reservation.validateCancelable(LocalDateTime.now(clock));
-        reservationDao.delete(reservationId);
+        reservationDao.deleteById(reservationId);
     }
 
     public Reservation update(long reservationId, LocalDate newDate, long newTimeId) {
         ReservationTime newTime = findTimeReference(newTimeId);
-        Reservation current = reservationDao.findById(reservationId);
+        Reservation current = findReservation(reservationId);
         Slot newSlot = new Slot(newDate, newTime, current.slot().theme());
 
         newSlot.validateNotPast(LocalDateTime.now(clock));
@@ -76,6 +75,6 @@ public class ReservationCommandService {
         if (isDuplicate) {
             throw new DuplicateException("변경하려는 시간에 이미 다른 예약이 존재합니다.");
         }
-        return reservationDao.updateDateAndTime(reservationId, newDate, newTimeId);
+        return reservationDao.update(current.withSlot(newSlot));
     }
 }

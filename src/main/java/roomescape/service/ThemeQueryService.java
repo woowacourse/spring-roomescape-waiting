@@ -15,12 +15,12 @@ public class ThemeQueryService {
     private final ThemeDao themeDao;
 
     public List<Theme> findAllThemes() {
-        return themeDao.findAllThemes().stream()
+        return themeDao.findAll().stream()
                 .toList();
     }
 
     public List<Theme> findPopularThemesBy(LocalDate startAt, LocalDate endAt, int limit) {
-        return themeDao.findSortedPopularThemesBy(startAt, endAt, limit).stream()
+        return themeDao.findPopularBetween(startAt, endAt, limit).stream()
                 .toList() ;
     }
 }

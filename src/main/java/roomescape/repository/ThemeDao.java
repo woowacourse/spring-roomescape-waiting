@@ -12,6 +12,7 @@ import roomescape.domain.Theme;
 import roomescape.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class ThemeDao {
@@ -32,22 +33,34 @@ public class ThemeDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Theme save(String name, String thumbnailUrl, String description) {
+    public Theme save(Theme theme) {
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("thumbnail_url", thumbnailUrl)
-                .addValue("description", description);
+                .addValue("name", theme.name())
+                .addValue("thumbnail_url", theme.thumbnailUrl())
+                .addValue("description", theme.description());
 
-        Number themeId = insertExecutor.executeAndReturnKey(params);
-
-        String sql = """
-                SELECT * FROM theme WHERE theme.id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, rowMapper, themeId.longValue());
+        long themeId = insertExecutor.executeAndReturnKey(params)
+                .longValue();
+        return Theme.create(themeId, theme.name(), theme.thumbnailUrl(), theme.description());
     }
 
-    public void delete(long themeId) {
+    public Optional<Theme> findById(long themeId) {
+        String sql = """
+                SELECT * FROM theme WHERE id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper, themeId)
+                .stream()
+                .findFirst();
+    }
+
+    public List<Theme> findAll() {
+        String sql = """
+                SELECT * FROM theme
+                """;
+        return jdbcTemplate.query(sql, rowMapper);
+    }
+
+    public void deleteById(long themeId) {
         String sql = """
                 DELETE FROM theme WHERE id = ?
                 """;
@@ -58,25 +71,7 @@ public class ThemeDao {
         }
     }
 
-    public Theme findById(long themeId) {
-        String sql = """
-                SELECT * FROM theme WHERE id = ?
-                """;
-        return jdbcTemplate.query(sql, rowMapper, themeId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 테마를 찾을 수 없습니다."));
-    }
-
-    public List<Theme> findAllThemes() {
-        String sql = """
-                SELECT * FROM theme
-                """;
-
-        return jdbcTemplate.query(sql, rowMapper);
-    }
-
-    public List<Theme> findSortedPopularThemesBy(LocalDate startAt, LocalDate endAt, int limit) {
+    public List<Theme> findPopularBetween(LocalDate startAt, LocalDate endAt, int limit) {
         String sql = """
                 SELECT 
                     theme.id, 
@@ -91,8 +86,6 @@ public class ThemeDao {
                 ORDER BY COUNT(reservation.id) DESC
                 LIMIT ?
                 """;
-
         return jdbcTemplate.query(sql, rowMapper, startAt, endAt, limit);
-
     }
 }

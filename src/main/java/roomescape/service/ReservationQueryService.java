@@ -14,12 +14,10 @@ public class ReservationQueryService {
     private final ReservationDao reservationDao;
 
     public List<Reservation> getAllReservations() {
-        return reservationDao.findAllReservations()
-                .stream()
-                .toList();
+        return reservationDao.findAll();
     }
 
     public List<Reservation> getByName(String name) {
-        return reservationDao.findByName(name);
+        return reservationDao.findAllByName(name);
     }
 }

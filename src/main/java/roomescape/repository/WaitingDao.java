@@ -20,6 +20,7 @@ import roomescape.exception.ResourceNotFoundException;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class WaitingDao {
@@ -64,31 +65,30 @@ public class WaitingDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Waiting save(String name, LocalDate date, long timeId, long themeId, LocalDateTime createAt) {
+    public Waiting save(Waiting waiting) {
+        Slot slot = waiting.slot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("date", date)
-                .addValue("time_id", timeId)
-                .addValue("theme_id", themeId)
-                .addValue("created_at", createAt);
+                .addValue("name", waiting.name())
+                .addValue("date", slot.date())
+                .addValue("time_id", slot.time().id())
+                .addValue("theme_id", slot.theme().id())
+                .addValue("created_at", waiting.createAt());
 
-        Number waitingId = insertExecutor.executeAndReturnKey(params);
+        long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        return findById(waitingId.longValue());
+        return Waiting.create(id, waiting.name(), slot, waiting.createAt());
     }
 
-    public void delete(long waitingId) {
-        String sql = """
-                DELETE FROM waiting WHERE id = ?
-                """;
-        int affected = jdbcTemplate.update(sql, waitingId);
+    public void deleteById(long id) {
+        String sql = "DELETE FROM waiting WHERE id = ?";
+        int affected = jdbcTemplate.update(sql, id);
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다.");
         }
     }
 
-    public Waiting findById(long waitingId) {
+    public Optional<Waiting> findById(long id) {
         String sql = """
                 SELECT
                     waiting.id as waiting_id,
@@ -108,10 +108,9 @@ public class WaitingDao {
                 ON waiting.theme_id = theme.id
                 WHERE waiting.id = ?
                 """;
-        return jdbcTemplate.query(sql, rowMapper, waitingId)
+        return jdbcTemplate.query(sql, rowMapper, id)
                 .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약 대기를 찾을 수 없습니다."));
+                .findFirst();
     }
 
     public List<Waiting> findAllBySlot(Slot slot) {

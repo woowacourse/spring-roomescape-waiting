@@ -27,27 +27,18 @@ public class WaitingCommandService {
     private final Clock clock;
 
     private Waiting findWaitingReference(long waitingId) {
-        try {
-            return waitingDao.findById(waitingId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 예약 대기입니다.");
-        }
+        return waitingDao.findById(waitingId)
+                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 대기입니다."));
     }
 
     private ReservationTime findTimeReference(long timeId) {
-        try {
-            return reservationTimeDao.findById(timeId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 예약 시간입니다.");
-        }
+        return reservationTimeDao.findById(timeId)
+                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 예약 시간입니다."));
     }
 
     private Theme findThemeReference(long themeId) {
-        try {
-            return themeDao.findById(themeId);
-        } catch (ResourceNotFoundException e) {
-            throw new InvalidReferenceException("존재하지 않는 테마입니다.");
-        }
+        return themeDao.findById(themeId)
+                .orElseThrow(() -> new InvalidReferenceException("존재하지 않는 테마입니다."));
     }
 
     public Waiting create(String name, LocalDate date, long timeId, long themeId) {
@@ -69,7 +60,7 @@ public class WaitingCommandService {
             throw new DuplicateException("같은 날짜/시간/테마에 여러 개의 예약 대기를 생성할 수 없습니다.");
         }
 
-        return waitingDao.save(name, date, timeId, themeId, LocalDateTime.now(clock));
+        return waitingDao.save(new Waiting(null, name, slot, LocalDateTime.now(clock)));
     }
 
     public void cancel(long waitingId, String name) {
@@ -78,6 +69,6 @@ public class WaitingCommandService {
         waiting.validateCancelable(LocalDateTime.now(clock));
         waiting.validateOwnedBy(name);
 
-        waitingDao.delete(waitingId);
+        waitingDao.deleteById(waitingId);
     }
 }

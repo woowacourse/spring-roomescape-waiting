@@ -15,12 +15,10 @@ public class ReservationTimeQueryService {
     private final ReservationTimeDao reservationTimeDao;
 
     public List<ReservationTime> findAllReservationTimes() {
-        return reservationTimeDao.findAllReservationTimes().stream()
-                .toList();
+        return reservationTimeDao.findAll();
     }
 
     public List<ReservationTime> findAvailableReservationTimes(LocalDate date, long themeId) {
-        return reservationTimeDao.findAvailableReservationTimes(date, themeId).stream()
-                .toList();
+        return reservationTimeDao.findAvailable(date, themeId);
     }
 }

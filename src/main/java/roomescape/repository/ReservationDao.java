@@ -20,6 +20,22 @@ import java.util.Optional;
 @Repository
 public class ReservationDao {
 
+    private static final String SELECT_BASE = """
+            SELECT
+                reservation.id as reservation_id,
+                reservation.name,
+                reservation.date,
+                time.id as time_id,
+                time.start_at as time_value,
+                theme.id as theme_id,
+                theme.name as theme_name,
+                theme.thumbnail_url as thumbnail_url,
+                theme.description as theme_description
+            FROM reservation as reservation
+            INNER JOIN reservation_time as time ON reservation.time_id = time.id
+            INNER JOIN theme as theme ON reservation.theme_id = theme.id
+            """;
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert insertExecutor;
     private final RowMapper<Reservation> rowMapper = (rs, rowNum) -> {
@@ -51,138 +67,59 @@ public class ReservationDao {
                 .usingGeneratedKeyColumns("id");
     }
 
-    public Reservation save(String name, LocalDate date, long timeId, long themeId) {
-
+    public Reservation save(Reservation reservation) {
+        Slot slot = reservation.slot();
         SqlParameterSource params = new MapSqlParameterSource()
-                .addValue("name", name)
-                .addValue("date", date)
-                .addValue("time_id", timeId)
-                .addValue("theme_id", themeId);
+                .addValue("name", reservation.username())
+                .addValue("date", slot.date())
+                .addValue("time_id", slot.time().id())
+                .addValue("theme_id", slot.theme().id());
 
-        Number reservationId = insertExecutor.executeAndReturnKey(params);
+        long id = insertExecutor.executeAndReturnKey(params).longValue();
 
-        String sql = """
-                SELECT 
-                    reservation.id as reservation_id,
-                    reservation.name,
-                    reservation.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description 
-                FROM reservation as reservation
-                INNER JOIN reservation_time as time
-                ON reservation.time_id = time.id
-                INNER JOIN theme as theme
-                ON reservation.theme_id = theme.id
-                WHERE reservation.id = ?
-                """;
-
-        return jdbcTemplate.queryForObject(sql, rowMapper, reservationId.longValue());
+        return Reservation.create(id, reservation.username(), slot);
     }
 
-    public void delete(long reservationId) {
+    public Reservation update(Reservation reservation) {
+        Slot slot = reservation.slot();
+        String sql = "UPDATE reservation SET name = ?, date = ?, time_id = ?, theme_id = ? WHERE id = ?";
+        int affected = jdbcTemplate.update(sql, reservation.username(), slot.date(), slot.time().id(), slot.theme().id(), reservation.id());
+
+        if (affected == 0) {
+            throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
+        }
+        return reservation;
+    }
+
+    public void deleteById(long id) {
         String sql = "DELETE FROM reservation WHERE id = ?";
-        int affected = jdbcTemplate.update(sql, reservationId);
+        int affected = jdbcTemplate.update(sql, id);
 
         if (affected == 0) {
             throw new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다.");
         }
     }
 
-    public List<Reservation> findAllReservations() {
-        String sql = """
-                SELECT
-                    reservation.id as reservation_id,
-                    reservation.name,
-                    reservation.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description 
-                FROM reservation as reservation
-                INNER JOIN reservation_time as time
-                ON reservation.time_id = time.id
-                INNER JOIN theme as theme
-                ON reservation.theme_id = theme.id
-                """;
-
-        return jdbcTemplate.query(sql, rowMapper);
+    public List<Reservation> findAll() {
+        return jdbcTemplate.query(SELECT_BASE, rowMapper);
     }
 
-    public Reservation findById(long reservationId) {
-        String sql = """
-                SELECT
-                    reservation.id as reservation_id,
-                    reservation.name,
-                    reservation.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description
-                FROM reservation as reservation
-                INNER JOIN reservation_time as time ON reservation.time_id = time.id
-                INNER JOIN theme as theme ON reservation.theme_id = theme.id
-                WHERE reservation.id = ?
-                """;
-        return jdbcTemplate.query(sql, rowMapper, reservationId)
-                .stream()
-                .findFirst()
-                .orElseThrow(() -> new ResourceNotFoundException("요청한 예약을 찾을 수 없습니다."));
-    }
-
-    public List<Reservation> findByName(String name) {
-        String sql = """
-                SELECT
-                    reservation.id as reservation_id,
-                    reservation.name,
-                    reservation.date,
-                    time.id as time_id,
-                    time.start_at as time_value,
-                    theme.id as theme_id,
-                    theme.name as theme_name,
-                    theme.thumbnail_url as thumbnail_url,
-                    theme.description as theme_description
-                FROM reservation as reservation
-                INNER JOIN reservation_time as time ON reservation.time_id = time.id
-                INNER JOIN theme as theme ON reservation.theme_id = theme.id
-                WHERE reservation.name = ?
-                """;
-        return jdbcTemplate.query(sql, rowMapper, name);
-    }
-
-    public Reservation updateDateAndTime(long reservationId, LocalDate date, long timeId) {
-        String sql = "UPDATE reservation SET date = ?, time_id = ? WHERE id = ?";
-        jdbcTemplate.update(sql, date, timeId, reservationId);
-        return findById(reservationId);
-    }
-
-    public Optional<Reservation> findBySlot(Slot slot) {
-        String sql = """
-                SELECT
-                            reservation.id as reservation_id,
-                            reservation.name,
-                            reservation.date,
-                            time.id as time_id,
-                            time.start_at as time_value,
-                            theme.id as theme_id,
-                            theme.name as theme_name,
-                            theme.thumbnail_url as thumbnail_url,
-                            theme.description as theme_description
-                        FROM reservation as reservation
-                        INNER JOIN reservation_time as time ON reservation.time_id = time.id
-                        INNER JOIN theme as theme ON reservation.theme_id = theme.id
-                        WHERE date = ? AND time_id = ? AND theme_id = ?;
-                """;
-        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id())
+    public Optional<Reservation> findById(long id) {
+        String sql = SELECT_BASE + " WHERE reservation.id = ?";
+        return jdbcTemplate.query(sql, rowMapper, id)
                 .stream()
                 .findFirst();
     }
 
+    public List<Reservation> findAllByName(String name) {
+        String sql = SELECT_BASE + " WHERE reservation.name = ?";
+        return jdbcTemplate.query(sql, rowMapper, name);
+    }
+
+    public Optional<Reservation> findBySlot(Slot slot) {
+        String sql = SELECT_BASE + " WHERE reservation.date = ? AND reservation.time_id = ? AND reservation.theme_id = ?";
+        return jdbcTemplate.query(sql, rowMapper, slot.date(), slot.time().id(), slot.theme().id())
+                .stream()
+                .findFirst();
+    }
 }
