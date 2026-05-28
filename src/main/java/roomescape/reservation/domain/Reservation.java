@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import lombok.Builder;
@@ -31,7 +32,7 @@ public class Reservation {
                 .build();
     }
 
-    public Reservation reschedule(LocalDate date, ReservationTime time) {
+    public Reservation reschedule(LocalDate date, ReservationTime time, Clock clock) {
         Reservation changed = Reservation.builder()
                 .id(id)
                 .name(this.name)
@@ -39,14 +40,14 @@ public class Reservation {
                 .time(time)
                 .theme(this.theme)
                 .build();
-        if (changed.isPast()) {
+        if (changed.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_TIME_RESERVATION);
         }
         return changed;
     }
 
-    public boolean isPast() {
-        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now());
+    public boolean isPast(Clock clock) {
+        return LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock));
     }
 
     public Long getId() { return id; }

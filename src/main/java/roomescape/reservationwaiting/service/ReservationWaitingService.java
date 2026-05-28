@@ -1,5 +1,6 @@
 package roomescape.reservationwaiting.service;
 
+import java.time.Clock;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.exception.ErrorCode;
@@ -23,13 +24,16 @@ public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
     private final ReservationWaitingFactory reservationWaitingFactory;
+    private final Clock clock;
 
     public ReservationWaitingService(ReservationWaitingRepository reservationWaitingRepository,
                                      ReservationRepository reservationRepository,
-                                     ReservationWaitingFactory reservationWaitingFactory) {
+                                     ReservationWaitingFactory reservationWaitingFactory,
+                                     Clock clock) {
         this.reservationWaitingRepository = reservationWaitingRepository;
         this.reservationRepository = reservationRepository;
         this.reservationWaitingFactory = reservationWaitingFactory;
+        this.clock = clock;
     }
 
     @Transactional
@@ -51,7 +55,7 @@ public class ReservationWaitingService {
         Reservation reservation = reservationRepository.findById(reservationWaiting.getReservation().getId())
                 .orElseThrow(() -> new BusinessException(
                         ErrorCode.RESERVATION_NOT_FOUND));
-        if (reservation.isPast()) {
+        if (reservation.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_WAITING_CANCEL);
         }
         reservationWaitingRepository.deleteById(id);

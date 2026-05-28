@@ -1,5 +1,6 @@
 package roomescape.reservation.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -30,17 +31,20 @@ public class ReservationService {
     private final ReservationTimeService reservationTimeService;
     private final ThemeService themeService;
     private final ReservationFactory reservationFactory;
+    private final Clock clock;
 
     public ReservationService(
             ReservationRepository reservationRepository,
             ReservationTimeService reservationTimeService,
             ThemeService themeService,
-            ReservationFactory reservationFactory
+            ReservationFactory reservationFactory,
+            Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeService = reservationTimeService;
         this.themeService = themeService;
         this.reservationFactory = reservationFactory;
+        this.clock = clock;
     }
 
     @Transactional
@@ -67,7 +71,7 @@ public class ReservationService {
     @Transactional
     public void deleteReservation(Long id) {
         Reservation reservation = getById(id);
-        if (reservation.isPast()) {
+        if (reservation.isPast(clock)) {
             throw new PastTimeCancelException();
         }
         reservationRepository.deleteById(id);
@@ -76,14 +80,14 @@ public class ReservationService {
     @Transactional
     public ReservationResponse updateReservation(Long id, ReservationUpdateRequest request) {
         Reservation reservation = getById(id);
-        if (reservation.isPast()) {
+        if (reservation.isPast(clock)) {
             throw new BusinessException(ErrorCode.PAST_RESERVATION_UPDATE);
         }
 
         ReservationTime newTime = reservationTimeService.getById(request.timeId());
         LocalDate newDate = request.date();
 
-        Reservation changed = reservation.reschedule(newDate, newTime);
+        Reservation changed = reservation.reschedule(newDate, newTime, clock);
         if (reservationRepository.existsByDateAndTimeIdAndThemeId(newDate, request.timeId(),
                 reservation.getTheme().getId())) {
             throw new DuplicateReservationException();

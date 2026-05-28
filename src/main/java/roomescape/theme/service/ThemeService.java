@@ -1,5 +1,6 @@
 package roomescape.theme.service;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
@@ -17,9 +18,11 @@ import roomescape.theme.repository.ThemeRepository;
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
+    private final Clock clock;
 
-    public ThemeService(ThemeRepository themeRepository) {
+    public ThemeService(ThemeRepository themeRepository, Clock clock) {
         this.themeRepository = themeRepository;
+        this.clock = clock;
     }
 
     public Theme getById(Long id) {
@@ -28,8 +31,8 @@ public class ThemeService {
     }
 
     public List<ThemeResponse> getTopThemes(int limit) {
-        LocalDate startDate = LocalDate.now().minusDays(7);
-        LocalDate endDate = LocalDate.now();
+        LocalDate startDate = LocalDate.now(clock).minusDays(7);
+        LocalDate endDate = LocalDate.now(clock);
 
         List<Long> themeIds = themeRepository.findTopThemeIds(startDate, endDate, limit);
         Map<Long, Theme> themeMap = themeRepository.findAllByIds(themeIds).stream()

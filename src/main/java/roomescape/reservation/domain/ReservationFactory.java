@@ -1,5 +1,6 @@
 package roomescape.reservation.domain;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
@@ -10,6 +11,12 @@ import roomescape.theme.domain.Theme;
 
 @Component
 public class ReservationFactory {
+
+    private final Clock clock;
+
+    public ReservationFactory(Clock clock) {
+        this.clock = clock;
+    }
 
     public Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
         validate(name, date, time, theme);
@@ -26,7 +33,7 @@ public class ReservationFactory {
         if (time == null || time.getId() == null) {
             throw new IllegalArgumentException("예약 시간은 필수입니다.");
         }
-        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now())) {
+        if (LocalDateTime.of(date, time.getStartAt()).isBefore(LocalDateTime.now(clock))) {
             throw new BusinessException(ErrorCode.PAST_TIME_CREATE);
         }
         if (theme == null) {
