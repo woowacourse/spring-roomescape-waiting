@@ -66,7 +66,8 @@ class ReservationTimeControllerTest {
                 .body(params)
                 .when().post("/times")
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(409)
+                .body("message", is("이미 등록된 시작 시간입니다."));
     }
 
     @Test
@@ -115,6 +116,7 @@ class ReservationTimeControllerTest {
         RestAssured.given().log().all()
                 .when().delete("/times/999")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 time id를 찾을 수 없습니다."));
     }
 }

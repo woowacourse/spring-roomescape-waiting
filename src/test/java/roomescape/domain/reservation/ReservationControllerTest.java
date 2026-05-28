@@ -75,7 +75,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(400)
+                .body("message", is("예약할 사용자의 이름은 필수 입력 값입니다."));
     }
 
     @Test
@@ -94,7 +95,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(422);
+                .statusCode(422)
+                .body("message", is("이미 지난 날짜의 예약은 생성할 수 없습니다."));
     }
 
     @Test
@@ -114,7 +116,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(409)
+                .body("message", is("이미 선택된 예약입니다."));
     }
 
     @Test
@@ -132,7 +135,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 time id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -150,7 +154,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().post("/reservations")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 theme id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -230,7 +235,8 @@ class ReservationControllerTest {
         RestAssured.given().log().all()
                 .when().delete("/reservation/999")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 reservation id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -280,7 +286,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().patch("/reservation/" + reservationId)
                 .then().log().all()
-                .statusCode(401);
+                .statusCode(401)
+                .body("message", is("해당 예약을 삭제할 권한이 없습니다."));
     }
 
     @Test
@@ -297,7 +304,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().patch("/reservation/999")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 reservation id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -316,7 +324,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().patch("/reservation/" + reservationId)
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 time id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -335,7 +344,8 @@ class ReservationControllerTest {
                 .body(params)
                 .when().patch("/reservation/" + reservationId)
                 .then().log().all()
-                .statusCode(422);
+                .statusCode(422)
+                .body("message", is("이미 지난 날짜의 예약은 생성할 수 없습니다."));
     }
 
     private Long insertTheme(String name) {

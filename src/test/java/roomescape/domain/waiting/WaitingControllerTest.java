@@ -74,7 +74,8 @@ class WaitingControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(400)
+                .body("message", is("예약할 사용자의 이름은 필수 입력 값입니다."));
     }
 
     @Test
@@ -93,7 +94,8 @@ class WaitingControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(422);
+                .statusCode(422)
+                .body("message", is("이미 지난 날짜의 예약은 생성할 수 없습니다."));
     }
 
     @Test
@@ -113,7 +115,8 @@ class WaitingControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(409)
+                .body("message", is("해당 이름의 예약 대기가 이미 존재합니다."));
     }
 
     @Test
@@ -131,7 +134,8 @@ class WaitingControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 time id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -149,7 +153,8 @@ class WaitingControllerTest {
                 .body(params)
                 .when().post("/reservations/waiting")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 theme id를 찾을 수 없습니다."));
     }
 
 
@@ -173,9 +178,10 @@ class WaitingControllerTest {
     @Test
     void deleteWaiting_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-                .when().delete("/reservation/waiting/999")
+                .when().delete("/reservations/waiting/999")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 waiting id를 찾을 수 없습니다."));
     }
 
     private Long insertTheme(String name) {

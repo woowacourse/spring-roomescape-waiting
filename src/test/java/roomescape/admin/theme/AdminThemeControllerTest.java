@@ -62,7 +62,8 @@ class AdminThemeControllerTest {
                 .body(params)
                 .when().post("/admin/themes")
                 .then().log().all()
-                .statusCode(400);
+                .statusCode(400)
+                .body("message", is("등록할 테마의 이름은 필수 입력 값입니다."));
     }
 
     @Test
@@ -84,7 +85,8 @@ class AdminThemeControllerTest {
                 .body(params)
                 .when().post("/admin/themes")
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(409)
+                .body("message", is("해당 이름의 예약이 이미 존재합니다."));
     }
 
     @Test
@@ -128,7 +130,8 @@ class AdminThemeControllerTest {
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/999")
                 .then().log().all()
-                .statusCode(404);
+                .statusCode(404)
+                .body("message", is("해당 theme id를 찾을 수 없습니다."));
     }
 
     @Test
@@ -155,6 +158,7 @@ class AdminThemeControllerTest {
         RestAssured.given().log().all()
                 .when().delete("/admin/themes/" + themeId)
                 .then().log().all()
-                .statusCode(409);
+                .statusCode(409)
+                .body("message", is("예약이 존재하는 시간을 삭제할 수 없습니다."));
     }
 }
