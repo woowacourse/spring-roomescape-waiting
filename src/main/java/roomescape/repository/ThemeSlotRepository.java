@@ -16,6 +16,8 @@ public interface ThemeSlotRepository {
 
     Optional<ThemeSlot> findById(long id);
 
+    Optional<ThemeSlot> findByIdForUpdate(long id);
+
     void deleteById(long id);
 
     boolean isExistBy(long themeId, LocalDate date);

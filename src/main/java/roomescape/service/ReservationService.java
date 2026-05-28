@@ -10,7 +10,6 @@ import roomescape.controller.dto.ReservationResponse;
 import roomescape.controller.dto.WaitingReservationResponse;
 import roomescape.domain.Reservation;
 import roomescape.domain.ThemeSlot;
-import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.global.exception.CustomException;
 import roomescape.global.exception.ErrorCode;
 import roomescape.repository.ReservationRepository;
@@ -96,11 +95,17 @@ public class ReservationService {
     @Transactional
     public void cancelReservation(Long reservationId) {
         Reservation reservation = getReservationOrElseThrow(reservationId);
+        boolean wasConfirmed = reservation.isConfirmedStatus();
+
+        if (wasConfirmed) {
+            themeSlotRepository.findByIdForUpdate(reservation.getThemeSlot().getId())
+                    .orElseThrow(() -> new CustomException(ErrorCode.THEME_SLOT_NOT_FOUND));
+        }
+
         reservation.cancel();
         reservationRepository.updateStatus(reservation);
 
-        if (reservation.getReservationStatus().equals(ConfirmedStatus.getInstance())) {
-
+        if (wasConfirmed) {
             Optional<Reservation> waitingReservation = reservationRepository.findRecentReservationByThemeSlot(reservation.getThemeSlot().getId());
 
             if (waitingReservation.isPresent()) {
@@ -109,7 +114,6 @@ public class ReservationService {
             }
 
             if (waitingReservation.isEmpty()) {
-                reservation.getThemeSlot().swtichIsReserved();
                 themeSlotRepository.update(new ThemeSlot(reservation.getTheme(), reservation.getDate(), reservation.getTime(), false));
             }
         }

@@ -1,6 +1,7 @@
 package roomescape.domain;
 
 import roomescape.domain.reservationStatus.PendingStatus;
+import roomescape.domain.reservationStatus.ConfirmedStatus;
 import roomescape.domain.reservationStatus.ReservationStatus;
 
 import java.time.LocalDate;
@@ -103,6 +104,10 @@ public class Reservation {
 
     public boolean isPendingStatus() {
         return reservationStatus == PendingStatus.getInstance();
+    }
+
+    public boolean isConfirmedStatus() {
+        return reservationStatus == ConfirmedStatus.getInstance();
     }
 
     @Override

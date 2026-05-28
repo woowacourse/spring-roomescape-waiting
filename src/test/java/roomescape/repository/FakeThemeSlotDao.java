@@ -45,6 +45,11 @@ public class FakeThemeSlotDao implements ThemeSlotRepository {
     }
 
     @Override
+    public Optional<ThemeSlot> findByIdForUpdate(long id) {
+        return findById(id);
+    }
+
+    @Override
     public boolean isExistBy(long themeId, LocalDate date) {
         return storage.values().stream()
                 .anyMatch(ts -> ts.getTheme().getId() == themeId && ts.getDate().equals(date));

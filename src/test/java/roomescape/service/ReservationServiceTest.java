@@ -31,12 +31,13 @@ class ReservationServiceTest {
     private Theme savedTheme;
     private ThemeSlot savedThemeSlot1;
     private ThemeSlot savedThemeSlot2;
+    private FakeThemeSlotDao fakeThemeSlotDao;
 
     @BeforeEach
     void setUp() {
         FakeTimeDao fakeReservationTimeDao = new FakeTimeDao();
         FakeThemeDao fakeThemeDao = new FakeThemeDao();
-        FakeThemeSlotDao fakeThemeSlotDao = new FakeThemeSlotDao();
+        fakeThemeSlotDao = new FakeThemeSlotDao();
 
         reservationService = new ReservationService(
                 new FakeReservationDao(),
@@ -145,8 +146,9 @@ class ReservationServiceTest {
 
         //then
         Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
+        Reservation findPendingReservation = reservationService.findReservation(pendingReservation.getId());
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
-        assertThat(pendingReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
+        assertThat(findPendingReservation.getReservationStatus()).isEqualTo(ConfirmedStatus.getInstance());
     }
 
     @Test
@@ -160,8 +162,9 @@ class ReservationServiceTest {
 
         //then
         Reservation findReservation = reservationService.findReservation(confirmReservation.getId());
+        ThemeSlot findThemeSlot = fakeThemeSlotDao.findById(savedThemeSlot1.getId()).orElseThrow();
         assertThat(findReservation.getReservationStatus()).isEqualTo(CancelledStatus.getInstance());
-        assertThat(confirmReservation.getThemeSlot().isReserved()).isFalse();
+        assertThat(findThemeSlot.isReserved()).isFalse();
     }
 
     @Test

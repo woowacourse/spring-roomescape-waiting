@@ -44,9 +44,9 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public List<ThemeSlot> saveAll(List<ThemeSlot> themeSlots) {
         String sql = """
-                INSERT INTO theme_slot 
+                INSERT INTO theme_slot
                 (theme_id, date, time_id, is_reserved)
-                VALUES (?, ?, ?, ?);                
+                VALUES (?, ?, ?, ?);
                 """;
 
         KeyHolder keyHolder = new GeneratedKeyHolder();
@@ -86,10 +86,10 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
         String sql = """
                         SELECT EXISTS (
                             SELECT 1
-                            FROM theme_slot 
-                            WHERE theme_id = ? 
+                            FROM theme_slot
+                            WHERE theme_id = ?
                             AND date = ?
-                        ) 
+                        )
                 """;
         return Boolean.TRUE.equals(jdbcTemplate.queryForObject(sql, Boolean.class, themeId, date));
     }
@@ -97,19 +97,19 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public List<ThemeSlot> findByThemeIdAndDate(long themeId, LocalDate date) {
         String sql = """
-                SELECT 
+                SELECT
                     ts.id AS id,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url,
                     ts.date AS date,
-                    t.id AS time_id, 
+                    t.id AS time_id,
                     t.start_at AS start_at,
                     ts.is_reserved AS is_reserved
-                FROM 
+                FROM
                     theme_slot ts
-                        INNER JOIN time t ON ts.time_id = t.id 
+                        INNER JOIN time t ON ts.time_id = t.id
                         INNER JOIN theme th ON ts.theme_id = th.id
                 WHERE ts.theme_id = ?
                 AND ts.date = ?
@@ -120,21 +120,44 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public Optional<ThemeSlot> findById(long id) {
         String sql = """
-                SELECT 
+                SELECT
                     ts.id AS id,
                     th.id AS theme_id,
                     th.name AS theme_name,
                     th.description AS theme_description,
                     th.thumbnail_url AS theme_thumbnail_url,
                     ts.date AS date,
-                    t.id AS time_id, 
+                    t.id AS time_id,
                     t.start_at AS start_at,
                     ts.is_reserved AS is_reserved
-                FROM 
+                FROM
                     theme_slot ts
-                        INNER JOIN time t ON ts.time_id = t.id 
+                        INNER JOIN time t ON ts.time_id = t.id
                         INNER JOIN theme th ON ts.theme_id = th.id
                 WHERE ts.id = ?
+                """;
+        return jdbcTemplate.query(sql, rowMapper(), id).stream().findFirst();
+    }
+
+    @Override
+    public Optional<ThemeSlot> findByIdForUpdate(long id) {
+        String sql = """
+                SELECT
+                    ts.id AS id,
+                    th.id AS theme_id,
+                    th.name AS theme_name,
+                    th.description AS theme_description,
+                    th.thumbnail_url AS theme_thumbnail_url,
+                    ts.date AS date,
+                    t.id AS time_id,
+                    t.start_at AS start_at,
+                    ts.is_reserved AS is_reserved
+                FROM
+                    theme_slot ts
+                        INNER JOIN time t ON ts.time_id = t.id
+                        INNER JOIN theme th ON ts.theme_id = th.id
+                WHERE ts.id = ?
+                FOR UPDATE
                 """;
         return jdbcTemplate.query(sql, rowMapper(), id).stream().findFirst();
     }
@@ -157,8 +180,8 @@ public class JdbcThemeSlotRepository implements ThemeSlotRepository {
     @Override
     public void update(ThemeSlot themeSlot) {
         String sql = """
-                UPDATE theme_slot 
-                SET is_reserved = ? 
+                UPDATE theme_slot
+                SET is_reserved = ?
                 WHERE theme_id = ?
                 AND date = ?
                 AND time_id = ?
