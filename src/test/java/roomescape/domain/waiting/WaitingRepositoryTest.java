@@ -35,7 +35,7 @@ class WaitingRepositoryTest {
     void setUp() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at, finish_at) VALUES ('10:00:00', '11:00:00')");
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, image_url) VALUES ('테마1', '설명', 'https://example.com/image.jpg')");
+            "INSERT INTO theme (name, description, image_url) VALUES ('테마1', '설명', 'https://example.com/image.jpg')");
 
         Long timeId = jdbcTemplate.queryForObject("SELECT id FROM reservation_time LIMIT 1", Long.class);
         Long themeId = jdbcTemplate.queryForObject("SELECT id FROM theme LIMIT 1", Long.class);
@@ -55,9 +55,9 @@ class WaitingRepositoryTest {
             Waiting saved = waitingRepository.save(waiting);
 
             assertAll(
-                    () -> assertThat(saved.getId()).isNotNull(),
-                    () -> assertThat(saved.getName()).isEqualTo("유저1"),
-                    () -> assertThat(saved.getDate()).isEqualTo(LocalDate.of(2099, 12, 31))
+                () -> assertThat(saved.getId()).isNotNull(),
+                () -> assertThat(saved.getName()).isEqualTo("유저1"),
+                () -> assertThat(saved.getDate()).isEqualTo(LocalDate.of(2099, 12, 31))
             );
         }
     }
@@ -72,7 +72,7 @@ class WaitingRepositoryTest {
             waitingRepository.save(waiting);
 
             boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저1"
+                LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저1"
             );
 
             assertThat(result).isTrue();
@@ -81,7 +81,7 @@ class WaitingRepositoryTest {
         @Test
         void 대기가_없으면_false를_반환한다() {
             boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저1"
+                LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저1"
             );
 
             assertThat(result).isFalse();
@@ -93,7 +93,7 @@ class WaitingRepositoryTest {
             waitingRepository.save(waiting);
 
             boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저2"
+                LocalDate.of(2099, 12, 31), time.getId(), theme.getId(), "유저2"
             );
 
             assertThat(result).isFalse();
@@ -105,7 +105,7 @@ class WaitingRepositoryTest {
             waitingRepository.save(waiting);
 
             boolean result = waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                    LocalDate.of(2099, 12, 30), time.getId(), theme.getId(), "유저1"
+                LocalDate.of(2099, 12, 30), time.getId(), theme.getId(), "유저1"
             );
 
             assertThat(result).isFalse();
@@ -162,13 +162,13 @@ class WaitingRepositoryTest {
             List<MyWaitingResult> result = waitingRepository.findByName("유저1");
 
             assertAll(
-                    () -> assertThat(result).hasSize(2),
-                    () -> assertThat(result).extracting(MyWaitingResult::name)
-                            .containsExactly("유저1", "유저1"),
-                    () -> assertThat(result).extracting(MyWaitingResult::themeName)
-                            .containsExactly("테마1", "테마1"),
-                    () -> assertThat(result).extracting(MyWaitingResult::waitingNumber)
-                            .containsExactly(1, 1)
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(MyWaitingResult::name)
+                    .containsExactly("유저1", "유저1"),
+                () -> assertThat(result).extracting(MyWaitingResult::themeName)
+                    .containsExactly("테마1", "테마1"),
+                () -> assertThat(result).extracting(MyWaitingResult::waitingNumber)
+                    .containsExactly(1, 1)
             );
         }
 

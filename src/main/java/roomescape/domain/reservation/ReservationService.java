@@ -26,9 +26,9 @@ public class ReservationService {
     private final ThemeRepository themeRepository;
 
     public ReservationService(
-            ReservationRepository reservationRepository,
-            ReservationTimeRepository reservationTimeRepository,
-            ThemeRepository themeRepository
+        ReservationRepository reservationRepository,
+        ReservationTimeRepository reservationTimeRepository,
+        ThemeRepository themeRepository
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -38,18 +38,18 @@ public class ReservationService {
     @Transactional
     public ReservationResponse createReservation(ReservationRequest request) {
         ReservationTime time = reservationTimeRepository.findByIdForUpdate(request.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(request.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
         validateDuplicateReservation(request.date(), request.timeId(), request.themeId());
         time.validateIfTimePast(request.date());
 
         Reservation reservation = Reservation.of(
-                request.name(),
-                request.date(),
-                time,
-                theme
+            request.name(),
+            request.date(),
+            time,
+            theme
         );
 
         try {
@@ -66,9 +66,9 @@ public class ReservationService {
         List<Long> bookedTimeIds = reservationRepository.findTimeByDateAndThemeId(date, themeId);
 
         return reservationTimes.stream()
-                .filter(reservationTime -> !bookedTimeIds.contains(reservationTime.getId()))
-                .map(TimeResponse::from)
-                .toList();
+            .filter(reservationTime -> !bookedTimeIds.contains(reservationTime.getId()))
+            .map(TimeResponse::from)
+            .toList();
     }
 
     @Transactional
@@ -86,14 +86,14 @@ public class ReservationService {
     @Transactional
     public void updateMyReservation(Long id, ReservationFixRequest fixRequest) {
         ReservationTime newTime = reservationTimeRepository.findByIdForUpdate(fixRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         newTime.validateIfTimePast(fixRequest.date());
 
         if (!reservationRepository.existsByIdForUpdate(id)) {
             throw new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
         Reservation reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_ID_NOT_FOUND));
         validateDuplicateReservation(fixRequest.date(), fixRequest.timeId(), reservation.getTheme().getId());
 
         reservation.validateOwner(fixRequest.name());

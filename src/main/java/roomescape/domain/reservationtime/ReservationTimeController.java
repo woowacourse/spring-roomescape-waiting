@@ -23,7 +23,7 @@ public class ReservationTimeController {
 
     @PostMapping("/times")
     public ResponseEntity<TimeResponse> createTime(
-            @RequestBody TimeRequest request
+        @RequestBody TimeRequest request
     ) {
         TimeResponse response = reservationTimeService.createTime(request);
         URI location = URI.create("/times/" + response.id());
@@ -38,7 +38,7 @@ public class ReservationTimeController {
 
     @DeleteMapping("/times/{id}")
     public ResponseEntity<Void> deleteTime(
-            @PathVariable Long id
+        @PathVariable Long id
     ) {
         reservationTimeService.deleteById(id);
         return ResponseEntity.noContent().build();

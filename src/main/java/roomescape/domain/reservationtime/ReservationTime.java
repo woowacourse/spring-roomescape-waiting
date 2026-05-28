@@ -29,7 +29,7 @@ public class ReservationTime {
     public void validateIfTimePast(LocalDate reservationDate) {
         LocalDateTime now = LocalDateTime.now();
         if (reservationDate.isBefore(now.toLocalDate())
-                || (reservationDate.isEqual(now.toLocalDate()) && startAt.isBefore(now.toLocalTime()))) {
+            || (reservationDate.isEqual(now.toLocalDate()) && startAt.isBefore(now.toLocalTime()))) {
             throw new RoomescapeException(ErrorCode.RESERVATION_TIME_PASSED);
         }
     }

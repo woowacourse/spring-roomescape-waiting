@@ -81,8 +81,8 @@ class ReservationServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
         }
 
         @Test
@@ -92,8 +92,8 @@ class ReservationServiceTest {
             when(themeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
         }
 
         @Test
@@ -103,8 +103,8 @@ class ReservationServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
         }
 
         @Test
@@ -115,8 +115,8 @@ class ReservationServiceTest {
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
 
             assertThatThrownBy(() -> reservationService.createReservation(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 
@@ -172,8 +172,8 @@ class ReservationServiceTest {
             when(reservationRepository.existsById(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.deleteReservation(99L))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
     }
 
@@ -189,9 +189,9 @@ class ReservationServiceTest {
             MyReservationsResponse response = reservationService.getMyReservations("유저1");
 
             assertAll(
-                    () -> assertThat(response.reservations()).hasSize(1),
-                    () -> assertThat(response.reservations().get(0).name()).isEqualTo("유저1"),
-                    () -> assertThat(response.reservations().get(0).themeName()).isEqualTo("테마1")
+                () -> assertThat(response.reservations()).hasSize(1),
+                () -> assertThat(response.reservations().get(0).name()).isEqualTo("유저1"),
+                () -> assertThat(response.reservations().get(0).themeName()).isEqualTo("테마1")
             );
         }
 
@@ -234,8 +234,8 @@ class ReservationServiceTest {
             when(reservationRepository.existsByIdForUpdate(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(99L, request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_ID_NOT_FOUND);
         }
 
         @Test
@@ -245,8 +245,8 @@ class ReservationServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
         }
 
         @Test
@@ -260,8 +260,8 @@ class ReservationServiceTest {
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(false);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED_NAME);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.UNAUTHORIZED_NAME);
         }
 
         @Test
@@ -271,8 +271,8 @@ class ReservationServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
         }
 
         @Test
@@ -286,8 +286,8 @@ class ReservationServiceTest {
             when(reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), 1L, 1L)).thenReturn(true);
 
             assertThatThrownBy(() -> reservationService.updateMyReservation(1L, request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_RESERVATION);
         }
     }
 }

@@ -23,8 +23,8 @@ public class ReservationTimeService {
     public TimeResponse createTime(TimeRequest request) {
         validateDuplicateTime(request.startAt());
         ReservationTime time = ReservationTime.of(
-                request.startAt(),
-                request.finishAt()
+            request.startAt(),
+            request.finishAt()
         );
         ReservationTime saved = timeRepository.save(time);
         return TimeResponse.from(saved);
@@ -35,8 +35,8 @@ public class ReservationTimeService {
         List<ReservationTime> times = timeRepository.findAll();
 
         return times.stream()
-                .map(TimeResponse::from)
-                .toList();
+            .map(TimeResponse::from)
+            .toList();
     }
 
     @Transactional

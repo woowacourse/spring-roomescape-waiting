@@ -47,14 +47,14 @@ class ReservationControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(201);
 
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE name = ?", Integer.class, "유저1"
+            "SELECT COUNT(*) FROM reservation WHERE name = ?", Integer.class, "유저1"
         );
         assertEquals(1, count);
     }
@@ -71,11 +71,11 @@ class ReservationControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(400);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(400);
     }
 
     @Test
@@ -90,11 +90,11 @@ class ReservationControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(422);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(422);
     }
 
     @Test
@@ -110,11 +110,11 @@ class ReservationControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(409);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(409);
     }
 
     @Test
@@ -128,11 +128,11 @@ class ReservationControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(404);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -146,11 +146,11 @@ class ReservationControllerTest {
         params.put("themeId", 999L);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(404);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations")
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -162,11 +162,11 @@ class ReservationControllerTest {
         insertReservation("유저1", "2099-12-31", timeId2, themeId);
 
         RestAssured.given().log().all()
-                .when().get("/reservations?date=2099-12-31&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2))
-                .body("id", containsInAnyOrder(timeId1.intValue(), timeId3.intValue()));
+            .when().get("/reservations?date=2099-12-31&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(2))
+            .body("id", containsInAnyOrder(timeId1.intValue(), timeId3.intValue()));
     }
 
     @Test
@@ -176,10 +176,10 @@ class ReservationControllerTest {
         insertTime("11:00", "12:00");
 
         RestAssured.given().log().all()
-                .when().get("/reservations?date=2099-12-31&themeId=" + themeId)
-                .then().log().all()
-                .statusCode(200)
-                .body("size()", is(2));
+            .when().get("/reservations?date=2099-12-31&themeId=" + themeId)
+            .then().log().all()
+            .statusCode(200)
+            .body("size()", is(2));
     }
 
     @Test
@@ -191,21 +191,21 @@ class ReservationControllerTest {
         insertReservation("유저2", "2099-12-29", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().get("/reservations/mine?name=유저1")
-                .then().log().all()
-                .statusCode(200)
-                .body("reservations.size()", is(2))
-                .body("reservations[0].name", is("유저1"))
-                .body("reservations[0].themeName", is("테마1"));
+            .when().get("/reservations/mine?name=유저1")
+            .then().log().all()
+            .statusCode(200)
+            .body("reservations.size()", is(2))
+            .body("reservations[0].name", is("유저1"))
+            .body("reservations[0].themeName", is("테마1"));
     }
 
     @Test
     void 나의_예약_조회_예약이_없는경우_빈_리스트_반환_테스트() {
         RestAssured.given().log().all()
-                .when().get("/reservations/mine?name=없는유저")
-                .then().log().all()
-                .statusCode(200)
-                .body("reservations", is(empty()));
+            .when().get("/reservations/mine?name=없는유저")
+            .then().log().all()
+            .statusCode(200)
+            .body("reservations", is(empty()));
     }
 
     @Test
@@ -215,12 +215,12 @@ class ReservationControllerTest {
         Long reservationId = insertReservation("유저1", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/reservation/" + reservationId)
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/reservation/" + reservationId)
+            .then().log().all()
+            .statusCode(204);
 
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM reservation WHERE id = ?", Integer.class, reservationId
+            "SELECT COUNT(*) FROM reservation WHERE id = ?", Integer.class, reservationId
         );
         assertEquals(0, count);
     }
@@ -228,9 +228,9 @@ class ReservationControllerTest {
     @Test
     void deleteReservation_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-                .when().delete("/reservation/999")
-                .then().log().all()
-                .statusCode(404);
+            .when().delete("/reservation/999")
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -246,21 +246,21 @@ class ReservationControllerTest {
         params.put("timeId", timeId2);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/reservation/" + reservationId)
-                .then().log().all()
-                .statusCode(204);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().patch("/reservation/" + reservationId)
+            .then().log().all()
+            .statusCode(204);
 
         String date = jdbcTemplate.queryForObject(
-                "SELECT date FROM reservation WHERE id = ?", String.class, reservationId
+            "SELECT date FROM reservation WHERE id = ?", String.class, reservationId
         );
         Long updatedTimeId = jdbcTemplate.queryForObject(
-                "SELECT time_id FROM reservation WHERE id = ?", Long.class, reservationId
+            "SELECT time_id FROM reservation WHERE id = ?", Long.class, reservationId
         );
         assertAll(
-                () -> assertEquals("2099-12-31", date),
-                () -> assertEquals(timeId2, updatedTimeId)
+            () -> assertEquals("2099-12-31", date),
+            () -> assertEquals(timeId2, updatedTimeId)
         );
     }
 
@@ -276,11 +276,11 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/reservation/" + reservationId)
-                .then().log().all()
-                .statusCode(401);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().patch("/reservation/" + reservationId)
+            .then().log().all()
+            .statusCode(401);
     }
 
     @Test
@@ -293,11 +293,11 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/reservation/999")
-                .then().log().all()
-                .statusCode(404);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().patch("/reservation/999")
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -312,11 +312,11 @@ class ReservationControllerTest {
         params.put("timeId", 999L);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/reservation/" + reservationId)
-                .then().log().all()
-                .statusCode(404);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().patch("/reservation/" + reservationId)
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -331,40 +331,40 @@ class ReservationControllerTest {
         params.put("timeId", timeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().patch("/reservation/" + reservationId)
-                .then().log().all()
-                .statusCode(422);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().patch("/reservation/" + reservationId)
+            .then().log().all()
+            .statusCode(422);
     }
 
     private Long insertTheme(String name) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, image_url) VALUES (?, ?, ?)",
-                name, "설명", "https://example.com/image.jpg"
+            "INSERT INTO theme (name, description, image_url) VALUES (?, ?, ?)",
+            name, "설명", "https://example.com/image.jpg"
         );
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM theme WHERE name = ?", Long.class, name
+            "SELECT id FROM theme WHERE name = ?", Long.class, name
         );
     }
 
     private Long insertTime(String startAt, String finishAt) {
         jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at, finish_at) VALUES (?, ?)",
-                startAt, finishAt
+            "INSERT INTO reservation_time (start_at, finish_at) VALUES (?, ?)",
+            startAt, finishAt
         );
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt
+            "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt
         );
     }
 
     private Long insertReservation(String name, String date, Long timeId, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date, timeId, themeId
+            "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+            name, date, timeId, themeId
         );
         return jdbcTemplate.queryForObject(
-                "SELECT MAX(id) FROM reservation", Long.class
+            "SELECT MAX(id) FROM reservation", Long.class
         );
     }
 }

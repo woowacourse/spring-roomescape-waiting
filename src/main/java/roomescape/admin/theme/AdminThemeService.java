@@ -19,8 +19,8 @@ public class AdminThemeService {
     private final ReservationRepository reservationRepository;
 
     public AdminThemeService(
-            AdminThemeRepository adminThemeRepository,
-            ReservationRepository reservationRepository
+        AdminThemeRepository adminThemeRepository,
+        ReservationRepository reservationRepository
     ) {
         this.adminThemeRepository = adminThemeRepository;
         this.reservationRepository = reservationRepository;
@@ -30,9 +30,9 @@ public class AdminThemeService {
     public AdminThemeResponse createTheme(AdminThemeRequest request) {
         validateDuplicateTheme(request.name());
         Theme theme = Theme.of(
-                request.name(),
-                request.description(),
-                request.imageUrl()
+            request.name(),
+            request.description(),
+            request.imageUrl()
         );
 
         Theme saved = adminThemeRepository.save(theme);

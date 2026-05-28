@@ -27,7 +27,7 @@ public class WaitingController {
 
     @PostMapping("/reservations/waiting")
     public ResponseEntity<WaitingResponse> createWaiting(
-            @RequestBody @Valid WaitingRequest waitingRequest
+        @RequestBody @Valid WaitingRequest waitingRequest
     ) {
 
         WaitingResponse response = waitingService.createWaiting(waitingRequest);
@@ -38,7 +38,7 @@ public class WaitingController {
 
     @GetMapping("/reservations/waiting/mine")
     public ResponseEntity<MyWaitingsResponse> getMyWaitings(
-            @RequestParam @NotBlank @Size(max = 100) String name
+        @RequestParam @NotBlank @Size(max = 100) String name
     ) {
         MyWaitingsResponse response = waitingService.getMyWaitings(name);
         return ResponseEntity.ok(response);
@@ -46,7 +46,7 @@ public class WaitingController {
 
     @DeleteMapping("/reservations/waiting/{id}")
     public ResponseEntity<Void> deleteReservation(
-            @PathVariable Long id
+        @PathVariable Long id
     ) {
         waitingService.deleteWaiting(id);
         return ResponseEntity.noContent().build();

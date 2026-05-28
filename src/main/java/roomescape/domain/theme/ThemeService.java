@@ -28,17 +28,17 @@ public class ThemeService {
         List<Long> themeIds = reservationRepository.findThemeIdTop10(startDate, endDate);
 
         return themeIds.stream()
-                .map((themeId) ->
-                        themeRepository.findById(themeId)
-                                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND)))
-                .map(ThemeResponse::from)
-                .toList();
+            .map((themeId) ->
+                themeRepository.findById(themeId)
+                    .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND)))
+            .map(ThemeResponse::from)
+            .toList();
     }
 
     @Transactional(readOnly = true)
     public List<ThemeResponse> getAllThemes() {
         return themeRepository.findAll().stream()
-                .map(ThemeResponse::from)
-                .toList();
+            .map(ThemeResponse::from)
+            .toList();
     }
 }

@@ -36,9 +36,9 @@ CREATE TABLE reservation
 
 CREATE TABLE waiting
 (
-    id       BIGINT NOT NULL AUTO_INCREMENT,
-    theme_id BIGINT NOT NULL,
-    time_id  BIGINT NOT NULL,
+    id       BIGINT       NOT NULL AUTO_INCREMENT,
+    theme_id BIGINT       NOT NULL,
+    time_id  BIGINT       NOT NULL,
     date     DATE         NOT NULL,
     name     VARCHAR(255) NOT NULL,
     PRIMARY KEY (id),

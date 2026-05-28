@@ -16,17 +16,17 @@ public class ThemeRepository {
     }
 
     private final RowMapper<Theme> rowMapper = (resultSet, rowNum) -> Theme.of(
-            resultSet.getLong("id"),
-            resultSet.getString("name"),
-            resultSet.getString("description"),
-            resultSet.getString("image_url")
+        resultSet.getLong("id"),
+        resultSet.getString("name"),
+        resultSet.getString("description"),
+        resultSet.getString("image_url")
     );
 
     public Optional<Theme> findById(Long id) {
         String query = "select * from theme where id = ?";
         return jdbcTemplate.query(query, rowMapper, id)
-                .stream()
-                .findFirst();
+            .stream()
+            .findFirst();
     }
 
     public List<Theme> findAll() {

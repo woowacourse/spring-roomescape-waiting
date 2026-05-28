@@ -4,14 +4,14 @@ import java.time.LocalTime;
 import roomescape.domain.reservationtime.ReservationTime;
 
 public record TimeResponse(
-        Long id,
-        LocalTime startAt
+    Long id,
+    LocalTime startAt
 ) {
 
     public static TimeResponse from(ReservationTime saved) {
         return new TimeResponse(
-                saved.getId(),
-                saved.getStartAt()
+            saved.getId(),
+            saved.getStartAt()
         );
     }
 }

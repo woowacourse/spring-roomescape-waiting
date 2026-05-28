@@ -34,7 +34,7 @@ public class ReservationController {
 
     @PostMapping("/reservations")
     public ResponseEntity<ReservationResponse> createReservation(
-            @RequestBody @Valid ReservationRequest request
+        @RequestBody @Valid ReservationRequest request
     ) {
         ReservationResponse response = reservationService.createReservation(request);
         URI location = URI.create("/reservations/" + response.id());
@@ -43,7 +43,7 @@ public class ReservationController {
 
     @GetMapping("/reservations")
     public ResponseEntity<List<TimeResponse>> getReservations(
-            @RequestParam LocalDate date, @RequestParam Long themeId
+        @RequestParam LocalDate date, @RequestParam Long themeId
     ) {
         List<TimeResponse> responses = reservationService.getReservations(date, themeId);
         return ResponseEntity.ok(responses);
@@ -51,7 +51,7 @@ public class ReservationController {
 
     @GetMapping("/reservations/mine")
     public ResponseEntity<MyReservationsResponse> getMyReservations(
-            @RequestParam @NotBlank @Size(max = 100) String name
+        @RequestParam @NotBlank @Size(max = 100) String name
     ) {
         MyReservationsResponse response = reservationService.getMyReservations(name);
         return ResponseEntity.ok(response);
@@ -59,7 +59,7 @@ public class ReservationController {
 
     @DeleteMapping("/reservation/{id}")
     public ResponseEntity<Void> deleteReservation(
-            @PathVariable Long id
+        @PathVariable Long id
     ) {
         reservationService.deleteReservation(id);
         return ResponseEntity.noContent().build();
@@ -67,8 +67,8 @@ public class ReservationController {
 
     @PatchMapping("/reservation/{id}")
     public ResponseEntity<Void> updateMyReservation(
-            @PathVariable Long id,
-            @RequestBody ReservationFixRequest request
+        @PathVariable Long id,
+        @RequestBody ReservationFixRequest request
     ) {
         reservationService.updateMyReservation(id, request);
         return ResponseEntity.noContent().build();

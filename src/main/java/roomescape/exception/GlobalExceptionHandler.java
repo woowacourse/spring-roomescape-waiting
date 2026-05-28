@@ -15,32 +15,32 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleRoomEscapeException(RoomescapeException exception) {
         ErrorCode code = exception.getErrorCode();
         return ResponseEntity
-                .status(code.getStatus())
-                .body(
-                        ErrorResponse.of(code.getMessage())
-                );
+            .status(code.getStatus())
+            .body(
+                ErrorResponse.of(code.getMessage())
+            );
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleMethodArgumentException(MethodArgumentNotValidException exception) {
         String message = exception.getBindingResult()
-                .getFieldErrors()
-                .getFirst()
-                .getDefaultMessage();
+            .getFieldErrors()
+            .getFirst()
+            .getDefaultMessage();
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(message));
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.of(message));
     }
 
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ErrorResponse> handleConstraintViolationException(ConstraintViolationException exception) {
         String message = exception.getConstraintViolations()
-                .stream()
-                .findFirst()
-                .map(ConstraintViolation::getMessage)
-                .orElse("잘못된 요청입니다.");
+            .stream()
+            .findFirst()
+            .map(ConstraintViolation::getMessage)
+            .orElse("잘못된 요청입니다.");
         return ResponseEntity
-                .status(HttpStatus.BAD_REQUEST)
-                .body(ErrorResponse.of(message));
+            .status(HttpStatus.BAD_REQUEST)
+            .body(ErrorResponse.of(message));
     }
 }

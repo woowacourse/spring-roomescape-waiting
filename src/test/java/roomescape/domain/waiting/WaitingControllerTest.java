@@ -46,14 +46,14 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(201);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(201);
 
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM waiting WHERE name = ?", Integer.class, "유저1"
+            "SELECT COUNT(*) FROM waiting WHERE name = ?", Integer.class, "유저1"
         );
         assertEquals(1, count);
     }
@@ -70,11 +70,11 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(400);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(400);
     }
 
     @Test
@@ -89,11 +89,11 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(422);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(422);
     }
 
     @Test
@@ -109,11 +109,11 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(409);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(409);
     }
 
     @Test
@@ -127,11 +127,11 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(404);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(404);
     }
 
     @Test
@@ -145,11 +145,11 @@ class WaitingControllerTest {
         params.put("themeId", 999L);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(404);
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(404);
     }
 
 
@@ -160,12 +160,12 @@ class WaitingControllerTest {
         Long waitingId = insertWaiting("유저1", "2099-12-31", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().delete("/reservations/waiting/" + waitingId)
-                .then().log().all()
-                .statusCode(204);
+            .when().delete("/reservations/waiting/" + waitingId)
+            .then().log().all()
+            .statusCode(204);
 
         Integer count = jdbcTemplate.queryForObject(
-                "SELECT COUNT(*) FROM waiting WHERE id = ?", Integer.class, waitingId
+            "SELECT COUNT(*) FROM waiting WHERE id = ?", Integer.class, waitingId
         );
         assertEquals(0, count);
     }
@@ -173,38 +173,38 @@ class WaitingControllerTest {
     @Test
     void deleteWaiting_존재하지_않는_id인경우_에러_반환_테스트() {
         RestAssured.given().log().all()
-                .when().delete("/reservation/waiting/999")
-                .then().log().all()
-                .statusCode(404);
+            .when().delete("/reservation/waiting/999")
+            .then().log().all()
+            .statusCode(404);
     }
 
     private Long insertTheme(String name) {
         jdbcTemplate.update(
-                "INSERT INTO theme (name, description, image_url) VALUES (?, ?, ?)",
-                name, "설명", "https://example.com/image.jpg"
+            "INSERT INTO theme (name, description, image_url) VALUES (?, ?, ?)",
+            name, "설명", "https://example.com/image.jpg"
         );
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM theme WHERE name = ?", Long.class, name
+            "SELECT id FROM theme WHERE name = ?", Long.class, name
         );
     }
 
     private Long insertTime(String startAt, String finishAt) {
         jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at, finish_at) VALUES (?, ?)",
-                startAt, finishAt
+            "INSERT INTO reservation_time (start_at, finish_at) VALUES (?, ?)",
+            startAt, finishAt
         );
         return jdbcTemplate.queryForObject(
-                "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt
+            "SELECT id FROM reservation_time WHERE start_at = ?", Long.class, startAt
         );
     }
 
     private Long insertWaiting(String name, String date, Long timeId, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date, timeId, themeId
+            "INSERT INTO waiting (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+            name, date, timeId, themeId
         );
         return jdbcTemplate.queryForObject(
-                "SELECT MAX(id) FROM waiting", Long.class
+            "SELECT MAX(id) FROM waiting", Long.class
         );
     }
 
@@ -218,25 +218,25 @@ class WaitingControllerTest {
         insertWaiting("유저2", "2099-12-30", timeId, themeId);
 
         RestAssured.given().log().all()
-                .when().get("/reservations/waiting/mine?name=유저1")
-                .then().log().all()
-                .statusCode(200)
-                .body("waitings.size()", is(2))
-                .body("waitings[0].name", is("유저1"))
-                .body("waitings[0].themeName", is("테마1"))
-                .body("waitings[0].waitingNumber", is(2))
-                .body("waitings[1].name", is("유저1"))
-                .body("waitings[1].themeName", is("테마1"))
-                .body("waitings[1].waitingNumber", is(1));
+            .when().get("/reservations/waiting/mine?name=유저1")
+            .then().log().all()
+            .statusCode(200)
+            .body("waitings.size()", is(2))
+            .body("waitings[0].name", is("유저1"))
+            .body("waitings[0].themeName", is("테마1"))
+            .body("waitings[0].waitingNumber", is(2))
+            .body("waitings[1].name", is("유저1"))
+            .body("waitings[1].themeName", is("테마1"))
+            .body("waitings[1].waitingNumber", is(1));
     }
 
     @Test
     void 나의_예약_조회_예약이_없는경우_빈_리스트_반환_테스트() {
         RestAssured.given().log().all()
-                .when().get("/reservations/waiting/mine?name=없는유저")
-                .then().log().all()
-                .statusCode(200)
-                .body("waitings", is(empty()));
+            .when().get("/reservations/waiting/mine?name=없는유저")
+            .then().log().all()
+            .statusCode(200)
+            .body("waitings", is(empty()));
     }
 
     @Test
@@ -251,12 +251,12 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(422)
-                .body("message", is("해당 예약은 점유되어있지 않습니다."));
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(422)
+            .body("message", is("해당 예약은 점유되어있지 않습니다."));
     }
 
     @Test
@@ -272,21 +272,21 @@ class WaitingControllerTest {
         params.put("themeId", themeId);
 
         RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(params)
-                .when().post("/reservations/waiting")
-                .then().log().all()
-                .statusCode(422)
-                .body("message", is("예약이 이미 등록되어있습니다."));
+            .contentType(ContentType.JSON)
+            .body(params)
+            .when().post("/reservations/waiting")
+            .then().log().all()
+            .statusCode(422)
+            .body("message", is("예약이 이미 등록되어있습니다."));
     }
 
     private Long insertReservation(String name, String date, Long timeId, Long themeId) {
         jdbcTemplate.update(
-                "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
-                name, date, timeId, themeId
+            "INSERT INTO reservation (name, date, time_id, theme_id) VALUES (?, ?, ?, ?)",
+            name, date, timeId, themeId
         );
         return jdbcTemplate.queryForObject(
-                "SELECT MAX(id) FROM reservation", Long.class
+            "SELECT MAX(id) FROM reservation", Long.class
         );
     }
 

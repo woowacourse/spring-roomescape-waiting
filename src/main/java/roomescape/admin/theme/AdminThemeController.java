@@ -24,7 +24,7 @@ public class AdminThemeController {
 
     @PostMapping("/admin/themes")
     public ResponseEntity<AdminThemeResponse> createTheme(
-            @RequestBody @Valid AdminThemeRequest request
+        @RequestBody @Valid AdminThemeRequest request
     ) {
         AdminThemeResponse response = adminThemeService.createTheme(request);
         URI location = URI.create("/admin/themes/" + response.id());
@@ -39,7 +39,7 @@ public class AdminThemeController {
 
     @DeleteMapping("/admin/themes/{id}")
     public ResponseEntity<Void> deleteTheme(
-            @PathVariable Long id
+        @PathVariable Long id
     ) {
         adminThemeService.deleteTheme(id);
         return ResponseEntity.noContent().build();

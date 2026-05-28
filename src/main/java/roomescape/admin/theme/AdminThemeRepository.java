@@ -18,22 +18,22 @@ public class AdminThemeRepository {
     public AdminThemeRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
         this.simpleJdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
-                .withTableName("theme")
-                .usingGeneratedKeyColumns("id");
+            .withTableName("theme")
+            .usingGeneratedKeyColumns("id");
     }
 
     private final RowMapper<Theme> rowMapper = (resultSet, rowNum) -> Theme.of(
-            resultSet.getLong("id"),
-            resultSet.getString("name"),
-            resultSet.getString("description"),
-            resultSet.getString("image_url")
+        resultSet.getLong("id"),
+        resultSet.getString("name"),
+        resultSet.getString("description"),
+        resultSet.getString("image_url")
     );
 
     public Theme save(Theme theme) {
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("name", theme.getName())
-                .addValue("description", theme.getDescription())
-                .addValue("image_url", theme.getImageUrl());
+            .addValue("name", theme.getName())
+            .addValue("description", theme.getDescription())
+            .addValue("image_url", theme.getImageUrl());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
         return Theme.of(id, theme.getName(), theme.getDescription(), theme.getImageUrl());
     }

@@ -70,9 +70,9 @@ class WaitingServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
-                    request.name())).thenReturn(false);
+                request.name())).thenReturn(false);
             when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
-                    .thenReturn(Optional.of("예약자"));
+                .thenReturn(Optional.of("예약자"));
             when(waitingRepository.save(any(Waiting.class))).thenReturn(saved);
 
             waitingService.createWaiting(request);
@@ -86,8 +86,8 @@ class WaitingServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
         }
 
         @Test
@@ -97,8 +97,8 @@ class WaitingServiceTest {
             when(themeRepository.findById(99L)).thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
         }
 
         @Test
@@ -108,8 +108,8 @@ class WaitingServiceTest {
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
         }
 
         @Test
@@ -118,11 +118,11 @@ class WaitingServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
-                    request.name())).thenReturn(true);
+                request.name())).thenReturn(true);
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_WAITING_NAME);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_WAITING_NAME);
         }
 
         @Test
@@ -131,13 +131,13 @@ class WaitingServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
-                    request.name())).thenReturn(false);
+                request.name())).thenReturn(false);
             when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
-                    .thenReturn(Optional.empty());
+                .thenReturn(Optional.empty());
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_NOT_FOUND);
         }
 
         @Test
@@ -146,13 +146,13 @@ class WaitingServiceTest {
             when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
             when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
             when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
-                    request.name())).thenReturn(false);
+                request.name())).thenReturn(false);
             when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
-                    .thenReturn(Optional.of("예약자"));
+                .thenReturn(Optional.of("예약자"));
 
             assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.WAITING_NOT_AVAILABLE);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.WAITING_NOT_AVAILABLE);
         }
     }
 
@@ -174,8 +174,8 @@ class WaitingServiceTest {
             when(waitingRepository.existsById(99L)).thenReturn(false);
 
             assertThatThrownBy(() -> waitingService.deleteWaiting(99L))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.WAITING_ID_NOT_FOUND);
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.WAITING_ID_NOT_FOUND);
         }
     }
 
@@ -186,21 +186,21 @@ class WaitingServiceTest {
         @Test
         void 이름으로_조회() {
             MyWaitingResult myWaitingResult = new MyWaitingResult(1L, "유저1", LocalDate.of(2099, 12, 31),
-                    time.getStartAt(), theme.getName(), 1);
+                time.getStartAt(), theme.getName(), 1);
             when(waitingRepository.findByName("유저1")).thenReturn(List.of(myWaitingResult));
 
             MyWaitingsResponse response = waitingService.getMyWaitings("유저1");
 
             assertAll(
-                    () -> assertThat(response.waitings()).hasSize(1),
-                    () -> {
-                        assertNotNull(response.waitings());
-                        assertThat(response.waitings().getFirst().name()).isEqualTo("유저1");
-                    },
-                    () -> {
-                        assertNotNull(response.waitings());
-                        assertThat(response.waitings().getFirst().themeName()).isEqualTo("테마1");
-                    }
+                () -> assertThat(response.waitings()).hasSize(1),
+                () -> {
+                    assertNotNull(response.waitings());
+                    assertThat(response.waitings().getFirst().name()).isEqualTo("유저1");
+                },
+                () -> {
+                    assertNotNull(response.waitings());
+                    assertThat(response.waitings().getFirst().themeName()).isEqualTo("테마1");
+                }
             );
         }
 

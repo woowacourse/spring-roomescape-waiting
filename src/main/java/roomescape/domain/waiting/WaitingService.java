@@ -26,9 +26,9 @@ public class WaitingService {
     private final ReservationRepository reservationRepository;
 
     public WaitingService(WaitingRepository waitingRepository,
-                          ReservationTimeRepository reservationTimeRepository,
-                          ThemeRepository themeRepository,
-                          ReservationRepository reservationRepository
+        ReservationTimeRepository reservationTimeRepository,
+        ThemeRepository themeRepository,
+        ReservationRepository reservationRepository
     ) {
         this.waitingRepository = waitingRepository;
         this.reservationTimeRepository = reservationTimeRepository;
@@ -39,20 +39,20 @@ public class WaitingService {
     @Transactional
     public WaitingResponse createWaiting(WaitingRequest waitingRequest) {
         ReservationTime reservationTime = reservationTimeRepository.findByIdForUpdate(waitingRequest.timeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.TIME_ID_NOT_FOUND));
         Theme theme = themeRepository.findById(waitingRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.THEME_ID_NOT_FOUND));
 
         validateDuplicateWaiting(waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId(),
-                waitingRequest.name());
+            waitingRequest.name());
         reservationTime.validateIfTimePast(waitingRequest.date());
         validateWaitingIsAvailable(waitingRequest);
 
         Waiting waiting = Waiting.of(
-                waitingRequest.name(),
-                waitingRequest.date(),
-                reservationTime,
-                theme
+            waitingRequest.name(),
+            waitingRequest.date(),
+            reservationTime,
+            theme
         );
 
         try {
@@ -91,8 +91,8 @@ public class WaitingService {
 
     private void validateWaitingIsAvailable(WaitingRequest waitingRequest) {
         String reservationName = reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(
-                        waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
-                .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
+                waitingRequest.date(), waitingRequest.timeId(), waitingRequest.themeId())
+            .orElseThrow(() -> new RoomescapeException(ErrorCode.RESERVATION_NOT_FOUND));
 
         if (reservationName.equals(waitingRequest.name())) {
             throw new RoomescapeException(ErrorCode.WAITING_NOT_AVAILABLE);

@@ -30,10 +30,10 @@ class AdminThemeRepositoryTest {
             Theme saved = adminThemeRepository.save(theme);
 
             assertAll(
-                    () -> assertThat(saved.getId()).isNotNull(),
-                    () -> assertThat(saved.getName()).isEqualTo("테마1"),
-                    () -> assertThat(saved.getDescription()).isEqualTo("설명"),
-                    () -> assertThat(saved.getImageUrl()).isEqualTo("https://example.com/image.jpg")
+                () -> assertThat(saved.getId()).isNotNull(),
+                () -> assertThat(saved.getName()).isEqualTo("테마1"),
+                () -> assertThat(saved.getDescription()).isEqualTo("설명"),
+                () -> assertThat(saved.getImageUrl()).isEqualTo("https://example.com/image.jpg")
             );
         }
     }
@@ -64,11 +64,11 @@ class AdminThemeRepositoryTest {
             List<Theme> result = adminThemeRepository.findAll();
 
             assertAll(
-                    () -> assertThat(result).hasSize(2),
-                    () -> assertThat(result).extracting(Theme::getId)
-                            .containsExactly(first.getId(), second.getId()),
-                    () -> assertThat(result).extracting(Theme::getName)
-                            .containsExactly("테마1", "테마2")
+                () -> assertThat(result).hasSize(2),
+                () -> assertThat(result).extracting(Theme::getId)
+                    .containsExactly(first.getId(), second.getId()),
+                () -> assertThat(result).extracting(Theme::getName)
+                    .containsExactly("테마1", "테마2")
             );
         }
     }
