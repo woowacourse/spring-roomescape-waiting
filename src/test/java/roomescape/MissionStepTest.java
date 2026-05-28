@@ -144,6 +144,26 @@ public class MissionStepTest {
     }
 
     @Test
+    void 예약이_없는_슬롯에는_대기할_수_없다() {
+        jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
+        jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
+
+        Map<String, Object> waiting = new HashMap<>();
+        waiting.put("name", "브라운");
+        waiting.put("date", TODAY.plusDays(1).toString());
+        waiting.put("timeId", 1);
+        waiting.put("themeId", 1);
+
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(waiting)
+                .when().post("/waiting")
+                .then().log().all()
+                .statusCode(400)
+                .body("message", is("예약이 존재하지 않으면, 대기요청을 할 수 없습니다."));
+    }
+
+    @Test
     void 예약_대기_삭제() {
         jdbcTemplate.update("INSERT INTO reservation_time (start_at) VALUES (?)", LocalTime.now().plusHours(1).toString());
         jdbcTemplate.update("INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)", "김인직", "레전드 방송", "gamst.jpg");
