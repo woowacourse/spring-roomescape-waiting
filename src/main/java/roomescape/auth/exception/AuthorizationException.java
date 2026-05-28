@@ -1,4 +1,4 @@
-package roomescape.reservation.exception;
+package roomescape.auth.exception;
 
 import roomescape.global.exception.BusinessException;
 

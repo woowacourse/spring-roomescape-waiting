@@ -6,8 +6,8 @@ import java.time.LocalTime;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.AuthorizationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
@@ -97,22 +97,32 @@ public class ReservationWaitingService {
     }
 
     @Transactional
-    public void deleteReservationWaitingById(Long id, String userName) {
-        ReservationWaiting reservationWaiting = reservationWaitingRepository.findById(id)
-                .orElseThrow(ReservationWaitingNotFoundException::new);
+    public void deleteReservationWaitingById(Long id) {
+        ReservationWaiting reservationWaiting = getReservationWaiting(id);
 
         validateExpiry(
                 reservationWaiting.getDate(),
                 reservationWaiting.getTime().getStartAt()
         );
 
-        if (!reservationWaiting.getName().equals(userName)) {
-            throw new AuthorizationException();
-        }
+        int affectedRow = reservationWaitingRepository.deleteById(id);
+        int nonAffected = 0;
 
-        int count = reservationWaitingRepository.deleteById(id);
-        if (count == 0) {
+        if (affectedRow == nonAffected) {
             throw new ReservationWaitingNotFoundException();
+        }
+    }
+
+    private ReservationWaiting getReservationWaiting(Long id) {
+        return reservationWaitingRepository.findById(id)
+                .orElseThrow(ReservationWaitingNotFoundException::new);
+    }
+
+    public void validateReservationWaitingOwnership(Long reservationWaitingId, String name) {
+        ReservationWaiting waiting = getReservationWaiting(reservationWaitingId);
+
+        if (!waiting.hasSameName(name)) {
+            throw new AuthorizationException();
         }
     }
 }

@@ -8,6 +8,7 @@ import java.util.List;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import roomescape.auth.exception.AuthorizationException;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.exception.DuplicateReservationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
@@ -274,5 +275,13 @@ public class ReservationService {
                 reservation.getDate(),
                 reservation.getTime().getStartAt()
         );
+    }
+
+    public void validateReservationOwnership(Long reservationId, String userName) {
+        Reservation reservation = getReservation(reservationId);
+
+        if (!reservation.hasSameName(userName)) {
+            throw new AuthorizationException();
+        }
     }
 }

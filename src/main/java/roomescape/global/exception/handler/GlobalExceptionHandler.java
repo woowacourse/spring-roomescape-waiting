@@ -5,14 +5,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.auth.exception.AuthorizationException;
+import roomescape.auth.exception.MissingAuthorizationHeaderException;
 import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.DeleteFailedException;
 import roomescape.global.exception.DuplicateException;
 import roomescape.global.exception.InvalidRequestValueException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.response.ErrorResponse;
-import roomescape.reservation.exception.AuthorizationException;
-import roomescape.reservation.exception.MissingAuthorizationHeaderException;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {

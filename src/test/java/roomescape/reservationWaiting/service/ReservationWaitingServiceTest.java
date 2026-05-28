@@ -20,7 +20,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.exception.AuthorizationException;
 import roomescape.reservation.exception.InvalidReservationDateValueException;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
@@ -249,7 +248,7 @@ class ReservationWaitingServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         // when, then
-        assertThatCode(() -> reservationWaitingService.deleteReservationWaitingById(1L, "브라운"))
+        assertThatCode(() -> reservationWaitingService.deleteReservationWaitingById(1L))
                 .doesNotThrowAnyException();
     }
 
@@ -264,7 +263,7 @@ class ReservationWaitingServiceTest {
                 Optional.empty());
 
         // when, then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "브라운")).isInstanceOf(
+        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L)).isInstanceOf(
                 ReservationWaitingNotFoundException.class);
     }
 
@@ -287,7 +286,7 @@ class ReservationWaitingServiceTest {
         when(clock.getZone()).thenReturn(ZoneId.systemDefault());
 
         // when,then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "브라운")).isInstanceOf(
+        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L)).isInstanceOf(
                 InvalidReservationDateValueException.class);
     }
 
@@ -312,30 +311,7 @@ class ReservationWaitingServiceTest {
 
         // when,then
         assertDoesNotThrow(
-                () -> reservationWaitingService.deleteReservationWaitingById(1L, "브라운")
+                () -> reservationWaitingService.deleteReservationWaitingById(1L)
         );
-    }
-
-    @Test
-    @DisplayName("예약 대기자와 삭제 신청자 이름이 다르면 오류가 발생한다")
-    void deleteReservationWaiting_ById_not_authorized() {
-        // given
-        ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
-        Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
-        when(reservationWaitingRepository.findById(any())).thenReturn(
-                Optional.of(new ReservationWaiting(
-                        1L, "브라운", LocalDate.of(2026, 5, 14), time, theme
-                )));
-
-        when(clock.instant()).thenReturn(
-                LocalDate.of(2026, 5, 1)
-                        .atStartOfDay(ZoneId.systemDefault())
-                        .toInstant()
-        );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-
-        // when,then
-        assertThatThrownBy(() -> reservationWaitingService.deleteReservationWaitingById(1L, "검프")).isInstanceOf(
-                AuthorizationException.class);
     }
 }

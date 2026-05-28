@@ -35,6 +35,10 @@ public class ReservationWaiting {
         );
     }
 
+    public boolean hasSameName(String other) {
+        return name.equals(other);
+    }
+
     public Long getId() {
         return id;
     }

@@ -368,7 +368,7 @@ class ConcurrencyTest {
 
         // when
         List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationWaitingService.deleteReservationWaitingById(1L, "포비"),
+                () -> reservationWaitingService.deleteReservationWaitingById(1L),
                 100,
                 ReservationWaitingNotFoundException.class
         );

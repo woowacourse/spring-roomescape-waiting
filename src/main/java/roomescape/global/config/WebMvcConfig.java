@@ -4,20 +4,22 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.util.List;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import roomescape.auth.LoginNameArgumentResolver;
+import roomescape.auth.NameAuthenticationInterceptor;
 import roomescape.global.exception.support.BusinessExceptionMappingJackson2HttpMessageConverter;
-import roomescape.reservation.auth.ReservationOwnerInterceptor;
 
 @Configuration
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final ObjectMapper objectMapper;
-    private final ReservationOwnerInterceptor reservationOwnerInterceptor;
+    private final NameAuthenticationInterceptor nameAuthenticationInterceptor;
 
-    public WebMvcConfig(ObjectMapper objectMapper, ReservationOwnerInterceptor interceptor) {
+    public WebMvcConfig(ObjectMapper objectMapper, NameAuthenticationInterceptor interceptor) {
         this.objectMapper = objectMapper;
-        this.reservationOwnerInterceptor = interceptor;
+        this.nameAuthenticationInterceptor = interceptor;
     }
 
     @Override
@@ -27,6 +29,11 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(reservationOwnerInterceptor);
+        registry.addInterceptor(nameAuthenticationInterceptor);
+    }
+
+    @Override
+    public void addArgumentResolvers(List<HandlerMethodArgumentResolver> resolvers) {
+        resolvers.addFirst(new LoginNameArgumentResolver());
     }
 }
