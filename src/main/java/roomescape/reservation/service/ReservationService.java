@@ -8,6 +8,7 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -44,7 +45,6 @@ public class ReservationService {
         return reservationRepository.findAll();
     }
 
-    // 대기 순번은 SQL에서 계산
     public List<ReservationWithWaitingTurn> readAllByName(String name) {
         return reservationRepository.findMyReservationsWithWaitingTurn(name);
     }
