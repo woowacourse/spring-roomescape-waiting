@@ -10,8 +10,6 @@ public interface ReservationRepository {
 
     List<Reservation> findAll();
 
-    List<Reservation> findAllByNameOrderByDateAndTime(String name);
-
     Optional<Reservation> findById(Long id);
 
     List<Reservation> findReservedAndWaitingBySlot(Long dateId, Long timeId, Long themeId);

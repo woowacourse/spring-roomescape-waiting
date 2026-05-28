@@ -21,13 +21,6 @@ public class FakeReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByNameOrderByDateAndTime(String name) {
-        return store.values().stream()
-                .filter(reservation -> reservation.getName().equals(name))
-                .toList();
-    }
-
-    @Override
     public Optional<Reservation> findById(Long id) {
         return Optional.ofNullable(store.get(id));
     }

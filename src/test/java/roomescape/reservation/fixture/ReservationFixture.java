@@ -22,6 +22,16 @@ public class ReservationFixture {
         return Reservation.reserve(name, date, time, theme, LocalDateTime.now().truncatedTo(ChronoUnit.MICROS));
     }
 
+    public static Reservation reservation(
+            String name,
+            ReservationDate date,
+            ReservationTime time,
+            Theme theme,
+            LocalDateTime reservedAt
+    ) {
+        return Reservation.reserve(name, date, time, theme, reservedAt.truncatedTo(ChronoUnit.MICROS));
+    }
+
     public static Reservation waitReservation(
             String name,
             ReservationDate date,

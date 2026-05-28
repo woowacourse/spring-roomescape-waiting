@@ -157,38 +157,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findAllByNameOrderByDateAndTime(String name) {
-        String sql = """
-                SELECT
-                    r.id AS reservation_id,
-                    r.name,
-                    r.status,
-                    r.reserved_at,
-                    d.id AS date_id,
-                    d.date,
-                    d.is_active as date_is_active,
-                    t.id AS time_id,
-                    t.start_at,
-                    t.is_active as time_is_active,
-                    th.id AS theme_id,
-                    th.name AS theme_name,
-                    th.description,
-                    th.thumbnail_url,
-                    th.is_active
-                FROM reservation r
-                INNER JOIN reservation_date d ON r.date_id = d.id
-                INNER JOIN reservation_time t ON r.time_id = t.id
-                INNER JOIN theme th ON r.theme_id = th.id
-                WHERE r.name = :name
-                ORDER BY d.date DESC , t.start_at ASC
-                """;
-
-        MapSqlParameterSource params = new MapSqlParameterSource("name", name);
-
-        return jdbcTemplate.query(sql, params, reservationRowMapper);
-    }
-
-    @Override
     public Reservation save(Reservation reservation) {
         SqlParameterSource params = new MapSqlParameterSource()
                 .addValue("name", reservation.getName())
@@ -286,7 +254,7 @@ public class JdbcReservationRepository implements ReservationRepository {
                 INNER JOIN reservation_time t ON r.time_id = t.id
                 INNER JOIN theme th ON r.theme_id = th.id
                 WHERE r.name = :memberName
-                ORDER BY r.reserved_at DESC
+                ORDER BY r.reserved_at ASC
                 """;
 
         MapSqlParameterSource params = new MapSqlParameterSource("memberName", memberName);
