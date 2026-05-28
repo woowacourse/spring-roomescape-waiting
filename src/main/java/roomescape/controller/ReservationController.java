@@ -12,6 +12,7 @@ import roomescape.dto.response.ReservationResponse;
 import roomescape.service.ReservationService;
 
 import java.net.URI;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -31,7 +32,7 @@ public class ReservationController {
         CreateReservationCommand command = new CreateReservationCommand(
                 request.name(), request.date(), request.timeId(), request.themeId()
         );
-        ReservationResponse response = reservationService.addReservation(command);
+        ReservationResponse response = reservationService.addReservation(command, LocalDateTime.now());
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }
@@ -49,7 +50,7 @@ public class ReservationController {
         UpdateReservationCommand command = new UpdateReservationCommand(
                 request.date(), request.timeId()
         );
-        ReservationResponse response = reservationService.update(reservationId, command);
+        ReservationResponse response = reservationService.update(reservationId, command, LocalDateTime.now());
         return ResponseEntity.ok(response);
     }
 
