@@ -1,15 +1,12 @@
 package roomescape.service.fake;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import roomescape.domain.ReservationTime;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.dto.TimeSlotProjection;
 
 public class FakeReservationTimeRepository implements ReservationTimeRepository {
 
@@ -40,21 +37,6 @@ public class FakeReservationTimeRepository implements ReservationTimeRepository 
         return reservationTimes.values()
                 .stream()
                 .anyMatch(reservationTime -> reservationTime.getStartAt().equals(time));
-    }
-
-    @Override
-    public List<ReservationTime> findAllTimes() {
-        return reservationTimes.values()
-                .stream()
-                .toList();
-    }
-
-    @Override
-    public List<TimeSlotProjection> findTimesByThemeWithReservationStatus(long themeId, LocalDate date) {
-        return reservationTimes.values()
-                .stream()
-                .map(time -> new TimeSlotProjection(time.getId(), time.getStartAt(), true))
-                .toList();
     }
 
     @Override

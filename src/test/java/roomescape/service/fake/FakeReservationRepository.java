@@ -1,6 +1,5 @@
 package roomescape.service.fake;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -42,11 +41,6 @@ public class FakeReservationRepository implements ReservationRepository {
                         entry.getCreatedAt()
                 ))
                 .toList();
-    }
-
-    @Override
-    public List<Reservation> findAll() {
-        return new ArrayList<>(storage.values());
     }
 
     @Override

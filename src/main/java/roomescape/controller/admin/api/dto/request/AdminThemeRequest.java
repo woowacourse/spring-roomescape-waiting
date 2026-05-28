@@ -1,4 +1,4 @@
-package roomescape.controller.admin.api.dto;
+package roomescape.controller.admin.api.dto.request;
 
 import jakarta.validation.constraints.NotBlank;
 import roomescape.service.command.ThemeRegisterCommand;

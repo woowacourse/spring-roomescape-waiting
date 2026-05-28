@@ -21,20 +21,19 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.web.context.WebApplicationContext;
 import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.client.api.ThemeApiController;
-import roomescape.controller.client.api.dto.ThemeResponse;
-import roomescape.controller.client.api.dto.ThemeTimesResponse;
-import roomescape.query.ThemeQuery;
-import roomescape.service.ThemeService;
-import roomescape.service.result.ThemeTimesResult;
+import roomescape.controller.client.api.dto.response.ThemeResponse;
+import roomescape.controller.client.api.dto.response.ThemeTimesResponse;
+import roomescape.controller.client.api.query.ThemeQuery;
+import roomescape.controller.client.api.query.ThemeTimesQuery;
 
 @WebMvcTest(ThemeApiController.class)
 class ThemeApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
-    private ThemeService themeService;
+    private ThemeQuery themeQuery;
 
     @MockitoBean
-    private ThemeQuery themeQuery;
+    private ThemeTimesQuery themeTimesQuery;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -44,8 +43,8 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 테마_시간대_조회_요청에_성공하면_정상_응답이_반환된다() {
         // given
-        ThemeTimesResult result = new ThemeTimesResult(1L, LocalTime.now(), true, "RESERVABLE");
-        when(themeService.getThemeReservationStatus(anyLong(), any(LocalDate.class))).thenReturn(List.of(result));
+        ThemeTimesResponse result = new ThemeTimesResponse(1L, LocalTime.now(), true, "RESERVABLE");
+        when(themeTimesQuery.getThemeReservationStatus(anyLong(), any(LocalDate.class))).thenReturn(List.of(result));
 
         // when & then
         List<ThemeTimesResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -56,7 +55,7 @@ class ThemeApiControllerTest extends BaseControllerUnitTest {
                 .extract().as(new TypeRef<>() {
                 });
 
-        assertThat(response).containsOnly(ThemeTimesResponse.from(result));
+        assertThat(response).containsOnly(result);
     }
 
     @ParameterizedTest

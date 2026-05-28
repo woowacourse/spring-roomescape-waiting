@@ -82,13 +82,4 @@ class ReservationTimeServiceTest {
         assertThat(reservationTime.getStatus()).isEqualTo(TimeStatus.ACTIVE);
     }
 
-    @Test
-    void 모든_예약_시간_목록을_조회한다() {
-        // given: 10시와 11시 예약 시간이 저장되어 있음
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
-        reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
-
-        // when & then: 저장된 2개의 시간 정보가 반환됨
-        assertThat(reservationTimeRepository.findAllTimes()).hasSize(2);
-    }
 }

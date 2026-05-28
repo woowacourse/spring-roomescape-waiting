@@ -1,9 +1,9 @@
-package roomescape.controller.client.api.dto;
+package roomescape.controller.client.api.dto.response;
 
 import java.time.LocalDate;
 import roomescape.service.result.ReservationResult;
 
-public record ReservationDetailResponse(
+public record ReservationResponse(
         long reservationId,
         LocalDate date,
         ThemeResponse theme,
@@ -11,8 +11,8 @@ public record ReservationDetailResponse(
         ReservationEntryResponse entry
 ) {
 
-    public static ReservationDetailResponse from(ReservationResult result) {
-        return new ReservationDetailResponse(
+    public static ReservationResponse from(ReservationResult result) {
+        return new ReservationResponse(
                 result.reservationId(),
                 result.date(),
                 ThemeResponse.from(result.theme()),

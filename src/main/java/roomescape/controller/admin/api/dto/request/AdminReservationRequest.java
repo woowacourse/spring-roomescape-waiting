@@ -1,4 +1,4 @@
-package roomescape.controller.client.api.dto;
+package roomescape.controller.admin.api.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import roomescape.service.command.ReservationCommand;
 
-public record ReservationRequest(
+public record AdminReservationRequest(
         @NotBlank(message = "예약자 이름 정보는 비어있을 수 없습니다.")
         String name,
         @NotNull(message = "예약 날짜 정보는 필수 값입니다.")

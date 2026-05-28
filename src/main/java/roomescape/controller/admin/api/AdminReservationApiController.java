@@ -15,8 +15,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.admin.api.dto.AdminReservationRequest;
-import roomescape.controller.admin.api.dto.AdminReservationResponse;
+import roomescape.controller.admin.api.dto.request.AdminReservationRequest;
+import roomescape.controller.admin.api.dto.response.AdminReservationResponse;
+import roomescape.controller.admin.api.query.AdminReservationQuery;
 import roomescape.service.ReservationService;
 import roomescape.service.result.ReservationResult;
 
@@ -27,6 +28,7 @@ import roomescape.service.result.ReservationResult;
 public class AdminReservationApiController {
 
     private final ReservationService reservationService;
+    private final AdminReservationQuery reservationQuery;
 
     @PostMapping
     public ResponseEntity<AdminReservationResponse> reserve(@Valid @RequestBody AdminReservationRequest request) {
@@ -45,10 +47,6 @@ public class AdminReservationApiController {
 
     @GetMapping
     public ResponseEntity<List<AdminReservationResponse>> getAllReservations() {
-        List<AdminReservationResponse> response = reservationService.getAllReservations()
-                .stream()
-                .map(AdminReservationResponse::from)
-                .toList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(reservationQuery.getAllReservations());
     }
 }

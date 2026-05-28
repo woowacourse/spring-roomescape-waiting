@@ -11,10 +11,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.controller.client.api.dto.ThemeResponse;
-import roomescape.controller.client.api.dto.ThemeTimesResponse;
-import roomescape.query.ThemeQuery;
-import roomescape.service.ThemeService;
+import roomescape.controller.client.api.dto.response.ThemeResponse;
+import roomescape.controller.client.api.dto.response.ThemeTimesResponse;
+import roomescape.controller.client.api.query.ThemeQuery;
+import roomescape.controller.client.api.query.ThemeTimesQuery;
 
 @RestController
 @RequiredArgsConstructor
@@ -22,8 +22,8 @@ import roomescape.service.ThemeService;
 @Validated
 public class ThemeApiController {
 
-    private final ThemeService themeService;
     private final ThemeQuery themeQuery;
+    private final ThemeTimesQuery themeTimesQuery;
 
     @GetMapping("/{id}/times")
     public ResponseEntity<List<ThemeTimesResponse>> getThemeReservationStatus(
@@ -31,11 +31,7 @@ public class ThemeApiController {
             @Positive(message = "테마 조회 식별자는 양수여야 합니다.") Long id,
             @RequestParam LocalDate date
     ) {
-        List<ThemeTimesResponse> response = themeService.getThemeReservationStatus(id, date)
-                .stream()
-                .map(ThemeTimesResponse::from)
-                .toList();
-        return ResponseEntity.ok().body(response);
+        return ResponseEntity.ok().body(themeTimesQuery.getThemeReservationStatus(id, date));
     }
 
     @GetMapping

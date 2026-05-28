@@ -3,46 +3,23 @@ package roomescape.service;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
-import java.util.List;
-import java.util.stream.Stream;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 import roomescape.domain.DuplicateEntityException;
-import roomescape.domain.fixture.ReservationTimeFixture;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.command.ThemeRegisterCommand;
-import roomescape.service.fake.FakeReservationTimeRepository;
 import roomescape.service.fake.FakeThemeRepository;
 import roomescape.service.result.ThemeRegisterResult;
-import roomescape.service.result.ThemeTimesResult;
 
 class ThemeServiceTest {
 
     private ThemeRepository themeRepository;
-    private ReservationTimeRepository reservationTimeRepository;
     private ThemeService themeService;
-
-    static Stream<Arguments> provideReservationStatusScenarios() {
-        LocalDate today = LocalDate.now();
-        return Stream.of(
-                // {조회날짜, 이른 시간 기댓값, 늦은 시간 기댓값}
-                Arguments.of(today.minusDays(7), false, false), // 과거: 모두 불가
-                Arguments.of(today, false, true),                            // 현재: 시간 비교
-                Arguments.of(today.plusDays(7), true, true)        // 미래: 모두 가능
-        );
-    }
 
     @BeforeEach
     void setUp() {
         this.themeRepository = new FakeThemeRepository();
-        this.reservationTimeRepository = new FakeReservationTimeRepository();
-        this.themeService = new ThemeService(themeRepository, reservationTimeRepository);
+        this.themeService = new ThemeService(themeRepository);
     }
 
     @Test
@@ -86,8 +63,8 @@ class ThemeServiceTest {
         // when
         themeService.deactivate(registerResult.id());
 
-        // then: 비활성화 후 활성 테마 없음
-        assertThat(themeRepository.findAllActiveThemes()).isEmpty();
+        // then: 테마가 비활성화됨
+        assertThat(themeRepository.findById(registerResult.id()).orElseThrow().isActive()).isFalse();
     }
 
     @Test
@@ -100,31 +77,8 @@ class ThemeServiceTest {
         // when
         themeService.activate(registerResult.id());
 
-        // then: 활성화 후 활성 테마 1개
-        assertThat(themeRepository.findAllActiveThemes()).hasSize(1);
+        // then: 테마가 활성화됨
+        assertThat(themeRepository.findById(registerResult.id()).orElseThrow().isActive()).isTrue();
     }
 
-    @ParameterizedTest
-    @MethodSource("provideReservationStatusScenarios")
-    void 테마별_예약_가능한_시간을_조회_시_시점에_따라_상태를_처리한다(LocalDate date, boolean expectedForEarlyTime, boolean expectedForLateTime) {
-        // given
-        for (int hour = 10; hour <= 18; hour++) {
-            reservationTimeRepository.save(ReservationTimeFixture.createWithTime(LocalTime.of(hour, 0)));
-        }
-        LocalTime nowTime = LocalTime.now();
-
-        // when
-        List<ThemeTimesResult> result = themeService.getThemeReservationStatus(1L, date);
-
-        // then
-        // 1. 현재 시간보다 이른 시간대 검증
-        assertThat(result)
-                .filteredOn(time -> time.startAt().isBefore(nowTime))
-                .allSatisfy(time -> assertThat(time.isReservable()).isEqualTo(expectedForEarlyTime));
-
-        // 2. 현재 시간보다 늦은 시간대 검증
-        assertThat(result)
-                .filteredOn(time -> time.startAt().isAfter(nowTime))
-                .allSatisfy(time -> assertThat(time.isReservable()).isEqualTo(expectedForLateTime));
-    }
 }

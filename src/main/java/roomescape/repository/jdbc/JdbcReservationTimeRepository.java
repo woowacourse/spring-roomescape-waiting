@@ -1,13 +1,9 @@
 package roomescape.repository.jdbc;
 
 import static roomescape.repository.jdbc.ReservationTimeEntityMapper.RESERVATION_TIME_MAPPER;
-import static roomescape.repository.jdbc.ReservationTimeEntityMapper.TIME_SLOT_PROJECTION_MAPPER;
-
 import java.sql.PreparedStatement;
 import java.sql.Time;
-import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -18,7 +14,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.TimeStatus;
 import roomescape.repository.ReservationTimeRepository;
-import roomescape.repository.dto.TimeSlotProjection;
 import roomescape.repository.util.RepositoryExceptionTranslator;
 
 @Repository
@@ -64,35 +59,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
         String sql = "SELECT EXISTS (SELECT 1 FROM reservation_time WHERE start_at = ?)";
         Boolean result = jdbcTemplate.queryForObject(sql, Boolean.class, time);
         return Boolean.TRUE.equals(result);
-    }
-
-    @Override
-    public List<ReservationTime> findAllTimes() {
-        String sql = "SELECT * FROM reservation_time";
-        return jdbcTemplate.query(sql, RESERVATION_TIME_MAPPER);
-    }
-
-    @Override
-    public List<TimeSlotProjection> findTimesByThemeWithReservationStatus(long themeId, LocalDate date) {
-        String sql = """
-                        SELECT
-                            rt.id AS time_id,
-                            rt.start_at AS time_start_at,
-                            NOT EXISTS (
-                                SELECT 1
-                                FROM reservation r
-                                JOIN reservation_entry re ON re.reservation_id = r.id
-                                WHERE r.time_id = rt.id
-                                  AND r.theme_id = ?
-                                  AND r.date = ?
-                                  AND re.status = 'RESERVED'
-                            ) AS is_reservable
-                        FROM reservation_time rt
-                        WHERE rt.status = ?
-                        ORDER BY rt.start_at ASC;
-                """;
-
-        return jdbcTemplate.query(sql, TIME_SLOT_PROJECTION_MAPPER, themeId, date, TimeStatus.ACTIVE.toString());
     }
 
     @Override

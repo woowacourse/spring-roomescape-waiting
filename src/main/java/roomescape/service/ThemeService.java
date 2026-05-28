@@ -1,26 +1,19 @@
 package roomescape.service;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.DuplicateEntityException;
 import roomescape.domain.Theme;
-import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
-import roomescape.repository.dto.TimeSlotProjection;
 import roomescape.service.command.ThemeRegisterCommand;
 import roomescape.service.result.ThemeRegisterResult;
-import roomescape.service.result.ThemeTimesResult;
 
 @Service
 @RequiredArgsConstructor
 public class ThemeService {
 
     private final ThemeRepository themeRepository;
-    private final ReservationTimeRepository reservationTimeRepository;
 
     @Transactional
     public ThemeRegisterResult register(ThemeRegisterCommand command) {
@@ -47,23 +40,6 @@ public class ThemeService {
                     existingTheme.activate();
                     themeRepository.update(existingTheme);
                 });
-    }
-
-    public List<ThemeTimesResult> getThemeReservationStatus(long id, LocalDate date) {
-        return reservationTimeRepository.findTimesByThemeWithReservationStatus(id, date)
-                .stream()
-                .map(projection -> toResultWithTimeCheck(projection, date))
-                .toList();
-    }
-
-    private ThemeTimesResult toResultWithTimeCheck(TimeSlotProjection projection, LocalDate date) {
-        LocalDateTime now = LocalDateTime.now();
-        LocalDateTime startAt = LocalDateTime.of(date, projection.startAt());
-
-        if (now.isAfter(startAt)) {
-            return ThemeTimesResult.unavailable(projection);
-        }
-        return ThemeTimesResult.from(projection);
     }
 
     private void validateDuplicationName(String name) {

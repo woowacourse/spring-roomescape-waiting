@@ -1,4 +1,4 @@
-package roomescape.controller.client.api.dto;
+package roomescape.controller.client.api.dto.request;
 
 import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotNull;
