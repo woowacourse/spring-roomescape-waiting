@@ -2,7 +2,6 @@ package roomescape.reservationWaiting.service;
 
 import org.springframework.stereotype.Service;
 import roomescape.common.exception.RoomEscapeException;
-import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
@@ -37,7 +36,7 @@ public class ReservationWaitingService {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
 
-        validateUniqueReservation(command.reservationDate(), command.timeId(), command.themeId());
+        validateReservationExists(command.reservationDate(), command.timeId(), command.themeId());
         validateUniqueReservationWaiting(command.name(), command.reservationDate(), command.timeId(), command.themeId());
         validatePastDatetime(command.reservationDate(), reservationTime);
 
@@ -51,7 +50,7 @@ public class ReservationWaitingService {
     public void delete(Long reservationWaitingId) {
         int deleted = reservationWaitingDao.delete(reservationWaitingId);
         if (deleted == 0) {
-            throw new RoomEscapeException(ReservationWaitingErrorCode.NOT_FOUND);
+            throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_WAITING_NOT_FOUND);
         }
     }
 
@@ -65,10 +64,10 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
-    private void validateUniqueReservation(LocalDate date, long timeId, long themeId) {
+    private void validateReservationExists(LocalDate date, long timeId, long themeId) {
         boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
-        if (exists) {
-            throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
+        if (!exists) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 

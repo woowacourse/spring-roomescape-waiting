@@ -8,6 +8,8 @@ import roomescape.reservationWaiting.dao.ReservationWaitingDao;
 import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.reservationWaiting.dto.command.CreateReservationWaitingCommand;
 import roomescape.reservationWaiting.dto.response.ReservationWaitingResponse;
+import roomescape.reservation.dao.ReservationDao;
+import roomescape.reservation.domain.Reservation;
 import roomescape.reservationtime.dao.ReservationTimeDao;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.dao.ThemeDao;
@@ -36,12 +38,17 @@ class ReservationWaitingServiceTest {
     private ReservationWaitingService reservationWaitingService;
     @Autowired
     private ReservationWaitingDao reservationWaitingDao;
+    @Autowired
+    private ReservationDao reservationDao;
 
     @Test
     void 예약_대기를_추가한다() {
         // given
         ReservationTime time = saveTime(10, 0);
         Theme theme = saveTheme("방탈출1", "설명", "https://thumb.com");
+        reservationDao.insert(Reservation.createWithoutId(
+                "브라운", LocalDate.of(2026, 6, 10), time, theme
+        ));
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 "맥스", LocalDate.of(2026, 6, 10), time.getId(), theme.getId()
         );

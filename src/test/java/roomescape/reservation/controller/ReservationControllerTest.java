@@ -89,6 +89,7 @@ public class ReservationControllerTest {
                 .statusCode(201)
                 .extract()
                 .path("name");
+        createReservation("로지", LocalDate.now().plusDays(1).toString(), timeId2, themeId).statusCode(201);
         createReservationWaiting("브라운", LocalDate.now().plusDays(1), timeId2, themeId).statusCode(201);
 
         RestAssured.given().log().all()
