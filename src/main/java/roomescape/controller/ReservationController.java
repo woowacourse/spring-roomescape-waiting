@@ -65,7 +65,7 @@ public class ReservationController {
                 .build();
     }
 
-    @DeleteMapping("/wait/{id}")
+    @DeleteMapping("/waits/{id}")
     public ResponseEntity<Void> deleteWait(@PathVariable Long id) {
         receptionFacade.deleteWait(id);
         return ResponseEntity
