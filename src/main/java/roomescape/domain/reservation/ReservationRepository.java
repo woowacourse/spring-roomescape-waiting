@@ -18,7 +18,7 @@ public interface ReservationRepository {
 
     List<Reservation> findAllByReservationIdOrder(Long reservationId);
 
-    Optional<Reservation> update(Long id, Reservation userReservation);
+    Optional<Reservation> update(Long id, Reservation updatedReservation);
 
     void updateStatus(Long id, ReservationStatus status);
 
