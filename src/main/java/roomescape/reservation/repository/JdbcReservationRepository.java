@@ -1,8 +1,5 @@
 package roomescape.reservation.repository;
 
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -13,6 +10,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
+
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -37,7 +38,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             )
     );
 
-    private final RowMapper<Long> rowMapper2 = (resultSet, rowNum) -> (
+    private final RowMapper<Long> idMapper = (resultSet, rowNum) -> (
             resultSet.getLong("id")
     );
 
@@ -111,6 +112,6 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
         String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
-        return ReservationIdResponse.from(jdbcTemplate.query(query, rowMapper2, date, themeId, timeId).getFirst());
+        return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
     }
 }

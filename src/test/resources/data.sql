@@ -39,9 +39,9 @@ INSERT INTO reservation (name, date, time_id, theme_id)
 VALUES ('user1', DATEADD('DAY', -10, CURRENT_DATE), 1, 4);
 
 INSERT INTO reservation (name, date, time_id, theme_id)
-VALUES ('user1', '2099-12-01', 1, 1);
+VALUES ('user1', DATEADD('DAY', 11, CURRENT_DATE), 1, 1);
 INSERT INTO reservation (name, date, time_id, theme_id)
-VALUES ('user2', '2099-12-01', 2, 1);
+VALUES ('user2', DATEADD('DAY', 12, CURRENT_DATE), 2, 1);
 
 INSERT INTO reservation_waiting (name, reservation_id)
 VALUES ('user2', 1);

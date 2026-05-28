@@ -1,8 +1,5 @@
 package roomescape.reservation.repository;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.time.LocalDate;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +9,10 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservationtime.repository.ReservationTimeRepository;
 import roomescape.theme.repository.ThemeRepository;
+
+import java.time.LocalDate;
+
+import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -43,7 +44,7 @@ class ReservationRepositoryTest {
     @DisplayName("예약 삭제 성공")
     void 예약_삭제_성공() {
         reservationRepository.deleteById(11L);
-
-        assertThat(timeRepository.findAvailableByDateAndThemeId(LocalDate.of(2099, 12, 1), 1L)).hasSize(2);
+        LocalDate date = LocalDate.now().plusDays(11);
+        assertThat(timeRepository.findAvailableByDateAndThemeId(date, 1L)).hasSize(3);
     }
 }

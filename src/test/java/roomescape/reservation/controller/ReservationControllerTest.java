@@ -1,16 +1,18 @@
 package roomescape.reservation.controller;
 
-import static org.hamcrest.Matchers.equalTo;
-
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
+
+import java.time.LocalDate;
+import java.util.Map;
+
+import static org.hamcrest.Matchers.equalTo;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -53,9 +55,10 @@ class ReservationControllerTest {
     @Test
     @DisplayName("중복 예약 생성 시 409")
     void 중복_예약_생성_실패() {
+        LocalDate date = LocalDate.now().plusDays(11);
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
-                .body(Map.of("name", "현미밥", "date", "2099-12-01", "timeId", 1, "themeId", 1))
+                .body(Map.of("name", "현미밥", "date", date, "timeId", 1, "themeId", 1))
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(409)
@@ -133,8 +136,9 @@ class ReservationControllerTest {
     @Test
     @DisplayName("예약 ID 조회")
     void 예약_ID_조회_성공() {
+        LocalDate date = LocalDate.now().plusDays(11);
         RestAssured.given().log().all()
-                .queryParam("date", "2099-12-01")
+                .queryParam("date", date.toString())
                 .queryParam("themeId", 1)
                 .queryParam("timeId", 1)
                 .when().get("/reservations/id")
