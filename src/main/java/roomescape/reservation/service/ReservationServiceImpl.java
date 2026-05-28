@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
+@Transactional(readOnly = true)
 public class ReservationServiceImpl implements ReservationService {
     private final ReservationRepository reservationRepository;
     private final TimeService timeService;
@@ -43,8 +44,8 @@ public class ReservationServiceImpl implements ReservationService {
         return reservationRepository.findAll();
     }
 
-    @Transactional
     @Override
+    @Transactional
     public Reservation create(ReservationSaveServiceRequest request) {
         ReservationTime time = findTime(request.timeId());
         Long themeId = request.themeId();
@@ -95,6 +96,7 @@ public class ReservationServiceImpl implements ReservationService {
     }
 
     @Override
+    @Transactional
     public void cancel(Long id) {
         boolean deleted = reservationRepository.deleteById(id);
         if (!deleted) {
@@ -109,8 +111,8 @@ public class ReservationServiceImpl implements ReservationService {
                 .toList();
     }
 
-    @Transactional
     @Override
+    @Transactional
     public void cancelForUser(Long id, String name) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));
@@ -127,8 +129,8 @@ public class ReservationServiceImpl implements ReservationService {
         reservationRepository.deleteById(id);
     }
 
-    @Transactional
     @Override
+    @Transactional
     public Reservation update(Long id, Long timeId) {
         Reservation reservation = reservationRepository.findById(id)
                 .orElseThrow(() -> new ReservationNotFoundException(id));

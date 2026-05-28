@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import org.springframework.transaction.annotation.Transactional;
 import roomescape.time.domain.ReservationTime;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.time.exception.ReservationTimeConflictException;
@@ -13,6 +14,7 @@ import roomescape.time.exception.TimeNotFoundException;
 import roomescape.time.repository.TimeRepository;
 
 @Service
+@Transactional(readOnly = true)
 public class TimeServiceImpl implements TimeService {
     private final TimeRepository timeRepository;
     private final ReservationRepository reservationRepository;
@@ -23,6 +25,7 @@ public class TimeServiceImpl implements TimeService {
     }
 
     @Override
+    @Transactional
     public ReservationTime create(LocalDateTime startAt, LocalDateTime endAt) {
         return timeRepository.save(startAt, endAt);
     }
@@ -44,6 +47,7 @@ public class TimeServiceImpl implements TimeService {
     }
 
     @Override
+    @Transactional
     public void deleteById(Long id) {
         if (reservationRepository.existsByTimeId(id)) {
             throw new ReservationTimeConflictException(id);
