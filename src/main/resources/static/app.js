@@ -18,8 +18,10 @@ async function api(path, options = {}) {
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || "요청 처리에 실패했습니다.");
+    const errorData = await response.json().catch(() => null);
+    const msg = errorData?.message || "요청 처리에 실패했습니다.";
+    window.alert(msg);
+    throw new Error(msg);
   }
 
   if (response.status === 204) return null;
@@ -80,8 +82,9 @@ function renderReservations(reservations) {
     const row = document.createElement("div");
     row.className = "reservation-row";
     const isWaiting = reservation.status === "waiting";
+    const waitingText = isWaiting && reservation.waitingOrder ? `(대기 ${reservation.waitingOrder}번째)` : (isWaiting ? '(대기)' : '');
     row.innerHTML = `
-      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${isWaiting ? '(대기)' : ''}</span>
+      <span class="reservation-text">${reservation.id}. [${reservation.theme?.name ?? "테마 없음"}] ${reservation.date} ${reservation.time.startAt} - ${reservation.name} ${waitingText}</span>
       <div class="reservation-actions">
         ${!isWaiting ? `<button class="ghost reservation-update" data-id="${reservation.id}" data-theme-id="${reservation.theme?.id ?? ""}" type="button">변경</button>` : ''}
         <button class="danger reservation-delete" data-id="${reservation.id}" data-status="${reservation.status || 'reserved'}" type="button">삭제</button>

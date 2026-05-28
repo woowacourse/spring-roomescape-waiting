@@ -22,8 +22,10 @@ async function api(path, options = {}) {
   });
 
   if (!response.ok) {
-    const text = await response.text();
-    throw new Error(text || "요청 처리에 실패했습니다.");
+    const errorData = await response.json().catch(() => null);
+    const msg = errorData?.message || "요청 처리에 실패했습니다.";
+    window.alert(msg);
+    throw new Error(msg);
   }
 
   if (response.status === 204) return null;
