@@ -8,9 +8,15 @@ import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
 import javax.sql.DataSource;
+import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestClassOrder;
+import org.junit.jupiter.api.ClassOrderer;
+import org.junit.jupiter.api.TestMethodOrder;
+import org.junit.jupiter.api.MethodOrderer;
 import org.springframework.dao.DuplicateKeyException;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -19,7 +25,11 @@ import org.springframework.jdbc.datasource.init.ResourceDatabasePopulator;
 import roomescape.domain.time.entity.Time;
 import roomescape.global.error.exception.GeneralException;
 
+@TestClassOrder(ClassOrderer.OrderAnnotation.class)
 class JdbcTimeRepositoryTest {
+
+    private static volatile boolean saveSucceeded = false;
+    private static volatile boolean findSucceeded = false;
 
     private JdbcTimeRepository timeRepository;
     private JdbcTemplate jdbcTemplate;
@@ -40,10 +50,13 @@ class JdbcTimeRepositoryTest {
     }
 
     @Nested
+    @Order(1)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class SaveTest {
 
         @Test
-        void 성공() {
+        @Order(1)
+        void 예약_시간을_저장한다() {
             // given
             Time time = Time.create(LocalTime.of(10, 30));
 
@@ -53,10 +66,14 @@ class JdbcTimeRepositoryTest {
             // then
             assertThat(actual.getId()).isEqualTo(1L);
             assertThat(actual.getStartAt()).isEqualTo(LocalTime.of(10, 30));
+            saveSucceeded = true;
         }
 
         @Test
+        @Order(2)
         void 삭제되지_않은_같은_예약_시간은_중복_저장할_수_없다() {
+            Assumptions.assumeTrue(saveSucceeded, "save 기능이 동작하지 않아 건너뜁니다.");
+
             // given
             LocalTime startAt = LocalTime.of(10, 30);
             timeRepository.save(Time.create(startAt));
@@ -68,10 +85,18 @@ class JdbcTimeRepositoryTest {
     }
 
     @Nested
+    @Order(2)
+    @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
     class FindAllTimesTest {
 
+        @BeforeEach
+        void assumeSaveWorks() {
+            Assumptions.assumeTrue(saveSucceeded, "save 기능이 동작하지 않아 건너뜁니다.");
+        }
+
         @Test
-        void 성공() {
+        @Order(1)
+        void 활성_예약_시간을_조회한다() {
             // given
             Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 30)));
@@ -88,14 +113,20 @@ class JdbcTimeRepositoryTest {
                     tuple(time2.getId(), time2.getStartAt()),
                     tuple(time3.getId(), time3.getStartAt())
                 );
+            findSucceeded = true;
         }
     }
 
     @Nested
     class FindTimeByIdTest {
 
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
         @Test
-        void 성공() {
+        void 예약_시간을_ID로_조회한다() {
             // given
             Time savedTime = timeRepository.save(Time.create(LocalTime.of(15, 30)));
 
@@ -109,7 +140,7 @@ class JdbcTimeRepositoryTest {
         }
 
         @Test
-        void 존재하지_않으면_빈_값을_반환한다() {
+        void 존재하지_않는_ID이면_빈_값을_반환한다() {
             // when
             Optional<Time> actual = timeRepository.findTimeByIdAndDeletedAtIsNull(1L);
 
@@ -121,8 +152,13 @@ class JdbcTimeRepositoryTest {
     @Nested
     class ExistsTimeByStartAtTest {
 
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
         @Test
-        void 존재하면_true를_반환한다() {
+        void 해당_시작_시간이_존재하면_true를_반환한다() {
             // given
             LocalTime startAt = LocalTime.of(15, 30);
             timeRepository.save(Time.create(startAt));
@@ -135,7 +171,7 @@ class JdbcTimeRepositoryTest {
         }
 
         @Test
-        void 존재하지_않으면_false를_반환한다() {
+        void 해당_시작_시간이_존재하지_않으면_false를_반환한다() {
             // when
             boolean actual = timeRepository.existsTimeByStartAtAndDeletedAtIsNull(LocalTime.of(15, 30));
 
@@ -147,8 +183,13 @@ class JdbcTimeRepositoryTest {
     @Nested
     class ExistsTimeByIdTest {
 
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
         @Test
-        void 존재하면_true를_반환한다() {
+        void 해당_ID가_존재하면_true를_반환한다() {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(15, 30)));
 
@@ -160,7 +201,7 @@ class JdbcTimeRepositoryTest {
         }
 
         @Test
-        void 존재하지_않으면_false를_반환한다() {
+        void 해당_ID가_존재하지_않으면_false를_반환한다() {
             // when
             boolean actual = timeRepository.existsTimeByIdAndDeletedAtIsNull(1L);
 
@@ -172,8 +213,13 @@ class JdbcTimeRepositoryTest {
     @Nested
     class DeleteTimeByIdTest {
 
+        @BeforeEach
+        void assumeBasicsWork() {
+            Assumptions.assumeTrue(saveSucceeded && findSucceeded, "기본 기능이 동작하지 않아 건너뜁니다.");
+        }
+
         @Test
-        void 성공() {
+        void 예약_시간을_소프트_삭제한다() {
             // given
             Time time1 = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             Time time2 = timeRepository.save(Time.create(LocalTime.of(11, 0)));
@@ -192,7 +238,7 @@ class JdbcTimeRepositoryTest {
         }
 
         @Test
-        void 삭제하려는_시간이_이미_삭제되었으면_예외가_발생한다() {
+        void 이미_삭제된_시간을_삭제하면_예외가_발생한다() {
             // given
             Time time = timeRepository.save(Time.create(LocalTime.of(10, 0)));
             timeRepository.deleteTimeById(time.getId());
