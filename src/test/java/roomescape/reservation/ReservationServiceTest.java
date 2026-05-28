@@ -7,8 +7,11 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -26,6 +29,11 @@ import roomescape.service.reservationtime.ReservationTimeService;
 import roomescape.service.theme.ThemeService;
 
 class ReservationServiceTest {
+
+    private static final Clock CLOCK = Clock.fixed(
+            Instant.parse("2026-08-06T01:00:00Z"),
+            ZoneId.of("Asia/Seoul")
+    );
 
     @Test
     @DisplayName("예약을 저장한다")
@@ -68,7 +76,7 @@ class ReservationServiceTest {
     @DisplayName("과거 날짜로는 예약할 수 없다")
     void savePastDate() {
         Fixture fixture = new Fixture();
-        LocalDate pastDate = LocalDate.now().minusDays(1);
+        LocalDate pastDate = LocalDate.now(CLOCK).minusDays(1);
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
@@ -86,7 +94,7 @@ class ReservationServiceTest {
     void savePastTimeToday() {
         Fixture fixture = new Fixture();
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+        LocalTime now = LocalTime.now(CLOCK).withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         ReservationTime time = ReservationTime.of(1L, pastTime);
 
@@ -95,7 +103,7 @@ class ReservationServiceTest {
 
         assertThrows(
                 InvalidInputException.class,
-                () -> fixture.reservationService.save("쿠다", LocalDate.now(), theme.getId(), time.getId())
+                () -> fixture.reservationService.save("쿠다", LocalDate.now(CLOCK), theme.getId(), time.getId())
         );
     }
 
@@ -133,10 +141,10 @@ class ReservationServiceTest {
     void deleteByIdAndNamePastReservation() {
         Fixture fixture = new Fixture();
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+        LocalTime now = LocalTime.now(CLOCK).withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         ReservationTime time = ReservationTime.of(1L, pastTime);
-        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(), theme, time);
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(CLOCK), theme, time);
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
 
@@ -152,7 +160,7 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
-        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now().plusDays(1), theme, time);
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(CLOCK).plusDays(1), theme, time);
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
         when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
@@ -220,7 +228,7 @@ class ReservationServiceTest {
         Fixture fixture = new Fixture();
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
         ReservationTime time = ReservationTime.of(1L, LocalTime.parse("10:00"));
-        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now().plusDays(1), theme, time);
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(CLOCK).plusDays(1), theme, time);
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
         when(fixture.reservationWaitingRepository.existsByReservationId(1L)).thenReturn(true);
@@ -230,7 +238,7 @@ class ReservationServiceTest {
                 () -> fixture.reservationService.updateByIdAndName(
                         1L,
                         "쿠다",
-                        LocalDate.now().plusDays(2),
+                        LocalDate.now(CLOCK).plusDays(2),
                         2L
                 )
         );
@@ -241,10 +249,10 @@ class ReservationServiceTest {
     void updateByIdAndNamePastReservation() {
         Fixture fixture = new Fixture();
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+        LocalTime now = LocalTime.now(CLOCK).withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         ReservationTime savedTime = ReservationTime.of(1L, pastTime);
-        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(), theme, savedTime);
+        Reservation reservation = Reservation.of(1L, "쿠다", LocalDate.now(CLOCK), theme, savedTime);
 
         when(fixture.reservationRepository.findByIdAndName(1L, "쿠다")).thenReturn(Optional.of(reservation));
 
@@ -253,7 +261,7 @@ class ReservationServiceTest {
                 () -> fixture.reservationService.updateByIdAndName(
                         1L,
                         "쿠다",
-                        LocalDate.now().plusDays(1),
+                        LocalDate.now(CLOCK).plusDays(1),
                         2L
                 )
         );
@@ -263,7 +271,7 @@ class ReservationServiceTest {
         private final ReservationRepository reservationRepository = mock(ReservationRepository.class);
         private final ReservationTimeService reservationTimeService = mock(ReservationTimeService.class);
         private final ThemeService themeService = mock(ThemeService.class);
-        private final ReservationValidator reservationValidator = new ReservationValidator();
+        private final ReservationValidator reservationValidator = new ReservationValidator(CLOCK);
         private final ReservationWaitingRepository reservationWaitingRepository = mock(ReservationWaitingRepository.class);
         private final ReservationService reservationService =
                 new ReservationService(

@@ -1,13 +1,15 @@
 package roomescape.service.theme;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Service;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.InvalidInputException;
 import roomescape.exception.ResourceNotFoundException;
 import roomescape.repository.reservation.ReservationRepository;
-import roomescape.domain.theme.Theme;
 import roomescape.repository.theme.ThemeRepository;
 
 @Service
@@ -15,13 +17,16 @@ public class ThemeService {
 
     private final ThemeRepository themeRepository;
     private final ReservationRepository reservationRepository;
+    private final Clock clock;
 
     public ThemeService(
             final ThemeRepository themeRepository,
-            final ReservationRepository reservationRepository
+            final ReservationRepository reservationRepository,
+            final Clock clock
     ) {
         this.themeRepository = themeRepository;
         this.reservationRepository = reservationRepository;
+        this.clock = clock;
     }
 
     public Theme save(final String name, final String description, final String thumbnailUrl) {
@@ -61,6 +66,9 @@ public class ThemeService {
     }
 
     public List<Theme> getPopularThemes(final int period, final int limit) {
-        return themeRepository.findPopularThemes(period, limit);
+        LocalDate end = LocalDate.now(clock);
+        LocalDate start = end.minusDays(period);
+
+        return themeRepository.findPopularThemes(start, end, limit);
     }
 }

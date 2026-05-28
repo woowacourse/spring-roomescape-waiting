@@ -1,5 +1,6 @@
 package roomescape.service.reservationwaiting;
 
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -17,13 +18,16 @@ import roomescape.repository.reservationwaiting.ReservationWaitingRepository;
 public class ReservationWaitingService {
     private final ReservationWaitingRepository reservationWaitingRepository;
     private final ReservationRepository reservationRepository;
+    private final Clock clock;
 
     public ReservationWaitingService(
             final ReservationRepository reservationRepository,
-            final ReservationWaitingRepository reservationWaitingRepository
+            final ReservationWaitingRepository reservationWaitingRepository,
+            final Clock clock
     ) {
         this.reservationRepository = reservationRepository;
         this.reservationWaitingRepository = reservationWaitingRepository;
+        this.clock = clock;
     }
 
     public ReservationWaiting save(String name, LocalDate date, Long themeId, Long timeId) {
@@ -37,7 +41,11 @@ public class ReservationWaitingService {
 
         validateWaitableName(reservation, waitingName);
 
-        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(reservation, waitingName, LocalDateTime.now());
+        ReservationWaiting nonIdReservationWaiting = ReservationWaiting.createNew(
+                reservation,
+                waitingName,
+                LocalDateTime.now(clock)
+        );
         return reservationWaitingRepository.save(nonIdReservationWaiting);
     }
 

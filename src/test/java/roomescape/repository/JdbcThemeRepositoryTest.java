@@ -1,10 +1,10 @@
 package roomescape.repository;
 
-import java.time.LocalDate;
-import java.time.LocalTime;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
+import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -13,11 +13,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.domain.reservation.Reservation;
+import roomescape.domain.reservationtime.ReservationTime;
+import roomescape.domain.theme.Theme;
 import roomescape.exception.ConflictException;
 import roomescape.repository.reservation.JdbcReservationRepository;
-import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.repository.reservationtime.JdbcReservationTimeRepository;
-import roomescape.domain.theme.Theme;
 import roomescape.repository.theme.JdbcThemeRepository;
 
 @JdbcTest
@@ -124,7 +124,7 @@ class JdbcThemeRepositoryTest {
     @Test
     @DisplayName("최근 기간 기준 인기 테마를 예약 수 순서대로 조회한다")
     void findPopularThemes_test() {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.parse("2026-08-06");
         Theme firstTheme = createTheme("미술관의 밤");
         Theme secondTheme = createTheme("심해 연구소");
         Theme thirdTheme = createTheme("폐병원 탈출");
@@ -143,7 +143,7 @@ class JdbcThemeRepositoryTest {
         jdbcReservationRepository.save(Reservation.createNew("레오", today.minusDays(1), thirdTheme, thirdThemeTime));
         jdbcReservationRepository.save(Reservation.createNew("오래된예약", today.minusDays(10), thirdTheme, thirdThemeTime));
 
-        List<Theme> popularThemes = jdbcThemeRepository.findPopularThemes(7, 2);
+        List<Theme> popularThemes = jdbcThemeRepository.findPopularThemes(today.minusDays(7), today, 2);
 
         assertThat(popularThemes).hasSize(2);
         assertThat(popularThemes.get(0).getId()).isEqualTo(firstTheme.getId());

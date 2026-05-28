@@ -7,6 +7,9 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneId;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -19,12 +22,17 @@ import roomescape.service.theme.ThemeService;
 
 class ThemeServiceTest {
 
+    private static final Clock CLOCK = Clock.fixed(
+            Instant.parse("2026-08-06T01:00:00Z"),
+            ZoneId.of("Asia/Seoul")
+    );
+
     @Test
     @DisplayName("테마를 저장한다")
     void save() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
         Theme savedTheme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
         when(themeRepository.existsByName("미술관의 밤")).thenReturn(false);
@@ -40,7 +48,7 @@ class ThemeServiceTest {
     void saveDuplicateName() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
 
         when(themeRepository.existsByName("미술관의 밤")).thenReturn(true);
 
@@ -55,7 +63,7 @@ class ThemeServiceTest {
     void getById() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
         Theme theme = Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png");
 
         when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
@@ -70,7 +78,7 @@ class ThemeServiceTest {
     void getByIdNotFound() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
 
         when(themeRepository.findById(1L)).thenReturn(Optional.empty());
 
@@ -82,7 +90,7 @@ class ThemeServiceTest {
     void deleteById() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
 
         when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
 
@@ -94,7 +102,7 @@ class ThemeServiceTest {
     void deleteByIdWithoutReservation() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
 
         when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
         when(themeRepository.deleteById(1L)).thenReturn(1);
@@ -109,7 +117,7 @@ class ThemeServiceTest {
     void deleteByIdNotFound() {
         ThemeRepository themeRepository = mock(ThemeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
-        ThemeService themeService = new ThemeService(themeRepository, reservationRepository);
+        ThemeService themeService = new ThemeService(themeRepository, reservationRepository, CLOCK);
 
         when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
         when(themeRepository.deleteById(1L)).thenReturn(0);

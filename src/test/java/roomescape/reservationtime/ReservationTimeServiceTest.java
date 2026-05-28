@@ -2,14 +2,16 @@ package roomescape.reservationtime;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -27,6 +29,11 @@ import roomescape.service.theme.ThemeService;
 
 class ReservationTimeServiceTest {
 
+    private static final Clock CLOCK = Clock.fixed(
+            Instant.parse("2026-08-06T01:00:00Z"),
+            ZoneId.of("Asia/Seoul")
+    );
+
     @Test
     @DisplayName("예약 시간을 저장한다")
     void save() {
@@ -36,7 +43,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
         ReservationTime savedTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
@@ -57,7 +65,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
 
         when(reservationTimeRepository.existsByStartAt(LocalTime.parse("10:00"))).thenReturn(true);
@@ -74,7 +83,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
         ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
         ReservationTime eleven = ReservationTime.of(2L, LocalTime.parse("11:00"));
@@ -100,7 +110,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
         ReservationTime ten = ReservationTime.of(1L, LocalTime.parse("10:00"));
         ReservationTime eleven = ReservationTime.of(2L, LocalTime.parse("11:00"));
@@ -126,9 +137,10 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
-        LocalDate pastDate = LocalDate.now().minusDays(1);
+        LocalDate pastDate = LocalDate.now(CLOCK).minusDays(1);
 
         when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
         when(reservationRepository.findReservedTimeIdsByDateAndThemeId(pastDate, 1L)).thenReturn(List.of());
@@ -145,27 +157,26 @@ class ReservationTimeServiceTest {
     @Test
     @DisplayName("오늘 날짜 조회 시 이미 지난 시간은 예약 가능 시간에서 제외된다")
     void findAvailableTimesTodayExcludesPastTimes() {
-        assumeTrue(LocalTime.now().isBefore(LocalTime.of(23, 59)));
-
         ReservationTimeRepository reservationTimeRepository = mock(ReservationTimeRepository.class);
         ReservationRepository reservationRepository = mock(ReservationRepository.class);
         ThemeService themeService = mock(ThemeService.class);
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
-        LocalTime now = LocalTime.now().withSecond(0).withNano(0);
+        LocalTime now = LocalTime.now(CLOCK).withSecond(0).withNano(0);
         LocalTime pastTime = now.equals(LocalTime.MIDNIGHT) ? now : now.minusMinutes(1);
         LocalTime futureTime = now.plusMinutes(1);
         ReservationTime past = ReservationTime.of(1L, pastTime);
         ReservationTime future = ReservationTime.of(2L, futureTime);
 
         when(themeService.getById(1L)).thenReturn(Theme.of(1L, "미술관의 밤", "추리 테마", "https://example.com/theme.png"));
-        when(reservationRepository.findReservedTimeIdsByDateAndThemeId(LocalDate.now(), 1L)).thenReturn(List.of());
+        when(reservationRepository.findReservedTimeIdsByDateAndThemeId(LocalDate.now(CLOCK), 1L)).thenReturn(List.of());
         when(reservationTimeRepository.findAll()).thenReturn(List.of(past, future));
 
-        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(LocalDate.now(), 1L);
+        List<ReservationTime> availableTimes = reservationTimeService.findAvailableTimes(LocalDate.now(CLOCK), 1L);
 
         assertThat(availableTimes)
                 .extracting(ReservationTime::getId)
@@ -182,7 +193,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(true);
@@ -199,7 +211,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
@@ -219,7 +232,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
 
         when(reservationRepository.existsByTimeId(1L)).thenReturn(false);
@@ -237,7 +251,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
         ReservationTime reservationTime = ReservationTime.of(1L, LocalTime.parse("10:00"));
 
@@ -257,7 +272,8 @@ class ReservationTimeServiceTest {
         ReservationTimeService reservationTimeService = new ReservationTimeService(
                 reservationTimeRepository,
                 reservationRepository,
-                themeService
+                themeService,
+                CLOCK
         );
 
         when(reservationTimeRepository.findById(1L)).thenReturn(Optional.empty());

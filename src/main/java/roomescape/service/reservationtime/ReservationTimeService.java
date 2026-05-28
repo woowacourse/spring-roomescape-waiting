@@ -1,7 +1,8 @@
 package roomescape.service.reservationtime;
 
-import java.time.LocalTime;
+import java.time.Clock;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 import java.util.Set;
 import org.springframework.stereotype.Service;
@@ -22,15 +23,18 @@ public class ReservationTimeService {
     private final ReservationTimeRepository reservationTimeRepository;
     private final ReservationRepository reservationRepository;
     private final ThemeService themeService;
+    private final Clock clock;
 
     public ReservationTimeService(
             final ReservationTimeRepository reservationTimeRepository,
             final ReservationRepository reservationRepository,
-            final ThemeService themeService
+            final ThemeService themeService,
+            final Clock clock
     ) {
         this.reservationTimeRepository = reservationTimeRepository;
         this.reservationRepository = reservationRepository;
         this.themeService = themeService;
+        this.clock = clock;
     }
 
 
@@ -105,7 +109,7 @@ public class ReservationTimeService {
     }
 
     private boolean isPast(final LocalDate date, final ReservationTime reservationTime) {
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(clock);
 
         if (date.isBefore(today)) {
             return true;
@@ -115,6 +119,6 @@ public class ReservationTimeService {
             return false;
         }
 
-        return reservationTime.getStartAt().isBefore(LocalTime.now());
+        return reservationTime.getStartAt().isBefore(LocalTime.now(clock));
     }
 }
