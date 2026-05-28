@@ -34,16 +34,11 @@ public class ReservationService {
 
     public List<ReservationOrderResponse> find(String name) {
         List<ReservationOrder> response = reservationDao.findByName(name);
-        return response.stream()
-                .map(ReservationOrderResponse::from)
-                .toList();
+        return response.stream().map(ReservationOrderResponse::from).toList();
     }
 
     public List<ReservationResponse> findAll() {
-        return reservationDao.findAll()
-                .stream()
-                .map(ReservationResponse::from)
-                .collect(Collectors.toList());
+        return reservationDao.findAll().stream().map(ReservationResponse::from).collect(Collectors.toList());
     }
 
     public ReservationResponse save(ReservationRequest request) {
@@ -54,13 +49,7 @@ public class ReservationService {
 
         ReservationStatus status = checkReservationStatus(request.date(), theme, time);
 
-        Reservation reservation = new Reservation(
-                request.name(),
-                request.date(),
-                time,
-                theme,
-                status
-        );
+        Reservation reservation = new Reservation(request.name(), request.date(), time, theme, status);
 
         Reservation saved = reservationDao.save(reservation);
         return ReservationResponse.from(saved);
@@ -94,11 +83,11 @@ public class ReservationService {
     }
 
     private Theme getValidTheme(Long themeId) {
-        Theme theme = themeDao.findThemeById(themeId);
-        if (theme == null) {
+        try {
+            return themeDao.findThemeById(themeId);
+        } catch (EmptyResultDataAccessException e) {
             throw new IdNotFoundException("요청하신 테마를 찾을 수 없습니다. 선택하신 테마가 정확한지 다시 한번 확인해 주세요.");
         }
-        return theme;
     }
 
     private void validateReservationDateTime(LocalDate date, ReservationTime time) {
