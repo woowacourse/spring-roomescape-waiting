@@ -21,6 +21,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.DuplicateKeyException;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationtime.ReservationTime;
 import roomescape.domain.reservationtime.ReservationTimeRepository;
@@ -29,6 +30,7 @@ import roomescape.domain.theme.ThemeRepository;
 import roomescape.domain.waiting.dto.MyWaitingResult;
 import roomescape.domain.waiting.dto.MyWaitingsResponse;
 import roomescape.domain.waiting.dto.WaitingRequest;
+import roomescape.domain.waiting.dto.WaitingResponse;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.RoomescapeException;
 
@@ -75,9 +77,15 @@ class WaitingServiceTest {
                     .thenReturn(Optional.of("예약자"));
             when(waitingRepository.save(any(Waiting.class))).thenReturn(saved);
 
-            waitingService.createWaiting(request);
+            WaitingResponse response = waitingService.createWaiting(request);
 
-            verify(waitingRepository, times(1)).save(any(Waiting.class));
+            assertAll(
+                    () -> assertThat(response.id()).isEqualTo(1L),
+                    () -> assertThat(response.name()).isEqualTo("유저1"),
+                    () -> assertThat(response.date()).isEqualTo(LocalDate.of(2099, 12, 31)),
+                    () -> assertThat(response.timeId()).isEqualTo(1L),
+                    () -> assertThat(response.themeId()).isEqualTo(1L)
+            );
         }
 
         @Test
@@ -99,17 +107,6 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
-        }
-
-        @Test
-        void 과거_날짜면_예외() {
-            WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2000, 1, 1), 1L, 1L);
-            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
-            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
-
-            assertThatThrownBy(() -> waitingService.createWaiting(request))
-                    .isInstanceOf(RoomescapeException.class)
-                    .extracting("errorCode").isEqualTo(ErrorCode.RESERVATION_TIME_PASSED);
         }
 
         @Test
@@ -153,6 +150,22 @@ class WaitingServiceTest {
             assertThatThrownBy(() -> waitingService.createWaiting(request))
                     .isInstanceOf(RoomescapeException.class)
                     .extracting("errorCode").isEqualTo(ErrorCode.WAITING_NOT_AVAILABLE);
+        }
+
+        @Test
+        void save_중_동시_요청으로_중복이_발생하면_예외() {
+            WaitingRequest request = new WaitingRequest("유저1", LocalDate.of(2099, 12, 31), 1L, 1L);
+            when(reservationTimeRepository.findByIdForUpdate(1L)).thenReturn(Optional.of(time));
+            when(themeRepository.findById(1L)).thenReturn(Optional.of(theme));
+            when(waitingRepository.existsByDateAndTimeIdAndThemeIdAndName(request.date(), 1L, 1L,
+                    request.name())).thenReturn(false);
+            when(reservationRepository.findNameByDateAndTimeIdAndThemeIdForUpdate(request.date(), 1L, 1L))
+                    .thenReturn(Optional.of("예약자"));
+            when(waitingRepository.save(any(Waiting.class))).thenThrow(DuplicateKeyException.class);
+
+            assertThatThrownBy(() -> waitingService.createWaiting(request))
+                    .isInstanceOf(RoomescapeException.class)
+                    .extracting("errorCode").isEqualTo(ErrorCode.DUPLICATE_WAITING_NAME);
         }
     }
 

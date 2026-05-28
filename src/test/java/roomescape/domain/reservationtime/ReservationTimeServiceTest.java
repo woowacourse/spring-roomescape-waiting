@@ -4,12 +4,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.time.LocalTime;
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -82,5 +84,15 @@ class ReservationTimeServiceTest {
         assertThatThrownBy(() -> reservationTimeService.deleteById(99L))
                 .isInstanceOf(RoomescapeException.class)
                 .extracting("errorCode").isEqualTo(ErrorCode.TIME_ID_NOT_FOUND);
+    }
+
+    @Test
+    void deleteById_예약이_있어_DB_제약_위반이_발생하면_예외() {
+        when(timeRepository.existsById(1L)).thenReturn(true);
+        doThrow(DataIntegrityViolationException.class).when(timeRepository).deleteById(1L);
+
+        assertThatThrownBy(() -> reservationTimeService.deleteById(1L))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_DELETE_NOT_ALLOWED);
     }
 }

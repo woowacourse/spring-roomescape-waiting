@@ -1,6 +1,7 @@
 package roomescape.domain.theme;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
@@ -14,6 +15,8 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.theme.dto.ThemeResponse;
+import roomescape.exception.ErrorCode;
+import roomescape.exception.RoomescapeException;
 
 @ExtendWith(MockitoExtension.class)
 class ThemeServiceTest {
@@ -40,6 +43,17 @@ class ThemeServiceTest {
 
         assertThat(responses).hasSize(2);
         assertThat(responses).extracting(ThemeResponse::name).containsExactly("테마1", "테마2");
+    }
+
+    @Test
+    void getTopThemes_테마_id가_존재하지_않으면_예외() {
+        when(reservationRepository.findThemeIdTop10(any(LocalDate.class), any(LocalDate.class)))
+                .thenReturn(List.of(999L));
+        when(themeRepository.findById(999L)).thenReturn(Optional.empty());
+
+        assertThatThrownBy(() -> themeService.getTopThemes())
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.THEME_ID_NOT_FOUND);
     }
 
     @Test

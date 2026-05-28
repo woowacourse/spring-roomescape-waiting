@@ -4,11 +4,13 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -98,6 +100,17 @@ class AdminThemeServiceTest {
     void deleteTheme_예약이_존재하면_예외() {
         when(adminThemeRepository.existsById(1L)).thenReturn(true);
         when(reservationRepository.existsByThemeId(1L)).thenReturn(true);
+
+        assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
+                .isInstanceOf(RoomescapeException.class)
+                .extracting("errorCode").isEqualTo(ErrorCode.TIME_DELETE_NOT_ALLOWED);
+    }
+
+    @Test
+    void deleteTheme_DB_제약_위반으로_삭제_실패하면_예외() {
+        when(adminThemeRepository.existsById(1L)).thenReturn(true);
+        when(reservationRepository.existsByThemeId(1L)).thenReturn(false);
+        doThrow(DataIntegrityViolationException.class).when(adminThemeRepository).deleteById(1L);
 
         assertThatThrownBy(() -> adminThemeService.deleteTheme(1L))
                 .isInstanceOf(RoomescapeException.class)
