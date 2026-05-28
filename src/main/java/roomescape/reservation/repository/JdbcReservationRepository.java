@@ -96,8 +96,6 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public List<Reservation> findAllByStatusCanceledNot(int page, int size) {
-
-        // todo 프론트엔드 설명 리드미에 추가하기, 동일 날짜 및시간으로 수정 못하게 하기
         return jdbcTemplate.query("""
                 SELECT
                     r.id AS reservation_id,
