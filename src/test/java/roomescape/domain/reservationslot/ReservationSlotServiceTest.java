@@ -49,7 +49,7 @@ class ReservationSlotServiceTest {
         ReservationSlotService reservationSlotService = createReservationSlotService();
 
         // when
-        List<ReservationSlotResponse> responses = reservationSlotService.getReservationSlot(
+        List<ReservationSlotResponse> responses = reservationSlotService.getReservationSlots(
             theme.getId(),
             reservationDate.getId()
         );
@@ -77,7 +77,7 @@ class ReservationSlotServiceTest {
         ReservationSlotService reservationSlotService = createReservationSlotService();
 
         // when & then
-        assertThatThrownBy(() -> reservationSlotService.getReservationSlot(1L, reservationDate.getId()))
+        assertThatThrownBy(() -> reservationSlotService.getReservationSlots(1L, reservationDate.getId()))
             .isInstanceOf(NotFoundException.class)
             .hasMessage("존재하지 않는 테마 입니다.");
     }
@@ -90,7 +90,7 @@ class ReservationSlotServiceTest {
         ReservationSlotService reservationSlotService = createReservationSlotService();
 
         // when & then
-        assertThatThrownBy(() -> reservationSlotService.getReservationSlot(theme.getId(), 1L))
+        assertThatThrownBy(() -> reservationSlotService.getReservationSlots(theme.getId(), 1L))
             .isInstanceOf(NotFoundException.class)
             .hasMessage("존재하지 않는 날짜 입니다.");
     }

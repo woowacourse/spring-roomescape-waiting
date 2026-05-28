@@ -152,15 +152,15 @@ class ReservationIntegrationTest {
     @DisplayName("예약 수정을 end-to-end로 확인한다.")
     void updateReservation() {
         Long reservationId = saveReservation("보예", "2026-06-01", "10:00", "공포");
-        saveDate("2026-06-02");
-        saveTime("11:00");
+        Long dateId = saveDate("2026-06-02");
+        Long timeId = saveTime("11:00");
 
         String request = """
             {
-                "startWhen": "2026-06-02",
-                "startAt": "11:00"
+                "dateId": %d,
+                "timeId": %d
             }
-            """;
+            """.formatted(dateId, timeId);
 
         given().log().all()
             .contentType(ContentType.JSON)

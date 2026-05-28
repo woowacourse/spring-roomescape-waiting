@@ -23,8 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import roomescape.domain.reservation.Reservation;
-import roomescape.domain.reservation.ReservationService;
 import roomescape.domain.reservation.ReservationController;
+import roomescape.domain.reservation.ReservationService;
 import roomescape.domain.reservation.ReservationStatus;
 import roomescape.domain.reservation.dto.CreateReservationRequest;
 import roomescape.domain.reservation.dto.CreateReservationResponse;
@@ -169,8 +169,8 @@ class ReservationControllerTest {
         // given
         Long id = 1L;
         UpdateReservationRequest request = new UpdateReservationRequest(
-            LocalDate.of(2026, 5, 18),
-            LocalTime.of(14, 30)
+            2L,
+            3L
         );
 
         // when & then
@@ -193,13 +193,13 @@ class ReservationControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content("""
                     {
-                      "startWhen": "2026/05/18",
-                      "startAt": "14:30"
+                      "dateId": "2026/05/18",
+                      "timeId": "14:30"
                     }
                     """))
             .andExpect(status().isBadRequest())
             .andExpect(jsonPath("$.code").value("INPUT_FORMAT_ERROR"))
-            .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다. 날짜는 yyyy-MM-dd, 시간은 HH:mm 형식으로 입력해주세요."));
+            .andExpect(jsonPath("$.message").value("입력 형식이 올바르지 않습니다."));
     }
 
     @Test
@@ -208,8 +208,8 @@ class ReservationControllerTest {
         // given
         Long id = 999L;
         UpdateReservationRequest request = new UpdateReservationRequest(
-            LocalDate.of(2026, 5, 18),
-            LocalTime.of(14, 30)
+            2L,
+            3L
         );
         willThrow(new NotFoundException(ReservationSlotErrors.RESERVATION_NOT_FOUND))
             .given(reservationService)

@@ -39,7 +39,7 @@ class ReservationSlotControllerTest {
             LocalTime.of(10, 10),
             2L
         );
-        given(reservationSlotService.getReservationSlot(themeId, dateId))
+        given(reservationSlotService.getReservationSlots(themeId, dateId))
             .willReturn(List.of(response));
 
         // when & then
@@ -52,7 +52,7 @@ class ReservationSlotControllerTest {
             .andExpect(jsonPath("$[0].startAt").value("10:10"))
             .andExpect(jsonPath("$[0].waitingNumber").value(2));
 
-        verify(reservationSlotService).getReservationSlot(themeId, dateId);
+        verify(reservationSlotService).getReservationSlots(themeId, dateId);
     }
 
     @Test
@@ -73,7 +73,7 @@ class ReservationSlotControllerTest {
         // given
         Long themeId = 999L;
         Long dateId = 2L;
-        given(reservationSlotService.getReservationSlot(themeId, dateId))
+        given(reservationSlotService.getReservationSlots(themeId, dateId))
             .willThrow(new NotFoundException(ThemeErrors.THEME_NOT_EXIST));
 
         // when & then

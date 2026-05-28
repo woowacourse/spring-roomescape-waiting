@@ -574,7 +574,7 @@ class ReservationServiceTest {
         // when & then
         assertThatThrownBy(() -> reservationService.cancelUserReservation(1L))
             .isInstanceOf(RoomescapeException.class)
-            .hasMessage("예약이 존재하지 않습니다.");
+            .hasMessage("사용자 예약 신청이 존재하지 않습니다.");
     }
 
     @Test
@@ -609,8 +609,8 @@ class ReservationServiceTest {
             now
         );
         UpdateReservationRequest request = new UpdateReservationRequest(
-            afterReservationDate.getDate(),
-            afterReservationTime.getStartAt()
+            afterReservationDate.getId(),
+            afterReservationTime.getId()
         );
 
         // when
@@ -628,10 +628,13 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("같은 날짜와 시간으로 예약을 수정하면 기존 상태와 대기 순번을 유지한다.")
+    @DisplayName("확정 예약을 같은 날짜와 시간으로 수정하면 수정 시각 기준으로 대기 순서를 재정렬한다.")
     void updateReservationToSameSchedule() {
         // given
-        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        Clock confirmedClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
+        Clock firstWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 1));
+        Clock secondWaitingClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 2));
+        Clock updateClock = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 3));
         ReservationTime reservationTime = reservationTimeRepository.save(
             ReservationTime.createWithoutId(LocalTime.of(10, 0))
         );
@@ -642,80 +645,53 @@ class ReservationServiceTest {
         ReservationSlot savedReservation = reservationSlotRepository.save(
             ReservationSlot.createWithoutId(reservationDate, reservationTime, theme)
         );
-        Reservation savedUserReservation = saveConfirmedReservation(savedReservation, now);
+        User confirmedUser = userRepository.save(User.createWithoutId("보예"));
+        User firstWaitingUser = userRepository.save(User.createWithoutId("로치"));
+        User secondWaitingUser = userRepository.save(User.createWithoutId("수민"));
+        Reservation confirmedReservation = saveConfirmedReservation(savedReservation, confirmedUser, confirmedClock);
+        Reservation firstWaitingReservation = saveWaitingReservation(
+            savedReservation,
+            firstWaitingUser,
+            1L,
+            firstWaitingClock
+        );
+        Reservation secondWaitingReservation = saveWaitingReservation(
+            savedReservation,
+            secondWaitingUser,
+            2L,
+            secondWaitingClock
+        );
         ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
+            reservationSlotRepository,
             reservationTimeRepository,
             reservationDateRepository,
-                reservationRepository,
+            reservationRepository,
             themeRepository,
             userRepository,
-            now
+            updateClock
         );
         UpdateReservationRequest request = new UpdateReservationRequest(
-            reservationDate.getDate(),
-            reservationTime.getStartAt()
+            reservationDate.getId(),
+            reservationTime.getId()
         );
 
         // when
-        reservationService.updateReservation(savedUserReservation.getId(), request);
+        reservationService.updateReservation(confirmedReservation.getId(), request);
 
         // then
-        Reservation updatedReservation = reservationRepository.findById(savedUserReservation.getId())
+        Reservation updatedConfirmedReservation = reservationRepository.findById(confirmedReservation.getId())
+            .orElseThrow();
+        Reservation updatedFirstWaitingReservation = reservationRepository.findById(firstWaitingReservation.getId())
+            .orElseThrow();
+        Reservation updatedSecondWaitingReservation = reservationRepository.findById(secondWaitingReservation.getId())
             .orElseThrow();
         assertSoftly(softly -> {
-            assertThat(updatedReservation.getReservationSlot().getId()).isEqualTo(savedReservation.getId());
-            assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
-            assertThat(updatedReservation.getWaitingNumber()).isNull();
-        });
-    }
-
-    @Test
-    @DisplayName("예약을 다른 슬롯으로 수정하면 이동할 슬롯의 예약 수로 대기 순번을 정한다.")
-    void updateReservationWaitingNumberByUpdatedReservationSlot() {
-        // given
-        Clock now = fixedClockAt(LocalDateTime.of(2026, 5, 12, 13, 0));
-        ReservationTime beforeReservationTime = reservationTimeRepository.save(
-            ReservationTime.createWithoutId(LocalTime.of(10, 0))
-        );
-        ReservationTime afterReservationTime = reservationTimeRepository.save(
-            ReservationTime.createWithoutId(LocalTime.of(15, 0))
-        );
-        ReservationDate reservationDate = reservationDateRepository.save(
-            ReservationDate.createWithoutId(LocalDate.of(2026, 5, 13))
-        );
-        Theme theme = themeRepository.save(Theme.createWithoutId("공포", "무서운 테마", "theme-url"));
-        ReservationSlot beforeReservation = reservationSlotRepository.save(
-            ReservationSlot.createWithoutId(reservationDate, beforeReservationTime, theme)
-        );
-        ReservationSlot afterReservation = reservationSlotRepository.save(
-            ReservationSlot.createWithoutId(reservationDate, afterReservationTime, theme)
-        );
-        User user = userRepository.save(User.createWithoutId("보예"));
-        User otherUser = userRepository.save(User.createWithoutId("이산"));
-        Reservation savedUserReservation = saveConfirmedReservation(beforeReservation, user, now);
-        saveConfirmedReservation(afterReservation, otherUser, now);
-        ReservationService reservationService = new ReservationService(
-                reservationSlotRepository,
-            reservationTimeRepository,
-            reservationDateRepository,
-                reservationRepository,
-            themeRepository,
-            userRepository,
-            now
-        );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, afterReservationTime.getStartAt());
-
-        // when
-        reservationService.updateReservation(savedUserReservation.getId(), request);
-
-        // then
-        Reservation updatedReservation = reservationRepository.findById(savedUserReservation.getId())
-            .orElseThrow();
-        assertSoftly(softly -> {
-            assertThat(updatedReservation.getReservationSlot().getId()).isEqualTo(afterReservation.getId());
-            assertThat(updatedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
-            assertThat(updatedReservation.getWaitingNumber()).isEqualTo(1L);
+            assertThat(updatedFirstWaitingReservation.getStatus()).isEqualTo(ReservationStatus.CONFIRMED);
+            assertThat(updatedFirstWaitingReservation.getWaitingNumber()).isEqualTo(0L);
+            assertThat(updatedSecondWaitingReservation.getWaitingNumber()).isEqualTo(1L);
+            assertThat(updatedSecondWaitingReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
+            assertThat(updatedConfirmedReservation.getWaitingNumber()).isEqualTo(2L);
+            assertThat(updatedConfirmedReservation.getStatus()).isEqualTo(ReservationStatus.WAITING);
         });
     }
 
@@ -747,7 +723,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, afterReservationTime.getStartAt());
+        UpdateReservationRequest request = new UpdateReservationRequest(null, afterReservationTime.getId());
 
         // when
         reservationService.updateReservation(savedUserReservation.getId(), request);
@@ -776,7 +752,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.of(2026, 5, 13), LocalTime.of(10, 0));
+        UpdateReservationRequest request = new UpdateReservationRequest(1L, 2L);
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(1L, request))
@@ -809,7 +785,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(LocalDate.of(2026, 5, 14), null);
+        UpdateReservationRequest request = new UpdateReservationRequest(999L, null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
@@ -842,7 +818,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, LocalTime.of(15, 0));
+        UpdateReservationRequest request = new UpdateReservationRequest(null, 999L);
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
@@ -878,7 +854,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(beforeToday.getDate(), null);
+        UpdateReservationRequest request = new UpdateReservationRequest(beforeToday.getId(), null);
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
@@ -914,7 +890,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, beforeNow.getStartAt());
+        UpdateReservationRequest request = new UpdateReservationRequest(null, beforeNow.getId());
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
@@ -955,7 +931,7 @@ class ReservationServiceTest {
             userRepository,
             now
         );
-        UpdateReservationRequest request = new UpdateReservationRequest(null, otherReservationTime.getStartAt());
+        UpdateReservationRequest request = new UpdateReservationRequest(null, otherReservationTime.getId());
 
         // when & then
         assertThatThrownBy(() -> reservationService.updateReservation(savedUserReservation.getId(), request))
@@ -974,6 +950,21 @@ class ReservationServiceTest {
             user,
             null,
             ReservationStatus.CONFIRMED,
+            clock
+        ));
+    }
+
+    private Reservation saveWaitingReservation(
+        ReservationSlot reservationSlot,
+        User user,
+        Long waitingNumber,
+        Clock clock
+    ) {
+        return reservationRepository.save(Reservation.createWithoutId(
+            reservationSlot,
+            user,
+            waitingNumber,
+            ReservationStatus.WAITING,
             clock
         ));
     }

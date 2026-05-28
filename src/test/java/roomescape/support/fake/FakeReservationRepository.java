@@ -104,12 +104,16 @@ public class FakeReservationRepository implements ReservationRepository {
     public void updateWaitingNumbers(List<Reservation> userReservations) {
         for (int index = 0; index < userReservations.size(); index++) {
             Reservation userReservation = userReservations.get(index);
+            ReservationStatus status = userReservation.getStatus();
+            if (index == 0) {
+                status = ReservationStatus.CONFIRMED;
+            }
             Reservation rerankedUserReservation = Reservation.of(
                 userReservation.getId(),
                 userReservation.getReservationSlot(),
                 userReservation.getUser(),
                 (long) index,
-                userReservation.getStatus(),
+                status,
                 userReservation.getCreatedAt(),
                 userReservation.getUpdatedAt()
             );
@@ -120,14 +124,18 @@ public class FakeReservationRepository implements ReservationRepository {
     @Override
     public void updateAllStatus(List<Reservation> userReservations) {
         for (Reservation userReservation : userReservations) {
+            Reservation currentReservation = storage.get(userReservation.getId());
+            if (currentReservation == null) {
+                continue;
+            }
             Reservation waitingReservation = Reservation.of(
-                userReservation.getId(),
-                userReservation.getReservationSlot(),
-                userReservation.getUser(),
-                userReservation.getWaitingNumber(),
+                currentReservation.getId(),
+                currentReservation.getReservationSlot(),
+                currentReservation.getUser(),
+                currentReservation.getWaitingNumber(),
                 ReservationStatus.WAITING,
-                userReservation.getCreatedAt(),
-                userReservation.getUpdatedAt()
+                currentReservation.getCreatedAt(),
+                currentReservation.getUpdatedAt()
             );
             storage.put(userReservation.getId(), waitingReservation);
         }
