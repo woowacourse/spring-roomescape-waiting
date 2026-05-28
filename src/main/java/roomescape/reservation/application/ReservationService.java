@@ -120,15 +120,19 @@ public class ReservationService {
     }
 
     private ReservationInfo changePendingReservation(final Reservation reservation, final ReservationChangeCommand command, final ReservationTime time, Theme theme) {
-        checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
+        checkDuplicateReservation(command.date(), command.name(), time, theme);
         Reservation changedReservation = reservation.changeTime(command.name(), command.date(), time, theme, Status.PENDING,
                 clock);
-        reservationRepository.updateDetails(reservation.getId(), changedReservation);
-        return ReservationInfo.from(changedReservation);
+        try {
+            reservationRepository.updateDetails(reservation.getId(), changedReservation);
+            return ReservationInfo.from(changedReservation);
+        } catch (DataIntegrityViolationException e) {
+            throw new ReservationInUseException("예약 변경 처리 중 일시적인 문제가 발생했습니다. 다시 시도해주세요.");
+        }
     }
 
     private ReservationInfo savePendingReservation(ReservationCreateCommand command, ReservationTime time, Theme theme) {
-        checkDuplicatePendingReservation(command.date(), command.name(), time, theme);
+        checkDuplicateReservation(command.date(), command.name(), time, theme);
         Reservation pendingReservation = command.toEntity(time, theme, clock)
                 .pending(command.name(), clock);
         try {
@@ -138,9 +142,9 @@ public class ReservationService {
         }
     }
 
-    private void checkDuplicatePendingReservation(final LocalDate date, final String name, final ReservationTime time, final Theme theme) {
-        if (reservationRepository.existsPendingReservationByName(time.getId(), theme.getId(), date, name)) {
-            throw new DuplicatedReservationException("이미 예약 대기 중입니다.");
+    private void checkDuplicateReservation(final LocalDate date, final String name, final ReservationTime time, final Theme theme) {
+        if (reservationRepository.existsReservationByName(time.getId(), theme.getId(), date, name)) {
+            throw new DuplicatedReservationException("이미 예약 중입니다.");
         }
     }
 
