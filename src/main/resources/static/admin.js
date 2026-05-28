@@ -8,6 +8,7 @@ const adminState = {
 
 const adminElements = {
   reservationCount: document.querySelector("#reservation-count"),
+  waitCount: document.querySelector("#wait-count"),
   themeCount: document.querySelector("#theme-count"),
   timeCount: document.querySelector("#time-count"),
   reservationFilterName: document.querySelector("#reservation-filter-name"),
@@ -63,35 +64,42 @@ function renderAdminPage() {
   renderTimes();
 }
 
+// ── 요약 ─────────────────────────────────────────────────────
+
 function renderSummary() {
-  adminElements.reservationCount.textContent = adminState.reservations.length;
+  const confirmed = adminState.reservations.filter((r) => r.status === "CONFIRMED").length;
+  const waiting = adminState.reservations.filter((r) => r.status === "WAITING").length;
+  adminElements.reservationCount.textContent = confirmed;
+  adminElements.waitCount.textContent = waiting;
   adminElements.themeCount.textContent = adminState.themes.length;
   adminElements.timeCount.textContent = adminState.times.length;
 }
 
+// ── 예약 테이블 ──────────────────────────────────────────────
+
 function renderThemeFilter() {
-  const selectedValue = adminElements.reservationFilterTheme.value;
+  const selected = adminElements.reservationFilterTheme.value;
   adminElements.reservationFilterTheme.innerHTML = '<option value="">전체</option>';
   adminState.themes.forEach((theme) => {
-    const option = document.createElement("option");
-    option.value = String(theme.id);
-    option.textContent = theme.name;
-    adminElements.reservationFilterTheme.appendChild(option);
+    const opt = document.createElement("option");
+    opt.value = String(theme.id);
+    opt.textContent = theme.name;
+    adminElements.reservationFilterTheme.appendChild(opt);
   });
-  adminElements.reservationFilterTheme.value = selectedValue;
+  adminElements.reservationFilterTheme.value = selected;
 }
 
 function renderReservations() {
   adminElements.reservationTableBody.innerHTML = "";
   const reservations = filteredReservations();
   if (reservations.length === 0) {
-    renderTableEmpty(adminElements.reservationTableBody, 5, "조회된 예약이 없습니다.");
+    renderTableEmpty(adminElements.reservationTableBody, 6, "조회된 예약이 없습니다.");
     renderReservationPagination(reservations);
     return;
   }
   normalizeReservationPage(reservations.length);
-  pagedReservations(reservations).forEach((reservation) => {
-    adminElements.reservationTableBody.appendChild(createReservationRow(reservation));
+  pagedReservations(reservations).forEach((r) => {
+    adminElements.reservationTableBody.appendChild(createReservationRow(r));
   });
   renderReservationPagination(reservations);
 }
@@ -101,101 +109,78 @@ function handleReservationFilterChange() {
   renderReservations();
 }
 
-function pagedReservations(reservations) {
-  const startIndex = (adminState.reservationPage - 1) * adminState.reservationPageSize;
-  const endIndex = startIndex + adminState.reservationPageSize;
-  return reservations.slice(startIndex, endIndex);
+function filteredReservations() {
+  const name = adminElements.reservationFilterName.value.trim();
+  const date = adminElements.reservationFilterDate.value;
+  const themeId = adminElements.reservationFilterTheme.value;
+  return adminState.reservations.filter((r) =>
+    r.name.includes(name) &&
+    (date === "" || r.date === date) &&
+    (themeId === "" || String(r.theme.id) === themeId)
+  );
 }
 
-function normalizeReservationPage(reservationCount) {
-  const totalPages = reservationTotalPages(reservationCount);
-  if (adminState.reservationPage <= totalPages) {
-    return;
-  }
-  adminState.reservationPage = totalPages;
+function pagedReservations(reservations) {
+  const start = (adminState.reservationPage - 1) * adminState.reservationPageSize;
+  return reservations.slice(start, start + adminState.reservationPageSize);
+}
+
+function normalizeReservationPage(count) {
+  const total = reservationTotalPages(count);
+  if (adminState.reservationPage > total) adminState.reservationPage = total;
+}
+
+function reservationTotalPages(count) {
+  return Math.ceil(count / adminState.reservationPageSize);
 }
 
 function renderReservationPagination(reservations) {
   adminElements.reservationPagination.innerHTML = "";
-  if (reservations.length === 0) {
-    return;
-  }
+  if (reservations.length === 0) return;
   adminElements.reservationPagination.append(
-    createPaginationButton("이전", adminState.reservationPage - 1, isFirstReservationPage()),
+    createPaginationButton("이전", adminState.reservationPage - 1, adminState.reservationPage === 1),
     createPaginationSummary(reservations.length),
-    createPaginationButton("다음", adminState.reservationPage + 1, isLastReservationPage(reservations.length))
+    createPaginationButton("다음", adminState.reservationPage + 1, adminState.reservationPage === reservationTotalPages(reservations.length))
   );
 }
 
 function createPaginationButton(text, page, disabled) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "secondary-button";
-  button.disabled = disabled;
-  button.textContent = text;
-  button.addEventListener("click", () => moveReservationPage(page));
-  return button;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "secondary-button";
+  btn.disabled = disabled;
+  btn.textContent = text;
+  btn.addEventListener("click", () => { adminState.reservationPage = page; renderReservations(); });
+  return btn;
 }
 
-function createPaginationSummary(reservationCount) {
-  const summary = document.createElement("span");
-  summary.className = "pagination-summary";
-  summary.textContent = `${adminState.reservationPage} / ${reservationTotalPages(reservationCount)} 페이지`;
-  return summary;
-}
-
-function moveReservationPage(page) {
-  adminState.reservationPage = page;
-  renderReservations();
-}
-
-function isFirstReservationPage() {
-  return adminState.reservationPage === 1;
-}
-
-function isLastReservationPage(reservationCount) {
-  return adminState.reservationPage === reservationTotalPages(reservationCount);
-}
-
-function reservationTotalPages(reservationCount) {
-  return Math.ceil(reservationCount / adminState.reservationPageSize);
-}
-
-function filteredReservations() {
-  return adminState.reservations.filter((reservation) => {
-    return includesName(reservation) && matchesDate(reservation) && matchesTheme(reservation);
-  });
-}
-
-function includesName(reservation) {
-  const name = adminElements.reservationFilterName.value.trim();
-  return reservation.name.includes(name);
-}
-
-function matchesDate(reservation) {
-  const date = adminElements.reservationFilterDate.value;
-  if (date === "") {
-    return true;
-  }
-  return reservation.date === date;
-}
-
-function matchesTheme(reservation) {
-  const themeId = adminElements.reservationFilterTheme.value;
-  if (themeId === "") {
-    return true;
-  }
-  return String(reservation.theme.id) === themeId;
+function createPaginationSummary(count) {
+  const span = document.createElement("span");
+  span.className = "pagination-summary";
+  span.textContent = `${adminState.reservationPage} / ${reservationTotalPages(count)} 페이지`;
+  return span;
 }
 
 function createReservationRow(reservation) {
   const row = document.createElement("tr");
-  row.append(createCell(reservation.name));
-  row.append(createCell(reservation.date));
-  row.append(createCell(formatStartAt(reservation.time.startAt)));
-  row.append(createCell(reservation.theme.name));
-  row.append(createActionCell(createDangerButton("취소", () => confirmReservationDelete(reservation))));
+  row.append(
+    createCell(reservation.name),
+    createCell(reservation.date),
+    createCell(formatStartAt(reservation.time.startAt)),
+    createCell(reservation.theme.name),
+    createStatusCell(reservation.status),
+    createActionCell(createDangerButton("취소", () => confirmReservationDelete(reservation)))
+  );
   return row;
+}
+
+function createStatusCell(status) {
+  const cell = document.createElement("td");
+  const pill = document.createElement("span");
+  pill.className = status === "CONFIRMED" ? "status-pill is-confirmed" : "status-pill is-waiting";
+  pill.textContent = status === "CONFIRMED" ? "예약 확정" : "대기";
+  cell.appendChild(pill);
+  return cell;
 }
 
 function resetReservationFilters() {
@@ -206,20 +191,30 @@ function resetReservationFilters() {
   renderReservations();
 }
 
-async function handleThemeSubmit(event) {
-  event.preventDefault();
-  await requestJson("/admin/themes", createPostOption(themePayload()));
-  adminElements.themeForm.reset();
-  showToast("테마가 추가되었습니다.");
+async function confirmReservationDelete(reservation) {
+  const type = reservation.status === "WAITING" ? "대기" : "예약";
+  const msg = `[${reservation.name} / ${reservation.date} / ${formatStartAt(reservation.time.startAt)} / ${reservation.theme.name}] ${type}를 취소하시겠습니까?`;
+  if (!window.confirm(msg)) return;
+  const url = reservation.status === "WAITING"
+    ? `/reservations/waits/${reservation.id}`
+    : `/reservations/${reservation.id}`;
+  await request(url, { method: "DELETE" });
+  showToast(`${type}가 취소되었습니다.`);
   await loadAdminData();
 }
 
-function themePayload() {
-  return {
+// ── 테마 관리 ────────────────────────────────────────────────
+
+async function handleThemeSubmit(event) {
+  event.preventDefault();
+  await requestJson("/admin/themes", createPostOption({
     name: adminElements.themeName.value.trim(),
     description: adminElements.themeDescription.value.trim(),
     thumbnailUrl: adminElements.themeThumbnail.value.trim(),
-  };
+  }));
+  adminElements.themeForm.reset();
+  showToast("테마가 추가되었습니다.");
+  await loadAdminData();
 }
 
 function renderThemes() {
@@ -235,32 +230,39 @@ function renderThemes() {
 
 function createThemeAdminItem(theme) {
   const item = createAdminItem();
-  item.append(createThemeAdminContent(theme));
-  item.append(createStatusBadge(themeReservationCount(theme.id)));
-  item.append(createDangerButton("삭제", () => confirmThemeDelete(theme)));
+  const content = document.createElement("div");
+  content.className = "admin-item-content";
+  const strong = document.createElement("strong");
+  strong.textContent = theme.name;
+  const span = document.createElement("span");
+  span.textContent = theme.description;
+  content.append(strong, span);
+  const count = themeReservationCount(theme.id);
+  item.append(content, createStatusBadge(count), createDangerButton("삭제", () => confirmThemeDelete(theme)));
   return item;
 }
 
-function createThemeAdminContent(theme) {
-  const content = document.createElement("div");
-  content.className = "admin-item-content";
-  content.append(createTextElement("strong", theme.name));
-  content.append(createTextElement("span", theme.description));
-  return content;
+async function confirmThemeDelete(theme) {
+  const count = themeReservationCount(theme.id);
+  if (window.confirm(deleteConfirmMessage(theme.name, count))) {
+    await request(`/admin/themes/${theme.id}`, { method: "DELETE" });
+    showToast("테마가 삭제되었습니다.");
+    await loadAdminData();
+  }
 }
+
+function themeReservationCount(themeId) {
+  return adminState.reservations.filter((r) => r.theme.id === themeId).length;
+}
+
+// ── 시간 관리 ────────────────────────────────────────────────
 
 async function handleTimeSubmit(event) {
   event.preventDefault();
-  await requestJson("/times", createPostOption(timePayload()));
+  await requestJson("/times", createPostOption({ startAt: adminElements.timeStartAt.value }));
   adminElements.timeForm.reset();
   showToast("예약 시간이 추가되었습니다.");
   await loadAdminData();
-}
-
-function timePayload() {
-  return {
-    startAt: adminElements.timeStartAt.value,
-  };
 }
 
 function renderTimes() {
@@ -276,60 +278,42 @@ function renderTimes() {
 
 function createTimeAdminItem(time) {
   const item = createAdminItem();
-  item.append(createTimeAdminContent(time));
-  item.append(createStatusBadge(timeReservationCount(time.id)));
-  item.append(createDangerButton("삭제", () => confirmTimeDelete(time)));
-  return item;
-}
-
-function createTimeAdminContent(time) {
   const content = document.createElement("div");
   content.className = "admin-item-content";
-  content.append(createTextElement("strong", formatStartAt(time.startAt)));
-  content.append(createTextElement("span", "공통 예약 시간"));
-  return content;
-}
-
-async function confirmReservationDelete(reservation) {
-  const message = `[${reservation.name} / ${reservation.date} / ${formatStartAt(reservation.time.startAt)} / ${reservation.theme.name}] 예약을 취소하시겠습니까?`;
-  if (window.confirm(message)) {
-    await request(`/reservations/${reservation.id}`, {method: "DELETE"});
-    showToast("예약이 취소되었습니다.");
-    await loadAdminData();
-  }
-}
-
-async function confirmThemeDelete(theme) {
-  const count = themeReservationCount(theme.id);
-  if (window.confirm(deleteConfirmMessage(theme.name, count))) {
-    await request(`/admin/themes/${theme.id}`, {method: "DELETE"});
-    showToast("테마가 삭제되었습니다.");
-    await loadAdminData();
-  }
+  const strong = document.createElement("strong");
+  strong.textContent = formatStartAt(time.startAt);
+  const span = document.createElement("span");
+  span.textContent = "공통 예약 시간";
+  content.append(strong, span);
+  const count = timeReservationCount(time.id);
+  item.append(content, createStatusBadge(count), createDangerButton("삭제", () => confirmTimeDelete(time)));
+  return item;
 }
 
 async function confirmTimeDelete(time) {
   const count = timeReservationCount(time.id);
   if (window.confirm(deleteConfirmMessage(formatStartAt(time.startAt), count))) {
-    await request(`/times/${time.id}`, {method: "DELETE"});
+    await request(`/times/${time.id}`, { method: "DELETE" });
     showToast("예약 시간이 삭제되었습니다.");
     await loadAdminData();
   }
 }
 
+function timeReservationCount(timeId) {
+  return adminState.reservations.filter((r) => r.time.id === timeId).length;
+}
+
 function deleteConfirmMessage(name, count) {
-  if (count > 0) {
-    return `[${name}] 항목은 예약 ${count}건에서 사용 중입니다. 삭제하시겠습니까?`;
-  }
+  if (count > 0) return `[${name}] 항목은 예약 ${count}건에서 사용 중입니다. 삭제하시겠습니까?`;
   return `[${name}] 항목을 삭제하시겠습니까?`;
 }
 
-function themeReservationCount(themeId) {
-  return adminState.reservations.filter((reservation) => reservation.theme.id === themeId).length;
-}
+// ── UI 유틸 ──────────────────────────────────────────────────
 
-function timeReservationCount(timeId) {
-  return adminState.reservations.filter((reservation) => reservation.time.id === timeId).length;
+function createAdminItem() {
+  const item = document.createElement("article");
+  item.className = "admin-item";
+  return item;
 }
 
 function createStatusBadge(count) {
@@ -339,19 +323,13 @@ function createStatusBadge(count) {
   return badge;
 }
 
-function createAdminItem() {
-  const item = document.createElement("article");
-  item.className = "admin-item";
-  return item;
-}
-
 function createDangerButton(text, clickHandler) {
-  const button = document.createElement("button");
-  button.type = "button";
-  button.className = "danger-button";
-  button.textContent = text;
-  button.addEventListener("click", clickHandler);
-  return button;
+  const btn = document.createElement("button");
+  btn.type = "button";
+  btn.className = "danger-button";
+  btn.textContent = text;
+  btn.addEventListener("click", clickHandler);
+  return btn;
 }
 
 function createCell(text) {
@@ -366,50 +344,16 @@ function createActionCell(button) {
   return cell;
 }
 
-function renderTableEmpty(tableBody, columnCount, message) {
+function renderTableEmpty(tableBody, colSpan, message) {
   const row = document.createElement("tr");
   const cell = document.createElement("td");
-  cell.colSpan = columnCount;
-  cell.appendChild(createTextElement("div", message));
-  cell.firstElementChild.className = "empty";
+  cell.colSpan = colSpan;
+  const div = document.createElement("div");
+  div.className = "empty";
+  div.textContent = message;
+  cell.appendChild(div);
   row.appendChild(cell);
   tableBody.appendChild(row);
-}
-
-function createPostOption(payload) {
-  return {
-    method: "POST",
-    headers: {"Content-Type": "application/json"},
-    body: JSON.stringify(payload),
-  };
-}
-
-async function requestJson(url, options = {}) {
-  const response = await request(url, options);
-  return response.json();
-}
-
-async function request(url, options = {}) {
-  const response = await fetch(url, options);
-  if (response.ok) {
-    return response;
-  }
-  await handleErrorResponse(response);
-}
-
-async function handleErrorResponse(response) {
-  const error = await readError(response);
-  showToast(error.message, true);
-  throw new Error(error.message);
-}
-
-async function readError(response) {
-  const fallback = {message: "요청을 처리하지 못했습니다."};
-  try {
-    return response.json();
-  } catch (error) {
-    return fallback;
-  }
 }
 
 function renderEmpty(container, message) {
@@ -420,17 +364,26 @@ function showToast(message, error = false) {
   adminElements.toast.textContent = message;
   adminElements.toast.className = error ? "toast is-error" : "toast";
   adminElements.toast.hidden = false;
-  window.setTimeout(() => {
-    adminElements.toast.hidden = true;
-  }, 2400);
+  clearTimeout(adminElements.toast._timer);
+  adminElements.toast._timer = setTimeout(() => { adminElements.toast.hidden = true; }, 2800);
 }
 
 function formatStartAt(startAt) {
   return startAt.slice(0, 5);
 }
 
-function createTextElement(tagName, text) {
-  const element = document.createElement(tagName);
-  element.textContent = text;
-  return element;
+function createPostOption(payload) {
+  return { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) };
+}
+
+async function requestJson(url, options = {}) {
+  return (await request(url, options)).json();
+}
+
+async function request(url, options = {}) {
+  const response = await fetch(url, options);
+  if (response.ok) return response;
+  const error = await response.json().catch(() => ({ message: "요청을 처리하지 못했습니다." }));
+  showToast(error.message, true);
+  throw new Error(error.message);
 }

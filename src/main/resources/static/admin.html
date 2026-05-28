@@ -8,10 +8,11 @@
 </head>
 <body>
   <main class="page">
+
     <header class="header">
       <div>
         <p class="eyebrow">Admin</p>
-        <h1>방탈출 관리자</h1>
+        <h1>관리자</h1>
       </div>
       <div class="header-side">
         <a class="admin-link" href="/">예약 화면</a>
@@ -27,9 +28,13 @@
         </div>
       </div>
       <div class="summary-grid">
-        <div class="summary-item">
-          <span>전체 예약</span>
+        <div class="summary-item is-confirmed">
+          <span>예약 확정</span>
           <strong id="reservation-count">0</strong>
+        </div>
+        <div class="summary-item is-waiting">
+          <span>예약 대기</span>
+          <strong id="wait-count">0</strong>
         </div>
         <div class="summary-item">
           <span>테마</span>
@@ -76,6 +81,7 @@
               <th>날짜</th>
               <th>시간</th>
               <th>테마</th>
+              <th>상태</th>
               <th>관리</th>
             </tr>
           </thead>
@@ -85,7 +91,7 @@
       <div id="reservation-pagination" class="pagination"></div>
     </section>
 
-    <section class="management-grid">
+    <div class="management-grid">
       <article class="section">
         <div class="section-header">
           <div>
@@ -126,12 +132,13 @@
             <label for="time-start-at">시작 시간</label>
             <input id="time-start-at" type="time" required>
           </div>
-          <button class="primary-button" type="submit">시간 추가</button>
+          <button class="primary-button" type="submit">추가</button>
         </form>
 
         <div id="time-admin-list" class="admin-list"></div>
       </article>
-    </section>
+    </div>
+
   </main>
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
   <script src="/admin.js" defer></script>

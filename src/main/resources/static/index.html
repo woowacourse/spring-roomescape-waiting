@@ -8,19 +8,20 @@
 </head>
 <body>
   <main class="page">
+
     <header class="header">
       <div>
         <p class="eyebrow">Room Escape</p>
         <h1>방탈출 예약</h1>
       </div>
       <div class="header-side">
-        <a class="admin-link" href="/admin.html">관리자</a>
+        <a class="admin-link" href="/admin.html">관리자 페이지</a>
         <p class="header-description">테마와 날짜를 선택하고 예약 가능한 시간을 확인하세요.</p>
       </div>
     </header>
 
-    <section class="reservation-layout" aria-label="예약 영역">
-      <article class="section">
+    <div class="reservation-layout" aria-label="예약 영역">
+      <section class="section" aria-label="테마 선택">
         <div class="section-header">
           <div>
             <p class="eyebrow">Theme</p>
@@ -28,7 +29,7 @@
           </div>
         </div>
         <div id="theme-list" class="theme-grid"></div>
-      </article>
+      </section>
 
       <aside class="reservation-panel">
         <form id="reservation-form" class="reservation-form">
@@ -43,7 +44,7 @@
           </div>
 
           <div class="field">
-            <label>예약 가능 시간</label>
+            <label>시간 선택</label>
             <div id="time-list" class="time-grid"></div>
           </div>
 
@@ -52,12 +53,12 @@
             <input id="reservation-name" name="name" type="text" placeholder="이름을 입력하세요" required>
           </div>
 
-          <button id="submit-button" class="primary-button" type="submit">예약하기</button>
+          <button id="submit-button" class="primary-button" type="submit" disabled>예약하기</button>
         </form>
 
         <div id="reservation-result" class="result" hidden></div>
       </aside>
-    </section>
+    </div>
 
     <section class="section" aria-labelledby="my-reservations-title">
       <div class="section-header">
@@ -66,15 +67,13 @@
           <h2 id="my-reservations-title">내 예약 조회</h2>
         </div>
       </div>
-
       <form id="reservation-search-form" class="search-form">
         <div class="field">
           <label for="reservation-search-name">예약자 이름</label>
           <input id="reservation-search-name" name="name" type="text" placeholder="예약 시 입력한 이름" required>
         </div>
-        <button class="secondary-button" type="submit">조회하기</button>
+        <button class="secondary-button" type="submit">조회</button>
       </form>
-
       <div id="reservation-search-result" class="reservation-list"></div>
     </section>
 
@@ -88,6 +87,7 @@
       </div>
       <div id="ranking-list" class="theme-grid"></div>
     </section>
+
   </main>
 
   <div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
