@@ -11,8 +11,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.domain.DuplicateEntityException;
-import roomescape.domain.EntityNotFoundException;
+import roomescape.exception.DuplicateEntityException;
+import roomescape.exception.EntityNotFoundException;
+import roomescape.exception.RoomEscapeException;
 
 @RestController
 @Validated
@@ -34,7 +35,7 @@ public class DummyController {
 
     @GetMapping("/dummy/business")
     public ResponseEntity<Long> business() {
-        throw new IllegalArgumentException("비즈니스 예외");
+        throw new RoomEscapeException("비즈니스 예외");
     }
 
     @GetMapping("/dummy/entityNotFound")

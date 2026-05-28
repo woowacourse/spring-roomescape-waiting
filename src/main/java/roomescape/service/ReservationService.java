@@ -4,11 +4,11 @@ import java.time.LocalDate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.EntityNotFoundException;
 import roomescape.domain.Reservation;
 import roomescape.domain.ReservationEntry;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.Theme;
+import roomescape.exception.EntityNotFoundException;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
@@ -92,11 +92,6 @@ public class ReservationService {
         reservationRepository.save(reservation);
     }
 
-    private Reservation findReservationByEntryIdWithThrow(long entryId) {
-        return reservationRepository.findByEntryIdForUpdate(entryId)
-                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
-    }
-
     private Theme findThemeWithThrow(Long themeId) {
         return themeRepository.findById(themeId)
                 .filter(Theme::isActive)
@@ -113,5 +108,10 @@ public class ReservationService {
         Reservation reservation = findReservationByEntryIdWithThrow(entryId);
         ReservationEntry reservationEntry = reservation.findReservedEntry(entryId);
         return ReservationResult.from(reservation, reservationEntry);
+    }
+
+    private Reservation findReservationByEntryIdWithThrow(long entryId) {
+        return reservationRepository.findByEntryIdForUpdate(entryId)
+                .orElseThrow(() -> new EntityNotFoundException("존재하지 않는 예약 정보입니다."));
     }
 }

@@ -1,4 +1,4 @@
-package roomescape.domain;
+package roomescape.exception;
 
 public class EntityNotFoundException extends RuntimeException {
 

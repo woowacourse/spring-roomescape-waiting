@@ -9,6 +9,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.NullAndEmptySource;
 import org.junit.jupiter.params.provider.ValueSource;
 import roomescape.domain.fixture.ThemeFixture;
+import roomescape.exception.RoomEscapeException;
 
 class ThemeTest {
 
@@ -38,7 +39,7 @@ class ThemeTest {
 
         // when & then
         assertThatThrownBy(() -> new Theme(invalidName, description, thumbnailImageUrl))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("이름은 필수 값입니다.");
     }
 
@@ -52,7 +53,7 @@ class ThemeTest {
 
         // when & then
         assertThatThrownBy(() -> new Theme(name, invalidDescription, thumbnailImageUrl))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessage("설명은 필수 값입니다.");
     }
 
@@ -72,7 +73,7 @@ class ThemeTest {
 
         // when & then
         assertThatThrownBy(() -> new Theme(name, description, invalidUrl))
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessage(expectedMessage);
     }
 
@@ -96,7 +97,7 @@ class ThemeTest {
 
         // when & then
         assertThatThrownBy(theme::deactivate)
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining("이미 비활성화 된 테마입니다.");
     }
 
@@ -120,7 +121,7 @@ class ThemeTest {
 
         // when & then
         assertThatThrownBy(theme::activate)
-                .isInstanceOf(IllegalArgumentException.class)
+                .isInstanceOf(RoomEscapeException.class)
                 .hasMessageContaining("이미 활성화 된 테마입니다.");
     }
 }

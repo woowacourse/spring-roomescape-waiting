@@ -2,7 +2,7 @@ package roomescape.repository.util;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
-import roomescape.domain.DuplicateEntityException;
+import roomescape.exception.DuplicateEntityException;
 
 @Slf4j
 public final class RepositoryExceptionTranslator {

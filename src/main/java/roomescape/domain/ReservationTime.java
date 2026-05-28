@@ -6,6 +6,7 @@ import java.time.LocalTime;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.ToString;
+import roomescape.exception.RoomEscapeException;
 
 @Getter
 @EqualsAndHashCode(of = "id")
@@ -18,7 +19,7 @@ public class ReservationTime {
 
     public ReservationTime(Long id, LocalTime startAt, TimeStatus status) {
         if (startAt == null) {
-            throw new IllegalArgumentException("추가 할 예약 시작 시간 정보가 누락되었습니다.");
+            throw new RoomEscapeException("추가 할 예약 시작 시간 정보가 누락되었습니다.");
         }
         this.id = id;
         this.startAt = startAt;
@@ -35,14 +36,14 @@ public class ReservationTime {
 
     public void deactivate() {
         if (this.status == TimeStatus.INACTIVE) {
-            throw new IllegalArgumentException("이미 비활성화 된 시간 정보입니다.");
+            throw new RoomEscapeException("이미 비활성화 된 시간 정보입니다.");
         }
         this.status = TimeStatus.INACTIVE;
     }
 
     public void activate() {
         if (this.status == TimeStatus.ACTIVE) {
-            throw new IllegalArgumentException("이미 활성화 된 시간 정보입니다.");
+            throw new RoomEscapeException("이미 활성화 된 시간 정보입니다.");
         }
         this.status = TimeStatus.ACTIVE;
     }
