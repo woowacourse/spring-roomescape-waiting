@@ -110,7 +110,9 @@ public class UserReservationTest {
                 .when().get("/times/available?themeId=1&date=2026-06-04")
                 .then().log().all()
                 .statusCode(200)
-                .body("size()", is(1));
+                .body("size()", is(2))
+                .body("[0].isAvailable", is(false))
+                .body("[1].isAvailable", is(true));
     }
 
     @Test

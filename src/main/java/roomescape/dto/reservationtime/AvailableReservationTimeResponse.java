@@ -27,4 +27,8 @@ public class AvailableReservationTimeResponse {
     public LocalTime getStartAt() {
         return startAt;
     }
+
+    public Boolean getIsAvailable() {
+        return isAvailable;
+    }
 }
