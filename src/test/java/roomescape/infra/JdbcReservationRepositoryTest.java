@@ -1,6 +1,7 @@
 package roomescape.infra;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.tuple;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
@@ -12,17 +13,21 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import roomescape.domain.Reservation;
+import roomescape.domain.ReservationStatus;
 import roomescape.domain.ReservationTime;
+import roomescape.domain.ReservationWithStatus;
 import roomescape.domain.Theme;
 import roomescape.repository.ReservationRepository;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ThemeRepository;
+import roomescape.repository.WaitlistRepository;
 
 @JdbcTest
 @Import({
         JdbcReservationRepository.class,
         JdbcReservationTimeRepository.class,
-        JdbcThemeRepository.class
+        JdbcThemeRepository.class,
+        JdbcWaitlistRepository.class
 })
 class JdbcReservationRepositoryTest {
 
@@ -39,6 +44,9 @@ class JdbcReservationRepositoryTest {
 
     @Autowired
     private ThemeRepository themeRepository;
+
+    @Autowired
+    private WaitlistRepository waitlistRepository;
 
     @Test
     void 예약을_저장한다() {
@@ -126,6 +134,40 @@ class JdbcReservationRepositoryTest {
         assertThat(findReservationsId.contains(firstSaveId)).isTrue();
         assertThat(findReservationsId.contains(secondSaveId)).isTrue();
         assertThat(findReservationsId.contains(thirdSaveId)).isFalse();
+    }
+
+    @Test
+    void 내_예약_조회() {
+        ReservationTime tenClock = createReservationTime(TEN);
+        ReservationTime twelveClock = createReservationTime(TWELVE);
+        Theme theme = createTheme();
+        String findName = "브리";
+
+        reservationRepository.save(new Reservation(
+                "브라운", FUTURE_THIRD_DATE, twelveClock, theme));
+        waitlistRepository.save(new Reservation(
+                findName, FUTURE_THIRD_DATE, twelveClock, theme));
+        reservationRepository.save(new Reservation(
+                findName, FUTURE_SECOND_DATE, tenClock, theme));
+
+        List<ReservationWithStatus> myReservations = reservationRepository.findByName(findName);
+
+        assertThat(myReservations).hasSize(2);
+        assertThat(myReservations)
+                .extracting(
+                        ReservationWithStatus::getName,
+                        ReservationWithStatus::getDate,
+                        reservation -> reservation.getTime().getId(),
+                        reservation -> reservation.getTheme().getId(),
+                        ReservationWithStatus::getStatus,
+                        ReservationWithStatus::getWaitingOrder
+                )
+                .containsExactly(
+                        tuple(findName, FUTURE_THIRD_DATE, twelveClock.getId(), theme.getId(),
+                                ReservationStatus.WAITING, 1),
+                        tuple(findName, FUTURE_SECOND_DATE, tenClock.getId(), theme.getId(),
+                                ReservationStatus.RESERVED, null)
+                );
     }
 
     @Test

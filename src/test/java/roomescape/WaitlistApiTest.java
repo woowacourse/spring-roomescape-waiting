@@ -1,5 +1,7 @@
 package roomescape;
 
+import static org.hamcrest.Matchers.is;
+
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
 import java.time.LocalDate;
@@ -9,6 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
+import roomescape.domain.ReservationStatus;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -31,6 +34,8 @@ public class WaitlistApiTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(201)
+                .body("status", is(ReservationStatus.WAITING.name()))
+                .body("waitingOrder", is(1))
                 .extract().jsonPath().get("id");
 
         RestAssured.given().log().all()
@@ -38,5 +43,12 @@ public class WaitlistApiTest {
                 .when().delete("/waitlists/" + waitlistId)
                 .then().log().all()
                 .statusCode(204);
+
+        RestAssured.given().log().all()
+                .queryParam("name", "브라운")
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .body("size()", is(0));
     }
 }
