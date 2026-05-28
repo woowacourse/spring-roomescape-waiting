@@ -14,7 +14,7 @@ public class WaitingValidator {
         this.waitingRepository = waitingRepository;
     }
 
-    public void validateAlreadyReservation(WaitingCreateCommand createCommand) {
+    public void validateAlreadyWaiting(WaitingCreateCommand createCommand) {
         boolean exists = waitingRepository
                 .findByDateAndTimeIdAndThemeId(createCommand.date(), createCommand.timeId(), createCommand.themeId())
                 .isPresent();

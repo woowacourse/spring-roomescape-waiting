@@ -42,7 +42,7 @@ public class WaitingService {
         Theme theme = themeRepository.findById(command.themeId())
                 .orElseThrow(() -> new BusinessException(WaitingErrorCode.WAITING_THEME_INVALID));
 
-        waitingValidator.validateAlreadyReservation(command);
+        waitingValidator.validateAlreadyWaiting(command);
         Waiting waiting = Waiting.create(
                 command.name(),
                 command.date(),
