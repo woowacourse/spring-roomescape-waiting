@@ -25,6 +25,7 @@ import roomescape.controller.BaseControllerUnitTest;
 import roomescape.controller.admin.api.AdminReservationTimeApiController;
 import roomescape.controller.admin.api.dto.AdminReservationTimeResponse;
 import roomescape.controller.admin.fixture.AdminReservationTimeApiRequestFixture;
+import roomescape.query.ReservationTimeQuery;
 import roomescape.service.ReservationTimeService;
 import roomescape.service.command.ReservationTimeCommand;
 import roomescape.service.result.ReservationTimeResult;
@@ -34,6 +35,9 @@ class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
 
     @MockitoBean
     private ReservationTimeService reservationTimeService;
+
+    @MockitoBean
+    private ReservationTimeQuery reservationTimeQuery;
 
     @BeforeEach
     void setUp(WebApplicationContext webApplicationContext) {
@@ -114,9 +118,8 @@ class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
     @Test
     void 전체_시간_조회_요청시_200OK와_시간_정보들을_응답한다() {
         // given
-        List<ReservationTimeResult> result = List.of(new ReservationTimeResult(1L, LocalTime.of(10, 0), "ACTIVE"));
-        when(reservationTimeService.getAllReservationTimes()).thenReturn(result);
-        List<AdminReservationTimeResponse> expected = result.stream().map(AdminReservationTimeResponse::from).toList();
+        List<AdminReservationTimeResponse> result = List.of(new AdminReservationTimeResponse(1L, LocalTime.of(10, 0), "ACTIVE"));
+        when(reservationTimeQuery.getAllReservationTimes()).thenReturn(result);
 
         // when & then
         List<AdminReservationTimeResponse> response = RestAssuredMockMvc.given().spec(defaultSpec()).log().all()
@@ -125,6 +128,6 @@ class AdminReservationTimeApiControllerTest extends BaseControllerUnitTest {
                 .status(HttpStatus.OK)
                 .extract().as(new TypeRef<>() {
                 });
-        assertThat(response).isEqualTo(expected);
+        assertThat(response).isEqualTo(result);
     }
 }

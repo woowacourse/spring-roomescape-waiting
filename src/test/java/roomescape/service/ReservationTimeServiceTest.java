@@ -4,7 +4,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.time.LocalTime;
-import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import roomescape.domain.DuplicateEntityException;
@@ -89,10 +88,7 @@ class ReservationTimeServiceTest {
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(10, 0)));
         reservationTimeRepository.save(new ReservationTime(LocalTime.of(11, 0)));
 
-        // when: 전체 조회를 요청함
-        List<ReservationTimeResult> results = reservationTimeService.getAllReservationTimes();
-
-        // then: 저장된 2개의 시간 정보가 반환됨
-        assertThat(results).hasSize(2);
+        // when & then: 저장된 2개의 시간 정보가 반환됨
+        assertThat(reservationTimeRepository.findAllTimes()).hasSize(2);
     }
 }

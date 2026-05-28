@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import roomescape.controller.admin.api.dto.AdminThemeRequest;
 import roomescape.controller.admin.api.dto.AdminThemeResponse;
+import roomescape.query.ThemeQuery;
 import roomescape.service.ThemeService;
 import roomescape.service.result.ThemeRegisterResult;
 
@@ -27,6 +28,7 @@ import roomescape.service.result.ThemeRegisterResult;
 public class AdminThemeApiController {
 
     private final ThemeService themeService;
+    private final ThemeQuery themeQuery;
 
     @PostMapping
     public ResponseEntity<AdminThemeResponse> register(@Valid @RequestBody AdminThemeRequest request) {
@@ -54,10 +56,6 @@ public class AdminThemeApiController {
 
     @GetMapping
     public ResponseEntity<List<AdminThemeResponse>> getAllThemes() {
-        List<AdminThemeResponse> response = themeService.getAllThemes()
-                .stream()
-                .map(AdminThemeResponse::from)
-                .toList();
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(themeQuery.getAllThemes());
     }
 }
