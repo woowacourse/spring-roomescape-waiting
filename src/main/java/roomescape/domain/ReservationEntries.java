@@ -30,7 +30,7 @@ public class ReservationEntries {
     public boolean hasActiveEntryByName(String name) {
         return entries.stream()
                 .filter(entry -> !entry.isDeleted())
-                .anyMatch(entry -> entry.getName().equals(name));
+                .anyMatch(entry -> entry.hasSameName(name));
     }
 
     public boolean hasReservedEntry() {
@@ -45,6 +45,12 @@ public class ReservationEntries {
     public Optional<ReservationEntry> findById(long id) {
         return entries.stream()
                 .filter(entry -> entry.isSameId(id))
+                .findFirst();
+    }
+
+    public Optional<ReservationEntry> findByNameAndStatus(String name, ReservationStatus status) {
+        return entries.stream()
+                .filter(e -> e.matches(name, status))
                 .findFirst();
     }
 
