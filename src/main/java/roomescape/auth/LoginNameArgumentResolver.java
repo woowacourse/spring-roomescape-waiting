@@ -8,7 +8,7 @@ import org.springframework.web.context.request.NativeWebRequest;
 import org.springframework.web.method.support.HandlerMethodArgumentResolver;
 import org.springframework.web.method.support.ModelAndViewContainer;
 import roomescape.auth.annotation.LoginName;
-import roomescape.auth.exception.MissingAuthorizationHeaderException;
+import roomescape.auth.exception.AuthenticationException;
 
 public class LoginNameArgumentResolver implements HandlerMethodArgumentResolver {
 
@@ -32,7 +32,7 @@ public class LoginNameArgumentResolver implements HandlerMethodArgumentResolver 
         String name = (String) request.getAttribute(NAME_ATTRIBUTE);
 
         if (name == null) {
-            throw new MissingAuthorizationHeaderException();
+            throw new AuthenticationException();
         }
 
         return name;

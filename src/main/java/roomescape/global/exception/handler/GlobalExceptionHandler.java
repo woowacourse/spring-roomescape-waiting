@@ -5,8 +5,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import roomescape.auth.exception.AuthenticationException;
 import roomescape.auth.exception.AuthorizationException;
-import roomescape.auth.exception.MissingAuthorizationHeaderException;
 import roomescape.global.exception.BusinessException;
 import roomescape.global.exception.DeleteFailedException;
 import roomescape.global.exception.DuplicateException;
@@ -46,7 +46,7 @@ public class GlobalExceptionHandler {
         if (e instanceof NotFoundException) {
             status = HttpStatus.NOT_FOUND;
         }
-        if (e instanceof MissingAuthorizationHeaderException) {
+        if (e instanceof AuthenticationException) {
             status = HttpStatus.UNAUTHORIZED;
         }
         if (e instanceof AuthorizationException) {

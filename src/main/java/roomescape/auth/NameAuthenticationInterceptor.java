@@ -2,24 +2,15 @@ package roomescape.auth;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.stereotype.Component;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.method.HandlerMethod;
 import org.springframework.web.servlet.HandlerInterceptor;
 import roomescape.auth.annotation.Authorized;
 import roomescape.auth.exception.MissingAuthorizationHeaderException;
-import roomescape.reservation.repository.ReservationRepository;
 
-@Component
 public class NameAuthenticationInterceptor implements HandlerInterceptor {
 
     private static final String NAME_ATTRIBUTE = "name";
-    private static final String AUTHORIZATION_HEADER = "Authorization";
-
-    private final ReservationRepository reservationRepository;
-
-    public NameAuthenticationInterceptor(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
-    }
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler)
@@ -39,7 +30,7 @@ public class NameAuthenticationInterceptor implements HandlerInterceptor {
     }
 
     private String extractName(HttpServletRequest request) {
-        String name = request.getHeader(AUTHORIZATION_HEADER);
+        String name = request.getHeader(HttpHeaders.AUTHORIZATION);
 
         if (name == null || name.isBlank()) {
             throw new MissingAuthorizationHeaderException();

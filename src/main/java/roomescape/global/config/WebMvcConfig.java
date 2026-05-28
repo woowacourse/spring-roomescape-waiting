@@ -15,11 +15,9 @@ import roomescape.global.exception.support.BusinessExceptionMappingJackson2HttpM
 public class WebMvcConfig implements WebMvcConfigurer {
 
     private final ObjectMapper objectMapper;
-    private final NameAuthenticationInterceptor nameAuthenticationInterceptor;
 
-    public WebMvcConfig(ObjectMapper objectMapper, NameAuthenticationInterceptor interceptor) {
+    public WebMvcConfig(ObjectMapper objectMapper) {
         this.objectMapper = objectMapper;
-        this.nameAuthenticationInterceptor = interceptor;
     }
 
     @Override
@@ -29,7 +27,7 @@ public class WebMvcConfig implements WebMvcConfigurer {
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(nameAuthenticationInterceptor);
+        registry.addInterceptor(new NameAuthenticationInterceptor());
     }
 
     @Override
