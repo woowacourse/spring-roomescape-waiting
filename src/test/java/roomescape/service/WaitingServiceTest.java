@@ -87,7 +87,7 @@ class WaitingServiceTest {
                 createAt
         );
 
-        given(reservationTimeDao.findTimeById(timeId)).willReturn(Optional.of(time));
+        given(reservationTimeDao.findById(timeId)).willReturn(Optional.of(time));
         given(themeDao.findThemeById(themeId)).willReturn(Optional.of(theme));
         given(waitingDao.save(any())).willReturn(saved);
         given(reservationDao.existsBy(date, theme, time)).willReturn(true);

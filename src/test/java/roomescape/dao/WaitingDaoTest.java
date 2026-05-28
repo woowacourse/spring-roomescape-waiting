@@ -68,7 +68,7 @@ public class WaitingDaoTest {
     void 예약_대기_사용자_이름_조회_정상_테스트() {
         String userName = "토리";
 
-        List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
+        List<WaitingQueryResult> waitings = waitingDao.findByUserName(userName);
 
         assertThat(waitings.size()).isEqualTo(1);
     }

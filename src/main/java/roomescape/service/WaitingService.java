@@ -40,7 +40,7 @@ public class WaitingService {
     }
 
     public WaitingResult registerWaiting(WaitingCommand command) {
-        ReservationTime time = reservationTimeDao.findTimeById(command.timeId())
+        ReservationTime time = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
         Theme theme = themeDao.findThemeById(command.themeId())
@@ -62,7 +62,7 @@ public class WaitingService {
                 LocalDateTime.now(clock)
         );
 
-        if (waitingDao.existsBy(waiting)) {
+        if (waitingDao.exists(waiting)) {
             throw new UnprocessableEntityException("예약 대기는 중복으로 생성할 수 없습니다.");
         }
 

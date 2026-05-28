@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.UUID;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ThemeDao;
 import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Description;
@@ -24,10 +25,12 @@ public class ThemeService {
 
     private final ThemeDao themeDao;
     private final Clock clock;
+    private final ReservationTimeDao reservationTimeDao;
 
-    public ThemeService(ThemeDao themeDao, Clock clock) {
+    public ThemeService(ThemeDao themeDao, Clock clock, ReservationTimeDao reservationTimeDao) {
         this.themeDao = themeDao;
         this.clock = clock;
+        this.reservationTimeDao = reservationTimeDao;
     }
 
     public List<ThemeResult> findThemes() {
@@ -81,7 +84,7 @@ public class ThemeService {
     }
 
     public List<ReservationTimeDetailResult> findThemeSchedulesByDate(Long id, LocalDate date) {
-        List<TimeQueryResult> availableTimes = themeDao.findTimeStatusBy(id, date);
+        List<TimeQueryResult> availableTimes = reservationTimeDao.findStatuesByThemeIdAndDate(id, date);
 
         return availableTimes.stream()
                 .map(ReservationTimeDetailResult::from)

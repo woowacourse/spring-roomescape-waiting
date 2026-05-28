@@ -21,6 +21,8 @@ class ThemeDaoTest {
     private JdbcTemplate jdbcTemplate;
     @Autowired
     private ThemeDao themeDao;
+    @Autowired
+    private ReservationTimeDao reservationTimeDao;
 
     @Test
     @DisplayName("특정 테마와 날짜에 대해 예약되지 않은 시간 목록만 조회한다.")
@@ -31,7 +33,7 @@ class ThemeDaoTest {
         boolean expected = false;
 
         // when
-        List<TimeQueryResult> availableTimes = themeDao.findTimeStatusBy(themeId, date);
+        List<TimeQueryResult> availableTimes = reservationTimeDao.findStatuesByThemeIdAndDate(themeId, date);
 
         // then
         assertThat(availableTimes.get(5).isReserved()).isEqualTo(expected);

@@ -54,8 +54,8 @@ public class ReservationService {
     }
 
     public ReservationDetailResults findReservationsByUserName(String userName) {
-        List<Reservation> reservations = reservationDao.findAllByUserName(userName);
-        List<WaitingQueryResult> waitings = waitingDao.findAllByUserName(userName);
+        List<Reservation> reservations = reservationDao.findByUserName(userName);
+        List<WaitingQueryResult> waitings = waitingDao.findByUserName(userName);
 
         return new ReservationDetailResults(
                 reservations.stream()
@@ -95,7 +95,7 @@ public class ReservationService {
     }
 
     private Reservation convertToReservation(Long id, ReservationCommand command) {
-        ReservationTime time = reservationTimeDao.findTimeById(command.timeId())
+        ReservationTime time = reservationTimeDao.findById(command.timeId())
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
 
         Theme theme = themeDao.findThemeById(command.themeId())

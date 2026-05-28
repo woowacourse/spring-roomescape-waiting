@@ -1,6 +1,5 @@
 package roomescape.dao;
 
-import static roomescape.dao.rowmapper.ReservationTimeMapper.RESERVATION_TIME_STATUS_ROW_MAPPER;
 import static roomescape.dao.rowmapper.ThemeMapper.THEME_ROW_MAPPER;
 
 import java.time.LocalDate;
@@ -11,7 +10,6 @@ import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
-import roomescape.dao.dto.TimeQueryResult;
 import roomescape.domain.reservation.theme.Theme;
 
 @Repository
@@ -24,6 +22,22 @@ public class ThemeDao {
         this.jdbcInsert = new SimpleJdbcInsert(jdbcTemplate)
                 .withTableName("theme")
                 .usingGeneratedKeyColumns("id");
+    }
+
+    public Theme save(Theme theme) {
+        Map<String, Object> params = new HashMap<>();
+        params.put("name", theme.getName().value());
+        params.put("description", theme.getDescription());
+        params.put("url", theme.getUrl());
+
+        Long id = jdbcInsert.executeAndReturnKey(params).longValue();
+
+        return new Theme(
+                id,
+                theme.getName(),
+                theme.getDescription(),
+                theme.getUrl()
+        );
     }
 
     public Optional<Theme> findThemeById(Long id) {
@@ -70,42 +84,7 @@ public class ThemeDao {
         );
     }
 
-
-    public Theme save(Theme theme) {
-        Map<String, Object> params = new HashMap<>();
-        params.put("name", theme.getName().value());
-        params.put("description", theme.getDescription());
-        params.put("url", theme.getUrl());
-
-        Long id = jdbcInsert.executeAndReturnKey(params).longValue();
-
-        return new Theme(
-                id,
-                theme.getName(),
-                theme.getDescription(),
-                theme.getUrl()
-        );
-    }
-
     public void delete(Long id) {
         jdbcTemplate.update("DELETE FROM theme WHERE id = ?", id);
-    }
-
-    public List<TimeQueryResult> findTimeStatusBy(Long id, LocalDate date) {
-        return jdbcTemplate.query(
-                """
-                          SELECT t.id AS time_id,
-                                 t.start_at,
-                                 CASE WHEN r.id IS NULL THEN FALSE ELSE TRUE END AS reserved
-                          FROM reservation_time t
-                          LEFT JOIN reservation r ON t.id = r.time_id
-                              AND r.theme_id = ?
-                              AND r.date = ?
-                          ORDER BY t.start_at
-                        """,
-                RESERVATION_TIME_STATUS_ROW_MAPPER,
-                id,
-                date
-        );
     }
 }
