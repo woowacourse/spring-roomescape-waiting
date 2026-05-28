@@ -8,7 +8,7 @@ import java.time.LocalDate;
 class ReservationDateTest {
 
     @Test
-    void 예약날짜_과거인_경우_성공() {
+    void isPast_과거인_경우_성공() {
         // given
         LocalDate past = LocalDate.now().minusDays(1);
 
@@ -20,7 +20,7 @@ class ReservationDateTest {
     }
 
     @Test
-    void 예약날짜_미래인_경우_실패() {
+    void isPast_미래인_경우_실패() {
         // given
         LocalDate future = LocalDate.now().plusDays(1);
 
@@ -32,7 +32,7 @@ class ReservationDateTest {
     }
 
     @Test
-    void 예약날짜_오늘인_경우_실패() {
+    void isPast_오늘인_경우_실패() {
         // given
         LocalDate future = LocalDate.now();
 
@@ -41,5 +41,41 @@ class ReservationDateTest {
 
         // then
         Assertions.assertThat(reservationDate.isPast()).isFalse();
+    }
+
+    @Test
+    void isToday_과거인_경우_실패() {
+        // given
+        LocalDate past = LocalDate.now().minusDays(1);
+
+        // when
+        ReservationDate reservationDate = new ReservationDate(past);
+
+        // then
+        Assertions.assertThat(reservationDate.isToday()).isFalse();
+    }
+
+    @Test
+    void isToday_미래인_경우_실패() {
+        // given
+        LocalDate future = LocalDate.now().plusDays(1);
+
+        // when
+        ReservationDate reservationDate = new ReservationDate(future);
+
+        // then
+        Assertions.assertThat(reservationDate.isToday()).isFalse();
+    }
+
+    @Test
+    void isToday_오늘인_경우_성공() {
+        // given
+        LocalDate future = LocalDate.now();
+
+        // when
+        ReservationDate reservationDate = new ReservationDate(future);
+
+        // then
+        Assertions.assertThat(reservationDate.isToday()).isTrue();
     }
 }
