@@ -1,0 +1,37 @@
+package roomescape.acceptance_test;
+
+import static org.springframework.test.context.jdbc.Sql.ExecutionPhase.BEFORE_TEST_METHOD;
+
+import io.restassured.RestAssured;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.web.server.LocalServerPort;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.jdbc.Sql;
+import roomescape.test_config.MutableTimeManager;
+import roomescape.test_config.TestTimeManagerConfig;
+
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
+@Import(TestTimeManagerConfig.class)
+@Sql(value = "/acceptance-cleanup.sql", executionPhase = BEFORE_TEST_METHOD)
+public abstract class AcceptanceTestSupport {
+
+    @LocalServerPort
+    protected int port;
+
+    @Autowired
+    protected MutableTimeManager mutableTimeManager;
+
+    @BeforeEach
+    void setUpAcceptanceTest() {
+        mutableTimeManager.reset();
+        RestAssured.port = port;
+    }
+
+    @AfterEach
+    void tearDownAcceptanceTest() {
+        RestAssured.reset();
+    }
+}
