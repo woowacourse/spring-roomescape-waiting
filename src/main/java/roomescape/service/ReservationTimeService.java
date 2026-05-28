@@ -1,24 +1,24 @@
 package roomescape.service;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
+import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.command.ReservationTimeCommand;
 import roomescape.dto.response.CreateReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeResponse;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
+import roomescape.dao.ThemeDao;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ReservationTimeService {
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
@@ -31,13 +31,13 @@ public class ReservationTimeService {
         this.reservationDao = reservationDao;
     }
 
-    @Transactional
     public CreateReservationTimeResponse addReservationTime(ReservationTimeCommand command) {
         ReservationTime reservationTime = ReservationTime.createWithoutId(command.startAt());
         ReservationTime newReservationTime = reservationTimeDao.insert(reservationTime);
         return CreateReservationTimeResponse.from(newReservationTime);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationTimeResponse> getReservationTimes(Long themeId, LocalDate date) {
         validateTheme(themeId);
 
@@ -49,7 +49,6 @@ public class ReservationTimeService {
                 .toList();
     }
 
-    @Transactional
     public void deleteReservationTime(long reservationTimeId) {
         Optional<ReservationTime> reservationTime = reservationTimeDao.selectById(reservationTimeId);
         if (reservationTime.isEmpty()) {

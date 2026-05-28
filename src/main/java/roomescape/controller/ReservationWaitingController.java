@@ -9,7 +9,6 @@ import roomescape.dto.response.ReservationWaitingResponse;
 import roomescape.service.ReservationWaitingService;
 
 import java.net.URI;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/waitings")
@@ -27,7 +26,7 @@ public class ReservationWaitingController {
         CreateReservationWaitingCommand command = new CreateReservationWaitingCommand(
                 request.name(), request.reservationDate(), request.timeId(), request.themeId()
         );
-        ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(command, LocalDateTime.now());
+        ReservationWaitingResponse response = reservationWaitingService.addReservationWaiting(command);
         return ResponseEntity.created(URI.create(LOCATION_DEFAULT_VALUE + response.id()))
                 .body(response);
     }

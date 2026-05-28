@@ -1,38 +1,39 @@
 package roomescape.service;
 
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationErrorCode;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
+import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
-import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
-import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationCommand;
 import roomescape.dto.command.UpdateReservationCommand;
 import roomescape.dto.response.MyReservationResponse;
 import roomescape.dto.response.ReservationResponse;
+import roomescape.dao.ReservationWaitingDao;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.domain.ReservationTime;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.Theme;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
+@Transactional
 public class ReservationService {
     private final ReservationDao reservationDao;
     private final ReservationWaitingDao reservationWaitingDao;
     private final ReservationTimeDao reservationTimeDao;
     private final ThemeDao themeDao;
 
-    public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao,
-                              ReservationTimeDao reservationTimeDao,
+    public ReservationService(ReservationDao reservationDao, ReservationWaitingDao reservationWaitingDao, ReservationTimeDao reservationTimeDao,
                               ThemeDao themeDao) {
         this.reservationDao = reservationDao;
         this.reservationWaitingDao = reservationWaitingDao;
@@ -40,52 +41,61 @@ public class ReservationService {
         this.themeDao = themeDao;
     }
 
-    @Transactional
-    public ReservationResponse addReservation(CreateReservationCommand command, LocalDateTime now) {
+    public ReservationResponse addReservation(CreateReservationCommand command) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
-        ReservationSlot slot = new ReservationSlot(command.date(), reservationTime, theme);
 
-        validateUniqueReservation(slot);
-        validatePastDatetime(slot, now);
+        validateUniqueReservation(command.date(), command.timeId(), command.themeId());
+        validatePastDatetime(command.date(), reservationTime);
 
-        Reservation reservation = Reservation.createWithoutId(command.name(), slot);
+        Reservation reservation = Reservation.createWithoutId(command.name(), command.date(), reservationTime, theme);
         Reservation savedReservation = reservationDao.insert(reservation);
         return ReservationResponse.from(savedReservation);
     }
 
+    @Transactional(readOnly = true)
     public List<ReservationResponse> getAllReservations() {
         return reservationDao.select().stream()
                 .map(ReservationResponse::from)
                 .toList();
     }
 
+    @Transactional(readOnly = true)
     public List<MyReservationResponse> getMyReservations(String name) {
         List<MyReservationResponse> reservations = reservationDao.selectByName(name).stream()
                 .map(MyReservationResponse::fromReservation)
                 .toList();
-        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByNameWithOrder(name)
-                .stream()
-                .map(MyReservationResponse::fromReservationWaiting)
+        List<MyReservationResponse> reservationWaitings = reservationWaitingDao.selectByName(name).stream()
+                .map(waiting -> MyReservationResponse.fromReservationWaiting(
+                        waiting,
+                        reservationWaitingDao.countOrder(
+                                waiting.getReservationDate(),
+                                waiting.getTime().getId(),
+                                waiting.getTheme().getId(),
+                                waiting.getId()
+                        )))
                 .toList();
 
-        return getMyReservationResponses(reservations, reservationWaitings);
+        List<MyReservationResponse> reservationResponses = new ArrayList<>();
+        reservationResponses.addAll(reservations);
+        reservationResponses.addAll(reservationWaitings);
+        reservationResponses.sort(Comparator.comparing(MyReservationResponse::date));
+
+        return reservationResponses;
     }
 
-    @Transactional
-    public ReservationResponse update(Long reservationId, UpdateReservationCommand command, LocalDateTime now) {
-        Reservation reservation = getReservation(reservationId);
-        ReservationTime time = getTime(command.timeId());
-        ReservationSlot slot = new ReservationSlot(command.date(), time, reservation.getTheme());
+    public ReservationResponse update(Long reservationId, UpdateReservationCommand command) {
+        getReservation(reservationId);
 
-        validateUniqueExcludingSelf(slot, reservationId);
-        validatePastDatetime(slot, now);
+        ReservationTime time = getTime(command.timeId());
+        validateUniqueExcludingSelf(command.date(), command.timeId(),
+                getReservation(reservationId).getTheme().getId(), reservationId);
+        validatePastDatetime(command.date(), time);
 
         Reservation updateReservation = reservationDao.update(reservationId, command.date(), command.timeId());
         return ReservationResponse.from(updateReservation);
     }
 
-    @Transactional
     public void delete(Long reservationId) {
         int deleted = reservationDao.delete(reservationId);
         if (deleted == 0) {
@@ -103,40 +113,28 @@ public class ReservationService {
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
-    private void validateUniqueReservation(ReservationSlot slot) {
-        boolean exists = reservationDao.existsBySlot(slot);
+    private void validateUniqueReservation(LocalDate date, long timeId, long themeId) {
+        boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
     }
 
-    private void validateUniqueExcludingSelf(ReservationSlot slot, long id) {
-        boolean exists = reservationDao.existsDuplicateExcluding(slot, id);
+    private void validateUniqueExcludingSelf(LocalDate date, long timeId, long themeId, long id) {
+        boolean exists = reservationDao.existsDuplicateExcluding(date, timeId, themeId, id);
         if (exists) {
             throw new RoomEscapeException(ReservationErrorCode.DUPLICATE);
         }
     }
 
-    private void validatePastDatetime(ReservationSlot slot, LocalDateTime now) {
-        if (slot.isPast(now)) {
-            throw new RoomEscapeException(ReservationErrorCode.PAST_DATETIME);
+    private void validatePastDatetime(LocalDate date, ReservationTime reservationTime) {
+        if (reservationTime.isPast(date, LocalDateTime.now())) {
+            throw new RoomEscapeException(ReservationWaitingErrorCode.PAST_DATETIME);
         }
     }
 
     private Reservation getReservation(Long reservationId) {
         return reservationDao.selectById(reservationId)
                 .orElseThrow(() -> new RoomEscapeException(ReservationErrorCode.NOT_FOUND));
-    }
-
-    private List<MyReservationResponse> getMyReservationResponses(List<MyReservationResponse> reservations,
-                                                                  List<MyReservationResponse> reservationWaitings) {
-        List<MyReservationResponse> reservationResponses = new ArrayList<>();
-        reservationResponses.addAll(reservations);
-        reservationResponses.addAll(reservationWaitings);
-        reservationResponses.sort(
-                Comparator.comparing(MyReservationResponse::date)
-                        .thenComparing(reservation -> reservation.time().startAt())
-        );
-        return reservationResponses;
     }
 }

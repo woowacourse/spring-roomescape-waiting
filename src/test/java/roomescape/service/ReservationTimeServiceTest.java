@@ -14,7 +14,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.dao.ReservationDao;
 import roomescape.domain.Reservation;
-import roomescape.domain.ReservationSlot;
 import roomescape.dao.ReservationTimeDao;
 import roomescape.domain.ReservationTime;
 import roomescape.dto.command.ReservationTimeCommand;
@@ -127,6 +126,6 @@ class ReservationTimeServiceTest {
     }
 
     private void saveReservation(String name, LocalDate date, ReservationTime time, Theme theme) {
-        reservationDao.insert(Reservation.createWithoutId(name, new ReservationSlot(date, time, theme)));
+        reservationDao.insert(Reservation.createWithoutId(name, date, time, theme));
     }
 }

@@ -1,22 +1,21 @@
 package roomescape.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import roomescape.common.exception.RoomEscapeException;
 import roomescape.common.exception.code.ReservationTimeErrorCode;
 import roomescape.common.exception.code.ReservationWaitingErrorCode;
 import roomescape.common.exception.code.ThemeErrorCode;
 import roomescape.dao.ReservationDao;
-import roomescape.dao.ReservationTimeDao;
 import roomescape.dao.ReservationWaitingDao;
-import roomescape.dao.ThemeDao;
-import roomescape.domain.ReservationSlot;
-import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
-import roomescape.domain.Theme;
 import roomescape.dto.command.CreateReservationWaitingCommand;
 import roomescape.dto.response.ReservationWaitingResponse;
+import roomescape.dao.ReservationTimeDao;
+import roomescape.domain.ReservationTime;
+import roomescape.dao.ThemeDao;
+import roomescape.domain.Theme;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Service
@@ -33,24 +32,21 @@ public class ReservationWaitingService {
         this.reservationDao = reservationDao;
     }
 
-    @Transactional
-    public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command, LocalDateTime now) {
+    public ReservationWaitingResponse addReservationWaiting(CreateReservationWaitingCommand command) {
         ReservationTime reservationTime = getTime(command.timeId());
         Theme theme = getTheme(command.themeId());
-        ReservationSlot slot = new ReservationSlot(command.reservationDate(), reservationTime, theme);
 
-        validateReservationExists(slot);
-        validateUniqueReservationWaiting(command.name(), slot);
-        validatePastDatetime(slot, now);
+        validateReservationExists(command.reservationDate(), command.timeId(), command.themeId());
+        validateUniqueReservationWaiting(command.name(), command.reservationDate(), command.timeId(), command.themeId());
+        validatePastDatetime(command.reservationDate(), reservationTime);
 
-        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), now, slot);
+        ReservationWaiting reservationWaiting = ReservationWaiting.createWithoutId(command.name(), LocalDateTime.now(), command.reservationDate(), reservationTime, theme);
         ReservationWaiting savedReservationWaiting = reservationWaitingDao.insert(reservationWaiting);
 
-        int order = reservationWaitingDao.countOrder(slot, savedReservationWaiting.getId());
+        int order = reservationWaitingDao.countOrder(command.reservationDate(), command.timeId(), command.themeId(), savedReservationWaiting.getId());
         return ReservationWaitingResponse.from(savedReservationWaiting, order);
     }
 
-    @Transactional
     public void delete(Long reservationWaitingId) {
         int deleted = reservationWaitingDao.delete(reservationWaitingId);
         if (deleted == 0) {
@@ -68,22 +64,22 @@ public class ReservationWaitingService {
                 .orElseThrow(() -> new RoomEscapeException(ThemeErrorCode.NOT_FOUND));
     }
 
-    private void validateReservationExists(ReservationSlot slot) {
-        boolean exists = reservationDao.existsBySlot(slot);
+    private void validateReservationExists(LocalDate date, long timeId, long themeId) {
+        boolean exists = reservationDao.existsByDateAndTimeIdAndThemeId(date, timeId, themeId);
         if (!exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.RESERVATION_NOT_FOUND);
         }
     }
 
-    private void validateUniqueReservationWaiting(String name, ReservationSlot slot) {
-        boolean exists = reservationWaitingDao.existsByNameAndSlot(name, slot);
+    private void validateUniqueReservationWaiting(String name, LocalDate reservationDate, long timeId, long themeId) {
+        boolean exists = reservationWaitingDao.existsByNameAndDateAndTimeIdAndThemeId(name, reservationDate, timeId, themeId);
         if (exists) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.DUPLICATE);
         }
     }
 
-    private void validatePastDatetime(ReservationSlot slot, LocalDateTime now) {
-        if (slot.isPast(now)) {
+    private void validatePastDatetime(LocalDate date, ReservationTime reservationTime) {
+        if (reservationTime.isPast(date, LocalDateTime.now())) {
             throw new RoomEscapeException(ReservationWaitingErrorCode.PAST_DATETIME);
         }
     }
