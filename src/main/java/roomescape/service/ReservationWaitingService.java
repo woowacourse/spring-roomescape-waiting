@@ -1,21 +1,19 @@
 package roomescape.service;
 
 import org.springframework.dao.DuplicateKeyException;
-import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.domain.ReservationTime;
 import roomescape.domain.ReservationWaiting;
 import roomescape.domain.Theme;
-import roomescape.exception.*;
-import roomescape.repository.ReservationRepository;
+import roomescape.exception.DuplicateReservationException;
+import roomescape.exception.NotFoundException;
 import roomescape.repository.ReservationTimeRepository;
 import roomescape.repository.ReservationWaitingRepository;
 import roomescape.repository.ThemeRepository;
 import roomescape.service.result.WaitingResult;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -79,19 +77,16 @@ public class ReservationWaitingService {
         return reservationWaitingRepository.countEarlierWaitings(waiting.getId()) + 1;
     }
 
-    @NonNull
     private Theme findTheme(Long themeId) {
         return themeRepository.findBy(themeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 테마입니다."));
     }
 
-    @NonNull
     private ReservationTime findReservationTime(Long timeId) {
         return reservationTimeRepository.findBy(timeId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 시간입니다."));
     }
 
-    @NonNull
     private ReservationWaiting save(ReservationWaiting waiting) {
         try {
             Long id = reservationWaitingRepository.insert(waiting);
@@ -102,10 +97,8 @@ public class ReservationWaitingService {
         }
     }
 
-    @NonNull
     private ReservationWaiting findWaiting(Long id) {
         return reservationWaitingRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 예약 대기입니다."));
     }
-
 }
