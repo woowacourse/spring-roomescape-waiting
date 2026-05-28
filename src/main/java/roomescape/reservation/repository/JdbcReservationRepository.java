@@ -68,7 +68,7 @@ public class JdbcReservationRepository implements ReservationRepository {
     public boolean update(Long id, Long timeId, LocalDateTime now) {
         int affected = jdbcTemplate.update(
                 "UPDATE reservation SET time_id = ?, created_at = ? WHERE id = ?",
-                timeId, id, now
+                timeId, now, id
         );
         return affected > 0;
     }
