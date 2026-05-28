@@ -11,7 +11,6 @@ import org.springframework.transaction.annotation.Transactional;
 import roomescape.controller.ReservationController;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
-@Transactional
 public class LayerArchitectureTest {
 
     @Autowired

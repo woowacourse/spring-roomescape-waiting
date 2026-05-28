@@ -12,7 +12,6 @@ import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.jdbc.Sql;
 
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
-@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 public class PopularThemeAcceptanceTest {
 
     @LocalServerPort
@@ -22,7 +21,7 @@ public class PopularThemeAcceptanceTest {
     void setUp() {
         RestAssured.port = port;
     }
-    
+
     @Test
     @Sql("/data.sql")
     void 인기_테마_조회() {
