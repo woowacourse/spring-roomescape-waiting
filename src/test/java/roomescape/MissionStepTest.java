@@ -31,7 +31,7 @@ public class MissionStepTest {
                 .contentType(ContentType.JSON)
                 .body(Map.of("name", "a", "password", "test1"))
                 .when().post("/api/login")
-                .then().statusCode(200)
+                .then().statusCode(201)
                 .extract()
                 .path("data.accessToken");
 

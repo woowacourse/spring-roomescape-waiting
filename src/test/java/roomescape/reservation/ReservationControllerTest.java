@@ -45,7 +45,7 @@ public class ReservationControllerTest {
                 .body(loginRequest)
                 .when().post("/api/login")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(201)
                 .extract()
                 .path("data.accessToken");
     }
@@ -122,7 +122,7 @@ public class ReservationControllerTest {
                 .body(waitingRequest())
                 .when().post("/api/user/waitings")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(201)
                 .body("success", is(true))
                 .body("data.id", notNullValue())
                 .extract()

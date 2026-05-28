@@ -48,7 +48,7 @@ public class ThemeControllerTest {
                 .body(loginRequest)
                 .when().post("/api/login")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(201)
                 .extract()
                 .path("data.accessToken");
     }
@@ -63,7 +63,7 @@ public class ThemeControllerTest {
                 .body(loginRequest)
                 .when().post("/api/login")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(201)
                 .extract()
                 .path("data.accessToken");
     }

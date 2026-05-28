@@ -44,7 +44,7 @@ public class H2DatabaseTest {
                 .contentType(ContentType.JSON)
                 .post("/api/login")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(201)
                 .extract()
                 .path("data.accessToken");
     }

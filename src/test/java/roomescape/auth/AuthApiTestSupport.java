@@ -28,7 +28,7 @@ abstract class AuthApiTestSupport {
                 .body(Map.of("name", name, "password", password))
                 .when().post("/api/login")
                 .then().log().all()
-                .statusCode(200)
+                .statusCode(201)
                 .extract()
                 .path("data.accessToken");
     }

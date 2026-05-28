@@ -1,6 +1,5 @@
 package roomescape.waiting.application;
 
-import java.util.Objects;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import roomescape.exception.ErrorCode;
@@ -8,9 +7,11 @@ import roomescape.exception.EscapeRoomException;
 import roomescape.reservation.infrastructure.ReservationRepository;
 import roomescape.schedule.application.ScheduleService;
 import roomescape.waiting.Waiting;
-import roomescape.waiting.infrastructure.WaitingRepository;
 import roomescape.waiting.dto.request.WaitingRequest;
 import roomescape.waiting.dto.response.WaitingResponse;
+import roomescape.waiting.infrastructure.WaitingRepository;
+
+import java.util.Objects;
 
 @Service
 @RequiredArgsConstructor
@@ -24,8 +25,8 @@ public class WaitingService {
         scheduleService.validateSchedule(body.date(), body.timeId(), body.themeId());
         long scheduleId = scheduleService.findScheduleIdByDateAndTimeIdAndThemeId(body.date(), body.timeId(), body.themeId());
 
-        validateReservedByMemberNotExists(memberId, scheduleId);
-        validateWaitingByMemberNotExists(memberId, scheduleId);
+        validateMemberNotAlreadyReserved(memberId, scheduleId);
+        validateMemberNotAlreadyWaiting(memberId, scheduleId);
         validateWaitingTargetExists(scheduleId);
 
         Waiting waiting = waitingRepository.save(body.toDomain(memberId, scheduleId));
@@ -37,7 +38,7 @@ public class WaitingService {
     public void deleteByIdForUser(long waitingId, long memberId) {
         Waiting waiting = waitingRepository.findById(waitingId)
                 .orElse(null);
-        if(waiting == null) {
+        if (waiting == null) {
             return;
         }
 
@@ -48,13 +49,13 @@ public class WaitingService {
         waitingRepository.deleteById(waitingId);
     }
 
-    private void validateReservedByMemberNotExists(long memberId, long scheduleId) {
+    private void validateMemberNotAlreadyReserved(long memberId, long scheduleId) {
         if (reservationRepository.existsByMemberIdAndScheduleId(memberId, scheduleId)) {
-            throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
+            throw new EscapeRoomException(ErrorCode.RESERVATION_ALREADY_EXIST);
         }
     }
 
-    private void validateWaitingByMemberNotExists(long memberId, long scheduleId) {
+    private void validateMemberNotAlreadyWaiting(long memberId, long scheduleId) {
         if (waitingRepository.existsByScheduleIdAndMemberId(memberId, scheduleId)) {
             throw new EscapeRoomException(ErrorCode.WAITING_ALREADY_EXIST);
         }
