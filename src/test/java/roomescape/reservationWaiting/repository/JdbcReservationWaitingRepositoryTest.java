@@ -7,6 +7,7 @@ import java.sql.Time;
 import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -138,17 +139,24 @@ class JdbcReservationWaitingRepositoryTest {
     }
 
     @Test
-    @DisplayName("날짜, 시간, 테마를 기반으로 예약 대기를 조회한다.")
-    void findByReservationDateAndTimeIdAndThemeIdTest() {
+    @DisplayName("날짜, 시간, 테마를 기반으로 첫번 째 예약 대기를 조회한다.")
+    void findFirstByReservationDateAndTimeIdAndThemeIdTest() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
-        ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
+        saveReservationWaiting("포비", LocalDate.of(2024, 5, 1), time, theme);
 
-        // when & then
-        assertThat(reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(
-                saved.getDate(), saved.getTime().getId(), saved.getTheme().getId()
-                )).isPresent();
+        // when
+        Optional<ReservationWaiting> result = reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
+                LocalDate.of(2024, 5, 1), time.getId(), theme.getId()
+        );
+
+        // then
+        assertThat(result).isPresent();
+
+        ReservationWaiting waiting = result.get();
+        assertThat(waiting.getName()).isEqualTo("브라운");
     }
 
     @Test

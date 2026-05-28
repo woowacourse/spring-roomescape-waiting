@@ -198,7 +198,7 @@ public class ReservationService {
         try {
             reservationRepository.update(updated);
 
-            reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(
+            reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
                     original.getDate(), original.getTime().getId(), original.getTheme().getId()
             ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
         } catch (DataIntegrityViolationException e) {
@@ -251,7 +251,7 @@ public class ReservationService {
             throw new ReservationNotFoundException();
         }
 
-        reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(
+        reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(
                 reservation.getDate(), reservation.getTime().getId(), reservation.getTheme().getId()
         ).ifPresent(this::promoteFirstWaitingForSameSlotToReservation);
     }

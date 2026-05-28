@@ -316,7 +316,7 @@ class ReservationServiceTest {
         when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(false);
 
-        when(reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "포비",
@@ -340,7 +340,7 @@ class ReservationServiceTest {
                         && reservation.getTime().equals(updatedTime)
                         && reservation.getTheme().equals(theme)
         ));
-        verify(reservationWaitingRepository).findByReservationDateAndTimeIdAndThemeId(originalDate, 1L, 1L);
+        verify(reservationWaitingRepository).findFirstByReservationDateAndTimeIdAndThemeId(originalDate, 1L, 1L);
         verify(reservationWaitingRepository).deleteById(1L);
         verify(reservationRepository).save(argThat(reservation ->
                 reservation.getName().equals("포비")
@@ -553,7 +553,7 @@ class ReservationServiceTest {
         when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(false);
 
-        when(reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "포비",
@@ -588,7 +588,7 @@ class ReservationServiceTest {
                         theme
                 )));
 
-        when(reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.of(new ReservationWaiting(
                         1L,
                         "포비",
@@ -605,7 +605,7 @@ class ReservationServiceTest {
 
         //then
         verify(reservationRepository).deleteById(1L);
-        verify(reservationWaitingRepository).findByReservationDateAndTimeIdAndThemeId(date, 1L, 1L);
+        verify(reservationWaitingRepository).findFirstByReservationDateAndTimeIdAndThemeId(date, 1L, 1L);
         verify(reservationWaitingRepository).deleteById(1L);
         verify(reservationRepository).save(argThat(reservation ->
                 reservation.getName().equals("포비")
@@ -640,7 +640,7 @@ class ReservationServiceTest {
                         new Theme(1L, "이름", "설명", "thumbnailUrl")
                 )));
 
-        when(reservationWaitingRepository.findByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
+        when(reservationWaitingRepository.findFirstByReservationDateAndTimeIdAndThemeId(any(), any(), any()))
                 .thenReturn(Optional.empty());
 
         when(reservationRepository.deleteById(any()))

@@ -11,7 +11,7 @@ public interface ReservationWaitingRepository {
 
     Optional<ReservationWaiting> findById(Long id);
 
-    Optional<ReservationWaiting> findByReservationDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
+    Optional<ReservationWaiting> findFirstByReservationDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId);
 
     List<ReservationWaiting> findAllByName(String name);
 

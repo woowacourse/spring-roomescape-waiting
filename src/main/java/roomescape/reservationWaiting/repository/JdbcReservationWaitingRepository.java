@@ -92,7 +92,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
     }
 
     @Override
-    public Optional<ReservationWaiting> findByReservationDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
+    public Optional<ReservationWaiting> findFirstByReservationDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
         String sql = """
                 SELECT r.id AS reservation_waiting_id,
                        r.name AS reservation_waiting_name,
@@ -109,6 +109,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 INNER JOIN theme h
                   ON r.theme_id = h.id
                 WHERE r.reservation_date = ? AND time_id = ? AND theme_id = ?
+                ORDER BY r.id ASC
                 """;
 
         return jdbcTemplate.query(sql, RESERVATION_WAITING_ROW_MAPPER, date, timeId, themeId)
