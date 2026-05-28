@@ -88,7 +88,8 @@ class ReservationDAOTest {
                             reservation.getName(),
                             reservation.getDate(),
                             TimeResponse.from(reservation.getTime()),
-                            ThemeSimpleResponse.from(reservation.getTheme())
+                            ThemeSimpleResponse.from(reservation.getTheme()),
+                            ReservationStatus.RESERVED
                     )).toList();
             assertThat(all).hasSize(1);
         }
@@ -115,7 +116,8 @@ class ReservationDAOTest {
                             reservation.getName(),
                             reservation.getDate(),
                             TimeResponse.from(reservation.getTime()),
-                            ThemeSimpleResponse.from(reservation.getTheme())
+                            ThemeSimpleResponse.from(reservation.getTheme()),
+                            ReservationStatus.RESERVED
                     )).toList();
 
             // then
@@ -168,7 +170,8 @@ class ReservationDAOTest {
                         reservation.getName(),
                         reservation.getDate(),
                         TimeResponse.from(reservation.getTime()),
-                        ThemeSimpleResponse.from(reservation.getTheme())
+                        ThemeSimpleResponse.from(reservation.getTheme()),
+                        ReservationStatus.RESERVED
                 )).toList();
         assertThat(all).isEmpty();
     }
