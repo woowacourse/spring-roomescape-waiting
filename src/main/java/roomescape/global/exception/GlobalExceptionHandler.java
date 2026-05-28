@@ -7,6 +7,8 @@ import java.time.LocalTime;
 import java.util.Map;
 import java.util.Objects;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -68,6 +70,13 @@ public class GlobalExceptionHandler {
                 .orElse(CommonErrorCode.INVALID_REQUEST_BODY.getMessage());
 
         return ResponseEntity.badRequest()
+                .body(new ErrorResponse(message));
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolation(DataIntegrityViolationException e) {
+        String message = "이미 존재하는 예약 입니다.";
+        return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse(message));
     }
 

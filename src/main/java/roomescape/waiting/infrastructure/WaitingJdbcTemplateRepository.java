@@ -1,5 +1,6 @@
 package roomescape.waiting.infrastructure;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -62,6 +63,32 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
         ) ranked_waiting
         WHERE waiting_name = ?
         """;
+    private static final String FIND_BY_NAME_AND_DATE_AND_TIME_ID_AND_THEME_ID_QUERY = """
+        SELECT *
+        FROM (
+            SELECT w.id,
+                   w.name AS waiting_name,
+                   w.date,
+                   w.created_at,
+                   rt.id AS time_id,
+                   rt.start_at,
+                   t.id AS theme_id,
+                   t.name AS theme_name,
+                   t.description AS theme_description,
+                   t.thumbnail_url,
+                   ROW_NUMBER() OVER (
+                       PARTITION BY w.date, w.time_id, w.theme_id
+                       ORDER BY w.created_at, w.id
+                   ) AS rank
+            FROM waiting w
+            JOIN reservation_time rt ON w.time_id = rt.id
+            JOIN theme t ON w.theme_id = t.id
+        ) ranked_waiting
+        WHERE waiting_name = ?
+          AND date = ?
+          AND time_id = ?
+          AND theme_id = ?
+        """;
     private static final String DELETE_BY_ID_AND_NAME_QUERY = "DELETE FROM waiting WHERE id = ? AND name = ?";
 
     private static final RowMapper<Waiting> ROW_MAPPER = (rs, rowNum) -> {
@@ -109,7 +136,8 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
                 "created_at", waiting.getCreatedAt()
         );
         Long id = simpleJdbcInsert.executeAndReturnKey(params).longValue();
-        return waiting.appendId(id);
+        return findById(id)
+                .orElseGet(() -> waiting.appendId(id));
     }
 
     @Override
@@ -118,6 +146,20 @@ public class WaitingJdbcTemplateRepository implements WaitingRepository {
                 FIND_BY_ID_QUERY,
                 ROW_MAPPER,
                 id
+        );
+        return waiting.stream()
+                .findFirst();
+    }
+
+    @Override
+    public Optional<Waiting> findByNameAndDateAndTimeIdAndThemeId(String name, LocalDate date, Long timeId, Long themeId) {
+        List<Waiting> waiting = jdbcTemplate.query(
+                FIND_BY_NAME_AND_DATE_AND_TIME_ID_AND_THEME_ID_QUERY,
+                ROW_MAPPER,
+                name,
+                date,
+                timeId,
+                themeId
         );
         return waiting.stream()
                 .findFirst();

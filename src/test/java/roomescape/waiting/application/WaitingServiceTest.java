@@ -8,6 +8,7 @@ import java.time.LocalTime;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import roomescape.global.exception.WaitingErrorCode;
 import roomescape.global.exception.customException.BusinessException;
 import roomescape.global.exception.customException.EntityNotFoundException;
 import roomescape.reservationTime.domain.ReservationTime;
@@ -25,6 +26,7 @@ class WaitingServiceTest {
     private FakeWaitingRepository waitingRepository;
     private ReservationTimeRepository reservationTimeRepository;
     private ThemeRepository themeRepository;
+    private WaitingReference waitingReference;
     private WaitingService waitingService;
 
     @BeforeEach
@@ -32,7 +34,15 @@ class WaitingServiceTest {
         waitingRepository = new FakeWaitingRepository();
         reservationTimeRepository = new FakeReservationTimeRepository();
         themeRepository = new FakeThemeRepository();
-        waitingService = new WaitingService(waitingRepository, reservationTimeRepository, themeRepository);
+        waitingReference = command -> {
+        };
+        waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                waitingReference,
+                new WaitingValidator(waitingRepository)
+        );
     }
 
     @Test
@@ -95,6 +105,80 @@ class WaitingServiceTest {
         assertThatThrownBy(() -> waitingService.save(command))
                 .isInstanceOf(BusinessException.class)
                 .hasMessageContaining("존재하지 않는 예약 테마입니다.");
+        assertThat(waitingRepository.isEmpty()).isTrue();
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 다른 사용자의 대기가 있어도 예약 대기를 저장한다")
+    void save_success_with_other_user_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when
+        Waiting waiting = waitingService.save(command);
+
+        // then
+        assertThat(waiting.getName()).isEqualTo("브라운");
+        assertThat(waiting.getDate()).isEqualTo(date);
+        assertThat(waitingRepository.findById(waiting.getId())).contains(waiting);
+    }
+
+    @Test
+    @DisplayName("같은 슬롯에 같은 사용자의 대기가 있으면 예약 대기 저장 시 예외가 발생한다")
+    void save_fail_with_same_user_waiting() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("브라운", date, savedTime, savedTheme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+    }
+
+    @Test
+    @DisplayName("예약이 존재하지 않는 슬롯에 대기를 저장하면 예외가 발생한다")
+    void 예약이_존재하지_않는_슬롯에_대기를_저장하면_예외가_발생한다() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                command -> {
+                    throw new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION);
+                },
+                new WaitingValidator(waitingRepository)
+        );
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                LocalDate.now().plusDays(1),
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("예약이 존재하지 않으면, 대기요청을 할 수 없습니다.");
         assertThat(waitingRepository.isEmpty()).isTrue();
     }
 
