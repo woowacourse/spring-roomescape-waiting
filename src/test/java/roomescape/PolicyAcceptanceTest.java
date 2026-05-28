@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.web.server.LocalServerPort;
 import org.springframework.test.annotation.DirtiesContext;
 
+import java.time.LocalDate;
 import java.util.Map;
 
 /**
@@ -170,14 +171,27 @@ public class PolicyAcceptanceTest {
     // ── 예약 규칙: 중복 예약(409) ──────────────────────────────────────────────────
 
     @Test
-    @DisplayName("[예약] 같은 날짜·시간·테마에 이미 예약이 있으면 409를 반환한다.")
+    @DisplayName("[예약] 같은 날짜·시간·테마에 이미 나의 예약이 있으면 409를 반환한다.")
     void 중복_예약_등록시_409() {
-        // theme_slot_id=34 는 이미 예약됨
-        Map<String, Object> body = Map.of(
-                "name", "신규사용자",
-                "themeSlotId", 34
-        );
+        String futureDate = LocalDate.now().plusMonths(1).toString();
 
+        // 미래 날짜의 themeSlot 목록 조회 (없으면 자동 생성)
+        long themeSlotId = RestAssured.given()
+                .when().get("/times?themeId=1&date=" + futureDate)
+                .then().statusCode(200)
+                .extract().jsonPath().getLong("[0].id");
+
+        Map<String, Object> body = Map.of("name", "테스트사용자", "themeSlotId", themeSlotId);
+
+        // 첫 번째 예약 → 201
+        RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201);
+
+        // 같은 사용자, 같은 슬롯으로 중복 예약 → 409
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
