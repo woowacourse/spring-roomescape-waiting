@@ -1,7 +1,6 @@
 package roomescape.wating.repository.jdbc;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 import java.sql.Date;
 import java.sql.PreparedStatement;
@@ -25,7 +24,6 @@ import org.springframework.test.context.jdbc.Sql;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
-import roomescape.wating.domain.exception.NoReservationForWaitingException;
 
 @JdbcTest
 @Sql("/clear.sql")
@@ -49,60 +47,84 @@ class JdbcWaitingRepositoryTest {
         jdbcWaitingRepository = new JdbcWaitingRepository(jdbcTemplate);
     }
 
-    @Test
-    void 예약이_있는_슬롯에_대기를_등록할_수_있다() {
-        //given
-        ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
+    @Nested
+    @DisplayName("슬롯에 대기를 등록한다")
+    class Save {
 
-        final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
-        insertReservation("브라운", tomorrow, time.getId(), theme.getId());
+        @Test
+        void 예약이_있는_슬롯에_대기를_등록할_수_있다() {
+            //given
+            ReservationTime time = insertReservationTime("11:00:00");
+            Theme theme = insertTheme("링", "공포 테마", "http:~");
 
-        Waiting waiting = Waiting.create(
-            "코로구",
-            tomorrow,
-            time,
-            theme,
-            NOW
-        );
+            final LocalDate tomorrow = NOW.plusDays(1).toLocalDate();
+            insertReservation("브라운", tomorrow, time.getId(), theme.getId());
 
-        //when
-        final Long savedWaitingId = jdbcWaitingRepository.save(waiting);
+            Waiting waiting = Waiting.create(
+                "코로구",
+                tomorrow,
+                time,
+                theme,
+                NOW
+            );
 
-        //then
-        assertThat(savedWaitingId).isNotNull();
+            //when
+            final Optional<Long> savedWaitingId = jdbcWaitingRepository.save(waiting);
+
+            //then
+            assertThat(savedWaitingId).isPresent();
+        }
+
+        @Test
+        void 예약이_없는_슬롯에_대기를_등록하면_empty가_반환된다() {
+            //given
+            ReservationTime time = insertReservationTime("11:00:00");
+            Theme theme = insertTheme("링", "공포 테마", "http:~");
+            Waiting waiting = Waiting.create(
+                "코로구",
+                NOW.plusDays(1).toLocalDate(),
+                time,
+                theme,
+                NOW
+            );
+
+            //when
+            final Optional<Long> result = jdbcWaitingRepository.save(waiting);
+
+            //then
+            assertThat(result).isEmpty();
+        }
     }
 
-    @Test
-    void 예약이_없는_슬롯에_대기를_등록하면_예외가_발생한다() {
-        //given
-        ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
-        Waiting waiting = Waiting.create(
-            "코로구",
-            NOW.plusDays(1).toLocalDate(),
-            time,
-            theme,
-            NOW
-        );
+    @Nested
+    @DisplayName("id로 대기를 삭제한다")
+    class DeleteById {
 
-        //when & then
-        assertThatThrownBy(() -> jdbcWaitingRepository.save(waiting))
-            .isInstanceOf(NoReservationForWaitingException.class);
-    }
+        @Test
+        void 존재하는_대기를_id로_삭제하면_TRUE를_반환한다() {
+            //given
+            ReservationTime time = insertReservationTime("11:00:00");
+            Theme theme = insertTheme("링", "공포 테마", "http:~");
+            final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
 
-    @Test
-    void id로_대기를_삭제할_수_있다() {
-        //given
-        ReservationTime time = insertReservationTime("11:00:00");
-        Theme theme = insertTheme("링", "공포 테마", "http:~");
-        final long savedId = insertWaiting("코로구", NOW.toLocalDate(), time.getId(), theme.getId());
+            //when
+            final boolean deleted = jdbcWaitingRepository.deleteById(savedId);
 
-        //when
-        final boolean deleted = jdbcWaitingRepository.deleteById(savedId);
+            //then
+            assertThat(deleted).isTrue();
+        }
 
-        //then
-        assertThat(deleted).isTrue();
+        @Test
+        void 존재하지_않는_대기를_id로_삭제하면_FALSE를_반환한다() {
+            //given
+            final long unsavedId = 999L;
+
+            //when
+            final boolean deleted = jdbcWaitingRepository.deleteById(unsavedId);
+
+            //then
+            assertThat(deleted).isFalse();
+        }
     }
 
     @Nested

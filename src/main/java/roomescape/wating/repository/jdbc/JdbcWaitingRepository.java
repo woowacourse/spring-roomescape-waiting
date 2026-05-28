@@ -17,7 +17,6 @@ import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 import roomescape.wating.domain.Waiting;
-import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.repository.WaitingRepository;
 
 @Repository
@@ -45,7 +44,7 @@ public class JdbcWaitingRepository implements WaitingRepository {
     private final JdbcTemplate jdbcTemplate;
 
     @Override
-    public Long save(final Waiting waiting) {
+    public Optional<Long> save(final Waiting waiting) {
         final String sql = """
             INSERT INTO waiting(customer_name, reservation_date, time_id, theme_id)
             SELECT ?, ?, ?, ?
@@ -67,14 +66,14 @@ public class JdbcWaitingRepository implements WaitingRepository {
         }, keyHolder);
 
         if (updateCount == 0) {
-            throw new NoReservationForWaitingException();
+            return Optional.empty();
         }
 
         Number key = keyHolder.getKey();
         if (key == null) {
-            throw new IllegalStateException("대기 생성에 실패했습니다.");
+            throw new IllegalStateException("INSERT 성공 후 generated key를 가져올 수 없습니다.");
         }
-        return key.longValue();
+        return Optional.of(key.longValue());
     }
 
     @Override

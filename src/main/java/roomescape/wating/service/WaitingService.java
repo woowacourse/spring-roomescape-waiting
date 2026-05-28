@@ -12,6 +12,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.domain.exception.ThemeNotFoundException;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.wating.domain.Waiting;
+import roomescape.wating.domain.exception.NoReservationForWaitingException;
 import roomescape.wating.domain.exception.PastReservationWaitingCancellationException;
 import roomescape.wating.domain.exception.WaitingNotFoundException;
 import roomescape.wating.domain.exception.WaitingSlotDuplicateException;
@@ -42,7 +43,9 @@ public class WaitingService {
             LocalDateTime.now(clock)
         );
         try {
-            return new WaitingCreateResponse(waitingRepository.save(waiting));
+            final Long id = waitingRepository.save(waiting)
+                    .orElseThrow(NoReservationForWaitingException::new);
+            return new WaitingCreateResponse(id);
         } catch (DuplicateKeyException exception) {
             throw new WaitingSlotDuplicateException();
         }

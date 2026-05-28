@@ -13,11 +13,9 @@ import roomescape.wating.repository.WaitingRepository;
 public class FakeWaitingRepository implements WaitingRepository {
 
     private final List<Waiting> waitings = new ArrayList<>();
-    private Waiting savedWaiting;
 
     @Override
-    public Long save(final Waiting waiting) {
-        savedWaiting = waiting;
+    public Optional<Long> save(final Waiting waiting) {
         final Waiting savedWaitingWithId = Waiting.of(
             1L,
             waiting.getCustomerName().name(),
@@ -27,7 +25,7 @@ public class FakeWaitingRepository implements WaitingRepository {
             waiting.getTheme()
         );
         waitings.add(savedWaitingWithId);
-        return savedWaitingWithId.getId();
+        return Optional.of(savedWaitingWithId.getId());
     }
 
     @Override
