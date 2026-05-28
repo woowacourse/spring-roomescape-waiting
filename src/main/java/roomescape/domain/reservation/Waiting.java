@@ -41,7 +41,7 @@ public class Waiting {
 
     public void validateOwner(String name) {
         if (!userName.isOwnedBy(name)) {
-            throw new ForbiddenException("다른 사람의 예약 대기는 취소/변경할 수 없습니다.");
+            throw new ForbiddenException("다른 사람의 예약 대기는 취소할 수 없습니다.");
         }
     }
 
