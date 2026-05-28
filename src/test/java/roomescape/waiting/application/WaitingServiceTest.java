@@ -105,6 +105,27 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("같은 슬롯에 이미 대기가 있으면 예약 대기 저장 시 예외가 발생한다")
+    void 같은_슬롯에_이미_대기가_있으면_예약_대기_저장_시_예외가_발생한다() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        LocalDate date = LocalDate.now().plusDays(1);
+        waitingRepository.save(Waiting.create("리오", date, savedTime, savedTheme));
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                date,
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("이미 예약된 시간입니다. 다른 시간을 선택해 주세요.");
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기를 취소한다")
     void cancelWaiting_success() {
         // given
