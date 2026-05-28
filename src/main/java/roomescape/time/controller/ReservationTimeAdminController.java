@@ -28,7 +28,7 @@ public class ReservationTimeAdminController {
         ReservationTime reservationTime = reservationTimeService.save(requestDto.toCommand());
         ReservationTimeResponse response = ReservationTimeResponse.from(reservationTime);
         return ResponseEntity
-                .created(URI.create("/times/" + reservationTime.getId()))
+                .created(URI.create("/times/" + reservationTime.id()))
                 .body(response);
     }
 

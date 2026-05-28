@@ -30,7 +30,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("새로운 테마를 저장하고 반환된 객체의 ID를 확인한다.")
-    void saveTest() {
+    void save_validTheme_returnsWithId() {
         // given
         Theme theme = Theme.of("테마", "설명", "thumbnailUrl");
 
@@ -38,13 +38,13 @@ class JdbcThemeRepositoryTest {
         Theme saved = themeRepository.save(theme);
 
         //then
-        assertThat(saved.getId()).isNotNull();
-        assertThat(saved.getName()).isEqualTo(theme.getName());
+        assertThat(saved.id()).isNotNull();
+        assertThat(saved.name()).isEqualTo(theme.name());
     }
 
     @Test
     @DisplayName("기존에 이미 테마 이름이 겹치는 테마가 있으면 예외가 발생한다.")
-    void saveTest_duplicate() {
+    void save_duplicateThemeName_throwsDataIntegrityViolation() {
         // given
         themeRepository.save(Theme.of("테마", "설명", "thumbnailUrl"));
 
@@ -55,7 +55,7 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("ID가 사용되고 있으면 예외가 발생한다.")
-    void deleteByIdTest_used() {
+    void deleteById_themeInUse_throwsDataIntegrityViolation() {
         //given
         jdbcTemplate.update(
                 "INSERT INTO reservation_time (start_at) VALUES (?)",
@@ -90,8 +90,8 @@ class JdbcThemeRepositoryTest {
         ).isInstanceOf(DataIntegrityViolationException.class);
     }
 
-    @DisplayName("테마 이름을 기준으로 조회한다.")
     @Test
+    @DisplayName("테마 이름을 기준으로 조회한다.")
     void existsByName() {
         //given
         themeRepository.save(
@@ -108,23 +108,23 @@ class JdbcThemeRepositoryTest {
 
     @Test
     @DisplayName("ID를 통해 저장된 테마를 조회한다.")
-    void findByIdTest() {
+    void findById_existingTheme_returnsTheme() {
         // given
         Theme saved = themeRepository.save(Theme.of("테마", "설명", "thumbnailUrl"));
 
         // when
-        Theme found = themeRepository.findById(saved.getId())
-                .orElseThrow(() -> new AssertionError("조회된 결과가 없습니다. id: " + saved.getId()));
+        Theme found = themeRepository.findById(saved.id())
+                .orElseThrow(() -> new AssertionError("조회된 결과가 없습니다. id: " + saved.id()));
 
         // then
-        assertThat(found.getName()).isEqualTo(saved.getName());
-        assertThat(found.getDescription()).isEqualTo(saved.getDescription());
-        assertThat(found.getThumbnailUrl()).isEqualTo(saved.getThumbnailUrl());
+        assertThat(found.name()).isEqualTo(saved.name());
+        assertThat(found.description()).isEqualTo(saved.description());
+        assertThat(found.thumbnailUrl()).isEqualTo(saved.thumbnailUrl());
     }
 
     @Test
     @DisplayName("존재하는 모든 테마 목록을 리스트로 조회한다.")
-    void findAllTest() {
+    void findAll_multipleThemes_returnsAllThemes() {
         // given
         Theme saved1 = themeRepository.save(Theme.of("테마1", "설명", "thumbnailUrl"));
         Theme saved2 = themeRepository.save(Theme.of("테마2", "설명", "thumbnailUrl"));

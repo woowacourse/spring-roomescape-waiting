@@ -1,14 +1,13 @@
-package roomescape.integration;
+package roomescape.global;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static roomescape.integration.support.RestAssuredTestHelper.createReservation;
+import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
+import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
 
-import io.restassured.RestAssured;
-import io.restassured.http.ContentType;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -33,7 +32,7 @@ import roomescape.time.service.ReservationTimeService;
 import roomescape.time.service.dto.ReservationTimeCommand;
 
 @SpringWebTest
-class ConcurrencyTest {
+class ConcurrencyIntegrationTest {
 
     @Autowired
     DatabaseHelper databaseHelper;
@@ -53,56 +52,6 @@ class ConcurrencyTest {
     @BeforeEach
     void setup() {
         databaseHelper.clear();
-    }
-
-    @DisplayName("동일한 예약 요청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
-    @Test
-    void saveReservation() throws InterruptedException {
-        //given
-        createReservationTime("10:00");
-        createTheme("테마", "설명", "thumbnailUrl");
-
-        //when
-        List<Integer> result = runConcurrentlyAndCountResults(
-                () -> reservationService.save(new ReservationCommand(
-                                "name",
-                                LocalDate.of(2026, 5, 15),
-                                1L,
-                                1L
-                        )
-                ),
-                100,
-                DuplicateException.class
-        );
-
-        //then
-        assertThat(result.get(0)).isEqualTo(1);
-        assertThat(result.get(1)).isEqualTo(99);
-        assertThat(result.get(2)).isEqualTo(0);
-    }
-
-    private void createReservationTime(String startAt) {
-        Map<String, Object> reservationTime = new HashMap<>();
-        reservationTime.put("startAt", startAt);
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservationTime)
-                .when().post("/admin/times")
-                .then().statusCode(201);
-    }
-
-    private void createTheme(String name, String description, String thumbnailUrl) {
-        Map<String, Object> theme = new HashMap<>();
-        theme.put("name", name);
-        theme.put("description", description);
-        theme.put("thumbnailUrl", thumbnailUrl);
-
-        RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(theme)
-                .when().post("/admin/themes")
-                .then().statusCode(201);
     }
 
     private List<Integer> runConcurrentlyAndCountResults(
@@ -145,8 +94,34 @@ class ConcurrencyTest {
         );
     }
 
-    @DisplayName("동일한 예약 시간을 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
+    @DisplayName("동일한 예약 요청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
+    void saveReservation() throws InterruptedException {
+        //given
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+
+        //when
+        List<Integer> result = runConcurrentlyAndCountResults(
+                () -> reservationService.save(new ReservationCommand(
+                                "name",
+                                LocalDate.of(2026, 5, 15),
+                                1L,
+                                1L
+                        )
+                ),
+                100,
+                DuplicateException.class
+        );
+
+        //then
+        assertThat(result.get(0)).isEqualTo(1);
+        assertThat(result.get(1)).isEqualTo(99);
+        assertThat(result.get(2)).isEqualTo(0);
+    }
+
+    @Test
+    @DisplayName("동일한 예약 시간을 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     void registerTime() throws InterruptedException {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
@@ -163,8 +138,8 @@ class ConcurrencyTest {
         assertThat(result.get(2)).isEqualTo(0);
     }
 
-    @DisplayName("동일한 테마를 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
+    @DisplayName("동일한 테마를 동시에 생성하면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     void saveTheme() throws InterruptedException {
         //when
         List<Integer> result = runConcurrentlyAndCountResults(
@@ -181,8 +156,8 @@ class ConcurrencyTest {
         assertThat(result.get(2)).isEqualTo(0);
     }
 
-    @DisplayName("예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
+    @DisplayName("예약 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     void deleteReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
@@ -203,8 +178,8 @@ class ConcurrencyTest {
         assertThat(result.get(2)).isEqualTo(0);
     }
 
-    @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
+    @DisplayName("테마 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     void deleteTheme() throws InterruptedException {
         //given
         createTheme("테마", "설명", "thumbnailUrl");
@@ -222,8 +197,8 @@ class ConcurrencyTest {
         assertThat(result.get(2)).isEqualTo(0);
     }
 
-    @DisplayName("예약 시간 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     @Test
+    @DisplayName("예약 시간 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     void deleteTime() throws InterruptedException {
         //given
         createReservationTime("10:00");
@@ -241,8 +216,8 @@ class ConcurrencyTest {
         assertThat(result.get(2)).isEqualTo(0);
     }
 
-    @DisplayName("서로 다른 본인 예약을 같은 슬롯으로 동시에 수정하면 하나만 성공하고 하나는 중복 예외가 발생한다")
     @Test
+    @DisplayName("서로 다른 본인 예약을 같은 슬롯으로 동시에 수정하면 하나만 성공하고 하나는 중복 예외가 발생한다")
     void updateMyReservation() throws InterruptedException {
         //given
         createReservationTime("10:00");
@@ -302,25 +277,8 @@ class ConcurrencyTest {
         assertThat(unexpectedErrorCount.get()).isEqualTo(0);
     }
 
-    private Long createReservation(String name, LocalDate date, Long timeId, Long themeId) {
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", name);
-        reservation.put("date", date.toString());
-        reservation.put("timeId", timeId);
-        reservation.put("themeId", themeId);
-
-        return RestAssured.given()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().statusCode(201)
-                .extract()
-                .jsonPath()
-                .getLong("id");
-    }
-
-    @DisplayName("동일한 예약 대기 신청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     @Test
+    @DisplayName("동일한 예약 대기 신청이 동시에 들어오면 하나만 성공하고 나머지는 중복 예외가 발생한다")
     void saveReservationWaiting() throws InterruptedException {
         //given
         createReservationTime("10:00");
@@ -347,6 +305,7 @@ class ConcurrencyTest {
     }
 
     @Test
+    @DisplayName("동일한 예약 대기 삭제 요청이 동시에 들어오면 하나만 성공하고 나머지는 예외가 발생한다")
     void delete() throws InterruptedException {
         // given
         createReservationTime("10:00");

@@ -10,7 +10,7 @@ class ReservationTimeTest {
 
     @Test
     @DisplayName("성공적으로 시간 도메인 객체를 생성한다.")
-    void ofSuccess() {
+    void of_validTime_returnsReservationTime() {
         // given
         LocalTime time = LocalTime.of(10, 0);
 
@@ -18,19 +18,19 @@ class ReservationTimeTest {
         ReservationTime reservationTime = ReservationTime.of(time);
 
         // then
-        assertThat(reservationTime.getStartAt()).isEqualTo(LocalTime.of(10, 0));
-        assertThat(reservationTime.getId()).isNull();
+        assertThat(reservationTime.startAt()).isEqualTo(LocalTime.of(10, 0));
+        assertThat(reservationTime.id()).isNull();
     }
 
     @Test
     @DisplayName("생성된 시간 객체의 필드 값을 확인한다.")
-    void getterTest() {
+    void constructor_validInput_storesFields() {
         // given
         LocalTime now = LocalTime.now();
         ReservationTime reservationTime = new ReservationTime(1L, now);
 
         // then
-        assertThat(reservationTime.getId()).isEqualTo(1L);
-        assertThat(reservationTime.getStartAt()).isEqualTo(now);
+        assertThat(reservationTime.id()).isEqualTo(1L);
+        assertThat(reservationTime.startAt()).isEqualTo(now);
     }
 }

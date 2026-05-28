@@ -28,7 +28,7 @@ public class ThemeAdminController {
         Theme theme = themeService.save(requestDto.toCommand());
         ThemeResponse response = ThemeResponse.from(theme);
         return ResponseEntity
-                .created(URI.create("/themes/" + theme.getId()))
+                .created(URI.create("/themes/" + theme.id()))
                 .body(response);
     }
 

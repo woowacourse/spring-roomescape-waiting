@@ -7,9 +7,6 @@ import roomescape.time.repository.ReservationTimeMapper;
 
 public class ReservationWaitingMapper {
 
-    private ReservationWaitingMapper() {
-    }
-
     public static ReservationWaiting toDomain(ReservationWaitingEntity entity) {
         return new ReservationWaiting(
                 entity.getId(),
@@ -22,11 +19,11 @@ public class ReservationWaitingMapper {
 
     public static ReservationWaitingEntity toEntity(ReservationWaiting domain) {
         return new ReservationWaitingEntity(
-                domain.getId(),
-                domain.getName(),
-                domain.getDate(),
-                ReservationTimeMapper.toEntity(domain.getTime()),
-                ThemeMapper.toEntity(domain.getTheme())
+                domain.id(),
+                domain.name(),
+                domain.date(),
+                ReservationTimeMapper.toEntity(domain.time()),
+                ThemeMapper.toEntity(domain.theme())
         );
     }
 }

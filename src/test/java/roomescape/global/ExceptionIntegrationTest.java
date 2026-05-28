@@ -1,26 +1,22 @@
-package roomescape.integration;
+package roomescape.global;
 
 import static org.hamcrest.Matchers.equalTo;
+import static roomescape.integration.support.RestAssuredTestHelper.createReservationTime;
+import static roomescape.integration.support.RestAssuredTestHelper.createTheme;
 
 import io.restassured.RestAssured;
 import io.restassured.http.ContentType;
-import java.sql.Time;
-import java.time.LocalTime;
 import java.util.HashMap;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.jdbc.core.JdbcTemplate;
 import roomescape.integration.support.DatabaseHelper;
 import roomescape.integration.support.SpringWebTest;
 
 @SpringWebTest
-public class ExceptionTest {
-
-    @Autowired
-    JdbcTemplate jdbcTemplate;
+public class ExceptionIntegrationTest {
 
     @Autowired
     DatabaseHelper databaseHelper;
@@ -30,19 +26,15 @@ public class ExceptionTest {
         databaseHelper.clear();
     }
 
-    @DisplayName("예약 날짜가 오늘 (5월 1일)보다 이전이면 예외가 발생한다.")
-    @Test
-    void makeReservation_invalid_date() {
-        //given
-        jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at) VALUES (?)",
-                Time.valueOf(LocalTime.of(10, 0))
-        );
+    private void setupDefaultTimeAndTheme() {
+        createReservationTime("10:00");
+        createTheme("테마", "설명", "thumbnailUrl");
+    }
 
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                "테마", "설명", "thumbnailUrl"
-        );
+    @Test
+    @DisplayName("예약 날짜가 오늘 (5월 1일)보다 이전이면 예외가 발생한다.")
+    void makeReservation_invalid_date() {
+        setupDefaultTimeAndTheme();
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", "브라운");
@@ -50,7 +42,6 @@ public class ExceptionTest {
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -60,19 +51,11 @@ public class ExceptionTest {
                 .body("message", equalTo("예약 날짜가 유효하지 않습니다."));
     }
 
-    @DisplayName("예약 시간이 오늘(5월 1일), 이 시간(09:00) 이전이면 예외가 발생한다.")
     @Test
+    @DisplayName("예약 시간이 오늘(5월 1일), 이 시간(09:00) 이전이면 예외가 발생한다.")
     void makeReservation_invalid_time() {
-        //given
-        jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at) VALUES (?)",
-                Time.valueOf(LocalTime.of(8, 0))
-        );
-
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                "테마", "설명", "thumbnailUrl"
-        );
+        createReservationTime("08:00");
+        createTheme("테마", "설명", "thumbnailUrl");
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", "브라운");
@@ -80,7 +63,6 @@ public class ExceptionTest {
         body.put("timeId", 1L);
         body.put("themeId", 1L);
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -90,19 +72,10 @@ public class ExceptionTest {
                 .body("message", equalTo("시작 시간이 유효하지 않습니다."));
     }
 
-    @DisplayName("기존에 예약이 있으면 예외가 발생한다.")
     @Test
+    @DisplayName("기존에 예약이 있으면 예외가 발생한다.")
     void makeReservation_duplicate_reservation() {
-        //given
-        jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at) VALUES (?)",
-                Time.valueOf(LocalTime.of(10, 0))
-        );
-
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                "테마", "설명", "thumbnailUrl"
-        );
+        setupDefaultTimeAndTheme();
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", "브라운");
@@ -117,7 +90,6 @@ public class ExceptionTest {
                 .then().log().all()
                 .statusCode(201);
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -127,19 +99,10 @@ public class ExceptionTest {
                 .body("message", equalTo("예약이 이미 존재합니다."));
     }
 
-    @DisplayName("예약에 사용 중인 예외를 삭제하면 예외가 발생한다.")
     @Test
+    @DisplayName("예약에 사용 중인 시간을 삭제하면 예외가 발생한다.")
     void delete_time_in_use() {
-        //given
-        jdbcTemplate.update(
-                "INSERT INTO reservation_time (start_at) VALUES (?)",
-                Time.valueOf(LocalTime.of(10, 0))
-        );
-
-        jdbcTemplate.update(
-                "INSERT INTO theme (name, description, thumbnail_url) VALUES (?, ?, ?)",
-                "테마", "설명", "thumbnailUrl"
-        );
+        setupDefaultTimeAndTheme();
 
         Map<String, Object> body = new HashMap<>();
         body.put("name", "브라운");
@@ -154,7 +117,6 @@ public class ExceptionTest {
                 .then().log().all()
                 .statusCode(201);
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(body)
@@ -164,10 +126,9 @@ public class ExceptionTest {
                 .body("message", equalTo("해당 예약 시간에 예약이 존재합니다."));
     }
 
-    @DisplayName("예약 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
     @Test
+    @DisplayName("예약 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
     void  makeReservation_invalid_name_form() {
-        //given
         Map<String, Object> valid = Map.of(
                 "name", "브라운",
                 "date", "2026-05-01",
@@ -184,7 +145,6 @@ public class ExceptionTest {
         Map<String, Object> WithWhiteSpace = new HashMap<>(valid);
         WithWhiteSpace.put("name", " ");
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(WithNull)
@@ -210,10 +170,9 @@ public class ExceptionTest {
                 .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
     }
 
-    @DisplayName("예약 시, date에 null이나 날짜 형식 아닌 값이 들어오면 예외가 발생한다.")
     @Test
+    @DisplayName("예약 시, date에 null이나 날짜 형식 아닌 값이 들어오면 예외가 발생한다.")
     void makeReservation_invalid_date_form() {
-        //given
         Map<String, Object> valid = Map.of(
                 "name", "브라운",
                 "date", "2026-04-29",
@@ -227,7 +186,6 @@ public class ExceptionTest {
         Map<String, Object> withIllegalDateForm = new HashMap<>(valid);
         withIllegalDateForm.put("date", "illegal_form");
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(withoutDate)
@@ -245,10 +203,9 @@ public class ExceptionTest {
                 .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
     }
 
-    @DisplayName("예약 시, timeId, themeId 중 하나라도 null이면 예외가 발생한다.")
     @Test
+    @DisplayName("예약 시, timeId, themeId 중 하나라도 null이면 예외가 발생한다.")
     void makeReservation_invalid_timeId_And_themeId_form() {
-        //given
         Map<String, Object> valid = Map.of(
                 "name", "브라운",
                 "date", "2026-04-29",
@@ -262,7 +219,6 @@ public class ExceptionTest {
         Map<String, Object> withoutThemeId = new HashMap<>(valid);
         withoutThemeId.put("themeId", null);
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(withoutTimeId)
@@ -280,17 +236,15 @@ public class ExceptionTest {
                 .body("message", equalTo("예약 요청 형식이 유효하지 않습니다."));
     }
 
-    @DisplayName("시간 등록 시, startAt에 null이나 시간 형식 아닌 값이 들어오면 예외가 발생한다.")
     @Test
+    @DisplayName("시간 등록 시, startAt에 null이나 시간 형식 아닌 값이 들어오면 예외가 발생한다.")
     void createTimes_invalid_time_form() {
-        //given
         Map<String, Object> withoutStartAt = new HashMap<>();
         withoutStartAt.put("startAt", null);
 
         Map<String, Object> withIllegalStartAt = new HashMap<>();
         withIllegalStartAt.put("startAt", "illegal_format");
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(withoutStartAt)
@@ -308,10 +262,9 @@ public class ExceptionTest {
                 .body("message", equalTo("요청 본문 형식이 유효하지 않습니다."));
     }
 
-    @DisplayName("테마 등록 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
     @Test
+    @DisplayName("테마 등록 시, name에 null이나 공백, 빈 문자열이 들어오면 예외가 발생한다.")
     void createTheme_invalid_name_form() {
-        //given
         Map<String, Object> valid = Map.of(
                 "name", "테마",
                 "description", "설명",
@@ -324,7 +277,6 @@ public class ExceptionTest {
         Map<String, Object> withEmptyName = new HashMap<>(valid);
         withEmptyName.put("name", "");
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(withoutName)
@@ -342,10 +294,9 @@ public class ExceptionTest {
                 .body("message", equalTo("테마 요청 형식이 유효하지 않습니다."));
     }
 
-    @DisplayName("테마 등록 시, description, thumbnailUrl 중 하나라도 null이면 예외가 발생한다.")
     @Test
+    @DisplayName("테마 등록 시, description, thumbnailUrl 중 하나라도 null이면 예외가 발생한다.")
     void createTheme_invalid_description_and_thumbnailUrl_form() {
-        //given
         Map<String, Object> valid = Map.of(
                 "name", "테마",
                 "description", "설명",
@@ -359,7 +310,6 @@ public class ExceptionTest {
         Map<String, Object> withoutThumbnailUrl = new HashMap<>(valid);
         withoutThumbnailUrl.put("thumbnailUrl", null);
 
-        //when & then
         RestAssured.given().log().all()
                 .contentType(ContentType.JSON)
                 .body(withoutDescription)

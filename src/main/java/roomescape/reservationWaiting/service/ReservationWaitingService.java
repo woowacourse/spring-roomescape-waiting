@@ -14,6 +14,7 @@ import roomescape.reservationWaiting.exception.ReservationWaitingErrorCode;
 import roomescape.reservationWaiting.repository.ReservationWaitingRepository;
 import roomescape.reservationWaiting.service.dto.ReservationWaitingCommand;
 
+@Transactional(readOnly = true)
 @Service
 public class ReservationWaitingService {
 
@@ -49,8 +50,8 @@ public class ReservationWaitingService {
         ReservationWaiting reservationWaiting = ReservationWaiting.of(
                 command.name(),
                 command.date(),
-                targetReservation.getTime(),
-                targetReservation.getTheme()
+                targetReservation.time(),
+                targetReservation.theme()
         );
 
         reservationWaiting.validateExpiry(clock);

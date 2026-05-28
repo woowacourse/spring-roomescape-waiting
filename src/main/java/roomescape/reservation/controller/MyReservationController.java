@@ -1,13 +1,15 @@
 package roomescape.reservation.controller;
 
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import roomescape.reservation.auth.Authorized;
+import roomescape.auth.Authorized;
+import roomescape.auth.OwnerOnly;
 import roomescape.reservation.controller.dto.ReservationUpdateRequest;
 import roomescape.reservation.service.ReservationService;
 
@@ -22,23 +24,23 @@ public class MyReservationController {
     }
 
     @Authorized
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @PatchMapping("/{id}")
-    public ResponseEntity<Void> updateMyReservation(
+    public void updateMyReservation(
+            @OwnerOnly String name,
             @PathVariable Long id,
             @RequestBody ReservationUpdateRequest request
     ) {
+        reservationService.validateOwnership(id, name);
         reservationService.update(request.toCommand(), id);
-        return ResponseEntity.noContent().build();
     }
 
     @Authorized
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteMyReservation(
-            @PathVariable Long id
-    ) {
+    public void deleteMyReservation(@OwnerOnly String name, @PathVariable Long id) {
+        reservationService.validateOwnership(id, name);
         reservationService.validateNotExpired(id);
         reservationService.deleteById(id);
-
-        return ResponseEntity.noContent().build();
     }
 }

@@ -19,11 +19,11 @@ public class ReservationMapper {
 
     public static ReservationEntity toEntity(Reservation domain) {
         return new ReservationEntity(
-                domain.getId(),
-                domain.getName(),
-                domain.getDate(),
-                ReservationTimeMapper.toEntity(domain.getTime()),
-                ThemeMapper.toEntity(domain.getTheme())
+                domain.id(),
+                domain.name(),
+                domain.date(),
+                ReservationTimeMapper.toEntity(domain.time()),
+                ThemeMapper.toEntity(domain.theme())
         );
     }
 }

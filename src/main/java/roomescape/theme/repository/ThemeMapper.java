@@ -16,10 +16,10 @@ public class ThemeMapper {
 
     public static ThemeEntity toEntity(Theme domain) {
         return new ThemeEntity(
-                domain.getId(),
-                domain.getName(),
-                domain.getDescription(),
-                domain.getThumbnailUrl()
+                domain.id(),
+                domain.name(),
+                domain.description(),
+                domain.thumbnailUrl()
         );
     }
 }

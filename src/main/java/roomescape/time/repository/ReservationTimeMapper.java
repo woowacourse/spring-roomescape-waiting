@@ -14,8 +14,8 @@ public class ReservationTimeMapper {
 
     public static ReservationTimeEntity toEntity(ReservationTime domain) {
         return new ReservationTimeEntity(
-                domain.getId(),
-                domain.getStartAt()
+                domain.id(),
+                domain.startAt()
         );
     }
 }

@@ -1,10 +1,6 @@
 package roomescape.reservation.controller;
 
-import roomescape.global.exception.InvalidRequestFormatException;
-
 import java.net.URI;
-import roomescape.reservation.exception.ReservationErrorCode;
-import roomescape.global.exception.BadRequestException;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,11 +9,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import roomescape.global.exception.InvalidRequestFormatException;
 import roomescape.reservation.controller.dto.ReservationRequest;
 import roomescape.reservation.controller.dto.ReservationResponse;
 import roomescape.reservation.controller.dto.ReservationWithStatusResponse;
 import roomescape.reservation.domain.Reservation;
-
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.service.ReservationService;
 
 @RestController
@@ -34,7 +31,6 @@ public class ReservationController {
     public ResponseEntity<ReservationResponse> createReservation(@RequestBody ReservationRequest requestDto) {
         Reservation reservation = reservationService.save(requestDto.toCommand());
         ReservationResponse response = ReservationResponse.from(reservation);
-
         return ResponseEntity
                 .created(URI.create("/reservations/" + response.id()))
                 .body(response);
@@ -42,7 +38,8 @@ public class ReservationController {
 
 
     @GetMapping
-    public ResponseEntity<List<ReservationWithStatusResponse>> getAllReservationsByName(@RequestParam("name") String name) {
+    public ResponseEntity<List<ReservationWithStatusResponse>> getAllReservationsByName(
+            @RequestParam("name") String name) {
         if (name == null || name.isBlank()) {
             throw new InvalidRequestFormatException(ReservationErrorCode.INVALID_FORMAT.getMessage());
         }

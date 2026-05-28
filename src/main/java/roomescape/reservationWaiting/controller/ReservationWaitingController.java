@@ -1,9 +1,8 @@
 package roomescape.reservationWaiting.controller;
 
-import jakarta.servlet.http.HttpServletRequest;
-import roomescape.global.exception.UnauthorizedException;
-import roomescape.reservation.exception.ReservationErrorCode;
 import java.net.URI;
+import roomescape.auth.Authorized;
+import roomescape.auth.OwnerOnly;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -41,14 +40,10 @@ public class ReservationWaitingController {
     }
 
     //- DELETE /reservations-waitings/{id}
+    @Authorized
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
-    public void deleteMyReservationWaiting(HttpServletRequest req, @PathVariable Long id) {
-        String userName = req.getHeader("Authorization");
-        if (userName == null) {
-            throw new UnauthorizedException(ReservationErrorCode.MISSING_AUTH_HEADER.getMessage());
-        }
-        
+    public void deleteMyReservationWaiting(@OwnerOnly String userName, @PathVariable Long id) {
         reservationWaitingService.delete(id, userName);
     }
 }

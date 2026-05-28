@@ -1,42 +1,16 @@
 package roomescape.time.domain;
 
 import java.time.LocalTime;
-import java.util.Objects;
 
-public class ReservationTime {
-
-    private final Long id;
-    private final LocalTime startAt;
-
-    public ReservationTime(Long id, LocalTime startAt) {
-        this.id = id;
-        this.startAt = startAt;
-    }
-
+public record ReservationTime(
+        Long id,
+        LocalTime startAt
+) {
     public static ReservationTime of(LocalTime startAt) {
         return new ReservationTime(null, startAt);
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public LocalTime getStartAt() {
-        return startAt;
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (o == null || getClass() != o.getClass()) {
-            return false;
-        }
-
-        ReservationTime that = (ReservationTime) o;
-        return Objects.equals(getId(), that.getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hashCode(getId());
+    public ReservationTime withId(Long id) {
+        return new ReservationTime(id, this.startAt);
     }
 }

@@ -30,7 +30,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("새로운 시간 정보를 저장하고 반환된 객체의 ID를 확인한다.")
-    void saveTest() {
+    void save_validTime_returnsWithId() {
         // given
         LocalTime startTime = LocalTime.of(10, 0);
         ReservationTime time = ReservationTime.of(startTime);
@@ -39,13 +39,13 @@ class JdbcReservationTimeRepositoryTest {
         ReservationTime savedTime = reservationTimeRepository.save(time);
 
         //then
-        assertThat(savedTime.getId()).isNotNull();
-        assertThat(savedTime.getStartAt()).isEqualTo(startTime);
+        assertThat(savedTime.id()).isNotNull();
+        assertThat(savedTime.startAt()).isEqualTo(startTime);
     }
 
     @Test
     @DisplayName("기존에 이미 해당 시간이 있으면 예외가 발생한다.")
-    void saveTest_duplicate() {
+    void save_duplicateTime_throwsDataIntegrityViolation() {
         // given
         LocalTime startTime = LocalTime.of(10, 0);
         ReservationTime time = ReservationTime.of(startTime);
@@ -59,12 +59,12 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("ID를 통해 시간 정보를 삭제한다.")
-    void deleteByIdTest() {
+    void deleteById_existingId_removesTime() {
         // given
         ReservationTime saved = createTime(LocalTime.of(10, 0));
 
         // when
-        reservationTimeRepository.deleteById(saved.getId());
+        reservationTimeRepository.deleteById(saved.id());
 
         // then
         List<ReservationTime> all = reservationTimeRepository.findAll();
@@ -73,7 +73,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("ID가 사용되고 있으면 예외가 발생한다.")
-    void deleteByIdTest_used() {
+    void deleteById_timeInUse_throwsDataIntegrityViolation() {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
 
@@ -82,26 +82,26 @@ class JdbcReservationTimeRepositoryTest {
 
         //when & then
         assertThatThrownBy(
-                () -> reservationTimeRepository.deleteById(time.getId())
+                () -> reservationTimeRepository.deleteById(time.id())
         ).isInstanceOf(DataIntegrityViolationException.class);
     }
 
     @Test
     @DisplayName("ID를 통해 저장된 시간 정보를 정확히 조회한다.")
-    void findByIdTest() {
+    void findById_existingTime_returnsTime() {
         // given
         ReservationTime savedTime = createTime(LocalTime.of(11, 0));
 
         // when
-        ReservationTime foundTime = reservationTimeRepository.findById(savedTime.getId())
-                .orElseThrow(() -> new AssertionError("조회된 결과가 없습니다. id: " + savedTime.getId()));
+        ReservationTime foundTime = reservationTimeRepository.findById(savedTime.id())
+                .orElseThrow(() -> new AssertionError("조회된 결과가 없습니다. id: " + savedTime.id()));
 
         // then
         assertThat(foundTime).isEqualTo(savedTime);
     }
 
-    @DisplayName("해당 시간이 저장돼 있는지 조회한다.")
     @Test
+    @DisplayName("해당 시간이 저장돼 있는지 조회한다.")
     void existsByStartAt() {
         //given
         createTime(LocalTime.of(11, 0));
@@ -116,7 +116,7 @@ class JdbcReservationTimeRepositoryTest {
 
     @Test
     @DisplayName("존재하는 모든 시간 목록을 리스트로 조회한다.")
-    void findAllTest() {
+    void findAll_multipleTimes_returnsAllTimes() {
         // given
         ReservationTime saved1 = createTime(LocalTime.of(10, 0));
         ReservationTime saved2 = createTime(LocalTime.of(11, 0));
@@ -149,8 +149,8 @@ class JdbcReservationTimeRepositoryTest {
                 .map(AvailableTimeQueryResult::startAt).toList();
 
         assertThat(times).containsExactly(
-                time2.getStartAt(),
-                time3.getStartAt()
+                time2.startAt(),
+                time3.startAt()
         );
     }
 
@@ -176,7 +176,7 @@ class JdbcReservationTimeRepositoryTest {
         jdbcTemplate.update("""
             insert into reservation(name, reservation_date, time_id, theme_id)
             values (?, ?, ?, ?)
-        """, "브라운", date, time.getId(), themeId
+        """, "브라운", date, time.id(), themeId
         );
     }
 }

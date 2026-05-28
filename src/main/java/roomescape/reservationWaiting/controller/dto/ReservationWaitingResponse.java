@@ -15,11 +15,11 @@ public record ReservationWaitingResponse(
 
     public static ReservationWaitingResponse from(ReservationWaiting reservationWaiting) {
         return new ReservationWaitingResponse(
-                reservationWaiting.getId(),
-                reservationWaiting.getName(),
-                reservationWaiting.getDate(),
-                ReservationTimeResponse.from(reservationWaiting.getTime()),
-                ThemeResponse.from(reservationWaiting.getTheme())
+                reservationWaiting.id(),
+                reservationWaiting.name(),
+                reservationWaiting.date(),
+                ReservationTimeResponse.from(reservationWaiting.time()),
+                ThemeResponse.from(reservationWaiting.theme())
         );
     }
 }

@@ -26,6 +26,7 @@ public class ThemeController {
 
     @GetMapping
     public ResponseEntity<List<ThemeResponse>> getAllThemes() {
+        System.out.println("====== getAllThemes EXECUTED ======");
         List<ThemeResponse> responses = themeService.findAll()
                 .stream()
                 .map(ThemeResponse::from)
@@ -38,7 +39,9 @@ public class ThemeController {
             @RequestParam("period") int period,
             @RequestParam("limit") int limit
     ) {
+        System.out.println("====== getPopularThemes EXECUTED, period: " + period + ", limit: " + limit + " ======");
         if (period < 1 || limit < 1) {
+            System.out.println("====== THROWING EXCEPTION ======");
             throw new InvalidRequestValueException();
         }
 

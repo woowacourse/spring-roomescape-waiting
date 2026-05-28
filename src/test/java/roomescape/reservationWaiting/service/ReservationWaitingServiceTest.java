@@ -5,7 +5,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -49,29 +50,29 @@ class ReservationWaitingServiceTest {
     @InjectMocks
     ReservationWaitingService reservationWaitingService;
 
-    @DisplayName("새로운 에약 대기를 신청한다.")
     @Test
-    void makeReservationWaitingTest() {
+    @DisplayName("새로운 에약 대기를 신청한다.")
+    void save_validCommand_returnsReservationWaiting() {
         //given
-        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .thenReturn(false);
+        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+                .willReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
 
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 14)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
-        when(reservationRepository.findByDateAndTimeIdAndThemeId(
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).thenReturn(Optional.of(new Reservation(1L, "포비", LocalDate.of(2026, 5, 15), time, theme)));
+        ).willReturn(Optional.of(new Reservation(1L, "포비", LocalDate.of(2026, 5, 15), time, theme)));
 
-        when(reservationWaitingRepository.save(any()))
-                .thenReturn(new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme));
+        given(reservationWaitingRepository.save(any()))
+                .willReturn(new ReservationWaiting(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme));
 
         //when
         ReservationWaiting reservationWaiting = reservationWaitingService.save(
@@ -81,15 +82,15 @@ class ReservationWaitingServiceTest {
         );
 
         //then
-        assertThat(reservationWaiting.getId()).isNotNull();
+        assertThat(reservationWaiting.id()).isNotNull();
     }
 
-    @DisplayName("예약 대기 생성 시, 기존에 이미 동일한 예약 대기가 있으면 예외가 발생한다.")
     @Test
-    void makeReservationWaitingTest_duplicate() {
+    @DisplayName("예약 대기 생성 시, 기존에 이미 동일한 예약 대기가 있으면 예외가 발생한다.")
+    void save_duplicateWaiting_throwsDuplicateException() {
         //given
-        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .thenReturn(true);
+        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+                .willReturn(true);
 
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
@@ -100,16 +101,16 @@ class ReservationWaitingServiceTest {
                 .hasMessage(ReservationWaitingErrorCode.DUPLICATE_WAITING.getMessage());
     }
 
-    @DisplayName("예약 대기 생성 시, 해당 슬롯의 예약이 없으면 예외가 발생한다.")
     @Test
-    void makeReservationWaitingTest_no_reservation() {
+    @DisplayName("예약 대기 생성 시, 해당 슬롯의 예약이 없으면 예외가 발생한다.")
+    void save_noTargetReservation_throwsNotFoundException() {
         //given
-        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .thenReturn(false);
+        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+                .willReturn(false);
 
-        when(reservationRepository.findByDateAndTimeIdAndThemeId(
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).thenReturn(Optional.empty());
+        ).willReturn(Optional.empty());
 
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
@@ -120,19 +121,19 @@ class ReservationWaitingServiceTest {
                 .hasMessage(ReservationWaitingErrorCode.TARGET_RESERVATION_NOT_FOUND.getMessage());
     }
 
-    @DisplayName("예약 대기 생성 시, 해당 슬롯으로 자신이 예약을 했었다면 예외가 발생한다.")
     @Test
-    void makeReservationWaitingTest_already_reserved() {
+    @DisplayName("예약 대기 생성 시, 해당 슬롯으로 자신이 예약을 했었다면 예외가 발생한다.")
+    void save_alreadyReservedByRequester_throwsBadRequestException() {
         //given
-        when(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
-                .thenReturn(false);
+        given(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(any(), any(), any(), anyString()))
+                .willReturn(false);
 
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
 
-        when(reservationRepository.findByDateAndTimeIdAndThemeId(
+        given(reservationRepository.findByDateAndTimeIdAndThemeId(
                 any(), any(), any())
-        ).thenReturn(Optional.of(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme)));
+        ).willReturn(Optional.of(new Reservation(1L, "브라운", LocalDate.of(2026, 5, 15), time, theme)));
 
         //when & then
         assertThatThrownBy(() -> reservationWaitingService.save(
@@ -150,17 +151,17 @@ class ReservationWaitingServiceTest {
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
 
-        when(reservationWaitingRepository.findById(any())).thenReturn(
+        given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
                         1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
                 )));
-        when(reservationWaitingRepository.deleteById(any())).thenReturn(1);
-        when(clock.instant()).thenReturn(
+        given(reservationWaitingRepository.deleteById(any())).willReturn(1);
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 1)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
         // when, then
         assertDoesNotThrow(
@@ -172,7 +173,7 @@ class ReservationWaitingServiceTest {
     @DisplayName("예약 대기 삭제 대상이 없는 경우 예외가 발생한다")
     void deleteReservationWaiting_fail_not_exist() {
         // given
-        when(reservationWaitingRepository.findById(any())).thenReturn(
+        given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.empty());
 
         // when, then
@@ -186,17 +187,17 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
-        when(reservationWaitingRepository.findById(any())).thenReturn(
+        given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
                         1L, "브라운", LocalDate.of(2026, 5, 1), time, theme
                 )));
 
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 14)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
         // when,then
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "브라운")).isInstanceOf(
@@ -209,18 +210,18 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
-        when(reservationWaitingRepository.findById(any())).thenReturn(
+        given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
                         1L, "브라운", LocalDate.of(2026, 5, 14), time, theme
                 )));
 
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 1)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
-        when(reservationWaitingRepository.deleteById(any())).thenReturn(1);
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
+        given(reservationWaitingRepository.deleteById(any())).willReturn(1);
 
         // when,then
         assertDoesNotThrow(
@@ -234,17 +235,17 @@ class ReservationWaitingServiceTest {
         // given
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
         Theme theme = new Theme(1L, "이름", "설명", "thumbnailUrl");
-        when(reservationWaitingRepository.findById(any())).thenReturn(
+        given(reservationWaitingRepository.findById(any())).willReturn(
                 Optional.of(new ReservationWaiting(
                         1L, "브라운", LocalDate.of(2026, 5, 14), time, theme
                 )));
 
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 1)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
         // when,then
         assertThatThrownBy(() -> reservationWaitingService.delete(1L, "검프")).isInstanceOf(

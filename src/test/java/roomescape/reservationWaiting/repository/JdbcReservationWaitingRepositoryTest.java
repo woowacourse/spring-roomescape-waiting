@@ -34,7 +34,7 @@ class JdbcReservationWaitingRepositoryTest {
 
     @Test
     @DisplayName("예약 대기를 저장하고 반환된 객체의 ID를 확인한다.")
-    void saveTest() {
+    void save_validWaiting_returnsWithId() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -59,13 +59,13 @@ class JdbcReservationWaitingRepositoryTest {
         );
 
         // then
-        assertThat(saved1.getId()).isNotNull();
-        assertThat(saved2.getId()).isNotNull();
+        assertThat(saved1.id()).isNotNull();
+        assertThat(saved2.id()).isNotNull();
     }
 
     @Test
     @DisplayName("기존에 이미 동일한 예약 대기가 있으면 예외가 발생한다.")
-    void saveTest_duplicate() {
+    void save_duplicateWaiting_throwsDataIntegrityViolation() {
         // given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -120,9 +120,9 @@ class JdbcReservationWaitingRepositoryTest {
         return new Theme(themeId, name, description, thumbnailUrl);
     }
 
-    @DisplayName("날짜, 시간, 테마, 예약자 이름에 해당하는 예약 대기가 존재하는지 조회한다.")
     @Test
-    void existsByDateAndTimeIdAndThemeIdAndNameTest() {
+    @DisplayName("날짜, 시간, 테마, 예약자 이름에 해당하는 예약 대기가 존재하는지 조회한다.")
+    void existsByDateAndTimeIdAndThemeIdAndName_matchingEntry_returnsTrue() {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -131,16 +131,16 @@ class JdbcReservationWaitingRepositoryTest {
 
         //when & then
         assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                saved.getDate(),
-                saved.getTime().getId(),
-                saved.getTheme().getId(),
+                saved.date(),
+                saved.time().id(),
+                saved.theme().id(),
                 "브라운"
         )).isTrue();
 
         assertThat(reservationWaitingRepository.existsByDateAndTimeIdAndThemeIdAndName(
-                saved.getDate(),
-                saved.getTime().getId(),
-                saved.getTheme().getId(),
+                saved.date(),
+                saved.time().id(),
+                saved.theme().id(),
                 "포비"
         )).isFalse();
     }
@@ -155,7 +155,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
-        int deletedCount = reservationWaitingRepository.deleteById(saved.getId());
+        int deletedCount = reservationWaitingRepository.deleteById(saved.id());
 
         // then
         assertThat(deletedCount).isEqualTo(1);
@@ -171,7 +171,7 @@ class JdbcReservationWaitingRepositoryTest {
         ReservationWaiting saved = saveReservationWaiting("브라운", LocalDate.of(2024, 5, 1), time, theme);
 
         // when
-        Optional<ReservationWaiting> found = reservationWaitingRepository.findById(saved.getId());
+        Optional<ReservationWaiting> found = reservationWaitingRepository.findById(saved.id());
 
         // then
         assertTrue(found.isPresent());
@@ -201,9 +201,9 @@ class JdbcReservationWaitingRepositoryTest {
         );
     }
 
-    @DisplayName("날짜, 시간, 테마에 해당하는 예약 대기들에 대한 순번을 계산한다.")
     @Test
-    void countByDateAndTimeIdAndThemeIdAndIdLessThanTest() {
+    @DisplayName("날짜, 시간, 테마에 해당하는 예약 대기들에 대한 순번을 계산한다.")
+    void countByDateAndTimeIdAndThemeIdAndIdLessThan_multipleEntries_returnsCorrectOrder() {
         //given
         ReservationTime time = createTime(LocalTime.of(10, 0));
         Theme theme = createTheme("우테코", "우테코 전용 테마", "https://example.com");
@@ -214,15 +214,15 @@ class JdbcReservationWaitingRepositoryTest {
 
         //when & then
         assertThat(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), brown.getId()
+                LocalDate.of(2024, 5, 1), time.id(), theme.id(), brown.id()
         )).isEqualTo(0);
 
         assertThat(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), gump.getId()
+                LocalDate.of(2024, 5, 1), time.id(), theme.id(), gump.id()
         )).isEqualTo(1);
 
         assertThat(reservationWaitingRepository.countByDateAndTimeIdAndThemeIdAndIdLessThan(
-                LocalDate.of(2024, 5, 1), time.getId(), theme.getId(), pobi.getId()
+                LocalDate.of(2024, 5, 1), time.id(), theme.id(), pobi.id()
         )).isEqualTo(2);
     }
 }

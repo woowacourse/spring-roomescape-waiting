@@ -1,13 +1,10 @@
 package roomescape.reservation.service;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import roomescape.global.exception.DuplicateException;
-import roomescape.global.exception.NotFoundException;
-import roomescape.reservation.exception.ReservationErrorCode;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 import java.time.Clock;
 import java.time.LocalDate;
@@ -22,14 +19,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.dao.DataIntegrityViolationException;
+import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
+import roomescape.reservation.exception.ReservationErrorCode;
 import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservation.repository.dto.PopularThemeQueryResult;
 import roomescape.reservation.service.dto.PopularThemesResult;
 import roomescape.reservation.service.dto.ReservationCommand;
 import roomescape.reservation.service.dto.ReservationUpdateCommand;
 import roomescape.reservation.service.dto.ReservationWithStatusResult;
-import roomescape.reservationWaiting.domain.ReservationWaiting;
 import roomescape.theme.domain.Theme;
 import roomescape.theme.service.ThemeService;
 import roomescape.time.domain.ReservationTime;
@@ -53,23 +52,23 @@ class ReservationServiceTest {
     @Mock
     ThemeService themeService;
 
-    @DisplayName("인기 테마 조회 시 period=7이면 오늘 제외 직전 7일 범위로 조회한다.")
     @Test
-    void findPopularThemesRange() {
+    @DisplayName("인기 테마 조회 시 period=7이면 오늘 제외 직전 7일 범위로 조회한다.")
+    void findPopularThemes_periodOf7_queriesLast7DaysExcludingToday() {
         //given
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 8)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
-        when(
+        given(
                 reservationRepository.findPopularThemes(
                         LocalDate.of(2026, 5, 1),
                         LocalDate.of(2026, 5, 7), 10
                 )
-        ).thenReturn(
+        ).willReturn(
                 List.of(
                         new PopularThemeQueryResult(
                                 1L,
@@ -99,19 +98,19 @@ class ReservationServiceTest {
         );
     }
 
-    @DisplayName("예약 생성 시, 기존에 이미 동일한 예약이 있으면 예외가 발생한다.")
     @Test
+    @DisplayName("예약 생성 시, 기존에 이미 동일한 예약이 있으면 예외가 발생한다.")
     void makeReservation_duplicate() {
         //given
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 8)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
-        when(reservationRepository.save(any()))
-                .thenThrow(new DataIntegrityViolationException("duplicate"));
+        given(reservationRepository.save(any()))
+                .willThrow(new DataIntegrityViolationException("duplicate"));
 
         //when & then
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -125,27 +124,27 @@ class ReservationServiceTest {
                 .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
-    @DisplayName("id에 해당하는 예약이 없으면 예외가 발생한다.")
     @Test
+    @DisplayName("id에 해당하는 예약이 없으면 예외가 발생한다.")
     void deleteReservationById_not_found() {
         assertThatThrownBy(() -> reservationService.deleteById(1L))
                 .isInstanceOf(NotFoundException.class)
                 .hasMessage(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage());
     }
 
-    @DisplayName("본인 예약 변경 시, 기존에 변경하려는 예약과 동일한 예약이 있으면 예외가 발생한다.")
     @Test
+    @DisplayName("본인 예약 변경 시, 기존에 변경하려는 예약과 동일한 예약이 있으면 예외가 발생한다.")
     void updateReservation_duplicate() {
         //given
-        when(clock.instant()).thenReturn(
+        given(clock.instant()).willReturn(
                 LocalDate.of(2026, 5, 8)
                         .atStartOfDay(ZoneId.systemDefault())
                         .toInstant()
         );
-        when(clock.getZone()).thenReturn(ZoneId.systemDefault());
+        given(clock.getZone()).willReturn(ZoneId.systemDefault());
 
-        when(reservationRepository.findById(1L))
-                .thenReturn(Optional.of(
+        given(reservationRepository.findById(1L))
+                .willReturn(Optional.of(
                         new Reservation(
                                 1L,
                                 "브라운",
@@ -155,9 +154,9 @@ class ReservationServiceTest {
                         )
                 ));
 
-        when(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
+        given(reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
                 LocalDate.of(2026, 5, 15), 1L, 1L, 1L)
-        ).thenReturn(true);
+        ).willReturn(true);
 
         //when & then
         ReservationTime time = new ReservationTime(1L, LocalTime.of(10, 0));
@@ -169,13 +168,13 @@ class ReservationServiceTest {
                 .hasMessage(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
     }
 
-    @DisplayName("이름에 해당하는 예약들을 조회한다.")
     @Test
-    void findReservationsByNameTest() {
+    @DisplayName("이름에 해당하는 예약들을 조회한다.")
+    void findAllByName_existingName_returnsReservationsWithStatus() {
         //given
         // Mock native query result combining reserved and waiting entries
-        when(reservationRepository.findAllByNameWithStatus("브라운"))
-                .thenReturn(List.of(
+        given(reservationRepository.findAllByNameWithStatus("브라운"))
+                .willReturn(List.of(
                         new ReservationWithStatusResult(
                                 1L,
                                 "브라운",

@@ -5,7 +5,8 @@ import roomescape.global.exception.DuplicateException;
 import roomescape.theme.exception.ThemeErrorCode;
 import roomescape.global.exception.NotFoundException;
 import roomescape.global.exception.BadRequestException;
-import static org.mockito.Mockito.when;
+import static org.mockito.BDDMockito.given;
+import static org.mockito.BDDMockito.willThrow;
 
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
@@ -27,14 +28,14 @@ class ThemeServiceTest {
     @Mock
     ThemeRepository themeRepository;
 
-    @DisplayName("테마 생성 시, 기존에 이미 동일한 테마가 있으면 예외가 발생한다.")
     @Test
+    @DisplayName("테마 생성 시, 기존에 이미 동일한 테마가 있으면 예외가 발생한다.")
     void registerTheme_duplicate() {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
 
-        when(themeRepository.existsByName("브라운"))
-                .thenReturn(true);
+        given(themeRepository.existsByName("브라운"))
+                .willReturn(true);
 
         //when & then
         assertThatThrownBy(() -> themeService.save(
@@ -43,14 +44,14 @@ class ThemeServiceTest {
                 .hasMessage(ThemeErrorCode.DUPLICATE_THEME.getMessage());
     }
 
-    @DisplayName("id에 해당하는 테마가 없으면 예외가 발생한다.")
     @Test
+    @DisplayName("id에 해당하는 테마가 없으면 예외가 발생한다.")
     void removeThemeById_not_found() {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
 
-        when(themeRepository.findById(1L))
-                .thenReturn(Optional.empty());
+        given(themeRepository.findById(1L))
+                .willReturn(Optional.empty());
 
         //when & then
         assertThatThrownBy(() -> themeService.deleteById(1L))
@@ -58,17 +59,17 @@ class ThemeServiceTest {
                 .hasMessage(ThemeErrorCode.THEME_NOT_FOUND.getMessage());
     }
 
-    @DisplayName("테마 삭제시, 테마가 사용 중이면 예외가 발생한다.")
     @Test
+    @DisplayName("테마 삭제시, 테마가 사용 중이면 예외가 발생한다.")
     void removeThemeById_in_use() {
         //given
         ThemeService themeService = new ThemeService(themeRepository);
 
-        when(themeRepository.findById(1L))
-                .thenReturn(Optional.of(new Theme(1L, "테마", "설명", "url")));
+        given(themeRepository.findById(1L))
+                .willReturn(Optional.of(new Theme(1L, "테마", "설명", "url")));
 
-        when(themeRepository.deleteById(1L))
-                .thenThrow(new DataIntegrityViolationException("foreign key"));
+        given(themeRepository.deleteById(1L))
+                .willThrow(new DataIntegrityViolationException("foreign key"));
 
         //when & then
         assertThatThrownBy(() -> themeService.deleteById(1L))

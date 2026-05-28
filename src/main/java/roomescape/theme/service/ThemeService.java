@@ -15,6 +15,7 @@ import roomescape.theme.domain.Theme;
 import roomescape.theme.repository.ThemeRepository;
 import roomescape.theme.service.dto.ThemeCommand;
 
+@Transactional(readOnly = true)
 @Service
 public class ThemeService {
 

@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import roomescape.global.exception.DuplicateException;
+import roomescape.global.exception.ForbiddenException;
 import roomescape.global.exception.InvalidRequestValueException;
 import roomescape.global.exception.NotFoundException;
 import roomescape.reservation.domain.Reservation;
@@ -23,6 +24,7 @@ import roomescape.time.domain.ReservationTime;
 import roomescape.time.exception.TimeErrorCode;
 import roomescape.time.service.ReservationTimeService;
 
+@Transactional(readOnly = true)
 @Service
 public class ReservationService {
 
@@ -43,13 +45,14 @@ public class ReservationService {
 
     @Transactional
     public Reservation save(ReservationCommand command, ReservationTime time, Theme theme) {
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(
-                command.date(),
-                time.getId(),
-                theme.getId())) {
+        return saveInternal(command, time, theme);
+    }
+
+    private Reservation saveInternal(ReservationCommand command, ReservationTime time, Theme theme) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(command.date(), time.id(), theme.id())) {
             throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
-        validateExpiry(command.date(), time.getStartAt());
+        validateExpiry(command.date(), time.startAt());
         try {
             return reservationRepository.save(
                     Reservation.of(
@@ -67,7 +70,7 @@ public class ReservationService {
     public Reservation save(ReservationCommand command) {
         ReservationTime time = reservationTimeService.getReservationTime(command.timeId());
         Theme theme = themeService.getTheme(command.themeId());
-        return save(command, time, theme);
+        return saveInternal(command, time, theme);
     }
 
     @Transactional
@@ -76,20 +79,25 @@ public class ReservationService {
         if (command.timeId() != null) {
             time = reservationTimeService.getReservationTime(command.timeId());
         }
-        update(command, id, time);
+        updateInternal(command, id, time);
     }
 
     @Transactional
     public void update(ReservationUpdateCommand command, Long id, ReservationTime time) {
+        updateInternal(command, id, time);
+    }
+
+    private void updateInternal(ReservationUpdateCommand command, Long id, ReservationTime time) {
         Reservation reservation = getReservation(id);
-        validateExpiry(reservation.getDate(), reservation.getTime().getStartAt());
+        validateExpiry(reservation.date(), reservation.time().startAt());
         Reservation updated = updateField(command, reservation, time);
-        validateExpiry(updated.getDate(), updated.getTime().getStartAt());
+        validateExpiry(updated.date(), updated.time().startAt());
         if (reservationRepository.existsByDateAndTimeIdAndThemeIdAndIdNot(
-                updated.getDate(),
-                updated.getTime().getId(),
-                updated.getTheme().getId(),
-                updated.getId())) {
+                updated.date(),
+                updated.time().id(),
+                updated.theme().id(),
+                updated.id())
+        ) {
             throw new DuplicateException(ReservationErrorCode.DUPLICATE_RESERVATION.getMessage());
         }
         try {
@@ -126,7 +134,7 @@ public class ReservationService {
 
     public void validateNotExpired(Long id) {
         Reservation reservation = getReservation(id);
-        validateExpiry(reservation.getDate(), reservation.getTime().getStartAt());
+        validateExpiry(reservation.date(), reservation.time().startAt());
     }
 
     private void validateExpiry(LocalDate date, LocalTime startAt) {
@@ -142,6 +150,13 @@ public class ReservationService {
     private Reservation getReservation(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException(ReservationErrorCode.RESERVATION_NOT_FOUND.getMessage()));
+    }
+
+    public void validateOwnership(Long id, String name) {
+        Reservation reservation = getReservation(id);
+        if (!reservation.hasSameName(name)) {
+            throw new ForbiddenException(ReservationErrorCode.AUTHORIZATION_FAIL.getMessage());
+        }
     }
 
     private Reservation updateField(ReservationUpdateCommand command, Reservation reservation, ReservationTime time) {
