@@ -132,6 +132,35 @@ class WaitingServiceTest {
     }
 
     @Test
+    @DisplayName("예약이 존재하지 않는 슬롯에 대기를 저장하면 예외가 발생한다")
+    void 예약이_존재하지_않는_슬롯에_대기를_저장하면_예외가_발생한다() {
+        // given
+        ReservationTime savedTime = reservationTimeRepository.save(ReservationTime.create(LocalTime.now().plusHours(1)));
+        Theme savedTheme = themeRepository.save(Theme.create("공포", "무서운 테마", "https://good.com/thumb-nail/1"));
+        WaitingService waitingService = new WaitingService(
+                waitingRepository,
+                reservationTimeRepository,
+                themeRepository,
+                command -> {
+                    throw new BusinessException(WaitingErrorCode.WAITING_NOT_EXIST_RESERVATION);
+                },
+                new WaitingValidator(waitingRepository)
+        );
+        WaitingCreateCommand command = new WaitingCreateCommand(
+                "브라운",
+                LocalDate.now().plusDays(1),
+                savedTime.getId(),
+                savedTheme.getId()
+        );
+
+        // when & then
+        assertThatThrownBy(() -> waitingService.save(command))
+                .isInstanceOf(BusinessException.class)
+                .hasMessageContaining("예약이 존재하지 않으면, 대기요청을 할 수 없습니다.");
+        assertThat(waitingRepository.isEmpty()).isTrue();
+    }
+
+    @Test
     @DisplayName("본인의 예약 대기를 취소한다")
     void cancelWaiting_success() {
         // given
