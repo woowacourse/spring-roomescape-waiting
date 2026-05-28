@@ -186,4 +186,14 @@ class WaitingJdbcTemplateRepositoryTest {
         assertThat(foundWaiting).isEqualTo(savedWaiting);
     }
 
+    @Test
+    @DisplayName("날짜와 시간과 테마가 모두 일치하는 예약 대기가 없으면 빈 Optional을 반환한다")
+    void 날짜와_시간과_테마가_모두_일치하는_예약_대기가_없으면_빈_옵셔널을_반환한다() {
+        // when & then
+        assertThat(waitingRepository.findByDateAndTimeIdAndThemeId(
+                LocalDate.now().plusDays(1),
+                savedTime.getId(),
+                savedTheme.getId()
+        )).isEmpty();
+    }
 }
