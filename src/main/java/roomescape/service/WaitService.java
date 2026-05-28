@@ -1,9 +1,9 @@
 package roomescape.service;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
-import roomescape.domain.Reservation;
 import roomescape.domain.ReservationStatus;
 import roomescape.domain.Wait;
 import roomescape.exception.CustomInvalidRequestException;
@@ -59,9 +59,8 @@ public class WaitService {
         waitRepository.delete(id);
     }
 
-    public List<Wait> findByReservation(Reservation reservation) {
-        return waitRepository.findBySlot(reservation.getDate(), reservation.getTime().getId(),
-                reservation.getTheme().getId());
+    public List<Wait> findBySlot(LocalDate reservationDate, Long timeId, Long themeId) {
+        return waitRepository.findBySlot(reservationDate, timeId, themeId);
     }
 
     public Wait findWait(Long waitId) {

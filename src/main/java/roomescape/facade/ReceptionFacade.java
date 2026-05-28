@@ -78,7 +78,8 @@ public class ReceptionFacade {
         validateDelete(reservation.getDate(), reservation.getTime());
         reservationService.delete(id);
 
-        List<Wait> waits = waitService.findByReservation(reservation);
+        List<Wait> waits = waitService.findBySlot(reservation.getDate(), reservation.getTime().getId(),
+                reservation.getTheme().getId());
         if (waits.isEmpty()) {
             return;
         }
