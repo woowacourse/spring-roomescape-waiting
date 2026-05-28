@@ -8,7 +8,6 @@ import roomescape.date.domain.ReservationDate;
 import roomescape.date.exception.ReservationDateException;
 import roomescape.date.repository.ReservationDateRepository;
 import roomescape.reservation.domain.Reservation;
-import roomescape.reservation.domain.ReservationSlot;
 import roomescape.reservation.domain.Reservations;
 import roomescape.reservation.exception.ReservationException;
 import roomescape.reservation.repository.ReservationRepository;
@@ -144,7 +143,7 @@ public class ReservationService {
     }
 
     private Reservations findTimeSlotReservations(Long dateId, Long timeId, Long themeId) {
-        return new Reservations(reservationRepository.findByDateTimeAndThemeId(dateId, timeId, themeId));
+        return new Reservations(reservationRepository.findReservedAndWaitingBySlot(dateId, timeId, themeId));
     }
 
 }

@@ -14,7 +14,7 @@ public interface ReservationRepository {
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findByDateTimeAndThemeId(Long dateId, Long timeId, Long themeId);
+    List<Reservation> findReservedAndWaitingBySlot(Long dateId, Long timeId, Long themeId);
 
     Reservation save(Reservation reservation);
 
