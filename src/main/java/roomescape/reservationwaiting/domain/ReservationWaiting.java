@@ -21,12 +21,6 @@ public class ReservationWaiting {
                 .build();
     }
 
-    public static ReservationWaiting restoreWithTurn(Long id, String name, Reservation reservation, Long turn) {
-        return ReservationWaiting.builder().
-                id(id).name(name).reservation(reservation)
-                .build();
-    }
-
     public Long getId() {
         return id;
     }

@@ -12,7 +12,6 @@ import roomescape.reservation.repository.ReservationRepository;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.domain.ReservationWaitingFactory;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
-import roomescape.reservationwaiting.service.ReservationWaitingService;
 
 import java.util.List;
 
@@ -31,8 +30,6 @@ public class ReservationWaitingRepositoryTest {
 
     @Autowired
     private ReservationWaitingFactory reservationWaitingFactory;
-    @Autowired
-    private ReservationWaitingService reservationWaitingService;
 
     @Test
     @DisplayName("예약 대기 신청에 성공한다.")

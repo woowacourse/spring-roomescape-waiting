@@ -1,6 +1,5 @@
 package roomescape.reservationwaiting.repository;
 
-import java.util.List;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
@@ -12,6 +11,8 @@ import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.reservationwaiting.domain.ReservationWaiting;
 import roomescape.reservationwaiting.dto.ReservationWaitingTurnResponse;
 import roomescape.theme.domain.Theme;
+
+import java.util.List;
 
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
@@ -97,9 +98,8 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 JOIN reservation r ON rw.reservation_id = r.id
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id) sub
-                WHERE sub.name = ? 
-                ORDER BY reservation_waiting_id
-                ;
+                WHERE sub.name = ?
+                ORDER BY reservation_waiting_id;
                 """;
         return jdbcTemplate.query(query, rowMapper, name);
     }
@@ -123,8 +123,7 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id) sub
                 WHERE sub.reservation_waiting_id = ? 
-                ORDER BY reservation_waiting_id
-                ;
+                ORDER BY reservation_waiting_id;
                 """;
         return jdbcTemplate.queryForObject(query, rowMapper2, reservationWaitingId);
     }
