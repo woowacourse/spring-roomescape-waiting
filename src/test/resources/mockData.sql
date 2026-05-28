@@ -27,11 +27,11 @@ INSERT INTO reservation_time (start_at) VALUES ('18:00:00');
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-01', 1, 11);
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-02', 1, 11);
 
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-03', 1, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-03', 2, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-03', 3, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-03', 4, 1);
-INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-03', 5, 1);
+INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 1, 1);
+INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 2, 1);
+INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 3, 1);
+INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 4, 1);
+INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('토리', '2026-05-03', 5, 1);
 
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-04', 1, 2);
 INSERT INTO reservation (name, date, time_id, theme_id) VALUES ('브라운', '2026-05-04', 2, 2);

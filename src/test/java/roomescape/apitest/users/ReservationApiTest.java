@@ -25,71 +25,72 @@ class ReservationApiTest {
     private final String userName = "브라운";
     private final Long timeId = 1L;
     private final Long themeId = 1L;
+
     @Autowired
     JdbcTemplate jdbcTemplate;
     private int initialReservationSize;
+    private int initialUserReservationSize;
 
     @BeforeEach
     void setUp() {
-        String sql = "SELECT COUNT(*) FROM reservation";
-        Integer result = jdbcTemplate.queryForObject(sql, Integer.class);
-        initialReservationSize = Optional.ofNullable(result).orElse(0);
+        Integer total = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation", Integer.class);
+        initialReservationSize = Optional.ofNullable(total).orElse(0);
+
+        Integer byUser = jdbcTemplate.queryForObject(
+                "SELECT COUNT(*) FROM reservation WHERE name = ?", Integer.class, userName);
+        initialUserReservationSize = Optional.ofNullable(byUser).orElse(0);
     }
 
     @Test
-    void 예약_사용자_API() {
-        Map<String, Object> reservation = new HashMap<>();
-        reservation.put("name", userName);
-        reservation.put("date", FUTURE_DATE);
-        reservation.put("timeId", timeId);
-        reservation.put("themeId", themeId);
+    @DisplayName("예약을 생성하면 201과 생성된 id를 반환한다.")
+    void 예약을_생성한다() {
+        Long generatedId = createReservation(userName, FUTURE_DATE, timeId, themeId);
 
-        Long generatedId = RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .body(reservation)
-                .when().post("/reservations")
-                .then().log().all()
-                .statusCode(201)
-                .extract().jsonPath().getLong("id");
+        assertThat(generatedId).isNotNull();
+    }
 
-        List<Long> allIds = RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .extract().jsonPath().getList("id", Long.class);
+    @Test
+    @DisplayName("생성한 예약이 전체 예약 조회에 포함된다.")
+    void 생성한_예약이_전체_조회에_포함된다() {
+        Long generatedId = createReservation(userName, FUTURE_DATE, timeId, themeId);
+
+        List<Long> allIds = getAllReservationIds();
 
         assertThat(allIds)
                 .hasSize(initialReservationSize + 1)
                 .contains(generatedId);
+    }
 
-        JsonPath jsonPath = RestAssured.given().log().all()
-                .when().get("/reservations?userName=" + userName)
-                .then().log().all()
-                .statusCode(200)
-                .extract().jsonPath();
+    @Test
+    @DisplayName("사용자 이름으로 조회하면 해당 사용자의 예약만 반환한다.")
+    void 사용자_이름으로_본인_예약을_조회한다() {
+        Long generatedId = createReservation(userName, FUTURE_DATE, timeId, themeId);
 
-        List<Long> idsByUserName = jsonPath.getList("reservationResponses.id", Long.class);
-        List<String> names = jsonPath.getList("reservationResponses.name", String.class);
+        JsonPath body = getReservationsByUserName(userName);
+        List<Long> ids = body.getList("reservationResponses.id", Long.class);
+        List<String> names = body.getList("reservationResponses.name", String.class);
 
-        assertThat(idsByUserName)
-                .hasSize(initialReservationSize + 1)
+        assertThat(ids)
+                .hasSize(initialUserReservationSize + 1)
                 .contains(generatedId);
-
         assertThat(names).containsOnly(userName);
+    }
+
+    @Test
+    @DisplayName("예약을 삭제하면 204를 반환하고 목록에서 제거된다.")
+    void 예약을_삭제하면_목록에서_제거된다() {
+        Long generatedId = createReservation(userName, FUTURE_DATE, timeId, themeId);
 
         RestAssured.given().log().all()
                 .when().delete("/reservations/" + generatedId + "?userName=" + userName)
                 .then().log().all()
                 .statusCode(204);
 
-        List<Long> remainIds = RestAssured.given().log().all()
-                .when().get("/reservations")
-                .then().log().all()
-                .statusCode(200)
-                .extract().jsonPath().getList("id", Long.class);
-
-        assertThat(remainIds).hasSize(initialReservationSize);
-        assertThat(remainIds).doesNotContain(generatedId);
+        List<Long> remainIds = getAllReservationIds();
+        assertThat(remainIds)
+                .hasSize(initialReservationSize)
+                .doesNotContain(generatedId);
     }
 
     @Test
@@ -241,5 +242,37 @@ class ReservationApiTest {
                 .when().post("/reservations")
                 .then().log().all()
                 .statusCode(400);
+    }
+
+    private Long createReservation(String name, String date, Long timeId, Long themeId) {
+        Map<String, Object> body = new HashMap<>();
+        body.put("name", name);
+        body.put("date", date);
+        body.put("timeId", timeId);
+        body.put("themeId", themeId);
+
+        return RestAssured.given().log().all()
+                .contentType(ContentType.JSON)
+                .body(body)
+                .when().post("/reservations")
+                .then().log().all()
+                .statusCode(201)
+                .extract().jsonPath().getLong("id");
+    }
+
+    private List<Long> getAllReservationIds() {
+        return RestAssured.given().log().all()
+                .when().get("/reservations")
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath().getList("id", Long.class);
+    }
+
+    private JsonPath getReservationsByUserName(String userName) {
+        return RestAssured.given().log().all()
+                .when().get("/reservations?userName=" + userName)
+                .then().log().all()
+                .statusCode(200)
+                .extract().jsonPath();
     }
 }
