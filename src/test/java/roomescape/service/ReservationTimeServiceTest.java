@@ -15,7 +15,7 @@ import roomescape.dto.request.ReservationTimeRequest;
 import roomescape.dto.response.ReservationTimeResponse;
 import roomescape.dto.response.ReservationTimeStatusResponse;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.DEFINED_PORT)
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ReservationTimeServiceTest {
 
@@ -33,21 +33,11 @@ class ReservationTimeServiceTest {
     void 전체_예약_시간_순서_확인() {
         List<ReservationTimeResponse> result = reservationTimeService.findAll();
 
-        List<LocalTime> startTimes = result.stream()
-                .map(ReservationTimeResponse::startAt)
-                .toList();
+        List<LocalTime> startTimes = result.stream().map(ReservationTimeResponse::startAt).toList();
 
-        assertThat(startTimes).containsExactly(
-                LocalTime.of(10, 0),
-                LocalTime.of(11, 0),
-                LocalTime.of(12, 0),
-                LocalTime.of(13, 0),
-                LocalTime.of(14, 0),
-                LocalTime.of(15, 0),
-                LocalTime.of(16, 0),
-                LocalTime.of(17, 0),
-                LocalTime.of(18, 0)
-        );
+        assertThat(startTimes).containsExactly(LocalTime.of(10, 0), LocalTime.of(11, 0), LocalTime.of(12, 0),
+                LocalTime.of(13, 0), LocalTime.of(14, 0), LocalTime.of(15, 0), LocalTime.of(16, 0), LocalTime.of(17, 0),
+                LocalTime.of(18, 0));
     }
 
     @Test
@@ -64,8 +54,7 @@ class ReservationTimeServiceTest {
     void 중복_시간_저장_시_예외() {
         ReservationTimeRequest request = new ReservationTimeRequest(LocalTime.of(10, 0));
 
-        assertThatThrownBy(() -> reservationTimeService.save(request))
-                .isInstanceOf(IllegalArgumentException.class)
+        assertThatThrownBy(() -> reservationTimeService.save(request)).isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("이미 존재하는 시간대이므로 추가할 수 없습니다.");
     }
 
@@ -82,9 +71,8 @@ class ReservationTimeServiceTest {
     void 예약_존재하는_시간_삭제_시_예외() {
         Long timeIdWithReservation = 1L;
 
-        assertThatThrownBy(() -> reservationTimeService.delete(timeIdWithReservation))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
+        assertThatThrownBy(() -> reservationTimeService.delete(timeIdWithReservation)).isInstanceOf(
+                IllegalArgumentException.class).hasMessage("해당 시간에 예약이 존재하여 삭제할 수 없습니다.");
     }
 
     @Test
@@ -93,9 +81,7 @@ class ReservationTimeServiceTest {
 
         List<ReservationTimeStatusResponse> result = reservationTimeService.findAvailableTime(1L, date);
 
-        long availableCount = result.stream()
-                .filter(r -> r.status() == ReservationStatus.AVAILABLE)
-                .count();
+        long availableCount = result.stream().filter(r -> r.status() == ReservationStatus.AVAILABLE).count();
 
         assertThat(availableCount).isEqualTo(4);
     }
