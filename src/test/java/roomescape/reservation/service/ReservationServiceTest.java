@@ -356,8 +356,8 @@ class ReservationServiceTest {
     }
 
     @Test
-    @DisplayName("수정하려는 날짜 및 시간에 예약이 존재는 하는데 그게 본인의 예약인 경우 예외가 발생한다.")
-    public void editDateTime_fail4_2() {
+    @DisplayName("본인의 기존 날짜 및 시간으로 예약을 수정하면 확정 상태를 유지한다.")
+    public void editDateTime_success_sameSlot() {
         // given
         clock.setFixed(LocalDate.of(2023, 7, 6));
 
@@ -365,12 +365,44 @@ class ReservationServiceTest {
         LocalDate date = LocalDate.of(2023, 8, 10);
         ReservationTime time = insertReservationTime(LocalTime.of(10, 0));
 
-        Reservation reservation = insertReservation("브라운", date, time, theme, Status.WAITING);
+        Reservation reservation = insertReservation("브라운", date, time, theme, Status.CONFIRMED);
+        Reservation waiting = insertReservation("포비", date, time, theme, Status.WAITING);
 
-        // when then
-        assertThatThrownBy(() -> reservationService.editDateTime(reservation.getId(), date, time.getId(), reservation.getGuestName()))
-                .isInstanceOf(DomainException.class)
-                .hasMessage(RESERVATION_ALREADY_EXISTS.message());
+        // when
+        reservationService.editDateTime(reservation.getId(), date, time.getId(), reservation.getGuestName());
+
+        // then
+        assertThat(reservationRepository.findById(reservation.getId()).get().getStatus())
+                .isEqualTo(Status.CONFIRMED);
+        assertThat(reservationRepository.findById(waiting.getId()).get().getStatus())
+                .isEqualTo(Status.WAITING);
+    }
+
+    @Test
+    @DisplayName("예약을 이미 확정 예약이 있는 슬롯으로 수정하면 수정 시각 기준으로 대기 순번을 받는다.")
+    public void editDateTime_success_waitingOrder() {
+        // given
+        clock.setFixed(LocalDateTime.of(2023, 7, 6, 10, 0));
+
+        Theme theme = insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
+        ReservationTime targetTime = insertReservationTime(LocalTime.of(10, 0));
+        ReservationTime originTime = insertReservationTime(LocalTime.of(12, 0));
+        LocalDate targetDate = LocalDate.of(2023, 8, 10);
+        LocalDate originDate = LocalDate.of(2023, 8, 11);
+
+        insertReservation("브라운", targetDate, targetTime, theme, Status.CONFIRMED);
+        insertReservation("포비", targetDate, targetTime, theme, Status.WAITING);
+        Reservation reservation = insertReservation("초코칩", originDate, originTime, theme, Status.CONFIRMED);
+
+        clock.setFixed(LocalDateTime.of(2023, 7, 6, 11, 0));
+
+        // when
+        reservationService.editDateTime(reservation.getId(), targetDate, targetTime.getId(), reservation.getGuestName());
+
+        // then
+        ReservationWaitingResult result = reservationService.findByGuestName("초코칩").getFirst();
+        assertThat(result.status()).isEqualTo(Status.WAITING);
+        assertThat(result.waitNumber()).isEqualTo(2);
     }
 
     @ParameterizedTest

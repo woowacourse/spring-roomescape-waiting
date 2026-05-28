@@ -7,11 +7,9 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 
 import java.sql.PreparedStatement;
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -55,29 +53,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
     }
 
     @Override
-    public List<ReservationTimeAvailability> findAllByDateAndThemeIdWithAvailability(LocalDate date, Long themeId) {
-        String sql = """
-                SELECT
-                    rt.id AS id,
-                    rt.start_at AS start_at,
-                    rt.deleted_at AS deleted_at,
-                    NOT EXISTS (
-                        SELECT 1
-                        FROM reservation r
-                        WHERE r.time_id = rt.id
-                          AND r.date = ?
-                          AND r.theme_id = ?
-                          AND r.status != 'CANCELED'
-                    ) AS available
-                FROM reservation_time rt
-                WHERE rt.deleted_at IS NULL
-                ORDER BY rt.start_at
-                """;
-
-        return jdbcTemplate.query(sql, reservationTimeAvailabilityRowMapper, date, themeId);
-    }
-
-    @Override
     public boolean existsByStartAt(LocalTime startAt) {
         Integer count = jdbcTemplate.queryForObject("""
                 SELECT COUNT(*)
@@ -117,19 +92,6 @@ public class JdbcReservationTimeRepository implements ReservationTimeRepository 
                     LocalTime.parse(resultSet.getString("start_at")),
                     toLocalDateTime(resultSet.getTimestamp("deleted_at"))
             );
-
-    private final RowMapper<ReservationTimeAvailability> reservationTimeAvailabilityRowMapper = (resultSet, rowNum) -> {
-        ReservationTime reservationTime = ReservationTime.of(
-                resultSet.getLong("id"),
-                LocalTime.parse(resultSet.getString("start_at")),
-                toLocalDateTime(resultSet.getTimestamp("deleted_at"))
-        );
-
-        if (resultSet.getBoolean("available")) {
-            return ReservationTimeAvailability.available(reservationTime);
-        }
-        return ReservationTimeAvailability.unavailable(reservationTime);
-    };
 
     private LocalDateTime toLocalDateTime(Timestamp timestamp) {
         if (timestamp == null) {

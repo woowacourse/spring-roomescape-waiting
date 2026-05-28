@@ -108,7 +108,8 @@ public class Reservation {
         return Objects.equals(this.guestName, guestName);
     }
 
-    public Reservation changeDateTimeAndStatus(LocalDate changedDate, ReservationTime changedTime, Status status) {
+    public Reservation changeDateTimeAndStatus(
+            LocalDate changedDate, ReservationTime changedTime, Status status, LocalDateTime lastModifiedAt) {
         return new Reservation(id, guestName, changedDate, changedTime, theme, status, lastModifiedAt);
     }
 

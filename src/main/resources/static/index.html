@@ -136,18 +136,35 @@
               <input id="editReservationDate" class="date-input" type="date" />
             </label>
             <label class="field">
-              <span class="label">예약 가능한 시간</span>
+              <span class="label">예약 시간</span>
               <select id="editReservationTime" class="select-input"></select>
             </label>
           </div>
           <button id="editReservationButton" class="primary-button" type="submit" disabled>수정하기</button>
           <p id="editReservationMessage" class="message"></p>
         </form>
+        <form id="cancelReservationForm" class="reservation-edit-form" hidden>
+          <div class="edit-head">
+            <div class="lookup-title-group">
+              <h2 id="cancelReservationTitle" class="area-title">예약 취소</h2>
+              <span id="cancelReservationMeta" class="area-subtitle"></span>
+            </div>
+            <button id="cancelReservationCloseButton" class="secondary-button" type="button">닫기</button>
+          </div>
+          <div class="edit-grid cancel-grid">
+            <label class="field">
+              <span class="label">예약자 이름</span>
+              <input id="cancelAuthorizationName" class="name-input" type="text" placeholder="이름" autocomplete="name" />
+            </label>
+          </div>
+          <button id="cancelReservationButton" class="danger-button" type="submit" disabled>취소하기</button>
+          <p id="cancelReservationMessage" class="message"></p>
+        </form>
       </section>
     </main>
   </div>
 
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
-  <script src="/js/roomescape.js?v=waiting-ui-1" defer></script>
+  <script src="/js/roomescape.js?v=reservation-times-1" defer></script>
 </body>
 </html>

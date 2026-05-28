@@ -54,7 +54,7 @@ public class ReservationService {
     }
 
     public List<Reservation> findAllReservations(int page, int size) {
-        return reservationRepository.findAll(page, size);
+        return reservationRepository.findAllByStatusCanceledNot(page, size);
     }
 
     public List<ReservationWaitingResult> findByGuestName(String guestName) {
@@ -69,13 +69,23 @@ public class ReservationService {
         ReservationTime changedTime = getReservationTime(timeId);
 
         Reservation beforeReservation = Reservation.clone(reservation);
-        Status afterStatus = determineState(changedDate, timeId, reservation.getTheme().getId());
-        Reservation changedReservation = reservation.changeDateTimeAndStatus(changedDate, changedTime, afterStatus);
+        Status afterStatus = determineState(changedDate, timeId, reservation.getTheme().getId(), reservationId);
+        Reservation changedReservation = reservation.changeDateTimeAndStatus(
+                changedDate, changedTime, afterStatus, LocalDateTime.now(clock));
 
         reservationValidator.validateEdit(reservation, changedReservation, requestGuestName);
 
         updateDateAndTimeAndStatus(changedReservation);
-        updateTopWaitingConfirmed(beforeReservation);
+        if (isVacatedConfirmedSlot(beforeReservation, changedReservation)) {
+            updateTopWaitingConfirmed(beforeReservation);
+        }
+    }
+
+    private boolean isVacatedConfirmedSlot(Reservation beforeReservation, Reservation changedReservation) {
+        return beforeReservation.isConfirmed() &&
+                (!beforeReservation.getDate().equals(changedReservation.getDate()) ||
+                        !beforeReservation.getTimeId().equals(changedReservation.getTimeId()) ||
+                        !changedReservation.isConfirmed());
     }
 
     private void updateTopWaitingConfirmed(Reservation reservation) {
@@ -133,7 +143,8 @@ public class ReservationService {
                 reservation.getId(),
                 reservation.getDate(),
                 reservation.getTime().getId(),
-                reservation.getStatus()
+                reservation.getStatus(),
+                reservation.getLastModifiedAt()
         )) {
             throw new DomainException(RESERVATION_NOT_FOUND);
         }
@@ -147,6 +158,13 @@ public class ReservationService {
 
     private Status determineState(LocalDate date, Long timeId, Long themeId){
         if (!reservationRepository.existsBySlot(date, timeId, themeId)){
+            return CONFIRMED;
+        }
+        return Status.WAITING;
+    }
+
+    private Status determineState(LocalDate date, Long timeId, Long themeId, Long excludedReservationId) {
+        if (!reservationRepository.existsBySlotExceptReservation(date, timeId, themeId, excludedReservationId)) {
             return CONFIRMED;
         }
         return Status.WAITING;

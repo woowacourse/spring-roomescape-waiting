@@ -7,14 +7,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest;
 import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
-import roomescape.reservation.domain.Status;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 import roomescape.test_config.fixture.SQLFixtureGenerator;
-import roomescape.theme.domain.Theme;
 
 import java.sql.Timestamp;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.List;
@@ -145,92 +141,6 @@ class JdbcReservationTimeRepositoryTest {
 
         // then
         assertThat(deleted).isFalse();
-    }
-
-    @Test
-    @DisplayName("이용 가능한 시간을 조회한다.")
-    public void findAllByDateAndThemeIdWithAvailability() {
-        // given
-        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
-        ReservationTime time2 = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
-        Theme targetTheme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        Theme nonTargetTheme = sqlFixtureGenerator.insertTheme("레벨3 탈출", "우테코 레벨3을 탈출하는 내용입니다.", "https://example.com/theme.png");
-
-        LocalDate targetDate = LocalDate.of(2023, 8, 5);
-        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, targetTheme, Status.WAITING);
-        sqlFixtureGenerator.insertReservation("브라운", LocalDate.of(2024, 9, 10), time, targetTheme, Status.WAITING);
-        sqlFixtureGenerator.insertReservation("브라운", targetDate, time, nonTargetTheme, Status.WAITING);
-
-        // when
-        List<ReservationTimeAvailability> availableTimes = reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(targetDate, targetTheme.getId());
-
-        // then
-        assertThat(availableTimes).hasSize(2)
-                .extracting(ReservationTimeAvailability::getReservationTime,
-                        ReservationTimeAvailability::isAvailable)
-                .containsExactly(Tuple.tuple(time, false), Tuple.tuple(time2, true));
-    }
-
-    @Test
-    @DisplayName("같은 시간에 예약과 대기가 여러 개 있어도 이용 가능 시간은 한 번만 조회한다.")
-    public void findAllByDateAndThemeIdWithAvailability_duplicatedWaiting() {
-        // given
-        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        LocalDate date = LocalDate.of(2023, 8, 5);
-        sqlFixtureGenerator.insertReservation("브라운", date, time, theme, Status.CONFIRMED);
-        sqlFixtureGenerator.insertReservation("주디", date, time, theme, Status.WAITING);
-        sqlFixtureGenerator.insertReservation("초코칩", date, time, theme, Status.WAITING);
-
-        // when
-        List<ReservationTimeAvailability> availableTimes =
-                reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(date, theme.getId());
-
-        // then
-        assertThat(availableTimes).hasSize(1)
-                .extracting(ReservationTimeAvailability::getReservationTime,
-                        ReservationTimeAvailability::isAvailable)
-                .containsExactly(Tuple.tuple(time, false));
-    }
-
-    @Test
-    @DisplayName("삭제된 예약은 이용 가능한 시간 조회에서 제외한다.")
-    public void findAllByDateAndThemeIdWithAvailability_softDelete() {
-        // given
-        ReservationTime time = sqlFixtureGenerator.insertReservationTime(LocalTime.of(10, 0));
-        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        LocalDate date = LocalDate.of(2023, 8, 5);
-        sqlFixtureGenerator.insertDeletedReservation("브라운", date, time, theme);
-
-        // when
-        List<ReservationTimeAvailability> availableTimes =
-                reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(date, theme.getId());
-
-        // then
-        assertThat(availableTimes).hasSize(1)
-                .extracting(ReservationTimeAvailability::getReservationTime,
-                        ReservationTimeAvailability::isAvailable)
-                .containsExactly(Tuple.tuple(time, true));
-    }
-
-    @Test
-    @DisplayName("삭제된 예약 시간은 이용 가능한 시간 조회에서 제외한다.")
-    public void findAllByDateAndThemeIdWithAvailability_deletedReservationTime() {
-        // given
-        sqlFixtureGenerator.insertDeletedReservationTime(LocalTime.of(10, 0));
-        ReservationTime activeTime = sqlFixtureGenerator.insertReservationTime(LocalTime.of(12, 0));
-        Theme theme = sqlFixtureGenerator.insertTheme("레벨2 탈출", "우테코 레벨2를 탈출하는 내용입니다.", "https://example.com/theme.png");
-        LocalDate date = LocalDate.of(2023, 8, 5);
-
-        // when
-        List<ReservationTimeAvailability> availableTimes =
-                reservationTimeRepository.findAllByDateAndThemeIdWithAvailability(date, theme.getId());
-
-        // then
-        assertThat(availableTimes).hasSize(1)
-                .extracting(ReservationTimeAvailability::getReservationTime,
-                        ReservationTimeAvailability::isAvailable)
-                .containsExactly(Tuple.tuple(activeTime, true));
     }
 
     private Map<String, Object> findDeleteInfoById(Long id) {

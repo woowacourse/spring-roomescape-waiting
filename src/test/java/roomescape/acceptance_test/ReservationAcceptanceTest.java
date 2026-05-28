@@ -89,6 +89,36 @@ public class ReservationAcceptanceTest extends AcceptanceTestSupport {
     }
 
     @Test
+    @DisplayName("예약 수정 시 이미 확정 예약이 있는 시간으로 변경하면 대기가 된다")
+    public void scenario4_2() {
+        mutableClock.setFixed(현재_날짜);
+        // given
+        Integer themeId = 테마_생성을_요청하고(new ThemeCreateRequest("테마1", "설명", "섬네일"));
+        Integer targetReservationTimeId = 예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(10, 30)));
+        Integer myReservationTimeId = 변경할_예약_시간_생성을_요청하고(new ReservationTimeCreateRequest(LocalTime.of(11, 30)));
+        예약_생성을_요청하고("brown", 예약일, targetReservationTimeId, themeId);
+        ReservationInfo myReservation = 예약_생성을_요청하고("pobi", 예약일, myReservationTimeId, themeId);
+
+        ReservationEditRequest editRequest = new ReservationEditRequest(예약일, targetReservationTimeId.longValue());
+
+        // when
+        ExtractableResponse<Response> response = 예약_날짜와_시간_수정을_요청하면(myReservation, editRequest);
+
+        // then
+        예약_수정이_성공한다(response, myReservation);
+        내_예약_목록에서_예약_상태를_응답받는다(
+                내_예약_목록_조회를_요청하면(myReservation.guestName()),
+                myReservation,
+                "WAITING"
+        );
+        내_예약_목록에서_대기_순번을_응답받는다(
+                내_예약_목록_조회를_요청하면(myReservation.guestName()),
+                myReservation,
+                1
+        );
+    }
+
+    @Test
     @DisplayName("이미 시작된 예약 수정 실패")
     public void scenario5() {
         mutableClock.setFixed(현재_날짜);

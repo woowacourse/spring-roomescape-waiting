@@ -4,12 +4,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
-import roomescape.reservation.controller.dto.ReservationCreateRequest;
 import roomescape.reservationtime.controller.dto.ReservationTimeCreateRequest;
 import roomescape.theme.controller.dto.ThemeCreateRequest;
-
-import java.time.LocalDate;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static roomescape.acceptance_test.util.RequestUtil.get;
@@ -74,52 +70,5 @@ public final class ReservationTimeAcceptanceSteps {
             ReservationTimeCreateRequest request
     ) {
         return 예약_시간_생성을_요청하고(request);
-    }
-
-    public static Integer 특정_날짜와_테마에_예약_생성을_요청하고(
-            LocalDate date,
-            Integer reservationTimeId,
-            Integer themeId
-    ) {
-        ReservationCreateRequest request = new ReservationCreateRequest(
-                "brown",
-                date,
-                reservationTimeId.longValue(),
-                themeId.longValue());
-
-        ExtractableResponse<Response> response = post(OBJECT_MAPPER, "/reservations", request);
-
-        assertThat(response.statusCode()).isEqualTo(201);
-        assertThat(response.jsonPath().getString("guestName")).isEqualTo(request.guestName());
-        assertThat(response.jsonPath().getString("date")).isEqualTo(request.date().toString());
-        assertThat(response.jsonPath().getInt("time.id")).isEqualTo(reservationTimeId);
-        assertThat(response.jsonPath().getInt("theme.id")).isEqualTo(themeId);
-        return response.path("id");
-    }
-
-    public static ExtractableResponse<Response> 특정_날짜와_테마의_예약_가능_시간_조회를_요청하면(
-            LocalDate date,
-            Integer themeId
-    ) {
-        return get("/times/availability", Map.of("date", date.toString(), "themeId", themeId));
-    }
-
-    public static void 예약된_시간은_예약_불가로_응답받는다(
-            ExtractableResponse<Response> response,
-            Integer reservationTimeId
-    ) {
-        assertThat(response.statusCode()).isEqualTo(200);
-        assertThat(response.jsonPath()
-                .getBoolean("availableTimes.find { it.id == " + reservationTimeId + " }.isAvailable"))
-                .isFalse();
-    }
-
-    public static void 예약되지_않은_시간은_예약_가능으로_응답받는다(
-            ExtractableResponse<Response> response,
-            Integer reservationTimeId
-    ) {
-        assertThat(response.jsonPath()
-                .getBoolean("availableTimes.find { it.id == " + reservationTimeId + " }.isAvailable"))
-                .isTrue();
     }
 }

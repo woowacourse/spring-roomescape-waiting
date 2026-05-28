@@ -453,12 +453,6 @@
       transition: border-color 160ms ease, background 160ms ease, color 160ms ease;
     }
 
-    .time-button.waitable {
-      border-color: rgba(184, 79, 47, 0.32);
-      background: #fff8f4;
-      color: #5e3427;
-    }
-
     .time-button:disabled {
       color: #9d968b;
       background: var(--surface-2);
@@ -470,19 +464,6 @@
       border-color: var(--accent);
       background: var(--accent);
       color: white;
-    }
-
-    .time-value {
-      font-size: 15px;
-      line-height: 1.15;
-    }
-
-    .time-state {
-      color: currentColor;
-      opacity: 0.74;
-      font-size: 11px;
-      line-height: 1.2;
-      font-weight: 850;
     }
 
     .summary-panel {
@@ -566,6 +547,10 @@
       grid-template-columns: minmax(0, 1fr) minmax(150px, 180px) minmax(150px, 180px);
       gap: 10px;
       align-items: end;
+    }
+
+    .cancel-grid {
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .compact-button {

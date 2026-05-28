@@ -47,11 +47,12 @@ public class ReservationValidator {
     }
 
     private void validateNotDuplicatedExcept(Reservation reservation) {
-        if (reservationRepository.existsBySlotAndGuestNameExceptCanceled(
+        if (reservationRepository.existsBySlotAndGuestNameExceptCanceledAndIdNot(
                 reservation.getDate(),
                 reservation.getTime().getId(),
                 reservation.getTheme().getId(),
-                reservation.getGuestName()
+                reservation.getGuestName(),
+                reservation.getId()
         )) {
             throw new DomainException(RESERVATION_ALREADY_EXISTS);
         }

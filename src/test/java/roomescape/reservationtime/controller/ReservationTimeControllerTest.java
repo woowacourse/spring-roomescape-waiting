@@ -8,15 +8,11 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-import roomescape.reservationtime.controller.dto.AvailableTimeListResponse;
-import roomescape.reservationtime.controller.dto.AvailableTimeResponse;
 import roomescape.reservationtime.controller.dto.ReservationTimeListResponse;
 import roomescape.reservationtime.controller.dto.ReservationTimeResponse;
 import roomescape.reservationtime.domain.ReservationTime;
-import roomescape.reservationtime.repository.dto.ReservationTimeAvailability;
 import roomescape.reservationtime.service.ReservationTimeService;
 
-import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 
@@ -82,57 +78,4 @@ class ReservationTimeControllerTest {
                 );
     }
 
-    @Test
-    @DisplayName("예약 가능한 시간 목록을 조회한다.")
-    public void getAvailableTimes() throws Exception {
-        // given
-        LocalDate date = LocalDate.of(2023, 8, 5);
-        Long themeId = 1L;
-        ReservationTime time = ReservationTime.of(1L, LocalTime.of(10, 0));
-        ReservationTime time2 = ReservationTime.of(2L, LocalTime.of(12, 0));
-        List<ReservationTimeAvailability> timeAvailabilities = List.of(
-                ReservationTimeAvailability.available(time),
-                ReservationTimeAvailability.unavailable(time2)
-        );
-        given(reservationTimeService.findAvailableTimes(date, themeId)).willReturn(timeAvailabilities);
-
-        // when then
-        MvcResult result = mockMvc.perform(get("/times/availability")
-                        .param("date", "2023-08-05")
-                        .param("themeId", "1"))
-                .andDo(print())
-                .andExpect(status().isOk())
-                .andReturn();
-
-        AvailableTimeListResponse response = objectMapper.readValue(
-                result.getResponse().getContentAsString(),
-                AvailableTimeListResponse.class
-        );
-
-        assertThat(response.availableTimes())
-                .extracting(
-                        AvailableTimeResponse::id,
-                        AvailableTimeResponse::startAt,
-                        AvailableTimeResponse::isAvailable
-                )
-                .containsExactly(
-                        tuple(1L, LocalTime.of(10, 0), true),
-                        tuple(2L, LocalTime.of(12, 0), false)
-                );
-
-        then(reservationTimeService)
-                .should()
-                .findAvailableTimes(date, themeId);
-    }
-
-    @Test
-    @DisplayName("예약 가능한 시간 목록을 조회할 때 날짜 형식이 올바르지 않으면 에러가 발생한다.")
-    public void getAvailableTimes_fail_invalidDateFormat() throws Exception {
-        // when then
-        mockMvc.perform(get("/times/availability")
-                        .param("date", "2023/08/05")
-                        .param("themeId", "1"))
-                .andDo(print())
-                .andExpect(status().isBadRequest());
-    }
 }
