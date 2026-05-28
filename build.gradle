@@ -48,7 +48,3 @@ test {
 tasks.withType(Test).configureEach {
     jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}", "-Xshare:off"
 }
-
-tasks.withType(Test).configureEach {
-    jvmArgs "-javaagent:${configurations.mockitoAgent.asPath}", "-Xshare:off"
-}
