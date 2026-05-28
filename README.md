@@ -64,14 +64,13 @@
         - [x] 예약 가능한 시간에 대기 신청: 409 Conflict
         - [x] 존재하지 않는 date/time/theme: 404 Not Found
         - [ ] 요청 값 누락/형식 오류: 400 Bad Request
-- [ ] 예약 대기 취소
+- [x] 예약 대기 취소
 
   **`DELETE /waiting-reservations/{id}`**
 
     - 설명: 사용자 본인 예약 대기 취소
     - 응답 `204 No Content`
-    - 에러 처리
-        - [ ] 존재하지 않는 예약 대기: 404 Not Found
+
 - [ ] 예약 대기 목록 조회
 
   **`GET /waiting-reservations?name={name}`**

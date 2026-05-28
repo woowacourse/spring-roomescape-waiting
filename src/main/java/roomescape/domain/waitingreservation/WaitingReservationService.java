@@ -3,6 +3,7 @@ package roomescape.domain.waitingreservation;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import roomescape.domain.reservation.ReservationRepository;
 import roomescape.domain.reservationdate.ReservationDate;
@@ -16,6 +17,7 @@ import roomescape.domain.waitingreservation.dto.WaitingReservationCreationRespon
 import roomescape.support.exception.RoomescapeException;
 import roomescape.support.exception.WaitingReservationErrorCode;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class WaitingReservationService {
@@ -53,6 +55,13 @@ public class WaitingReservationService {
         );
         if (!reserved) {
             throw new RoomescapeException(WaitingReservationErrorCode.AVAILABLE_SLOT_NOT_WAITABLE);
+        }
+    }
+
+    public void cancelWaitingReservation(Long id) {
+        int deletedCount = waitingReservationRepository.deleteById(id);
+        if (deletedCount == 0) {
+            log.warn("이미 삭제된 예약 대기 삭제 요청이 들어왔습니다. reservationId={}", id);
         }
     }
 }

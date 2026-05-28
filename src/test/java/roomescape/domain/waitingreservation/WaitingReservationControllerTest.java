@@ -94,4 +94,14 @@ class WaitingReservationControllerTest {
                 .statusCode(404);
 
     }
+
+    @Test
+    void 사용자는_예약_대기를_취소한다() {
+        RestAssured.given().log().all()
+            .contentType(ContentType.JSON)
+            .when()
+            .delete("/waiting-reservations/" + 1)
+            .then().log().all()
+            .statusCode(204);
+    }
 }
