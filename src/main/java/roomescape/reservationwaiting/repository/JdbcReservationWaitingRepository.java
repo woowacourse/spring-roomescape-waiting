@@ -19,6 +19,17 @@ import roomescape.theme.domain.Theme;
 @Repository
 public class JdbcReservationWaitingRepository implements ReservationWaitingRepository {
 
+    private static final String BASE_QUERY = """
+            SELECT rw.id as reservation_waiting_id, rw.name,
+                   r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
+                   rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
+                   t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
+            FROM reservation_waiting rw
+            JOIN reservation r ON rw.reservation_id = r.id
+            JOIN reservation_time rt ON r.time_id = rt.id
+            JOIN theme t ON r.theme_id = t.id
+            """;
+
     private final JdbcTemplate jdbcTemplate;
     private final SimpleJdbcInsert simpleJdbcInsert;
 
@@ -88,43 +99,20 @@ public class JdbcReservationWaitingRepository implements ReservationWaitingRepos
 
     @Override
     public List<ReservationWaiting> findByName(String name) {
-        String query = """
-                SELECT * FROM (
-                SELECT rw.id as reservation_waiting_id, rw.name,
-                       r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
-                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
-                FROM reservation_waiting rw
-                JOIN reservation r ON rw.reservation_id = r.id
-                JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id) sub
-                WHERE sub.name = ?
-                ORDER BY reservation_waiting_id;
-                """;
+        String query = "SELECT * FROM (" + BASE_QUERY + ") sub WHERE sub.name = ? ORDER BY reservation_waiting_id";
         return jdbcTemplate.query(query, rowMapper, name);
+    }
+
+    @Override
+    public Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId) {
+        String query = "SELECT * FROM (" + BASE_QUERY
+                + ") sub WHERE sub.reservation_waiting_id = ? ORDER BY reservation_waiting_id";
+        return jdbcTemplate.query(query, rowMapper, reservationWaitingId).stream().findFirst();
     }
 
     @Override
     public boolean existsByNameAndReservationId(String name, Long reservationId) {
         String query = "select count(*) from reservation_waiting where name = ? and reservation_id = ?";
         return jdbcTemplate.queryForObject(query, Integer.class, name, reservationId) >= 1;
-    }
-
-    @Override
-    public Optional<ReservationWaiting> findReservationWaitingById(Long reservationWaitingId) {
-        String query = """
-                SELECT * FROM (
-                SELECT rw.id as reservation_waiting_id, rw.name,
-                       r.id as reservation_id, r.name as reservation_name, r.date as reservation_date,
-                       rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
-                       t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
-                FROM reservation_waiting rw
-                JOIN reservation r ON rw.reservation_id = r.id
-                JOIN reservation_time rt ON r.time_id = rt.id
-                JOIN theme t ON r.theme_id = t.id) sub
-                WHERE sub.reservation_waiting_id = ? 
-                ORDER BY reservation_waiting_id;
-                """;
-        return jdbcTemplate.query(query, rowMapper, reservationWaitingId).stream().findFirst();
     }
 }
