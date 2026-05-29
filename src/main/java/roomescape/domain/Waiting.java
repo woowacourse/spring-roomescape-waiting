@@ -17,18 +17,14 @@ public class Waiting {
         return new Waiting(id, name, slot, createdAt);
     }
 
-    public boolean isPast(LocalDateTime now) {
-        return slot.isPast(now);
-    }
-
-    public void validateCancelable(LocalDateTime now) {
+    public void validateNotStarted(LocalDateTime now) {
         if (isPast(now)) {
             throw new PastReservationException("이미 시작된 게임의 예약대기는 취소할 수 없습니다.");
         }
     }
 
     public void validateOwnedBy(String name) {
-        if (!this.name.equals(name)) {
+        if (!isOwnedBy(name)) {
             throw new ForbiddenException("타인의 예약대기는 취소할 수 없습니다.");
         }
     }
@@ -47,5 +43,13 @@ public class Waiting {
 
     public LocalDateTime createAt() {
         return createdAt;
+    }
+
+    private boolean isPast(LocalDateTime now) {
+        return slot.isPast(now);
+    }
+
+    private boolean isOwnedBy(String name) {
+        return this.name.equals(name);
     }
 }

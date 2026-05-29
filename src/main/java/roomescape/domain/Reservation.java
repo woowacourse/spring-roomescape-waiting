@@ -17,23 +17,18 @@ public class Reservation {
         return new Reservation(id, username, slot);
     }
 
-    public void validateCancelable(String name, LocalDateTime now) {
+    public void validateNotStarted(LocalDateTime now) {
         if (isPast(now)) {
-            throw new PastReservationException("이미 시작된 예약은 취소할 수 없습니다.");
+            throw new PastReservationException("이미 시작된 예약은 변경할 수 없습니다.");
         }
+    }
+
+    public void validateOwnedBy(String name) {
         if (!isOwnedBy(name)) {
             throw new ForbiddenException("본인의 예약만 변경할 수 있습니다.");
         }
     }
 
-    public void validateUpdatable(String name, LocalDateTime now) {
-        if (isPast(now)) {
-            throw new PastReservationException("이미 시작된 예약은 취소할 수 없습니다.");
-        }
-        if (!isOwnedBy(name)) {
-            throw new ForbiddenException("본인의 예약만 변경할 수 있습니다.");
-        }
-    }
     public Reservation withSlot(Slot newSlot) {
         return new Reservation(id, name, newSlot);
     }
