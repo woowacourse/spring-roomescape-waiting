@@ -10,6 +10,7 @@ import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
 import roomescape.exception.business.DuplicateReservationException;
 import roomescape.exception.business.PastTimeCancelException;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.domain.ReservationFactory;
 import roomescape.reservation.dto.ReservationIdResponse;
@@ -44,29 +45,31 @@ public class ReservationService {
     }
 
     @Transactional
-    public ReservationResponse createReservation(ReservationRequest request) {
+    public ReservationResponse createReservation(Member member, ReservationRequest request) {
         ReservationTime time = reservationTimeService.getById(request.timeId());
         Theme theme = themeService.getById(request.themeId());
 
-        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(),
-                request.themeId())) {
+        if (reservationRepository.existsByDateAndTimeIdAndThemeId(request.date(), request.timeId(), request.themeId())) {
             throw new DuplicateReservationException();
         }
 
         Reservation saved = reservationRepository.save(
-                reservationFactory.create(request.name(), request.date(), time, theme));
+                reservationFactory.create(member, request.date(), time, theme));
         return ReservationResponse.from(saved);
     }
 
-    public List<ReservationResponse> getReservationsByName(String name) {
-        return reservationRepository.findByName(name).stream()
+    public List<ReservationResponse> getReservationsByMemberId(Long memberId) {
+        return reservationRepository.findByMemberId(memberId).stream()
                 .map(ReservationResponse::from)
                 .collect(Collectors.toList());
     }
 
     @Transactional
-    public void deleteReservation(Long id) {
+    public void deleteReservation(Long id, Long memberId) {
         Reservation reservation = getById(id);
+        if (!reservation.isOwnedBy(memberId)) {
+            throw new BusinessException(ErrorCode.FORBIDDEN);
+        }
         if (reservation.isPast()) {
             throw new PastTimeCancelException();
         }
@@ -94,7 +97,7 @@ public class ReservationService {
     }
 
     @NonNull
-    private Reservation getById(Long id) {
+    public Reservation getById(Long id) {
         return reservationRepository.findById(id)
                 .orElseThrow(() -> new BusinessException(ErrorCode.RESERVATION_NOT_FOUND));
     }

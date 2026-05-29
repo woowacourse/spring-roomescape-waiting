@@ -7,11 +7,12 @@ import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 
 public interface ReservationRepository {
+
     Reservation save(Reservation reservation);
 
     Optional<Reservation> findById(Long id);
 
-    List<Reservation> findByName(String name);
+    List<Reservation> findByMemberId(Long memberId);
 
     void update(Long id, LocalDate date, Long timeId);
 

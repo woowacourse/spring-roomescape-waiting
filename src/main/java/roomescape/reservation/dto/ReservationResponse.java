@@ -6,7 +6,7 @@ import roomescape.reservationtime.dto.TimeResponse;
 
 public record ReservationResponse(
         Long id,
-        String name,
+        String memberName,
         LocalDate date,
         TimeResponse time,
         Long themeId,
@@ -16,7 +16,7 @@ public record ReservationResponse(
     public static ReservationResponse from(Reservation reservation) {
         return new ReservationResponse(
                 reservation.getId(),
-                reservation.getName(),
+                reservation.getMember().getName(),
                 reservation.getDate(),
                 TimeResponse.of(reservation.getTime()),
                 reservation.getTheme().getId(),

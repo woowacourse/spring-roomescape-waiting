@@ -1,19 +1,19 @@
 package roomescape.reservation.repository;
 
+import java.time.LocalDate;
+import java.util.List;
+import java.util.Optional;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.SqlParameterSource;
 import org.springframework.jdbc.core.simple.SimpleJdbcInsert;
 import org.springframework.stereotype.Repository;
+import roomescape.member.domain.Member;
 import roomescape.reservation.domain.Reservation;
 import roomescape.reservation.dto.ReservationIdResponse;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
-
-import java.time.LocalDate;
-import java.util.List;
-import java.util.Optional;
 
 @Repository
 public class JdbcReservationRepository implements ReservationRepository {
@@ -23,7 +23,12 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     private final RowMapper<Reservation> rowMapper = (resultSet, rowNum) -> Reservation.restore(
             resultSet.getLong("reservation_id"),
-            resultSet.getString("name"),
+            Member.restore(
+                    resultSet.getLong("member_id"),
+                    resultSet.getString("member_name"),
+                    resultSet.getString("member_email"),
+                    resultSet.getString("member_password")
+            ),
             resultSet.getDate("date").toLocalDate(),
             ReservationTime.restore(
                     resultSet.getLong("time_id"),
@@ -38,9 +43,7 @@ public class JdbcReservationRepository implements ReservationRepository {
             )
     );
 
-    private final RowMapper<Long> idMapper = (resultSet, rowNum) -> (
-            resultSet.getLong("id")
-    );
+    private final RowMapper<Long> idMapper = (resultSet, rowNum) -> resultSet.getLong("id");
 
     public JdbcReservationRepository(JdbcTemplate jdbcTemplate) {
         this.jdbcTemplate = jdbcTemplate;
@@ -52,22 +55,24 @@ public class JdbcReservationRepository implements ReservationRepository {
     @Override
     public Reservation save(Reservation reservation) {
         SqlParameterSource parameters = new MapSqlParameterSource()
-                .addValue("name", reservation.getName())
+                .addValue("member_id", reservation.getMember().getId())
                 .addValue("date", reservation.getDate())
                 .addValue("time_id", reservation.getTime().getId())
                 .addValue("theme_id", reservation.getTheme().getId());
         Long id = simpleJdbcInsert.executeAndReturnKey(parameters).longValue();
-        return Reservation.restore(id, reservation.getName(), reservation.getDate(), reservation.getTime(),
+        return Reservation.restore(id, reservation.getMember(), reservation.getDate(), reservation.getTime(),
                 reservation.getTheme());
     }
 
     @Override
     public Optional<Reservation> findById(Long id) {
         String query = """
-                SELECT r.id as reservation_id, r.name, r.date,
+                SELECT r.id as reservation_id, r.date,
+                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
                        t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
                 FROM reservation r
+                JOIN member m ON r.member_id = m.id
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
                 WHERE r.id = ?
@@ -76,18 +81,20 @@ public class JdbcReservationRepository implements ReservationRepository {
     }
 
     @Override
-    public List<Reservation> findByName(String name) {
+    public List<Reservation> findByMemberId(Long memberId) {
         String query = """
-                SELECT r.id as reservation_id, r.name, r.date,
+                SELECT r.id as reservation_id, r.date,
+                       m.id as member_id, m.name as member_name, m.email as member_email, m.password as member_password,
                        rt.id as time_id, rt.start_at as time_start_at, rt.finish_at as time_finish_at,
                        t.id as theme_id, t.name as theme_name, t.description as theme_description, t.image_url as theme_image_url
                 FROM reservation r
+                JOIN member m ON r.member_id = m.id
                 JOIN reservation_time rt ON r.time_id = rt.id
                 JOIN theme t ON r.theme_id = t.id
-                WHERE r.name = ?
+                WHERE r.member_id = ?
                 ORDER BY r.date DESC, rt.start_at DESC
                 """;
-        return jdbcTemplate.query(query, rowMapper, name);
+        return jdbcTemplate.query(query, rowMapper, memberId);
     }
 
     @Override
@@ -98,20 +105,20 @@ public class JdbcReservationRepository implements ReservationRepository {
 
     @Override
     public boolean existsByDateAndTimeIdAndThemeId(LocalDate date, Long timeId, Long themeId) {
-        String query = "select count(*) from reservation where date = ? and time_id = ? and theme_id = ?";
+        String query = "SELECT count(*) FROM reservation WHERE date = ? AND time_id = ? AND theme_id = ?";
         Integer count = jdbcTemplate.queryForObject(query, Integer.class, date, timeId, themeId);
         return count != null && count > 0;
     }
 
     @Override
     public void deleteById(Long id) {
-        String query = "delete from reservation where id = ?";
+        String query = "DELETE FROM reservation WHERE id = ?";
         jdbcTemplate.update(query, id);
     }
 
     @Override
     public ReservationIdResponse findReservationId(LocalDate date, Long themeId, Long timeId) {
-        String query = "select id from reservation where date = ? and theme_id = ? and time_id = ?";
+        String query = "SELECT id FROM reservation WHERE date = ? AND theme_id = ? AND time_id = ?";
         return ReservationIdResponse.from(jdbcTemplate.query(query, idMapper, date, themeId, timeId).getFirst());
     }
 }

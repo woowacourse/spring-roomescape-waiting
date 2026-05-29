@@ -5,20 +5,21 @@ import java.time.LocalDateTime;
 import org.springframework.stereotype.Component;
 import roomescape.exception.ErrorCode;
 import roomescape.exception.business.BusinessException;
+import roomescape.member.domain.Member;
 import roomescape.reservationtime.domain.ReservationTime;
 import roomescape.theme.domain.Theme;
 
 @Component
 public class ReservationFactory {
 
-    public Reservation create(String name, LocalDate date, ReservationTime time, Theme theme) {
-        validate(name, date, time, theme);
-        return Reservation.restore(null, name, date, time, theme);
+    public Reservation create(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        validate(member, date, time, theme);
+        return Reservation.restore(null, member, date, time, theme);
     }
 
-    private void validate(String name, LocalDate date, ReservationTime time, Theme theme) {
-        if (name == null || name.isBlank()) {
-            throw new IllegalArgumentException("예약자 이름은 필수입니다.");
+    private void validate(Member member, LocalDate date, ReservationTime time, Theme theme) {
+        if (member == null) {
+            throw new IllegalArgumentException("예약자는 필수입니다.");
         }
         if (date == null) {
             throw new IllegalArgumentException("날짜는 필수입니다.");
