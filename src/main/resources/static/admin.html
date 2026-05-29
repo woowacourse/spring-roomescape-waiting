@@ -7,17 +7,20 @@
     <link rel="stylesheet" href="/css/admin.css"/>
 </head>
 <body>
-<header class="admin-header">
-    <div class="admin-header__inner">
-        <h1 class="admin-title">관리자</h1>
-        <a href="/index.html" class="link-home">사용자 예약 페이지</a>
+<header class="site-header">
+    <div class="header-inner">
+        <h1 class="logo">Room Escape</h1>
+        <nav class="header-nav">
+            <a href="/index.html" class="nav-link">예약</a>
+            <a href="/admin.html" class="nav-link active">관리자</a>
+        </nav>
     </div>
 </header>
 
-<main class="admin-main">
+<main class="main">
     <section class="card">
-        <h2>테마 추가</h2>
-        <p class="help">썸네일은 이미지 파일로 첨부합니다. (서버 API는 URL 문자열을 저장합니다.)</p>
+        <h2 class="section-title">테마 추가</h2>
+        <p class="section-desc">새 테마를 등록합니다. 썸네일은 이미지 파일로 첨부합니다.</p>
         <form id="theme-create-form" class="form-grid">
             <label class="field">
                 <span class="field__label">이름</span>
@@ -39,8 +42,8 @@
     </section>
 
     <section class="card">
-        <h2>테마 삭제</h2>
-        <p class="help">삭제할 테마 이름을 선택하세요.</p>
+        <h2 class="section-title">테마 삭제</h2>
+        <p class="section-desc">삭제할 테마를 선택하세요. 예약이 있는 테마는 삭제할 수 없습니다.</p>
         <div class="row">
             <label class="field grow">
                 <span class="field__label">테마</span>
@@ -52,8 +55,8 @@
     </section>
 
     <section class="card">
-        <h2>시간 추가</h2>
-        <p class="help">새로운 예약 시작 시간을 등록합니다.</p>
+        <h2 class="section-title">시간 추가</h2>
+        <p class="section-desc">새로운 예약 시작 시간을 등록합니다.</p>
         <form id="time-create-form" class="row">
             <label class="field grow">
                 <span class="field__label">시작 시간</span>
@@ -65,8 +68,8 @@
     </section>
 
     <section class="card">
-        <h2>시간 삭제</h2>
-        <p class="help">삭제할 예약 시간을 선택하세요.</p>
+        <h2 class="section-title">시간 삭제</h2>
+        <p class="section-desc">삭제할 예약 시간을 선택하세요. 예약이 있는 시간은 삭제할 수 없습니다.</p>
         <div class="row">
             <label class="field grow">
                 <span class="field__label">시간 선택</span>
@@ -78,8 +81,8 @@
     </section>
 
     <section class="card">
-        <h2>전체 예약 목록</h2>
-        <p class="help">관리자 페이지에서만 확인할 수 있습니다.</p>
+        <h2 class="section-title">전체 예약 목록</h2>
+        <p class="section-desc">관리자 페이지에서만 확인할 수 있습니다.</p>
         <div class="table-wrap">
             <table class="data-table">
                 <thead>
@@ -98,6 +101,10 @@
         <p id="reservations-msg" class="message" role="status"></p>
     </section>
 </main>
+
+<footer class="site-footer">
+    <small>Room Escape · 관리자 페이지</small>
+</footer>
 
 <script src="/js/admin.js" defer></script>
 </body>

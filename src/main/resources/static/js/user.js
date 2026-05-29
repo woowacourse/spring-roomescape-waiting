@@ -15,7 +15,8 @@
   const selectedThemeName = document.getElementById("selected-theme-name");
   const summaryTheme = document.getElementById("summary-theme");
   const summaryDate = document.getElementById("summary-date");
-  const timeSelect = document.getElementById("time-select");
+  const timeChips = document.getElementById("time-chips");
+  const timeChipsEmpty = document.getElementById("time-chips-empty");
   const nameInput = document.getElementById("name-input");
   const reserveForm = document.getElementById("reserve-form");
   const reserveMessage = document.getElementById("reserve-message");
@@ -24,18 +25,26 @@
   const btnBackCalendar = document.getElementById("btn-back-to-calendar");
   const stepIndicators = document.querySelectorAll(".steps__item");
 
+  const tabBooking = document.getElementById("tab-booking");
+  const tabLookup = document.getElementById("tab-lookup");
+  const panelBooking = document.getElementById("panel-booking");
+  const panelLookup = document.getElementById("panel-lookup");
+
   const PLACEHOLDER_IMG =
       "data:image/svg+xml," +
       encodeURIComponent(
-          '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120"><rect fill="#2a3040" width="200" height="120"/><text x="100" y="62" fill="#8b93a7" font-size="12" text-anchor="middle" font-family="sans-serif">No image</text></svg>'
+          '<svg xmlns="http://www.w3.org/2000/svg" width="200" height="120" viewBox="0 0 200 120"><rect fill="#f2f4f6" width="200" height="120"/><text x="100" y="62" fill="#8b95a1" font-size="12" text-anchor="middle" font-family="sans-serif">No image</text></svg>'
       );
 
   let state = {
     themes: [],
     selectedTheme: null,
     selectedDate: null,
+    selectedTimeId: null,
+    selectedTimeIsReserved: false,
     availableDates: new Set(),
     calendarMonth: new Date(),
+    editing: null,
   };
 
   function formatYmd(d) {
@@ -70,11 +79,69 @@
     return res.json();
   }
 
-  // 인기 테마 조회 (서버 데이터만 사용)[cite: 13]
+  function setActiveTab(tab) {
+    const isBooking = tab === "booking";
+    tabBooking.classList.toggle("is-active", isBooking);
+    tabBooking.setAttribute("aria-selected", String(isBooking));
+    tabLookup.classList.toggle("is-active", !isBooking);
+    tabLookup.setAttribute("aria-selected", String(!isBooking));
+    panelBooking.classList.toggle("is-hidden", !isBooking);
+    panelLookup.classList.toggle("is-hidden", isBooking);
+  }
+
+  tabBooking.addEventListener("click", () => setActiveTab("booking"));
+  tabLookup.addEventListener("click", () => {
+    exitEditMode();
+    setActiveTab("lookup");
+    document.getElementById("lookup-name-input").focus();
+  });
+
+  function enterEditMode(item, userName) {
+    state.editing = { id: item.id, userName };
+    state.selectedTheme = {
+      id: item.themeResponse.id,
+      name: item.themeResponse.name,
+    };
+    state.selectedDate = null;
+    state.availableDates = new Set();
+    state.calendarMonth = new Date();
+    selectedThemeName.textContent = item.themeResponse.name;
+    btnBackThemes.style.display = "none";
+    nameInput.value = userName;
+    nameInput.readOnly = true;
+
+    setActiveTab("booking");
+    setStep(2);
+    calendarRoot.innerHTML = "";
+    calendarLoading.classList.remove("is-hidden");
+
+    collectAvailableDates(item.themeResponse.id)
+        .then((dates) => {
+          state.availableDates = dates;
+          calendarLoading.classList.add("is-hidden");
+          renderCalendar();
+        })
+        .catch(() => {
+          calendarLoading.classList.add("is-hidden");
+          calendarRoot.innerHTML =
+              '<p class="message message--err">예약 가능 날짜를 계산하지 못했습니다.</p>';
+        });
+  }
+
+  function exitEditMode() {
+    if (!state.editing) return;
+    state.editing = null;
+    state.selectedTheme = null;
+    state.selectedDate = null;
+    btnBackThemes.style.display = "";
+    nameInput.readOnly = false;
+    nameInput.value = "";
+    setStep(1);
+  }
+
   async function loadPopular() {
     try {
       const themes = await fetchJson(`/themes/popular?limit=${POPULAR_LIMIT}`);
-
       popularList.innerHTML = "";
       if (!themes || !themes.length) {
         popularList.innerHTML =
@@ -99,7 +166,6 @@
     }
   }
 
-  // 예약용 테마 목록 (서버 데이터만 사용)[cite: 13]
   async function loadThemesForBooking() {
     themeGrid.innerHTML = '<p class="panel-hint">테마 목록을 불러오는 중…</p>';
     try {
@@ -138,7 +204,6 @@
     }
   }
 
-  // ... 나머지 예약 관련 함수 (collectAvailableDates, renderCalendar 등 기존 유지)[cite: 13]
   async function collectAvailableDates(themeId) {
     const start = new Date();
     start.setHours(0, 0, 0, 0);
@@ -263,10 +328,33 @@
     return `${parts[0]}:${parts[1] || "00"}`;
   }
 
-  function updateSubmitButtonLabel() {
-    const opt = timeSelect.options[timeSelect.selectedIndex];
-    const reserved = opt && opt.dataset.reserved === "true";
-    reserveSubmitBtn.textContent = reserved ? "대기 신청" : "예약 완료";
+  function updateSubmitButton() {
+    const hasTime = state.selectedTimeId != null;
+    const hasName = nameInput.value.trim().length > 0;
+    reserveSubmitBtn.disabled = !hasTime || !hasName;
+    if (state.editing) {
+      reserveSubmitBtn.textContent = "예약 변경";
+    } else {
+      reserveSubmitBtn.textContent = state.selectedTimeIsReserved ? "대기 신청" : "예약 완료";
+    }
+  }
+
+  function clearTimeChips() {
+    timeChips.innerHTML = "";
+    state.selectedTimeId = null;
+    state.selectedTimeIsReserved = false;
+  }
+
+  function selectTimeChip(chip) {
+    timeChips.querySelectorAll(".time-chip").forEach((c) => {
+      c.classList.remove("is-active");
+      c.setAttribute("aria-checked", "false");
+    });
+    chip.classList.add("is-active");
+    chip.setAttribute("aria-checked", "true");
+    state.selectedTimeId = Number(chip.dataset.timeId);
+    state.selectedTimeIsReserved = chip.dataset.reserved === "true";
+    updateSubmitButton();
   }
 
   async function onSelectDate(dateStr) {
@@ -277,47 +365,68 @@
     summaryDate.textContent = dateStr;
     reserveMessage.textContent = "";
     reserveMessage.className = "message";
-    nameInput.value = "";
-    timeSelect.innerHTML = "";
+    if (!state.editing) {
+      nameInput.value = "";
+    }
+    clearTimeChips();
+    timeChipsEmpty.classList.add("is-hidden");
+    updateSubmitButton();
     try {
       const slots = await fetchJson(
           `/themes/${state.selectedTheme.id}/schedule?date=${dateStr}`
       );
       if (!slots.length) {
-        timeSelect.disabled = true;
-        reserveMessage.textContent =
+        timeChipsEmpty.textContent =
             "선택한 날짜에 예약 또는 대기 가능한 시간이 없습니다. 날짜를 다시 선택해 주세요.";
-        reserveMessage.classList.add("message--err");
-        updateSubmitButtonLabel();
+        timeChipsEmpty.classList.remove("is-hidden");
         return;
       }
-      timeSelect.disabled = false;
       slots.forEach((s) => {
-        const opt = document.createElement("option");
-        opt.value = String(s.timeResponse.id);
-        const statusLabel = s.isReserved ? "대기 가능" : "예약 가능";
-        opt.textContent = `${formatTimeLabel(s.timeResponse.startAt)} (${statusLabel})`;
-        opt.dataset.reserved = s.isReserved ? "true" : "false";
-        timeSelect.appendChild(opt);
+        const chip = document.createElement("button");
+        chip.type = "button";
+        chip.className = "time-chip";
+        chip.dataset.timeId = String(s.timeResponse.id);
+        chip.dataset.reserved = s.isReserved ? "true" : "false";
+        chip.setAttribute("role", "radio");
+        chip.setAttribute("aria-checked", "false");
+
+        const timeEl = document.createElement("span");
+        timeEl.className = "time-chip__time";
+        timeEl.textContent = formatTimeLabel(s.timeResponse.startAt);
+
+        const statusEl = document.createElement("span");
+        statusEl.className = "time-chip__status";
+        if (state.editing && s.isReserved) {
+          statusEl.textContent = "예약됨";
+          chip.disabled = true;
+        } else {
+          statusEl.textContent = s.isReserved ? "대기 가능" : "예약 가능";
+        }
+
+        chip.append(timeEl, statusEl);
+        if (!chip.disabled) {
+          chip.addEventListener("click", () => selectTimeChip(chip));
+        }
+        timeChips.appendChild(chip);
       });
-      updateSubmitButtonLabel();
     } catch (e) {
-      timeSelect.disabled = true;
-      reserveMessage.textContent = "시간 목록을 불러오지 못했습니다.";
-      reserveMessage.classList.add("message--err");
+      timeChipsEmpty.textContent = "시간 목록을 불러오지 못했습니다.";
+      timeChipsEmpty.classList.remove("is-hidden");
     }
   }
 
-  timeSelect.addEventListener("change", updateSubmitButtonLabel);
+  nameInput.addEventListener("input", updateSubmitButton);
 
   btnBackThemes.addEventListener("click", () => {
     state.selectedTheme = null;
     state.selectedDate = null;
+    clearTimeChips();
     setStep(1);
   });
 
   btnBackCalendar.addEventListener("click", () => {
     state.selectedDate = null;
+    clearTimeChips();
     setStep(2);
     renderCalendar();
   });
@@ -327,12 +436,33 @@
     reserveMessage.textContent = "";
     reserveMessage.className = "message";
     if (!state.selectedTheme || !state.selectedDate) return;
-    const timeId = Number(timeSelect.value, 10);
+    const timeId = state.selectedTimeId;
     const name = nameInput.value.trim();
     if (!timeId || !name) return;
-    const selectedOpt = timeSelect.options[timeSelect.selectedIndex];
-    const isReserved = selectedOpt && selectedOpt.dataset.reserved === "true";
+    const isReserved = state.selectedTimeIsReserved;
+    const editing = state.editing;
     try {
+      if (editing) {
+        await fetchJson(`/reservations/${editing.id}`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            name,
+            date: state.selectedDate,
+            timeId,
+            themeId: state.selectedTheme.id,
+          }),
+        });
+        const userName = editing.userName;
+        exitEditMode();
+        setActiveTab("lookup");
+        lookupNameInput.value = userName;
+        lookupMessage.textContent = "예약이 변경되었습니다.";
+        lookupMessage.className = "message message--ok";
+        await runLookup(userName);
+        loadPopular();
+        return;
+      }
       if (isReserved) {
         await fetchJson("/waitings", {
           method: "POST",
@@ -364,9 +494,11 @@
       renderCalendar();
       setStep(2);
     } catch (e) {
-      reserveMessage.textContent = isReserved
-          ? "대기 신청에 실패했습니다. 입력값을 확인해 주세요."
-          : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
+      reserveMessage.textContent = editing
+          ? "예약 변경에 실패했습니다. 입력값을 확인해 주세요."
+          : isReserved
+              ? "대기 신청에 실패했습니다. 입력값을 확인해 주세요."
+              : "예약에 실패했습니다. 이미 예약된 시간이거나 입력값을 확인해 주세요.";
       reserveMessage.classList.add("message--err");
     }
   });
@@ -374,8 +506,7 @@
   const lookupForm = document.getElementById("lookup-form");
   const lookupNameInput = document.getElementById("lookup-name-input");
   const lookupMessage = document.getElementById("lookup-message");
-  const lookupReservations = document.getElementById("lookup-reservations");
-  const lookupWaitings = document.getElementById("lookup-waitings");
+  const lookupItems = document.getElementById("lookup-items");
 
   function formatTime(startAt) {
     if (!startAt) return "";
@@ -383,64 +514,154 @@
     return `${parts[0]}:${parts[1] || "00"}`;
   }
 
-  function renderReservationItems(items) {
-    lookupReservations.innerHTML = "";
+  function isReservationPast(item) {
+    if (!item.date || !item.timeResponse || !item.timeResponse.startAt) return false;
+    const dateTime = new Date(`${item.date}T${item.timeResponse.startAt}`);
+    return dateTime.getTime() < Date.now();
+  }
+
+  function renderReservationDetailItems(items, userName) {
+    lookupItems.innerHTML = "";
     if (!items.length) {
-      const empty = document.createElement("li");
-      empty.className = "lookup-list__empty";
+      const empty = document.createElement("div");
+      empty.className = "lookup-empty";
       empty.textContent = "예약 내역이 없습니다.";
-      lookupReservations.appendChild(empty);
+      lookupItems.appendChild(empty);
       return;
     }
-    items.forEach((r) => {
-      const li = document.createElement("li");
-      li.className = "lookup-list__item";
-      li.textContent = `${r.themeResponse.name} · ${r.date} · ${formatTime(r.timeResponse.startAt)}`;
-      lookupReservations.appendChild(li);
-    });
+
+    const reservations = items.filter((i) => i.status !== "WAITING");
+    const waitings = items.filter((i) => i.status === "WAITING");
+
+    if (reservations.length) {
+      lookupItems.appendChild(buildLookupGroup("예약 확정", "reserved", reservations, userName));
+    }
+    if (waitings.length) {
+      lookupItems.appendChild(buildLookupGroup("예약 대기", "waiting", waitings, userName));
+    }
   }
 
-  function renderWaitingItems(items) {
-    lookupWaitings.innerHTML = "";
-    if (!items.length) {
-      const empty = document.createElement("li");
-      empty.className = "lookup-list__empty";
-      empty.textContent = "예약 대기 내역이 없습니다.";
-      lookupWaitings.appendChild(empty);
-      return;
-    }
-    items.forEach((w) => {
+  function buildLookupGroup(title, kind, items, userName) {
+    const section = document.createElement("section");
+    section.className = `lookup-group lookup-group--${kind}`;
+
+    const header = document.createElement("div");
+    header.className = "lookup-group__header";
+
+    const dot = document.createElement("span");
+    dot.className = `lookup-group__dot lookup-group__dot--${kind}`;
+
+    const titleEl = document.createElement("h3");
+    titleEl.className = "lookup-group__title";
+    titleEl.textContent = title;
+
+    const count = document.createElement("span");
+    count.className = "lookup-group__count";
+    count.textContent = `${items.length}건`;
+
+    header.append(dot, titleEl, count);
+
+    const list = document.createElement("ul");
+    list.className = "lookup-list";
+    items.forEach((item) => {
       const li = document.createElement("li");
       li.className = "lookup-list__item";
-      const info = document.createElement("span");
+
+      const info = document.createElement("div");
       info.className = "lookup-list__info";
-      info.textContent = `${w.themeResponse.name} · ${w.date} · ${formatTime(w.timeResponse.startAt)}`;
-      const rank = document.createElement("span");
-      rank.className = "lookup-list__rank";
-      rank.textContent = `대기 ${w.sequence}번`;
-      li.append(info, rank);
-      lookupWaitings.appendChild(li);
+      const theme = document.createElement("div");
+      theme.className = "lookup-list__theme";
+      theme.textContent = item.themeResponse.name;
+      const meta = document.createElement("div");
+      meta.className = "lookup-list__meta";
+      meta.textContent = `${item.date} · ${formatTime(item.timeResponse.startAt)}`;
+      info.append(theme, meta);
+
+      const badge = document.createElement("span");
+      badge.className = `lookup-list__badge lookup-list__badge--${kind}`;
+      badge.textContent = kind === "waiting" ? `대기 ${item.sequence}번` : "예약 확정";
+
+      const isPast = kind === "reserved" && isReservationPast(item);
+
+      if (isPast) {
+        const pastTag = document.createElement("span");
+        pastTag.className = "lookup-list__past";
+        pastTag.textContent = "지난 예약";
+        li.append(info, badge, pastTag);
+      } else {
+        const cancelBtn = document.createElement("button");
+        cancelBtn.type = "button";
+        cancelBtn.className = "lookup-list__cancel";
+        cancelBtn.textContent = "취소";
+        cancelBtn.addEventListener("click", () => cancelLookupItem(item, userName, cancelBtn));
+
+        if (kind === "reserved") {
+          const editBtn = document.createElement("button");
+          editBtn.type = "button";
+          editBtn.className = "lookup-list__edit";
+          editBtn.textContent = "변경";
+          editBtn.addEventListener("click", () => enterEditMode(item, userName));
+          li.append(info, badge, editBtn, cancelBtn);
+        } else {
+          li.append(info, badge, cancelBtn);
+        }
+      }
+      list.appendChild(li);
     });
+
+    section.append(header, list);
+    return section;
   }
 
-  lookupForm.addEventListener("submit", async (ev) => {
+  async function runLookup(userName) {
+    try {
+      const data = await fetchJson(
+          `/reservations?userName=${encodeURIComponent(userName)}`
+      );
+      renderReservationDetailItems(data.reservationDetailResponses || [], userName);
+    } catch (e) {
+      lookupItems.innerHTML = "";
+      lookupMessage.textContent = "조회에 실패했습니다. 잠시 후 다시 시도해 주세요.";
+      lookupMessage.classList.add("message--err");
+    }
+  }
+
+  async function cancelLookupItem(item, userName, btn) {
+    const isWaiting = item.status === "WAITING";
+    const label = isWaiting ? "대기" : "예약";
+    const confirmMsg = `${item.themeResponse.name} ${item.date} ${formatTime(item.timeResponse.startAt)} ${label}을(를) 취소하시겠습니까?`;
+    if (!window.confirm(confirmMsg)) return;
+    btn.disabled = true;
+    try {
+      if (isWaiting) {
+        await fetchJson(
+            `/waitings/${item.id}?name=${encodeURIComponent(userName)}`,
+            { method: "DELETE" }
+        );
+      } else {
+        await fetchJson(
+            `/reservations/${item.id}?userName=${encodeURIComponent(userName)}`,
+            { method: "DELETE" }
+        );
+      }
+      lookupMessage.textContent = `${label}이(가) 취소되었습니다.`;
+      lookupMessage.className = "message message--ok";
+      await runLookup(userName);
+      loadPopular();
+    } catch (e) {
+      btn.disabled = false;
+      lookupMessage.textContent = `${label} 취소에 실패했습니다.`;
+      lookupMessage.className = "message message--err";
+    }
+  }
+
+  lookupForm.addEventListener("submit", (ev) => {
     ev.preventDefault();
     lookupMessage.textContent = "";
     lookupMessage.className = "message";
     const userName = lookupNameInput.value.trim();
     if (!userName) return;
-    try {
-      const data = await fetchJson(
-          `/reservations?userName=${encodeURIComponent(userName)}`
-      );
-      renderReservationItems(data.reservationResponses || []);
-      renderWaitingItems(data.waitingDetailResponses || []);
-    } catch (e) {
-      lookupReservations.innerHTML = "";
-      lookupWaitings.innerHTML = "";
-      lookupMessage.textContent = "조회에 실패했습니다. 잠시 후 다시 시도해 주세요.";
-      lookupMessage.classList.add("message--err");
-    }
+    runLookup(userName);
   });
 
   loadPopular();
