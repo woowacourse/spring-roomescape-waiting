@@ -48,12 +48,10 @@ public class ReservationController {
         ReservationResponse reservationResponse = ReservationResponse.from(
                 reservationCommandService.create(request.name(), request.date(), request.timeId(), request.themeId()));
 
-        Long savedId = reservationResponse.id();
-
         URI location = ServletUriComponentsBuilder
                 .fromCurrentRequest()
                 .path("/{id}")
-                .buildAndExpand(savedId)
+                .buildAndExpand(reservationResponse.id())
                 .toUri();
 
         return ResponseEntity.created(location).body(reservationResponse);
