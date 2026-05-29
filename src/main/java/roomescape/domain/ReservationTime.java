@@ -2,8 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalTime;
 
-import roomescape.exception.CustomException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
 
 public class ReservationTime {
 
@@ -18,7 +18,7 @@ public class ReservationTime {
 
     private void validateStartAt(LocalTime startAt) {
         if (startAt == null) {
-            throw new CustomException(ErrorCode.TIME_START_AT_NULL);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 시간은 null일 수 없습니다.");
         }
     }
 

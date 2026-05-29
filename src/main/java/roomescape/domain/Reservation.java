@@ -2,8 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalDateTime;
 
-import roomescape.exception.CustomException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
 
 public class Reservation {
 
@@ -25,11 +25,11 @@ public class Reservation {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new CustomException(ErrorCode.RESERVATION_NAME_BLANK);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약자 이름은 비거나 공백일 수 없습니다.");
         }
 
         if (name.length() > 255) {
-            throw new CustomException(ErrorCode.RESERVATION_NAME_TOO_LONG);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약자 이름은 255자를 초과할 수 없습니다.");
         }
     }
 

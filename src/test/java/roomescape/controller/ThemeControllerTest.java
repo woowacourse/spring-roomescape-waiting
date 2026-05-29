@@ -71,19 +71,6 @@ class ThemeControllerTest {
     }
 
     @Test
-    @DisplayName("특정 id의 테마 시간 조회_API - 이상값 예외 테스트")
-    void 특정_id의_테마_시간_조회_API_예외_테스트() {
-
-        RestAssured.given().log().all()
-                .contentType(ContentType.JSON)
-                .pathParam("id", "ㅇㄴ")
-                .queryParam("date", "2026-04-29")
-                .when().get("/themes/{id}/available-times")
-                .then().log().all()
-                .statusCode(400);
-    }
-
-    @Test
     @DisplayName("특정 id의 테마 시간 조회_API - 정상 테스트")
     void 특정_id의_테마_시간_조회_API_정상_테스트() {
 

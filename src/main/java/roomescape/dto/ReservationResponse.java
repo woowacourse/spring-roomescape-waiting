@@ -20,7 +20,8 @@ public record ReservationResponse(
         String themeThumbnailUrl,
         @JsonFormat(pattern = "HH:mm")
         LocalTime time,
-        int order) {
+        int order
+) {
 
     public static ReservationResponse from(Reservation reservation, Schedule schedule, int order) {
         Theme theme = schedule.getTheme();

@@ -1,0 +1,12 @@
+package roomescape.domain.exception;
+
+public enum DomainErrorCode {
+
+    INVALID_INPUT,
+    PAST_RESERVATION,
+    NOT_FOUND_RESERVATION,
+    DUPLICATE_RESERVATION,
+    DUPLICATE_RESERVATION_TIME,
+    DUPLICATE_THEME_NAME,
+    REFERENTIAL_INTEGRITY;
+}

@@ -2,8 +2,8 @@ package roomescape.domain;
 
 import java.time.LocalDate;
 
-import roomescape.exception.CustomException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
 
 public class Schedule {
 
@@ -24,19 +24,19 @@ public class Schedule {
 
     private void validateDate(LocalDate date) {
         if (date == null) {
-            throw new CustomException(ErrorCode.RESERVATION_DATE_NULL);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 날짜는 null일 수 없습니다.");
         }
     }
 
     private void validateTime(ReservationTime reservationTime) {
         if (reservationTime == null) {
-            throw new CustomException(ErrorCode.RESERVATION_TIME_NULL);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 시간은 null일 수 없습니다.");
         }
     }
 
     private void validateTheme(Theme theme) {
         if (theme == null) {
-            throw new CustomException(ErrorCode.RESERVATION_THEME_NULL);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "예약 테마는 null일 수 없습니다.");
         }
     }
 

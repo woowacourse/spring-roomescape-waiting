@@ -3,6 +3,7 @@ package roomescape.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
@@ -56,7 +57,7 @@ public class ReservationDao {
         )).longValue();
     }
 
-    public Reservation findById(long id) {
+    public Optional<Reservation> findById(long id) {
         String sql = """
                 SELECT r.id,
                        r.name,
@@ -66,7 +67,8 @@ public class ReservationDao {
                 FROM reservation AS r
                 WHERE r.id = ?
                 """;
-        return jdbcTemplate.queryForObject(sql, reservationRowMapper, id);
+        List<Reservation> results = jdbcTemplate.query(sql, reservationRowMapper, id);
+        return results.stream().findFirst();
     }
 
     public int findOrderByReservationId(long reservationId, long scheduleId) {

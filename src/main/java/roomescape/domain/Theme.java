@@ -2,8 +2,8 @@ package roomescape.domain;
 
 import java.util.Objects;
 
-import roomescape.exception.CustomException;
-import roomescape.exception.ErrorCode;
+import roomescape.domain.exception.DomainErrorCode;
+import roomescape.domain.exception.RoomescapeException;
 
 public class Theme {
 
@@ -24,19 +24,19 @@ public class Theme {
 
     private void validateName(String name) {
         if (name == null || name.isBlank()) {
-            throw new CustomException(ErrorCode.THEME_NAME_BLANK);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "테마 이름은 비거나 공백일 수 없습니다.");
         }
     }
 
     private void validateDescription(String description) {
         if (description == null || description.isBlank()) {
-            throw new CustomException(ErrorCode.THEME_DESCRIPTION_BLANK);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "테마 설명은 비거나 공백일 수 없습니다.");
         }
     }
 
     private void validateThumbnailUrl(String thumbnailUrl) {
         if (thumbnailUrl == null || thumbnailUrl.isBlank()) {
-            throw new CustomException(ErrorCode.THEME_THUMBNAIL_URL_BLANK);
+            throw new RoomescapeException(DomainErrorCode.INVALID_INPUT, "테마 썸네일 URL은 비거나 공백일 수 없습니다.");
         }
     }
 

@@ -9,21 +9,21 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import roomescape.dto.AdminReservationResponse;
-import roomescape.service.AdminReservationService;
+import roomescape.service.ReservationService;
 
 @RequestMapping("/admin/reservations")
 @RestController
 public class AdminReservationController {
 
-    private final AdminReservationService adminReservationService;
+    private final ReservationService reservationService;
 
-    public AdminReservationController(AdminReservationService adminReservationService) {
-        this.adminReservationService = adminReservationService;
+    public AdminReservationController(ReservationService reservationService) {
+        this.reservationService = reservationService;
     }
 
     @ResponseStatus(HttpStatus.OK)
     @GetMapping
     public List<AdminReservationResponse> getAllReservations() {
-        return adminReservationService.getAllReservations();
+        return reservationService.getAllReservations();
     }
 }
