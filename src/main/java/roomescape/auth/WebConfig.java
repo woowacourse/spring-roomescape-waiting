@@ -20,7 +20,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(new AuthInterceptor())
-                .addPathPatterns("/reservations/**", "/waitings/**", "/my-reservations")
+                .addPathPatterns("/reservations/**", "/waitings/**")
                 .excludePathPatterns("/reservations/id");
     }
 

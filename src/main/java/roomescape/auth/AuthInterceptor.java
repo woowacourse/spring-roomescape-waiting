@@ -13,8 +13,8 @@ public class AuthInterceptor implements HandlerInterceptor {
         HttpSession session = request.getSession(false);
         if (session == null || session.getAttribute("memberId") == null) {
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
-            response.getWriter().write("{\"errorCode\":\"UNAUTHORIZED\",\"message\":\"로그인이 필요합니다.\"}");
             response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write("{\"errorCode\":\"UNAUTHORIZED\",\"message\":\"로그인이 필요합니다.\"}");
             return false;
         }
         return true;
