@@ -17,7 +17,7 @@ public record ReservationResponse(
         TimeInfo time,
         ThemeInfo theme,
 
-        String status,
+        ReservationStatus status,
         Integer rank
 ) {
     public static ReservationResponse from(Reservation reservation) {
@@ -28,7 +28,7 @@ public record ReservationResponse(
                 slot.date(),
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),
-                "예약",
+                ReservationStatus.RESERVED,
                 null
         );
     }
@@ -41,7 +41,7 @@ public record ReservationResponse(
                 slot.date(),
                 TimeInfo.from(slot.time()),
                 ThemeInfo.from(slot.theme()),
-                "예약대기",
+                ReservationStatus.WAITING,
                 waiting.rank()
         );
     }
